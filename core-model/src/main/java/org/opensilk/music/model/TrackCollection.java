@@ -30,51 +30,44 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.TreeSet;
 
 /**
  * Created by drew on 5/12/15.
  */
-public class TrackCollection implements Bundleable {
+public class TrackCollection extends Container {
 
-    public final String name;
-    public final Uri tracksUri;
-    public final int trackCount;
-    public final int albumCount;
-    public final List<ArtInfo> artInfos;
-
-    protected TrackCollection(
-            @NonNull String name,
-            @NonNull Uri tracksUri,
-            int trackCount,
-            int albumCount,
-            @NonNull List<ArtInfo> artInfos
-    ) {
-        this.name = name;
-        this.tracksUri = tracksUri;
-        this.trackCount = trackCount;
-        this.albumCount = albumCount;
-        this.artInfos = Collections.unmodifiableList(artInfos);
+    protected TrackCollection(@NonNull Uri uri, @NonNull String name, @NonNull Metadata metadata) {
+        super(uri, name, metadata);
     }
 
-    @Override
-    public String getIdentity() {
-        return tracksUri.toString();
+    public Uri getTracksUri() {
+        return metadata.getUri(Metadata.KEY_CHILD_TRACKS_URI);
     }
 
-    @Override
-    public String getName() {
-        return name;
+    public int getTracksCount() {
+        return metadata.getInt(Metadata.KEY_CHILD_TRACKS_COUNT);
+    }
+
+    public Uri getAlbumsUri() {
+        return metadata.getUri(Metadata.KEY_CHILD_ALBUMS_URI);
+    }
+
+    public int getAlbumsCount() {
+        return metadata.getInt(Metadata.KEY_CHILD_ALBUMS_COUNT);
+    }
+
+    public List<ArtInfo> getArtInfos() {
+        return metadata.getArtInfos();
     }
 
     @Override
     public Bundle toBundle() {
-        Bundle b = new Bundle(10); //2x
+        Bundle b = new Bundle(4);
         b.putString(CLZ, TrackCollection.class.getName());
-        b.putString("_1", name);
-        b.putParcelable("_2", tracksUri);
-        b.putInt("_3", trackCount);
-        b.putInt("_4", albumCount);
-        b.putParcelableArrayList("_5", new ArrayList<Parcelable>(artInfos));
+        b.putParcelable("_1", uri);
+        b.putString("_2", name);
+        b.putParcelable("_3", metadata);
         return b;
     }
 
@@ -82,42 +75,12 @@ public class TrackCollection implements Bundleable {
         if (!TrackCollection.class.getName().equals(b.getString(CLZ))) {
             throw new IllegalArgumentException("Wrong class for TrackCollection: "+b.getString(CLZ));
         }
-        return TrackCollection.builder()
-                .setName(b.getString("_1"))
-                .setTracksUri(b.<Uri>getParcelable("_2"))
-                .setTrackCount(b.getInt("_3"))
-                .setAlbumCount(b.getInt("_4"))
-                .addArtInfos(b.<ArtInfo>getParcelableArrayList("_5"))
-                .build();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TrackCollection that = (TrackCollection) o;
-        if (trackCount != that.trackCount) return false;
-        if (albumCount != that.albumCount) return false;
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        if (tracksUri != null ? !tracksUri.equals(that.tracksUri) : that.tracksUri != null)
-            return false;
-        return !(artInfos != null ? !artInfos.equals(that.artInfos) : that.artInfos != null);
-
-    }
-
-    @Override
-    public int hashCode() {
-        int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (tracksUri != null ? tracksUri.hashCode() : 0);
-        result = 31 * result + trackCount;
-        result = 31 * result + albumCount;
-        result = 31 * result + (artInfos != null ? artInfos.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return name;
+        b.setClassLoader(TrackCollection.class.getClassLoader());
+        return new TrackCollection(
+                b.<Uri>getParcelable("_1"),
+                b.getString("_2"),
+                b.<Metadata>getParcelable("_3")
+        );
     }
 
     public static Builder builder() {
@@ -133,13 +96,17 @@ public class TrackCollection implements Bundleable {
     };
 
     public static final class Builder  {
+        private Uri uri;
         private String name;
-        private Uri tracksUri;
-        private int trackCount;
-        private int albumCount;
-        private HashSet<ArtInfo> artInfos = new HashSet<>();
+        private Metadata.Builder bob = Metadata.builder();
+        private TreeSet<ArtInfo> artInfos = new TreeSet<>();
 
         private Builder() {
+        }
+
+        public Builder setUri(Uri uri) {
+            this.uri = uri;
+            return this;
         }
 
         public Builder setName(String name) {
@@ -147,23 +114,33 @@ public class TrackCollection implements Bundleable {
             return this;
         }
 
-        public Builder setTracksUri(Uri tracksUri) {
-            this.tracksUri = tracksUri;
+        public Builder setParentUri(Uri uri) {
+            bob.putUri(Metadata.KEY_PARENT_URI, uri);
             return this;
         }
 
-        public Builder setTrackCount(int trackCount) {
-            this.trackCount = trackCount;
+        public Builder setTracksUri(Uri uri) {
+            bob.putUri(Metadata.KEY_CHILD_TRACKS_URI, uri);
             return this;
         }
 
-        public Builder setAlbumCount(int albumCount) {
-            this.albumCount = albumCount;
+        public Builder setTrackCount(int count) {
+            bob.putInt(Metadata.KEY_CHILD_TRACKS_COUNT, count);
+            return this;
+        }
+
+        public Builder setAlbumsUri(Uri uri) {
+            bob.putUri(Metadata.KEY_CHILD_ALBUMS_URI, uri);
+            return this;
+        }
+
+        public Builder setAlbumCount(int count) {
+            bob.putInt(Metadata.KEY_CHILD_TRACKS_COUNT, count);
             return this;
         }
 
         public Builder addArtInfo(String artist, String album, Uri uri) {
-            this.artInfos.add(new ArtInfo(artist, album, uri));
+            this.artInfos.add(ArtInfo.forAlbum(artist, album, uri));
             return this;
         }
 
@@ -178,15 +155,11 @@ public class TrackCollection implements Bundleable {
         }
 
         public TrackCollection build() {
-            if (name == null || tracksUri == null) {
-                throw new NullPointerException("name and tracksUri are required");
+            if (uri == null || name == null) {
+                throw new NullPointerException("uri and name are required");
             }
-            List<ArtInfo> artworks = Arrays.asList(artInfos.toArray(new ArtInfo[artInfos.size()]));
-            Collections.sort(artworks);
-            if (artworks.size() > 4) {
-                artworks = artworks.subList(0, 3); //Only need 4;
-            }
-            return new TrackCollection(name, tracksUri, trackCount, albumCount, artworks);
+            bob.putArtInfos(new ArrayList<>(artInfos).subList(0, 3)); //Only need 4;
+            return new TrackCollection(uri, name, bob.build());
         }
     }
 }

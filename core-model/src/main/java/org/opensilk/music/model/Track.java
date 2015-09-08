@@ -32,62 +32,73 @@ import java.util.Map;
 /**
  * Created by drew on 6/10/14.
  */
-public class Track implements Bundleable {
+public class Track extends Item {
 
     public static final String DEFAULT_MIME_TYPE = "audio/*";
 
-    public final String identity;
-    public final String name;
-    public final String albumName;
-    public final String artistName;
-    public final String albumArtistName;
-    public final String albumIdentity;
-    public final int duration;
-    public final Uri dataUri;
-    public final Uri artworkUri;
-    public final String mimeType;
-    private final String headers;
-    public final int index;
+    @Deprecated public final String albumName;
+    @Deprecated public final String artistName;
+    @Deprecated public final String albumArtistName;
+    @Deprecated public final String albumIdentity;
+    @Deprecated public final int duration;
+    @Deprecated public final Uri dataUri;
+    @Deprecated public final Uri artworkUri;
+    @Deprecated public final String mimeType;
+    @Deprecated public final int index;
 
-    protected Track(@NonNull String identity,
-                    @NonNull String name,
-                    @Nullable String albumName,
-                    @Nullable String artistName,
-                    @Nullable String albumArtistName,
-                    @Nullable String albumIdentity,
-                    int duration,
-                    @NonNull Uri dataUri,
-                    @Nullable Uri artworkUri,
-                    @Nullable String mimeType,
-                    @Nullable String headers,
-                    int index
-    ) {
-        this.identity = identity;
-        this.name = name;
-        this.albumName = albumName;
-        this.artistName = artistName;
-        this.albumArtistName = albumArtistName;
-        this.albumIdentity = albumIdentity;
-        this.duration = duration;
-        this.dataUri = dataUri;
-        this.artworkUri = artworkUri;
-        this.mimeType = mimeType != null ? mimeType : DEFAULT_MIME_TYPE;
-        this.headers = headers;
-        this.index = index;
+    protected Track(@NonNull Uri uri, @NonNull String name, @NonNull Metadata metadata) {
+        super(uri, name, metadata);
+        this.albumName = getAlbumName();
+        this.artistName = getArtistName();
+        this.albumArtistName = getAlbumArtistName();
+        this.albumIdentity = getAlbumUri().toString();
+        this.duration = getDuration();
+        this.dataUri = getResourceUri();
+        this.artworkUri = getArtworkUri();
+        this.mimeType = getMimeType();
+        this.index = getPlayOrderIndex();
     }
 
-    @Override
-    public String getIdentity() {
-        return identity;
+    public String getAlbumName() {
+        return metadata.getString(Metadata.KEY_ALBUM_NAME);
     }
 
-    @Override
-    public String getName() {
-        return name;
+    public String getAlbumArtistName() {
+        return metadata.getString(Metadata.KEY_ALBUM_ARTIST_NAME);
+    }
+
+    public Uri getAlbumUri() {
+        return metadata.getUri(Metadata.KEY_ALBUM_URI);
+    }
+
+    public String getArtistName() {
+        return metadata.getString(Metadata.KEY_ARTIST_NAME);
+    }
+
+    public Uri getArtistUri() {
+        return metadata.getUri(Metadata.KEY_ARTIST_URI);
+    }
+
+    public int getDuration() {
+        return metadata.getInt(Metadata.KEY_DURATION);
+    }
+
+    public Uri getResourceUri() {
+        return metadata.getUri(Metadata.KEY_RESOURCE_URI);
+    }
+
+    public Uri getArtworkUri() {
+        return metadata.getUri(Metadata.KEY_ALBUM_ART_URI);
+    }
+
+    public String getMimeType() {
+        final String mimeType = metadata.getString(Metadata.KEY_MIME_TYPE);
+        return mimeType != null ? mimeType : DEFAULT_MIME_TYPE;
     }
 
     @NonNull
     public Map<String, String> getHeaders() {
+        final String headers = metadata.getString(Metadata.KEY_RESOURCE_HEADERS);
         if (TextUtils.isEmpty(headers)) {
             return Collections.emptyMap();
         }
@@ -102,22 +113,17 @@ public class Track implements Bundleable {
         return hdrs;
     }
 
+    public int getPlayOrderIndex() {
+        return metadata.getInt(Metadata.KEY_PLAY_ORDER_INDEX);
+    }
+
     @Override
     public Bundle toBundle() {
-        Bundle b = new Bundle(22); //2x
+        Bundle b = new Bundle(4);
         b.putString(CLZ, Track.class.getName());
-        b.putString("_1", identity);
+        b.putParcelable("_1", uri);
         b.putString("_2", name);
-        b.putString("_3", albumName);
-        b.putString("_4", artistName);
-        b.putString("_5", albumArtistName);
-        b.putString("_6", albumIdentity);
-        b.putInt("_7", duration);
-        b.putParcelable("_8", dataUri);
-        b.putParcelable("_9", artworkUri);
-        b.putString("_10", mimeType);
-        b.putString("_11", headers);
-        b.putInt("_12", index);
+        b.putParcelable("_3", metadata);
         return b;
     }
 
@@ -125,70 +131,12 @@ public class Track implements Bundleable {
         if (!Track.class.getName().equals(b.getString(CLZ))) {
             throw new IllegalArgumentException("Wrong class for Track: "+b.getString(CLZ));
         }
-        return new Builder()
-                .setIdentity(b.getString("_1"))
-                .setName(b.getString("_2"))
-                .setAlbumName(b.getString("_3"))
-                .setArtistName(b.getString("_4"))
-                .setAlbumArtistName(b.getString("_5"))
-                .setAlbumIdentity(b.getString("_6"))
-                .setDuration(b.getInt("_7"))
-                .setDataUri(b.<Uri>getParcelable("_8"))
-                .setArtworkUri(b.<Uri>getParcelable("_9"))
-                .setMimeType(b.getString("_10"))
-                .setHeaders(b.getString("_11"))
-                .setIndex(b.getInt("_12"))
-                .build();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Track)) return false;
-
-        Track track = (Track) o;
-
-        if (duration != track.duration) return false;
-        if (albumArtistName != null ? !albumArtistName.equals(track.albumArtistName) : track.albumArtistName != null)
-            return false;
-        if (albumIdentity != null ? !albumIdentity.equals(track.albumIdentity) : track.albumIdentity != null)
-            return false;
-        if (albumName != null ? !albumName.equals(track.albumName) : track.albumName != null)
-            return false;
-        if (artistName != null ? !artistName.equals(track.artistName) : track.artistName != null)
-            return false;
-        if (artworkUri != null ? !artworkUri.equals(track.artworkUri) : track.artworkUri != null)
-            return false;
-        if (dataUri != null ?  !dataUri.equals(track.dataUri) : track.dataUri != null) return false;
-        if (identity != null ? !identity.equals(track.identity) : track.identity != null)
-            return false;
-        if (name != null ? !name.equals(track.name) : track.name != null) return false;
-        if (mimeType != null ? !mimeType.equals(track.mimeType) : track.name != null) return false;
-        //ignoring headers
-        if (index != track.index) return false;
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = identity != null ? identity.hashCode() : 0;
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (albumName != null ? albumName.hashCode() : 0);
-        result = 31 * result + (artistName != null ? artistName.hashCode() : 0);
-        result = 31 * result + (albumArtistName != null ? albumArtistName.hashCode() : 0);
-        result = 31 * result + (albumIdentity != null ? albumIdentity.hashCode() : 0);
-        result = 31 * result + duration;
-        result = 31 * result + (dataUri != null ? dataUri.hashCode() : 0);
-        result = 31 * result + (artworkUri != null ? artworkUri.hashCode() : 0);
-        result = 31 * result + (mimeType != null ? mimeType.hashCode() : 0);
-        //ignoring headers
-        result = 31 * result + index;
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return name;
+        b.setClassLoader(Track.class.getClassLoader());
+        return new Track(
+                b.<Uri>getParcelable("_1"),
+                b.getString("_2"),
+                b.<Metadata>getParcelable("_3")
+        );
     }
 
     public static Builder builder() {
@@ -207,39 +155,23 @@ public class Track implements Bundleable {
     };
 
     public static final class Builder {
-        private String identity;
+        private Uri uri;
         private String name;
-        private String albumName;
-        private String artistName;
-        private String albumArtistName;
-        private String albumIdentity;
-        private int duration;
-        private Uri dataUri;
-        private Uri artworkUri;
-        private String mimeType = DEFAULT_MIME_TYPE;
+        private Metadata.Builder bob = Metadata.builder();
         private String headers = "";
-        private int index;
 
         private Builder() {
         }
 
         private Builder(Track t) {
-            identity = t.identity;
+            uri = t.uri;
             name = t.name;
-            albumName = t.albumName;
-            artistName = t.artistName;
-            albumArtistName = t.albumArtistName;
-            albumIdentity = t.albumIdentity;
-            duration = t.duration;
-            dataUri = t.dataUri;
-            artworkUri = t.artworkUri;
-            mimeType = t.mimeType;
-            headers = t.headers;
-            index = t.index;
+            bob = t.metadata.buildUpon();
+            headers = t.metadata.getString(Metadata.KEY_RESOURCE_HEADERS);
         }
 
-        public Builder setIdentity(String identity) {
-            this.identity = identity;
+        public Builder setUri(Uri uri) {
+            this.uri = uri;
             return this;
         }
 
@@ -248,43 +180,53 @@ public class Track implements Bundleable {
             return this;
         }
 
-        public Builder setAlbumName(String albumName) {
-            this.albumName = albumName;
+        public Builder setParentUri(Uri uri) {
+            bob.putUri(Metadata.KEY_PARENT_URI, uri);
             return this;
         }
 
-        public Builder setArtistName(String artistName) {
-            this.artistName = artistName;
+        public Builder setAlbumName(String albumName) {
+            bob.putString(Metadata.KEY_ALBUM_NAME, albumName);
             return this;
         }
 
         public Builder setAlbumArtistName(String albumArtistName) {
-            this.albumArtistName = albumArtistName;
+            bob.putString(Metadata.KEY_ALBUM_ARTIST_NAME, albumArtistName);
             return this;
         }
 
-        public Builder setAlbumIdentity(String albumIdentity) {
-            this.albumIdentity = albumIdentity;
+        public Builder setAlbumUri(Uri albumUri) {
+            bob.putUri(Metadata.KEY_ALBUM_URI, albumUri);
+            return this;
+        }
+
+        public Builder setArtistName(String artistName) {
+            bob.putString(Metadata.KEY_ARTIST_NAME, artistName);
+            return this;
+        }
+
+        public Builder setArtistUri(Uri artistUri) {
+            bob.putUri(Metadata.KEY_ARTIST_URI, artistUri);
             return this;
         }
 
         public Builder setDuration(int duration) {
-            this.duration = duration;
+            bob.putInt(Metadata.KEY_DURATION, duration);
             return this;
         }
 
-        public Builder setDataUri(Uri dataUri) {
-            this.dataUri = dataUri;
+        public Builder setResourceUri(Uri resUri) {
+            bob.putUri(Metadata.KEY_RESOURCE_URI, resUri);
             return this;
         }
 
         public Builder setArtworkUri(Uri artworkUri) {
-            this.artworkUri = artworkUri;
+            bob.putUri(Metadata.KEY_ALBUM_ART_URI, artworkUri);
             return this;
         }
 
         public Builder setMimeType(String mimeType) {
-            this.mimeType = mimeType;
+            bob.putString(Metadata.KEY_MIME_TYPE, mimeType);
             return this;
         }
 
@@ -302,17 +244,18 @@ public class Track implements Bundleable {
             return this;
         }
 
-        public Builder setIndex(int index) {
-            this.index = index;
+        public Builder setPlayOrderIndex(int index) {
+            bob.putInt(Metadata.KEY_PLAY_ORDER_INDEX, index);
             return this;
         }
 
         public Track build() {
-            if (identity == null || name == null || dataUri == null) {
-                throw new NullPointerException("identity, name, and dataUri are required");
+            bob.putString(Metadata.KEY_RESOURCE_HEADERS, headers);
+            Metadata metadata = bob.build();
+            if (uri == null || name == null || metadata.getUri(Metadata.KEY_RESOURCE_URI) == null) {
+                throw new NullPointerException("identity, name, and resourceUri are required");
             }
-            return new Track(identity, name, albumName, artistName, albumArtistName,
-                    albumIdentity, duration, dataUri, artworkUri, mimeType, headers, index);
+            return new Track(uri, name, metadata);
         }
     }
 }

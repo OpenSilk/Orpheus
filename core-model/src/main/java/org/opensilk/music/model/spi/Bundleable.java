@@ -16,6 +16,7 @@
 
 package org.opensilk.music.model.spi;
 
+import android.net.Uri;
 import android.os.Bundle;
 
 /**
@@ -24,19 +25,14 @@ import android.os.Bundle;
 public interface Bundleable {
     String CLZ = "clz";
 
-    /*
-     * @since API_010
-     */
-
     Bundle toBundle();
     interface BundleCreator<T> {
         public T fromBundle(Bundle b) throws IllegalArgumentException;
     }
 
-    /*
-     * @since API_020
-     */
+    @Deprecated String getIdentity();
+    @Deprecated String getName();
 
-    String getIdentity();
-    String getName();
+    Uri getUri();
+    String getDisplayName();
 }

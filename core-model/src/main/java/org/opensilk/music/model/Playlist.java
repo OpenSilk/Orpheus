@@ -30,47 +30,36 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.TreeSet;
 
 /**
  * Created by drew on 5/2/15.
  */
-public class Playlist implements Bundleable {
+public class Playlist extends Container {
 
-    public final String identity;
-    public final String name;
-    public final List<Uri> trackUris;
-    public final List<ArtInfo> artInfos;
-
-    protected Playlist(
-            @NonNull String identity,
-            @NonNull String name,
-            @NonNull List<Uri> trackUris,
-            @NonNull List<ArtInfo> artInfos
-    ) {
-        this.identity = identity;
-        this.name = name;
-        this.trackUris = Collections.unmodifiableList(trackUris);
-        this.artInfos = Collections.unmodifiableList(artInfos);
+    protected Playlist(@NonNull Uri uri, @NonNull String name, @NonNull Metadata metadata) {
+        super(uri, name, metadata);
     }
 
-    @Override
-    public String getIdentity() {
-        return identity;
+    public Uri getTracksUri() {
+        return metadata.getUri(Metadata.KEY_CHILD_TRACKS_URI);
     }
 
-    @Override
-    public String getName() {
-        return name;
+    public int getTracksCount() {
+        return metadata.getInt(Metadata.KEY_CHILD_TRACKS_COUNT);
+    }
+
+    public List<ArtInfo> getArtInfos() {
+        return metadata.getArtInfos();
     }
 
     @Override
     public Bundle toBundle() {
-        Bundle b = new Bundle(10); //2x
+        Bundle b = new Bundle(4);
         b.putString(CLZ, Playlist.class.getName());
-        b.putString("_1", identity);
+        b.putParcelable("_1", uri);
         b.putString("_2", name);
-        b.putParcelableArrayList("_3", new ArrayList<Parcelable>(trackUris));
-        b.putParcelableArrayList("_4", new ArrayList<Parcelable>(artInfos));
+        b.putParcelable("_3", metadata);
         return b;
     }
 
@@ -78,48 +67,16 @@ public class Playlist implements Bundleable {
         if (!Playlist.class.getName().equals(b.getString(CLZ))) {
             throw new IllegalArgumentException("Wrong class for Playlist: "+b.getString(CLZ));
         }
-        return Playlist.builder()
-                .setIdentity(b.getString("_1"))
-                .setName(b.getString("_2"))
-                .addTrackUris(b.<Uri>getParcelableArrayList("_3"))
-                .addArtInfos(b.<ArtInfo>getParcelableArrayList("_4"))
-                .build();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Playlist playlist = (Playlist) o;
-        if (identity != null ? !identity.equals(playlist.identity) : playlist.identity != null)
-            return false;
-        if (name != null ? !name.equals(playlist.name) : playlist.name != null) return false;
-        if (trackUris != null ? !trackUris.equals(playlist.trackUris) : playlist.trackUris != null)
-            return false;
-        return !(artInfos != null ? !artInfos.equals(playlist.artInfos) : playlist.artInfos != null);
-
-    }
-
-    @Override
-    public int hashCode() {
-        int result = identity != null ? identity.hashCode() : 0;
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (trackUris != null ? trackUris.hashCode() : 0);
-        result = 31 * result + (artInfos != null ? artInfos.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return name;
+        b.setClassLoader(Playlist.class.getClassLoader());
+        return new Playlist(
+                b.<Uri>getParcelable("_1"),
+                b.getString("_2"),
+                b.<Metadata>getParcelable("_3")
+        );
     }
 
     public static Builder builder() {
         return new Builder();
-    }
-
-    public Builder buildUpon() {
-        return new Builder(this);
     }
 
     public static final BundleCreator<Playlist> BUNDLE_CREATOR = new BundleCreator<Playlist>() {
@@ -131,23 +88,16 @@ public class Playlist implements Bundleable {
     };
 
     public static final class Builder {
-        private String identity;
+        private Uri uri;
         private String name;
-        private ArrayList<Uri> trackUris = new ArrayList<>();
-        private HashSet<ArtInfo> artInfos = new HashSet<>();
+        private Metadata.Builder bob = Metadata.builder();
+        private TreeSet<ArtInfo> artInfos = new TreeSet<>();
 
         private Builder() {
         }
 
-        private Builder(Playlist p) {
-            this.identity = p.identity;
-            this.name = p.name;
-            this.trackUris.addAll(p.trackUris);
-            this.artInfos.addAll(p.artInfos);
-        }
-
-        public Builder setIdentity(String identity) {
-            this.identity = identity;
+        public Builder setUri(Uri uri) {
+            this.uri = uri;
             return this;
         }
 
@@ -156,18 +106,23 @@ public class Playlist implements Bundleable {
             return this;
         }
 
-        public Builder addTrackUri(Uri uri) {
-            this.trackUris.add(uri);
+        public Builder setParentUri(Uri uri) {
+            bob.putUri(Metadata.KEY_PARENT_URI, uri);
             return this;
         }
 
-        public Builder addTrackUris(Collection<Uri> uris) {
-            this.trackUris.addAll(uris);
+        public Builder setTracksUri(Uri uri) {
+            bob.putUri(Metadata.KEY_CHILD_TRACKS_URI, uri);
+            return this;
+        }
+
+        public Builder setTrackCount(int count) {
+            bob.putInt(Metadata.KEY_CHILD_TRACKS_COUNT, count);
             return this;
         }
 
         public Builder addArtInfo(String artist, String album, Uri uri) {
-            this.artInfos.add(new ArtInfo(artist, album, uri));
+            this.artInfos.add(ArtInfo.forAlbum(artist, album, uri));
             return this;
         }
 
@@ -182,15 +137,11 @@ public class Playlist implements Bundleable {
         }
 
         public Playlist build() {
-            if (identity == null || name == null) {
-                throw new NullPointerException("identity and name are required");
+            if (uri == null || name == null) {
+                throw new NullPointerException("uri and name are required");
             }
-            List<ArtInfo> artworks = Arrays.asList(artInfos.toArray(new ArtInfo[artInfos.size()]));
-            Collections.sort(artworks);
-            if (artworks.size() > 4) {
-                artworks = artworks.subList(0, 3); //Only need 4;
-            }
-            return new Playlist(identity, name, trackUris, artworks);
+            bob.putArtInfos(new ArrayList<>(artInfos).subList(0, 3)); //Only need 4;
+            return new Playlist(uri, name, bob.build());
         }
     }
 }

@@ -19,62 +19,50 @@ package org.opensilk.music.model;
 
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
-import org.opensilk.music.model.spi.Bundleable;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
+import java.util.TreeSet;
 
 /**
  * Created by drew on 5/2/15.
  */
-public class Genre implements Bundleable {
+public class Genre extends Container {
 
-    public final String identity;
-    public final String name;
-    public final List<Uri> trackUris;
-    public final List<Uri> albumUris;
-    public final List<ArtInfo> artInfos;
-
-    protected Genre(
-            @NonNull String identity,
-            @NonNull String name,
-            @NonNull List<Uri> trackUris,
-            @NonNull List<Uri> albumUris,
-            @NonNull List<ArtInfo> artInfos
-    ) {
-        this.identity = identity;
-        this.name = name;
-        this.trackUris = Collections.unmodifiableList(trackUris);
-        this.albumUris = Collections.unmodifiableList(albumUris);
-        this.artInfos = Collections.unmodifiableList(artInfos);
+    protected Genre(@NonNull Uri uri, @NonNull String name, @NonNull Metadata metadata) {
+        super(uri, name, metadata);
     }
 
-    @Override
-    public String getIdentity() {
-        return identity;
+    public Uri getTracksUri() {
+        return metadata.getUri(Metadata.KEY_CHILD_TRACKS_URI);
     }
 
-    @Override
-    public String getName() {
-        return name;
+    public int getTracksCount() {
+        return metadata.getInt(Metadata.KEY_CHILD_TRACKS_COUNT);
+    }
+
+    public Uri getAlbumsUri() {
+        return metadata.getUri(Metadata.KEY_CHILD_ALBUMS_URI);
+    }
+
+    public int getAlbumsCount() {
+        return metadata.getInt(Metadata.KEY_CHILD_ALBUMS_COUNT);
+    }
+
+    public List<ArtInfo> getArtInfos() {
+        return metadata.getArtInfos();
     }
 
     @Override
     public Bundle toBundle() {
-        Bundle b = new Bundle(10); //2x
+        Bundle b = new Bundle(4);
         b.putString(CLZ, Genre.class.getName());
-        b.putString("_1", identity);
+        b.putParcelable("_1", uri);
         b.putString("_2", name);
-        b.putParcelableArrayList("_3", new ArrayList<Parcelable>(trackUris));
-        b.putParcelableArrayList("_4", new ArrayList<Parcelable>(albumUris));
-        b.putParcelableArrayList("_5", new ArrayList<Parcelable>(artInfos));
+        b.putParcelable("_3", metadata);
         return b;
     }
 
@@ -82,51 +70,16 @@ public class Genre implements Bundleable {
         if (!Genre.class.getName().equals(b.getString(CLZ))) {
             throw new IllegalArgumentException("Wrong class for Genre: "+b.getString(CLZ));
         }
-        return Genre.builder()
-                .setIdentity(b.getString("_1"))
-                .setName(b.getString("_2"))
-                .addTrackUris(b.<Uri>getParcelableArrayList("_3"))
-                .addAlbumUris(b.<Uri>getParcelableArrayList("_4"))
-                .addArtInfos(b.<ArtInfo>getParcelableArrayList("_5"))
-                .build();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Genre genre = (Genre) o;
-        if (identity != null ? !identity.equals(genre.identity) : genre.identity != null)
-            return false;
-        if (name != null ? !name.equals(genre.name) : genre.name != null) return false;
-        if (trackUris != null ? !trackUris.equals(genre.trackUris) : genre.trackUris != null)
-            return false;
-        if (albumUris != null ? !albumUris.equals(genre.albumUris) : genre.albumUris != null)
-            return false;
-        return !(artInfos != null ? !artInfos.equals(genre.artInfos) : genre.artInfos != null);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = identity != null ? identity.hashCode() : 0;
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (trackUris != null ? trackUris.hashCode() : 0);
-        result = 31 * result + (albumUris != null ? albumUris.hashCode() : 0);
-        result = 31 * result + (artInfos != null ? artInfos.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return name;
+        b.setClassLoader(Genre.class.getClassLoader());
+        return new Genre(
+                b.<Uri>getParcelable("_1"),
+                b.getString("_2"),
+                b.<Metadata>getParcelable("_3")
+        );
     }
 
     public static Builder builder() {
         return new Builder();
-    }
-
-    public Builder buildUpon() {
-        return new Builder(this);
     }
 
     public static final BundleCreator<Genre> BUNDLE_CREATOR = new BundleCreator<Genre>() {
@@ -138,25 +91,16 @@ public class Genre implements Bundleable {
     };
 
     public static final class Builder  {
-        private String identity;
+        private Uri uri;
         private String name;
-        private ArrayList<Uri> trackUris = new ArrayList<>();
-        private HashSet<Uri> albumUris = new HashSet<>();
-        private HashSet<ArtInfo> artInfos = new HashSet<>();
+        private Metadata.Builder bob = Metadata.builder();
+        private TreeSet<ArtInfo> artInfos = new TreeSet<>();
 
         private Builder() {
         }
 
-        private Builder(Genre g) {
-            this.identity = g.identity;
-            this.name = g.name;
-            this.trackUris.addAll(g.trackUris);
-            this.albumUris.addAll(g.albumUris);
-            this.artInfos.addAll(g.artInfos);
-        }
-
-        public Builder setIdentity(String identity) {
-            this.identity = identity;
+        public Builder setUri(Uri uri) {
+            this.uri = uri;
             return this;
         }
 
@@ -165,28 +109,33 @@ public class Genre implements Bundleable {
             return this;
         }
 
-        public Builder addTrackUri(Uri uri) {
-            this.trackUris.add(uri);
+        public Builder setParentUri(Uri uri) {
+            bob.putUri(Metadata.KEY_PARENT_URI, uri);
             return this;
         }
 
-        public Builder addTrackUris(Collection<Uri> uris) {
-            this.trackUris.addAll(uris);
+        public Builder setTracksUri(Uri uri) {
+            bob.putUri(Metadata.KEY_CHILD_TRACKS_URI, uri);
             return this;
         }
 
-        public Builder addAlbumUri(Uri uri) {
-            this.albumUris.add(uri);
+        public Builder setTrackCount(int count) {
+            bob.putInt(Metadata.KEY_CHILD_TRACKS_COUNT, count);
             return this;
         }
 
-        public Builder addAlbumUris(Collection<Uri> uris) {
-            this.albumUris.addAll(uris);
+        public Builder setAlbumsUri(Uri uri) {
+            bob.putUri(Metadata.KEY_CHILD_ALBUMS_URI, uri);
+            return this;
+        }
+
+        public Builder setAlbumCount(int count) {
+            bob.putInt(Metadata.KEY_CHILD_TRACKS_COUNT, count);
             return this;
         }
 
         public Builder addArtInfo(String artist, String album, Uri uri) {
-            this.artInfos.add(new ArtInfo(artist, album, uri));
+            this.artInfos.add(ArtInfo.forAlbum(artist, album, uri));
             return this;
         }
 
@@ -201,18 +150,11 @@ public class Genre implements Bundleable {
         }
 
         public Genre build() {
-            if (identity == null || name == null) {
-                throw new NullPointerException("identity and name are required");
+            if (uri == null || name == null) {
+                throw new NullPointerException("uri and name are required");
             }
-            Collections.sort(trackUris);
-            List<Uri> albums = Arrays.asList(albumUris.toArray(new Uri[albumUris.size()]));
-            Collections.sort(albums);
-            List<ArtInfo> artworks = Arrays.asList(artInfos.toArray(new ArtInfo[artInfos.size()]));
-            Collections.sort(artworks);
-            if (artworks.size() > 4) {
-                artworks = artworks.subList(0, 3); //Only need 4;
-            }
-            return new Genre(identity, name, trackUris, albums, artworks);
+            bob.putArtInfos(new ArrayList<>(artInfos).subList(0, 3)); //Only need 4;
+            return new Genre(uri, name, bob.build());
         }
     }
 }

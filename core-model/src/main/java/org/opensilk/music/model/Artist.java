@@ -17,50 +17,34 @@
 
 package org.opensilk.music.model;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-
-import org.opensilk.music.model.spi.Bundleable;
 
 /**
  * Created by drew on 6/10/14.
  */
-public class Artist implements Bundleable {
+public class Artist extends Container {
 
-    public final String identity;
-    public final String name;
-    public final int albumCount;
-    public final int trackCount;
-
-    protected Artist(@NonNull String identity,
-                     @NonNull String name,
-                     int albumCount,
-                     int trackCount
-    ) {
-        this.identity = identity;
-        this.name = name;
-        this.albumCount = albumCount;
-        this.trackCount = trackCount;
+    protected Artist(@NonNull Uri uri, @NonNull String name, @NonNull Metadata metadata) {
+        super(uri, name, metadata);
     }
 
-    @Override
-    public String getIdentity() {
-        return identity;
+    public int getAlbumCount() {
+        return metadata.getInt(Metadata.KEY_CHILD_ALBUMS_COUNT);
     }
 
-    @Override
-    public String getName() {
-        return name;
+    public int getTrackCount() {
+        return metadata.getInt(Metadata.KEY_CHILD_TRACKS_COUNT);
     }
 
     @Override
     public Bundle toBundle() {
-        Bundle b = new Bundle(10); //2x
+        Bundle b = new Bundle(4);
         b.putString(CLZ, Artist.class.getName());
-        b.putString("_1", identity);
+        b.putParcelable("_1", uri);
         b.putString("_2", name);
-        b.putInt("_3", albumCount);
-        b.putInt("_4", trackCount);
+        b.putParcelable("_3", metadata);
         return b;
     }
 
@@ -68,42 +52,12 @@ public class Artist implements Bundleable {
         if (!Artist.class.getName().equals(b.getString(CLZ))) {
             throw new IllegalArgumentException("Wrong class for Artist: "+b.getString(CLZ));
         }
-        return new Builder()
-                .setIdentity(b.getString("_1"))
-                .setName(b.getString("_2"))
-                .setAlbumCount(b.getInt("_3"))
-                .setTrackCount(b.getInt("_4"))
-                .build();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Artist)) return false;
-
-        Artist artist = (Artist) o;
-
-        if (albumCount != artist.albumCount) return false;
-        if (trackCount != artist.trackCount) return false;
-        if (identity != null ? !identity.equals(artist.identity) : artist.identity != null)
-            return false;
-        if (name != null ? !name.equals(artist.name) : artist.name != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = identity != null ? identity.hashCode() : 0;
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + albumCount;
-        result = 31 * result + trackCount;
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return name;
+        b.setClassLoader(Artist.class.getClassLoader());
+        return new Artist(
+                b.<Uri>getParcelable("_1"),
+                b.getString("_2"),
+                b.<Metadata>getParcelable("_3")
+        );
     }
 
     public static Builder builder() {
@@ -118,13 +72,15 @@ public class Artist implements Bundleable {
     };
 
     public static final class Builder {
-        private String identity;
+        private Uri uri;
         private String name;
-        private int albumCount;
-        private int trackCount;
+        private Metadata.Builder bob = Metadata.builder();
 
-        public Builder setIdentity(String identity) {
-            this.identity = identity;
+        private Builder() {
+        }
+
+        public Builder setUri(Uri uri) {
+            this.uri = uri;
             return this;
         }
 
@@ -133,21 +89,26 @@ public class Artist implements Bundleable {
             return this;
         }
 
+        public Builder setParentUri(Uri uri) {
+            bob.putUri(Metadata.KEY_PARENT_URI, uri);
+            return this;
+        }
+
         public Builder setAlbumCount(int albumCount) {
-            this.albumCount = albumCount;
+            bob.putInt(Metadata.KEY_CHILD_ALBUMS_COUNT, albumCount);
             return this;
         }
 
         public Builder setTrackCount(int trackCount) {
-            this.trackCount = trackCount;
+            bob.putInt(Metadata.KEY_CHILD_TRACKS_COUNT, trackCount);
             return this;
         }
 
         public Artist build() {
-            if (identity == null || name == null) {
-                throw new NullPointerException("identity and name are required");
+            if (uri == null || name == null) {
+                throw new NullPointerException("uri and name are required");
             }
-            return new Artist(identity, name, albumCount, trackCount);
+            return new Artist(uri, name, bob.build());
         }
     }
 }
