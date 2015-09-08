@@ -40,13 +40,13 @@ import rx.functions.Func1;
         }
 )
 public interface VolleyComponent extends AppContextComponent {
-    Func1<Context, VolleyComponent> FACTORY = new Func1<Context, VolleyComponent>() {
-        @Override
-        public VolleyComponent call(Context context) {
-            return DaggerVolleyComponent.builder()
-                    .appContextModule(new AppContextModule(context))
-                    .build();
-        }
-    };
+//    Func1<Context, VolleyComponent> FACTORY = new Func1<Context, VolleyComponent>() {
+//        @Override
+//        public VolleyComponent call(Context context) {
+//            return DaggerVolleyComponent.builder()
+//                    .appContextModule(new AppContextModule(context))
+//                    .build();
+//        }
+//    };
     RequestQueue requestQueue();
 }

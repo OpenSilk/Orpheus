@@ -44,19 +44,18 @@ import rx.functions.Func1;
         modules = {
                 AppContextModule.class,
                 ArtworkModule.class,
-                VolleyModule.class
         }
 )
 public interface ArtworkComponent extends ArtworkComponentCommon, GsonComponent,
         SystemServicesComponent, VolleyComponent, LastFMComponent {
-    Func1<Context, ArtworkComponent> FACTORY = new Func1<Context, ArtworkComponent>() {
-        @Override
-        public ArtworkComponent call(Context context) {
-            return DaggerArtworkComponent.builder()
-                    .appContextModule(new AppContextModule(context))
-                    .build();
-        }
-    };
+//    Func1<Context, ArtworkComponent> FACTORY = new Func1<Context, ArtworkComponent>() {
+//        @Override
+//        public ArtworkComponent call(Context context) {
+//            return DaggerArtworkComponent.builder()
+//                    .appContextModule(new AppContextModule(context))
+//                    .build();
+//        }
+//    };
     void inject(ArtworkProvider provider);
     BitmapDiskCache bitmapDiskCache();
 }
