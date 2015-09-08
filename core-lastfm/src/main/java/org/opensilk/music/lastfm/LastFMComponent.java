@@ -17,6 +17,13 @@
 
 package org.opensilk.music.lastfm;
 
+import org.opensilk.common.core.dagger2.AppContextModule;
+import org.opensilk.music.volley.VolleyComponent;
+import org.opensilk.music.volley.VolleyModule;
+
+import javax.inject.Singleton;
+
+import dagger.Component;
 import de.umass.lastfm.LastFM;
 
 /**
@@ -24,6 +31,13 @@ import de.umass.lastfm.LastFM;
  *
  * Created by drew on 9/1/15.
  */
-public interface LastFMComponent {
+@Singleton
+@Component(
+        modules = {
+                AppContextModule.class,
+                VolleyModule.class,
+        }
+)
+public interface LastFMComponent extends VolleyComponent {
     LastFM lastFM();
 }
