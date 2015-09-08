@@ -26,7 +26,7 @@ import android.view.ViewGroup;
  */
 public class HeaderRecyclerAdapter<VH extends RecyclerView.ViewHolder> extends RecyclerListAdapter<View, RecyclerView.ViewHolder> {
 
-    RecyclerListAdapter<?, VH> wrappedAdapter;
+    final RecyclerListAdapter<?, VH> wrappedAdapter;
 
     public HeaderRecyclerAdapter(RecyclerListAdapter<?, VH> wrappedAdapter) {
         super();
