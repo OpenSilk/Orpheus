@@ -23,7 +23,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import org.opensilk.common.core.mortar.HasScope;
-import org.opensilk.common.ui.R;
 
 import mortar.MortarScope;
 
@@ -36,7 +35,7 @@ public class ToolbarOwnerDelegate<A extends AppCompatActivity & HasScope> implem
     private final ToolbarOwner toolbarOwner;
     private final Callback callback;
 
-    ActionBarMenuConfig currentMenu;
+    ActionBarMenuHandler currentMenu;
 
     public interface Callback {
         void onToolbarAttached(Toolbar toolbar);
@@ -68,28 +67,11 @@ public class ToolbarOwnerDelegate<A extends AppCompatActivity & HasScope> implem
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (currentMenu != null) {
-            for (int item : currentMenu.menus) {
-                activity.getMenuInflater().inflate(item, menu);
-            }
-            for (ActionBarMenuConfig.CustomMenuItem item : currentMenu.customMenus) {
-                menu.add(item.groupId, item.itemId, item.order, item.title)
-                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-                if (item.iconRes >= 0) {
-                    menu.findItem(item.itemId)
-                            .setIcon(item.iconRes)
-                            .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-                }
-            }
-            return true;
-        }
-        return false;
+        return currentMenu != null && currentMenu.onBuildMenu(activity.getMenuInflater(), menu);
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
-        return currentMenu != null
-                && currentMenu.actionHandler != null
-                && currentMenu.actionHandler.call(activity, item.getItemId());
+        return currentMenu != null && currentMenu.onMenuItemClicked(activity, item);
     }
 
     /*
@@ -102,7 +84,7 @@ public class ToolbarOwnerDelegate<A extends AppCompatActivity & HasScope> implem
     }
 
     @Override
-    public void setToolbarMenu(ActionBarMenuConfig menuConfig) {
+    public void setToolbarMenu(ActionBarMenuHandler menuConfig) {
         currentMenu = menuConfig;
         activity.supportInvalidateOptionsMenu();
     }

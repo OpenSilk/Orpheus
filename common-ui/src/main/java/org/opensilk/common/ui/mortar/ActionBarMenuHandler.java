@@ -17,9 +17,30 @@
 
 package org.opensilk.common.ui.mortar;
 
+import android.content.Context;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+
 /**
- * Created by drew on 5/5/15.
+ * Created by drew on 9/7/15.
  */
-public interface HasOptionsMenu {
-    ActionBarMenuHandler getMenuConfig();
+public interface ActionBarMenuHandler {
+    /**
+     * Add items to menu
+     *
+     * @param menuInflater
+     * @param menu
+     * @return true if items added
+     */
+    boolean onBuildMenu(MenuInflater menuInflater, Menu menu);
+
+    /**
+     * Handle menu item clicks
+     *
+     * @param context
+     * @param menuItem
+     * @return true if click was handled
+     */
+    boolean onMenuItemClicked(Context context, MenuItem menuItem);
 }

@@ -27,7 +27,7 @@ import org.opensilk.common.core.mortar.HasScope;
 public interface ToolbarOwnerActivity extends HasScope {
     void setSupportActionBar(Toolbar toolbar);
 
-    void setToolbarMenu(ActionBarMenuConfig menuConfig);
+    void setToolbarMenu(ActionBarMenuHandler menuConfig);
 
     void onToolbarAttached(Toolbar toolbar);
 

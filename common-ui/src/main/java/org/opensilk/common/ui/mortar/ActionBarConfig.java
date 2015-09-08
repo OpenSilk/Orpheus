@@ -26,7 +26,7 @@ public class ActionBarConfig {
     public final CharSequence title;
     public final int subtitleRes;
     public final CharSequence subtitle;
-    public final ActionBarMenuConfig menuConfig;
+    public final ActionBarMenuHandler menuConfig;
     public final boolean transparentBackground;
 
     private ActionBarConfig(
@@ -35,7 +35,7 @@ public class ActionBarConfig {
             CharSequence title,
             int subtitleRes,
             CharSequence subtitle,
-            ActionBarMenuConfig menuConfig,
+            ActionBarMenuHandler menuConfig,
             boolean transparentBackground
     ) {
         this.upButtonEnabled = upButtonEnabled;
@@ -61,7 +61,7 @@ public class ActionBarConfig {
         private CharSequence title = null;
         private int subtitleRes = -1;
         private CharSequence subtitle = null;
-        private ActionBarMenuConfig menuConfig = null;
+        private ActionBarMenuHandler menuConfig = null;
         private boolean trasparentBackground = false;
 
         private Builder() {
@@ -110,7 +110,7 @@ public class ActionBarConfig {
             return this;
         }
 
-        public Builder setMenuConfig(ActionBarMenuConfig menuConfig) {
+        public Builder setMenuConfig(ActionBarMenuHandler menuConfig) {
             this.menuConfig = menuConfig;
             return this;
         }

@@ -19,21 +19,22 @@ package org.opensilk.common.ui.mortar;
 
 import android.content.Context;
 import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import org.opensilk.common.core.util.Preconditions;
 
 import java.util.Arrays;
 
-import rx.functions.Func1;
 import rx.functions.Func2;
 
 /**
  * Created by drew on 5/5/15.
  */
-public class ActionBarMenuConfig {
-    public final Func2<Context, Integer, Boolean> actionHandler;
-    public final Integer[] menus;
-    public final CustomMenuItem[] customMenus;
+public class ActionBarMenuConfig implements ActionBarMenuHandler {
+    final Func2<Context, Integer, Boolean> actionHandler;
+    final Integer[] menus;
+    final CustomMenuItem[] customMenus;
 
     private ActionBarMenuConfig(
             Func2<Context, Integer, Boolean> actionHandler,
@@ -43,6 +44,47 @@ public class ActionBarMenuConfig {
         this.actionHandler = actionHandler;
         this.menus = menus;
         this.customMenus = customMenus;
+    }
+
+    public Func2<Context, Integer, Boolean> getActionHandler() {
+        return actionHandler;
+    }
+
+    public Integer[] getMenus() {
+        return menus;
+    }
+
+    public CustomMenuItem[] getCustomMenus() {
+        return customMenus;
+    }
+
+    @Override
+    public boolean onBuildMenu(MenuInflater menuInflater, Menu menu) {
+        boolean annyadded = false;
+        if (menus != null && menus.length != 0) {
+            for (int item : menus) {
+                menuInflater.inflate(item, menu);
+            }
+            annyadded = true;
+        }
+        if (customMenus != null && customMenus.length != 0) {
+            for (CustomMenuItem item : customMenus) {
+                menu.add(item.groupId, item.itemId, item.order, item.title)
+                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+                if (item.iconRes >= 0) {
+                    menu.findItem(item.itemId)
+                            .setIcon(item.iconRes)
+                            .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+                }
+            }
+            annyadded = true;
+        }
+        return annyadded;
+    }
+
+    @Override
+    public boolean onMenuItemClicked(Context context, MenuItem menuItem) {
+        return actionHandler != null && actionHandler.call(context, menuItem.getItemId());
     }
 
     public static Builder builder() {
