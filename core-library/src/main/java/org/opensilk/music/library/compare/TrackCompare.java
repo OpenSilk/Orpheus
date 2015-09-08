@@ -44,7 +44,7 @@ public class TrackCompare {
                 return new Comparator<Track>() {
                     @Override
                     public int compare(Track lhs, Track rhs) {
-                        int c = BundleableCompare.compareAZ(lhs.artistName, rhs.artistName);
+                        int c = BundleableCompare.compareAZ(lhs.getArtistName(), rhs.getArtistName());
                         //TODO throw albumArtist into the mix?
                         if (c == 0) {
                             return BundleableCompare.compareNameAZ(lhs, rhs);
@@ -56,9 +56,9 @@ public class TrackCompare {
                 return new Comparator<Track>() {
                     @Override
                     public int compare(Track lhs, Track rhs) {
-                        int c = BundleableCompare.compareAZ(lhs.albumName, rhs.albumName);
+                        int c = BundleableCompare.compareAZ(lhs.getAlbumName(), rhs.getAlbumName());
                         if (c == 0) {
-                            return lhs.index - rhs.index;
+                            return lhs.getPlayOrderIndex() - rhs.getPlayOrderIndex();
                         }
                         return c;
                     }
@@ -68,7 +68,7 @@ public class TrackCompare {
                     @Override
                     public int compare(Track lhs, Track rhs) {
                         //reversed
-                        int c = rhs.duration - lhs.duration;
+                        int c = rhs.getDuration() - lhs.getDuration();
                         if (c == 0) {
                             return BundleableCompare.compareNameAZ(lhs, rhs);
                         }
@@ -79,7 +79,7 @@ public class TrackCompare {
                 return new Comparator<Track>() {
                     @Override
                     public int compare(Track lhs, Track rhs) {
-                        return lhs.index - rhs.index;
+                        return lhs.getPlayOrderIndex() - rhs.getPlayOrderIndex();
                     }
                 };
             default:

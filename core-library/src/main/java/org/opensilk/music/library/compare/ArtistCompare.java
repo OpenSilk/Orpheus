@@ -45,7 +45,7 @@ public class ArtistCompare {
                     @Override
                     public int compare(Artist lhs, Artist rhs) {
                         //reversed
-                        int c = rhs.trackCount - lhs.trackCount;
+                        int c = rhs.getTrackCount() - lhs.getTrackCount();
                         if (c == 0) {
                             return BundleableCompare.compareNameAZ(lhs, rhs);
                         }
@@ -57,7 +57,7 @@ public class ArtistCompare {
                     @Override
                     public int compare(Artist lhs, Artist rhs) {
                         //reversed
-                        int c = rhs.albumCount - lhs.albumCount;
+                        int c = rhs.getAlbumCount() - lhs.getAlbumCount();
                         if (c == 0) {
                             return BundleableCompare.compareNameAZ(lhs, rhs);
                         }

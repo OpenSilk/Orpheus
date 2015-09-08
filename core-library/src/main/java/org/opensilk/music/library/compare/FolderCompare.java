@@ -44,7 +44,7 @@ public class FolderCompare {
                     @Override
                     public int compare(Folder lhs, Folder rhs) {
                         //Reversed
-                        int c = rhs.childCount - lhs.childCount;
+                        int c = rhs.getChildCount() - lhs.getChildCount();
                         if (c == 0) {
                             return BundleableCompare.compareNameAZ(lhs, rhs);
                         }
@@ -56,7 +56,7 @@ public class FolderCompare {
                     @Override
                     public int compare(Folder lhs, Folder rhs) {
                         //Z-A
-                        int c = BundleableCompare.compareZA(lhs.date, rhs.date);
+                        int c = BundleableCompare.compareZA(lhs.getDateModified(), rhs.getDateModified());
                         if (c == 0) {
                             return BundleableCompare.compareNameAZ(lhs, rhs);
                         }

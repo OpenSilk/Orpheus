@@ -46,7 +46,7 @@ public class AlbumCompare {
                     @Override
                     public int compare(Album lhs, Album rhs) {
                         //reversed
-                        int c = rhs.trackCount - lhs.trackCount;
+                        int c = rhs.getTrackCount() - lhs.getTrackCount();
                         if (c == 0) {
                             return BundleableCompare.compareNameAZ(lhs, rhs);
                         }
@@ -57,7 +57,7 @@ public class AlbumCompare {
                 return new Comparator<Album>() {
                     @Override
                     public int compare(Album lhs, Album rhs) {
-                        int c = ObjectUtils.compare(lhs.artistName, rhs.artistName);
+                        int c = ObjectUtils.compare(lhs.getArtistName(), rhs.getArtistName());
                         if (c == 0) {
                             return BundleableCompare.compareNameAZ(lhs, rhs);
                         }
@@ -69,7 +69,7 @@ public class AlbumCompare {
                     @Override
                     public int compare(Album lhs, Album rhs) {
                         //reversed
-                        int c = ObjectUtils.compare(rhs.date, lhs.date);
+                        int c = ObjectUtils.compare(rhs.getYear(), lhs.getYear());
                         if (c == 0) {
                             return BundleableCompare.compareNameAZ(lhs, rhs);
                         }
