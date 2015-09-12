@@ -17,6 +17,7 @@
 
 package de.umass.lastfm;
 
+import android.net.Uri;
 import android.text.TextUtils;
 
 import com.android.volley.Request;
@@ -25,8 +26,6 @@ import com.android.volley.VolleyError;
 
 import org.opensilk.music.lastfm.BuildConfig;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Locale;
 
 import javax.inject.Inject;
@@ -48,19 +47,23 @@ public class LastFM {
 
     private static final String PARAM_API_KEY = "api_key";
     private static final String PARAM_METHOD = "method";
-    public static final String PARAM_METHOD_ARTIST_INFO = "artist.getInfo";
-    public static final String PARAM_METHOD_ALBUM_INFO = "album.getInfo";
     private static final String PARAM_ARTIST = "artist";
     private static final String PARAM_ALBUM = "album";
+    private static final String PARAM_LANG = "lang";
+    private static final String PARAM_AUTOCORRECT = "autocorrect";
+
+    public static final String VAL_ARTIST_INFO = "artist.getInfo";
+    public static final String VAL_ALBUM_INFO = "album.getInfo";
 
     private final RequestQueue mVolleyQueue;
+    private final String mApiKey;
 
     @Inject
     public LastFM(
             RequestQueue mVolleyQueue
     ) {
         this.mVolleyQueue = mVolleyQueue;
-        //TODO allow using custom api key
+        this.mApiKey = BuildConfig.LASTFM_KEY;//TODO allow using custom api key
     }
 
     public Observable<Album> newAlbumRequestObservable(final String artistName, final String albumName) {
@@ -81,7 +84,7 @@ public class LastFM {
                             subscriber.onCompleted();
                         } else {
                             Timber.w("Api response does not contain mbid for %s", album.getName());
-                            onErrorResponse(new VolleyError("Unknown mbid"));
+                            onErrorResponse(new VolleyError("Unknown mbid for " + album.getName()));
                         }
                     }
                 };
@@ -96,18 +99,17 @@ public class LastFM {
      * @param listener
      * @return new Volley request
      */
-    public static Request<Album> newAlbumRequest(
+    public Request<Album> newAlbumRequest(
             String artistName,
             String albumName,
             MusicEntryResponseCallback<Album> listener,
             Request.Priority priority
     ) {
-        StringBuilder fetchUrl = baseUrl();
-        fetchUrl.append(PARAM_METHOD_ALBUM_INFO)
-                .append("&")
-                .append(PARAM_ARTIST).append("=").append(encode(artistName))
-                .append("&")
-                .append(PARAM_ALBUM).append("=").append(encode(albumName));
+        Uri fetchUrl = baseUriBuilder()
+                .appendQueryParameter(PARAM_METHOD, VAL_ALBUM_INFO)
+                .appendQueryParameter(PARAM_ARTIST, artistName)
+                .appendQueryParameter(PARAM_ALBUM, albumName)
+                .build();
 
         final AlbumRequest request = new AlbumRequest(fetchUrl.toString(), listener);
         request.setPriority(priority);
@@ -128,8 +130,13 @@ public class LastFM {
                     @Override
                     public void onResponse(Artist artist) {
                         if (subscriber.isUnsubscribed()) return;
-                        subscriber.onNext(artist);
-                        subscriber.onCompleted();
+                        if (!TextUtils.isEmpty(artist.getMbid())) {
+                            subscriber.onNext(artist);
+                            subscriber.onCompleted();
+                        } else {
+                            Timber.w("Api response does not contain mbid for %s", artist.getName());
+                            onErrorResponse(new VolleyError("Unknown mbid for " + artist.getName()));
+                        }
                     }
                 };
                 mVolleyQueue.add(newArtistRequest(artistName, listener, Request.Priority.HIGH));
@@ -142,38 +149,27 @@ public class LastFM {
      * @param listener
      * @return new Volley request
      */
-    public static Request<Artist> newArtistRequest(
+    public Request<Artist> newArtistRequest(
             String artistName,
             MusicEntryResponseCallback<Artist> listener,
             Request.Priority priority
     ) {
-        StringBuilder fetchUrl = baseUrl();
-        fetchUrl.append(PARAM_METHOD_ARTIST_INFO)
-                .append("&")
-                .append(PARAM_ARTIST).append("=").append(encode(artistName))
-                .append("&")
-                .append("lang").append("=").append(Locale.getDefault().getLanguage());
+        Uri fetchUrl = baseUriBuilder()
+                .appendQueryParameter(PARAM_METHOD, VAL_ARTIST_INFO)
+                .appendQueryParameter(PARAM_ARTIST, artistName)
+                .appendQueryParameter(PARAM_LANG, Locale.getDefault().getLanguage())
+                .build();
 
         final ArtistRequest request = new ArtistRequest(fetchUrl.toString(), listener);
         request.setPriority(priority);
         return request;
     }
 
-
-
-    /**
-     * @return StringBuilder with default params already included
-     */
-    private static StringBuilder baseUrl() {
-        StringBuilder baseUrl = new StringBuilder(200);
-        baseUrl.append(DEFAULT_API_ROOT)
-                .append("?")
-                .append(PARAM_API_KEY).append("=").append(BuildConfig.LASTFM_KEY)
-                .append("&")
-                .append("autocorrect=1")
-                .append("&")
-                .append(PARAM_METHOD).append("=");
-        return baseUrl;
+    private Uri.Builder baseUriBuilder() {
+        Uri.Builder b = Uri.parse(DEFAULT_API_ROOT).buildUpon();
+        b.appendQueryParameter(PARAM_API_KEY, mApiKey);
+        b.appendQueryParameter(PARAM_AUTOCORRECT, "1");
+        return b;
     }
 
     /**
@@ -191,19 +187,6 @@ public class LastFM {
             }
         }
         return null;
-    }
-
-    /**
-     * @param param
-     * @return UrlEncoded String
-     */
-    private static String encode(String param) {
-        try {
-            return URLEncoder.encode(param, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return null;//never happen
     }
 
 }

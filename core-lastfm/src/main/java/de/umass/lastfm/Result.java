@@ -23,7 +23,6 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package de.umass.lastfm;
 
 import org.w3c.dom.Document;
@@ -60,17 +59,17 @@ public class Result {
         this.errorMessage = errorMessage;
     }
 
-    public static Result createOkResult(Document resultDocument) {
+    static Result createOkResult(Document resultDocument) {
         return new Result(resultDocument);
     }
 
-    public static Result createHttpErrorResult(int httpErrorCode, String errorMessage) {
+    static Result createHttpErrorResult(int httpErrorCode, String errorMessage) {
         Result r = new Result(errorMessage);
         r.httpErrorCode = httpErrorCode;
         return r;
     }
 
-    public static Result createRestErrorResult(int errorCode, String errorMessage) {
+    static Result createRestErrorResult(int errorCode, String errorMessage) {
         Result r = new Result(errorMessage);
         r.errorCode = errorCode;
         return r;
