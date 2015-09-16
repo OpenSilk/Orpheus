@@ -34,165 +34,96 @@ public class IndexSchema {
      */
     public static final String UNKNOWN_STRING = "<unknown>";
 
-    public interface ContainerMeta extends BaseColumns {
-        String AUTHORITY = "authority";
-        String LIBRARY_IDENT = "library_ident";
-        String CONTAINER_IDENT = "container_ident";
-    }
-
-    public interface ContainerChildren extends BaseColumns {
-        String PARENT_IDENT = "parent_ident";
-        String CONTAINER_IDENT = "container_ident";
-    }
-
-    public interface TrackMeta extends BaseColumns {
-        String TRACK_NAME = "track_name";
-        String TRACK_NAME_KEY = "track_name_key";
-        String DURATION = "duration";
-        String ARTIST_ID = "artist_id";
-        String ALBUM_ID = "album_id";
-        /**
-         * Position in album
-         */
-        String ALBUM_INDEX = "album_index";
-        String GENRE_ID = "genre_id";
-    }
-
-    public interface Track {
-        String TRACK_ID = "track_id";
-        String TITLE = "title";
-        String ALBUM = "album";
-        String ARTIST = "artist";
-        String ALBUM_ARTIST = "album_artist";
-        String DURATION = "duration";
-
-    }
-
-    public interface ArtistMeta extends BaseColumns {
-        String ARTIST_NAME = "artist_name";
-        String ARTIST_NAME_KEY = "artist_name_key";
-        String MBID = "mbid";
+    public interface ArtistInfo extends BaseColumns {
+        String TABLE = "artist_info";
+        String ARTIST = "name";
+        String ARTIST_KEY = "artist_key";
+        String NUMBER_OF_ALBUMS = "number_of_albums";
+        String NUMBER_OF_TRACKS = "number_of_tracks";
         String BIO = "bio";
-        String URL = "url";
-        String IMAGE_ID = "image_id";
-        String THUMB_ID = "thumb_id";
-    }
-
-    public interface AlbumMeta extends BaseColumns {
-        String ALBUM_NAME = "album_name";
-        String ALBUM_NAME_KEY = "album_name_key";
-        String ALBUM_ARTIST_ID = "album_artist_id";
-        String YEAR = "year";
+        String SUMMARY = "summary";
         String MBID = "mbid";
-        String IMAGE_ID = "image_id";
-        String THUMB_ID = "thumb_id";
     }
 
-    public interface GenreMeta extends BaseColumns {
-        String GENRE = "genre";
-        String GENRE_KEY = "genre_key";
+    public interface AlbumInfo extends BaseColumns {
+        String TABLE = "album_info";
+        String ALBUM = "name";
+        String ALBUM_KEY = "album_key";
+        String ARTIST = "artist";
+        String ARTIST_KEY = "artist_key";
+        String ARTIST_ID = "artist_id";
+        String TRACK_COUNT = "track_count";
+        String BIO = "bio";
+        String SUMMARY = "summary";
+        String MBID = "mbid";
     }
 
-    public interface PlaylistMeta extends BaseColumns {
-        String PLAYLIST = "playlist";
-        String PLAYLIST_KEY = "playlist_key";
-    }
-
-    public interface PlayistTracks {
-        String PLAYLIST_ID = "playlist_id";
-        String TRACK_ID = "track_id";
-        /**
-         * Position in playlist
-         */
-        String PLAYLIST_INDEX = "playlist_index";
-    }
-
-    public interface Image extends BaseColumns {
-        String DATA = "_data";
-    }
-
-    public interface Thumb extends BaseColumns {
-        String DATA = "_data";
-    }
-
-    public interface TrackLocation extends BaseColumns {
-        String TRACK_ID = "track_id";
+    public interface TrackInfo extends BaseColumns {
+        String TABLE = "track_info";
+        String TITLE = "name";
+        String TITLE_KEY = "title_key";
+        String ARTIST = "artist";
+        String ARTIST_ID = "artist_id";
+        String ALBUM = "album";
+        String ALBUM_ID = "album_id";
+        String ALBUM_ARTIST = "album_artist";
+        String ALBUM_ARTIST_ID = "album_artist_id";
+        String TRACK = "track";
+        String URI = "uri";
         String SIZE = "size";
         String MIME_TYPE = "mime_type";
         String DATE_ADDED = "date_added";
-        String DATE_MODIFIED = "date_modified";
         String BITRATE = "bitrate";
-        String AUTHORITY = "authority";
-        String LIBRARY_IDENT = "library_ident";
-        String DATA = "_data";
+        String DURATION = "duration";
     }
 
-    /**
-     * Converts a name to a "key" that can be used for grouping, sorting
-     * and searching.
-     * The rules that govern this conversion are:
-     * - remove 'special' characters like ()[]'!?.,
-     * - remove leading/trailing spaces
-     * - convert everything to lowercase
-     * - remove leading "the ", "an " and "a "
-     * - remove trailing ", the|an|a"
-     * - remove accents. This step leaves us with CollationKey data,
-     *   which is not human readable
-     *
-     * from MediaStore.java
-     *
-     * @param name The artist or album name to convert
-     * @return The "key" for the given name.
-     */
-    public static String keyFor(String name) {
-        if (name != null)  {
-            boolean sortfirst = false;
-            if (name.equals(UNKNOWN_STRING)) {
-                return "\001";
-            }
-            // Check if the first character is \001. We use this to
-            // force sorting of certain special files, like the silent ringtone.
-            if (name.startsWith("\001")) {
-                sortfirst = true;
-            }
-            name = name.trim().toLowerCase();
-            if (name.startsWith("the ")) {
-                name = name.substring(4);
-            }
-            if (name.startsWith("an ")) {
-                name = name.substring(3);
-            }
-            if (name.startsWith("a ")) {
-                name = name.substring(2);
-            }
-            if (name.endsWith(", the") || name.endsWith(",the") ||
-                    name.endsWith(", an") || name.endsWith(",an") ||
-                    name.endsWith(", a") || name.endsWith(",a")) {
-                name = name.substring(0, name.lastIndexOf(','));
-            }
-            name = name.replaceAll("[\\[\\]\\(\\)\"'.,?!]", "").trim();
-            if (name.length() > 0) {
-                // Insert a separator between the characters to avoid
-                // matches on a partial character. If we ever change
-                // to start-of-word-only matches, this can be removed.
-                StringBuilder b = new StringBuilder();
-                b.append('.');
-                int nl = name.length();
-                for (int i = 0; i < nl; i++) {
-                    b.append(name.charAt(i));
-                    b.append('.');
-                }
-                name = b.toString();
-                String key = DatabaseUtils.getCollationKey(name);
-                if (sortfirst) {
-                    key = "\001" + key;
-                }
-                return key;
-            } else {
-                return "";
-            }
-        }
-        return null;
+    public interface ArtistMeta {
+        String TABLE = "artist_meta";
+        String ARTIST_ID = "artist_id";
+        String ARTIST_NAME = "artist_name";
+        String ARTIST_KEY = "artist_key";
+        String ARTIST_BIO_SUMMARY = "artist_bio_summary";
+        String ARTIST_BIO_CONTENT = "artist_bio_content";
+        String ARTIST_BIO_DATE_MOD = "artist_bio_date_modified";
+        String ARTIST_MBID = "artist_mbid";
+    }
+
+    public interface AlbumMeta {
+        String TABLE = "album_meta";
+        String ALBUM_ID = "album_id";
+        String ALBUM_NAME = "album_name";
+        String ALBUM_KEY = "album_key";
+        String ALBUM_BIO_SUMMARY = "album_bio_summary";
+        String ALBUM_BIO_CONTENT = "album_bio_content";
+        String ALBUM_BIO_DATE_MOD = "album_bio_date_modified";
+        String ALBUM_MBID = "album_mbid";
+        String ALBUM_ARTIST_ID = "album_artist_id";
+    }
+
+    public interface TrackMeta {
+        String TABLE = "track_meta";
+        String TRACK_NAME = "track_name";
+        String TRACK_KEY = "track_key";
+        String DURATION = "duration";
+        String TRACK_NUMBER = "track_number";
+        String DISC_NUMBER = "disc_number";
+        String GENRE = "genre";
+        String ARTIST_ID = "artist_id";
+        String ALBUM_ID = "album_id";
+    }
+
+    public interface TrackResMeta {
+        String TABLE = "track_res_meta";
+        String RES_ID = "res_id";
+        String TRACK_ID = "track_id";
+        String AUTHORITY = "authority";
+        String URI = "uri";
+        String SIZE = "size";
+        String MIME_TYPE = "mime_type";
+        String DATE_ADDED = "date_added";
+        String LAST_MOD = "last_modified";
+        String BITRATE = "bitrate";
+        String DURATION = "duration";
     }
 
 }

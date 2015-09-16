@@ -17,6 +17,7 @@
 
 package org.opensilk.music.index.provider;
 
+import android.content.ContentUris;
 import android.content.UriMatcher;
 import android.net.Uri;
 import android.util.Log;
@@ -46,6 +47,7 @@ public class IndexUris {
     static final String tracks = "tracks";
     static final String track = "track";
     static final String details = "details";
+    static final String locations = "locations";
 
     private static Uri.Builder baseUriBuilder(String authority) {
         return new Uri.Builder().scheme(scheme).authority(authority);
@@ -60,12 +62,12 @@ public class IndexUris {
     }
 
     public static Uri albums(String authority) {
-        return album(authority, null);
+        return modelBase(authority).appendPath(albums).build();
     }
 
     public static Uri album(String authority, String id) {
         if (StringUtils.isEmpty(id)) {
-            return modelBase(authority).appendPath(albums).build();
+            throw new IllegalArgumentException("Null id");
         }
         return modelBase(authority).appendPath(album).appendPath(id).build();
     }
@@ -81,12 +83,12 @@ public class IndexUris {
     }
 
     public static Uri artists(String authority) {
-        return artist(authority, null);
+        return modelBase(authority).appendPath(artists).build();
     }
 
     public static Uri artist(String authority, String id) {
         if (StringUtils.isEmpty(id)) {
-            return modelBase(authority).appendPath(artists).build();
+            throw new IllegalArgumentException("Null id");
         }
         return modelBase(authority).appendPath(artist).appendPath(id).build();
     }
@@ -156,6 +158,10 @@ public class IndexUris {
         return modelBase(authority).appendPath(track).appendPath(id).build();
     }
 
+    public static Uri locations(String authority) {
+        return modelBase(authority).appendPath(locations).build();
+    }
+
     public static Uri call(String authority) {
         return baseUriBuilder(authority).build();
     }
@@ -181,6 +187,7 @@ public class IndexUris {
     public static final int M_DETAILS_ALBUM = 19;
     public static final int M_DETAILS_ARTIST = 20;
     public static final int M_DETAILS_GENRE = 21;
+    public static final int M_LOCATIONS = 22;
 
     private static final String slash_wild = "/*";
     private static final String slash_wild_slash = "/*/";
@@ -214,6 +221,8 @@ public class IndexUris {
 
         uriMatcher.addURI(authority, model_base_match + tracks, M_TRACKS);
         uriMatcher.addURI(authority, model_base_match + track + slash_wild, M_TRACK);
+
+        uriMatcher.addURI(authority, model_base_match + locations, M_LOCATIONS);
 
         return uriMatcher;
     }

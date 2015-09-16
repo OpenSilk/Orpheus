@@ -17,41 +17,27 @@
 
 package org.opensilk.music.index;
 
-import android.content.Context;
-
-import org.opensilk.common.core.dagger2.AppContextComponent;
-import org.opensilk.common.core.dagger2.AppContextModule;
 import org.opensilk.music.index.database.IndexDatabase;
-import org.opensilk.music.lastfm.LastFMComponent;
+import org.opensilk.music.index.database.IndexDatabaseImpl;
 import org.opensilk.music.lastfm.LastFMModule;
 
-import javax.inject.Named;
 import javax.inject.Singleton;
 
-import dagger.Component;
 import dagger.Module;
-import de.umass.lastfm.LastFM;
-import rx.functions.Func1;
+import dagger.Provides;
 
 /**
  * Created by drew on 9/16/15.
  */
-@Singleton
-@Component(
-        modules = {
-                AppContextModule.class,
-                IndexModule.class
+@Module(
+        includes = {
+                IndexProviderAuthorityModule.class,
+                LastFMModule.class,
         }
 )
-public interface IndexComponent extends AppContextComponent, LastFMComponent {
-    Func1<Context, IndexComponent> FACTORY = new Func1<Context, IndexComponent>() {
-        @Override
-        public IndexComponent call(Context context) {
-            return DaggerIndexComponent.builder()
-                    .appContextModule(new AppContextModule(context))
-                    .build();
-        }
-    };
-    IndexDatabase indexDatabase();
-    @Named("IndexProviderAuthority") String indexProviderAuthority();
+public class IndexModule {
+    @Provides @Singleton
+    IndexDatabase provideIndexDatabase(IndexDatabaseImpl impl) {
+        return impl;
+    }
 }

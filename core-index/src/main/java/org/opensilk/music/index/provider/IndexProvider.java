@@ -17,48 +17,59 @@
 
 package org.opensilk.music.index.provider;
 
-import android.content.ComponentName;
+import android.content.UriMatcher;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 
 import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.index.IndexComponent;
+import org.opensilk.music.index.database.IndexDatabase;
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.provider.LibraryProviderOld;
+import org.opensilk.music.library.internal.BundleableSubscriber;
+import org.opensilk.music.library.internal.LibraryException;
+import org.opensilk.music.library.provider.LibraryExtras;
+import org.opensilk.music.library.provider.LibraryProvider;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
-import org.opensilk.music.model.Genre;
-import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
+import org.opensilk.music.model.spi.Bundleable;
 
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 
-import rx.Subscriber;
 import timber.log.Timber;
+
+import static org.opensilk.music.index.provider.IndexUris.*;
 
 /**
  * Created by drew on 7/11/15.
  */
-public class IndexProvider extends LibraryProviderOld {
+public class IndexProvider extends LibraryProvider {
     static final boolean TESTING = false; //for when the tester app doesnt use mortar
 
-    @Named("IndexProviderAuthority") String mRealAuthority;
+    @Inject @Named("IndexProviderAuthority") String mRealAuthority;
+    @Inject IndexDatabase mDataBase;
+
+    private UriMatcher mUriMatcher;
 
     @Override
     public boolean onCreate() {
-        final AppContextComponent acc;
+        final IndexComponent acc;
         if (TESTING) {
             Timber.plant(new Timber.DebugTree());
-            acc = AppContextComponent.FACTORY.call(getContext());
+            acc = IndexComponent.FACTORY.call(getContext());
         } else {
             acc = DaggerService.getDaggerComponent(getContext());
         }
-        IndexComponent.FACTORY.call(acc).inject(this);
+        IndexProviderComponent.FACTORY.call(acc).inject(this);
         super.onCreate();
         //override authority to avoid discover-ability
         mAuthority = mRealAuthority;
+        mUriMatcher = makeMatcher(mAuthority);
         return true;
     }
 
@@ -66,73 +77,46 @@ public class IndexProvider extends LibraryProviderOld {
     protected LibraryConfig getLibraryConfig() {
         return LibraryConfig.builder()
                 .setAuthority(mAuthority)
-                //Not used but can't be null.
-                .setLabel("index")
+                .setLabel("index") //Not used but can't be null.
                 .build();
     }
 
-    protected void getAlbums(Subscriber<? super List<Album>> subscriber, Bundle args) {
-
-    }
-
-    protected void getAlbum(Subscriber<? super Album> subscriber, Bundle args) {
-
-    }
-
-    protected void getAlbumTracks(Subscriber<? super List<Track>> subscriber, Bundle args) {
-
-    }
-
-    protected void getArtists(Subscriber<? super List<Artist>> subscriber, Bundle args) {
-
-    }
-
-    protected void getArtist(Subscriber<? super Artist> subscriber, Bundle args) {
-
-    }
-
-    protected void getArtistAlbums(Subscriber<? super List<Album>> subscriber, Bundle args) {
-
-    }
-
-    protected void getArtistTracks(Subscriber<? super List<Track>> subscriber, Bundle args) {
-
-    }
-
-    protected void getGenres(Subscriber<? super List<Genre>> subscriber, Bundle args) {
-
-    }
-
-    protected void getGenre(Subscriber<? super Genre> subscriber, Bundle args) {
-
-    }
-
-    protected void getGenreAlbums(Subscriber<? super List<Album>> subscriber, Bundle args) {
-
-    }
-
-    protected void getGenreTracks(Subscriber<? super List<Track>> subscriber, Bundle args) {
-
-    }
-
-    protected void getPlaylists(Subscriber<? super List<Playlist>> subscriber, Bundle args) {
-
-    }
-
-    protected void getPlaylist(Subscriber<? super Playlist> subscriber, Bundle args) {
-
-    }
-
-    protected void getPlaylistTracks(Subscriber<? super List<Track>> subscriber, Bundle args) {
-
-    }
-
-    protected void getTracks(Subscriber<? super List<Track>> subscriber, Bundle args) {
-
-    }
-
-    protected void getTrack(Subscriber<? super Track> subscriber, Bundle args) {
-
+    @Override
+    protected void listObjsInternal(Uri uri, final IBinder binder, Bundle args) {
+        switch (mUriMatcher.match(uri)) {
+            case M_ALBUMS: {
+                final BundleableSubscriber<Album> subscriber = new BundleableSubscriber<>(binder);
+                final List<Album> lst = mDataBase.getAlbums(LibraryExtras.getSortOrder(args));
+                if (!subscriber.isUnsubscribed()) {
+                    subscriber.onNext(lst);
+                    subscriber.onCompleted();
+                }
+                break;
+            }
+            case M_ARTISTS: {
+                final BundleableSubscriber<Artist> subscriber = new BundleableSubscriber<>(binder);
+                final List<Artist> lst = mDataBase.getArtists(LibraryExtras.getSortOrder(args));
+                if (!subscriber.isUnsubscribed()) {
+                    subscriber.onNext(lst);
+                    subscriber.onCompleted();
+                }
+                break;
+            }
+            case M_TRACKS: {
+                final BundleableSubscriber<Track> subscriber = new BundleableSubscriber<>(binder);
+                final List<Track> lst = mDataBase.getTracks(LibraryExtras.getSortOrder(args), false);
+                if (!subscriber.isUnsubscribed()) {
+                    subscriber.onNext(lst);
+                    subscriber.onCompleted();
+                }
+                break;
+            }
+            default: {
+                final BundleableSubscriber<Bundleable> subscriber = new BundleableSubscriber<>(binder);
+                subscriber.onError(new LibraryException(LibraryException.Kind.ILLEGAL_URI,
+                        new IllegalArgumentException(uri.toString())));
+            }
+        }
     }
 
 }

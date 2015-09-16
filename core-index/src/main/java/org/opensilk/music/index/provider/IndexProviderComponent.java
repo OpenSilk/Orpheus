@@ -15,43 +15,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.index;
-
-import android.content.Context;
+package org.opensilk.music.index.provider;
 
 import org.opensilk.common.core.dagger2.AppContextComponent;
-import org.opensilk.common.core.dagger2.AppContextModule;
+import org.opensilk.music.index.IndexComponent;
+import org.opensilk.music.index.IndexProviderAuthorityModule;
 import org.opensilk.music.index.database.IndexDatabase;
-import org.opensilk.music.lastfm.LastFMComponent;
-import org.opensilk.music.lastfm.LastFMModule;
-
-import javax.inject.Named;
-import javax.inject.Singleton;
 
 import dagger.Component;
-import dagger.Module;
-import de.umass.lastfm.LastFM;
 import rx.functions.Func1;
 
 /**
- * Created by drew on 9/16/15.
+ * Created by drew on 7/11/15.
  */
-@Singleton
+@IndexProviderScope
 @Component(
-        modules = {
-                AppContextModule.class,
-                IndexModule.class
-        }
+        dependencies = IndexComponent.class
 )
-public interface IndexComponent extends AppContextComponent, LastFMComponent {
-    Func1<Context, IndexComponent> FACTORY = new Func1<Context, IndexComponent>() {
+public interface IndexProviderComponent {
+    Func1<IndexComponent, IndexProviderComponent> FACTORY = new Func1<IndexComponent, IndexProviderComponent>() {
         @Override
-        public IndexComponent call(Context context) {
-            return DaggerIndexComponent.builder()
-                    .appContextModule(new AppContextModule(context))
+        public IndexProviderComponent call(IndexComponent indexComponent) {
+            return DaggerIndexProviderComponent.builder()
+                    .indexComponent(indexComponent)
                     .build();
         }
     };
-    IndexDatabase indexDatabase();
-    @Named("IndexProviderAuthority") String indexProviderAuthority();
+    void inject(IndexProvider provider);
 }

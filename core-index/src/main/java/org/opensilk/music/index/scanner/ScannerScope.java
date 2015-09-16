@@ -15,13 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.index;
+package org.opensilk.music.index.scanner;
 
 import javax.inject.Scope;
 
 /**
- * Created by drew on 9/3/15.
+ * Created by drew on 9/16/15.
  */
 @Scope
-public @interface IndexScope {
+public @interface ScannerScope {
 }

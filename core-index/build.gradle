@@ -53,4 +53,9 @@ dependencies {
     compile project(':common-core')
     compile project(':core-library')
     compile project(':core-lastfm')
+    compile project(':core-loader')
+
+    testCompile "junit:junit:4.10"
+    testCompile "org.assertj:assertj-core:1.7.0"
+    testCompile "org.robolectric:robolectric:3.0"
 }
