@@ -17,10 +17,8 @@
 
 package org.opensilk.music.index.provider;
 
-import android.content.ContentUris;
 import android.content.UriMatcher;
 import android.net.Uri;
-import android.util.Log;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.music.model.Album;

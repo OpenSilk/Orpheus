@@ -20,20 +20,33 @@ package org.opensilk.music.index.scanner;
 import android.content.Intent;
 import android.os.Build;
 
+import junit.framework.Assert;
+
+import org.apache.commons.io.IOUtils;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.core.util.Preconditions;
 import org.opensilk.music.index.BuildConfig;
+import org.opensilk.music.index.IndexComponent;
 import org.opensilk.music.index.IndexTestApplication;
+import org.opensilk.music.index.database.IndexDatabase;
+import org.opensilk.music.library.sort.AlbumSortOrder;
+import org.opensilk.music.model.Album;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLog;
+import org.robolectric.shadows.ShadowService;
 import org.robolectric.util.ServiceController;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * Created by drew on 9/16/15.
@@ -56,18 +69,34 @@ public class TestScannerService {
     }
 
     @Test
-    public void testreadResource() {
-        readResource("lfm_album_alvvays_alvvays.xml");
-    }
+    public void testlookup() {
+        ServiceController<ScannerService> controller = Robolectric.buildService(ScannerService.class);
+        controller.create();
+        ScannerService service = controller.get();
+        long id = service.lookupArtistInfo("foxes");
+        Assert.assertNotSame(id, -1);
+        long id2 = service.lookupAlbumInfo("foxes", "glorious", id);
+        Assert.assertNotSame(id2, -1);
+        long id3 =service.checkArtist("foxes");
+        Assert.assertNotSame(id3, -1);
+        long id4 = service.checkAlbum("foxes", "glorious");
+        Assert.assertNotSame(id4, -1);
+        IndexComponent acc = DaggerService.getDaggerComponent(RuntimeEnvironment.application);
+        IndexDatabase db = acc.indexDatabase();
+        List<Album> albums = db.getAlbums(AlbumSortOrder.A_Z);
+        Assertions.assertThat(albums.isEmpty()).isFalse();
+        Method[] mds = Album.class.getDeclaredMethods();
+        for (Method m : mds) {
+            try {
+                System.out.println(m.getName());
+                System.out.println(m.invoke(albums.get(0)));
 
-    String readResource(String name) {
-        InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        try {
-            is.close();
-        } catch (IOException e) {
+            } catch (IllegalAccessException e) {
 
+            } catch (InvocationTargetException e) {
+
+            }
         }
-        return null;
     }
 
 }

@@ -22,7 +22,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 
-import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.index.IndexComponent;
 import org.opensilk.music.index.database.IndexDatabase;
@@ -43,7 +42,10 @@ import javax.inject.Named;
 
 import timber.log.Timber;
 
-import static org.opensilk.music.index.provider.IndexUris.*;
+import static org.opensilk.music.index.provider.IndexUris.M_ALBUMS;
+import static org.opensilk.music.index.provider.IndexUris.M_ARTISTS;
+import static org.opensilk.music.index.provider.IndexUris.M_TRACKS;
+import static org.opensilk.music.index.provider.IndexUris.makeMatcher;
 
 /**
  * Created by drew on 7/11/15.

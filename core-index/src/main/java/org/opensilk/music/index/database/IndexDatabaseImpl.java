@@ -28,8 +28,6 @@ import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Track;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 

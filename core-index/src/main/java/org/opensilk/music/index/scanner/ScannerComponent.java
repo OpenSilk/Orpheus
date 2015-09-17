@@ -18,7 +18,6 @@
 package org.opensilk.music.index.scanner;
 
 import org.opensilk.music.index.IndexComponent;
-import org.opensilk.music.index.provider.IndexProvider;
 
 import dagger.Component;
 import rx.functions.Func1;

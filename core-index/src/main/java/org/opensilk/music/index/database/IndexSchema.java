@@ -17,7 +17,6 @@
 
 package org.opensilk.music.index.database;
 
-import android.database.DatabaseUtils;
 import android.provider.BaseColumns;
 
 /**

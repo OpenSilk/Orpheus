@@ -18,24 +18,12 @@
 package org.opensilk.music.index.database;
 
 import android.content.Context;
-import android.database.Cursor;
-import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.net.Uri;
-import android.provider.MediaStore;
 
 import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.music.index.provider.IndexUris;
-import org.opensilk.music.model.Album;
-import org.opensilk.music.model.Artist;
-import org.opensilk.music.model.Track;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 /**
@@ -103,7 +91,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "UNIQUE(artist_id,album_id,track_key,track_number,disc_number) ON CONFLICT IGNORE" +
                     ");");
             //Track resources
-            db.execSQL("CREATE TABLE IF NOT EXISTS track_res (" +
+            db.execSQL("CREATE TABLE IF NOT EXISTS track_res_meta (" +
                     "res_id INTEGER PRIMARY KEY, " +
                     "track_id INTEGER REFERENCES track_meta(track_id) ON DELETE CASCADE, " +
                     "authority TEXT NOT NULL, " +
@@ -146,7 +134,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     ";");
 
             // Provides some extra info about tracks like album artist name and number of resources
-            db.execSQL("CREATE VIEW IN NOT EXISTS track_info as SELECT " +
+            db.execSQL("CREATE VIEW IF NOT EXISTS track_info as SELECT " +
                     "t1.track_id as _id, track_name as name, track_key as title_key, duration, " +
                     "artist_name as artist, artist_id, album_name as album, album_id, " +
                     "album_artist_id, track_number as track, " +
@@ -184,16 +172,16 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("CREATE VIEW IF NOT EXISTS genre_info AS " +
                     "SELECT DISTINCT genre, " +
                     "COUNT(track_id) as number_of_tracks, " +
-                    "COUNT(DISTINCT album_id) as number_of_albums, " +
+                    "COUNT(DISTINCT album_id) as number_of_albums " +
                     "FROM track_meta GROUP BY genre" +
                     ";");
 
-            db.execSQL("CREATE INDEX IF NOT EXISTS artistkey_idx on artist_info(artist_key);");
-            db.execSQL("CREATE INDEX IF NOT EXISTS albumkey_idx on album_info(album_key);");
-            db.execSQL("CREATE INDEX IF NOT EXISTS trackkey_idx on track_info(title_key);");
-            db.execSQL("CREATE INDEX IF NOT EXISTS artistid_idx on artist_info(artist_id);");
-            db.execSQL("CREATE INDEX IF NOT EXISTS albumid_idx on album_info(album_id);");
-            db.execSQL("CREATE INDEX IF NOT EXISTS trackid_idx on track_info(track_id);");
+            db.execSQL("CREATE INDEX IF NOT EXISTS artistkey_idx on artist_meta(artist_key);");
+            db.execSQL("CREATE INDEX IF NOT EXISTS albumkey_idx on album_meta(album_key);");
+            db.execSQL("CREATE INDEX IF NOT EXISTS trackkey_idx on track_meta(track_key);");
+            db.execSQL("CREATE INDEX IF NOT EXISTS artistid_idx on artist_meta(artist_id);");
+            db.execSQL("CREATE INDEX IF NOT EXISTS albumid_idx on album_meta(album_id);");
+            db.execSQL("CREATE INDEX IF NOT EXISTS trackid_idx on track_meta(track_id);");
             db.execSQL("CREATE INDEX IF NOT EXISTS trackresuri_idx on track_res_meta(uri);");
 
         }

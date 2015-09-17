@@ -17,21 +17,17 @@
 
 package org.opensilk.music.index.scanner;
 
-import android.app.Service;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
-import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.provider.BaseColumns;
-import android.support.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.common.core.mortar.MortarService;
-import org.opensilk.common.core.rx.SingleThreadScheduler;
+import org.opensilk.common.core.mortar.MortarIntentService;
 import org.opensilk.music.index.IndexComponent;
 import org.opensilk.music.index.database.IndexDatabase;
 import org.opensilk.music.index.database.IndexSchema;
@@ -40,11 +36,9 @@ import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.spi.Bundleable;
 
-import java.util.Collections;
-import java.util.HashSet;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
@@ -53,12 +47,8 @@ import de.umass.lastfm.Album;
 import de.umass.lastfm.Artist;
 import de.umass.lastfm.LastFM;
 import mortar.MortarScope;
-import rx.Observable;
-import rx.Scheduler;
-import rx.Subscription;
-import rx.functions.Action0;
-import rx.functions.Action1;
-import rx.subscriptions.CompositeSubscription;
+import retrofit.Call;
+import retrofit.Response;
 import timber.log.Timber;
 
 import static android.provider.MediaStore.Audio.keyFor;
@@ -67,21 +57,16 @@ import static org.opensilk.common.core.util.Preconditions.checkNotNullOrBlank;
 /**
  * Created by drew on 8/25/15.
  */
-public class ScannerService extends MortarService {
+public class ScannerService extends MortarIntentService {
 
     @Inject LastFM mLastFM;
     @Inject IndexDatabase mIndexDatabase;
 
-    final Scheduler mScheduler = new SingleThreadScheduler();
-    final Set<Uri> mScansInProgress = Collections.synchronizedSet(new HashSet<Uri>());
-    final CompositeSubscription mCs = new CompositeSubscription();
-
     final AtomicInteger numTotal = new AtomicInteger(0);
     final AtomicInteger numProcessed = new AtomicInteger(0);
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
+    public ScannerService() {
+        super(ScannerService.class.getSimpleName());
     }
 
     @Override
@@ -98,67 +83,50 @@ public class ScannerService extends MortarService {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent == null || intent.getData() == null) {
-            Timber.w("ScannerService started with null uri");
-            return START_NOT_STICKY;
-        }
+    protected void onHandleIntent(Intent intent) {
         final Uri uri = intent.getData();
-        postScan(uri);
-        return START_REDELIVER_INTENT;
-    }
-
-    void postScan(final Uri uri) {
-        final Scheduler.Worker worker = mScheduler.createWorker();
-        worker.schedule(new Action0() {
-            @Override
-            public void call() {
-                scan2(uri);
-                worker.unsubscribe();
-            }
-        });
+        if (uri == null) {
+            Timber.w("ScannerService called without uri");
+            return;
+        }
+        scan2(uri);
     }
 
     void scan2(final Uri uri) {
         BundleableLoader loader = new BundleableLoader(this, uri, null);
-        Subscription s = loader.createObservable()
-                .observeOn(mScheduler)
-                .subscribe(new Action1<List<Bundleable>>() {
-                    @Override
-                    public void call(List<Bundleable> bundleables) {
-                        for (Bundleable b : bundleables) {
-                            if (b instanceof Track) {
-                                numTotal.incrementAndGet();
-                                Track item = (Track) b;
-                                if (!needsScan(item.getResources().get(0))) {
-                                    numProcessed.incrementAndGet();
-                                    Timber.v("Skipping item already in db %s @ %s", item.getDisplayName(), item.getUri());
-                                    continue;
-                                }
-                                if (trackHasRequiredMeta(item)) {
-                                    addMetaToDb(item);
-                                } else {
-                                    Track t = extractMeta(item);
-                                    if (t == null) {
-                                        numProcessed.incrementAndGet();
-                                        continue;
-                                    }
-                                    addMetaToDb(t);
-                                }
-                            } else if (b instanceof Container) {
-                                postScan(b.getUri());
-                            } else {
-                                Timber.w("Unsupported bundleable %s at %s", b.getClass(), b.getUri());
-                            }
-                        }
+        List<Bundleable> bundleables;
+        try {
+            bundleables = loader.createObservable().toBlocking().first();
+        } catch (RuntimeException e) {
+            Timber.e(e, "scan2(%s)", uri);
+            return;
+        }
+        for (Bundleable b : bundleables) {
+            if (b instanceof Track) {
+                numTotal.incrementAndGet();
+                Track item = (Track) b;
+                if (!needsScan(item.getResources().get(0))) {
+                    numProcessed.incrementAndGet();
+                    Timber.v("Skipping item already in db %s @ %s", item.getDisplayName(), item.getUri());
+                    continue;
+                }
+                if (trackHasRequiredMeta(item)) {
+                    addMetaToDb(item);
+                } else {
+                    Track t = extractMeta(item);
+                    if (t == null) {
+                        numProcessed.incrementAndGet();
+                        continue;
                     }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Timber.w(throwable, "Error fetching %s", uri);
-                    }
-                });
-        mCs.add(s);
+                    addMetaToDb(t);
+                }
+                numProcessed.incrementAndGet();
+            } else if (b instanceof Container) {
+                scan2(b.getUri());
+            } else {
+                Timber.w("Unsupported bundleable %s at %s", b.getClass(), b.getUri());
+            }
+        }
     }
 
     static boolean trackHasRequiredMeta(Track track) {
@@ -197,9 +165,11 @@ public class ScannerService extends MortarService {
         try {
             if (StringUtils.startsWith(uri.getScheme(), "http")) {
                 mmr.setDataSource(uri.toString(), headers);
-            } else {
+            } else if (StringUtils.equals(uri.getScheme(), "content")) {
                 ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(uri, "r");
                 mmr.setDataSource(pfd.getFileDescriptor());
+            } else if (StringUtils.equals(uri.getScheme(), "file")) {
+                mmr.setDataSource(uri.getPath());
             }
 
             tob
@@ -292,38 +262,32 @@ public class ScannerService extends MortarService {
 
         if (StringUtils.isEmpty(albumArtist)) {
             Timber.w("Cannot process item %s missing albumArtist", track.getUri());
-            numProcessed.incrementAndGet();
             return;
         }
 
         long albumArtistId = checkArtist(albumArtist);
         if (albumArtistId < 0) {
-            albumArtistId = insertArtist(albumArtist);
+            albumArtistId = lookupArtistInfo(albumArtist);
             if (albumArtistId < 0) {
                 Timber.e("Unable to insert %s into db", albumArtist);
-                numProcessed.incrementAndGet();
                 return;
             }
-            lookupArtistInfo(albumArtist, albumArtistId);
         }
 
         String album = track.getAlbumName();
 
         if (StringUtils.isEmpty(album)) {
             Timber.w("Cannot process item %s missing album", track.getUri());
-            numProcessed.incrementAndGet();
             return;
         }
 
-        long albumId = checkAlbum(album, albumArtist);
+        long albumId = checkAlbum(albumArtist, album);
         if (albumId < 0) {
-            albumId = insertAlbum(album, albumArtistId);
+            albumId = lookupAlbumInfo(albumArtist, album, albumId);
             if (albumId < 0) {
                 Timber.e("Unable to insert %s into db", album);
-                numProcessed.incrementAndGet();
                 return;
             }
-            lookupAlbumInfo(album, albumArtist, albumId);
         }
 
         String artist = track.getArtistName();
@@ -341,66 +305,60 @@ public class ScannerService extends MortarService {
         } else {
             artistId = checkArtist(artist);
             if (artistId < 0) {
-                artistId = insertArtist(artist);
+                artistId = lookupArtistInfo(artist);
                 if (artistId < 0) {
                     Timber.e("Unable to insert %s into db", artist);
-                    numProcessed.incrementAndGet();
                     return;
                 }
-                lookupArtistInfo(artist, artistId);
             }
         }
 
         long trackId = insertTrack(track, artistId, albumId);
         if (trackId < 0) {
             Timber.e("Unable to insert %s into db", track.getName());
-            numProcessed.incrementAndGet();
             return;
         }
 
         long resId = insertRes(track.getResources().get(0), trackId);
         if (trackId < 0) {
             Timber.e("Unable to insert %s into db", track.getResources().get(0).getUri());
-            numProcessed.incrementAndGet();
             return;
         }
 
+        //TODO artwork
+
     }
 
-    void lookupAlbumInfo(final String album, final String albumArtist, final long alummId) {
-        Observable<Album> albumObservable = mLastFM.newAlbumRequestObservable(albumArtist, album);
-        Subscription subscription = albumObservable.subscribe(new Action1<Album>() {
-            @Override
-            public void call(Album album) {
-                updateAlbum(alummId, album);
-                numProcessed.incrementAndGet();
-            }
-        }, new Action1<Throwable>() {
-            @Override
-            public void call(Throwable throwable) {
-                Timber.e(throwable, "lookupAlbumInfo(%s, %s)", album, albumArtist);
-                numProcessed.incrementAndGet();
-            }
-        });
-        mCs.add(subscription);
+    long lookupAlbumInfo(final String albumArtist, final String albumName, final long artistId) {
+        Call<Album> call = mLastFM.getAlbum(albumArtist, albumName);
+        Response<Album> response;
+        try {
+            response = call.execute();
+        } catch (IOException e) {
+            return -1;
+        }
+        Album album = response.body();
+        if (album == null) {
+            Timber.w("Failed to retrieve album %s", albumName);
+            return -1;
+        }
+        return insertAlbum(album, artistId);
     }
 
-    void lookupArtistInfo(final String artist, final long artistId) {
-        Observable<Artist> artistObservable = mLastFM.newArtistRequestObservable(artist);
-        Subscription subscription = artistObservable.subscribe(new Action1<Artist>() {
-            @Override
-            public void call(Artist artist) {
-                updateArtist(artistId, artist);
-                numProcessed.incrementAndGet();
-            }
-        }, new Action1<Throwable>() {
-            @Override
-            public void call(Throwable throwable) {
-                Timber.e(throwable, "lookupArtistInfo(%s)", artist);
-                numProcessed.incrementAndGet();
-            }
-        });
-        mCs.add(subscription);
+    long lookupArtistInfo(final String artistName) {
+        Call<Artist> call = mLastFM.getArtist(artistName);
+        Response<Artist> response;
+        try {
+            response = call.execute();
+        } catch (IOException e) {
+            return -1;
+        }
+        Artist artist = response.body();
+        if (artist == null) {
+            Timber.w("Failed to retrieve artist %s", artistName);
+            return -1;
+        }
+        return insertArtist(artist);
     }
 
     private static final String[] resMetaCols = new String[] {
@@ -450,25 +408,18 @@ public class ScannerService extends MortarService {
         }
     }
 
-    long insertArtist(String artist) {
+    long insertArtist(Artist artist) {
         ContentValues cv = new ContentValues(2);
-        cv.put(IndexSchema.ArtistMeta.ARTIST_NAME, artist);
-        cv.put(IndexSchema.ArtistMeta.ARTIST_KEY, keyFor(artist));
-        return mIndexDatabase.insert(IndexSchema.ArtistMeta.TABLE, null, cv);
-    }
-
-    void updateArtist(long id, Artist artist) {
-        ContentValues cv = new ContentValues(5);
+        cv.put(IndexSchema.ArtistMeta.ARTIST_NAME, artist.getName());
+        cv.put(IndexSchema.ArtistMeta.ARTIST_KEY, keyFor(artist.getName()));
         cv.put(IndexSchema.ArtistMeta.ARTIST_BIO_SUMMARY, artist.getWikiSummary());
         cv.put(IndexSchema.ArtistMeta.ARTIST_BIO_CONTENT, artist.getWikiText());
         cv.put(IndexSchema.ArtistMeta.ARTIST_BIO_DATE_MOD, artist.getWikiLastChanged().getTime());
         cv.put(IndexSchema.ArtistMeta.ARTIST_MBID, artist.getMbid());
-        final String sel = IndexSchema.ArtistMeta.ARTIST_ID + "=?";
-        final String[] selArgs = new String[]{String.valueOf(id)};
-        mIndexDatabase.update(IndexSchema.ArtistMeta.TABLE, cv, sel, selArgs);
+        return mIndexDatabase.insert(IndexSchema.ArtistMeta.TABLE, null, cv);
     }
 
-    long checkAlbum(String album, String albumArtist) {
+    long checkAlbum(String albumArtist, String album) {
         long id = -1;
         Cursor c = null;
         try {
@@ -484,23 +435,17 @@ public class ScannerService extends MortarService {
         }
     }
 
-    long insertAlbum(String album, long albumArtistId) {
-        ContentValues cv = new ContentValues(3);
-        cv.put(IndexSchema.AlbumMeta.ALBUM_NAME, album);
-        cv.put(IndexSchema.AlbumMeta.ALBUM_KEY, keyFor(album));
+    long insertAlbum(Album album, long albumArtistId) {
+        ContentValues cv = new ContentValues(10);
+        cv.put(IndexSchema.AlbumMeta.ALBUM_NAME, album.getName());
+        cv.put(IndexSchema.AlbumMeta.ALBUM_KEY, keyFor(album.getName()));
         cv.put(IndexSchema.AlbumMeta.ALBUM_ARTIST_ID, albumArtistId);
-        return mIndexDatabase.insert(IndexSchema.AlbumMeta.TABLE, null, cv);
-    }
-
-    void updateAlbum(long id, Album album) {
-        ContentValues cv = new ContentValues(5);
         cv.put(IndexSchema.AlbumMeta.ALBUM_BIO_SUMMARY, album.getWikiSummary());
         cv.put(IndexSchema.AlbumMeta.ALBUM_BIO_CONTENT, album.getWikiText());
-        cv.put(IndexSchema.AlbumMeta.ALBUM_BIO_DATE_MOD, album.getWikiLastChanged().getTime());
+        cv.put(IndexSchema.AlbumMeta.ALBUM_BIO_DATE_MOD,
+                album.getWikiLastChanged() != null ? album.getWikiLastChanged().getTime() : null);
         cv.put(IndexSchema.AlbumMeta.ALBUM_MBID, album.getMbid());
-        final String sel = IndexSchema.AlbumMeta.ALBUM_ID + "=?";
-        final String[] selArgs = new String[] { String.valueOf(id)};
-        mIndexDatabase.update(IndexSchema.AlbumMeta.TABLE, cv, sel, selArgs);
+        return mIndexDatabase.insert(IndexSchema.AlbumMeta.TABLE, null, cv);
     }
 
     long insertTrack(Track t, long artistId, long albumId) {

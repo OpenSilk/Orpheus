@@ -17,10 +17,7 @@
 
 package org.opensilk.music.index.provider;
 
-import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.music.index.IndexComponent;
-import org.opensilk.music.index.IndexProviderAuthorityModule;
-import org.opensilk.music.index.database.IndexDatabase;
 
 import dagger.Component;
 import rx.functions.Func1;

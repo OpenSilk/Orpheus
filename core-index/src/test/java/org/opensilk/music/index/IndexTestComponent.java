@@ -37,18 +37,16 @@ import rx.functions.Func1;
 @Component(
         modules = {
                 AppContextModule.class,
-                IndexModule.class
+                IndexTestModule.class
         }
 )
-public interface IndexComponent extends AppContextComponent, LastFMComponent {
-    Func1<Context, IndexComponent> FACTORY = new Func1<Context, IndexComponent>() {
+public interface IndexTestComponent extends IndexComponent {
+    Func1<Context, IndexTestComponent> FACTORY = new Func1<Context, IndexTestComponent>() {
         @Override
-        public IndexComponent call(Context context) {
-            return DaggerIndexComponent.builder()
+        public IndexTestComponent call(Context context) {
+            return DaggerIndexTestComponent.builder()
                     .appContextModule(new AppContextModule(context))
                     .build();
         }
     };
-    IndexDatabase indexDatabase();
-    @Named("IndexProviderAuthority") String indexProviderAuthority();
 }

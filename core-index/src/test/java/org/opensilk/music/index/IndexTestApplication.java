@@ -34,6 +34,6 @@ public class IndexTestApplication extends BaseApp {
 
     @Override
     protected Object getRootComponent() {
-        return IndexComponent.FACTORY.call(this);
+        return IndexTestComponent.FACTORY.call(this);
     }
 }
