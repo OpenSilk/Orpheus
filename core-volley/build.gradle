@@ -45,11 +45,10 @@ android {
     }
 
     defaultPublishConfig "debug"
-
 }
 
 dependencies {
     provided(group: 'com.google.dagger', name:'dagger-compiler', version: rootProject.ext.dagger2Version)
     compile project(':common-core')
-    compile 'com.android.volley:volley:1.0-SNAPSHOT@aar'
+    compile 'com.android.volley:volley:1.0-SNAPSHOT@jar'
 }
