@@ -29,6 +29,7 @@ import org.opensilk.music.library.mediastore.util.Projections;
 import org.opensilk.music.library.mediastore.util.SelectionArgs;
 import org.opensilk.music.library.mediastore.util.Selections;
 import org.opensilk.music.library.mediastore.util.Uris;
+import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.model.Track;
 
 import javax.inject.Inject;
@@ -81,17 +82,15 @@ public class TracksLoader extends RxCursorLoader<Track> {
         final String mimeType = getStringOrNull(c, MediaStore.Audio.AudioColumns.MIME_TYPE);
         final int index = getIntOrZero(c, MediaStore.Audio.AudioColumns.TRACK);
         return Track.builder()
-                .setIdentity(id)
+                .setUri(LibraryUris.track("FAKE", "0", id))
                 .setName(songName)
                 .setArtistName(artist)
                 .setAlbumName(album)
-                .setAlbumIdentity(albumId)
+                .setAlbumUri(LibraryUris.album("FAKE", "0", id))
                 .setAlbumArtistName(albumArtist)
                 .setDuration(seconds)
-                .setDataUri(dataUri)
                 .setArtworkUri(artworkUri)
-                .setMimeType(mimeType)
-                .setIndex(index)
+                .addRes(Track.Res.builder().setDuration(duration).setMimeType(mimeType).setUri(dataUri).build())
                 .build();
     }
 

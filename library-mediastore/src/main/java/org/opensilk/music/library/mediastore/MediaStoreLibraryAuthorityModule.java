@@ -26,7 +26,7 @@ import javax.inject.Named;
 import dagger.Module;
 import dagger.Provides;
 
-import static org.opensilk.music.library.provider.LibraryProvider.AUTHORITY_PFX;
+import static org.opensilk.music.library.provider.LibraryProviderOld.AUTHORITY_PFX;
 
 /**
  * Created by drew on 5/5/15.

@@ -28,6 +28,7 @@ import org.opensilk.music.library.mediastore.util.Projections;
 import org.opensilk.music.library.mediastore.util.SelectionArgs;
 import org.opensilk.music.library.mediastore.util.Selections;
 import org.opensilk.music.library.mediastore.util.Uris;
+import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.model.Artist;
 
 import javax.inject.Inject;
@@ -62,7 +63,7 @@ public class ArtistsLoader extends RxCursorLoader<Artist> {
         final int songCount = getIntOrZero(c, MediaStore.Audio.ArtistColumns.NUMBER_OF_TRACKS);
         // Create a new artist
         return Artist.builder()
-                .setIdentity(id)
+                .setUri(LibraryUris.artist("FAKE", "0", id))
                 .setName(artistName)
                 .setAlbumCount(albumCount)
                 .setTrackCount(songCount)

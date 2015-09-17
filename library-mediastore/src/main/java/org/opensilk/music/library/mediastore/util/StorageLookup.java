@@ -47,10 +47,6 @@ import timber.log.Timber;
 @MediaStoreLibraryScope
 public class StorageLookup {
 
-    //Library identities
-    public static final String PRIMARY_STORAGE_ID = "0";
-    public static final String SECONDARY_STORAGE_ID = "1";
-
     public static final int DEFAULT_PRIMARY_STORAGE_ID = 0;
 
     private static final boolean DUMPSTACKS = true;
@@ -61,7 +57,9 @@ public class StorageLookup {
     private List<StorageVolume> storageVolumes;
 
     @Inject
-    public StorageLookup(@ForApplication Context appContext) {
+    public StorageLookup(
+            @ForApplication Context appContext
+    ) {
         this.appContext = appContext;
     }
 
@@ -148,42 +146,22 @@ public class StorageLookup {
         return storageVolumes;
     }
 
+    public StorageVolume getStorageVolume(String id) {
+        int sid = Integer.valueOf(id);
+        List<StorageVolume> storages = getStorageVolumes();
+        for (StorageVolume v : storages) {
+            if (v.id == sid) {
+                return v;
+            }
+        }
+        throw new IllegalArgumentException("Unknown id "+sid);
+    }
+
     public File getStorageFile(String id) {
-        int sid = Integer.valueOf(id);
-        List<StorageVolume> storages = getStorageVolumes();
-        for (StorageVolume v : storages) {
-            if (v.id == sid) {
-                return new File(v.path);
-            }
-        }
-        throw new IllegalArgumentException("Unknown id "+sid);
+        return new File(getStorageVolume(id).path);
     }
 
-    public LibraryInfo getStorageInfo(String id) {
-        int sid = Integer.valueOf(id);
-        List<StorageVolume> storages = getStorageVolumes();
-        for (StorageVolume v : storages) {
-            if (v.id == sid) {
-                return new LibraryInfo(id, null, "", v.description);
-            }
-        }
-        throw new IllegalArgumentException("Unknown id "+sid);
-    }
-
-//    public File getStorageFile(String id) {
-//        String[] storages = getStoragePaths();
-//        switch (id) {
-//            case SECONDARY_STORAGE_ID:
-//                if (storages.length > 1) {
-//                    return new File(storages[1]);
-//                }
-//                //fall
-//            case PRIMARY_STORAGE_ID:
-//            default:
-//                return new File(storages[0]);
-//        }
-//    }
-
+    @Deprecated
     public String[] getStoragePaths() {
         if (storagePaths == null) {
             synchronized (this) {

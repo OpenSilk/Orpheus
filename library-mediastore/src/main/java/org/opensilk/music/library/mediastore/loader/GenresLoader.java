@@ -73,7 +73,7 @@ public class GenresLoader extends RxCursorLoader<Genre> {
         final String id = c.getString(c.getColumnIndexOrThrow(BaseColumns._ID));
         final String name = getStringOrEmpty(c, MediaStore.Audio.Genres.NAME);
         return Genre.builder()
-                .setIdentity(id)
+                .setUri(LibraryUris.genre("FAKE", "0", id))
                 .setName(name)
                 .build();
     }
@@ -86,30 +86,32 @@ public class GenresLoader extends RxCursorLoader<Genre> {
                 //We have to pull all the member tracks so we can
                 //set the extra info.
                 TracksLoader l = tracksLoaderProvider.get();
-                l.setUri(Uris.GENRE_MEMBERS(genre.identity));
+                l.setUri(Uris.GENRE_MEMBERS(genre.getUri().getLastPathSegment()));
                 l.setProjection(Projections.GENRE_SONGS);
                 l.setSelection(Selections.GENRE_SONGS);
                 l.setSelectionArgs(SelectionArgs.GENRE_SONGS);
-                return l.createObservable().collect(genre.buildUpon(), new Action2<Genre.Builder, Track>() {
-                    @Override
-                    public void call(Genre.Builder builder, Track track) {
-                        builder.addTrackUri(LibraryUris.track(myAuthority, "0", track.identity));
-                        builder.addAlbumUri(LibraryUris.album(myAuthority, "0", track.albumIdentity));
-                        builder.addArtInfo(track.albumArtistName, track.albumName, generateArtworkUri(track.albumIdentity));
-                    }
-                }).map(new Func1<Genre.Builder, Genre>() {
-                    @Override
-                    public Genre call(Genre.Builder builder) {
-                        return builder.build();
-                    }
-                });
+//                return l.createObservable().collect(genre.buildUpon(), new Action2<Genre.Builder, Track>() {
+//                    @Override
+//                    public void call(Genre.Builder builder, Track track) {
+//                        builder.addTrackUri(LibraryUris.track(myAuthority, "0", track.identity));
+//                        builder.addAlbumUri(LibraryUris.album(myAuthority, "0", track.albumIdentity));
+//                        builder.addArtInfo(track.albumArtistName, track.albumName, generateArtworkUri(track.albumIdentity));
+//                    }
+//                }).map(new Func1<Genre.Builder, Genre>() {
+//                    @Override
+//                    public Genre call(Genre.Builder builder) {
+//                        return builder.build();
+//                    }
+//                });
+                return Observable.empty();
             }
         }).filter(new Func1<Genre, Boolean>() {
             @Override
             public Boolean call(Genre genre) {
                 // mediastore doesnt cleanup old genres so
                 // we have to make sure not to add any that are empty
-                return genre.trackUris.size() > 0;
+//                return genre.trackUris.size() > 0;
+                return true;
             }
         });
     }

@@ -28,6 +28,8 @@ import android.webkit.MimeTypeMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.music.library.mediastore.BuildConfig;
+import org.opensilk.music.library.mediastore.provider.FoldersUris;
+import org.opensilk.music.library.mediastore.util.StorageLookup.StorageVolume;
 import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Track;
 
@@ -111,25 +113,41 @@ public class FilesHelper {
         return !p.startsWith("/") ? p : p.substring(1);
     }
 
+    public static String toRelativePath(String base, File f) {
+        return toRelativePath(new File(base), f);
+    }
+
+    static @NonNull Uri findParentUri(String authority, StorageVolume volume, File f) {
+        final File parent = f.getParentFile();
+        final Uri parentUri;
+        if (StringUtils.equals(volume.path, f.getAbsolutePath())
+                || parent == null
+                || StringUtils.equals(volume.path, parent.getAbsolutePath())) {
+            parentUri = FoldersUris.folders(authority, String.valueOf(volume.id));
+        } else {
+            parentUri = FoldersUris.folder(authority, String.valueOf(volume.id), toRelativePath(volume.path, parent));
+        }
+        return parentUri;
+    }
+
     @NonNull
-    public static Folder makeFolder(File base, File dir) {
+    public static Folder makeFolder(String authority, StorageVolume volume, File dir) {
         final String[] children = dir.list();
-        final File parent = dir.getParentFile();
         return Folder.builder()
-                .setIdentity(toRelativePath(base, dir))
-                .setParentIdentity(parent != null ? toRelativePath(base, parent) : null)
+                .setUri(FoldersUris.folder(authority, String.valueOf(volume.id), toRelativePath(volume.path, dir)))
+                .setParentUri(findParentUri(authority, volume, dir))
                 .setName(dir.getName())
                 .setChildCount(children != null ? children.length : 0)
-                .setDate(formatDate(dir.lastModified()))
+                .setDateModified(formatDate(dir.lastModified()))
                 .build();
     }
 
-    public static Track makeTrackFromFile(File base, File f) {
+    public static Track makeTrackFromFile(String authority, StorageVolume volume, File f) {
         return Track.builder()
-                .setIdentity(toRelativePath(base, f))
+                .setUri(FoldersUris.track(authority, String.valueOf(volume.id), toRelativePath(volume.path, f)))
+                .setParentUri(findParentUri(authority, volume, f))
                 .setName(f.getName())
-                .setMimeType(guessMimeType(f))
-                .setDataUri(Uri.fromFile(f))
+                .addRes(Track.Res.builder().setUri(Uri.fromFile(f)).setMimeType(guessMimeType(f)).build())
                 .build();
     }
 
@@ -177,6 +195,7 @@ public class FilesHelper {
                     selection.append(")");
                     Timber.d("Removing %s", selection.toString());
                     //remove from mediastore
+                    //TODO just delete on the glob
                     context.getContentResolver().delete(
                             Uris.EXTERNAL_MEDIASTORE_FILES,
                             selection.toString(), null);
@@ -209,17 +228,18 @@ public class FilesHelper {
 
         //Build the selection
         final int size = files.size();
-        final StringBuilder selection = new StringBuilder();
+        final StringBuilder selection = new StringBuilder(size * 2 + 20);
+        final String[] selectionArgs = new String[size];
         selection.append(MediaStore.Files.FileColumns.DATA + " IN (");
         for (int i = 0; i < size; i++) {
             final File f = files.get(i);
             final String path = f.getAbsolutePath();
-            pathMap.put(path, f); //Add file to map while where iterating
-            //TODO it would probably be better to use selectionArgs
-            selection.append("'").append(StringUtils.replace(path, "'", "''")).append("'");
+            selection.append("?");
             if (i < size - 1) {
                 selection.append(",");
             }
+            selectionArgs[i] = path;
+            pathMap.put(path, f); //Add file to map while where iterating
         }
         selection.append(")");
         Cursor c = null;
@@ -228,7 +248,7 @@ public class FilesHelper {
                     Uris.EXTERNAL_MEDIASTORE_FILES,
                     Projections.MEDIA_TYPE_PROJECTION,
                     selection.toString(),
-                    null,
+                    selectionArgs,
                     null);
             if (c != null && c.moveToFirst()) {
                 do {
@@ -243,6 +263,7 @@ public class FilesHelper {
             //either the query failed or the cursor didn't contain all the files we asked for.
             if (!pathMap.isEmpty()) {
                 Timber.w("%d files weren't found in mediastore. Best guessing mime type", pathMap.size());
+                //TODO add files to mediastore
                 for (File f : pathMap.values()) {
                     final String mime = guessMimeType(f);
                     if (StringUtils.contains(mime, "audio") || "application/ogg".equals(mime)) {
@@ -259,7 +280,7 @@ public class FilesHelper {
     }
 
     @NonNull
-    public static List<Track> convertAudioFilesToTracks(Context context, File base, List<File> audioFiles) {
+    public static List<Track> convertAudioFilesToTracks(Context context, String authority, StorageVolume volume, List<File> audioFiles) {
         if (audioFiles.size() == 0) {
             return Collections.emptyList();
         }
@@ -272,26 +293,27 @@ public class FilesHelper {
 
             //Build the selection
             final int size = audioFiles.size();
-            final StringBuilder selection = new StringBuilder();
+            final StringBuilder selection = new StringBuilder(size * 2 + 20);
+            final String[] selectionArgs = new String[size];
             selection.append(MediaStore.Audio.AudioColumns.DATA + " IN (");
             for (int i = 0; i < size; i++) {
                 final File f = audioFiles.get(i);
                 final String path = f.getAbsolutePath();
-                pathMap.put(path, f); //Add file to map while where iterating
-                //TODO it would probably be better to use selectionArgs
-                selection.append("'").append(StringUtils.replace(path, "'", "''")).append("'");
+                selection.append("?");
                 if (i < size - 1) {
                     selection.append(",");
                 }
+                selectionArgs[i] = path;
+                pathMap.put(path, f); //Add file to map while where iterating
             }
             selection.append(")");
 
             //make query
             c = context.getContentResolver().query(
-                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                    Uris.EXTERNAL_MEDIASTORE_MEDIA,
                     Projections.SONG_FILE,
                     selection.toString(),
-                    null,
+                    selectionArgs,
                     null);
             if (c != null && c.moveToFirst()) {
                 do {
@@ -299,18 +321,23 @@ public class FilesHelper {
                     if (f != null) {
                         try {
                             Track.Builder tb = Track.builder()
-                                    .setIdentity(c.getString(c.getColumnIndexOrThrow(BaseColumns._ID)))
+                                    .setUri(FoldersUris.track(authority, volume.id, c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID))))
+                                    .setParentUri(findParentUri(authority, volume, f))
                                     .setName(getStringOrNull(c, MediaStore.Audio.AudioColumns.DISPLAY_NAME))
                                     .setArtistName(getStringOrNull(c, MediaStore.Audio.AudioColumns.ARTIST))
                                     .setAlbumName(getStringOrNull(c, MediaStore.Audio.AudioColumns.ALBUM))
                                     .setAlbumArtistName(getStringOrNull(c, "album_artist"))
-                                    .setAlbumIdentity(getStringOrNull(c, MediaStore.Audio.AudioColumns.ALBUM_ID))
+//                                    .setAlbumIdentity(getStringOrNull(c, MediaStore.Audio.AudioColumns.ALBUM_ID))
                                     .setDuration((int) (getLongOrZero(c, MediaStore.Audio.AudioColumns.DURATION) / 1000))
-                                    .setMimeType(getStringOrNull(c, MediaStore.Audio.AudioColumns.MIME_TYPE))
-                                    .setDataUri(generateDataUri(c.getString(c.getColumnIndexOrThrow(BaseColumns._ID))))
+                                    .addRes(Track.Res.builder()
+                                            .setUri(generateDataUri(c.getString(c.getColumnIndexOrThrow(BaseColumns._ID))))
+                                            .setMimeType(getStringOrNull(c, MediaStore.Audio.AudioColumns.MIME_TYPE))
+                                            .setDuration(getLongOrZero(c, MediaStore.Audio.AudioColumns.DURATION))
+                                            .build()
+                                    )
                                     .setArtworkUri(generateArtworkUri(
                                             c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))))
-                                    .setIndex(getIntOrZero(c, MediaStore.Audio.AudioColumns.TRACK))
+                                    .setTrackNumber(getIntOrZero(c, MediaStore.Audio.AudioColumns.TRACK))
                                     ;
                             trackList.add(tb.build());
                         } catch (IllegalArgumentException ignored) {}
@@ -320,7 +347,7 @@ public class FilesHelper {
             if (!pathMap.isEmpty()) {
                 Timber.w("%d audioFiles didn't make the cursor", pathMap.size());
                 for (File f : pathMap.values()) {
-                    trackList.add(makeTrackFromFile(base, f));
+                    trackList.add(makeTrackFromFile(authority, volume, f));
                 }
             }
         } catch (Exception e) {

@@ -73,7 +73,7 @@ public class PlaylistsLoader extends RxCursorLoader<Playlist> {
         final String id = c.getString(c.getColumnIndexOrThrow(BaseColumns._ID));
         final String name= getStringOrEmpty(c, MediaStore.Audio.Playlists.NAME);
         return Playlist.builder()
-                .setIdentity(id)
+                .setUri(LibraryUris.playlist(myAuthority, "0", id))
                 .setName(name)
                 .build();
     }
@@ -86,23 +86,24 @@ public class PlaylistsLoader extends RxCursorLoader<Playlist> {
                 //We have to pull all the member tracks so we can
                 //set the extra info.
                 TracksLoader l = tracksLoaderProvider.get();
-                l.setUri(Uris.PLAYLIST_MEMBERS(playlist.identity));
+                l.setUri(Uris.PLAYLIST_MEMBERS(playlist.getUri().getLastPathSegment()));
                 l.setProjection(Projections.PLAYLIST_SONGS);
                 l.setSelection(Selections.PLAYLIST_SONGS);
                 l.setSelectionArgs(SelectionArgs.PLAYLIST_SONGS);
                 l.setSortOrder(MediaStore.Audio.Playlists.Members.PLAY_ORDER);
-                return l.createObservable().collect(playlist.buildUpon(), new Action2<Playlist.Builder, Track>() {
-                    @Override
-                    public void call(Playlist.Builder builder, Track track) {
-                        builder.addTrackUri(LibraryUris.track(myAuthority, "0", track.identity));
-                        builder.addArtInfo(track.albumArtistName, track.artistName, generateArtworkUri(track.albumIdentity));
-                    }
-                }).map(new Func1<Playlist.Builder, Playlist>() {
-                    @Override
-                    public Playlist call(Playlist.Builder builder) {
-                        return builder.build();
-                    }
-                });
+//                return l.createObservable().collect(playlist.buildUpon(), new Action2<Playlist.Builder, Track>() {
+//                    @Override
+//                    public void call(Playlist.Builder builder, Track track) {
+//                        builder.addTrackUri(LibraryUris.track(myAuthority, "0", track.identity));
+//                        builder.addArtInfo(track.albumArtistName, track.artistName, generateArtworkUri(track.albumIdentity));
+//                    }
+//                }).map(new Func1<Playlist.Builder, Playlist>() {
+//                    @Override
+//                    public Playlist call(Playlist.Builder builder) {
+//                        return builder.build();
+//                    }
+//                });
+                return Observable.empty();
             }
         });
     }

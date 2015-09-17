@@ -29,6 +29,7 @@ import org.opensilk.music.library.mediastore.util.Projections;
 import org.opensilk.music.library.mediastore.util.SelectionArgs;
 import org.opensilk.music.library.mediastore.util.Selections;
 import org.opensilk.music.library.mediastore.util.Uris;
+import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.model.Album;
 
 import javax.inject.Inject;
@@ -71,7 +72,7 @@ public class AlbumsLoader extends RxCursorLoader<Album> {
         // generate artwork Uri
         final Uri artworkUri = generateArtworkUri(id);
         return Album.builder()
-                .setIdentity(id)
+                .setUri(LibraryUris.album("FAKE", "0", id))
                 .setName(albumName)
                 .setArtistName(artist)
                 .setTrackCount(songCount)

@@ -17,7 +17,7 @@
 
 package org.opensilk.music.library.mediastore.provider;
 
-import android.content.ComponentName;
+import android.content.UriMatcher;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -25,19 +25,19 @@ import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.LibraryInfo;
+import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.mediastore.MediaStoreLibraryComponent;
 import org.opensilk.music.library.mediastore.R;
 import org.opensilk.music.library.mediastore.loader.TracksLoader;
-import org.opensilk.music.library.mediastore.ui.StoragePickerActivity;
 import org.opensilk.music.library.mediastore.util.CursorHelpers;
 import org.opensilk.music.library.mediastore.util.FilesHelper;
-import org.opensilk.music.library.mediastore.util.SelectionArgs;
-import org.opensilk.music.library.mediastore.util.Selections;
 import org.opensilk.music.library.mediastore.util.StorageLookup;
 import org.opensilk.music.library.mediastore.util.Uris;
 import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryProvider;
+import org.opensilk.music.library.provider.LibraryUris;
+import org.opensilk.music.model.Container;
+import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.spi.Bundleable;
 
@@ -53,13 +53,7 @@ import rx.Subscriber;
 import rx.functions.Action1;
 import timber.log.Timber;
 
-import static org.opensilk.music.library.LibraryCapability.DELETE;
-import static org.opensilk.music.library.LibraryCapability.FOLDERSTRACKS;
-import static org.opensilk.music.library.LibraryCapability.TRACKS;
 import static org.opensilk.music.library.mediastore.util.CursorHelpers.appendId;
-import static org.opensilk.music.library.provider.LibraryUris.Q.FOLDERS_ONLY;
-import static org.opensilk.music.library.provider.LibraryUris.Q.Q;
-import static org.opensilk.music.library.provider.LibraryUris.Q.TRACKS_ONLY;
 
 /**
  * Created by drew on 5/17/15.
@@ -69,6 +63,8 @@ public class FoldersLibraryProvider extends LibraryProvider {
     @Inject @Named("foldersLibraryBaseAuthority") String mBaseAuthority;
     @Inject StorageLookup mStorageLookup;
     @Inject Provider<TracksLoader> mTracksLoaderProvider;
+
+    UriMatcher mUriMatcher;
 
     @Override
     public boolean onCreate() {
@@ -80,15 +76,14 @@ public class FoldersLibraryProvider extends LibraryProvider {
             acc = DaggerService.getDaggerComponent(getContext());
         }
         MediaStoreLibraryComponent.FACTORY.call(acc).inject(this);
-        return super.onCreate();
+        super.onCreate();
+        mUriMatcher = FoldersUris.makeMatcher(mAuthority);
+        return true;
     }
 
     @Override
     protected LibraryConfig getLibraryConfig() {
         return LibraryConfig.builder()
-                .setCapabilities(FOLDERSTRACKS|TRACKS|DELETE)
-                .setPickerComponent(new ComponentName(getContext(), StoragePickerActivity.class),
-                        getContext().getString(R.string.folders_picker_title))
                 .setAuthority(mAuthority)
                 .setLabel(getContext().getString(R.string.folders_library_label))
                 .build();
@@ -100,20 +95,56 @@ public class FoldersLibraryProvider extends LibraryProvider {
     }
 
     @Override
-    protected LibraryInfo getDefaultFolder(String library) {
-        try {
-            return mStorageLookup.getStorageInfo(library);
-        } catch (IllegalArgumentException e) {
-            return null;
+    protected void listObjs(Uri uri, Subscriber<? super Bundleable> subscriber, Bundle args) {
+        switch (mUriMatcher.match(uri)) {
+            case FoldersUris.M_FOLDERS: {
+                browseFolders(uri.getPathSegments().get(0), null, subscriber, args);
+                break;
+            }
+            case FoldersUris.M_FOLDER: {
+                browseFolders(uri.getPathSegments().get(0), uri.getLastPathSegment(), subscriber, args);
+                break;
+            }
+            case FoldersUris.M_TRACK_MS:
+            case FoldersUris.M_TRACK_PTH: {
+                getTrack(uri.getPathSegments().get(0), uri.getLastPathSegment(), subscriber, args);
+                break;
+            }
+            default:
+                Timber.w("Unmatched uri %s", uri);
+                subscriber.onError(new LibraryException(LibraryException.Kind.ILLEGAL_URI,
+                        new IllegalArgumentException("Invalid uri " + uri)));
         }
     }
 
     @Override
+    protected void listRoots(Uri uri, Subscriber<? super Container> subscriber, Bundle args) {
+        List<StorageLookup.StorageVolume> volumes = mStorageLookup.getStorageVolumes();
+        if (volumes == null || volumes.size() == 0) {
+            subscriber.onCompleted();
+            return;
+        }
+        for (StorageLookup.StorageVolume v : volumes) {
+            Folder f = Folder.builder()
+                    .setUri(FoldersUris.folders(mAuthority, String.valueOf(v.id)))
+                    .setParentUri(LibraryUris.rootUri(mAuthority))
+                    .setName(v.description)
+                    .build();
+            subscriber.onNext(f);
+        }
+        subscriber.onCompleted();
+    }
+
+    @Override
+    protected void scanObjs(Uri uri, Subscriber<? super Bundleable> subscriber, Bundle args) {
+    }
+
     protected void browseFolders(String library, String identity, Subscriber<? super Bundleable> subscriber, Bundle args) {
-        final File base;
+        final StorageLookup.StorageVolume volume;
         final File rootDir;
         try {
-            base = mStorageLookup.getStorageFile(library);
+            volume = mStorageLookup.getStorageVolume(library);
+            final File base = new File(volume.path);
             rootDir = StringUtils.isEmpty(identity) ? base : new File(base, identity);
             if (!rootDir.exists() || !rootDir.isDirectory() || !rootDir.canRead()) {
                 Timber.e("Can't access path %s", rootDir.getPath());
@@ -124,9 +155,8 @@ public class FoldersLibraryProvider extends LibraryProvider {
             return;
         }
 
-        final String q = LibraryExtras.getUri(args).getQueryParameter(Q);
-        final boolean dirsOnly = StringUtils.equals(q, FOLDERS_ONLY);
-        final boolean tracksOnly = StringUtils.equals(q, TRACKS_ONLY);
+        final boolean dirsOnly = false;
+        final boolean tracksOnly = false;
 
         File[] dirList = rootDir.listFiles();
         List<File> files = new ArrayList<>(dirList.length);
@@ -138,7 +168,7 @@ public class FoldersLibraryProvider extends LibraryProvider {
                 continue;
             }
             if (f.isDirectory() && !tracksOnly) {
-                subscriber.onNext(FilesHelper.makeFolder(base, f));
+                subscriber.onNext(FilesHelper.makeFolder(mAuthority, volume, f));
             } else if (f.isFile()) {
                 files.add(f);
             }
@@ -152,7 +182,7 @@ public class FoldersLibraryProvider extends LibraryProvider {
         }
         // convert raw file list into something useful
         List<File> audioFiles = FilesHelper.filterAudioFiles(getContext(), files);
-        List<Track> tracks = FilesHelper.convertAudioFilesToTracks(getContext(), base, audioFiles);
+        List<Track> tracks = FilesHelper.convertAudioFilesToTracks(getContext(), mAuthority, volume, audioFiles);
         if (subscriber.isUnsubscribed()) {
             return;
         }
@@ -162,26 +192,6 @@ public class FoldersLibraryProvider extends LibraryProvider {
         subscriber.onCompleted();
     }
 
-    @Override
-    protected void queryTracks(String library, Subscriber<? super Track> subscriber, Bundle args) {
-        final File base;
-        try {
-            base = mStorageLookup.getStorageFile(library);
-            if (!base.exists() || !base.isDirectory() || !base.canRead()) {
-                Timber.e("Can't access path %s", base.getPath());
-                throw new IllegalArgumentException("Can't access path " + base.getPath());
-            }
-        } catch (IllegalArgumentException e) {
-            subscriber.onError(e);
-            return;
-        }
-        TracksLoader l = mTracksLoaderProvider.get();
-        l.setSelection(Selections.LOCAL_SONG_PATH);
-        l.setSelectionArgs(SelectionArgs.LOCAL_SONG_PATH(base.getAbsolutePath()));
-        l.createObservable().subscribe(subscriber);
-    }
-
-    @Override
     protected void getTrack(String library, String identity, Subscriber<? super Track> subscriber, Bundle args) {
         if (StringUtils.isNumeric(identity)) {
             TracksLoader l = mTracksLoaderProvider.get();
@@ -189,19 +199,19 @@ public class FoldersLibraryProvider extends LibraryProvider {
             l.createObservable().doOnNext(new Action1<Track>() {
                 @Override
                 public void call(Track track) {
-                    Timber.v("Track name=%s artist=%s albumArtist=%s", track.name, track.artistName, track.albumArtistName);
+                    Timber.v("Track name=%s artist=%s albumArtist=%s", track.getDisplayName(), track.getArtistName(), track.getAlbumArtistName());
                 }
             }).subscribe(subscriber);
         } else {
-            final File base;
             try {
-                base = mStorageLookup.getStorageFile(library);
+                final StorageLookup.StorageVolume volume = mStorageLookup.getStorageVolume(library);
+                final File base = new File(volume.path);
                 final File f = new File(base, identity);
                 if (!f.exists() || !f.isFile() || !f.canRead()) {
                     Timber.e("Can't access file %s", f.getPath());
                     throw new IllegalArgumentException("Can't access file " + f.getPath());
                 }
-                subscriber.onNext(FilesHelper.makeTrackFromFile(base, f));
+                subscriber.onNext(FilesHelper.makeTrackFromFile(mAuthority, volume, f));
                 subscriber.onCompleted();
             } catch (Exception e) {
                 subscriber.onError(e);
@@ -210,10 +220,10 @@ public class FoldersLibraryProvider extends LibraryProvider {
     }
 
     @Override
-    protected void deleteFolder(String library, String identity, Subscriber<? super Boolean> subscriber, Bundle args) {
+    protected void deleteObj(Uri uri, Subscriber<? super Uri> subscriber, Bundle args) {
         final File base;
         try {
-            base = mStorageLookup.getStorageFile(library);
+            base = mStorageLookup.getStorageFile(uri.getPathSegments().get(0));
             if (!base.exists() || !base.isDirectory() || !base.canRead()) {
                 Timber.e("Can't access path %s", base.getPath());
                 throw new IllegalArgumentException("Can't access path " + base.getPath());
@@ -222,11 +232,12 @@ public class FoldersLibraryProvider extends LibraryProvider {
             subscriber.onError(e);
             return;
         }
-        boolean success = FilesHelper.deleteDirectory(getContext(), new File(base, identity));
-        if (!subscriber.isUnsubscribed()) {
-            subscriber.onNext(success);
-            subscriber.onCompleted();
-        }
+//        boolean success = FilesHelper.deleteDirectory(getContext(), new File(base, identity));
+//        if (!subscriber.isUnsubscribed()) {
+//            subscriber.onNext(success);
+//            subscriber.onCompleted();
+//        }
+        subscriber.onError(new UnsupportedOperationException());
     }
 
     protected void deleteTracks(String library, Subscriber<? super Boolean> subscriber, Bundle args) {

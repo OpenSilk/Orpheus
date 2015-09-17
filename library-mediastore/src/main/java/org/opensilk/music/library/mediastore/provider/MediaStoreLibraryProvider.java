@@ -17,7 +17,6 @@
 
 package org.opensilk.music.library.mediastore.provider;
 
-import android.content.ComponentName;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -32,15 +31,13 @@ import org.opensilk.music.library.mediastore.loader.ArtistsLoader;
 import org.opensilk.music.library.mediastore.loader.GenresLoader;
 import org.opensilk.music.library.mediastore.loader.PlaylistsLoader;
 import org.opensilk.music.library.mediastore.loader.TracksLoader;
-import org.opensilk.music.library.mediastore.ui.FakeStorageActivity;
-import org.opensilk.music.library.mediastore.ui.StoragePickerActivity;
 import org.opensilk.music.library.mediastore.util.CursorHelpers;
 import org.opensilk.music.library.mediastore.util.Projections;
 import org.opensilk.music.library.mediastore.util.SelectionArgs;
 import org.opensilk.music.library.mediastore.util.Selections;
 import org.opensilk.music.library.mediastore.util.Uris;
 import org.opensilk.music.library.provider.LibraryExtras;
-import org.opensilk.music.library.provider.LibraryProvider;
+import org.opensilk.music.library.provider.LibraryProviderOld;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Genre;
@@ -66,7 +63,7 @@ import static org.opensilk.music.library.mediastore.util.CursorHelpers.appendId;
 /**
  * Created by drew on 4/26/15.
  */
-public class MediaStoreLibraryProvider extends LibraryProvider {
+public class MediaStoreLibraryProvider extends LibraryProviderOld {
     static final boolean TESTING = false; //for when the tester app doesnt use mortar
 
     @Inject @Named("mediaStoreLibraryBaseAuthority") String mBaseAuthority;
@@ -92,9 +89,8 @@ public class MediaStoreLibraryProvider extends LibraryProvider {
     @Override
     protected LibraryConfig getLibraryConfig() {
         return LibraryConfig.builder()
-                .setCapabilities(ALBUMS|ARTISTS|GENRES|PLAYLISTS|EDIT_PLAYLISTS|TRACKS|DELETE)
-                .addAbility(GALLERY)
-                .setPickerComponentNoMenu(new ComponentName(getContext(), FakeStorageActivity.class))
+                .setFlags(ALBUMS | ARTISTS | GENRES | PLAYLISTS | EDIT_PLAYLISTS | TRACKS | DELETE)
+                .setFlag(GALLERY)
                 .setAuthority(mAuthority)
                 .setLabel(getContext().getString(R.string.mediastore_library_label))
                 .build();
@@ -128,7 +124,7 @@ public class MediaStoreLibraryProvider extends LibraryProvider {
                 .doOnNext(new Action1<Track>() {
                     @Override
                     public void call(Track track) {
-                        Timber.v("Track name=%s artist=%s albumArtist=%s", track.name, track.artistName, track.albumArtistName);
+                        Timber.v("Track name=%s artist=%s albumArtist=%s", track.getDisplayName(), track.getArtistName(), track.getAlbumArtistName());
                     }
                 }).subscribe(subscriber);
     }
@@ -162,7 +158,7 @@ public class MediaStoreLibraryProvider extends LibraryProvider {
                 .doOnNext(new Action1<Track>() {
                     @Override
                     public void call(Track track) {
-                        Timber.v("Track name=%s artist=%s albumArtist=%s", track.name, track.artistName, track.albumArtistName);
+                        Timber.v("Track name=%s artist=%s albumArtist=%s", track.getDisplayName(), track.getArtistName(), track.getAlbumArtistName());
                     }
                 }).subscribe(subscriber);
     }
@@ -188,13 +184,14 @@ public class MediaStoreLibraryProvider extends LibraryProvider {
             @Override
             public Observable<Album> call(Genre genre) {
                 //Extract the albumuris and load them
-                AlbumsLoader l = mAlbumsLoaderProvider.get();
-                String[] ids = new String[genre.albumUris.size()];
-                for (int ii = 0; ii < genre.albumUris.size(); ii++) {
-                    ids[ii] = genre.albumUris.get(ii).getLastPathSegment();
-                }
-                l.setSelection(Selections.LOCAL_ALBUMS(ids));
-                return l.createObservable();
+//                AlbumsLoader l = mAlbumsLoaderProvider.get();
+//                String[] ids = new String[genre.albumUris.size()];
+//                for (int ii = 0; ii < genre.albumUris.size(); ii++) {
+//                    ids[ii] = genre.albumUris.get(ii).getLastPathSegment();
+//                }
+//                l.setSelection(Selections.LOCAL_ALBUMS(ids));
+//                return l.createObservable();
+                return Observable.empty();
             }
         }).subscribe(subscriber);
     }
@@ -209,7 +206,7 @@ public class MediaStoreLibraryProvider extends LibraryProvider {
         l.createObservable().doOnNext(new Action1<Track>() {
             @Override
             public void call(Track track) {
-                Timber.v("Track name=%s artist=%s albumArtist=%s", track.name, track.artistName, track.albumArtistName);
+                Timber.v("Track name=%s artist=%s albumArtist=%s", track.getDisplayName(), track.getArtistName(), track.getAlbumArtistName());
             }
         }).subscribe(subscriber);
     }
@@ -238,7 +235,7 @@ public class MediaStoreLibraryProvider extends LibraryProvider {
         l.createObservable().doOnNext(new Action1<Track>() {
             @Override
             public void call(Track track) {
-                Timber.v("Track name=%s artist=%s albumArtist=%s", track.name, track.artistName, track.albumArtistName);
+                Timber.v("Track name=%s artist=%s albumArtist=%s", track.getDisplayName(), track.getArtistName(), track.getAlbumArtistName());
             }
         }).subscribe(subscriber);
     }
@@ -256,7 +253,7 @@ public class MediaStoreLibraryProvider extends LibraryProvider {
         l.createObservable().doOnNext(new Action1<Track>() {
             @Override
             public void call(Track track) {
-                Timber.v("Track name=%s artist=%s albumArtist=%s", track.name, track.artistName, track.albumArtistName);
+                Timber.v("Track name=%s artist=%s albumArtist=%s", track.getDisplayName(), track.getArtistName(), track.getAlbumArtistName());
             }
         }).subscribe(subscriber);
     }
