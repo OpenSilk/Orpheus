@@ -20,10 +20,8 @@ package org.opensilk.music.loader;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 
@@ -37,7 +35,6 @@ import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.model.spi.Bundleable;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,6 +79,7 @@ public class BundleableLoader implements RxLoader<Bundleable> {
     final Uri uri;
 
     String sortOrder;
+    String method = LIST;
 
     Scheduler observeOnScheduler = AndroidSchedulers.mainThread();
 
@@ -161,7 +159,7 @@ public class BundleableLoader implements RxLoader<Bundleable> {
                         .putBundleableObserverCallback(o)
                         .get();
 
-                Bundle ok = context.getContentResolver().call(uri, QUERY, null, extras);
+                Bundle ok = context.getContentResolver().call(uri, method, null, extras);
                 if (!LibraryExtras.getOk(ok)) {
                     subscriber.onError(LibraryExtras.getCause(ok));
                 }
@@ -190,6 +188,11 @@ public class BundleableLoader implements RxLoader<Bundleable> {
 
     public void setSortOrder(String sortOrder) {
         this.sortOrder = sortOrder;
+    }
+
+    public BundleableLoader setMethod(String method) {
+        this.method = method;
+        return this;
     }
 
     public void setObserveOnScheduler(Scheduler scheduler) {
