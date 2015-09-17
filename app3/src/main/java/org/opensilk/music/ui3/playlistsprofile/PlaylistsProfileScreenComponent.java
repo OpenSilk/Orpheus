@@ -20,7 +20,6 @@ package org.opensilk.music.ui3.playlistsprofile;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.ui3.MusicActivityComponent;
 import org.opensilk.music.ui3.common.BundleableComponent;
-import org.opensilk.music.ui3.dragswipe.TracksDragSwipeComponent;
 import org.opensilk.music.ui3.profile.ProfileComponent;
 
 import dagger.Component;
@@ -29,20 +28,21 @@ import rx.functions.Func2;
 /**
  * Created by drew on 5/5/15.
  */
-@ScreenScope
-@Component(
-        dependencies = MusicActivityComponent.class,
-        modules = PlaylistsProfileScreenModule.class
-)
-public interface PlaylistsProfileScreenComponent extends TracksDragSwipeComponent {
+//@ScreenScope
+//@Component(
+//        dependencies = MusicActivityComponent.class,
+//        modules = PlaylistsProfileScreenModule.class
+//)
+public interface PlaylistsProfileScreenComponent extends BundleableComponent {
     Func2<MusicActivityComponent, PlaylistsProfileScreen, PlaylistsProfileScreenComponent> FACTORY =
             new Func2<MusicActivityComponent, PlaylistsProfileScreen, PlaylistsProfileScreenComponent>() {
                 @Override
                 public PlaylistsProfileScreenComponent call(MusicActivityComponent musicActivityComponent, PlaylistsProfileScreen screen) {
-                    return DaggerPlaylistsProfileScreenComponent.builder()
-                            .musicActivityComponent(musicActivityComponent)
-                            .playlistsProfileScreenModule(new PlaylistsProfileScreenModule(screen))
-                            .build();
+//                    return DaggerPlaylistsProfileScreenComponent.builder()
+//                            .musicActivityComponent(musicActivityComponent)
+//                            .playlistsProfileScreenModule(new PlaylistsProfileScreenModule(screen))
+//                            .build();
+                    return null;
                 }
             };
 }

@@ -20,6 +20,7 @@ package org.opensilk.music.ui3.nowplaying;
 import android.content.Context;
 import android.support.v7.internal.view.menu.MenuBuilder;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.widget.RelativeLayout;
@@ -27,8 +28,6 @@ import android.widget.TextView;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.R;
-import org.opensilk.music.ui3.dragswipe.DragSwipeRecyclerView;
-import org.opensilk.music.ui3.dragswipe.SwipeableRecyclerView;
 
 import javax.inject.Inject;
 
@@ -44,7 +43,7 @@ public class QueueScreenView extends RelativeLayout {
     @Inject QueueScreenViewAdapter mAdapter;
 
     @InjectView(R.id.queue_toolbar) Toolbar mToolbar;
-    @InjectView(R.id.recyclerview) SwipeableRecyclerView mList;
+    @InjectView(R.id.recyclerview) RecyclerView mList;
 
     public QueueScreenView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -57,7 +56,7 @@ public class QueueScreenView extends RelativeLayout {
         super.onFinishInflate();
         ButterKnife.inject(this);
         mList.setHasFixedSize(true);
-        mList.setup(mAdapter);
+        mList.setAdapter(mAdapter);
         mPresenter.takeView(this);
     }
 

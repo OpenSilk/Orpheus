@@ -17,9 +17,7 @@
 
 package org.opensilk.music.ui3.common;
 
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.text.TextUtils;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
@@ -30,7 +28,6 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryCapability;
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.ui3.library.LandingScreenFragment;
 
 import javax.inject.Inject;
 
@@ -79,19 +76,19 @@ public class ActionBarMenuConfigWrapper {
     }
 
     public void applyCommonItems(ActionBarMenuConfig.Builder builder) {
-        // device selection
-        if (!libraryConfig.meta.getBoolean(LibraryConfig.META_MENU_PICKER_HIDE, false)) {
-            String selectName = libraryConfig.getMeta(LibraryConfig.META_MENU_PICKER_NAME);
-            if (!TextUtils.isEmpty(selectName)) {
-                builder.withMenu(new ActionBarMenuConfig.CustomMenuItem(
-                        0, R.id.menu_change_source, 99, selectName, -1));
-            } else {
-                builder.withMenu(R.menu.library_change_source);
-            }
-        }
+//        // device selection
+//        if (!libraryConfig.getMeta().getBoolean(LibraryConfig.META_MENU_PICKER_HIDE, false)) {
+//            String selectName = libraryConfig.getMeta(LibraryConfig.META_MENU_PICKER_NAME);
+//            if (!TextUtils.isEmpty(selectName)) {
+//                builder.withMenu(new ActionBarMenuConfig.CustomMenuItem(
+//                        0, R.id.menu_change_source, 99, selectName, -1));
+//            } else {
+//                builder.withMenu(R.menu.library_change_source);
+//            }
+//        }
 
         // library settings
-        if (libraryConfig.hasAbility(LibraryCapability.SETTINGS)) {
+        if (libraryConfig.hasFlag(LibraryCapability.SETTINGS)) {
             String settingsName = libraryConfig.getMeta(LibraryConfig.META_MENU_NAME_SETTINGS);
             if (!TextUtils.isEmpty(settingsName)) {
                 builder.withMenu(new ActionBarMenuConfig.CustomMenuItem(
@@ -108,19 +105,19 @@ public class ActionBarMenuConfigWrapper {
             public Boolean call(Context context, Integer integer) {
                 boolean handled = super.call(context, integer);
                 if (!handled) {
-                    switch (integer) {
-                        case R.id.menu_change_source:
-                            settings.removeLibraryInfo(libraryConfig, AppPreferences.DEFAULT_LIBRARY);
-                            fm.killBackStack();
-                            fm.replaceMainContent(LandingScreenFragment.ni(libraryConfig), false);
-                            handled = true;
-                            break;
-                        case R.id.menu_library_settings:
-                            Intent intent = new Intent().setComponent(libraryConfig.<ComponentName>getMeta(LibraryConfig.META_SETTINGS_COMPONENT));
-                            activityResultsController.startActivityForResult(intent, ActivityRequestCodes.LIBRARY_SETTINGS, null);
-                            handled = true;
-                            break;
-                    }
+//                    switch (integer) {
+//                        case R.id.menu_change_source:
+//                            settings.removeLibraryInfo(libraryConfig, AppPreferences.DEFAULT_LIBRARY);
+//                            fm.killBackStack();
+//                            fm.replaceMainContent(LandingScreenFragment.ni(libraryConfig), false);
+//                            handled = true;
+//                            break;
+//                        case R.id.menu_library_settings:
+//                            Intent intent = new Intent().setComponent(libraryConfig.<ComponentName>getMeta(LibraryConfig.META_SETTINGS_COMPONENT));
+//                            activityResultsController.startActivityForResult(intent, ActivityRequestCodes.LIBRARY_SETTINGS, null);
+//                            handled = true;
+//                            break;
+//                    }
                 }
                 return handled;
             }

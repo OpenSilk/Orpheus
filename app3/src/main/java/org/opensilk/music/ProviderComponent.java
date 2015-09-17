@@ -24,7 +24,8 @@ import org.opensilk.common.core.dagger2.AppContextModule;
 import org.opensilk.music.artwork.provider.ArtworkComponent;
 import org.opensilk.music.artwork.provider.ArtworkModule;
 import org.opensilk.music.index.IndexComponent;
-import org.opensilk.music.index.IndexProviderAuthorityModule;
+import org.opensilk.music.index.IndexModule;
+import org.opensilk.music.lastfm.LastFMModule;
 
 import javax.inject.Singleton;
 
@@ -39,9 +40,10 @@ import rx.functions.Func1;
         modules = {
                 AppContextModule.class,
                 ArtworkModule.class,
+                IndexModule.class,
         }
 )
-public interface ProviderComponent extends AppContextComponent, ArtworkComponent {
+public interface ProviderComponent extends AppContextComponent, ArtworkComponent, IndexComponent {
         Func1<Context, ProviderComponent> FACTORY = new Func1<Context, ProviderComponent>() {
                 @Override
                 public ProviderComponent call(Context context) {

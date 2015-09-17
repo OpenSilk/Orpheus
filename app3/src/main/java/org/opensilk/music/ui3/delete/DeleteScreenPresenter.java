@@ -151,32 +151,32 @@ public class DeleteScreenPresenter extends ViewPresenter<DeleteScreenView> {
         }
         final String authority = uri.getAuthority();
         final String libraryId = uri.getPathSegments().get(0);
-        loaderSubscription = new BundleableLoader(appContext, uri, null).createObservable()
-                .flatMap(new Func1<List<Bundleable>, Observable<Bundleable>>() {
-                    @Override
-                    public Observable<Bundleable> call(List<Bundleable> bundleables) {
-                        return Observable.from(bundleables);
-                    }
-                })
-                .collect(new ArrayList<Uri>(), new Action2<ArrayList<Uri>, Bundleable>() {
-                    @Override
-                    public void call(ArrayList<Uri> uris, Bundleable track) {
-                        uris.add(LibraryUris.track(authority, libraryId, track.getIdentity()));
-                    }
-                })
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<ArrayList<Uri>>() {
-                    @Override
-                    public void call(ArrayList<Uri> uris) {
-                        deleteTracks(uris, notifyUri);
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        notifyFailure(new LibraryException(throwable));
-                    }
-                });
+//        loaderSubscription = new BundleableLoader(appContext, uri, null).createObservable()
+//                .flatMap(new Func1<List<Bundleable>, Observable<Bundleable>>() {
+//                    @Override
+//                    public Observable<Bundleable> call(List<Bundleable> bundleables) {
+//                        return Observable.from(bundleables);
+//                    }
+//                })
+//                .collect(new ArrayList<Uri>(), new Action2<ArrayList<Uri>, Bundleable>() {
+//                    @Override
+//                    public void call(ArrayList<Uri> uris, Bundleable track) {
+//                        uris.add(LibraryUris.track(authority, libraryId, track.getIdentity()));
+//                    }
+//                })
+//                .subscribeOn(Schedulers.newThread())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new Action1<ArrayList<Uri>>() {
+//                    @Override
+//                    public void call(ArrayList<Uri> uris) {
+//                        deleteTracks(uris, notifyUri);
+//                    }
+//                }, new Action1<Throwable>() {
+//                    @Override
+//                    public void call(Throwable throwable) {
+//                        notifyFailure(new LibraryException(throwable));
+//                    }
+//                });
     }
 
     //usually for single tracks

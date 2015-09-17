@@ -19,36 +19,22 @@ package org.opensilk.music.loader;
 
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
-import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.util.JsonReader;
-import android.util.JsonWriter;
 
-import com.google.common.collect.Collections2;
-
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.library.LibraryCapability;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryProviderInfo;
-import org.opensilk.music.library.provider.LibraryProvider;
+import org.opensilk.music.library.provider.LibraryProviderOld;
 import org.opensilk.music.library.provider.LibraryUris;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -59,7 +45,7 @@ import rx.functions.Func1;
 import rx.functions.Func2;
 import timber.log.Timber;
 
-import static org.opensilk.music.library.provider.LibraryMethods.LIBRARYCONF;
+import static org.opensilk.music.library.provider.LibraryMethods.CONFIG;
 
 /**
  * Created by drew on 11/15/14.
@@ -122,7 +108,7 @@ public class LibraryProviderInfoLoader {
         }).filter(new Func1<ProviderInfo, Boolean>() {
             @Override
             public Boolean call(ProviderInfo providerInfo) {
-                return StringUtils.startsWith(providerInfo.authority, LibraryProvider.AUTHORITY_PFX)
+                return StringUtils.startsWith(providerInfo.authority, LibraryProviderOld.AUTHORITY_PFX)
                         //Ignore non exported providers unless they're ours
                         && (StringUtils.equals(providerInfo.packageName, context.getPackageName()) || providerInfo.exported);
             }
@@ -162,7 +148,7 @@ public class LibraryProviderInfoLoader {
                 List<LibraryConfig> configs = new ArrayList<LibraryConfig>(libraryProviderInfos.size());
                 for (LibraryProviderInfo libraryProviderInfo : libraryProviderInfos) {
                     Bundle b = context.getContentResolver().call(
-                            LibraryUris.call(libraryProviderInfo.authority), LIBRARYCONF, null, null);
+                            LibraryUris.call(libraryProviderInfo.authority), CONFIG, null, null);
                     if (b == null) {
                         Timber.e("Got null config for %s", libraryProviderInfo.authority);
                         continue;
@@ -174,7 +160,7 @@ public class LibraryProviderInfoLoader {
         }).filter(new Func1<LibraryConfig, Boolean>() {
             @Override
             public Boolean call(LibraryConfig libraryConfig) {
-                return libraryConfig.hasAbility(LibraryCapability.GALLERY);
+                return libraryConfig.hasFlag(LibraryCapability.GALLERY);
             }
         });
     }

@@ -45,7 +45,7 @@ import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.model.TrackCollection;
+import org.opensilk.music.model.TrackList;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.ui.widget.GridTileDescription;
 
@@ -106,8 +106,8 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
             bindPlaylist(viewHolder, (Playlist)b);
         } else if (b instanceof Track) {
             bindTrack(viewHolder, (Track) b);
-        } else if (b instanceof TrackCollection) {
-            bindTrackCollection(viewHolder, (TrackCollection) b);
+        } else if (b instanceof TrackList) {
+            bindTrackCollection(viewHolder, (TrackList) b);
         } else {
             Timber.e("Somehow an invalid Bundleable slipped through.");
         }
@@ -118,7 +118,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
     }
 
     void bindAlbum(ViewHolder holder, Album album) {
-        ArtInfo artInfo = UtilsCommon.makeBestfitArtInfo(album.getArtistName(), null, album.getDisplayName(), album.getArtworkUri());
+        ArtInfo artInfo = UtilsCommon.makeBestfitArtInfo(album.getArtistName(), null, album.getName(), album.getArtworkUri());
         holder.title.setText(album.getDisplayName());
         holder.subtitle.setText(album.getArtistName());
         if (artInfo == ArtInfo.NULLINSTANCE) {
@@ -132,7 +132,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
     }
 
     void bindArtist(ViewHolder holder, Artist artist) {
-        ArtInfo artInfo = ArtInfo.forArtist(artist.getDisplayName(), null);
+        ArtInfo artInfo = ArtInfo.forArtist(artist.getName(), null);
         holder.title.setText(artist.getDisplayName());
         Context context = holder.itemView.getContext();
         String subtitle = "";
@@ -194,11 +194,12 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
     }
 
     void bindTrack(ViewHolder holder, Track track) {
-        ArtInfo artInfo = UtilsCommon.makeBestfitArtInfo(track.albumArtistName, track.artistName, track.albumName, track.artworkUri);
+        ArtInfo artInfo = UtilsCommon.makeBestfitArtInfo(track.getAlbumArtistName(), track.getArtistName(),
+                track.getAlbumName(), track.getArtworkUri());
         holder.title.setText(track.getDisplayName());
-        holder.subtitle.setText(track.artistName);
-        if (holder.extraInfo != null && track.duration > 0) {
-            holder.extraInfo.setText(UtilsCommon.makeTimeString(holder.itemView.getContext(), track.duration));
+        holder.subtitle.setText(track.getArtistName());
+        if (holder.extraInfo != null && track.getDurationS() > 0) {
+            holder.extraInfo.setText(UtilsCommon.makeTimeString(holder.itemView.getContext(), track.getDurationS()));
             holder.extraInfo.setVisibility(View.VISIBLE);
         }
         if (artInfo == ArtInfo.NULLINSTANCE) {
@@ -209,7 +210,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         }
     }
 
-    void bindTrackCollection(ViewHolder holder, TrackCollection collection) {
+    void bindTrackCollection(ViewHolder holder, TrackList collection) {
         holder.title.setText(collection.getDisplayName());
         Context context = holder.itemView.getContext();
         String l2 = UtilsCommon.makeLabel(context, R.plurals.Nalbums, collection.getAlbumsCount())
@@ -281,8 +282,8 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
             return ((Genre) item).getArtInfos().size() > 1;
         } else if (item instanceof Playlist) {
             return ((Playlist) item).getArtInfos().size() > 1;
-        } else if (item instanceof TrackCollection) {
-            return ((TrackCollection) item).getArtInfos().size() > 1;
+        } else if (item instanceof TrackList) {
+            return ((TrackList) item).getArtInfos().size() > 1;
         } else {
             return false;
         }

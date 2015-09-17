@@ -319,7 +319,7 @@ public class AppPreferences extends PreferencesWrapper {
     }
 
     public String makePluginPrefKey(LibraryConfig libraryConfig, String key) {
-        return makePrefKey(libraryConfig.authority, key);
+        return makePrefKey(libraryConfig.getAuthority(), key);
     }
 
     public String makePrefKey(String root, String key) {

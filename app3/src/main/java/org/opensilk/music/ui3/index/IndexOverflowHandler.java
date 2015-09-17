@@ -25,30 +25,21 @@ import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.library.LibraryCapability;
-import org.opensilk.music.library.provider.LibraryUris;
-import org.opensilk.music.library.sort.FolderTrackSortOrder;
-import org.opensilk.music.library.sort.TrackSortOrder;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
-import org.opensilk.music.model.TrackCollection;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.common.OverflowAction;
 import org.opensilk.music.ui3.common.OverflowClickListener;
-import org.opensilk.music.ui3.delete.DeleteRequest;
-import org.opensilk.music.ui3.delete.DeleteScreenFragment;
 
 import java.util.Collections;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import timber.log.Timber;
 
 /**
  * Created by drew on 5/9/15.
@@ -142,7 +133,7 @@ public class IndexOverflowHandler implements OverflowClickListener {
             adddelete = false;
 //        } else if (item instanceof Playlist) {
 //            menus = PLAYLISTS;
-//            if (!libraryConfig.hasAbility(LibraryCapability.EDIT_PLAYLISTS)) {
+//            if (!libraryConfig.hasFlag(LibraryCapability.EDIT_PLAYLISTS)) {
 //                adddelete = false;
 //            }
         } else if (item instanceof Track) {
@@ -156,7 +147,7 @@ public class IndexOverflowHandler implements OverflowClickListener {
         //Add delete here, cause i dont know what do to about the profiles
         //action bar overflow. currently deleting has no way of telling the profile
         //activity to finish so just making them not have a delete button. TODO fix
-//        if (adddelete && libraryConfig.hasAbility(LibraryCapability.DELETE)) {
+//        if (adddelete && libraryConfig.hasFlag(LibraryCapability.DELETE)) {
 //            m.inflate(R.menu.popup_delete);
 //        }
     }

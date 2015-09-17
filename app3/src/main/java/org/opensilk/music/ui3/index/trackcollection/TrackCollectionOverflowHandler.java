@@ -23,9 +23,8 @@ import android.widget.PopupMenu;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.sort.TrackSortOrder;
-import org.opensilk.music.model.TrackCollection;
+import org.opensilk.music.model.TrackList;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.common.OverflowAction;
@@ -74,7 +73,7 @@ public class TrackCollectionOverflowHandler implements OverflowClickListener {
 
     @Override
     public boolean onItemClicked(Context context, OverflowAction action, Bundleable item) {
-        TrackCollection tc = (TrackCollection) item;
+        TrackList tc = (TrackList) item;
         String sortOrder = appPreferences.getString(appPreferences.makePrefKey(AppPreferences.KEY_INDEX,
                 sortOrderPref), TrackSortOrder.A_Z);
         switch (action) {

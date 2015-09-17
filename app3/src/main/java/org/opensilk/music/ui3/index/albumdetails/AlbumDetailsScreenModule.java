@@ -81,7 +81,7 @@ public class AlbumDetailsScreenModule {
     public List<ArtInfo> provideHeroArtinfos() {
         final Album album = screen.album;
         return Collections.singletonList(ArtInfo.forAlbum(album.getArtistName(),
-                album.getDisplayName(), album.getArtworkUri()));
+                album.getName(), album.getArtworkUri()));
     }
 
     @Provides @Named("profile_title")

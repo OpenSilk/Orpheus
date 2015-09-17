@@ -27,8 +27,6 @@ import org.opensilk.music.R;
 import org.opensilk.music.ui3.MusicActivityComponent;
 import org.opensilk.music.ui3.common.BundleableFragment;
 import org.opensilk.music.ui3.common.UtilsCommon;
-import org.opensilk.music.ui3.dragswipe.TracksDragSwipeComponent;
-import org.opensilk.music.ui3.dragswipe.TracksDragSwipePresenter;
 
 /**
  * Created by drew on 5/5/15.

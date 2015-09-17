@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.folders;
+package org.opensilk.music.ui3.library;
 
 import android.content.Context;
 import android.net.Uri;
@@ -26,7 +26,6 @@ import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.sort.FolderTrackSortOrder;
 import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Track;
@@ -66,7 +65,7 @@ public class FoldersScreenModule {
 
     @Provides @Named("loader_uri")
     public Uri provideLoaderUri() {
-        return Uri.EMPTY;
+        return screen.folder.getUri();
     }
 
     @Provides @Named("loader_sortorder")

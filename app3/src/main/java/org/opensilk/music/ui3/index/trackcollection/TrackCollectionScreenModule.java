@@ -27,13 +27,9 @@ import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.library.sort.TrackSortOrder;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.spi.Bundleable;
-import org.opensilk.music.ui3.common.ActionBarMenuBaseHandler;
-import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
 import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
@@ -65,7 +61,7 @@ public class TrackCollectionScreenModule {
 
     @Provides @Named("loader_uri")
     public Uri provideLoaderUri(@Named("IndexProviderAuthority") String authority) {
-        return screen.trackCollection.getUri();
+        return screen.trackList.getUri();
     }
 
     @Provides @Named("loader_sortorder")
@@ -81,23 +77,23 @@ public class TrackCollectionScreenModule {
 
     @Provides @Named("profile_heros")
     public Boolean provideWantMultiHeros() {
-        return screen.trackCollection.getArtInfos().size() > 1;
+        return screen.trackList.getArtInfos().size() > 1;
     }
 
     @Provides @Named("profile_heros")
     public List<ArtInfo> provideHeroArtinfos() {
-        return screen.trackCollection.getArtInfos();
+        return screen.trackList.getArtInfos();
     }
 
     @Provides @Named("profile_title")
     public String provideProfileTitle() {
-        return screen.trackCollection.getDisplayName();
+        return screen.trackList.getDisplayName();
     }
 
     @Provides @Named("profile_subtitle")
     public String provideProfileSubTitle(@ForApplication Context context) {
-        return UtilsCommon.makeLabel(context, R.plurals.Nalbums, screen.trackCollection.getAlbumsCount())
-                + ", " + UtilsCommon.makeLabel(context, R.plurals.Nsongs, screen.trackCollection.getTracksCount());
+        return UtilsCommon.makeLabel(context, R.plurals.Nalbums, screen.trackList.getAlbumsCount())
+                + ", " + UtilsCommon.makeLabel(context, R.plurals.Nsongs, screen.trackList.getTracksCount());
     }
 
     @Provides @ScreenScope
@@ -169,7 +165,7 @@ public class TrackCollectionScreenModule {
                     default:
                         try {
                             return trackCollectionOverflowHandler.onItemClicked(context,
-                                    OverflowAction.valueOf(integer), screen.trackCollection);
+                                    OverflowAction.valueOf(integer), screen.trackList);
                         } catch (IllegalArgumentException e) {
                             return false;
                         }

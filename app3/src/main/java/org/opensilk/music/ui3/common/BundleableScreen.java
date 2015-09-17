@@ -33,6 +33,6 @@ public class BundleableScreen extends Screen {
 
     @Override
     public String getName() {
-        return getClass().getSimpleName() + "-" + libraryConfig.authority;
+        return getClass().getSimpleName() + "-" + libraryConfig.getAuthority();
     }
 }

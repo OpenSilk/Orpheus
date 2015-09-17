@@ -34,19 +34,11 @@ import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.library.LibraryCapability;
-import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.LibraryInfo;
-import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.loader.LibraryProviderInfoLoader;
 import org.opensilk.music.settings.SettingsActivity;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
-import org.opensilk.music.ui3.index.GalleryPage;
 import org.opensilk.music.ui3.index.GalleryScreenFragment;
 import org.opensilk.music.ui3.library.LibraryScreenFragment;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -54,8 +46,6 @@ import javax.inject.Named;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import mortar.MortarScope;
-
-import static org.opensilk.music.library.provider.LibraryMethods.LIBRARYCONF;
 
 /**
  * Created by drew on 4/30/15.

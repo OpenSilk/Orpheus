@@ -18,27 +18,33 @@
 package org.opensilk.music.ui3.nowplaying;
 
 import org.apache.commons.lang3.StringUtils;
+import org.opensilk.common.ui.recycler.RecyclerListAdapter;
+import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.playback.control.PlaybackController;
-import org.opensilk.music.ui3.dragswipe.BaseSwipeableRecyclerAdapter;
+import org.opensilk.music.ui.widget.PlayingIndicator;
 import org.opensilk.music.ui3.common.OverflowAction;
 
 import android.content.Context;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.PopupMenu;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import javax.inject.Inject;
 
+import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 /**
  * Created by drew on 5/10/15.
  */
-public class QueueScreenViewAdapter extends BaseSwipeableRecyclerAdapter<QueueScreenItem> {
+public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueScreenItem, QueueScreenViewAdapter.ViewHolder> {
 
     final ArtworkRequestManager requestor;
     final QueueScreenPresenter presenter;
@@ -46,6 +52,21 @@ public class QueueScreenViewAdapter extends BaseSwipeableRecyclerAdapter<QueueSc
 
     String activeId;
     boolean isPlaying;
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView title;
+        TextView subtitle;
+        AnimatedImageView artwork;
+        PlayingIndicator playingIndicator;
+
+        final CompositeSubscription subscriptions = new CompositeSubscription();
+        public ViewHolder(View itemView) {
+            super(itemView);
+        }
+        void reset() {
+            subscriptions.clear();
+        }
+    }
 
     @Inject
     public QueueScreenViewAdapter(
@@ -60,6 +81,11 @@ public class QueueScreenViewAdapter extends BaseSwipeableRecyclerAdapter<QueueSc
     }
 
     @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        return null;
+    }
+
+    @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         QueueScreenItem item = getItem(position);
         holder.reset();
@@ -67,7 +93,7 @@ public class QueueScreenViewAdapter extends BaseSwipeableRecyclerAdapter<QueueSc
         holder.subtitle.setText(item.subtitle);
         ArtInfo artInfo = item.artInfo;
         if (artInfo == null || artInfo.equals(ArtInfo.NULLINSTANCE)) {
-            setLetterTileDrawable(holder, item.title);
+//            setLetterTileDrawable(holder, item.title);
         } else {
             holder.subscriptions.add(
                     requestor.newRequest(holder.artwork, null, artInfo, ArtworkType.THUMBNAIL));
@@ -95,8 +121,7 @@ public class QueueScreenViewAdapter extends BaseSwipeableRecyclerAdapter<QueueSc
 //                holder.playingIndicator.setVisibility(View.VISIBLE);
 //            }
 //        }
-        bindClickListeners(holder, position);
-        super.onBindViewHolder(holder, position);
+//        bindClickListeners(holder, position);
     }
 
     @Override
@@ -105,7 +130,7 @@ public class QueueScreenViewAdapter extends BaseSwipeableRecyclerAdapter<QueueSc
         return item.hashCode();// item.getDescription().getMediaId().hashCode() + (31 * item.getQueueId());
     }
 
-    @Override
+//    @Override
     protected void onItemRemoved(Context context, int position, QueueScreenItem item) {
         playbackController.removeQueueItemAt(position);
     }
@@ -126,12 +151,12 @@ public class QueueScreenViewAdapter extends BaseSwipeableRecyclerAdapter<QueueSc
         }
     }
 
-    @Override
+//    @Override
     protected void onItemClicked(Context context, QueueScreenItem item) {
         playbackController.skipToQueueItem(item.getQueueId());
     }
 
-    @Override
+//    @Override
     protected void onOverflowClicked(Context context, PopupMenu menu, QueueScreenItem item) {
         menu.inflate(R.menu.popup_play_next);
         menu.inflate(R.menu.popup_add_to_playlist);
@@ -140,7 +165,7 @@ public class QueueScreenViewAdapter extends BaseSwipeableRecyclerAdapter<QueueSc
         menu.inflate(R.menu.popup_delete);
     }
 
-    @Override
+//    @Override
     protected boolean onOverflowActionClicked(Context context, OverflowAction action, QueueScreenItem item) {
         switch (action) {
             case PLAY_NEXT:

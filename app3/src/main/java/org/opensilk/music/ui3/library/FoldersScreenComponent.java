@@ -19,28 +19,28 @@ package org.opensilk.music.ui3.library;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.ui3.MusicActivityComponent;
+import org.opensilk.music.ui3.common.BundleableComponent;
 
 import dagger.Component;
 import rx.functions.Func2;
 
 /**
- * Created by drew on 5/1/15.
+ * Created by drew on 5/2/15.
  */
 @ScreenScope
 @Component(
         dependencies = MusicActivityComponent.class,
-        modules = LandingScreenModule.class
+        modules = FoldersScreenModule.class
 )
-public interface LandingScreenComponent {
-        Func2<MusicActivityComponent, LandingScreen, LandingScreenComponent> FACTORY =
-                new Func2<MusicActivityComponent, LandingScreen, LandingScreenComponent>() {
+public interface FoldersScreenComponent extends BundleableComponent {
+        Func2<MusicActivityComponent, FoldersScreen, FoldersScreenComponent> FACTORY =
+                new Func2<MusicActivityComponent, FoldersScreen, FoldersScreenComponent>() {
                         @Override
-                        public LandingScreenComponent call(MusicActivityComponent musicActivityComponent, LandingScreen landingScreen) {
-                                return DaggerLandingScreenComponent.builder()
+                        public FoldersScreenComponent call(MusicActivityComponent musicActivityComponent, FoldersScreen foldersScreen) {
+                                return DaggerFoldersScreenComponent.builder()
                                         .musicActivityComponent(musicActivityComponent)
-                                        .landingScreenModule(new LandingScreenModule(landingScreen))
+                                        .foldersScreenModule(new FoldersScreenModule(foldersScreen))
                                         .build();
                         }
                 };
-        void inject(LandingScreenView view);
 }

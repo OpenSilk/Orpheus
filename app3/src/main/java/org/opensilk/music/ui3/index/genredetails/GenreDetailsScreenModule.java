@@ -28,21 +28,15 @@ import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.index.provider.IndexUris;
-import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.LibraryInfo;
-import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.sort.AlbumSortOrder;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.ArtInfo;
-import org.opensilk.music.model.Genre;
-import org.opensilk.music.model.TrackCollection;
+import org.opensilk.music.model.TrackList;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.ui3.index.IndexBaseMenuHandler;
 import org.opensilk.music.ui3.index.IndexOverflowHandler;
 import org.opensilk.music.ui3.profile.ProfileActivity;
 import org.opensilk.music.ui3.index.albumdetails.AlbumDetailsScreen;
-import org.opensilk.music.ui3.common.ActionBarMenuBaseHandler;
-import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
 import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
@@ -145,8 +139,8 @@ public class GenreDetailsScreenModule {
             public void onItemClicked(BundleablePresenter presenter, Context context, Bundleable item) {
                 if (item instanceof Album) {
                     ProfileActivity.startSelf(context, new AlbumDetailsScreen((Album) item));
-                } else if (item instanceof TrackCollection) {
-                    ProfileActivity.startSelf(context, new TrackCollectionScreen((TrackCollection) item,
+                } else if (item instanceof TrackList) {
+                    ProfileActivity.startSelf(context, new TrackCollectionScreen((TrackList) item,
                             AppPreferences.GENRE_TRACK_SORT_ORDER));
                 }
             }
@@ -163,7 +157,7 @@ public class GenreDetailsScreenModule {
             public void onBuildMenu(Context context, PopupMenu m, Bundleable item) {
                 if (item instanceof Album) {
                     albumsOverflowHandler.onBuildMenu(context, m, item);
-                } else if (item instanceof TrackCollection) {
+                } else if (item instanceof TrackList) {
                     trackCollectionOverflowHandler.onBuildMenu(context, m, item);
                 }
             }
@@ -172,7 +166,7 @@ public class GenreDetailsScreenModule {
             public boolean onItemClicked(Context context, OverflowAction action, Bundleable item) {
                 if (item instanceof Album) {
                     return albumsOverflowHandler.onItemClicked(context, action, item);
-                } else if (item instanceof TrackCollection) {
+                } else if (item instanceof TrackList) {
                     return trackCollectionOverflowHandler.onItemClicked(context, action, item);
                 } else {
                     return false;

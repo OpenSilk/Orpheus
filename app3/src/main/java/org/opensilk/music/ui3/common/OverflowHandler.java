@@ -36,11 +36,8 @@ import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
-import org.opensilk.music.model.TrackCollection;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.playback.control.PlaybackController;
-import org.opensilk.music.ui3.common.OverflowAction;
-import org.opensilk.music.ui3.common.OverflowClickListener;
 import org.opensilk.music.ui3.delete.DeleteRequest;
 import org.opensilk.music.ui3.delete.DeleteScreenFragment;
 
@@ -48,8 +45,6 @@ import java.util.Collections;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import timber.log.Timber;
 
 /**
  * Created by drew on 5/9/15.
@@ -146,7 +141,7 @@ public class OverflowHandler implements OverflowClickListener {
             adddelete = false;
         } else if (item instanceof Playlist) {
             menus = PLAYLISTS;
-            if (!libraryConfig.hasAbility(LibraryCapability.EDIT_PLAYLISTS)) {
+            if (!libraryConfig.hasFlag(LibraryCapability.EDIT_PLAYLISTS)) {
                 adddelete = false;
             }
         } else if (item instanceof Track) {
@@ -160,10 +155,10 @@ public class OverflowHandler implements OverflowClickListener {
         //Add delete here, cause i dont know what do to about the profiles
         //action bar overflow. currently deleting has no way of telling the profile
         //activity to finish so just making them not have a delete button. TODO fix
-        if (adddelete && libraryConfig.hasAbility(LibraryCapability.DELETE)) {
+        if (adddelete && libraryConfig.hasFlag(LibraryCapability.DELETE)) {
             m.inflate(R.menu.popup_delete);
         }
-//        if (!libraryConfig.hasAbility(LibraryCapability.DELETE)) {
+//        if (!libraryConfig.hasFlag(LibraryCapability.DELETE)) {
 //            m.getMenu().removeItem(R.id.popup_delete);
 //        }
     }
@@ -183,31 +178,31 @@ public class OverflowHandler implements OverflowClickListener {
         Uri uri;
         String sortOrder;
         if (item instanceof Album) {
-            uri = LibraryUris.albumTracks(libraryConfig.authority,
+            uri = LibraryUris.albumTracks(libraryConfig.getAuthority(),
                     libraryInfo.libraryId, item.getIdentity());
             sortOrder = appPreferences.getString(appPreferences.makePluginPrefKey(libraryConfig,
                     AppPreferences.ALBUM_TRACK_SORT_ORDER), TrackSortOrder.PLAYORDER);
         } else if (item instanceof Artist) {
-            uri = LibraryUris.artistTracks(libraryConfig.authority,
+            uri = LibraryUris.artistTracks(libraryConfig.getAuthority(),
                     libraryInfo.libraryId, item.getIdentity());
             sortOrder = appPreferences.getString(appPreferences.makePluginPrefKey(libraryConfig,
                     AppPreferences.ARTIST_TRACK_SORT_ORDER), TrackSortOrder.ALBUM);
         } else if (item instanceof Folder) {
-            uri = LibraryUris.folderTracks(libraryConfig.authority,
+            uri = LibraryUris.folderTracks(libraryConfig.getAuthority(),
                     libraryInfo.libraryId, item.getIdentity());
             sortOrder = appPreferences.getString(appPreferences.makePluginPrefKey(libraryConfig,
                     AppPreferences.FOLDER_SORT_ORDER), FolderTrackSortOrder.A_Z);
         } else if (item instanceof Genre) {
-            uri = LibraryUris.genreTracks(libraryConfig.authority,
+            uri = LibraryUris.genreTracks(libraryConfig.getAuthority(),
                     libraryInfo.libraryId, item.getIdentity());
             sortOrder = appPreferences.getString(appPreferences.makePluginPrefKey(libraryConfig,
                     AppPreferences.GENRE_TRACK_SORT_ORDER), TrackSortOrder.ALBUM);
         } else if (item instanceof Playlist) {
-            uri = LibraryUris.playlistTracks(libraryConfig.authority,
+            uri = LibraryUris.playlistTracks(libraryConfig.getAuthority(),
                     libraryInfo.libraryId, item.getIdentity());
             sortOrder = TrackSortOrder.PLAYORDER;
         } else if (item instanceof Track) {
-            uri = LibraryUris.track(libraryConfig.authority,
+            uri = LibraryUris.track(libraryConfig.getAuthority(),
                     libraryInfo.libraryId, item.getIdentity());
             sortOrder = null;
         } else {
@@ -244,7 +239,7 @@ public class OverflowHandler implements OverflowClickListener {
                 //TODO
                 return true;
             case DELETE: {
-                String auth = libraryConfig.authority;
+                String auth = libraryConfig.getAuthority();
                 String lib = libraryInfo.libraryId;
                 DeleteRequest request;
                 if (item instanceof Album) {

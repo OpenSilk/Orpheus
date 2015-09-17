@@ -15,18 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.folders;
+package org.opensilk.music.ui3.library;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.LibraryInfo;
-import org.opensilk.music.library.provider.LibraryExtras;
-import org.opensilk.music.library.provider.LibraryMethods;
-import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.model.Folder;
 import org.opensilk.music.ui3.common.BundleableFragment;
 
@@ -37,15 +32,6 @@ public class FoldersScreenFragment extends BundleableFragment {
     public static final String NAME = FoldersScreenFragment.class.getName();
 
     public static FoldersScreenFragment ni(Context context, LibraryConfig config, Folder folder) {
-//        if (info.folderId == null) {
-//            final Uri uri = LibraryUris.call(config.authority, info.libraryId);
-//            Bundle reply = context.getContentResolver()
-//                    .call(uri, LibraryMethods.DEFAULTFOLDER, null, LibraryExtras.b().putUri(uri).get());
-//            if (LibraryExtras.getOk(reply)) {
-//                LibraryInfo libraryInfo = LibraryExtras.getLibraryInfo(reply);
-//                info = info.buildUpon(libraryInfo.folderId, libraryInfo.folderName);
-//            }
-//        }
         Bundle args = makeCommonArgsBundle(config, folder.getDisplayName());
         args.putBundle("fldr", folder.toBundle());
         return factory(context, NAME, args);

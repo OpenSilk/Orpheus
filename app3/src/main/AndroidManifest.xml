@@ -188,6 +188,12 @@
             android:name="org.opensilk.music.library.mediastore.provider.FoldersLibraryProvider"
             tools:replace="authorities"/>
 
+        <!--Index provider-->
+        <provider
+            android:authorities="${applicationId}.provider.index"
+            android:name="org.opensilk.music.index.provider.IndexProvider"
+            tools:replace="authorities"/>
+
     </application>
 
 </manifest>

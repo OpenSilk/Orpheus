@@ -35,10 +35,6 @@ import org.opensilk.music.ui3.common.OverflowHandler;
 import org.opensilk.music.ui3.common.ItemClickDelegate;
 import org.opensilk.music.ui3.common.OverflowAction;
 import org.opensilk.music.ui3.common.OverflowClickListener;
-import org.opensilk.music.ui3.dragswipe.TrackDragSwipeEventListener;
-import org.opensilk.music.ui3.dragswipe.TrackItemClickListener;
-import org.opensilk.music.ui3.dragswipe.TracksDragSwipePresenter;
-import org.opensilk.music.ui3.dragswipe.TracksDragSwipePresenterConfig;
 
 import javax.inject.Named;
 
@@ -72,30 +68,30 @@ public class PlaylistsProfileScreenModule {
         return TrackSortOrder.PLAYORDER;
     }
 
-    @Provides @ScreenScope
-    public TracksDragSwipePresenterConfig providePresenterConfig(
-            TrackItemClickListener itemClickListener,
-            OverflowClickListener overflowClickListener,
-            ActionBarMenuConfig menuConfig,
-            TrackDragSwipeEventListener eventListener
-    ) {
-        return TracksDragSwipePresenterConfig.builder()
-                .setItemClickListener(itemClickListener)
-                .setOverflowClickListener(overflowClickListener)
-                .setMenuConfig(menuConfig)
-                .setDragSwipeEventListener(eventListener)
-                .build();
-    }
-
-    @Provides @ScreenScope
-    public TrackItemClickListener provideItemClickListener(final ItemClickDelegate delegate) {
-        return new TrackItemClickListener() {
-            @Override
-            public void onItemClicked(TracksDragSwipePresenter presenter, Context context, Bundleable item) {
-                delegate.playAllItems(context, presenter.getItems(), item);
-            }
-        };
-    }
+//    @Provides @ScreenScope
+//    public TracksDragSwipePresenterConfig providePresenterConfig(
+//            TrackItemClickListener itemClickListener,
+//            OverflowClickListener overflowClickListener,
+//            ActionBarMenuConfig menuConfig,
+//            TrackDragSwipeEventListener eventListener
+//    ) {
+//        return TracksDragSwipePresenterConfig.builder()
+//                .setItemClickListener(itemClickListener)
+//                .setOverflowClickListener(overflowClickListener)
+//                .setMenuConfig(menuConfig)
+//                .setDragSwipeEventListener(eventListener)
+//                .build();
+//    }
+//
+//    @Provides @ScreenScope
+//    public TrackItemClickListener provideItemClickListener(final ItemClickDelegate delegate) {
+//        return new TrackItemClickListener() {
+//            @Override
+//            public void onItemClicked(TracksDragSwipePresenter presenter, Context context, Bundleable item) {
+//                delegate.playAllItems(context, presenter.getItems(), item);
+//            }
+//        };
+//    }
 
     @Provides @ScreenScope
     public OverflowClickListener provideOverflowClickListener(final OverflowHandler delegate) {
@@ -137,13 +133,13 @@ public class PlaylistsProfileScreenModule {
                 .build());
     }
 
-    @Provides @ScreenScope
-    public TrackDragSwipeEventListener provideDragSwipeEventListener() {
-        return new TrackDragSwipeEventListener() {
-            @Override
-            public void onItemRemoved(Context context, Track track) {
-
-            }
-        };
-    }
+//    @Provides @ScreenScope
+//    public TrackDragSwipeEventListener provideDragSwipeEventListener() {
+//        return new TrackDragSwipeEventListener() {
+//            @Override
+//            public void onItemRemoved(Context context, Track track) {
+//
+//            }
+//        };
+//    }
 }

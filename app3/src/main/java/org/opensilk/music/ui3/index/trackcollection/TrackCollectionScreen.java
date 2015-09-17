@@ -28,11 +28,8 @@ import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortar.WithComponentFactory;
 import org.opensilk.common.ui.mortarfragment.MortarFragment;
 import org.opensilk.music.R;
-import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.LibraryInfo;
-import org.opensilk.music.model.TrackCollection;
+import org.opensilk.music.model.TrackList;
 import org.opensilk.music.ui3.MusicActivityComponent;
-import org.opensilk.music.ui3.common.BundleableScreen;
 import org.opensilk.music.ui3.profile.ProfileScreen;
 
 import mortar.MortarScope;
@@ -44,17 +41,17 @@ import mortar.MortarScope;
 @WithComponentFactory(TrackCollectionScreen.Factory.class)
 public class TrackCollectionScreen extends Screen implements ProfileScreen {
 
-    final TrackCollection trackCollection;
+    final TrackList trackList;
     final String sortOrderPref;
 
-    public TrackCollectionScreen(TrackCollection trackCollection, String sortOrderPref) {
-        this.trackCollection = trackCollection;
+    public TrackCollectionScreen(TrackList trackList, String sortOrderPref) {
+        this.trackList = trackList;
         this.sortOrderPref = sortOrderPref;
     }
 
     @Override
     public String getName() {
-        return super.getName() + "-" + trackCollection.getUri();
+        return super.getName() + "-" + trackList.getUri();
     }
 
     @Override
@@ -69,7 +66,7 @@ public class TrackCollectionScreen extends Screen implements ProfileScreen {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeBundle(trackCollection.toBundle());
+        dest.writeBundle(trackList.toBundle());
         dest.writeString(sortOrderPref);
     }
 
@@ -77,7 +74,7 @@ public class TrackCollectionScreen extends Screen implements ProfileScreen {
         @Override
         public TrackCollectionScreen createFromParcel(Parcel source) {
             return new TrackCollectionScreen(
-                    TrackCollection.BUNDLE_CREATOR.fromBundle(source.readBundle()),
+                    TrackList.BUNDLE_CREATOR.fromBundle(source.readBundle()),
                     source.readString()
             );
         }

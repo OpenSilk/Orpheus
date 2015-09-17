@@ -33,7 +33,6 @@ import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.loader.LibraryProviderInfoLoader;
 import org.opensilk.music.settings.SettingsActivity;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
-import org.opensilk.music.ui3.library.LandingScreenFragment;
 import org.opensilk.music.ui3.nowplaying.CarModeActivity;
 
 import java.util.List;
@@ -135,16 +134,16 @@ public class DrawerScreenPresenter extends ViewPresenter<DrawerScreenView> {
     }
 
     void goToCurrent() {
-        Bundle config = appContext.getContentResolver().call(
-                LibraryUris.call(currentSelection.authority), LIBRARYCONF, null, null);
-        if (config == null) {
-            Timber.e("Got null config");
-            //TODO toast
-            return;
-        }
-        fm.killBackStack();
-        fm.replaceMainContent(LandingScreenFragment.ni(config), false);
-        drawerOwner.closeDrawer();
+//        Bundle config = appContext.getContentResolver().call(
+//                LibraryUris.call(currentSelection.authority), CONFIG, null, null);
+//        if (config == null) {
+//            Timber.e("Got null config");
+//            //TODO toast
+//            return;
+//        }
+//        fm.killBackStack();
+//        fm.replaceMainContent(LandingScreenFragment.ni(config), false);
+//        drawerOwner.closeDrawer();
     }
 
     void openSettings(Context context) {
