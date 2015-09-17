@@ -39,7 +39,7 @@ public class ParcelableExceptionTest {
     @Test
     public void testParcelableExceptionWorks() {
         LibraryException ex =
-                new LibraryException(LibraryException.NETWORK, new IOException("No network"));
+                new LibraryException(LibraryException.Kind.NETWORK, new IOException("No network"));
         Parcel p = Parcel.obtain();
         ex.writeToParcel(p, 0);
         p.setDataPosition(0);

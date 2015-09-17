@@ -21,7 +21,7 @@ package org.opensilk.music.library.sort;
  * Created by drew on 4/26/15.
  */
 public interface AlbumSortOrder extends BundleableSortOrder {
-    String MOST_TRACKS = "trackCount DESC";
-    String ARTIST = "artistName";
-    String NEWEST = "date DESC";
+    String MOST_TRACKS = "track_count DESC";
+    String ARTIST = "artist";
+    String NEWEST = "date_added DESC";
 }

@@ -23,25 +23,35 @@ package org.opensilk.music.library.provider;
  * Created by drew on 5/3/15.
  */
 public interface LibraryMethods {
+
     /**
-     * Request plugin config
-     * returned bundle from the call is the dematerialized {@link org.opensilk.music.library.LibraryConfig}
+     * List children of container;
      */
-    String LIBRARYCONF = "conf";
+    String LIST = "list";
     /**
-     * Query the library
+     * Return whatever object this uri describes
      */
-    String QUERY = "query";
+    String GET = "get";
     /**
-     * Delete item
+     * List children of container, returned objects need not be sorted
+     */
+    String SCAN = "scan";
+    /**
+     * Request default containers, sorting is left to discretion of library
+     */
+    String ROOTS = "roots";
+    /**
+     * Delete object described by uri
      */
     String DELETE = "delete";
     /**
      * Update item
      */
-    String UPDATE = "update";
+    String UPDATE_ITEM = "update";
     /**
-     * Request default folders {@link org.opensilk.music.library.LibraryInfo}
+     * Request plugin config
+     * returned bundle from the call is the dematerialized {@link org.opensilk.music.library.LibraryConfig}
      */
-    String DEFAULTFOLDER = "defaultfolder";
+    String CONFIG = "config";
+
 }

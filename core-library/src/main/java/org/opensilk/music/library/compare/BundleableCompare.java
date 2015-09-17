@@ -67,7 +67,7 @@ public class BundleableCompare {
     private static final AlphanumComparator sComparator = new AlphanumComparator();
 
     public static <T extends Bundleable> int compareNameAZ(T lhs, T rhs) {
-        return compareAZ(lhs.getDisplayName(), rhs.getDisplayName());
+        return compareAZ(lhs.getName(), rhs.getName());
     }
 
     public static int compareAZ(String lhs, String rhs) {
@@ -75,7 +75,7 @@ public class BundleableCompare {
     }
 
     public static <T extends Bundleable> int compareNameZA(T lhs, T rhs) {
-        return compareZA(lhs.getDisplayName(), rhs.getDisplayName());
+        return compareZA(lhs.getName(), rhs.getName());
     }
 
     public static int compareZA(String lhs, String rhs) {

@@ -34,6 +34,10 @@ public class LibraryUris {
         String TRACKS_ONLY = "tracksOnly";
     }
 
+    public interface Params {
+        String SCAN = "scan";
+    }
+
     static final String scheme = "content";
     static final String model = "model";
     static final String albums = "albums";
@@ -48,13 +52,32 @@ public class LibraryUris {
     static final String playlist = "playlist";
     static final String tracks = "tracks";
     static final String track = "track";
+    static final String root = "root";
+
+    static final String browse = "browse";
+
+    private static Uri.Builder baseUriBuilder(String authority, String library) {
+        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library);
+    }
+
+    private static Uri.Builder baseUriBuilder(String authority) {
+        return new Uri.Builder().scheme(scheme).authority(authority);
+    }
 
     private static Uri.Builder modelBase(String authority, String library){
-        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(model);
+        return baseUriBuilder(authority, library).appendPath(model);
     }
 
     public static Uri withQ(Uri uri, String q) {
         return uri.buildUpon().appendQueryParameter(Q.Q, q).build();
+    }
+
+    public static Uri rootUri(String authority) {
+        return baseUriBuilder(authority).appendPath(root).build();
+    }
+
+    public static Uri scanUri(Uri uri) {
+        return uri.buildUpon().appendQueryParameter(Params.SCAN, "1").build();
     }
 
     public static Uri albums(String authority, String library) {
@@ -161,6 +184,14 @@ public class LibraryUris {
         return modelBase(authority, library).appendPath(track).appendPath(id).build();
     }
 
+    public static Uri browse(String authority, String library, String id) {
+        if (StringUtils.isEmpty(id)) {
+            return baseUriBuilder(authority, library).appendPath(browse).build();
+        } else {
+            return baseUriBuilder(authority, library).appendPath(browse).appendPath(id).build();
+        }
+    }
+
     public static Uri call(String authority) {
         return new Uri.Builder().scheme(scheme).authority(authority).build();
     }
@@ -187,38 +218,48 @@ public class LibraryUris {
     public static final int M_GENRE_ALBUMS = 16;
     public static final int M_GENRE_TRACKS = 17;
     public static final int M_PLAYLIST_TRACKS = 18;
+    public static final int M_BROWSE_ROOT = 19;
+    public static final int M_BROWSE_CONTAINER = 20;
+    public static final int M_ROOT = 21;
 
     private static final String slash_wild = "/*";
     private static final String slash_wild_slash = "/*/";
-    private static final String model_base_match = "*/" + model + "/";
+    private static final String base_match = "*/";
+    private static final String model_base_match = base_match + model + "/";
 
     public static UriMatcher makeMatcher(String authority) {
-        Log.i("LibraryUris", "Creating matcher for authority="+authority);
+        Log.i("LibraryUris", "Creating matcher for authority=" + authority);
         UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
-        uriMatcher.addURI(authority, model_base_match + albums, M_ALBUMS);
-        uriMatcher.addURI(authority, model_base_match + album + slash_wild, M_ALBUM);
-        uriMatcher.addURI(authority, model_base_match + album + slash_wild_slash + tracks, M_ALBUM_TRACKS);
+        uriMatcher.addURI(authority, root, M_ROOT);
 
-        uriMatcher.addURI(authority, model_base_match + artists, M_ARTISTS);
-        uriMatcher.addURI(authority, model_base_match + artist + slash_wild, M_ARTIST);
-        uriMatcher.addURI(authority, model_base_match + artist + slash_wild_slash + albums, M_ARTIST_ALBUMS);
-        uriMatcher.addURI(authority, model_base_match + artist + slash_wild_slash + tracks, M_ARTIST_TRACKS);
+//        uriMatcher.addURI(authority, model_base_match + albums, M_ALBUMS);
+//        uriMatcher.addURI(authority, model_base_match + album + slash_wild, M_ALBUM);
+//        uriMatcher.addURI(authority, model_base_match + album + slash_wild_slash + tracks, M_ALBUM_TRACKS);
+//
+//        uriMatcher.addURI(authority, model_base_match + artists, M_ARTISTS);
+//        uriMatcher.addURI(authority, model_base_match + artist + slash_wild, M_ARTIST);
+//        uriMatcher.addURI(authority, model_base_match + artist + slash_wild_slash + albums, M_ARTIST_ALBUMS);
+//        uriMatcher.addURI(authority, model_base_match + artist + slash_wild_slash + tracks, M_ARTIST_TRACKS);
+//
+//        uriMatcher.addURI(authority, model_base_match + folders, M_FOLDERS);
+//        uriMatcher.addURI(authority, model_base_match + folder + slash_wild, M_FOLDER);
+//
+//        uriMatcher.addURI(authority, model_base_match + genres, M_GENRES);
+//        uriMatcher.addURI(authority, model_base_match + genre + slash_wild, M_GENRE);
+//        uriMatcher.addURI(authority, model_base_match + genre + slash_wild_slash + albums, M_GENRE_ALBUMS);
+//        uriMatcher.addURI(authority, model_base_match + genre + slash_wild_slash + tracks, M_GENRE_TRACKS);
+//
+//        uriMatcher.addURI(authority, model_base_match + playlists, M_PLAYLISTS);
+//        uriMatcher.addURI(authority, model_base_match + playlist + slash_wild, M_PLAYLIST);
+//        uriMatcher.addURI(authority, model_base_match + playlist + slash_wild_slash + tracks, M_PLAYLIST_TRACKS);
+//
+//        uriMatcher.addURI(authority, model_base_match + tracks, M_TRACKS);
+//        uriMatcher.addURI(authority, model_base_match + track + slash_wild, M_TRACK);
+//
+//        uriMatcher.addURI(authority, base_match + browse, M_BROWSE_ROOT);
+//        uriMatcher.addURI(authority, base_match + browse + slash_wild, M_BROWSE_CONTAINER);
 
-        uriMatcher.addURI(authority, model_base_match + folders, M_FOLDERS);
-        uriMatcher.addURI(authority, model_base_match + folder + slash_wild, M_FOLDER);
-
-        uriMatcher.addURI(authority, model_base_match + genres, M_GENRES);
-        uriMatcher.addURI(authority, model_base_match + genre + slash_wild, M_GENRE);
-        uriMatcher.addURI(authority, model_base_match + genre + slash_wild_slash + albums, M_GENRE_ALBUMS);
-        uriMatcher.addURI(authority, model_base_match + genre + slash_wild_slash + tracks, M_GENRE_TRACKS);
-
-        uriMatcher.addURI(authority, model_base_match + playlists, M_PLAYLISTS);
-        uriMatcher.addURI(authority, model_base_match + playlist + slash_wild, M_PLAYLIST);
-        uriMatcher.addURI(authority, model_base_match + playlist + slash_wild_slash + tracks, M_PLAYLIST_TRACKS);
-
-        uriMatcher.addURI(authority, model_base_match + tracks, M_TRACKS);
-        uriMatcher.addURI(authority, model_base_match + track + slash_wild, M_TRACK);
 
         return uriMatcher;
     }

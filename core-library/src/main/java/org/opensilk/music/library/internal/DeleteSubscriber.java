@@ -17,6 +17,7 @@
 
 package org.opensilk.music.library.internal;
 
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -24,16 +25,19 @@ import android.util.Log;
 
 import org.opensilk.music.library.provider.LibraryExtras;
 
+import java.util.List;
+
 import rx.Subscriber;
 
 /**
  * Created by drew on 5/14/15.
  */
-public class DeleteSubscriber extends Subscriber<Boolean> {
+public class DeleteSubscriber extends Subscriber<List<Uri>> {
     public static final String TAG = DeleteSubscriber.class.getSimpleName();
 
     public static final int RESULT = 1;
     public static final int ERROR = 2;
+    public static final int COMPLETE = 3;
 
     final ResultReceiver resultReceiver;
 
@@ -43,7 +47,7 @@ public class DeleteSubscriber extends Subscriber<Boolean> {
 
     @Override
     public void onCompleted() {
-        //nothing
+        resultReceiver.send(COMPLETE, null);
     }
 
     @Override
@@ -57,8 +61,7 @@ public class DeleteSubscriber extends Subscriber<Boolean> {
     }
 
     @Override
-    public void onNext(Boolean aBoolean) {
-        //TODO check if false and log
-        resultReceiver.send(RESULT, LibraryExtras.b().putOk(aBoolean).get());
+    public void onNext(List<Uri> uriList) {
+        resultReceiver.send(RESULT, LibraryExtras.b().putUriList(uriList).get());
     }
 }

@@ -47,13 +47,17 @@ public class LibraryExtras {
      */
     public static final String NOTIFY_URI = "notify_uri";
     /**
-     * Sortorder: one of the strings in the sort package. never null for {@link LibraryMethods#QUERY}
+     * Sortorder: one of the strings in the sort package. never null for {@link LibraryMethods#LIST}
      */
     public static final String SORTORDER = "sortorder";
     /**
      *
      */
     public static final String URI_LIST = "uri_list";
+    /**
+     * Proprietary extras
+     */
+    public static final String EXTRAS_BUNDLE = "extras_bundle";
     /**
      * Internal use: {@link org.opensilk.music.library.internal.IBundleableObserver}, never null
      */
@@ -153,6 +157,11 @@ public class LibraryExtras {
         return b.<LibraryInfo>getParcelable(LIBRARY_INFO);
     }
 
+    public static Bundle getExtrasBundle(Bundle extras) {
+        Bundle b = extras.getBundle(EXTRAS_BUNDLE);
+        return b;
+    }
+
     public static Builder b() {
         return new Builder();
     }
@@ -214,6 +223,11 @@ public class LibraryExtras {
             Bundle b2 = new Bundle();
             b2.putParcelable(LIBRARY_INFO, libraryInfo);
             b.putBundle(WRAPPED_LIBRARY_INFO, b2);
+            return this;
+        }
+
+        public Builder putExtrasBundle(Bundle extras) {
+            b.putBundle(EXTRAS_BUNDLE, extras);
             return this;
         }
 

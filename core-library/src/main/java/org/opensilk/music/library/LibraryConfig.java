@@ -23,21 +23,115 @@ import android.support.annotation.NonNull;
 
 import org.apache.commons.lang3.StringUtils;
 
-import static org.opensilk.music.library.LibraryCapability.*;
-
 /**
  * Created by drew on 11/11/14.
  */
 public class LibraryConfig {
 
     /**
-     * Api version of plugin. Set automatically by {@code Builder}
+     * Library has a settings activity
+     * Scope: Global
      */
-    public final int apiVersion;
+    public static final long FLAG_HAS_SETTINGS   = 1 << 1;
     /**
-     * Bitmask of abilities listed above
+     * Library requires authentication
+     * Scope: Global
      */
-    public final long capabilities;
+    public static final long FLAG_REQUIRES_AUTH = 1 << 2;
+    /**
+     * Object supports deletion
+     * Scope: Container, Item
+     */
+    public static final long FLAG_SUPPORTS_DELETE = 1 << 11;
+
+    private final int apiVersion;
+    private final long flags;
+    private final Bundle meta;
+    private final String authority;
+    private final String label;
+
+    public static final String META_LOGIN_COMPONENT = "loginComponent";
+    public static final String META_SETTINGS_COMPONENT = "settingsComponent";
+    public static final String META_MENU_NAME_SETTINGS = "menu_settings_name";
+
+    protected LibraryConfig(
+            int apiVersion,
+            long flags,
+            @NonNull Bundle meta,
+            @NonNull String authority,
+            @NonNull String label
+    ) {
+        this.apiVersion = apiVersion;
+        this.flags = flags;
+        this.meta = meta;
+        this.authority = authority;
+        this.label = label;
+    }
+
+    /**
+     * @return Api version of plugin. Set automatically by {@code Builder}
+     */
+    public int getApiVersion() {
+        return apiVersion;
+    }
+
+    /**
+     * Checks if an {@link LibraryCapability} is declared
+     */
+    public boolean hasFlag(long flag) {
+        return (flags & flag) != 0;
+    }
+
+    /**
+     * @return Bitmask of {@link LibraryCapability}s
+     */
+    public long getFlags() {
+        return flags;
+    }
+
+    /**
+     * @return optional config bundle
+     */
+    public Bundle getMetaBundle() {
+        return meta;
+    }
+
+    /**
+     * @return Object at key or null (uses unsafe casting)
+     */
+    public <T> T getMeta(String key) {
+        return getMeta(key, null);
+    }
+
+    /**
+     * @return Object at key or defvalue (uses unsafe casting)
+     */
+    public <T> T getMeta(String key, T defvalue) {
+        if (meta.containsKey(key)) {
+            return (T) meta.get(key);
+        } else {
+            return defvalue;
+        }
+    }
+
+    /**
+     * @return Library's authority
+     */
+    public String getAuthority() {
+        return authority;
+    }
+
+    /**
+     * @return Label declared in manifest
+     */
+    public String getLabel() {
+        return label;
+    }
+
+    public boolean requiresAuth() {
+        return (flags & FLAG_REQUIRES_AUTH) != 0;
+    }
+
     /**
      * Component for activity to allow user to choose from available libraries.
      * The activity should be of Dialog Style, and should take care of everything needed
@@ -52,54 +146,14 @@ public class LibraryConfig {
      * {@link LibraryConstants#EXTRA_WANT_LIGHT_THEME} to style the activity to match the
      * current Orpheus theme.
      */
-    public final ComponentName pickerComponent;
-    /**
-     * Contains optional config information
-     */
-    public final Bundle meta;
-    /**
-     * Library's authority
-     */
-    public final String authority;
-    /**
-     * Manifest label
-     */
-    public final String label;
-
-    public static final String META_MENU_PICKER_NAME = "menu_picker_name";
-    public static final String META_MENU_PICKER_HIDE = "menu_picker_hide";
-    public static final String META_SETTINGS_COMPONENT = "settingsComponent";
-    public static final String META_MENU_NAME_SETTINGS = "menu_settings_name";
-
-    protected LibraryConfig(
-            int apiVersion,
-            long capabilities,
-            @NonNull ComponentName pickerComponent,
-            @NonNull Bundle meta,
-            @NonNull String authority,
-            @NonNull String label
-    ) {
-        this.apiVersion = apiVersion;
-        this.capabilities = capabilities;
-        this.pickerComponent = pickerComponent;
-        this.meta = meta;
-        this.authority = authority;
-        this.label = label;
-    }
-
-    public boolean hasAbility(long ability) {
-        return (capabilities & ability) != 0;
-    }
-
-    public <T> T getMeta(String key) {
-        return (T) meta.get(key);
+    public ComponentName getLoginComponent() {
+        return meta.<ComponentName>getParcelable(META_LOGIN_COMPONENT);
     }
 
     public Bundle dematerialize() {
         Bundle b = new Bundle(4);
         b.putInt("_1", apiVersion);
-        b.putLong("_2", capabilities);
-        b.putParcelable("_3", pickerComponent);
+        b.putLong("_2", flags);
         b.putBundle("_4", meta);
         b.putString("_5", authority);
         b.putString("_6", label);
@@ -110,7 +164,6 @@ public class LibraryConfig {
         return new LibraryConfig(
                 b.getInt("_1"),
                 b.getLong("_2"),
-                b.<ComponentName>getParcelable("_3"),
                 b.getBundle("_4"),
                 b.getString("_5"),
                 b.getString("_6")
@@ -123,8 +176,7 @@ public class LibraryConfig {
 
     public static final class Builder {
         private int apiVersion = 1; //TODO
-        private long capabilities;
-        private ComponentName pickerComponent;
+        private long flags;
         private Bundle meta = new Bundle();
         private String authority;
         private String label;
@@ -133,25 +185,19 @@ public class LibraryConfig {
 
         }
 
-        public Builder setCapabilities(long capabilities) {
-            this.capabilities = capabilities;
+        public Builder setFlags(long flags) {
+            this.flags = flags;
             return this;
         }
 
-        public Builder addAbility(long ability) {
-            capabilities |= ability;
+        public Builder setFlag(long flag) {
+            flags |= flag;
             return this;
         }
 
-        public Builder setPickerComponent(ComponentName pickerComponent, String menuName) {
-            this.pickerComponent = pickerComponent;
-            meta.putString(META_MENU_PICKER_NAME, menuName);
-            return this;
-        }
-
-        public Builder setPickerComponentNoMenu(ComponentName pickerComponent) {
-            this.pickerComponent = pickerComponent;
-            meta.putBoolean(META_MENU_PICKER_HIDE, true);
+        public Builder setLoginComponent(ComponentName component) {
+            setFlag(FLAG_REQUIRES_AUTH);
+            meta.putParcelable(META_LOGIN_COMPONENT, component);
             return this;
         }
 
@@ -165,7 +211,7 @@ public class LibraryConfig {
          * current Orpheus theme.
          */
         public Builder setSettingsComponent(ComponentName settingsComponent, String menuName) {
-            addAbility(SETTINGS);
+            setFlag(FLAG_HAS_SETTINGS);
             meta.putParcelable(META_SETTINGS_COMPONENT, settingsComponent);
             meta.putString(META_MENU_NAME_SETTINGS, menuName);
             return this;
@@ -182,20 +228,19 @@ public class LibraryConfig {
         }
 
         public LibraryConfig build() {
-            if (pickerComponent == null) {
-                throw new IllegalArgumentException("pickerComponent must not be null");
+            if ((flags & FLAG_REQUIRES_AUTH) != 0 && meta.getParcelable(META_LOGIN_COMPONENT) == null) {
+                throw new IllegalArgumentException("You defined REQUIRES_AUTH but left loginComponent null");
             }
-            if ((capabilities & SETTINGS) != 0 && meta.getParcelable(META_SETTINGS_COMPONENT) == null) {
+            if ((flags & FLAG_HAS_SETTINGS) != 0 && meta.getParcelable(META_SETTINGS_COMPONENT) == null) {
                 throw new IllegalArgumentException("You defined SETTINGS but left settingsComponent null");
             }
             if ((StringUtils.isEmpty(authority))) {
                 throw new IllegalArgumentException("Authority may not be null");
             }
             if (StringUtils.isEmpty(label)) {
-                throw new IllegalArgumentException("Lable may not be null");
+                throw new IllegalArgumentException("Label may not be null");
             }
-            return new LibraryConfig(apiVersion, capabilities,
-                    pickerComponent, meta, authority, label);
+            return new LibraryConfig(apiVersion, flags, meta, authority, label);
         }
 
     }

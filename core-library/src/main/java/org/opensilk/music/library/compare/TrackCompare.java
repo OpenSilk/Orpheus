@@ -58,7 +58,7 @@ public class TrackCompare {
                     public int compare(Track lhs, Track rhs) {
                         int c = BundleableCompare.compareAZ(lhs.getAlbumName(), rhs.getAlbumName());
                         if (c == 0) {
-                            return lhs.getPlayOrderIndex() - rhs.getPlayOrderIndex();
+                            return lhs.getTrackNumber() - rhs.getTrackNumber();
                         }
                         return c;
                     }
@@ -68,18 +68,18 @@ public class TrackCompare {
                     @Override
                     public int compare(Track lhs, Track rhs) {
                         //reversed
-                        int c = rhs.getDuration() - lhs.getDuration();
+                        long c = rhs.getDuration() - lhs.getDuration();
                         if (c == 0) {
                             return BundleableCompare.compareNameAZ(lhs, rhs);
                         }
-                        return c;
+                        return (int)c;
                     }
                 };
             case TrackSortOrder.PLAYORDER:
                 return new Comparator<Track>() {
                     @Override
                     public int compare(Track lhs, Track rhs) {
-                        return lhs.getPlayOrderIndex() - rhs.getPlayOrderIndex();
+                        return lhs.getTrackNumber() - rhs.getTrackNumber();
                     }
                 };
             default:

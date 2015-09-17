@@ -60,6 +60,30 @@ public class LibraryProviderInfo implements Parcelable, Comparable<LibraryProvid
         this.authority = authority;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getAuthority() {
+        return authority;
+    }
+
+    public Drawable getIcon() {
+        return icon;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -21,8 +21,8 @@ package org.opensilk.music.library.sort;
  * Created by drew on 4/26/15.
  */
 public interface TrackSortOrder extends BundleableSortOrder {
-    String ARTIST = "artistName";
-    String ALBUM = "albumName";
+    String ARTIST = "artist";
+    String ALBUM = "album";
     String LONGEST = "duration DESC";
-    String PLAYORDER = "index";
+    String PLAYORDER = "track";
 }

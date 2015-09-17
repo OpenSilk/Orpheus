@@ -21,6 +21,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import org.opensilk.music.library.provider.LibraryExtras;
+import org.opensilk.music.library.provider.LibraryProviderOld;
 
 /**
  * Specialized execption capable of being sent across ipc. All exceptions
@@ -51,30 +52,24 @@ public class LibraryException extends Exception implements Parcelable {
         int NETWORK = 3;
         /**
          * Internal use: argument for {@link LibraryExtras#CAUSE}
-         * in returned bundle from {@link org.opensilk.music.library.provider.LibraryProvider#call}
+         * in returned bundle from {@link LibraryProviderOld#call}
          * when invalid method is requested
          */
         int METHOD_NOT_IMPLEMENTED = 4;
         /**
          * Internal use: argument for {@link LibraryExtras#CAUSE}
-         * in returned bundle from {@link org.opensilk.music.library.provider.LibraryProvider#call}
+         * in returned bundle from {@link LibraryProviderOld#call}
          * when requested uri is malformed or unknown
          */
         int ILLEGAL_URI = 5;
         /**
          * Internal use: argument for {@link LibraryExtras#CAUSE}
-         * in returned bundle from {@link org.opensilk.music.library.provider.LibraryProvider#call}
+         * in returned bundle from {@link LibraryProviderOld#call}
          * when {@link LibraryExtras#BUNDLE_SUBSCRIBER_CALLBACK} is missing from
          * the Extras bundle passed to the call or when the binder is already dead when we received the call
          */
         int BAD_BINDER = 6;
     }
-
-    //Following are deprecated TODO remove once users are converted
-    public static final int UNKNOWN = Kind.UNKNOWN;
-    public static final int RETRY = Kind.RETRY;
-    public static final int AUTH_FAILURE = Kind.AUTH_FAILURE;
-    public static final int NETWORK = Kind.NETWORK;
 
     private int code;
 

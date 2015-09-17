@@ -19,6 +19,8 @@ package org.opensilk.music.library;
 
 import android.os.Bundle;
 
+import org.opensilk.music.library.provider.LibraryProviderOld;
+
 import rx.Subscriber;
 
 /**
@@ -35,13 +37,13 @@ public interface LibraryCapability {
     long ARTISTS       = 1 << 1;
     /**
      * Folders tracks is for 'dumb' libraries that don't know anything
-     * about meta. And {@link org.opensilk.music.library.provider.LibraryProvider#browseFolders(String, String, Subscriber, Bundle) browseFolders}
+     * about meta. And {@link LibraryProviderOld#browseFolders(String, String, Subscriber, Bundle) browseFolders}
      * will only return {@link org.opensilk.music.model.Folder}s and {@link org.opensilk.music.model.Track}s.
      */
     long FOLDERSTRACKS = 1 << 2;
     /**
      * Indicates we know about meta but can only browse the 'native'
-     * hierarchy. Thus {@link org.opensilk.music.library.provider.LibraryProvider#browseFolders(String, String, Subscriber, Bundle) browseFolders}
+     * hierarchy. Thus {@link LibraryProviderOld#browseFolders(String, String, Subscriber, Bundle) browseFolders}
      * may return any model object. Not just {@link org.opensilk.music.model.Folder}s and
      * {@link org.opensilk.music.model.Track}s.
      */
@@ -79,6 +81,10 @@ public interface LibraryCapability {
      * Library has a settings activity
      */
     long SETTINGS   = 1 << 21;
+    /**
+     * Library requires authentication
+     */
+    long REQUIRES_AUTH = 1 << 22;
 
     //31-40
 
