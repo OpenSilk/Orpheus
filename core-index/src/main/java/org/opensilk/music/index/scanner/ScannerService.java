@@ -414,7 +414,8 @@ public class ScannerService extends MortarIntentService {
         cv.put(IndexSchema.ArtistMeta.ARTIST_KEY, keyFor(artist.getName()));
         cv.put(IndexSchema.ArtistMeta.ARTIST_BIO_SUMMARY, artist.getWikiSummary());
         cv.put(IndexSchema.ArtistMeta.ARTIST_BIO_CONTENT, artist.getWikiText());
-        cv.put(IndexSchema.ArtistMeta.ARTIST_BIO_DATE_MOD, artist.getWikiLastChanged().getTime());
+        cv.put(IndexSchema.ArtistMeta.ARTIST_BIO_DATE_MOD,
+                artist.getWikiLastChanged() != null ? artist.getWikiLastChanged().getTime() : null);
         cv.put(IndexSchema.ArtistMeta.ARTIST_MBID, artist.getMbid());
         return mIndexDatabase.insert(IndexSchema.ArtistMeta.TABLE, null, cv);
     }
