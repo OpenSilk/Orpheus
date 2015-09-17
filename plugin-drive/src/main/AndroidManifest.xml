@@ -31,7 +31,7 @@
         android:label="@string/app_name">
 
         <!-- Library picker activity
-             intent retrieved through PluginConfig#pickerComponent -->
+             intent retrieved through PluginConfig#loginComponent -->
         <activity android:name=".ui.LibraryChooserActivity"
             android:exported="true"
             android:theme="@style/AppThemeTranslucentDark"/>
