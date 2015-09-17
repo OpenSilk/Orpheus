@@ -59,6 +59,11 @@ android {
 dependencies {
     provided(group: 'com.google.dagger', name:'dagger-compiler', version: rootProject.ext.dagger2Version)
 
+    compile 'com.squareup.okhttp:okhttp:2.5.0'
+    compile 'com.squareup.okio:okio:1.6.0'
+    compile 'com.squareup.retrofit:retrofit:2.0.0-beta1'
+    compile 'com.squareup.retrofit:adapter-rxjava:2.0.0-beta1'
+
     compile project(':common-core')
     compile project(':core-volley')
 }

@@ -44,8 +44,12 @@ import de.umass.xml.DomElement;
  */
 public abstract class MusicEntry extends ImageHolder {
 
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss ZZZZ",
-            Locale.ENGLISH);
+    private static final DateFormat[] DATE_FORMATS = new DateFormat[] {
+            new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.ENGLISH),
+            new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss ZZZZ", Locale.ENGLISH),
+            new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.ENGLISH),
+            new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss ZZZZ", Locale.getDefault()),
+    };
 
     protected String name;
     protected String url;
@@ -228,15 +232,12 @@ public abstract class MusicEntry extends ImageHolder {
             wiki = element.getChild("wiki");
         if (wiki != null) {
             String publishedText = wiki.getChildText("published");
-            try {
-                entry.wikiLastChanged = DATE_FORMAT.parse(publishedText);
-            } catch (ParseException e) {
-                // try parsing it with current locale
+            for (DateFormat dateFormat : DATE_FORMATS) {
                 try {
-                    DateFormat clFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss ZZZZ", Locale.getDefault());
-                    entry.wikiLastChanged = clFormat.parse(publishedText);
-                } catch (ParseException e2) {
-                    // cannot parse date, wrong locale. wait for last.fm to fix.
+                    entry.wikiLastChanged = dateFormat.parse(publishedText);
+                    break;
+                } catch (ParseException e) {
+                    //
                 }
             }
             entry.wikiSummary = wiki.getChildText("summary");

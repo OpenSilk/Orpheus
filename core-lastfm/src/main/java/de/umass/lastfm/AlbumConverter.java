@@ -15,30 +15,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.lastfm;
+package de.umass.lastfm;
 
-import org.opensilk.common.core.dagger2.AppContextModule;
-import org.opensilk.music.volley.VolleyComponent;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.ResponseBody;
 
-import javax.inject.Singleton;
+import org.xml.sax.SAXException;
 
-import dagger.Component;
-import de.umass.lastfm.LastFM;
-import de.umass.lastfm.LastFMVolley;
+import java.io.IOException;
 
 /**
- * Extend to provide LastFM to child scopes
- *
- * Created by drew on 9/1/15.
+ * Created by drew on 9/16/15.
  */
-@Singleton
-@Component(
-        modules = {
-                AppContextModule.class,
-                LastFMModule.class,
+public class AlbumConverter extends MusicEntryConverter<Album> {
+    @Override
+    public Album fromBody(ResponseBody responseBody) throws IOException {
+        try {
+            Result res = createResultFromInputStream(responseBody.byteStream());
+            return ResponseBuilder.buildItem(res, Album.class);
+        } catch (SAXException e) {
+            return null;
         }
-)
-public interface LastFMComponent extends VolleyComponent {
-    LastFMVolley lastFMVolley();
-    LastFM lastFM();
+    }
+
+    @Override
+    public RequestBody toBody(Album album) {
+        return null;
+    }
 }

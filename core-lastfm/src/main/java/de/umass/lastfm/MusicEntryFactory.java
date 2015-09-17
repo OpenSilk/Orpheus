@@ -15,30 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.lastfm;
+package de.umass.lastfm;
 
-import org.opensilk.common.core.dagger2.AppContextModule;
-import org.opensilk.music.volley.VolleyComponent;
+import java.lang.reflect.Type;
 
-import javax.inject.Singleton;
-
-import dagger.Component;
-import de.umass.lastfm.LastFM;
-import de.umass.lastfm.LastFMVolley;
+import retrofit.Converter;
 
 /**
- * Extend to provide LastFM to child scopes
- *
- * Created by drew on 9/1/15.
+ * Created by drew on 9/16/15.
  */
-@Singleton
-@Component(
-        modules = {
-                AppContextModule.class,
-                LastFMModule.class,
+public class MusicEntryFactory implements Converter.Factory {
+    @Override
+    public Converter<?> get(Type type) {
+        if (type instanceof Album) {
+            return new AlbumConverter();
+        } else if (type instanceof Artist) {
+            return new ArtistConverter();
+        } else {
+            return null;
         }
-)
-public interface LastFMComponent extends VolleyComponent {
-    LastFMVolley lastFMVolley();
-    LastFM lastFM();
+    }
 }
