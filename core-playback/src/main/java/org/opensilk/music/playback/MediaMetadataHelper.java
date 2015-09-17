@@ -101,8 +101,8 @@ public class MediaMetadataHelper {
         currentInfo.track = track;
         currentInfo.trackUri = trackUri;
 
-        final ArtInfo artInfo = UtilsArt.makeBestfitArtInfo(track.albumArtistName,
-                track.artistName, track.albumName, track.artworkUri);
+        final ArtInfo artInfo = UtilsArt.makeBestfitArtInfo(track.getAlbumArtistName(),
+                track.getArtistName(), track.getAlbumName(), track.getArtworkUri());
 
         if (artInfo.equals(currentInfo.artInfo)) {
             if (currentInfo.bitmap != null) {
@@ -152,12 +152,12 @@ public class MediaMetadataHelper {
         MediaMetadataCompat m = new MediaMetadataCompat.Builder()
                 .putString(METADATA_KEY_TITLE, t.getDisplayName())
                 .putString(METADATA_KEY_DISPLAY_TITLE, t.getDisplayName())
-                .putString(METADATA_KEY_ARTIST, t.artistName)
-                .putString(METADATA_KEY_DISPLAY_SUBTITLE, t.artistName)
+                .putString(METADATA_KEY_ARTIST, t.getArtistName())
+                .putString(METADATA_KEY_DISPLAY_SUBTITLE, t.getArtistName())
                 //.putString(METADATA_KEY_DISPLAY_DESCRIPTION, TODO)
                 .putString(METADATA_KEY_ALBUM_ARTIST,
-                        StringUtils.isEmpty(t.albumArtistName) ? t.artistName : t.albumArtistName)
-                .putString(METADATA_KEY_ALBUM, t.albumName)
+                        StringUtils.isEmpty(t.getAlbumArtistName()) ? t.getArtistName() : t.getAlbumArtistName())
+                .putString(METADATA_KEY_ALBUM, t.getAlbumName())
                 .putLong(METADATA_KEY_DURATION, duration)
                 .putBitmap(METADATA_KEY_ALBUM_ART, b)
                 //.putString(METADATA_KEY_ALBUM_ART_URI, TODO)
@@ -168,7 +168,7 @@ public class MediaMetadataHelper {
                 //using the art uri. even though we also set a bitmap
                 .putString(METADATA_KEY_DISPLAY_ICON_URI, artUri.toString())
                 .putString(METADATA_KEY_ART_URI, //used by now playing
-                        t.artworkUri != null ? t.artworkUri.toString() : null)
+                        t.getArtworkUri() != null ? t.getArtworkUri().toString() : null)
                 .build();
         mediaSession.setMetadata((MediaMetadata)m.getMediaMetadata());
     }
@@ -178,11 +178,11 @@ public class MediaMetadataHelper {
         if (track == null) {
             return null;
         }
-        ArtInfo artInfo = UtilsArt.makeBestfitArtInfo(track.albumArtistName,
-                track.artistName, track.albumName, track.artworkUri);
+        ArtInfo artInfo = UtilsArt.makeBestfitArtInfo(track.getAlbumArtistName(),
+                track.getArtistName(), track.getAlbumName(), track.getArtworkUri());
         MediaDescription desc = new MediaDescription.Builder()
                 .setTitle(track.getDisplayName())
-                .setSubtitle(track.artistName)
+                .setSubtitle(track.getArtistName())
                 .setMediaId(uri.toString())
                 .setExtras(BundleHelper.builder().putParcleable(artInfo).get())
                 //.setIconUri(providerHelper.makeUri(artInfo, ArtworkType.THUMBNAIL))

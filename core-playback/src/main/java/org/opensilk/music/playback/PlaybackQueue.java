@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 
@@ -48,6 +49,7 @@ public class PlaybackQueue {
     int mCurrentPos = -1;
     QueueChangeListener mListener;
     Handler mCallbackHandler;
+    final AtomicLong mIdGenerator = new AtomicLong(1);
 
     @Inject
     public PlaybackQueue(

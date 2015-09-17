@@ -640,7 +640,7 @@ public class PlaybackService extends Service {
                                 mPlayWhenReady = true;
                             }
                             mPlaybackStateHelper.gotoConnecting();
-                            mPlayer.setDataSource(track.dataUri);
+                            mPlayer.setDataSource(track.getResources().get(0).getUri());//TODO FixME
                             mMediaSession.setQueue(mQueue.getQueueItems());
                             updateMeta();
                         }
@@ -684,7 +684,7 @@ public class PlaybackService extends Service {
                     } else if (!track.equals(mNextTrack)) {
                         mNextTrack = track;
                         mNextUri = uri;
-                        mPlayer.setNextDataSource(track.dataUri);
+                        mPlayer.setNextDataSource(track.getResources().get(0).getUri());//TODO fixme
                     } else {
                         Timber.i("Next track is still up to date");
                     }

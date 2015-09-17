@@ -136,8 +136,8 @@ public class NotificationHelper {
         mCurrentInfo.track = track;
         mCurrentInfo.isPlaying = isPlaying;
 
-        final ArtInfo artInfo = UtilsArt.makeBestfitArtInfo(track.albumArtistName,
-                track.artistName, track.albumName, track.artworkUri);
+        final ArtInfo artInfo = UtilsArt.makeBestfitArtInfo(track.getAlbumArtistName(),
+                track.getArtistName(), track.getAlbumName(), track.getArtworkUri());
 
         if (artInfo.equals(mCurrentInfo.artInfo)) {
             if (mCurrentInfo.bitmap != null) {
@@ -183,7 +183,7 @@ public class NotificationHelper {
 
         // Set up the content view
         initCollapsedLayout(mCurrentInfo.track.getDisplayName(),
-                mCurrentInfo.track.artistName, mCurrentInfo.bitmap);
+                mCurrentInfo.track.getArtistName(), mCurrentInfo.bitmap);
 
         // Notification Builder
         mNotification = new NotificationCompat.Builder(mContext)
@@ -204,8 +204,8 @@ public class NotificationHelper {
             // Control playback from the notification
             initExpandedPlaybackActions(mCurrentInfo.isPlaying);
             // Set up the expanded content view
-            initExpandedLayout(mCurrentInfo.track.getDisplayName(), mCurrentInfo.track.albumName,
-                    mCurrentInfo.track.artistName, mCurrentInfo.bitmap);
+            initExpandedLayout(mCurrentInfo.track.getDisplayName(), mCurrentInfo.track.getAlbumName(),
+                    mCurrentInfo.track.getArtistName(), mCurrentInfo.bitmap);
         }
 
         mNotification.flags |= Notification.FLAG_ONGOING_EVENT;

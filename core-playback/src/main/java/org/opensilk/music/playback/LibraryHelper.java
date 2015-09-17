@@ -64,25 +64,26 @@ public class LibraryHelper {
     }
 
     public List<Uri> getTracks(final Uri uri, String sortorder) {
-        try {
-            final String authority = uri.getAuthority();
-            final String library = uri.getPathSegments().get(0);
-            return new BundleableLoader(context, uri, sortorder)
-                    .createObservable().flatMap(new Func1<List<Bundleable>, Observable<Bundleable>>() {
-                        @Override
-                        public Observable<Bundleable> call(List<Bundleable> bundleables) {
-                            return Observable.from(bundleables);
-                        }
-                    }).collect(new ArrayList<Uri>(), new Action2<ArrayList<Uri>, Bundleable>() {
-                        @Override
-                        public void call(ArrayList<Uri> uris, Bundleable bundleable) {
-                            uris.add(LibraryUris.track(authority, library, bundleable.getIdentity()));
-                        }
-                    }).toBlocking().first();
-        } catch (Exception e) {
-            Timber.e(e, "getTracks");
-            return Collections.emptyList();
-        }
+//        try {
+//            final String authority = uri.getAuthority();
+//            final String library = uri.getPathSegments().get(0);
+//            return new BundleableLoader(context, uri, sortorder)
+//                    .createObservable().flatMap(new Func1<List<Bundleable>, Observable<Bundleable>>() {
+//                        @Override
+//                        public Observable<Bundleable> call(List<Bundleable> bundleables) {
+//                            return Observable.from(bundleables);
+//                        }
+//                    }).collect(new ArrayList<Uri>(), new Action2<ArrayList<Uri>, Bundleable>() {
+//                        @Override
+//                        public void call(ArrayList<Uri> uris, Bundleable bundleable) {
+//                            uris.add(LibraryUris.track(authority, library, bundleable.getIdentity()));
+//                        }
+//                    }).toBlocking().first();
+//        } catch (Exception e) {
+//            Timber.e(e, "getTracks");
+//            return Collections.emptyList();
+//        }
+        return Collections.emptyList();
     }
 
 }
