@@ -25,6 +25,7 @@ import android.support.v4.util.LruCache;
 import android.util.AttributeSet;
 import android.widget.ImageButton;
 
+import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.common.ui.R;
 
 /**
@@ -43,6 +44,8 @@ public class TintImageButton extends ImageButton {
 
     public TintImageButton(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+
+        if (VersionUtils.hasApi21()) return;
 
         if (attrs == null) return;
 
