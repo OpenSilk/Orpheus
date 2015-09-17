@@ -158,11 +158,16 @@ public class LetterTileDrawable extends Drawable {
      * Returns a deterministic color based on the provided contact identifier string.
      */
     private int pickColor(final String identifier) {
-        if (TextUtils.isEmpty(identifier)
-                || !isEnglishLetter(identifier.charAt(0))) {
+        if (TextUtils.isEmpty(identifier)) {
             return sDefaultColor;
         }
-        final int color = Math.abs(identifier.charAt(0)) % sColors.length();
+        int idx = 0;
+        while (!isEnglishLetter(identifier.charAt(idx))) {
+            if (++idx == identifier.length()) {
+                return sDefaultColor;
+            }
+        }
+        final int color = Math.abs(identifier.charAt(idx)) % sColors.length();
         return sColors.getColor(color, sDefaultColor);
     }
 
