@@ -20,8 +20,13 @@ package org.opensilk.music.model;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 
 import org.opensilk.music.model.spi.Bundleable;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Describes a single object
@@ -45,7 +50,7 @@ public abstract class Item implements Bundleable {
         return uri.toString();
     }
 
-    @Override @Deprecated
+    @Override
     public String getName() {
         return getDisplayName();
     }
@@ -57,11 +62,20 @@ public abstract class Item implements Bundleable {
 
     @Override
     public String getDisplayName() {
-        return name;
+        String disName = metadata.getString(Metadata.KEY_DISPLAY_NAME);
+        return disName != null ? disName : name;
     }
 
     public Uri getParentUri() {
         return metadata.getUri(Metadata.KEY_PARENT_URI);
+    }
+
+    public long getLastModified() {
+        return metadata.getLong(Metadata.KEY_LAST_MODIFIED);
+    }
+
+    public String getMimeType() {
+        return metadata.getString(Metadata.KEY_MIME_TYPE);
     }
 
     @Override

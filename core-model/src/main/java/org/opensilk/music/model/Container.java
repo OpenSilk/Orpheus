@@ -45,7 +45,7 @@ public abstract class Container implements Bundleable {
         return uri.toString();
     }
 
-    @Override @Deprecated
+    @Override
     public String getName() {
         return getDisplayName();
     }
@@ -57,7 +57,8 @@ public abstract class Container implements Bundleable {
 
     @Override
     public String getDisplayName() {
-        return name;
+        String disName = metadata.getString(Metadata.KEY_DISPLAY_NAME);
+        return disName != null ? disName : name;
     }
 
     public Uri getParentUri() {

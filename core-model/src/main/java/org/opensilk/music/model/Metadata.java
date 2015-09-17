@@ -44,9 +44,15 @@ public class Metadata implements Parcelable {
     public static final String KEY_YEAR = "orpheus.year";
     public static final String KEY_DATE_ADDED = "orpheus.date.added";
     public static final String KEY_DATE_MODIFIED = "orpheus.date.modified";
+    //long
     public static final String KEY_BITRATE = "orpheus.bitrate";
     public static final String KEY_PLAY_ORDER_INDEX = "orpheus.play.order.index";
     public static final String KEY_MIME_TYPE = "orpheus.mime.type";
+    /**
+     * Size of resource
+     * Used: in display, by scanner as sanity check (will rescan if uri matched but size differs)
+     * TYPE: Long
+     */
     public static final String KEY_SIZE = "orpheus.size";
 
     public static final String KEY_ALBUM_ARTIST_NAME = "orpheus.album.artist.name";
@@ -63,6 +69,19 @@ public class Metadata implements Parcelable {
     public static final String KEY_CHILD_ALBUMS_URI = "orpheus.child.albums.uri";
     public static final String KEY_CHILD_TRACKS_URI = "orpheus.child.tracks.uri";
     public static final String KEY_ARTINFOS = "orpheus.artinfos";
+    //int
+    public static final String KEY_IS_COMPILATION = "orpheus.iscompilation";
+    public static final String KEY_GENRE_NAME = "orpheus.genre.name";
+    public static final String KEY_TRACK_NAME = "orpheus.track.name";
+    public static final String KEY_TRACK_NUMBER = "orpheus.track.number";
+    public static final String KEY_DISC_NUMBER = "orpheus.disc.number";
+    /**
+     * Opaque value provided by library, could be date, version, etc
+     * Used: by scanner to determine if item should be rescanned (along with {@link #KEY_SIZE})
+     * TYPE: Long
+     */
+    public static final String KEY_LAST_MODIFIED = "orpheus.last.modified";
+    public static final String KEY_DISPLAY_NAME = "orpheus.display.name";
 
     private final Bundle meta;
 
@@ -75,11 +94,11 @@ public class Metadata implements Parcelable {
     }
 
     public int getInt(String key) {
-        return meta.getInt(key);
+        return meta.getInt(key, -1);
     }
 
     public long getLong(String key) {
-        return meta.getLong(key);
+        return meta.getLong(key, -1);
     }
 
     public Uri getUri(String key) {
@@ -121,6 +140,9 @@ public class Metadata implements Parcelable {
         }
     };
 
+    /**
+     * TODO sanity check key types
+     */
     public static class Builder {
         private final Bundle meta;
 

@@ -19,25 +19,21 @@ package org.opensilk.music.model;
 
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import org.opensilk.music.model.spi.Bundleable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.TreeSet;
 
 /**
  * Created by drew on 5/12/15.
  */
-public class TrackCollection extends Container {
+public class TrackList extends Container {
 
-    protected TrackCollection(@NonNull Uri uri, @NonNull String name, @NonNull Metadata metadata) {
+    protected TrackList(@NonNull Uri uri, @NonNull String name, @NonNull Metadata metadata) {
         super(uri, name, metadata);
     }
 
@@ -64,19 +60,19 @@ public class TrackCollection extends Container {
     @Override
     public Bundle toBundle() {
         Bundle b = new Bundle(4);
-        b.putString(CLZ, TrackCollection.class.getName());
+        b.putString(CLZ, TrackList.class.getName());
         b.putParcelable("_1", uri);
         b.putString("_2", name);
         b.putParcelable("_3", metadata);
         return b;
     }
 
-    protected static TrackCollection fromBundle(Bundle b) {
-        if (!TrackCollection.class.getName().equals(b.getString(CLZ))) {
+    protected static TrackList fromBundle(Bundle b) {
+        if (!TrackList.class.getName().equals(b.getString(CLZ))) {
             throw new IllegalArgumentException("Wrong class for TrackCollection: "+b.getString(CLZ));
         }
-        b.setClassLoader(TrackCollection.class.getClassLoader());
-        return new TrackCollection(
+        b.setClassLoader(TrackList.class.getClassLoader());
+        return new TrackList(
                 b.<Uri>getParcelable("_1"),
                 b.getString("_2"),
                 b.<Metadata>getParcelable("_3")
@@ -87,11 +83,11 @@ public class TrackCollection extends Container {
         return new Builder();
     }
 
-    public static final Bundleable.BundleCreator<TrackCollection> BUNDLE_CREATOR = new Bundleable.BundleCreator<TrackCollection>() {
+    public static final Bundleable.BundleCreator<TrackList> BUNDLE_CREATOR = new Bundleable.BundleCreator<TrackList>() {
         @Override
-        public TrackCollection fromBundle(Bundle b) throws IllegalArgumentException {
+        public TrackList fromBundle(Bundle b) throws IllegalArgumentException {
             b.setClassLoader(getClass().getClassLoader());
-            return TrackCollection.fromBundle(b);
+            return TrackList.fromBundle(b);
         }
     };
 
@@ -111,6 +107,11 @@ public class TrackCollection extends Container {
 
         public Builder setName(String name) {
             this.name = name;
+            return this;
+        }
+
+        public Builder setDisplayName(String name) {
+            bob.putString(Metadata.KEY_DISPLAY_NAME, name);
             return this;
         }
 
@@ -154,12 +155,12 @@ public class TrackCollection extends Container {
             return this;
         }
 
-        public TrackCollection build() {
+        public TrackList build() {
             if (uri == null || name == null) {
                 throw new NullPointerException("uri and name are required");
             }
             bob.putArtInfos(new ArrayList<>(artInfos).subList(0, 3)); //Only need 4;
-            return new TrackCollection(uri, name, bob.build());
+            return new TrackList(uri, name, bob.build());
         }
     }
 }

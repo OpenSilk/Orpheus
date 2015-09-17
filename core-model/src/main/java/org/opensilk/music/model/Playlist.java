@@ -106,6 +106,11 @@ public class Playlist extends Container {
             return this;
         }
 
+        public Builder setDisplayName(String name) {
+            bob.putString(Metadata.KEY_DISPLAY_NAME, name);
+            return this;
+        }
+
         public Builder setParentUri(Uri uri) {
             bob.putUri(Metadata.KEY_PARENT_URI, uri);
             return this;

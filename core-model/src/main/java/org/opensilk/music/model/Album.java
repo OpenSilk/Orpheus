@@ -34,6 +34,10 @@ public class Album extends Container {
         return metadata.getString(Metadata.KEY_ARTIST_NAME);
     }
 
+    public Uri getArtistUri() {
+        return metadata.getUri(Metadata.KEY_ARTIST_URI);
+    }
+
     public int getTrackCount() {
         return metadata.getInt(Metadata.KEY_CHILD_TRACKS_COUNT);
     }
@@ -97,6 +101,11 @@ public class Album extends Container {
             return this;
         }
 
+        public Builder setDisplayName(String name) {
+            bob.putString(Metadata.KEY_DISPLAY_NAME, name);
+            return this;
+        }
+
         public Builder setParentUri(Uri uri) {
             bob.putUri(Metadata.KEY_PARENT_URI, uri);
             return this;
@@ -104,6 +113,11 @@ public class Album extends Container {
 
         public Builder setArtistName(String artistName) {
             bob.putString(Metadata.KEY_ARTIST_NAME, artistName);
+            return this;
+        }
+
+        public Builder setArtistUri(Uri artistUri) {
+            bob.putUri(Metadata.KEY_ARTIST_URI, artistUri);
             return this;
         }
 

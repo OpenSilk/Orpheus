@@ -19,15 +19,20 @@ package org.opensilk.music.model;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import org.opensilk.music.model.spi.Bundleable;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by drew on 6/10/14.
@@ -36,27 +41,186 @@ public class Track extends Item {
 
     public static final String DEFAULT_MIME_TYPE = "audio/*";
 
-    @Deprecated public final String albumName;
-    @Deprecated public final String artistName;
-    @Deprecated public final String albumArtistName;
-    @Deprecated public final String albumIdentity;
-    @Deprecated public final int duration;
-    @Deprecated public final Uri dataUri;
-    @Deprecated public final Uri artworkUri;
-    @Deprecated public final String mimeType;
-    @Deprecated public final int index;
+    public static class Res implements Parcelable {
+        private final Uri uri;
+        private final Metadata metadata;
 
-    protected Track(@NonNull Uri uri, @NonNull String name, @NonNull Metadata metadata) {
+        protected Res(Uri uri, Metadata metadata) {
+            this.uri = uri;
+            this.metadata = metadata;
+        }
+
+        public Uri getUri() {
+            return uri;
+        }
+
+        public String getMimeType() {
+            final String mimeType = metadata.getString(Metadata.KEY_MIME_TYPE);
+            return mimeType != null ? mimeType : DEFAULT_MIME_TYPE;
+        }
+
+        public long getBitrate() {
+            return metadata.getLong(Metadata.KEY_BITRATE);
+        }
+
+        public long getSize() {
+            return metadata.getLong(Metadata.KEY_SIZE);
+        }
+
+        public long getDuration() {
+            return metadata.getLong(Metadata.KEY_DURATION);
+        }
+
+        public int getDurationS() {
+            long duration = getDuration();
+            return duration != 0 ? (int) (duration / 1000) : 0;
+        }
+
+        public long getLastMod() {
+            return metadata.getLong(Metadata.KEY_LAST_MODIFIED);
+        }
+
+        public @NonNull Map<String, String> getHeaders() {
+            final String headers = metadata.getString(Metadata.KEY_RESOURCE_HEADERS);
+            if (TextUtils.isEmpty(headers)) {
+                return Collections.emptyMap();
+            }
+            HashMap<String, String> hdrs = new HashMap<>();
+            String[] lines = headers.split("\n");
+            for (String line : lines) {
+                String[] entry = line.split(":");
+                if (entry.length == 2) {
+                    hdrs.put(entry[0].trim(), entry[1].trim());
+                }
+            }
+            return hdrs;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public Builder buildUpon() {
+            return new Builder(this);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeParcelable(uri, flags);
+            dest.writeParcelable(metadata, flags);
+        }
+
+        public static final Creator<Res> CREATOR = new Creator<Res>() {
+            @Override
+            public Res createFromParcel(Parcel source) {
+                final Uri uri = source.readParcelable(Res.class.getClassLoader());
+                final Metadata metadata = source.readParcelable(Res.class.getClassLoader());
+                return new Res(uri, metadata);
+            }
+
+            @Override
+            public Res[] newArray(int size) {
+                return new Res[size];
+            }
+        };
+
+        public static class Builder {
+            private Uri uri;
+            private Metadata.Builder bob = Metadata.builder();
+            private String headers = "";
+
+            private Builder() {
+            }
+
+            private Builder(Res res) {
+                this.uri = res.uri;
+                this.bob = res.metadata.buildUpon();
+                this.headers = res.metadata.getString(Metadata.KEY_RESOURCE_HEADERS);
+            }
+
+            public Builder setUri(Uri uri) {
+                this.uri = uri;
+                return this;
+            }
+
+            public Builder setMimeType(String mimeType) {
+                bob.putString(Metadata.KEY_MIME_TYPE, mimeType);
+                return this;
+            }
+
+            public Builder setBitrate(long bitrate) {
+                bob.putLong(Metadata.KEY_BITRATE, bitrate);
+                return this;
+            }
+
+            public Builder setSize(long size) {
+                bob.putLong(Metadata.KEY_SIZE, size);
+                return this;
+            }
+
+            public Builder setDuration(long duration) {
+                bob.putLong(Metadata.KEY_DURATION, duration);
+                return this;
+            }
+
+            public Builder setDurationS(int durationS) {
+                bob.putLong(Metadata.KEY_DURATION, (long)durationS * 1000);
+                return this;
+            }
+
+            /**
+             * Opaque value, increase when resource changes
+             */
+            public Builder putLastMod(long lastMod) {
+                bob.putLong(Metadata.KEY_LAST_MODIFIED, lastMod);
+                return this;
+            }
+
+            private Builder setHeaders(String headers) {
+                this.headers = headers;
+                return this;
+            }
+
+            public Builder addHeaders(Map<String, String> headers) {
+                Set<Map.Entry<String, String>> es = headers.entrySet();
+                for (Map.Entry<String, String> e : es) {
+                    addHeader(e.getKey(), e.getValue());
+                }
+                return this;
+            }
+
+            public Builder addHeader(String key, String val) {
+                String n = "";
+                if (!TextUtils.isEmpty(headers)) {
+                    n += "\n";
+                }
+                headers += n + key + ":" + val;
+                return this;
+            }
+
+            public Res build() {
+                bob.putString(Metadata.KEY_RESOURCE_HEADERS, headers);
+                Metadata metadata = bob.build();
+                if (uri == null) {
+                    throw new NullPointerException("uri is required");
+                }
+                return new Res(uri, metadata);
+            }
+
+        }
+    }
+
+    private final ArrayList<Res> resList;
+
+    protected Track(@NonNull Uri uri, @NonNull String name,
+                    @NonNull Metadata metadata, @NonNull ArrayList<Res> resList) {
         super(uri, name, metadata);
-        this.albumName = getAlbumName();
-        this.artistName = getArtistName();
-        this.albumArtistName = getAlbumArtistName();
-        this.albumIdentity = getAlbumUri().toString();
-        this.duration = getDuration();
-        this.dataUri = getResourceUri();
-        this.artworkUri = getArtworkUri();
-        this.mimeType = getMimeType();
-        this.index = getPlayOrderIndex();
+        this.resList = resList;
     }
 
     public String getAlbumName() {
@@ -79,42 +243,37 @@ public class Track extends Item {
         return metadata.getUri(Metadata.KEY_ARTIST_URI);
     }
 
-    public int getDuration() {
-        return metadata.getInt(Metadata.KEY_DURATION);
+    public long getDuration() {
+        return metadata.getLong(Metadata.KEY_DURATION);
     }
 
-    public Uri getResourceUri() {
-        return metadata.getUri(Metadata.KEY_RESOURCE_URI);
+    public int getDurationS() {
+        long duration = getDuration();
+        return duration != 0 ? (int) (duration / 1000) : 0;
     }
 
     public Uri getArtworkUri() {
         return metadata.getUri(Metadata.KEY_ALBUM_ART_URI);
     }
 
-    public String getMimeType() {
-        final String mimeType = metadata.getString(Metadata.KEY_MIME_TYPE);
-        return mimeType != null ? mimeType : DEFAULT_MIME_TYPE;
+    public int getTrackNumber() {
+        return metadata.getInt(Metadata.KEY_TRACK_NUMBER);
     }
 
-    @NonNull
-    public Map<String, String> getHeaders() {
-        final String headers = metadata.getString(Metadata.KEY_RESOURCE_HEADERS);
-        if (TextUtils.isEmpty(headers)) {
-            return Collections.emptyMap();
-        }
-        HashMap<String, String> hdrs = new HashMap<>();
-        String[] lines = headers.split("\n");
-        for (String line : lines) {
-            String[] entry = line.split(":");
-            if (entry.length == 2) {
-                hdrs.put(entry[0].trim(), entry[1].trim());
-            }
-        }
-        return hdrs;
+    public int getDiscNumber() {
+        return metadata.getInt(Metadata.KEY_DISC_NUMBER);
     }
 
-    public int getPlayOrderIndex() {
-        return metadata.getInt(Metadata.KEY_PLAY_ORDER_INDEX);
+    public boolean isCompilation() {
+        return metadata.getInt(Metadata.KEY_IS_COMPILATION) > 0;
+    }
+
+    public String getGenre(){
+        return metadata.getString(Metadata.KEY_GENRE_NAME);
+    }
+
+    public List<Res> getResources() {
+        return Collections.unmodifiableList(resList);
     }
 
     @Override
@@ -124,6 +283,7 @@ public class Track extends Item {
         b.putParcelable("_1", uri);
         b.putString("_2", name);
         b.putParcelable("_3", metadata);
+        b.putParcelableArrayList("_4", resList);
         return b;
     }
 
@@ -135,7 +295,8 @@ public class Track extends Item {
         return new Track(
                 b.<Uri>getParcelable("_1"),
                 b.getString("_2"),
-                b.<Metadata>getParcelable("_3")
+                b.<Metadata>getParcelable("_3"),
+                b.<Res>getParcelableArrayList("_4")
         );
     }
 
@@ -143,6 +304,9 @@ public class Track extends Item {
         return new Builder();
     }
 
+    /**
+     * Mutate this track minus any resources
+     */
     public Builder buildUpon() {
         return new Builder(this);
     }
@@ -158,7 +322,7 @@ public class Track extends Item {
         private Uri uri;
         private String name;
         private Metadata.Builder bob = Metadata.builder();
-        private String headers = "";
+        private ArrayList<Res> resList = new ArrayList<>();
 
         private Builder() {
         }
@@ -167,7 +331,7 @@ public class Track extends Item {
             uri = t.uri;
             name = t.name;
             bob = t.metadata.buildUpon();
-            headers = t.metadata.getString(Metadata.KEY_RESOURCE_HEADERS);
+            //ignoring reslist
         }
 
         public Builder setUri(Uri uri) {
@@ -177,6 +341,11 @@ public class Track extends Item {
 
         public Builder setName(String name) {
             this.name = name;
+            return this;
+        }
+
+        public Builder setDisplayName(String name) {
+            bob.putString(Metadata.KEY_DISPLAY_NAME, name);
             return this;
         }
 
@@ -210,13 +379,13 @@ public class Track extends Item {
             return this;
         }
 
-        public Builder setDuration(int duration) {
-            bob.putInt(Metadata.KEY_DURATION, duration);
+        public Builder setDuration(long duration) {
+            bob.putLong(Metadata.KEY_DURATION, duration);
             return this;
         }
 
-        public Builder setResourceUri(Uri resUri) {
-            bob.putUri(Metadata.KEY_RESOURCE_URI, resUri);
+        public Builder setDurationS(int durationS) {
+            bob.putLong(Metadata.KEY_DURATION, (long)durationS * 1000);
             return this;
         }
 
@@ -225,37 +394,36 @@ public class Track extends Item {
             return this;
         }
 
-        public Builder setMimeType(String mimeType) {
-            bob.putString(Metadata.KEY_MIME_TYPE, mimeType);
+        public Builder setTrackNumber(int trackNumber) {
+            bob.putInt(Metadata.KEY_TRACK_NUMBER, trackNumber);
             return this;
         }
 
-        private Builder setHeaders(String headers) {
-            this.headers = headers;
+        public Builder setDiscNumber(int discNumber) {
+            bob.putInt(Metadata.KEY_DISC_NUMBER, discNumber);
             return this;
         }
 
-        public Builder addHeader(String key, String val) {
-            String n = "";
-            if (!TextUtils.isEmpty(headers)) {
-                n += "\n";
-            }
-            headers += n + key + ":" + val;
+        public Builder setIsCompliation(boolean yes) {
+            bob.putInt(Metadata.KEY_IS_COMPILATION, yes ? 1 : 0);
             return this;
         }
 
-        public Builder setPlayOrderIndex(int index) {
-            bob.putInt(Metadata.KEY_PLAY_ORDER_INDEX, index);
+        public Builder setGenre(String genre) {
+            bob.putString(Metadata.KEY_GENRE_NAME, genre);
+            return this;
+        }
+
+        public Builder addRes(Res res) {
+            resList.add(res);
             return this;
         }
 
         public Track build() {
-            bob.putString(Metadata.KEY_RESOURCE_HEADERS, headers);
-            Metadata metadata = bob.build();
-            if (uri == null || name == null || metadata.getUri(Metadata.KEY_RESOURCE_URI) == null) {
-                throw new NullPointerException("identity, name, and resourceUri are required");
+            if (uri == null || name == null || resList.isEmpty()) {
+                throw new NullPointerException("uri, name, and resList are required");
             }
-            return new Track(uri, name, metadata);
+            return new Track(uri, name, bob.build(), resList);
         }
     }
 }
