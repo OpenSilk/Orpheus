@@ -60,7 +60,7 @@ import javax.inject.Named;
 
 import de.umass.lastfm.Album;
 import de.umass.lastfm.Artist;
-import de.umass.lastfm.LastFM;
+import de.umass.lastfm.LastFMVolley;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscriber;
@@ -83,7 +83,7 @@ public class ArtworkFetcherManager {
     final RequestQueue mVolleyQueue;
     final Gson mGson;
     final ConnectivityManager mConnectivityManager;
-    final LastFM mLastFM;
+    final LastFMVolley mLastFMVolley;
 
     final UriMatcher mUriMatcher;
     /*
@@ -109,7 +109,7 @@ public class ArtworkFetcherManager {
             ConnectivityManager mConnectivityManager,
             UriMatcher mUriMatcher,
             @Named("oScheduler") Scheduler oScheduler,
-            LastFM lastFM
+            LastFMVolley lastFMVolley
     ) {
         this.mContext = mContext;
         this.mPreferences = mPreferences;
@@ -119,7 +119,7 @@ public class ArtworkFetcherManager {
         this.mConnectivityManager = mConnectivityManager;
         this.mUriMatcher = mUriMatcher;
         this.oScheduler = oScheduler;
-        this.mLastFM = lastFM;
+        this.mLastFMVolley = lastFMVolley;
     }
 
     interface CompletionListener {
@@ -497,7 +497,7 @@ public class ArtworkFetcherManager {
     }
 
     public Observable<Bitmap> createAlbumNetworkObservable(final ArtInfo artInfo, final ArtworkType artworkType) {
-        return mLastFM.newAlbumRequestObservable(artInfo.artistName, artInfo.albumName)
+        return mLastFMVolley.newAlbumRequestObservable(artInfo.artistName, artInfo.albumName)
                 // remap the album info returned by last fm into a url where we can find an image
                 .flatMap(new Func1<Album, Observable<String>>() {
                     @Override
@@ -513,7 +513,7 @@ public class ArtworkFetcherManager {
                                         @Override
                                         public Observable<String> call(Throwable throwable) {
                                             Timber.v("CoverArtRequest failed %s, from %s", album.getName(), Thread.currentThread().getName());
-                                            String url = LastFM.getBestImage(album, true);
+                                            String url = LastFMVolley.getBestImage(album, true);
                                             if (!TextUtils.isEmpty(url)) {
                                                 return Observable.just(url);
                                             } else {
@@ -522,7 +522,7 @@ public class ArtworkFetcherManager {
                                         }
                                     });
                         } else { // user wants low res go straight for lastfm
-                            String url = LastFM.getBestImage(album, false);
+                            String url = LastFMVolley.getBestImage(album, false);
                             if (!TextUtils.isEmpty(url)) {
                                 return Observable.just(url);
                             } else {
@@ -541,11 +541,11 @@ public class ArtworkFetcherManager {
     }
 
     public Observable<Bitmap> createArtistNetworkRequest(final ArtInfo artInfo, final ArtworkType artworkType) {
-        return mLastFM.newArtistRequestObservable(artInfo.artistName)
+        return mLastFMVolley.newArtistRequestObservable(artInfo.artistName)
                 .map(new Func1<Artist, String>() {
                     @Override
                     public String call(Artist artist) {
-                        String url = LastFM.getBestImage(artist,
+                        String url = LastFMVolley.getBestImage(artist,
                                 !mPreferences.getBoolean(ArtworkPreferences.WANT_LOW_RESOLUTION_ART, false));
                         if (!TextUtils.isEmpty(url)) {
                             return url;

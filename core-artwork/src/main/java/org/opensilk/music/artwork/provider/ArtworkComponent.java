@@ -17,21 +17,17 @@
 
 package org.opensilk.music.artwork.provider;
 
-import android.content.Context;
-
 import org.opensilk.common.core.dagger2.AppContextModule;
 import org.opensilk.music.artwork.shared.ArtworkComponentCommon;
 import org.opensilk.music.artwork.cache.BitmapDiskCache;
 import org.opensilk.music.artwork.shared.GsonComponent;
 import org.opensilk.music.lastfm.LastFMComponent;
+import org.opensilk.music.lastfm.LastFMModule;
 import org.opensilk.music.volley.VolleyComponent;
-import org.opensilk.music.volley.VolleyModule;
 
 import javax.inject.Singleton;
 
 import dagger.Component;
-import de.umass.lastfm.LastFM;
-import rx.functions.Func1;
 
 /**
  * Root component for provider process, This isnt used directly but extended to allow
@@ -47,7 +43,7 @@ import rx.functions.Func1;
         }
 )
 public interface ArtworkComponent extends ArtworkComponentCommon, GsonComponent,
-        SystemServicesComponent, VolleyComponent, LastFMComponent {
+        SystemServicesComponent, LastFMComponent {
 //    Func1<Context, ArtworkComponent> FACTORY = new Func1<Context, ArtworkComponent>() {
 //        @Override
 //        public ArtworkComponent call(Context context) {

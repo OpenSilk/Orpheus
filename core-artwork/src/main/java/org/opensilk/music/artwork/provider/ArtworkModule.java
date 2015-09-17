@@ -26,6 +26,7 @@ import org.opensilk.music.artwork.cache.BitmapDiskCache;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.artwork.cache.CacheUtil;
 import org.opensilk.music.artwork.shared.GsonModule;
+import org.opensilk.music.lastfm.LastFMModule;
 import org.opensilk.music.volley.VolleyModule;
 
 import javax.inject.Singleton;
@@ -43,7 +44,7 @@ import static org.opensilk.music.artwork.Constants.DISK_CACHE_DIRECTORY;
                 ArtworkAuthorityModule.class,
                 GsonModule.class,
                 SystemServicesModule.class,
-                VolleyModule.class,
+                LastFMModule.class
         }
 )
 public class ArtworkModule {
