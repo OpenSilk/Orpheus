@@ -22,7 +22,10 @@ import android.os.Bundle;
 
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Folder;
+import org.opensilk.music.model.ex.BadBundleableException;
+import org.opensilk.music.model.util.BundleableUtil;
 import org.opensilk.music.ui3.common.BundleableFragment;
 
 /**
@@ -31,17 +34,20 @@ import org.opensilk.music.ui3.common.BundleableFragment;
 public class FoldersScreenFragment extends BundleableFragment {
     public static final String NAME = FoldersScreenFragment.class.getName();
 
-    public static FoldersScreenFragment ni(Context context, LibraryConfig config, Folder folder) {
-        Bundle args = makeCommonArgsBundle(config, folder.getDisplayName());
-        args.putBundle("fldr", folder.toBundle());
+    public static FoldersScreenFragment ni(Context context, LibraryConfig config, Container container) {
+        Bundle args = makeCommonArgsBundle(config, container.getDisplayName());
+        args.putBundle("fldr", container.toBundle());
         return factory(context, NAME, args);
     }
 
     @Override
     protected Screen newScreen() {
         extractCommonArgs();
-        Folder folder = Folder.BUNDLE_CREATOR.fromBundle(getArguments().getBundle("fldr"));
-        return new FoldersScreen(mLibraryConfig, folder);
+        Container container = null;
+        try {
+            container = BundleableUtil.materializeBundle(getArguments().getBundle("fldr"));
+        } catch (BadBundleableException ignored) {/*cant recover let it crash from null*/}
+        return new FoldersScreen(mLibraryConfig, container);
     }
 
 }

@@ -19,5 +19,8 @@
         <attr name="carModePrevStyle" format="reference"/>
         <attr name="mainContentTopMargin" format="reference"/>
         <attr name="footerPlayStyle" format="reference"/>
+        <attr name="iconTint" format="reference"/>
+        <attr name="iconTintInverted" format="reference"/>
+        <attr name="iconTintAlt" format="reference"/>
     </declare-styleable>
 </resources>

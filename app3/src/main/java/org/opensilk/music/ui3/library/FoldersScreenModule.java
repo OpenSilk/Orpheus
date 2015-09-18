@@ -20,6 +20,7 @@ package org.opensilk.music.ui3.library;
 import android.content.Context;
 import android.net.Uri;
 
+import org.aspectj.lang.annotation.Pointcut;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
@@ -27,6 +28,7 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.sort.FolderTrackSortOrder;
+import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.spi.Bundleable;
@@ -65,13 +67,23 @@ public class FoldersScreenModule {
 
     @Provides @Named("loader_uri")
     public Uri provideLoaderUri() {
-        return screen.folder.getUri();
+        return screen.container.getUri();
     }
 
     @Provides @Named("loader_sortorder")
     public String provideLoaderSortOrder(AppPreferences preferences) {
         return preferences.getString(preferences.makePluginPrefKey(screen.libraryConfig,
                 AppPreferences.FOLDER_SORT_ORDER), FolderTrackSortOrder.A_Z);
+    }
+
+    @Provides @Named("folders_title")
+    public String provideTitle() {
+        return screen.container.getDisplayName();
+    }
+
+    @Provides
+    public Container provideTHisContainer() {
+        return screen.container;
     }
 
     @Provides @ScreenScope
@@ -136,7 +148,7 @@ public class FoldersScreenModule {
                     default:
                         try {
                             return foldersOverflowHandler.onItemClicked(context,
-                                    OverflowAction.valueOf(integer), screen.folder);
+                                    OverflowAction.valueOf(integer), screen.container);
                         } catch (IllegalArgumentException e) {
                             return false;
                         }

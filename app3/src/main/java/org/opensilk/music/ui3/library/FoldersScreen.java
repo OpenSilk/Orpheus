@@ -25,6 +25,7 @@ import org.opensilk.common.ui.mortar.Layout;
 import org.opensilk.common.ui.mortar.WithComponentFactory;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Folder;
 import org.opensilk.music.ui3.MusicActivityComponent;
 import org.opensilk.music.ui3.common.BundleableScreen;
@@ -34,20 +35,20 @@ import mortar.MortarScope;
 /**
  * Created by drew on 5/2/15.
  */
-@Layout(R.layout.bundleable_recycler)
+@Layout(R.layout.screen_folders)
 @WithComponentFactory(FoldersScreen.Factory.class)
 public class FoldersScreen extends BundleableScreen {
 
-    final Folder folder;
+    final Container container;
 
-    public FoldersScreen(LibraryConfig libraryConfig, Folder folder) {
+    public FoldersScreen(LibraryConfig libraryConfig, Container container) {
         super(libraryConfig);
-        this.folder = folder;
+        this.container = container;
     }
 
     @Override
     public String getName() {
-        return super.getName() + "-" + folder.getUri();
+        return super.getName() + "-" + container.getUri();
     }
 
     public static class Factory extends ComponentFactory<FoldersScreen> {

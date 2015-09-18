@@ -23,6 +23,8 @@ import org.opensilk.music.artwork.requestor.ArtworkRequestorModule;
 import org.opensilk.music.artwork.shared.GsonComponent;
 import org.opensilk.music.artwork.shared.GsonModule;
 import org.opensilk.music.index.IndexProviderAuthorityModule;
+import org.opensilk.music.index.client.IndexClientComponent;
+import org.opensilk.music.index.client.IndexClientModule;
 import org.opensilk.music.library.mediastore.MediaStoreLibraryAuthorityModule;
 import org.opensilk.music.playback.control.PlaybackController;
 
@@ -42,10 +44,12 @@ import rx.functions.Func1;
                 ArtworkRequestorModule.class,
                 GsonModule.class,
                 MediaStoreLibraryAuthorityModule.class,
-                IndexProviderAuthorityModule.class
+                IndexProviderAuthorityModule.class,
+                IndexClientModule.class,
         }
 )
-public interface AppComponent extends AppContextComponent, ArtworkRequestorComponent, GsonComponent {
+public interface AppComponent extends AppContextComponent, ArtworkRequestorComponent,
+        GsonComponent, IndexClientComponent {
     Func1<App, AppComponent> FACTORY = new Func1<App, AppComponent>() {
         @Override
         public AppComponent call(App app) {

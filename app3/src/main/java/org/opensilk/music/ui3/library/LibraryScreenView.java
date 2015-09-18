@@ -25,6 +25,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.ToolbarOwner;
 import org.opensilk.common.ui.recycler.HeaderRecyclerAdapter;
 import org.opensilk.common.ui.util.ViewUtils;
@@ -63,8 +64,9 @@ public class LibraryScreenView extends CoordinatorLayout {
         ButterKnife.inject(this);
         mList.setLayoutManager(new LinearLayoutManager(getContext()));
         mList.setAdapter(mAdapter);
-        mList.setHasFixedSize(true);
+        mList.setHasFixedSize(false);
         mToolbarOwner.attachToolbar(mToolbar);
+        mToolbarOwner.setConfig(ActionBarConfig.builder().setTitle("Libraries").build());
         mPresenter.takeView(this);
     }
 

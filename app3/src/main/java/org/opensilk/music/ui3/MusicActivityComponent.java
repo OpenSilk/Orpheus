@@ -25,6 +25,8 @@ import org.opensilk.common.ui.mortar.ToolbarOwner;
 import org.opensilk.common.ui.mortarfragment.MortarFragmentActivityComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
+import org.opensilk.music.index.IndexComponent;
+import org.opensilk.music.index.client.IndexClient;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.main.MainPresenter;
 
@@ -44,4 +46,5 @@ public interface MusicActivityComponent extends MortarFragmentActivityComponent 
     MainPresenter mainPresenter();
     ToolbarOwner toolbarOwner();
     @Named("IndexProviderAuthority") String indexProviderAuthority();
+    IndexClient indexClient();
 }
