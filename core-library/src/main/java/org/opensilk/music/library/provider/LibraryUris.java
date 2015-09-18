@@ -38,6 +38,8 @@ public class LibraryUris {
         String SCAN = "scan";
     }
 
+    public static final String ROOT = "root";
+
     static final String scheme = "content";
     static final String model = "model";
     static final String albums = "albums";
