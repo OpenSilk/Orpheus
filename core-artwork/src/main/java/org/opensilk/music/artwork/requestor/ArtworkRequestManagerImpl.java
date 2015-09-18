@@ -61,7 +61,7 @@ import rx.Observable;
 import rx.Scheduler;
 import rx.Subscriber;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
+import rx.android.schedulers.HandlerScheduler;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
@@ -82,7 +82,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
     final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
     final Scheduler scheduler = Schedulers.computation();
-    final Scheduler oScheduler = AndroidSchedulers.handlerThread(mMainThreadHandler);
+    final Scheduler oScheduler = HandlerScheduler.from(mMainThreadHandler);
     final Map<RequestKey, IArtworkRequest> mActiveRequests = new LinkedHashMap<>(10);
 
 

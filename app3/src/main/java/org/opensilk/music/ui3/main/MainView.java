@@ -29,6 +29,9 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
 
+import com.jakewharton.rxbinding.view.RxView;
+import com.jakewharton.rxbinding.view.ViewClickEvent;
+
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.widget.FlingyFabLayout;
 import org.opensilk.common.ui.widget.FloatingActionButton;
@@ -41,8 +44,6 @@ import org.opensilk.music.ui3.MusicActivityComponent;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import mortar.MortarScope;
-import rx.android.events.OnClickEvent;
-import rx.android.observables.ViewObservable;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
@@ -170,33 +171,33 @@ public class MainView extends FlingyFabLayout {
     void subscribeFabClicks() {
         if (isSubscribed(fabClicksSubscription)) return;
         fabClicksSubscription = new CompositeSubscription(
-                ViewObservable.clicks(fabPlay).subscribe(new Action1<OnClickEvent>() {
+                RxView.clickEvents(fabPlay).subscribe(new Action1<ViewClickEvent>() {
                     @Override
-                    public void call(OnClickEvent onClickEvent) {
+                    public void call(ViewClickEvent viewClickEvent) {
                         presenter.handlePrimaryClick();
                     }
                 }),
-                ViewObservable.clicks(fabNext).subscribe(new Action1<OnClickEvent>() {
+                RxView.clickEvents(fabNext).subscribe(new Action1<ViewClickEvent>() {
                     @Override
-                    public void call(OnClickEvent onClickEvent) {
+                    public void call(ViewClickEvent viewClickEvent) {
                         playbackController.skipToNext();
                     }
                 }),
-                ViewObservable.clicks(fabPrev).subscribe(new Action1<OnClickEvent>() {
+                RxView.clickEvents(fabPrev).subscribe(new Action1<ViewClickEvent>() {
                     @Override
-                    public void call(OnClickEvent onClickEvent) {
+                    public void call(ViewClickEvent viewClickEvent) {
                         playbackController.skipToPrevious();
                     }
                 }),
-                ViewObservable.clicks(fabShuffle).subscribe(new Action1<OnClickEvent>() {
+                RxView.clickEvents(fabShuffle).subscribe(new Action1<ViewClickEvent>() {
                     @Override
-                    public void call(OnClickEvent onClickEvent) {
+                    public void call(ViewClickEvent viewClickEvent) {
                         playbackController.shuffleQueue();
                     }
                 }),
-                ViewObservable.clicks(fabRepeat).subscribe(new Action1<OnClickEvent>() {
+                RxView.clickEvents(fabRepeat).subscribe(new Action1<ViewClickEvent>() {
                     @Override
-                    public void call(OnClickEvent onClickEvent) {
+                    public void call(ViewClickEvent viewClickEvent) {
                         playbackController.cycleRepeateMode();
                     }
                 })

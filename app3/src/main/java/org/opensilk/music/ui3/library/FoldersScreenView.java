@@ -31,6 +31,9 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.jakewharton.rxbinding.view.RxView;
+import com.jakewharton.rxbinding.view.ViewClickEvent;
+
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarConfig;
@@ -49,8 +52,6 @@ import javax.inject.Named;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import rx.android.events.OnClickEvent;
-import rx.android.observables.ViewObservable;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 
@@ -170,22 +171,12 @@ public class FoldersScreenView extends CoordinatorLayout implements BundleableRe
     }
 
     void subscribeClicks() {
-        mSubscriptions.add(ViewObservable.clicks(mUpView).subscribe(
-                new Action1<OnClickEvent>() {
-                    @Override
-                    public void call(OnClickEvent onClickEvent) {
-                        Uri parentUri = mThisContainer.getParentUri();
-                        //TODO we want to pop the backstack up to the library fragment
-                        //then go to the parent uri, for now just go back.
-                        mPresenter.getFm().goBack();
-                    }
-                }
-        ));
-        mSubscriptions.add(ViewObservable.clicks(mFab).subscribe(
-                new Action1<OnClickEvent>() {
+        mSubscriptions.add(RxView.clickEvents(mFab).subscribe(
+                new Action1<ViewClickEvent>() {
                     int level = 0;
+
                     @Override
-                    public void call(OnClickEvent onClickEvent) {
+                    public void call(ViewClickEvent onClickEvent) {
                         level = level == 0 ? 1 : 0;
                         mFab.setImageLevel(level);
                     }

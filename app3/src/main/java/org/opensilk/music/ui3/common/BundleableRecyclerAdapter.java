@@ -29,6 +29,9 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 
+import com.jakewharton.rxbinding.view.RxView;
+import com.jakewharton.rxbinding.view.ViewClickEvent;
+
 import org.opensilk.common.core.rx.SimpleObserver;
 import org.opensilk.common.ui.recycler.DragSwipeViewHolder;
 import org.opensilk.common.ui.recycler.RecyclerListAdapter;
@@ -60,8 +63,6 @@ import butterknife.InjectView;
 import butterknife.Optional;
 import rx.Observer;
 import rx.Subscription;
-import rx.android.events.OnClickEvent;
-import rx.android.observables.ViewObservable;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
@@ -112,9 +113,9 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
             Timber.e("Somehow an invalid Bundleable slipped through.");
         }
         itemClickSubscriptions.put(viewHolder.itemView,
-                SubCont.ni(position, ViewObservable.clicks(viewHolder.itemView).subscribe(itemClickObserver)));
+                SubCont.ni(position, RxView.clickEvents(viewHolder.itemView).subscribe(itemClickObserver)));
         overflowClickSubscriptions.put(viewHolder.overflow,
-                SubCont.ni(position, ViewObservable.clicks(viewHolder.overflow).subscribe(overflowClickObserver)));
+                SubCont.ni(position, RxView.clickEvents(viewHolder.overflow).subscribe(overflowClickObserver)));
     }
 
     void bindAlbum(ViewHolder holder, Album album) {
@@ -300,25 +301,25 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         UtilsCommon.loadMultiArtwork(requestor, cs, artwork, artwork2, artwork3, artwork4, artInfos, artworkType);
     }
 
-    final Observer<OnClickEvent> itemClickObserver = new SimpleObserver<OnClickEvent>() {
+    final Observer<ViewClickEvent> itemClickObserver = new SimpleObserver<ViewClickEvent>() {
         @Override
-        public void onNext(OnClickEvent onClickEvent) {
-            SubCont c = itemClickSubscriptions.get(onClickEvent.view);
+        public void onNext(ViewClickEvent onClickEvent) {
+            SubCont c = itemClickSubscriptions.get(onClickEvent.view());
             if (c != null) {
-                Context context = onClickEvent.view.getContext();
+                Context context = onClickEvent.view().getContext();
                 presenter.onItemClicked(context, getItem(c.pos));
             }
         }
     };
 
-    final Observer<OnClickEvent> overflowClickObserver = new SimpleObserver<OnClickEvent>() {
+    final Observer<ViewClickEvent> overflowClickObserver = new SimpleObserver<ViewClickEvent>() {
         @Override
-        public void onNext(OnClickEvent onClickEvent) {
-            SubCont c = overflowClickSubscriptions.get(onClickEvent.view);
+        public void onNext(ViewClickEvent onClickEvent) {
+            SubCont c = overflowClickSubscriptions.get(onClickEvent.view());
             if (c != null) {
-                final Context context = onClickEvent.view.getContext();
+                final Context context = onClickEvent.view().getContext();
                 final Bundleable bundleable = getItem(c.pos);
-                PopupMenu m = new PopupMenu(context, onClickEvent.view);
+                PopupMenu m = new PopupMenu(context, onClickEvent.view());
                 presenter.onOverflowClicked(context, m, bundleable);
                 m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override

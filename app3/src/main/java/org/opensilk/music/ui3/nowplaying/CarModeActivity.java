@@ -36,7 +36,6 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import mortar.MortarScope;
 import rx.Subscription;
-import rx.android.observables.AndroidObservable;
 import rx.functions.Action1;
 import timber.log.Timber;
 
@@ -93,20 +92,20 @@ public class CarModeActivity extends NowPlayingActivity {
 
     void subscribeChargingState() {
         IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        mChargingSubscription = AndroidObservable.bindActivity(this, AndroidObservable.fromBroadcast(this, filter))
-                .subscribe(new Action1<Intent>() {
-                               @Override
-                               public void call(Intent intent) {
-                                   int status = intent != null ? intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) : 0;
-                                   Timber.d("received BATTERY_CHANGED plugged=%s", status != 0);
-                                   if (status != 0) {
-                                       getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                                   } else {
-                                       getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                                   }
-                               }
-                           }
-                );
+//        mChargingSubscription = AndroidObservable.bindActivity(this, AndroidObservable.fromBroadcast(this, filter))
+//                .subscribe(new Action1<Intent>() {
+//                               @Override
+//                               public void call(Intent intent) {
+//                                   int status = intent != null ? intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) : 0;
+//                                   Timber.d("received BATTERY_CHANGED plugged=%s", status != 0);
+//                                   if (status != 0) {
+//                                       getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+//                                   } else {
+//                                       getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+//                                   }
+//                               }
+//                           }
+//                );
     }
 
 }

@@ -42,7 +42,7 @@ import javax.inject.Inject;
 
 import rx.Scheduler;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
+import rx.android.schedulers.HandlerScheduler;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
@@ -85,7 +85,7 @@ public class MediaMetadataHelper {
 
     public void setMediaSession(MediaSession mediaSession, Handler handler) {
         this.mediaSession = mediaSession;
-        this.oScheduler = AndroidSchedulers.handlerThread(handler);
+        this.oScheduler = HandlerScheduler.from(handler);
     }
 
     public void updateMeta(Track track, Uri trackUri) {

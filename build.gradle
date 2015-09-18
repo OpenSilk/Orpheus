@@ -27,7 +27,8 @@ ext.targetSdkVersion = 22
 
 ext.supportLibVersion = "23.0.1"
 ext.dagger2Version = "2.0"
-ext.rxAndroidVersion = "0.23.0"
+ext.rxJavaVersion = "1.0.14"
+ext.rxAndroidVersion = "1.0.1"
 ext.timberVersion = "2.5.0"
 ext.commonsLangVersion = "3.3.2"
 ext.butterKnifeVersion = "6.0.0"

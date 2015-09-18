@@ -28,6 +28,9 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.jakewharton.rxbinding.view.RxView;
+import com.jakewharton.rxbinding.view.ViewClickEvent;
+
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.common.ui.util.ThemeUtils;
@@ -44,8 +47,6 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import rx.android.events.OnClickEvent;
-import rx.android.observables.ViewObservable;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 
@@ -181,21 +182,21 @@ public class CarModeScreenView extends RelativeLayout implements NowPlayingView 
     void subscribeClicks() {
         if (isSubscribed(clicks)) return;
         clicks = new CompositeSubscription(
-                ViewObservable.clicks(prev).subscribe(new Action1<OnClickEvent>() {
+                RxView.clickEvents(prev).subscribe(new Action1<ViewClickEvent>() {
                     @Override
-                    public void call(OnClickEvent onClickEvent) {
+                    public void call(ViewClickEvent onClickEvent) {
                         playbackController.skipToPrevious();
                     }
                 }),
-                ViewObservable.clicks(play).subscribe(new Action1<OnClickEvent>() {
+                RxView.clickEvents(play).subscribe(new Action1<ViewClickEvent>() {
                     @Override
-                    public void call(OnClickEvent onClickEvent) {
+                    public void call(ViewClickEvent onClickEvent) {
                         playbackController.playorPause();
                     }
                 }),
-                ViewObservable.clicks(next).subscribe(new Action1<OnClickEvent>() {
+                RxView.clickEvents(next).subscribe(new Action1<ViewClickEvent>() {
                     @Override
-                    public void call(OnClickEvent onClickEvent) {
+                    public void call(ViewClickEvent onClickEvent) {
                         playbackController.skipToNext();
                     }
                 })

@@ -32,6 +32,7 @@ import javax.inject.Provider;
 
 import rx.Observable;
 import rx.functions.Action2;
+import rx.functions.Func0;
 import rx.functions.Func1;
 
 /**
@@ -62,7 +63,12 @@ public class AddAlbumArtistTrackTranformer implements Observable.Transformer<Tra
 
     @Override
     public Observable<Track> call(Observable<Track> trackObservable) {
-        return trackObservable.collect(new State(), new Action2<State, Track>() {
+        return trackObservable.collect(new Func0<State>() {
+            @Override
+            public State call() {
+                return new State();
+            }
+        }, new Action2<State, Track>() {
             @Override
             public void call(State state, Track track) {
                 //First collect all the albumids, and store the tracks for later use
@@ -92,27 +98,31 @@ public class AddAlbumArtistTrackTranformer implements Observable.Transformer<Tra
                 l.setSelection(selection.toString());
                 //we query the mediastore for all the album ids we collected
                 //then grab the albumartist from the albums and store in a map
-//                return l.createObservable().collect(
-//                        new AlbumArtistsMap(size), new Action2<AlbumArtistsMap, Album>() {
-//                            @Override
-//                            public void call(AlbumArtistsMap albumArtistsMap, Album album) {
-//                                albumArtistsMap.put(album.identity, album.artistName);
-//                            }
-//                        })
-//                        //now get the tracks out of storage and add the albumartist to them
-//                        //then reemmit
-//                        .flatMap(new Func1<AlbumArtistsMap, Observable<Track>>() {
-//                            @Override
-//                            public Observable<Track> call(AlbumArtistsMap albumArtistsMap) {
-//                                //TODO could this be more idiomatic?
-//                                List<Track> l = new ArrayList<Track>(finalState.tracks.size());
-//                                for (Track t : finalState.tracks) {
-//                                    l.add(t.buildUpon().setAlbumArtistName(albumArtistsMap.get(t.albumIdentity)).build());
-//                                }
-//                                return Observable.from(l);
-//                            }
-//                        });
-                return Observable.empty();
+                return l.createObservable().collect(new Func0<AlbumArtistsMap>() {
+                    @Override
+                    public AlbumArtistsMap call() {
+                        return new AlbumArtistsMap(size);
+                    }
+                }, new Action2<AlbumArtistsMap, Album>() {
+                    @Override
+                    public void call(AlbumArtistsMap albumArtistsMap, Album album) {
+                        albumArtistsMap.put(album.getUri().getLastPathSegment(), album.getArtistName());
+                    }
+                })
+                //now get the tracks out of storage and add the albumartist to them
+                //then reemmit
+                .flatMap(new Func1<AlbumArtistsMap, Observable<Track>>() {
+                    @Override
+                    public Observable<Track> call(AlbumArtistsMap albumArtistsMap) {
+                        //TODO could this be more idiomatic?
+                        List<Track> l = new ArrayList<Track>(finalState.tracks.size());
+                        for (Track t : finalState.tracks) {
+                            l.add(t.buildUpon().setAlbumArtistName(albumArtistsMap.get(
+                                    t.getAlbumUri().getLastPathSegment())).build());
+                        }
+                        return Observable.from(l);
+                    }
+                });
             }
         });
     }

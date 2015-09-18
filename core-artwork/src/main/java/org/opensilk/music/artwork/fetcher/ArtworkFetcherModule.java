@@ -28,7 +28,7 @@ import javax.inject.Named;
 import dagger.Module;
 import dagger.Provides;
 import rx.Scheduler;
-import rx.android.schedulers.AndroidSchedulers;
+import rx.android.schedulers.HandlerScheduler;
 
 /**
  * Created by drew on 5/1/15.
@@ -54,7 +54,7 @@ public class ArtworkFetcherModule {
 
     @Provides @ArtworkFetcherScope @Named("oScheduler")
     public Scheduler provideObserveOnScheduler(@Named("fetcher") HandlerThread ht) {
-        return AndroidSchedulers.handlerThread(new Handler(ht.getLooper()));
+        return HandlerScheduler.from(new Handler(ht.getLooper()));
     }
 
     @Provides @ArtworkFetcherScope @Named("fetcher")

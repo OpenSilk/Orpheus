@@ -28,6 +28,9 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.jakewharton.rxbinding.view.RxView;
+import com.jakewharton.rxbinding.view.ViewClickEvent;
+
 import org.opensilk.common.ui.recycler.RecyclerListAdapter;
 import org.opensilk.common.ui.util.ViewUtils;
 import org.opensilk.music.R;
@@ -42,9 +45,6 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.Optional;
-import rx.android.events.OnClickEvent;
-import rx.android.observables.ViewObservable;
-import rx.android.subscriptions.AndroidSubscriptions;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 
@@ -129,11 +129,11 @@ public class LibraryScreenViewAdapter extends RecyclerListAdapter<ProviderInfoIt
                 TextView tv = ViewUtils.inflate(rootsContainer.getContext(),
                         R.layout.mtrl_list_item_oneline_text, rootsContainer, false);
                 tv.setText(c.getDisplayName());
-                subscriptions.add(ViewObservable.clicks(tv).subscribe(
-                        new Action1<OnClickEvent>() {
+                subscriptions.add(RxView.clickEvents(tv).subscribe(
+                        new Action1<ViewClickEvent>() {
                             @Override
-                            public void call(OnClickEvent onClickEvent) {
-                                presenter.onRootClick(onClickEvent.view,c);
+                            public void call(ViewClickEvent onClickEvent) {
+                                presenter.onRootClick(onClickEvent.view(), c);
                             }
                         }
                 ));

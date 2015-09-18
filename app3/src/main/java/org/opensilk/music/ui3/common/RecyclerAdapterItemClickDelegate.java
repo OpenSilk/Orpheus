@@ -23,6 +23,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
 
+import com.jakewharton.rxbinding.view.RxView;
+import com.jakewharton.rxbinding.view.ViewClickEvent;
+
 import org.opensilk.common.core.rx.SimpleObserver;
 
 import java.util.Map;
@@ -30,8 +33,6 @@ import java.util.WeakHashMap;
 
 import rx.Observer;
 import rx.Subscription;
-import rx.android.events.OnClickEvent;
-import rx.android.observables.ViewObservable;
 
 /**
  * Created by drew on 5/24/15.
@@ -55,7 +56,7 @@ public class RecyclerAdapterItemClickDelegate<VH extends RecyclerView.ViewHolder
 
     public void bindClickListener(VH holder, int position) {
         itemClickSubscriptions.put(holder.getContentView(),
-                SubCont.ni(position, ViewObservable.clicks(holder.getContentView()).subscribe(itemClickObserver)));
+                SubCont.ni(position, RxView.clickEvents(holder.getContentView()).subscribe(itemClickObserver)));
     }
 
     public void onViewRecycled(VH holder) {
@@ -65,12 +66,12 @@ public class RecyclerAdapterItemClickDelegate<VH extends RecyclerView.ViewHolder
         }
     }
 
-    final Observer<OnClickEvent> itemClickObserver = new SimpleObserver<OnClickEvent>() {
+    final Observer<ViewClickEvent> itemClickObserver = new SimpleObserver<ViewClickEvent>() {
         @Override
-        public void onNext(OnClickEvent onClickEvent) {
-            SubCont c = itemClickSubscriptions.get(onClickEvent.view);
+        public void onNext(ViewClickEvent onClickEvent) {
+            SubCont c = itemClickSubscriptions.get(onClickEvent.view());
             if (c != null) {
-                Context context = onClickEvent.view.getContext();
+                Context context = onClickEvent.view().getContext();
                 listener.onItemClicked(context, c.pos);
             }
         }

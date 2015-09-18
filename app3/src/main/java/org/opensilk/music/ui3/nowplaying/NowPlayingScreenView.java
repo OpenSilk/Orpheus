@@ -33,6 +33,8 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.jakewharton.rxbinding.view.RxView;
+import com.jakewharton.rxbinding.view.ViewClickEvent;
 import com.pheelicks.visualizer.VisualizerView;
 import com.pheelicks.visualizer.renderer.CircleBarRenderer;
 import com.pheelicks.visualizer.renderer.CircleRenderer;
@@ -59,8 +61,6 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.Optional;
 import hugo.weaving.DebugLog;
-import rx.android.events.OnClickEvent;
-import rx.android.observables.ViewObservable;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 
@@ -317,33 +317,33 @@ public class NowPlayingScreenView extends RelativeLayout implements NowPlayingVi
     void subscribeClicks() {
         if (isSubscribed(clicks)) return;
         clicks = new CompositeSubscription(
-                ViewObservable.clicks(shuffle).subscribe(new Action1<OnClickEvent>() {
+                RxView.clickEvents(shuffle).subscribe(new Action1<ViewClickEvent>() {
                     @Override
-                    public void call(OnClickEvent onClickEvent) {
+                    public void call(ViewClickEvent onClickEvent) {
                         playbackController.shuffleQueue();
                     }
                 }),
-                ViewObservable.clicks(prev).subscribe(new Action1<OnClickEvent>() {
+                RxView.clickEvents(prev).subscribe(new Action1<ViewClickEvent>() {
                     @Override
-                    public void call(OnClickEvent onClickEvent) {
+                    public void call(ViewClickEvent onClickEvent) {
                         playbackController.skipToPrevious();
                     }
                 }),
-                ViewObservable.clicks(play).subscribe(new Action1<OnClickEvent>() {
+                RxView.clickEvents(play).subscribe(new Action1<ViewClickEvent>() {
                     @Override
-                    public void call(OnClickEvent onClickEvent) {
+                    public void call(ViewClickEvent onClickEvent) {
                         playbackController.playorPause();
                     }
                 }),
-                ViewObservable.clicks(next).subscribe(new Action1<OnClickEvent>() {
+                RxView.clickEvents(next).subscribe(new Action1<ViewClickEvent>() {
                     @Override
-                    public void call(OnClickEvent onClickEvent) {
+                    public void call(ViewClickEvent onClickEvent) {
                         playbackController.skipToNext();
                     }
                 }),
-                ViewObservable.clicks(repeat).subscribe(new Action1<OnClickEvent>() {
+                RxView.clickEvents(repeat).subscribe(new Action1<ViewClickEvent>() {
                     @Override
-                    public void call(OnClickEvent onClickEvent) {
+                    public void call(ViewClickEvent onClickEvent) {
                         playbackController.cycleRepeateMode();
                     }
                 })
