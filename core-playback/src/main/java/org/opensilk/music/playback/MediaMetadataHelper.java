@@ -173,7 +173,7 @@ public class MediaMetadataHelper {
         mediaSession.setMetadata((MediaMetadata)m.getMediaMetadata());
     }
 
-    public MediaSession.QueueItem buildQueueItem(Uri uri, int pos) {
+    public MediaSession.QueueItem buildQueueItem(Uri uri, long id) {
         Track track = libraryHelper.getTrack(uri);
         if (track == null) {
             return null;
@@ -187,6 +187,6 @@ public class MediaMetadataHelper {
                 .setExtras(BundleHelper.builder().putParcleable(artInfo).get())
                 //.setIconUri(providerHelper.makeUri(artInfo, ArtworkType.THUMBNAIL))
                 .build();
-        return new MediaSession.QueueItem(desc, pos);
+        return new MediaSession.QueueItem(desc, id);
     }
 }

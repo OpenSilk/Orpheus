@@ -21,6 +21,7 @@ import android.media.session.MediaSession.QueueItem;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.support.v4.media.session.MediaSessionCompat;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -214,6 +215,19 @@ public class PlaybackQueue {
         notifyCurrentPosChanged();
     }
 
+    public int getPosOfId(long id) {
+        int pos = 0;
+        boolean found = false;
+        for (QueueItem qi : mQueueMeta) {
+            if (qi.getQueueId() == id) {
+                found = true;
+                break;
+            }
+            pos++;
+        }
+        return found ? pos : -1;
+    }
+
     public void goToItem(int pos) {
         mCurrentPos = clamp(pos);
         notifyCurrentPosChanged();
@@ -333,7 +347,7 @@ public class PlaybackQueue {
                 //check if item exits in another position.
                 for (QueueItem item2 : mQueueMeta) {
                     if (uri.toString().equals(item2.getDescription().getMediaId())) {
-                        queueItem = new QueueItem(item2.getDescription(), qi.previousIndex());
+                        queueItem = item2;
                         break;
                     }
                 }
@@ -341,7 +355,7 @@ public class PlaybackQueue {
             if (queueItem == null) {
                 //new item, fetch the meta from the provider
                 //todo it would be great to fetch all at once
-                queueItem = mMetaHelper.buildQueueItem(uri, qi.previousIndex());
+                queueItem = mMetaHelper.buildQueueItem(uri, mIdGenerator.getAndIncrement());
             }
             if (queueItem == null) {
                 //item was removed externally todo this might fuckup currentpos

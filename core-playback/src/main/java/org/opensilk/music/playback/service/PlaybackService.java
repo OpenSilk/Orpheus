@@ -381,14 +381,14 @@ public class PlaybackService extends Service {
                 Timber.w("Ignoring onSkipToQueueItem while loading/skipping");
                 return;
             }
-            int qid = (int) id;
-            if (mQueue.getCurrentPos() != qid) {
-                if (mQueue.getNextPos() == qid) {
+            int pos = mQueue.getPosOfId(id);
+            if (mQueue.getCurrentPos() != pos) {
+                if (mQueue.getNextPos() == pos) {
                     onSkipToNext();
                 } else {
                     onPause();
                     mPlayWhenReady = true;
-                    mQueue.goToItem(qid);
+                    mQueue.goToItem(pos);
                 }
             }
         }
