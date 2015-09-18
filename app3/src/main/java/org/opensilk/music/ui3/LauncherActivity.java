@@ -189,6 +189,7 @@ public class LauncherActivity extends MusicActivity implements DrawerOwnerActivi
     private void setToolbar(Toolbar toolbar) {
         if (mDrawerLayout != null) {
             mDrawerToggle = new Toggle(this, mDrawerLayout, toolbar);
+            mDrawerToggle.syncState();
             mDrawerLayout.setDrawerListener(mDrawerToggle);
         }
     }
