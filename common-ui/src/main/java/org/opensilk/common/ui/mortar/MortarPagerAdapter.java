@@ -20,12 +20,15 @@ package org.opensilk.common.ui.mortar;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 
 import org.opensilk.common.ui.util.ViewUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -58,15 +61,20 @@ public class MortarPagerAdapter<S extends Screen, V extends View> extends PagerA
     protected Bundle savedState = new Bundle();
 
     protected final Context context;
-    protected final List<S> screens;
+    protected final ArrayList<S> screens;
+
+    public MortarPagerAdapter(Context context) {
+        this.context = context;
+        this.screens = new ArrayList<>();
+    }
 
     public MortarPagerAdapter(Context context, S[] screens) {
         this (context, Arrays.asList(screens));
     }
 
-    public MortarPagerAdapter(Context context, List<S> screens) {
+    public MortarPagerAdapter(@NonNull Context context, @NonNull List<S> screens) {
         this.context = context;
-        this.screens = screens;
+        this.screens = new ArrayList<>(screens);
     }
 
     @Override
@@ -114,6 +122,14 @@ public class MortarPagerAdapter<S extends Screen, V extends View> extends PagerA
         Bundle b = (Bundle) state;
         b.setClassLoader(loader);
         savedState = b;
+    }
+
+    /**
+     * @return Modifiable list of screens, be sure to call
+     *         {@link #notifyDataSetChanged()} to propagate any changes
+     */
+    public List<S> screens() {
+        return screens;
     }
 
     /** Allows themeing views */
