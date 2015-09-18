@@ -22,19 +22,18 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
+import android.support.v4.view.ViewPager;
 import android.support.v7.graphics.Palette;
 import android.util.AttributeSet;
-import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.util.ThemeUtils;
-import org.opensilk.common.ui.widget.AnimatedImageView;
-import org.opensilk.common.ui.widget.ForegroundRelativeLayout;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.PaletteResponse;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -44,16 +43,16 @@ import butterknife.InjectView;
 /**
  * Created by drew on 10/15/14.
  */
-public class FooterScreenView extends ForegroundRelativeLayout {
+public class FooterScreenView extends LinearLayout {
 
     @Inject FooterScreenPresenter presenter;
 
-    @InjectView(R.id.footer_thumbnail) AnimatedImageView artworkThumbnail;
     @InjectView(R.id.footer_progress) ProgressBar progressBar;
-    @InjectView(R.id.footer_track_title) TextView trackTitle;
-    @InjectView(R.id.footer_artist_name) TextView artistName;
+    @InjectView(R.id.footer_pager) ViewPager mViewPager;
 
+    final FooterScreenViewAdapter mAdapter;
     final boolean lightTheme;
+    boolean selfChange;
 
     public FooterScreenView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -62,6 +61,7 @@ public class FooterScreenView extends ForegroundRelativeLayout {
             component.inject(this);
         }
         lightTheme = ThemeUtils.isLightTheme(getContext());
+        mAdapter = new FooterScreenViewAdapter(getContext());
     }
 
     @Override
@@ -70,6 +70,9 @@ public class FooterScreenView extends ForegroundRelativeLayout {
         if (!isInEditMode()) {
             ButterKnife.inject(this);
             ThemeUtils.themeProgressBar(progressBar, R.attr.colorAccent);
+            mViewPager.setOffscreenPageLimit(2);
+            mViewPager.addOnPageChangeListener(new PageChangeListener());
+            mViewPager.setAdapter(mAdapter);
             presenter.takeView(this);
         }
     }
@@ -77,60 +80,47 @@ public class FooterScreenView extends ForegroundRelativeLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        subscribeClicks();
         if (!isInEditMode()) presenter.takeView(this);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        unsubscribeClicks();
         if (!isInEditMode()) presenter.dropView(this);
     }
 
-    void subscribeClicks() {
-        this.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                presenter.onClick(getContext());
-            }
-        });
-        this.setOnLongClickListener(new OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                return presenter.onLongClick(getContext());
-            }
-        });
+    FooterScreenViewAdapter getAdapter() {
+        return mAdapter;
     }
 
-    void unsubscribeClicks() {
-        this.setOnClickListener(null);
-        this.setOnLongClickListener(null);
+    void goToCurrent(long qId) {
+        int pos = getPosForID(qId);
+        if (pos >= 0 && pos != mViewPager.getCurrentItem()) {
+            selfChange = true;
+            mViewPager.setCurrentItem(pos, true);
+        }
     }
 
-    public void updateBackground(PaletteResponse paletteResponse) {
-        Palette palette = paletteResponse.palette;
-        Palette.Swatch swatch = lightTheme
-                ? palette.getLightMutedSwatch() : palette.getDarkMutedSwatch();
-        if (swatch == null) swatch = palette.getMutedSwatch();
-        Drawable d1;
-        if (getBackground() == null) {
-            d1 = new ColorDrawable(Color.TRANSPARENT);
-        } else {
-            d1 = getBackground();
-            if (d1 instanceof TransitionDrawable) {
-                d1 = ((TransitionDrawable)d1).getDrawable(1);
+    int getPosForID(long qId) {
+        List<FooterPageScreen> screens = mAdapter.screens();
+        for (FooterPageScreen s : screens) {
+            if (s.queueItem.getQueueId() == qId) {
+                return screens.indexOf(s);
             }
         }
-        Drawable d2;
-        if (swatch != null) {
-            d2 = new ColorDrawable(swatch.getRgb());
-        } else {
-            d2 = new ColorDrawable(Color.TRANSPARENT);
-        }
-        TransitionDrawable td = new TransitionDrawable(new Drawable[]{d1,d2});
-        td.setCrossFadeEnabled(true);
-        setBackgroundDrawable(td);
-        td.startTransition(600);
+        return -1;
     }
+
+    class PageChangeListener extends ViewPager.SimpleOnPageChangeListener {
+        @Override
+        public void onPageSelected(int position) {
+            if (selfChange) {
+                selfChange = false;
+                return;
+            }
+            FooterPageScreen screen = mAdapter.screens().get(position);
+            presenter.goToQueueItem(screen.queueItem);
+        }
+    }
+
 }

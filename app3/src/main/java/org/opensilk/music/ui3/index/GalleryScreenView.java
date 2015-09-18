@@ -50,8 +50,6 @@ public class GalleryScreenView extends CoordinatorLayout {
     @InjectView(R.id.toolbar) Toolbar mToolbar;
     @InjectView(R.id.tab_bar) TabLayout mTabBar;
     @InjectView(R.id.pager) ViewPager mViewPager;
-    @InjectView(R.id.footer_playpause_btn) ImageView mFooterPlayBtn;
-
 
     public GalleryScreenView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -64,7 +62,6 @@ public class GalleryScreenView extends CoordinatorLayout {
         super.onFinishInflate();
         if (!isInEditMode()) {
             ButterKnife.inject(this);
-            mFooterPlayBtn.setVisibility(GONE);
             mToolbarOwner.attachToolbar(mToolbar);
             mPresenter.takeView(this);
         }

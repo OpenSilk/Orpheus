@@ -26,10 +26,10 @@
     android:background="?android:colorBackground"
     android:foreground="?android:selectableItemBackground">
 
-    <org.opensilk.common.ui.widget.SquareImageView
-        android:id="@+id/footer_thumbnail"
-        android:layout_height="match_parent"
-        android:layout_width="wrap_content"/>
+    <android.support.v4.view.ViewPager
+        android:id="@+id/footer_pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
     <ProgressBar
         android:id="@+id/footer_progress"
@@ -38,51 +38,8 @@
         android:layout_toEndOf="@id/footer_thumbnail"
         android:layout_toRightOf="@id/footer_thumbnail"
         android:layout_marginTop="-6dp"
+        android:layout_alignParentTop="true"
         style="?android:progressBarStyleHorizontal"
         android:max="1000"/>
-
-    <ImageView
-        android:id="@+id/footer_playpause_btn"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:src="@drawable/ic_play_arrow_white_36dp"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:scaleType="centerInside"
-        android:background="?android:selectableItemBackground"/>
-
-    <TextView
-        android:id="@+id/footer_track_title"
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:layout_toEndOf="@id/footer_thumbnail"
-        android:layout_toRightOf="@id/footer_thumbnail"
-        android:layout_toLeftOf="@id/footer_playpause_btn"
-        android:layout_toStartOf="@id/footer_playpause_btn"
-        android:layout_below="@id/footer_progress"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        tools:text="Track Title"
-        android:textAppearance="?android:textAppearanceMedium"
-        android:fontFamily="sans-serif-condensed"
-        android:textStyle="bold"
-        style="@style/SingleLineTextView"/>
-
-    <TextView
-        android:id="@+id/footer_artist_name"
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:layout_toEndOf="@id/footer_thumbnail"
-        android:layout_toRightOf="@id/footer_thumbnail"
-        android:layout_toLeftOf="@id/footer_playpause_btn"
-        android:layout_toStartOf="@id/footer_playpause_btn"
-        android:layout_below="@id/footer_track_title"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        tools:text="Artist Name"
-        android:textAppearance="?android:textAppearance"
-        android:fontFamily="sans-serif-condensed"
-        style="@style/SingleLineTextView"/>
 
 </org.opensilk.music.ui3.main.FooterScreenView>

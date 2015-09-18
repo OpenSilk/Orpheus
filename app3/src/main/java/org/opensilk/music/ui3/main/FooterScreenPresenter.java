@@ -19,8 +19,10 @@ package org.opensilk.music.ui3.main;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.media.session.MediaSession;
 import android.os.Bundle;
 import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
 import org.apache.commons.lang3.StringUtils;
@@ -33,11 +35,15 @@ import org.opensilk.music.R;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.nowplaying.NowPlayingActivity;
+import org.opensilk.music.ui3.nowplaying.QueueScreenItem;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Observable;
@@ -60,13 +66,9 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
 
     final Context appContext;
     final PlaybackController playbackController;
-    final ArtworkRequestManager artworkReqestor;
     final PauseAndResumeRegistrar pauseAndResumeRegistrar;
     final AppPreferences settings;
 
-    String lastTrackName;
-    String lastArtistName;
-    Bitmap lastAlbumARt;
     long lastPosition;
     long lastDuration;
     boolean lastPosSynced;
@@ -78,13 +80,11 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
     public FooterScreenPresenter(
             @ForApplication Context context,
             PlaybackController playbackController,
-            ArtworkRequestManager artworkReqestor,
             PauseAndResumeRegistrar pauseAndResumeRegistrar,
             AppPreferences settings
     ) {
         this.appContext = context;
         this.playbackController = playbackController;
-        this.artworkReqestor = artworkReqestor;
         this.pauseAndResumeRegistrar = pauseAndResumeRegistrar;
         this.settings = settings;
     }
@@ -138,35 +138,13 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
     }
 
     void init() {
-        if (!StringUtils.isEmpty(lastTrackName)) {
-            getView().trackTitle.setText(lastTrackName);
-        }
-        if (!StringUtils.isEmpty(lastArtistName)) {
-            getView().artistName.setText(lastArtistName);
-        }
-        if (lastAlbumARt != null) {
-            getView().artworkThumbnail.setImageBitmap(lastAlbumARt, false);
-        }
         //progress is always updated
         subscribeBroadcasts();
     }
 
-    void setTrackName(String s) {
-        if (!StringUtils.equals(lastTrackName, s)) {
-            lastTrackName = s;
-            if (hasView()) {
-                getView().trackTitle.setText(s);
-            }
-        }
-    }
-
-    void setArtistName(String s) {
-        if (!StringUtils.equals(lastArtistName, s)) {
-            lastArtistName = s;
-            if (hasView()) {
-                getView().artistName.setText(s);
-            }
-        }
+    void goToQueueItem(MediaSessionCompat.QueueItem item) {
+        long id = item.getQueueId();
+        playbackController.skipToQueueItem(id);
     }
 
     void setProgress(int progress) {
@@ -176,46 +154,11 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
         }
     }
 
-    void updateArtwork(Bitmap bitmap) {
-        if (bitmap != null) {
-            if (!bitmap.sameAs(lastAlbumARt)) {
-                lastAlbumARt = bitmap;
-                if (hasView()) {
-                    getView().artworkThumbnail.setImageBitmap(bitmap, true);
-                }
-            }
-        } else if (hasView()) {
-            getView().artworkThumbnail.setDefaultImage(R.drawable.default_artwork);
-        }
-    }
-
-    void onClick(Context context) {
-        handleClick(settings.getString(AppPreferences.FOOTER_CLICK, AppPreferences.ACTION_OPEN_NOW_PLAYING), context);
-    }
-
-    boolean onLongClick(Context context) {
-        return handleClick(settings.getString(AppPreferences.FOOTER_LONG_CLICK, AppPreferences.ACTION_NONE), context);
-    }
-
-    boolean handleClick(String action, Context context) {
-        switch (action) {
-            case AppPreferences.ACTION_OPEN_QUEUE:
-                NowPlayingActivity.startSelf(context, true);
-                return true;
-            case AppPreferences.ACTION_OPEN_NOW_PLAYING:
-                NowPlayingActivity.startSelf(context, false);
-                return true;
-            case AppPreferences.ACTION_NONE:
-            default:
-                return false;
-        }
-    }
-
     void subscribeBroadcasts() {
         if (isSubscribed(broadcastSubscriptions)) {
             return;
         }
-        Subscription s = playbackController.subscribePlayStateChanges(
+        final Subscription s = playbackController.subscribePlayStateChanges(
                 new Action1<PlaybackStateCompat>() {
                     @Override
                     public void call(PlaybackStateCompat playbackState) {
@@ -236,16 +179,25 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
                             lastPosSynced = true;
                             subscribeProgress(state == STATE_PLAYING);
                         }
+                        if (hasView()) {
+                            getView().goToCurrent(playbackState.getActiveQueueItemId());
+                        }
                     }
                 }
         );
-        Subscription s2 = playbackController.subscribeMetaChanges(
-                new Action1<MediaMetadataCompat>() {
+        Subscription s2 = playbackController.subscribeQueueChanges(
+                new Action1<List<MediaSessionCompat.QueueItem>>() {
                     @Override
-                    public void call(MediaMetadataCompat mediaMetadata) {
-                        setTrackName(mediaMetadata.getString(METADATA_KEY_TITLE));
-                        setArtistName(mediaMetadata.getString(METADATA_KEY_ARTIST));
-                        updateArtwork(mediaMetadata.getBitmap(METADATA_KEY_ALBUM_ART));
+                    @DebugLog
+                    public void call(List<MediaSessionCompat.QueueItem> queueItems) {
+                        if (hasView()) {
+                            List<FooterPageScreen> screens = getView().getAdapter().screens();
+                            screens.clear();
+                            for (MediaSessionCompat.QueueItem item : queueItems) {
+                                screens.add(new FooterPageScreen(item));
+                            }
+                            getView().getAdapter().notifyDataSetChanged();
+                        }
                     }
                 }
         );

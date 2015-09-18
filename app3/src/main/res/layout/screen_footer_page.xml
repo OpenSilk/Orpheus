@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2015 OpenSilk Productions LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<org.opensilk.music.ui3.main.FooterPageScreenView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <org.opensilk.common.ui.widget.SquareImageView
+        android:id="@+id/footer_thumbnail"
+        android:layout_height="match_parent"
+        android:layout_width="wrap_content"/>
+
+    <ImageButton
+        android:id="@+id/footer_playpause_btn"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_play_arrow_white_36dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:scaleType="centerInside"
+        android:background="?android:selectableItemBackground"/>
+
+    <TextView
+        android:id="@+id/footer_track_title"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_toEndOf="@id/footer_thumbnail"
+        android:layout_toRightOf="@id/footer_thumbnail"
+        android:layout_toLeftOf="@id/footer_playpause_btn"
+        android:layout_toStartOf="@id/footer_playpause_btn"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        tools:text="Track Title"
+        android:textAppearance="?android:textAppearanceMedium"
+        android:ellipsize="marquee"
+        android:textStyle="bold"
+        android:singleLine="true"/>
+
+    <TextView
+        android:id="@+id/footer_artist_name"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_toEndOf="@id/footer_thumbnail"
+        android:layout_toRightOf="@id/footer_thumbnail"
+        android:layout_toLeftOf="@id/footer_playpause_btn"
+        android:layout_toStartOf="@id/footer_playpause_btn"
+        android:layout_below="@id/footer_track_title"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        tools:text="Artist Name"
+        android:textAppearance="?android:textAppearance"
+        android:ellipsize="marquee"
+        android:singleLine="true"/>
+
+</org.opensilk.music.ui3.main.FooterPageScreenView>
