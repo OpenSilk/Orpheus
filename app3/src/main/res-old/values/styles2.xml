@@ -75,6 +75,7 @@
     <!-- Tiles -->
 
     <style name="TileOverflow" parent="Widget.AppCompat.ActionButton.Overflow">
+        <item name="android:src">@drawable/ic_menu_moreoverflow_mtrl_alpha</item>
         <item name="tibTint">?attr/colorControlNormal</item>
     </style>
 

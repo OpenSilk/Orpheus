@@ -20,6 +20,7 @@
 
     <!--Tiles-->
     <style name="TileOverflow" parent="Widget.AppCompat.ActionButton.Overflow">
+        <item name="android:src">@drawable/ic_menu_moreoverflow_mtrl_alpha</item>
         <item name="android:tint">?attr/colorControlNormal</item>
     </style>
 
