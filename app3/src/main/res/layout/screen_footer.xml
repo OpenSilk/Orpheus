@@ -35,8 +35,6 @@
         android:id="@+id/footer_progress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/footer_thumbnail"
-        android:layout_toRightOf="@id/footer_thumbnail"
         android:layout_marginTop="-6dp"
         android:layout_alignParentTop="true"
         style="?android:progressBarStyleHorizontal"
