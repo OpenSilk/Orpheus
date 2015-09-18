@@ -22,8 +22,10 @@ import android.os.Build;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.util.Pair;
 import android.transition.Explode;
 import android.transition.Slide;
+import android.transition.Transition;
 import android.view.Gravity;
 
 import org.opensilk.common.core.dagger2.ActivityScope;
@@ -63,18 +65,11 @@ public class FragmentManagerOwner extends Presenter<FragmentManagerOwnerActivity
         }
     }
 
-    public int addFragment(MortarFragment f , boolean addToBackstack) {
-        return addFragment(f, f.getScopeName(), addToBackstack);
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public int addFragment(Fragment frag, String tag, boolean addToBackstack) {
+    public int addFragment(MortarFragment frag, boolean addToBackstack) {
         if (!hasView()) return -1;
+        String tag = frag.getScopeName();
         FragmentTransaction ft = getView().getSupportFragmentManager().beginTransaction();
-        if (VersionUtils.hasLollipop()) {
-            frag.setEnterTransition(new Explode());
-            frag.setExitTransition(new Explode());
-        } else {
+        if (!VersionUtils.hasLollipop()) {
             ft.setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         }
         ft.add(frag, tag);
@@ -82,20 +77,11 @@ public class FragmentManagerOwner extends Presenter<FragmentManagerOwnerActivity
         return ft.commit();
     }
 
-    public int replaceMainContent(MortarFragment frag, boolean addToBackStack) {
-        return replaceMainContent(frag, frag.getScopeName(), addToBackStack);
-    }
-
-    @SuppressLint("RtlHardcoded")
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    @Deprecated
-    public int replaceMainContent(Fragment frag, String tag, boolean addToBackstack) {
+    public int replaceMainContent(MortarFragment frag, boolean addToBackstack) {
         if (!hasView()) return -1;
+        String tag = frag.getScopeName();
         FragmentTransaction ft = getView().getSupportFragmentManager().beginTransaction();
-        if (VersionUtils.hasLollipop()) {
-            frag.setEnterTransition(new Slide(Gravity.RIGHT));
-            frag.setExitTransition(new Slide(Gravity.LEFT));
-        } else {
+        if (!VersionUtils.hasLollipop()) {
             ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         }
         ft.replace(getView().getContainerViewId(), frag, tag);
