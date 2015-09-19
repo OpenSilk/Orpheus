@@ -62,6 +62,14 @@ import rx.functions.Action1;
 import rx.subjects.BehaviorSubject;
 import timber.log.Timber;
 
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_BUFFERING;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_CONNECTING;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_FAST_FORWARDING;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_PLAYING;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_REWINDING;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_SKIPPING_TO_NEXT;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS;
+
 /**
  * Created by drew on 5/6/15.
  */
@@ -103,6 +111,36 @@ public class PlaybackController {
         } else if (mForegroundActivities == 0) {
             disconnect();
         }
+    }
+
+    public static boolean isActive(PlaybackStateCompat state) {
+        switch (state.getState()) {
+            case STATE_FAST_FORWARDING:
+            case STATE_REWINDING:
+            case STATE_SKIPPING_TO_PREVIOUS:
+            case STATE_SKIPPING_TO_NEXT:
+            case STATE_BUFFERING:
+            case STATE_CONNECTING:
+            case STATE_PLAYING:
+                return true;
+        }
+        return false;
+    }
+
+    public static boolean isPlayingOrSimilar(PlaybackStateCompat state) {
+        switch (state.getState()) {
+            case STATE_FAST_FORWARDING:
+            case STATE_REWINDING:
+            case STATE_SKIPPING_TO_PREVIOUS:
+            case STATE_SKIPPING_TO_NEXT:
+            case STATE_PLAYING:
+                return true;
+        }
+        return false;
+    }
+
+    public static boolean isPlaying(PlaybackStateCompat state) {
+        return state.getState() == STATE_PLAYING;
     }
 
     /*
