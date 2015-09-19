@@ -40,7 +40,6 @@
 
         <LinearLayout
             android:id="@+id/go_up"
-            app:layout_scrollFlags="scroll|enterAlways"
             style="@style/mtrl.SingleLineListItemLinear">
 
             <ImageView

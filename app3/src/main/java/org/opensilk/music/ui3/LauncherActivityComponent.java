@@ -20,6 +20,7 @@ package org.opensilk.music.ui3;
 import org.opensilk.common.core.dagger2.ActivityScope;
 import org.opensilk.common.ui.mortar.ActivityResultsOwnerModule;
 import org.opensilk.common.ui.mortar.DrawerOwner;
+import org.opensilk.common.ui.mortar.DrawerOwnerModule;
 import org.opensilk.common.ui.mortar.PauseAndResumeModule;
 import org.opensilk.music.AppComponent;
 
@@ -34,7 +35,9 @@ import rx.functions.Func1;
 @ActivityScope
 @Component(
         dependencies = AppComponent.class,
-        modules = MusicActivityModule.class
+        modules = {
+                MusicActivityModule.class
+        }
 )
 public interface LauncherActivityComponent extends MusicActivityComponent {
     Func1<AppComponent, LauncherActivityComponent> FACTORY =

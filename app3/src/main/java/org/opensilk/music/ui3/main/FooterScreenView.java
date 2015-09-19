@@ -30,6 +30,8 @@ import android.widget.ProgressBar;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.util.ThemeUtils;
+import org.opensilk.common.ui.widget.ForegroundLinearLayout;
+import org.opensilk.common.ui.widget.ForegroundRelativeLayout;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.PaletteResponse;
 
@@ -43,7 +45,7 @@ import butterknife.InjectView;
 /**
  * Created by drew on 10/15/14.
  */
-public class FooterScreenView extends LinearLayout {
+public class FooterScreenView extends ForegroundRelativeLayout {
 
     @Inject FooterScreenPresenter presenter;
 

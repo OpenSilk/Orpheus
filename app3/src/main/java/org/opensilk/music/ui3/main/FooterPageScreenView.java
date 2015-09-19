@@ -21,6 +21,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.jakewharton.rxbinding.view.RxView;
@@ -29,6 +30,7 @@ import com.jakewharton.rxbinding.view.ViewLongClickEvent;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.widget.AnimatedImageView;
+import org.opensilk.common.ui.widget.ForegroundLinearLayout;
 import org.opensilk.common.ui.widget.ForegroundRelativeLayout;
 import org.opensilk.music.R;
 
@@ -43,7 +45,7 @@ import rx.subscriptions.CompositeSubscription;
 /**
  * Created by drew on 9/17/15.
  */
-public class FooterPageScreenView extends ForegroundRelativeLayout {
+public class FooterPageScreenView extends LinearLayout {
 
     @Inject FooterPageScreenPresenter mPresenter;
 
@@ -56,16 +58,20 @@ public class FooterPageScreenView extends ForegroundRelativeLayout {
 
     public FooterPageScreenView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        FooterPageScreenComponent cmp = DaggerService.getDaggerComponent(getContext());
-        cmp.inject(this);
+        if (!isInEditMode()) {
+            FooterPageScreenComponent cmp = DaggerService.getDaggerComponent(getContext());
+            cmp.inject(this);
+        }
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        ButterKnife.inject(this);
-        mPresenter.takeView(this);
-        subscribeClicks();
+        if (!isInEditMode()) {
+            ButterKnife.inject(this);
+            mPresenter.takeView(this);
+            subscribeClicks();
+        }
     }
 
     @Override

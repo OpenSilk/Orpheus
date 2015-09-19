@@ -40,4 +40,12 @@
         app:headerLayout="@layout/drawer_banner"
         app:menu="@menu/navigation"/>
 
+    <fragment
+        android:id="@+id/controls_fragment"
+        android:layout_width="@dimen/drawer_width"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        class="org.opensilk.music.ui3.main.ControlsScreenFragment"
+        tools:layout="@layout/screen_controls"/>
+
 </android.support.v4.widget.DrawerLayout>

@@ -39,7 +39,6 @@ import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.common.UtilsCommon;
-import org.opensilk.music.ui3.main.MainPresenter;
 
 import java.util.concurrent.TimeUnit;
 
@@ -185,7 +184,7 @@ public class NowPlayingViewPresenter extends Presenter<NowPlayingView> implement
                     public void call(PlaybackStateCompat playbackState) {
                         boolean playing = playbackState.getState() == STATE_PLAYING;
                         if (hasView()) {
-                            getView().setPlayChecked(MainPresenter.isPlayingOrSimilar(playbackState));
+                            getView().setPlayChecked(PlaybackController.isPlayingOrSimilar(playbackState));
                             getView().setVisualizerEnabled(playing);
                             //TODO shuffle/repeat
                         }

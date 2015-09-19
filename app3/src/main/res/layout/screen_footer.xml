@@ -23,8 +23,7 @@
     android:id="@+id/footer_view"
     android:layout_width="match_parent"
     android:layout_height="@dimen/footer_height"
-    android:background="?android:colorBackground"
-    android:foreground="?android:selectableItemBackground">
+    android:background="?android:colorBackground">
 
     <android.support.v4.view.ViewPager
         android:id="@+id/footer_pager"
@@ -38,6 +37,7 @@
         android:layout_marginTop="-6dp"
         android:layout_alignParentTop="true"
         style="?android:progressBarStyleHorizontal"
-        android:max="1000"/>
+        android:max="1000"
+        tools:progress="500"/>
 
 </org.opensilk.music.ui3.main.FooterScreenView>

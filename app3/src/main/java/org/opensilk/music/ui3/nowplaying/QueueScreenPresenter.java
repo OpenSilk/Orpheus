@@ -30,7 +30,6 @@ import org.opensilk.common.ui.mortar.PausesAndResumes;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.common.OverflowAction;
-import org.opensilk.music.ui3.main.MainPresenter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -129,7 +128,7 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView>
                     @Override
                     public void call(PlaybackStateCompat playbackState) {
                         if (hasView()) {
-                            getView().getAdapter().setPlaying(MainPresenter.isPlaying(playbackState));
+                            getView().getAdapter().setPlaying(PlaybackController.isPlaying(playbackState));
                         }
                     }
                 }

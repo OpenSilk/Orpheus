@@ -19,18 +19,21 @@ package org.opensilk.music.ui3;
 
 import android.content.Context;
 
+import org.opensilk.common.core.dagger2.ActivityScope;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.common.ui.mortar.ToolbarOwner;
 import org.opensilk.common.ui.mortarfragment.MortarFragmentActivityComponent;
+import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.index.IndexComponent;
 import org.opensilk.music.index.client.IndexClient;
 import org.opensilk.music.playback.control.PlaybackController;
-import org.opensilk.music.ui3.main.MainPresenter;
 
 import javax.inject.Named;
+
+import dagger.Component;
 
 /**
  * Requires ActivityResultsOwnerModule
@@ -43,7 +46,6 @@ public interface MusicActivityComponent extends MortarFragmentActivityComponent 
     ActivityResultsController activityResultsController();
     ArtworkRequestManager artworkRequestor();
     PlaybackController playbackController();
-    MainPresenter mainPresenter();
     ToolbarOwner toolbarOwner();
     @Named("IndexProviderAuthority") String indexProviderAuthority();
     IndexClient indexClient();

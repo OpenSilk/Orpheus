@@ -20,9 +20,14 @@ package org.opensilk.music.ui3.nowplaying;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
@@ -31,6 +36,7 @@ import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.ToolbarOwner;
 import org.opensilk.common.ui.mortar.ToolbarOwnerDelegate;
 import org.opensilk.common.ui.mortarfragment.MortarFragmentActivity;
+import org.opensilk.common.ui.recycler.RecyclerListAdapter;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
@@ -52,8 +58,8 @@ public class NowPlayingActivity extends MortarFragmentActivity {
     @Inject protected PlaybackController mPlaybackController;
 //    @Inject ToolbarOwner mToolbarOwner;
 
-    @InjectView(R.id.main_toolbar) Toolbar mToolbar;
     @InjectView(R.id.sliding_panel) @Optional SlidingUpPanelLayout mSlidingPanel;
+    @InjectView(R.id.recyclerview) RecyclerView mList;
 
 //    ToolbarOwnerDelegate<NowPlayingActivity> mActionBarDelegate;
 
@@ -90,8 +96,10 @@ public class NowPlayingActivity extends MortarFragmentActivity {
     }
 
     protected void setupView() {
-        setContentView(R.layout.activity_nowplaying);
+        setContentView(R.layout.activity_nowplaying2);
         ButterKnife.inject(this);
+        mList.setLayoutManager(new LinearLayoutManager(this));
+        mList.setAdapter(new TestAdapter());
     }
 
     @Override
@@ -153,6 +161,30 @@ public class NowPlayingActivity extends MortarFragmentActivity {
             mSlidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         } else {
             super.onBackPressed();
+        }
+    }
+
+    static class TestAdapter extends RecyclerListAdapter<String, TestAdapter.ViewHolder> {
+
+        @Override
+        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            return new ViewHolder(inflate(parent, R.layout.mtrl_list_item_oneline_text));
+        }
+
+        @Override
+        public void onBindViewHolder(ViewHolder holder, int position) {
+            ((TextView) holder.itemView).setText("ITem " + position);
+        }
+
+        @Override
+        public int getItemCount() {
+            return 20;
+        }
+
+        static class ViewHolder extends RecyclerView.ViewHolder {
+            public ViewHolder(View itemView) {
+                super(itemView);
+            }
         }
     }
 }

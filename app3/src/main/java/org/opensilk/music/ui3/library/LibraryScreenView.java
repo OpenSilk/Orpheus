@@ -27,11 +27,7 @@ import android.util.AttributeSet;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.ToolbarOwner;
-import org.opensilk.common.ui.recycler.HeaderRecyclerAdapter;
-import org.opensilk.common.ui.util.ViewUtils;
 import org.opensilk.music.R;
-import org.opensilk.music.ui3.MusicActivityComponent;
-import org.opensilk.music.ui3.main.DrawerScreenViewAdapter;
 
 import javax.inject.Inject;
 

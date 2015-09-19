@@ -137,7 +137,7 @@ public class FooterPageScreenPresenter extends ViewPresenter<FooterPageScreenVie
 
     void updatePlayBtn() {
         if (hasView() && lastState != null) {
-            getView().setPlaying(MainPresenter.isPlayingOrSimilar(lastState));
+            getView().setPlaying(PlaybackController.isPlayingOrSimilar(lastState));
         }
     }
 

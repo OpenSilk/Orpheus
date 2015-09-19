@@ -54,12 +54,8 @@ public class LauncherActivity extends MusicActivity implements DrawerOwnerActivi
 
     @Inject DrawerOwner mDrawerOwner;
     @Inject AppPreferences mSettings;
-    @Inject @Named("IndexProviderAuthority") String mIndexProviderAuthority;
-    @Inject @Named("mediaStoreLibraryAuthority") String mMediaStoreLibraryAuthority;
     @Inject FragmentManagerOwner mFm;
-    @Inject LibraryProviderInfoLoader mLibraryProviderLoader;
 
-//    @InjectView(R.id.main_toolbar) Toolbar mToolbar;
     @InjectView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
     @InjectView(R.id.navigation) NavigationView mNavigation;
 
@@ -230,19 +226,34 @@ public class LauncherActivity extends MusicActivity implements DrawerOwnerActivi
 
     static class Toggle extends ActionBarDrawerToggle {
         final LauncherActivity activity;
+
         public Toggle(LauncherActivity activity, DrawerLayout drawerLayout, Toolbar toolbar) {
             super(activity, drawerLayout, toolbar, R.string.app_name, R.string.app_name);
             this.activity = activity;
         }
 
         @Override
+        public void onDrawerSlide(View drawerView, float slideOffset) {
+            super.onDrawerSlide(drawerView, slideOffset);
+            activity.mDrawerOwner.onDrawerSlide(drawerView, slideOffset);
+        }
+
+        @Override
         public void onDrawerOpened(View drawerView) {
             super.onDrawerOpened(drawerView);
+            activity.mDrawerOwner.onDrawerOpened(drawerView);
         }
 
         @Override
         public void onDrawerClosed(View view) {
             super.onDrawerClosed(view);
+            activity.mDrawerOwner.onDrawerClosed(view);
+        }
+
+        @Override
+        public void onDrawerStateChanged(int newState) {
+            super.onDrawerStateChanged(newState);
+            activity.mDrawerOwner.onDrawerStateChanged(newState);
         }
     }
 }
