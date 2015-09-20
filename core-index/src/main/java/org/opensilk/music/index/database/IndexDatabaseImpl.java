@@ -231,13 +231,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
     @Override
     @DebugLog
     public long insert(String table, String nullColumnHack, ContentValues values, int conflictAlgorithm) {
-        try {
-            return helper.getWritableDatabase().insertOrThrow(table, nullColumnHack, values);
-        } catch (Exception e) {
-            Timber.e(e, "insert()");
-        }
-        return -1;
-//        return helper.getWritableDatabase().insertWithOnConflict(table, nullColumnHack, values, conflictAlgorithm);
+        return helper.getWritableDatabase().insertWithOnConflict(table, nullColumnHack, values, conflictAlgorithm);
     }
 
     @Override
@@ -249,10 +243,11 @@ public class IndexDatabaseImpl implements IndexDatabase {
     public boolean hasContainer(Uri uri) {
         Cursor c = null;
         try {
-            String sel = IndexSchema.TrackResMeta.URI + "=?";
+            String sel = IndexSchema.Containers.URI + "=?";
             String[] selArgs = new String[] {uri.toString()};
-            c = query(IndexSchema.TrackResMeta.TABLE, new String[] {IndexSchema.TrackResMeta.RES_ID}, sel, selArgs, null, null, null);
-            if (c != null && c.getCount() > 1) {
+            c = query(IndexSchema.Containers.TABLE, new String[] {IndexSchema.Containers.URI},
+                    sel, selArgs, null, null, null);
+            if (c != null && c.getCount() > 0) {
                 return true;
             }
         } finally {

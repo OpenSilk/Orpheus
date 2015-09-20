@@ -125,7 +125,7 @@ public class IndexSchema {
     }
 
     public interface Containers {
-        String TABLE = "container_uris";
+        String TABLE = "containers";
         String URI = "uri";
         String AUTHORITY = "authority";
     }

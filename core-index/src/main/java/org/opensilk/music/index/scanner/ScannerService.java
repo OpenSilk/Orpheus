@@ -36,10 +36,12 @@ import org.opensilk.music.loader.BundleableLoader;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.spi.Bundleable;
+import org.opensilk.music.index.scanner.NotificationHelper.Status;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
@@ -51,6 +53,14 @@ import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import retrofit.Call;
 import retrofit.Response;
+import rx.Observable;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.subjects.PublishSubject;
+import rx.subjects.SerializedSubject;
+import rx.subjects.Subject;
 import timber.log.Timber;
 
 import static android.provider.MediaStore.Audio.keyFor;
@@ -63,9 +73,13 @@ public class ScannerService extends MortarIntentService {
 
     @Inject LastFM mLastFM;
     @Inject IndexDatabase mIndexDatabase;
+    @Inject NotificationHelper mNotifHelper;
 
     final AtomicInteger numTotal = new AtomicInteger(0);
+    final AtomicInteger numError = new AtomicInteger(0);
     final AtomicInteger numProcessed = new AtomicInteger(0);
+
+    Subject<Status, Status> notifSubject;//DO NOT ACCESS FROM MAIN THREAD
 
     public ScannerService() {
         super(ScannerService.class.getSimpleName());
@@ -82,6 +96,34 @@ public class ScannerService extends MortarIntentService {
         super.onCreate();
         ScannerComponent acc = DaggerService.getDaggerComponent(this);
         acc.inject(this);
+
+        mNotifHelper.attachService(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mNotifHelper.detachService(this);
+    }
+
+    void notifySuccess(Uri uri) {
+        numProcessed.incrementAndGet();
+        notifSubject.onNext(Status.SCANNING);
+    }
+
+    void notifySkipped(Uri uri) {
+        Timber.d("Skipping item already in db %s", uri);
+        numProcessed.incrementAndGet();
+        notifSubject.onNext(Status.SCANNING);
+    }
+
+    void notifyError(Uri uri) {
+        numError.incrementAndGet();
+        notifSubject.onNext(Status.SCANNING);
+    }
+
+    void updateNotification(Status status) {
+        mNotifHelper.updateNotification(status, numProcessed.get(), numError.get(), numTotal.get());
     }
 
     @Override
@@ -91,7 +133,26 @@ public class ScannerService extends MortarIntentService {
             Timber.w("ScannerService called without uri");
             return;
         }
+        notifSubject = PublishSubject.create();
+        notifSubject.asObservable().debounce(1, TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Status>() {
+                    @Override
+                    @DebugLog
+                    public void call(Status status) {
+                        updateNotification(status);
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    @DebugLog
+                    public void call(Throwable throwable) {
+                        updateNotification(Status.COMPLETED);
+                    }
+                });
+        notifSubject.onNext(Status.SCANNING);
         scan2(uri);
+        notifSubject.onNext(Status.COMPLETED);
+        notifSubject.onCompleted();
     }
 
     void scan2(final Uri uri) {
@@ -111,8 +172,7 @@ public class ScannerService extends MortarIntentService {
                 Track item = (Track) b;
                 Timber.i("indexing %s, %s", item.getName(), item.getUri());
                 if (!needsScan(item.getResources().get(0))) {
-                    numProcessed.incrementAndGet();
-                    Timber.v("Skipping item already in db %s @ %s", item.getDisplayName(), item.getUri());
+                    notifySkipped(item.getUri());
                     continue;
                 }
                 if (trackHasRequiredMeta(item)) {
@@ -120,12 +180,12 @@ public class ScannerService extends MortarIntentService {
                 } else {
                     Track t = extractMeta(item);
                     if (t == null) {
-                        numProcessed.incrementAndGet();
+                        notifyError(item.getUri());
                         continue;
                     }
                     addMetaToDb(t);
                 }
-                numProcessed.incrementAndGet();
+                notifySuccess(item.getUri());
             } else if (b instanceof Container) {
                 scan2(b.getUri());
             } else {
@@ -252,19 +312,7 @@ public class ScannerService extends MortarIntentService {
 
     void addMetaToDb(Track track) {
 
-        String albumArtist = track.getAlbumArtistName();
-        if (StringUtils.isEmpty(albumArtist)) {
-            Timber.w("No albumArtist in metadata for %s", track.getUri());
-            //No albumartist, we still may get away with the track artist though.
-            albumArtist = track.getArtistName();
-            //Artist names such as "Pretty Lights feat. Eligh" will fail so strip off the featured artist.
-            if (StringUtils.containsIgnoreCase(albumArtist, "feat.")) {
-                String[] strings = StringUtils.splitByWholeSeparator(albumArtist.toLowerCase(), "feat.");
-                if (strings.length > 0) {
-                    albumArtist = strings[0].trim();
-                }
-            }
-        }
+        String albumArtist = resolveAlbumArtist(track);
 
         if (StringUtils.isEmpty(albumArtist)) {
             Timber.w("Cannot process item %s missing albumArtist", track.getUri());
@@ -296,17 +344,13 @@ public class ScannerService extends MortarIntentService {
             }
         }
 
-        String artist = track.getArtistName();
-        //Artist names such as "Pretty Lights feat. Eligh" will fail so strip off the album artist.
-        if (StringUtils.containsIgnoreCase(artist, "feat.")) {
-            String[] strings = StringUtils.splitByWholeSeparator(artist.toLowerCase(), "feat.");
-            if (strings.length > 1) {
-                artist = strings[2].trim();
-            }
-        }
+        String artist = resolveTrackArtist(track);
 
         long artistId;
-        if (StringUtils.equals(artist, albumArtist)) {
+        if (StringUtils.isEmpty(artist)) {
+            Timber.w("Cannot process item %s missing artist", track.getUri());
+            return;
+        } else if (StringUtils.equalsIgnoreCase(artist, albumArtist)) {
             artistId = albumArtistId;
         } else {
             artistId = checkArtist(artist);
@@ -400,6 +444,35 @@ public class ScannerService extends MortarIntentService {
     private static final String[] idCols = new String[] {
             BaseColumns._ID,
     };
+
+    static String resolveAlbumArtist(Track track) {
+        String albumArtist = track.getAlbumArtistName();
+        if (StringUtils.isEmpty(albumArtist)) {
+            Timber.w("No albumArtist in metadata for %s", track.getUri());
+            //No albumartist, we still may get away with the track artist though.
+            albumArtist = track.getArtistName();
+            //Artist names such as "Pretty Lights feat. Eligh" will fail so strip off the featured artist.
+            if (StringUtils.containsIgnoreCase(albumArtist, "feat.")) {
+                String[] strings = StringUtils.splitByWholeSeparator(albumArtist.toLowerCase(), "feat.");
+                if (strings.length > 0) {
+                    albumArtist = strings[0].trim();
+                }
+            }
+        }
+        return albumArtist;
+    }
+
+    static String resolveTrackArtist(Track track) {
+        String artist = track.getArtistName();
+        //Artist names such as "Pretty Lights feat. Eligh" will fail so strip off the album artist.
+        if (StringUtils.containsIgnoreCase(artist, "feat.")) {
+            String[] strings = StringUtils.splitByWholeSeparator(artist.toLowerCase(), "feat.");
+            if (strings.length > 1) {
+                artist = strings[2].trim();
+            }
+        }
+        return artist;
+    }
 
     @DebugLog
     long checkArtist(String artist) {

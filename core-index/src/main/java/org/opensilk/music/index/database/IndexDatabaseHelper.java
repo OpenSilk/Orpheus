@@ -32,7 +32,7 @@ import javax.inject.Singleton;
 @Singleton
 public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
-    public static final int DB_VERSION = 7;
+    public static final int DB_VERSION = 8;
     public static final String DB_NAME = "music.db";
 
     @Inject
@@ -63,6 +63,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP TABLE IF EXISTS track_meta;");
             db.execSQL("DROP TABLE IF EXISTS album_meta;");
             db.execSQL("DROP TABLE IF EXISTS artist_meta;");
+            db.execSQL("DROP TABLE IF EXISTS container_uris;");
         }
 
         if (oldVersion < shipVer) {
@@ -115,7 +116,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "duration INTEGER " +
                     ");");
 
-            db.execSQL("CREATE TABLE IF NOT EXISTS container_uris (" +
+            db.execSQL("CREATE TABLE IF NOT EXISTS containers (" +
                     "uri TEXT NOT NULL UNIQUE ON CONFLICT IGNORE, " +
                     "authority TEXT NOT NULL" +
                     ");");
@@ -199,7 +200,6 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("CREATE INDEX IF NOT EXISTS albumid_idx on album_meta(album_id);");
             db.execSQL("CREATE INDEX IF NOT EXISTS trackid_idx on track_meta(track_id);");
             db.execSQL("CREATE INDEX IF NOT EXISTS trackresuri_idx on track_res_meta(uri);");
-
         }
 
         /*
