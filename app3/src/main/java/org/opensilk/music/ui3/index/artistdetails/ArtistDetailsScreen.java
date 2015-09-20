@@ -73,7 +73,7 @@ public class ArtistDetailsScreen extends Screen implements ProfileScreen {
         @Override
         public ArtistDetailsScreen createFromParcel(Parcel source) {
             return new ArtistDetailsScreen(
-                    Artist.BUNDLE_CREATOR.fromBundle(source.readBundle())
+                    Artist.BUNDLE_CREATOR.fromBundle(source.readBundle(Artist.class.getClassLoader()))
             );
         }
 

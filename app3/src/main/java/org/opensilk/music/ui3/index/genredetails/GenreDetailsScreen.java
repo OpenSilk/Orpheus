@@ -74,7 +74,7 @@ public class GenreDetailsScreen extends Screen implements ProfileScreen {
         @Override
         public GenreDetailsScreen createFromParcel(Parcel source) {
             return new GenreDetailsScreen(
-                    Genre.BUNDLE_CREATOR.fromBundle(source.readBundle())
+                    Genre.BUNDLE_CREATOR.fromBundle(source.readBundle(Genre.class.getClassLoader()))
             );
         }
 

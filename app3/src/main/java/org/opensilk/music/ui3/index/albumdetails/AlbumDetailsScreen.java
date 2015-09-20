@@ -71,7 +71,7 @@ public class AlbumDetailsScreen extends Screen implements ProfileScreen {
         @Override
         public AlbumDetailsScreen createFromParcel(Parcel source) {
             return new AlbumDetailsScreen(
-                    Album.BUNDLE_CREATOR.fromBundle(source.readBundle())
+                    Album.BUNDLE_CREATOR.fromBundle(source.readBundle(Album.class.getClassLoader()))
             );
         }
 

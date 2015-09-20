@@ -74,7 +74,7 @@ public class TrackCollectionScreen extends Screen implements ProfileScreen {
         @Override
         public TrackCollectionScreen createFromParcel(Parcel source) {
             return new TrackCollectionScreen(
-                    TrackList.BUNDLE_CREATOR.fromBundle(source.readBundle()),
+                    TrackList.BUNDLE_CREATOR.fromBundle(source.readBundle(TrackList.class.getClassLoader())),
                     source.readString()
             );
         }
