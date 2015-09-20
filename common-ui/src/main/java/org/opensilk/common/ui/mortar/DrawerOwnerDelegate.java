@@ -123,7 +123,7 @@ public class DrawerOwnerDelegate<A extends Activity & HasScope>
     @Override
     public void openDrawer(int gravity) {
         if (mDrawerLayout != null && !mDrawerLayout.isDrawerOpen(gravity)) {
-            mDrawerLayout.closeDrawer(gravity);
+            mDrawerLayout.openDrawer(gravity);
         }
     }
 
@@ -174,7 +174,6 @@ public class DrawerOwnerDelegate<A extends Activity & HasScope>
         }
         return false;
     }
-
 
     class Toggle extends ActionBarDrawerToggle {
 
