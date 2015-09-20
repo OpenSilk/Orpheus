@@ -29,10 +29,6 @@ import android.view.MenuItem;
 import android.view.View;
 
 import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.common.ui.mortar.DrawerOwner;
-import org.opensilk.common.ui.mortar.DrawerController;
-import org.opensilk.common.ui.mortar.DrawerOwnerActivity;
-import org.opensilk.common.ui.mortar.DrawerOwnerDelegate;
 import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
@@ -53,14 +49,12 @@ import mortar.MortarScope;
  */
 public class LauncherActivity extends MusicActivity {
 
-    @Inject DrawerOwner mDrawerOwner;
     @Inject AppPreferences mSettings;
     @Inject FragmentManagerOwner mFm;
 
     @InjectView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
     @InjectView(R.id.navigation) NavigationView mNavigation;
 
-    DrawerOwnerDelegate<LauncherActivity> mDrawerOwnerDelegate;
 
     @Override
     protected void onCreateScope(MortarScope.Builder builder) {
@@ -95,61 +89,8 @@ public class LauncherActivity extends MusicActivity {
         super.onCreate(savedInstanceState);
 
         if (mDrawerLayout != null) {
-            mDrawerOwnerDelegate = new DrawerOwnerDelegate<>(this, mDrawerOwner,
-                    mDrawerLayout, R.string.app_name, R.string.app_name);
-            mDrawerOwnerDelegate.onCreate();
             mNavigation.setNavigationItemSelectedListener(mNavigaitonClickListener);
             mNavigaitonClickListener.onNavigationItemSelected(mNavigation.getMenu().getItem(0));
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (mDrawerOwnerDelegate != null) mDrawerOwnerDelegate.onDestroy();
-    }
-
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        if (mDrawerOwnerDelegate != null) mDrawerOwnerDelegate.onPostCreate(savedInstanceState);
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        if (mDrawerOwnerDelegate != null) mDrawerOwnerDelegate.onConfigurationChanged(newConfig);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return (mDrawerOwnerDelegate != null && mDrawerOwnerDelegate.onOptionsItemSelected(item))
-                || super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (mDrawerOwnerDelegate != null && mDrawerOwnerDelegate.onBackPressed()) {
-            return;
-        }
-        super.onBackPressed();
-    }
-
-    @Override
-    public void onToolbarAttached(Toolbar toolbar) {
-        if (mDrawerOwnerDelegate != null) {
-            mDrawerOwnerDelegate.onToolbarAttached(toolbar);
-        } else {
-            super.onToolbarAttached(toolbar);
-        }
-    }
-
-    @Override
-    public void onToolbarDetached(Toolbar toolbar) {
-        if (mDrawerOwnerDelegate != null) {
-            mDrawerOwnerDelegate.onToolbarDetached(toolbar);
-        } else {
-            super.onToolbarDetached(toolbar);
         }
     }
 

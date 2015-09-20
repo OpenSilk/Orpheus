@@ -50,6 +50,4 @@ public interface LauncherActivityComponent extends MusicActivityComponent {
                 }
             };
     void inject(LauncherActivity activity);
-    DrawerOwner drawerOwner();
-    @Named("mediaStoreLibraryAuthority") String mediaStoreLibraryAuthority();
 }

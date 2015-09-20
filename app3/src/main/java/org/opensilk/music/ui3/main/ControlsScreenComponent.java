@@ -18,6 +18,8 @@
 package org.opensilk.music.ui3.main;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.ui.mortar.DrawerController;
+import org.opensilk.common.ui.mortar.DrawerListenerRegistrar;
 import org.opensilk.music.ui3.LauncherActivityComponent;
 import org.opensilk.music.ui3.MusicActivity;
 import org.opensilk.music.ui3.MusicActivityComponent;
@@ -30,16 +32,17 @@ import rx.functions.Func1;
  */
 @ScreenScope
 @Component(
-        dependencies = LauncherActivityComponent.class
+        dependencies = MusicActivityComponent.class
 )
 public interface ControlsScreenComponent {
-    Func1<LauncherActivityComponent, ControlsScreenComponent> FACTORY = new Func1<LauncherActivityComponent, ControlsScreenComponent>() {
-        @Override
-        public ControlsScreenComponent call(LauncherActivityComponent launcherActivityComponent) {
-            return DaggerControlsScreenComponent.builder()
-                    .launcherActivityComponent(launcherActivityComponent)
-                    .build();
-        }
+    Func1<MusicActivityComponent, ControlsScreenComponent> FACTORY =
+            new Func1<MusicActivityComponent, ControlsScreenComponent>() {
+                @Override
+                public ControlsScreenComponent call(MusicActivityComponent activityComponent) {
+                    return DaggerControlsScreenComponent.builder()
+                            .musicActivityComponent(activityComponent)
+                            .build();
+                }
     };
     void inject(ControlsScreenView view);
 }

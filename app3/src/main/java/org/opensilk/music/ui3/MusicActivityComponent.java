@@ -22,6 +22,9 @@ import android.content.Context;
 import org.opensilk.common.core.dagger2.ActivityScope;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
+import org.opensilk.common.ui.mortar.DrawerController;
+import org.opensilk.common.ui.mortar.DrawerListenerRegistrar;
+import org.opensilk.common.ui.mortar.DrawerOwner;
 import org.opensilk.common.ui.mortar.ToolbarOwner;
 import org.opensilk.common.ui.mortarfragment.MortarFragmentActivityComponent;
 import org.opensilk.music.AppComponent;
@@ -36,7 +39,7 @@ import javax.inject.Named;
 import dagger.Component;
 
 /**
- * Requires ActivityResultsOwnerModule
+ * Subclasses must include {@link MusicActivityModule}
  *
  * Created by drew on 5/1/15.
  */
@@ -49,4 +52,6 @@ public interface MusicActivityComponent extends MortarFragmentActivityComponent 
     ToolbarOwner toolbarOwner();
     @Named("IndexProviderAuthority") String indexProviderAuthority();
     IndexClient indexClient();
+    //TODO figure out why i cant use DrawerController/DrawerListenerRegistrar here
+    DrawerOwner drawerOwner();
 }
