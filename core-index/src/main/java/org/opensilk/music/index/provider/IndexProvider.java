@@ -17,6 +17,7 @@
 
 package org.opensilk.music.index.provider;
 
+import android.content.Intent;
 import android.content.UriMatcher;
 import android.net.Uri;
 import android.os.Bundle;
@@ -25,6 +26,7 @@ import android.os.IBinder;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.index.IndexComponent;
 import org.opensilk.music.index.database.IndexDatabase;
+import org.opensilk.music.index.scanner.ScannerService;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.internal.BundleableSubscriber;
 import org.opensilk.music.library.internal.LibraryException;
@@ -45,6 +47,7 @@ import timber.log.Timber;
 import static org.opensilk.music.index.provider.IndexUris.M_ALBUMS;
 import static org.opensilk.music.index.provider.IndexUris.M_ARTISTS;
 import static org.opensilk.music.index.provider.IndexUris.M_TRACKS;
+import static org.opensilk.music.index.provider.IndexUris.details;
 import static org.opensilk.music.index.provider.IndexUris.makeMatcher;
 
 /**
@@ -84,6 +87,29 @@ public class IndexProvider extends LibraryProvider {
     }
 
     @Override
+    protected Bundle callCustom(String method, String arg, Bundle extras) {
+        LibraryExtras.Builder reply = LibraryExtras.b();
+        switch (method) {
+            case Methods.IS_INDEXED: {
+                boolean yes = mDataBase.hasContainer(LibraryExtras.getUri(extras));
+                return reply.putOk(yes).get();
+            }
+            case Methods.ADD: {
+                Intent i = new Intent(getContext(), ScannerService.class)
+                        .setData(LibraryExtras.getUri(extras));
+                getContext().startService(i);
+                return reply.putOk(true).get();
+            }
+            case Methods.REMOVE: {
+                return reply.get();
+            }
+            default: {
+                return super.callCustom(method, arg, extras);
+            }
+        }
+    }
+
+    @Override
     protected void listObjsInternal(Uri uri, final IBinder binder, Bundle args) {
         switch (mUriMatcher.match(uri)) {
             case M_ALBUMS: {
@@ -116,7 +142,7 @@ public class IndexProvider extends LibraryProvider {
             default: {
                 final BundleableSubscriber<Bundleable> subscriber = new BundleableSubscriber<>(binder);
                 subscriber.onError(new LibraryException(LibraryException.Kind.ILLEGAL_URI,
-                        new IllegalArgumentException(uri.toString())));
+                        new IllegalArgumentException("Unknown uri: " + uri.toString())));
             }
         }
     }

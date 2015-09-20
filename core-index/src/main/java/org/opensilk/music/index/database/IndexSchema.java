@@ -103,7 +103,6 @@ public class IndexSchema {
         String TABLE = "track_meta";
         String TRACK_NAME = "track_name";
         String TRACK_KEY = "track_key";
-        String DURATION = "duration";
         String TRACK_NUMBER = "track_number";
         String DISC_NUMBER = "disc_number";
         String GENRE = "genre";
@@ -123,6 +122,12 @@ public class IndexSchema {
         String LAST_MOD = "last_modified";
         String BITRATE = "bitrate";
         String DURATION = "duration";
+    }
+
+    public interface Containers {
+        String TABLE = "container_uris";
+        String URI = "uri";
+        String AUTHORITY = "authority";
     }
 
 }

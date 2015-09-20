@@ -32,7 +32,7 @@ import javax.inject.Singleton;
 @Singleton
 public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
-    public static final int DB_VERSION = 4;
+    public static final int DB_VERSION = 7;
     public static final String DB_NAME = "music.db";
 
     @Inject
@@ -54,12 +54,23 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP TABLE IF EXISTS recent;");
         }
 
-        if (oldVersion < 4) {
+        // STOPSHIP: 9/19/15  
+        final int shipVer = DB_VERSION;
+
+        if (oldVersion < shipVer) {
+            //cleanup mistakes prior to 3.0 release
+            db.execSQL("DROP TABLE IF EXISTS track_res_meta;");
+            db.execSQL("DROP TABLE IF EXISTS track_meta;");
+            db.execSQL("DROP TABLE IF EXISTS album_meta;");
+            db.execSQL("DROP TABLE IF EXISTS artist_meta;");
+        }
+
+        if (oldVersion < shipVer) {
             //Artist metadata
             db.execSQL("CREATE TABLE IF NOT EXISTS artist_meta (" +
                     "artist_id INTEGER PRIMARY KEY, " +
                     "artist_name TEXT NOT NULL, " +
-                    "artist_key TEXT NOT NULL COLLATE NOCASE, " +
+                    "artist_key TEXT NOT NULL, " +
                     "artist_bio_summary TEXT, " +
                     "artist_bio_content TEXT, " +
                     "artist_bio_date_modified INTEGER, " +
@@ -70,7 +81,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("CREATE TABLE IF NOT EXISTS album_meta (" +
                     "album_id INTEGER PRIMARY KEY, " +
                     "album_name TEXT NOT NULL, " +
-                    "album_key TEXT NOT NULL COLLATE NOCASE, " +
+                    "album_key TEXT NOT NULL, " +
                     "album_bio_summary TEXT, " +
                     "album_bio_content TEXT, " +
                     "album_bio_date_modified INTEGER, " +
@@ -82,7 +93,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("CREATE TABLE IF NOT EXISTS track_meta (" +
                     "track_id INTEGER PRIMARY KEY, " +
                     "track_name TEXT NOT NULL, " +
-                    "track_key TEXT NOT NULL COLLATE NOCASE, " +
+                    "track_key TEXT NOT NULL, " +
                     "track_number INTEGER, " +
                     "disc_number INTEGER DEFAULT 1, " +
                     "genre TEXT, " +
@@ -102,6 +113,11 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "last_modified INTEGER, " + //opaque provided by library
                     "bitrate INTEGER, " +
                     "duration INTEGER " +
+                    ");");
+
+            db.execSQL("CREATE TABLE IF NOT EXISTS container_uris (" +
+                    "uri TEXT NOT NULL UNIQUE ON CONFLICT IGNORE, " +
+                    "authority TEXT NOT NULL" +
                     ");");
 
             db.execSQL("CREATE TABLE IF NOT EXISTS playlists (" +

@@ -20,6 +20,7 @@ package org.opensilk.music.index.scanner;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
@@ -46,6 +47,7 @@ import javax.inject.Inject;
 import de.umass.lastfm.Album;
 import de.umass.lastfm.Artist;
 import de.umass.lastfm.LastFM;
+import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import retrofit.Call;
 import retrofit.Response;
@@ -93,6 +95,8 @@ public class ScannerService extends MortarIntentService {
     }
 
     void scan2(final Uri uri) {
+        Timber.i("scan2(%s)", uri);
+        mIndexDatabase.addContainer(uri);
         BundleableLoader loader = new BundleableLoader(this, uri, null);
         List<Bundleable> bundleables;
         try {
@@ -105,6 +109,7 @@ public class ScannerService extends MortarIntentService {
             if (b instanceof Track) {
                 numTotal.incrementAndGet();
                 Track item = (Track) b;
+                Timber.i("indexing %s, %s", item.getName(), item.getUri());
                 if (!needsScan(item.getResources().get(0))) {
                     numProcessed.incrementAndGet();
                     Timber.v("Skipping item already in db %s @ %s", item.getDisplayName(), item.getUri());
@@ -138,7 +143,7 @@ public class ScannerService extends MortarIntentService {
             checkNotNullOrBlank(track.getGenre(), err);
             checkNotNullOrBlank(track.getMimeType(), err);
             checkNotNullOrBlank(track.getName(), err);
-        } catch (IllegalArgumentException e) {
+        } catch (NullPointerException| IllegalArgumentException e) {
             return false;
         }
         for (Track.Res res : track.getResources()) {
@@ -168,6 +173,7 @@ public class ScannerService extends MortarIntentService {
             } else if (StringUtils.equals(uri.getScheme(), "content")) {
                 ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(uri, "r");
                 mmr.setDataSource(pfd.getFileDescriptor());
+                pfd.close();
             } else if (StringUtils.equals(uri.getScheme(), "file")) {
                 mmr.setDataSource(uri.getPath());
             }
@@ -269,7 +275,7 @@ public class ScannerService extends MortarIntentService {
         if (albumArtistId < 0) {
             albumArtistId = lookupArtistInfo(albumArtist);
             if (albumArtistId < 0) {
-                Timber.e("Unable to insert %s into db", albumArtist);
+                Timber.e("Unable to insert artist %s into db", albumArtist);
                 return;
             }
         }
@@ -283,9 +289,9 @@ public class ScannerService extends MortarIntentService {
 
         long albumId = checkAlbum(albumArtist, album);
         if (albumId < 0) {
-            albumId = lookupAlbumInfo(albumArtist, album, albumId);
+            albumId = lookupAlbumInfo(albumArtist, album, albumArtistId);
             if (albumId < 0) {
-                Timber.e("Unable to insert %s into db", album);
+                Timber.e("Unable to insert album %s into db", album);
                 return;
             }
         }
@@ -307,7 +313,7 @@ public class ScannerService extends MortarIntentService {
             if (artistId < 0) {
                 artistId = lookupArtistInfo(artist);
                 if (artistId < 0) {
-                    Timber.e("Unable to insert %s into db", artist);
+                    Timber.e("Unable to insert artist %s into db", artist);
                     return;
                 }
             }
@@ -315,7 +321,7 @@ public class ScannerService extends MortarIntentService {
 
         long trackId = insertTrack(track, artistId, albumId);
         if (trackId < 0) {
-            Timber.e("Unable to insert %s into db", track.getName());
+            Timber.e("Unable to insert track %s into db", track.getName());
             return;
         }
 
@@ -329,6 +335,7 @@ public class ScannerService extends MortarIntentService {
 
     }
 
+    @DebugLog
     long lookupAlbumInfo(final String albumArtist, final String albumName, final long artistId) {
         Call<Album> call = mLastFM.getAlbum(albumArtist, albumName);
         Response<Album> response;
@@ -345,6 +352,7 @@ public class ScannerService extends MortarIntentService {
         return insertAlbum(album, artistId);
     }
 
+    @DebugLog
     long lookupArtistInfo(final String artistName) {
         Call<Artist> call = mLastFM.getArtist(artistName);
         Response<Artist> response;
@@ -366,6 +374,7 @@ public class ScannerService extends MortarIntentService {
             IndexSchema.TrackResMeta.LAST_MOD,
     };
 
+    @DebugLog
     boolean needsScan(Track.Res res) {
         Cursor c = null;
         try {
@@ -392,6 +401,7 @@ public class ScannerService extends MortarIntentService {
             BaseColumns._ID,
     };
 
+    @DebugLog
     long checkArtist(String artist) {
         long id = -1;
         Cursor c = null;
@@ -408,8 +418,9 @@ public class ScannerService extends MortarIntentService {
         }
     }
 
+    @DebugLog
     long insertArtist(Artist artist) {
-        ContentValues cv = new ContentValues(2);
+        ContentValues cv = new ContentValues(10);
         cv.put(IndexSchema.ArtistMeta.ARTIST_NAME, artist.getName());
         cv.put(IndexSchema.ArtistMeta.ARTIST_KEY, keyFor(artist.getName()));
         cv.put(IndexSchema.ArtistMeta.ARTIST_BIO_SUMMARY, artist.getWikiSummary());
@@ -417,9 +428,10 @@ public class ScannerService extends MortarIntentService {
         cv.put(IndexSchema.ArtistMeta.ARTIST_BIO_DATE_MOD,
                 artist.getWikiLastChanged() != null ? artist.getWikiLastChanged().getTime() : null);
         cv.put(IndexSchema.ArtistMeta.ARTIST_MBID, artist.getMbid());
-        return mIndexDatabase.insert(IndexSchema.ArtistMeta.TABLE, null, cv);
+        return mIndexDatabase.insert(IndexSchema.ArtistMeta.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
     }
 
+    @DebugLog
     long checkAlbum(String albumArtist, String album) {
         long id = -1;
         Cursor c = null;
@@ -436,6 +448,7 @@ public class ScannerService extends MortarIntentService {
         }
     }
 
+    @DebugLog
     long insertAlbum(Album album, long albumArtistId) {
         ContentValues cv = new ContentValues(10);
         cv.put(IndexSchema.AlbumMeta.ALBUM_NAME, album.getName());
@@ -446,22 +459,23 @@ public class ScannerService extends MortarIntentService {
         cv.put(IndexSchema.AlbumMeta.ALBUM_BIO_DATE_MOD,
                 album.getWikiLastChanged() != null ? album.getWikiLastChanged().getTime() : null);
         cv.put(IndexSchema.AlbumMeta.ALBUM_MBID, album.getMbid());
-        return mIndexDatabase.insert(IndexSchema.AlbumMeta.TABLE, null, cv);
+        return mIndexDatabase.insert(IndexSchema.AlbumMeta.TABLE, null, cv,SQLiteDatabase.CONFLICT_IGNORE);
     }
 
+    @DebugLog
     long insertTrack(Track t, long artistId, long albumId) {
         ContentValues cv = new ContentValues(10);
         cv.put(IndexSchema.TrackMeta.TRACK_NAME, t.getName());
         cv.put(IndexSchema.TrackMeta.TRACK_KEY, keyFor(t.getName()));
-        cv.put(IndexSchema.TrackMeta.DURATION, t.getResources().get(0).getDuration());
         cv.put(IndexSchema.TrackMeta.TRACK_NUMBER, t.getTrackNumber());
         cv.put(IndexSchema.TrackMeta.DISC_NUMBER, t.getDiscNumber());
         cv.put(IndexSchema.TrackMeta.GENRE, t.getGenre());
         cv.put(IndexSchema.TrackMeta.ARTIST_ID, artistId);
         cv.put(IndexSchema.TrackMeta.ALBUM_ID, albumId);
-        return mIndexDatabase.insert(IndexSchema.TrackMeta.TABLE, null, cv);
+        return mIndexDatabase.insert(IndexSchema.TrackMeta.TABLE, null, cv,SQLiteDatabase.CONFLICT_IGNORE);
     }
 
+    @DebugLog
     long insertRes(Track.Res res, long trackId) {
         ContentValues cv = new ContentValues(10);
         cv.put(IndexSchema.TrackResMeta.TRACK_ID, trackId);
@@ -473,7 +487,7 @@ public class ScannerService extends MortarIntentService {
         cv.put(IndexSchema.TrackResMeta.LAST_MOD, res.getLastMod());
         cv.put(IndexSchema.TrackResMeta.BITRATE, res.getBitrate());
         cv.put(IndexSchema.TrackResMeta.DURATION, res.getDuration());
-        return mIndexDatabase.insert(IndexSchema.TrackResMeta.TABLE, null, cv);
+        return mIndexDatabase.insert(IndexSchema.TrackResMeta.TABLE, null, cv,SQLiteDatabase.CONFLICT_IGNORE);
     }
 
     static void closeCursor(Cursor c) {

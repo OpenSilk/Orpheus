@@ -21,6 +21,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.provider.BaseColumns;
 
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.model.Album;
@@ -34,6 +35,9 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+
+import hugo.weaving.DebugLog;
+import timber.log.Timber;
 
 /**
  * Created by drew on 9/16/15.
@@ -214,6 +218,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
     }
 
     @Override
+    @DebugLog
     public Cursor query(String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy) {
         return helper.getReadableDatabase().query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
     }
@@ -224,13 +229,47 @@ public class IndexDatabaseImpl implements IndexDatabase {
     }
 
     @Override
-    public long insert(String table, String nullColumnHack, ContentValues values) {
-        return helper.getWritableDatabase().insert(table, nullColumnHack, values);
+    @DebugLog
+    public long insert(String table, String nullColumnHack, ContentValues values, int conflictAlgorithm) {
+        try {
+            return helper.getWritableDatabase().insertOrThrow(table, nullColumnHack, values);
+        } catch (Exception e) {
+            Timber.e(e, "insert()");
+        }
+        return -1;
+//        return helper.getWritableDatabase().insertWithOnConflict(table, nullColumnHack, values, conflictAlgorithm);
     }
 
     @Override
     public int update(String table, ContentValues values, String whereClause, String[] whereArgs) {
         return helper.getWritableDatabase().update(table, values, whereClause, whereArgs);
+    }
+
+    @Override
+    public boolean hasContainer(Uri uri) {
+        Cursor c = null;
+        try {
+            String sel = IndexSchema.TrackResMeta.URI + "=?";
+            String[] selArgs = new String[] {uri.toString()};
+            c = query(IndexSchema.TrackResMeta.TABLE, new String[] {IndexSchema.TrackResMeta.RES_ID}, sel, selArgs, null, null, null);
+            if (c != null && c.getCount() > 1) {
+                return true;
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return false;
+    }
+
+    @Override
+    public void addContainer(Uri uri) {
+        ContentValues cv = new ContentValues(2);
+        cv.put(IndexSchema.Containers.URI, uri.toString());
+        cv.put(IndexSchema.Containers.AUTHORITY, uri.getAuthority());
+        long id = insert(IndexSchema.Containers.TABLE, null, cv,SQLiteDatabase.CONFLICT_IGNORE);
+        if (id < 0) {
+            Timber.e("Uh oh there was a problem inserting %s", uri);
+        }
     }
 
     static void closeCursor(Cursor c) {

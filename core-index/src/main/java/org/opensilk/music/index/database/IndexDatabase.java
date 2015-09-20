@@ -19,6 +19,7 @@ package org.opensilk.music.index.database;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.net.Uri;
 
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
@@ -37,6 +38,8 @@ public interface IndexDatabase {
                  String[] selectionArgs, String groupBy, String having,
                  String orderBy);
     int delete(String table, String whereClause, String[] whereArgs);
-    long insert(String table, String nullColumnHack, ContentValues values);
+    long insert(String table, String nullColumnHack, ContentValues values,int conflictAlgorithm);
     int update(String table, ContentValues values, String whereClause, String[] whereArgs);
+    boolean hasContainer(Uri uri);
+    void addContainer(Uri uri);
 }

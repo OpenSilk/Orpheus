@@ -15,22 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.index.client;
-
-import org.opensilk.music.index.IndexProviderAuthorityModule;
-
-import dagger.Module;
-import dagger.Provides;
+package org.opensilk.music.index.provider;
 
 /**
- * Created by drew on 9/17/15.
+ * Created by drew on 9/19/15.
  */
-@Module(
-        includes = IndexProviderAuthorityModule.class
-)
-public class IndexClientModule {
-    @Provides
-    public IndexClient provideINdexClient(IndexClientImpl impl) {
-        return impl;
-    }
+public interface Methods {
+    String IS_INDEXED = "idx.is_indexed";
+    String ADD = "idx.add";
+    String REMOVE = "idx.remove";
 }
