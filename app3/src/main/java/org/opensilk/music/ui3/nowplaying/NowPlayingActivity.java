@@ -96,7 +96,7 @@ public class NowPlayingActivity extends MortarFragmentActivity {
     }
 
     protected void setupView() {
-        setContentView(R.layout.activity_nowplaying2);
+        setContentView(R.layout.activity_nowplaying);
         ButterKnife.inject(this);
         mList.setLayoutManager(new LinearLayoutManager(this));
         mList.setAdapter(new TestAdapter());

@@ -17,7 +17,6 @@
 package org.opensilk.common.ui.mortar;
 
 
-import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.view.View;
 
@@ -37,17 +36,14 @@ import mortar.bundler.BundleService;
  * A bridge between presenters and the host activity to propagate
  * drawer actions/events. It is the activities responibility
  * to call all the {@link android.support.v4.widget.DrawerLayout.DrawerListener}
- * methods from the {@link android.support.v7.app.ActionBarDrawerToggle.DrawerToggle}
- *
- * Presenters may register their own listeners with us and events will propagate to them
- *
- * TODO better left/right drawer controls
+ * methods from the {@link android.support.v7.app.ActionBarDrawerToggle.DrawerToggle}.
+ * Presenters may register their own listeners with us and events will propagate to them.
  *
  * Created by drew on 10/5/14.
  */
 @ActivityScope
 public class DrawerOwner extends Presenter<DrawerOwnerActivity>
-        implements DrawerLayout.DrawerListener, DrawerListenerRegistrar {
+        implements DrawerLayout.DrawerListener, DrawerListenerRegistrar, DrawerController {
 
     private final Set<Registration> registrations = new HashSet<>();
 
@@ -60,33 +56,39 @@ public class DrawerOwner extends Presenter<DrawerOwnerActivity>
         return BundleService.getBundleService(view.getScope());
     }
 
-    public void openDrawer() {
-        DrawerOwnerActivity v = getView();
-        if (v == null) return;
-        v.openDrawer();
-    }
-
-    public void closeDrawer() {
-        DrawerOwnerActivity v = getView();
-        if (v == null) return;
-        v.closeDrawer();
-    }
-
-    public void disableDrawer(boolean hideIndicator) {
-        DrawerOwnerActivity v = getView();
-        if (v == null) return;
-        v.disableDrawer(hideIndicator);
-    }
-
-    public void enableDrawer() {
-        DrawerOwnerActivity v = getView();
-        if (v == null) return;
-        v.enableDrawer();
-    }
-
     @Override
     public void onExitScope() {
         registrations.clear();
+    }
+
+    @Override
+    public void openDrawer(int gravity) {
+        if (hasView()) getView().openDrawer(gravity);
+    }
+
+    @Override
+    public void openDrawers() {
+        if (hasView()) getView().openDrawers();
+    }
+
+    @Override
+    public void closeDrawer(int gravity) {
+        if (hasView()) getView().closeDrawer(gravity);
+    }
+
+    @Override
+    public void closeDrawers() {
+        if (hasView()) getView().closeDrawers();
+    }
+
+    @Override
+    public void enableDrawer(int gravity, boolean enable) {
+        if (hasView()) getView().enableDrawer(gravity, enable);
+    }
+
+    @Override
+    public void enableDrawers(boolean enable) {
+        if (hasView()) getView().enableDrawers(enable);
     }
 
     @Override

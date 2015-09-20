@@ -22,6 +22,8 @@ import android.support.v4.widget.DrawerLayout;
 import mortar.MortarScope;
 
 /**
+ * Allows presenters to register for drawer events
+ *
  * Created by drew on 9/19/15.
  */
 public interface DrawerListenerRegistrar {

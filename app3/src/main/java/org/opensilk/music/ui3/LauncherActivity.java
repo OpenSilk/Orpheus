@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
@@ -29,19 +30,19 @@ import android.view.View;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.DrawerOwner;
+import org.opensilk.common.ui.mortar.DrawerController;
 import org.opensilk.common.ui.mortar.DrawerOwnerActivity;
+import org.opensilk.common.ui.mortar.DrawerOwnerDelegate;
 import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.loader.LibraryProviderInfoLoader;
 import org.opensilk.music.settings.SettingsActivity;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
 import org.opensilk.music.ui3.index.GalleryScreenFragment;
 import org.opensilk.music.ui3.library.LibraryScreenFragment;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -50,7 +51,7 @@ import mortar.MortarScope;
 /**
  * Created by drew on 4/30/15.
  */
-public class LauncherActivity extends MusicActivity implements DrawerOwnerActivity {
+public class LauncherActivity extends MusicActivity {
 
     @Inject DrawerOwner mDrawerOwner;
     @Inject AppPreferences mSettings;
@@ -59,7 +60,7 @@ public class LauncherActivity extends MusicActivity implements DrawerOwnerActivi
     @InjectView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
     @InjectView(R.id.navigation) NavigationView mNavigation;
 
-    private ActionBarDrawerToggle mDrawerToggle;
+    DrawerOwnerDelegate<LauncherActivity> mDrawerOwnerDelegate;
 
     @Override
     protected void onCreateScope(MortarScope.Builder builder) {
@@ -93,14 +94,10 @@ public class LauncherActivity extends MusicActivity implements DrawerOwnerActivi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//        ActionBarConfig config = ActionBarConfig.builder()
-//                .setTitle("")
-//                .build();
-//        mToolbarOwner.setConfig(config);
-
         if (mDrawerLayout != null) {
-            setToolbar(null);
-            mDrawerOwner.takeView(this);
+            mDrawerOwnerDelegate = new DrawerOwnerDelegate<>(this, mDrawerOwner,
+                    mDrawerLayout, R.string.app_name, R.string.app_name);
+            mDrawerOwnerDelegate.onCreate();
             mNavigation.setNavigationItemSelectedListener(mNavigaitonClickListener);
             mNavigaitonClickListener.onNavigationItemSelected(mNavigation.getMenu().getItem(0));
         }
@@ -109,106 +106,69 @@ public class LauncherActivity extends MusicActivity implements DrawerOwnerActivi
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mDrawerOwner.dropView(this);//Noop if no view taken
+        if (mDrawerOwnerDelegate != null) mDrawerOwnerDelegate.onDestroy();
     }
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        if (mDrawerToggle != null) mDrawerToggle.syncState();
+        if (mDrawerOwnerDelegate != null) mDrawerOwnerDelegate.onPostCreate(savedInstanceState);
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        if (mDrawerToggle != null) mDrawerToggle.onConfigurationChanged(newConfig);
+        if (mDrawerOwnerDelegate != null) mDrawerOwnerDelegate.onConfigurationChanged(newConfig);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        return (mDrawerToggle != null && mDrawerToggle.onOptionsItemSelected(item)) || super.onOptionsItemSelected(item);
+        return (mDrawerOwnerDelegate != null && mDrawerOwnerDelegate.onOptionsItemSelected(item))
+                || super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onBackPressed() {
-        if (isDrawerOpen()) {
-            closeDrawer();
-        } else {
-            super.onBackPressed();
+        if (mDrawerOwnerDelegate != null && mDrawerOwnerDelegate.onBackPressed()) {
+            return;
         }
+        super.onBackPressed();
     }
-
-    /*
-     * DrawerOwnerActivity
-     */
-
-    @Override
-    public void openDrawer() {
-        if (!isDrawerOpen()) mDrawerLayout.openDrawer(mNavigation);
-    }
-
-    public void closeDrawer() {
-        if (isDrawerOpen()) mDrawerLayout.closeDrawer(mNavigation);
-    }
-
-    @Override
-    public void disableDrawer(boolean hideIndicator) {
-        if (mDrawerToggle != null) mDrawerToggle.setDrawerIndicatorEnabled(!hideIndicator);
-        closeDrawer();
-        if (mDrawerLayout != null) mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, mNavigation);
-    }
-
-    @Override
-    public void enableDrawer() {
-        if (mDrawerToggle != null) mDrawerToggle.setDrawerIndicatorEnabled(true);
-        if (mDrawerLayout != null) mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, mNavigation);
-    }
-
-    /*
-     * Toolbar
-     */
 
     @Override
     public void onToolbarAttached(Toolbar toolbar) {
-        setToolbar(toolbar);
+        if (mDrawerOwnerDelegate != null) {
+            mDrawerOwnerDelegate.onToolbarAttached(toolbar);
+        } else {
+            super.onToolbarAttached(toolbar);
+        }
     }
 
     @Override
     public void onToolbarDetached(Toolbar toolbar) {
-        setToolbar(null);
-    }
-
-    /*
-     * drawer helpers
-     */
-
-    private void setToolbar(Toolbar toolbar) {
-        if (mDrawerLayout != null) {
-            mDrawerToggle = new Toggle(this, mDrawerLayout, toolbar);
-            mDrawerToggle.syncState();
-            mDrawerLayout.setDrawerListener(mDrawerToggle);
+        if (mDrawerOwnerDelegate != null) {
+            mDrawerOwnerDelegate.onToolbarDetached(toolbar);
+        } else {
+            super.onToolbarDetached(toolbar);
         }
-    }
-
-    private boolean isDrawerOpen() {
-        return mNavigation != null && mDrawerLayout != null && mDrawerLayout.isDrawerOpen(mNavigation);
     }
 
     final NavigationView.OnNavigationItemSelectedListener mNavigaitonClickListener =
             new NavigationView.OnNavigationItemSelectedListener() {
         @Override
         public boolean onNavigationItemSelected(MenuItem menuItem) {
+            mDrawerOwnerDelegate.closeDrawer(GravityCompat.START);
             switch (menuItem.getItemId()) {
                 case R.id.my_library: {
-                    menuItem.setChecked(true);
                     mFm.killBackStack();
                     mFm.replaceMainContent(GalleryScreenFragment.ni(LauncherActivity.this), false);
+                    menuItem.setChecked(true);
                     break;
                 }
                 case R.id.folders:
-                    menuItem.setChecked(true);
                     mFm.killBackStack();
                     mFm.replaceMainContent(LibraryScreenFragment.ni(), false);
+                    menuItem.setChecked(true);
                     break;
                 case R.id.settings: {
                     Intent i = new Intent(LauncherActivity.this, SettingsActivity.class);
@@ -218,42 +178,10 @@ public class LauncherActivity extends MusicActivity implements DrawerOwnerActivi
                 default:
                     return false;
             }
-            closeDrawer();
             return true;
         }
 
     };
 
-    static class Toggle extends ActionBarDrawerToggle {
-        final LauncherActivity activity;
 
-        public Toggle(LauncherActivity activity, DrawerLayout drawerLayout, Toolbar toolbar) {
-            super(activity, drawerLayout, toolbar, R.string.app_name, R.string.app_name);
-            this.activity = activity;
-        }
-
-        @Override
-        public void onDrawerSlide(View drawerView, float slideOffset) {
-            super.onDrawerSlide(drawerView, slideOffset);
-            activity.mDrawerOwner.onDrawerSlide(drawerView, slideOffset);
-        }
-
-        @Override
-        public void onDrawerOpened(View drawerView) {
-            super.onDrawerOpened(drawerView);
-            activity.mDrawerOwner.onDrawerOpened(drawerView);
-        }
-
-        @Override
-        public void onDrawerClosed(View view) {
-            super.onDrawerClosed(view);
-            activity.mDrawerOwner.onDrawerClosed(view);
-        }
-
-        @Override
-        public void onDrawerStateChanged(int newState) {
-            super.onDrawerStateChanged(newState);
-            activity.mDrawerOwner.onDrawerStateChanged(newState);
-        }
-    }
 }

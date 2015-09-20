@@ -23,12 +23,20 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
+ * Activities may wish to hide their {@link DrawerOwner} from presenters. In that case
+ * include this module with the activity module and declare methods for
+ * {@link DrawerListenerRegistrar} and {@link DrawerController} in the component
+ *
  * Created by drew on 9/19/15.
  */
 @Module
 public class DrawerOwnerModule {
     @Provides @ActivityScope
     public DrawerListenerRegistrar provideDrawerListenerRegistrar(DrawerOwner owner) {
+        return owner;
+    }
+    @Provides @ActivityScope
+    public DrawerController provideDrawerController(DrawerOwner owner) {
         return owner;
     }
 }
