@@ -103,5 +103,16 @@ public class FooterPageScreenView extends LinearLayout {
                 mPresenter.togglePlayback();
             }
         }));
+        mSubs.add(RxView.longClickEvents(mPlayPause, new Func1<ViewLongClickEvent, Boolean>() {
+            @Override
+            public Boolean call(ViewLongClickEvent viewLongClickEvent) {
+                return true;
+            }
+        }).subscribe(new Action1<ViewLongClickEvent>() {
+            @Override
+            public void call(ViewLongClickEvent viewLongClickEvent) {
+                mPresenter.openControls();
+            }
+        }));
     }
 }

@@ -79,6 +79,7 @@ public abstract class MusicActivity extends MortarFragmentActivity
         if (drawerLayout != null) {
             mDrawerOwnerDelegate = new DrawerOwnerDelegate<>(this, mDrawerOwner, drawerLayout,
                     R.string.app_name, R.string.app_name);
+            mDrawerOwnerDelegate.onCreate();
             mToolbarOwnerDelegate = new ToolbarOwnerDelegate<>(this, mToolbarOwner, mDrawerOwnerDelegate);
         } else {
             mToolbarOwnerDelegate = new ToolbarOwnerDelegate<>(this, mToolbarOwner, this);

@@ -22,9 +22,11 @@ import android.os.Bundle;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.session.MediaSessionCompat.QueueItem;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.support.v4.view.GravityCompat;
 import android.view.View;
 
 import org.opensilk.common.core.dagger2.SubScreenScope;
+import org.opensilk.common.ui.mortar.DrawerOwner;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkType;
@@ -36,6 +38,7 @@ import org.opensilk.music.ui3.nowplaying.NowPlayingActivity;
 
 import javax.inject.Inject;
 
+import hugo.weaving.DebugLog;
 import mortar.ViewPresenter;
 import rx.Subscription;
 import rx.functions.Action1;
@@ -57,6 +60,7 @@ public class FooterPageScreenPresenter extends ViewPresenter<FooterPageScreenVie
     final QueueItem queueItem;
     final AppPreferences settings;
     final PlaybackController playbackController;
+    final DrawerOwner drawerController;
 
 
     CompositeSubscription subscriptions = new CompositeSubscription();
@@ -67,12 +71,14 @@ public class FooterPageScreenPresenter extends ViewPresenter<FooterPageScreenVie
             ArtworkRequestManager artworkReqestor,
             QueueItem queueItem,
             AppPreferences settings,
-            PlaybackController playbackController
+            PlaybackController playbackController,
+            DrawerOwner drawerController
     ) {
         this.artworkReqestor = artworkReqestor;
         this.queueItem = queueItem;
         this.settings = settings;
         this.playbackController = playbackController;
+        this.drawerController = drawerController;
     }
 
     @Override
@@ -134,6 +140,9 @@ public class FooterPageScreenPresenter extends ViewPresenter<FooterPageScreenVie
         }
     }
 
+    void openControls() {
+        drawerController.openDrawer(GravityCompat.END);
+    }
 
     void updatePlayBtn() {
         if (hasView() && lastState != null) {

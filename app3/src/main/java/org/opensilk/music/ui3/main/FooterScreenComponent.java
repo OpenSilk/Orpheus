@@ -18,6 +18,7 @@
 package org.opensilk.music.ui3.main;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.ui.mortar.DrawerOwner;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.playback.control.PlaybackController;
@@ -48,4 +49,5 @@ public interface FooterScreenComponent {
     AppPreferences appPreferences();
     PlaybackController playbackController();
     ArtworkRequestManager artworkRequestManager();
+    DrawerOwner drawerOwner();
 }

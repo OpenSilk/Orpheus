@@ -115,6 +115,11 @@
         app:progress="400"
         app:maintain_equal_circle="false"
         app:ignore_view_bounds="true"
+        app:circle_color="@color/white"
+        app:circle_progress_color="?colorAccent"
+        app:pointer_color="?colorAccent"
+        app:pointer_halo_color="@android:color/transparent"
+        app:pointer_halo_color_ontouch="?colorAccent"
         />
 
 </org.opensilk.music.ui3.main.ControlsScreenView>
