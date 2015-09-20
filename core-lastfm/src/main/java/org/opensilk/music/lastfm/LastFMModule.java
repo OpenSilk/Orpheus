@@ -33,6 +33,10 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import de.umass.lastfm.Album;
+import de.umass.lastfm.AlbumConverter;
+import de.umass.lastfm.Artist;
+import de.umass.lastfm.ArtistConverter;
 import de.umass.lastfm.LastFM;
 import de.umass.lastfm.LastFMVolley;
 import de.umass.lastfm.MusicEntryFactory;
@@ -74,7 +78,9 @@ public class LastFMModule {
             });
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(endpoint)
-                    .addConverterFactory(new MusicEntryFactory())
+                    .addConverter(Album.class, new AlbumConverter())
+                    .addConverter(Artist.class, new ArtistConverter())
+//                    .addConverterFactory(new MusicEntryFactory())
                     .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                     .client(client)
                     .build();
