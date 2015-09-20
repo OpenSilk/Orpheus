@@ -165,9 +165,8 @@ public class FoldersScreenView extends CoordinatorLayout implements BundleableRe
 
     }
 
-
     void updateFab() {
-
+        mFab.setImageLevel(mIndexClient.isIndexed(mThisContainer.getUri()) ? 1 : 0);
     }
 
     void subscribeClicks() {
@@ -177,7 +176,14 @@ public class FoldersScreenView extends CoordinatorLayout implements BundleableRe
 
                     @Override
                     public void call(ViewClickEvent onClickEvent) {
-                        level = level == 0 ? 1 : 0;
+                        if (!mIndexClient.isIndexed(mThisContainer.getUri())) {
+                            mIndexClient.add(mThisContainer.getUri());
+                            level = 1;
+                        } else {
+                            mIndexClient.remove(mThisContainer.getUri());
+                            //TODO show toast
+                            level = 0;
+                        }
                         mFab.setImageLevel(level);
                     }
                 }

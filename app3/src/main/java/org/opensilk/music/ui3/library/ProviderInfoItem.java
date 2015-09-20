@@ -17,13 +17,8 @@
 
 package org.opensilk.music.ui3.library;
 
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.os.Bundle;
-
 import org.opensilk.music.library.LibraryProviderInfo;
 import org.opensilk.music.model.Container;
-import org.opensilk.music.model.spi.Bundleable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,8 +31,9 @@ public class ProviderInfoItem {
     final LibraryProviderInfo info;
     final List<Container> roots = new ArrayList<>();
 
-    boolean isLoading = true;
-    boolean needsLogin = false;
+    private boolean isLoading = true;
+    private boolean needsLogin = false;
+    private boolean inError = false;
 
     public ProviderInfoItem(LibraryProviderInfo info) {
         this.info = info;
@@ -65,5 +61,13 @@ public class ProviderInfoItem {
 
     public boolean needsLogin() {
         return needsLogin;
+    }
+
+    public void setError(boolean yes) {
+        inError = yes;
+    }
+
+    public boolean isError() {
+        return inError;
     }
 }

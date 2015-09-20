@@ -19,6 +19,7 @@ package org.opensilk.music;
 
 import android.content.ComponentCallbacks2;
 import android.content.res.Configuration;
+import android.os.Environment;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.NotImplementedException;
@@ -62,7 +63,14 @@ public class App extends BaseApp {
             DaggerService.<AppComponent>getDaggerComponent(this).inject(this);
             registerComponentCallbacks(mUiComponentCallbacks);
         } else if (isProviderProcess()) {
+            // STOPSHIP: 9/19/15  
+            File db = getDatabasePath("music.db");
+            Timber.e("Database path = %s", db);
+            try {
+                FileUtils.copyFile(db, new File(Environment.getExternalStorageDirectory(), "orpheus.db"));
+            } catch (Exception e) {
 
+            }
         } else if (isServiceProcess()) {
 
         } else {

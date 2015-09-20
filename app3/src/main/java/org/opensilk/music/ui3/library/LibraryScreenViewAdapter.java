@@ -87,15 +87,21 @@ public class LibraryScreenViewAdapter extends RecyclerListAdapter<ProviderInfoIt
         });
         holder.progress.setVisibility(item.isLoading() ? View.VISIBLE : View.GONE);
         holder.loginBtn.setVisibility(item.needsLogin() ? View.VISIBLE : View.GONE);
-        if (item.needsLogin()) {
-            holder.loginBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                }
-            });
-        } else if (!item.isLoading()) {
-            holder.addRoots(item.getRoots(), presenter);
+        if (!item.isLoading()) {
+            if (!item.getRoots().isEmpty()) {
+                holder.addRoots(item.getRoots(), presenter);
+            } if (item.isError()) {
+                //TODO show error
+            } else if (item.needsLogin()) {
+                holder.loginBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //TODO
+                    }
+                });
+            } else {
+                //TODO show empty
+            }
         }
     }
 

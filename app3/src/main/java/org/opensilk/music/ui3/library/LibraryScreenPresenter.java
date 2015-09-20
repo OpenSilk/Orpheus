@@ -37,6 +37,7 @@ import org.opensilk.common.ui.mortarfragment.MortarFragment;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryProviderInfo;
+import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.loader.BundleableLoader;
@@ -160,7 +161,6 @@ public class LibraryScreenPresenter extends ViewPresenter<LibraryScreenView> {
                             int index = adapter.indexOf(item);
                             item.getRoots().addAll(roots);
                             item.setLoading(false);
-                            item.setNeedsLogin(false);
                             adapter.notifyItemChanged(index);
                         }
                     }
@@ -168,11 +168,20 @@ public class LibraryScreenPresenter extends ViewPresenter<LibraryScreenView> {
                     @Override
                     public void call(Throwable throwable) {
                         Timber.w(throwable, "getRootListing(%s)", item.getInfo().getAuthority());
+                        if (throwable instanceof LibraryException) {
+                            LibraryException e = (LibraryException) throwable;
+                            if (e.getCode() == LibraryException.Kind.AUTH_FAILURE) {
+                                item.setLoading(false);
+                                item.setNeedsLogin(true);
+                            }
+                        }
+                        if (hasView()) {
+                            item.setLoading(false);
+                            item.setError(true);
+                        }
                         if (hasView()) {
                             LibraryScreenViewAdapter adapter = getView().getAdapter();
                             int index = adapter.indexOf(item);
-                            item.setLoading(false);
-                            item.setNeedsLogin(true);
                             adapter.notifyItemChanged(index);
                         }
                     }
