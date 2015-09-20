@@ -26,6 +26,7 @@ import rx.Subscriber;
 /**
  * Created by drew on 4/29/15.
  */
+@Deprecated
 public interface LibraryCapability {
     /**
      * Supports querying for albums

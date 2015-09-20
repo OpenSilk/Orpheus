@@ -64,6 +64,8 @@ public abstract class LibraryProvider extends ContentProvider {
      */
     public static final String AUTHORITY_PFX = "orpheus.library.";
 
+    public static final String ACTION_FILTER = "org.opensilk.music.action.LIBRARY_PROVIDER";
+
     /**
      * Our full authority
      */
@@ -173,12 +175,16 @@ public abstract class LibraryProvider extends ContentProvider {
                 return getLibraryConfig().dematerialize();
             }
             default: {
-                Log.e(TAG, "Unknown method " + method);
-                ok.putOk(false).putCause(new LibraryException(METHOD_NOT_IMPLEMENTED,
-                        new UnsupportedOperationException(method)));
-                return ok.get();
+                return callCustom(method, arg, extras);
             }
         }
+    }
+
+    protected Bundle callCustom(String method, String arg, Bundle extras) {
+        Log.e(TAG, "Unknown method " + method);
+        LibraryExtras.Builder ok = LibraryExtras.b();
+        return ok.putOk(false).putCause(new LibraryException(METHOD_NOT_IMPLEMENTED,
+                new UnsupportedOperationException(method))).get();
     }
 
     /*

@@ -26,6 +26,7 @@ import android.text.TextUtils;
 /**
  * Created by drew on 7/2/14.
  */
+@Deprecated
 public class LibraryInfo implements Parcelable {
 
     /**
