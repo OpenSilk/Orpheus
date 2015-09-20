@@ -34,7 +34,6 @@ import org.opensilk.music.index.IndexComponent;
 import org.opensilk.music.index.database.IndexDatabase;
 import org.opensilk.music.index.database.IndexSchema;
 import org.opensilk.music.library.provider.LibraryExtras;
-import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.loader.BundleableLoader;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Track;
@@ -56,13 +55,9 @@ import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import retrofit.Call;
 import retrofit.Response;
-import rx.Observable;
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.functions.Func1;
 import rx.subjects.PublishSubject;
-import rx.subjects.SerializedSubject;
 import rx.subjects.Subject;
 import timber.log.Timber;
 
@@ -566,36 +561,17 @@ public class ScannerService extends MortarIntentService {
     }
 
     long insertContainer(Uri uri, Uri parentUri) {
-        return mIndexDatabase.addContainer(uri, parentUri);
+        return mIndexDatabase.insertContainer(uri, parentUri);
     }
 
     @DebugLog
     long insertTrack(Track t, long artistId, long albumId) {
-        ContentValues cv = new ContentValues(10);
-        cv.put(IndexSchema.TrackMeta.TRACK_NAME, t.getName());
-        cv.put(IndexSchema.TrackMeta.TRACK_KEY, keyFor(t.getName()));
-        cv.put(IndexSchema.TrackMeta.TRACK_NUMBER, t.getTrackNumber());
-        cv.put(IndexSchema.TrackMeta.DISC_NUMBER, t.getDiscNumber());
-        cv.put(IndexSchema.TrackMeta.GENRE, t.getGenre());
-        cv.put(IndexSchema.TrackMeta.ARTIST_ID, artistId);
-        cv.put(IndexSchema.TrackMeta.ALBUM_ID, albumId);
-        return mIndexDatabase.insert(IndexSchema.TrackMeta.TABLE, null, cv,SQLiteDatabase.CONFLICT_IGNORE);
+        return mIndexDatabase.insertTrack(t, artistId, albumId);
     }
 
     @DebugLog
     long insertRes(Track.Res res, long trackId, long containerId) {
-        ContentValues cv = new ContentValues(10);
-        cv.put(IndexSchema.TrackResMeta.TRACK_ID, trackId);
-        cv.put(IndexSchema.TrackResMeta.CONTAINER_ID, containerId);
-        cv.put(IndexSchema.TrackResMeta.AUTHORITY,res.getUri().getAuthority());
-        cv.put(IndexSchema.TrackResMeta.URI, res.getUri().toString());
-        cv.put(IndexSchema.TrackResMeta.SIZE, res.getSize());
-        cv.put(IndexSchema.TrackResMeta.MIME_TYPE, res.getMimeType());
-        cv.put(IndexSchema.TrackResMeta.DATE_ADDED, System.currentTimeMillis());
-        cv.put(IndexSchema.TrackResMeta.LAST_MOD, res.getLastMod());
-        cv.put(IndexSchema.TrackResMeta.BITRATE, res.getBitrate());
-        cv.put(IndexSchema.TrackResMeta.DURATION, res.getDuration());
-        return mIndexDatabase.insert(IndexSchema.TrackResMeta.TABLE, null, cv,SQLiteDatabase.CONFLICT_IGNORE);
+        return mIndexDatabase.insertTrackRes(res, trackId, containerId);
     }
 
     static void closeCursor(Cursor c) {

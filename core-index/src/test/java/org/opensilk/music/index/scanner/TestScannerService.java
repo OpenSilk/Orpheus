@@ -20,8 +20,6 @@ package org.opensilk.music.index.scanner;
 import android.content.Intent;
 import android.os.Build;
 
-import junit.framework.Assert;
-
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -33,7 +31,9 @@ import org.opensilk.music.index.IndexComponent;
 import org.opensilk.music.index.IndexTestApplication;
 import org.opensilk.music.index.database.IndexDatabase;
 import org.opensilk.music.library.sort.AlbumSortOrder;
+import org.opensilk.music.library.sort.ArtistSortOrder;
 import org.opensilk.music.model.Album;
+import org.opensilk.music.model.Artist;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
@@ -73,18 +73,23 @@ public class TestScannerService {
         ServiceController<ScannerService> controller = Robolectric.buildService(ScannerService.class);
         controller.create();
         ScannerService service = controller.get();
+
         long id = service.lookupArtistInfo("foxes");
-        Assert.assertNotSame(id, -1);
+        Assertions.assertThat(id).isNotEqualTo(-1);
         long id2 = service.lookupAlbumInfo("foxes", "glorious", id);
-        Assert.assertNotSame(id2, -1);
+        Assertions.assertThat(id2).isNotEqualTo(-1);
         long id3 =service.checkArtist("foxes");
-        Assert.assertNotSame(id3, -1);
+        Assertions.assertThat(id3).isNotEqualTo(-1);
         long id4 = service.checkAlbum("foxes", "glorious");
-        Assert.assertNotSame(id4, -1);
+        Assertions.assertThat(id4).isNotEqualTo(-1);
+
         IndexComponent acc = DaggerService.getDaggerComponent(RuntimeEnvironment.application);
         IndexDatabase db = acc.indexDatabase();
+        //make sure they show in the views
         List<Album> albums = db.getAlbums(AlbumSortOrder.A_Z);
-        Assertions.assertThat(albums.isEmpty()).isFalse();
+        Assertions.assertThat(albums.size()).isEqualTo(1);
+        List<Artist> artists = db.getArtists(ArtistSortOrder.A_Z);
+        Assertions.assertThat(artists.size()).isEqualTo(1);
     }
 
 }

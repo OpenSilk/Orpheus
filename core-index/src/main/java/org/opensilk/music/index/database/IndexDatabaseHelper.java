@@ -32,7 +32,7 @@ import javax.inject.Singleton;
 @Singleton
 public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
-    public static final int DB_VERSION = 10;
+    public static final int DB_VERSION = 14;
     public static final String DB_NAME = "music.db";
 
     @Inject
@@ -47,27 +47,33 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (oldVersion < 4) {
+        if (oldVersion < 5) {
             //Drop tables from orpheus 0.x - 2.x
             db.execSQL("DROP TABLE IF EXISTS genres;");
             db.execSQL("DROP TABLE IF EXISTS playlists;");
             db.execSQL("DROP TABLE IF EXISTS recent;");
         }
 
-        // STOPSHIP: 9/19/15  
-        final int shipVer = DB_VERSION;
-
-        if (oldVersion < shipVer) {
+        if (oldVersion < DB_VERSION) {
+            // STOPSHIP: 9/19/15 remove before release
             //cleanup mistakes prior to 3.0 release
             db.execSQL("DROP TABLE IF EXISTS track_res_meta;");
-            db.execSQL("DROP TABLE IF EXISTS container_uris;");
             db.execSQL("DROP TABLE IF EXISTS containers;");
             db.execSQL("DROP TABLE IF EXISTS track_meta;");
             db.execSQL("DROP TABLE IF EXISTS album_meta;");
             db.execSQL("DROP TABLE IF EXISTS artist_meta;");
-        }
+            db.execSQL("DROP VIEW IF EXISTS album_info;");
+            db.execSQL("DROP VIEW IF EXISTS artist_info;");
+            db.execSQL("DROP TRIGGER IF EXISTS tracks_cleanup;");
+            db.execSQL("DROP INDEX IF EXISTS artistkey_idx;");
+            db.execSQL("DROP INDEX IF EXISTS albumkey_idx;");
+            db.execSQL("DROP INDEX IF EXISTS trackkey_idx;");
+            db.execSQL("DROP INDEX IF EXISTS artistid_idx;");
+            db.execSQL("DROP INDEX IF EXISTS albumid_idx;");
+            db.execSQL("DROP INDEX IF EXISTS trackid_idx;");
+            db.execSQL("DROP INDEX IF EXISTS trackresuri_idx;");
+            //end mistakes cleanup
 
-        if (oldVersion < shipVer) {
             //Artist metadata
             db.execSQL("CREATE TABLE IF NOT EXISTS artist_meta (" +
                     "artist_id INTEGER PRIMARY KEY, " +
@@ -145,13 +151,24 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     ";");
 
             // Provides some extra info about artists, like the number of tracks and albums for this artist
+//            db.execSQL("CREATE VIEW IF NOT EXISTS artist_info AS " +
+//                    "SELECT artist_id AS _id, artist_name as name, artist_key, " +
+//                    "COUNT(DISTINCT album_id) AS number_of_albums, " +
+//                    "COUNT(*) AS number_of_tracks, "+
+//                    "artist_bio_content as bio, artist_bio_summary as summary, artist_mbid as mbid " +
+//                    "FROM track_full " +
+//                    "GROUP BY artist_id" +
+//                    ";");
+
             db.execSQL("CREATE VIEW IF NOT EXISTS artist_info AS " +
-                    "SELECT artist_id AS _id, artist_name as name, artist_key, " +
-                    "COUNT(DISTINCT album_id) AS number_of_albums, " +
-                    "COUNT(*) AS number_of_tracks, "+
+                    "SELECT a1.artist_id AS _id, artist_name as name, artist_key, " +
+                    "COUNT(a2.album_id) AS number_of_albums, " +
+                    "COUNT(t1.track_id) AS number_of_tracks, "+
                     "artist_bio_content as bio, artist_bio_summary as summary, artist_mbid as mbid " +
-                    "FROM track_full " +
-                    "GROUP BY artist_id" +
+                    "FROM artist_meta a1 " +
+                    "LEFT OUTER JOIN album_meta a2 ON a2.album_artist_id = a1.artist_id " +
+                    "LEFT OUTER JOIN track_meta t1 ON t1.artist_id = a1.artist_id " +
+                    "GROUP BY a1.artist_id" +
                     ";");
 
             // Provides some extra info about tracks like album artist name and number of resources
@@ -174,14 +191,14 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
 //                "FROM track_full WHERE hidden=0 GROUP BY album_id" +
 //                ";");
             db.execSQL("CREATE VIEW IF NOT EXISTS album_info AS " +
-                    "SELECT album_meta.album_id AS _id, album_name as name, album_key, " +
-                    "artist_name as artist, album_artist_id as artist_id, artist_key," +
-                    "count(track_id) AS track_count, " +
+                    "SELECT a1.album_id AS _id, album_name as name, album_key, " +
+                    "artist_name as artist, album_artist_id as artist_id, artist_key, " +
+                    "count(t1.track_id) AS track_count, " +
                     "album_bio_content as bio, album_bio_summary as summary, album_mbid as mbid " +
-                    "FROM album_meta " +
-                    "LEFT OUTER JOIN artist_meta on album_meta.album_artist_id = artist_meta.artist_id " +
-                    "LEFT OUTER JOIN track_meta on album_meta.album_id = track_meta.album_id " +
-                    "GROUP BY album_meta.album_id" +
+                    "FROM album_meta a1 " +
+                    "LEFT OUTER JOIN artist_meta a2 on a1.album_artist_id = a2.artist_id " +
+                    "LEFT OUTER JOIN track_meta t1 on a1.album_id = t1.album_id " +
+                    "GROUP BY a1.album_id" +
                     ";");
 
             // For a given artist_id, provides the album_id for albums on
@@ -197,13 +214,35 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "FROM track_meta GROUP BY genre" +
                     ";");
 
-            db.execSQL("CREATE INDEX IF NOT EXISTS artistkey_idx on artist_meta(artist_key);");
-            db.execSQL("CREATE INDEX IF NOT EXISTS albumkey_idx on album_meta(album_key);");
-            db.execSQL("CREATE INDEX IF NOT EXISTS trackkey_idx on track_meta(track_key);");
-            db.execSQL("CREATE INDEX IF NOT EXISTS artistid_idx on artist_meta(artist_id);");
-            db.execSQL("CREATE INDEX IF NOT EXISTS albumid_idx on album_meta(album_id);");
-            db.execSQL("CREATE INDEX IF NOT EXISTS trackid_idx on track_meta(track_id);");
-            db.execSQL("CREATE INDEX IF NOT EXISTS trackresuri_idx on track_res_meta(uri);");
+            //More efficient lookups
+            db.execSQL("CREATE INDEX IF NOT EXISTS artist_key_idx on artist_meta(artist_key);");
+            db.execSQL("CREATE INDEX IF NOT EXISTS album_key_idx on album_meta(album_key);");
+            db.execSQL("CREATE INDEX IF NOT EXISTS track_key_idx on track_meta(track_key);");
+            db.execSQL("CREATE INDEX IF NOT EXISTS artist_id_idx on artist_meta(artist_id);");
+            db.execSQL("CREATE INDEX IF NOT EXISTS album_id_idx on album_meta(album_id);");
+            db.execSQL("CREATE INDEX IF NOT EXISTS track_id_idx on track_meta(track_id);");
+
+            //Cleanup tracks when resources are deleted
+            db.execSQL("CREATE TRIGGER IF NOT EXISTS tracks_cleanup AFTER DELETE ON track_res_meta " +
+                    "FOR EACH ROW " +
+                    "WHEN (SELECT COUNT(track_id) FROM track_res_meta WHERE track_id=OLD.track_id) = 0 " +
+                    "BEGIN " +
+                    "DELETE FROM track_meta WHERE track_id=OLD.track_id; " +
+                    "END");
+            //Cleanup albums when tracks ar deleted
+            db.execSQL("CREATE TRIGGER IF NOT EXISTS albums_cleanup AFTER DELETE ON track_meta " +
+                    "FOR EACH ROW " +
+                    "WHEN (SELECT COUNT(track_id) FROM track_meta WHERE album_id=OLD.album_id) = 0 " +
+                    "BEGIN " +
+                    "DELETE FROM album_meta WHERE album_id=OLD.album_id; " +
+                    "END");
+            //Cleanup artists when tracks are deleted
+            db.execSQL("CREATE TRIGGER IF NOT EXISTS artists_cleanup AFTER DELETE ON track_meta " +
+                    "FOR EACH ROW " +
+                    "WHEN (SELECT COUNT(track_id) FROM track_meta WHERE artist_id=OLD.artist_id) = 0 " +
+                    "BEGIN " +
+                    "DELETE FROM artist_meta WHERE artist_id=OLD.artist_id; " +
+                    "END");
         }
 
         /*

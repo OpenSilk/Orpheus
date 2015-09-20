@@ -101,6 +101,7 @@ public class IndexSchema {
 
     public interface TrackMeta {
         String TABLE = "track_meta";
+        String TRACK_ID = "track_id";
         String TRACK_NAME = "track_name";
         String TRACK_KEY = "track_key";
         String TRACK_NUMBER = "track_number";

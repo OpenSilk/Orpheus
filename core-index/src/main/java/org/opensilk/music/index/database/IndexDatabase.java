@@ -41,6 +41,8 @@ public interface IndexDatabase {
     long insert(String table, String nullColumnHack, ContentValues values,int conflictAlgorithm);
     int update(String table, ContentValues values, String whereClause, String[] whereArgs);
     long hasContainer(Uri uri);
-    long addContainer(Uri uri, Uri parentUri);
+    long insertContainer(Uri uri, Uri parentUri);
     int removeContainer(Uri uri);
+    long insertTrack(Track t, long artistId, long albumId);
+    long insertTrackRes(Track.Res res, long trackId, long containerId);
 }

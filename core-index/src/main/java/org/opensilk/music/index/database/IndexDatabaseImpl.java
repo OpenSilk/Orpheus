@@ -42,6 +42,8 @@ import javax.inject.Singleton;
 import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
+import static android.provider.MediaStore.Audio.keyFor;
+
 /**
  * Created by drew on 9/16/15.
  */
@@ -264,7 +266,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
     }
 
     @Override
-    public long addContainer(Uri uri, Uri parentUri) {
+    public long insertContainer(Uri uri, Uri parentUri) {
         ContentValues cv = new ContentValues(2);
         cv.put(IndexSchema.Containers.URI, uri.toString());
         cv.put(IndexSchema.Containers.PARENT_URI, parentUri.toString());
@@ -276,17 +278,20 @@ public class IndexDatabaseImpl implements IndexDatabase {
         return id;
     }
 
+    static final String[] removeContainercols = new String[] {
+            IndexSchema.Containers.CONTAINER_ID,
+    };
+
+    static final String removeContainerSel = IndexSchema.Containers.URI + "=?";
+
     @Override
     public int removeContainer(Uri uri) {
-        final String[] cols = new String[] {
-                IndexSchema.Containers.CONTAINER_ID,
-        };
         String[] containers = null;
         Cursor c = null;
         try {
-            String sel = IndexSchema.Containers.URI + "=?";
             String[] selArgs = new String[]{uri.toString()};
-            c = query(IndexSchema.Containers.TABLE, cols, sel, selArgs, null, null, null);
+            c = query(IndexSchema.Containers.TABLE, removeContainercols,
+                    removeContainerSel, selArgs, null, null, null);
             if (c == null || !c.moveToFirst()) {
                 return 0;
             }
@@ -294,7 +299,9 @@ public class IndexDatabaseImpl implements IndexDatabase {
         } finally {
             closeCursor(c);
         }
+
         containers = ArrayUtils.addAll(containers, findChildrenUnder(uri));
+
         StringBuilder where = new StringBuilder();
         where.append(IndexSchema.Containers.CONTAINER_ID).append(" IN (");
         where.append("?");
@@ -302,6 +309,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
             where.append(",?");
         }
         where.append(")");
+
         return delete(IndexSchema.Containers.TABLE, where.toString(), containers);
     }
 
@@ -315,9 +323,9 @@ public class IndexDatabaseImpl implements IndexDatabase {
     private String[] findChildrenUnder(Uri uri) {
         String[] containers = null;
         HashSet<String> children = new HashSet<>();
-        String[] selArgs = new String[]{uri.toString()};
         Cursor c = null;
         try {
+            String[] selArgs = new String[]{uri.toString()};
             c = query(IndexSchema.Containers.TABLE, findChildrenUnderCols,
                     findChildrenUnderSel, selArgs, null, null, null);
             if (c != null && c.moveToFirst()) {
@@ -333,6 +341,35 @@ public class IndexDatabaseImpl implements IndexDatabase {
             ArrayUtils.addAll(containers, findChildrenUnder(Uri.parse(child)));
         }
         return containers;
+    }
+
+    @Override
+    public long insertTrack(Track t, long artistId, long albumId) {
+        ContentValues cv = new ContentValues(10);
+        cv.put(IndexSchema.TrackMeta.TRACK_NAME, t.getName());
+        cv.put(IndexSchema.TrackMeta.TRACK_KEY, keyFor(t.getName()));
+        cv.put(IndexSchema.TrackMeta.TRACK_NUMBER, t.getTrackNumber());
+        cv.put(IndexSchema.TrackMeta.DISC_NUMBER, t.getDiscNumber());
+        cv.put(IndexSchema.TrackMeta.GENRE, t.getGenre());
+        cv.put(IndexSchema.TrackMeta.ARTIST_ID, artistId);
+        cv.put(IndexSchema.TrackMeta.ALBUM_ID, albumId);
+        return insert(IndexSchema.TrackMeta.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+    }
+
+    @Override
+    public long insertTrackRes(Track.Res res, long trackId, long containerId) {
+        ContentValues cv = new ContentValues(10);
+        cv.put(IndexSchema.TrackResMeta.TRACK_ID, trackId);
+        cv.put(IndexSchema.TrackResMeta.CONTAINER_ID, containerId);
+        cv.put(IndexSchema.TrackResMeta.AUTHORITY,res.getUri().getAuthority());
+        cv.put(IndexSchema.TrackResMeta.URI, res.getUri().toString());
+        cv.put(IndexSchema.TrackResMeta.SIZE, res.getSize());
+        cv.put(IndexSchema.TrackResMeta.MIME_TYPE, res.getMimeType());
+        cv.put(IndexSchema.TrackResMeta.DATE_ADDED, System.currentTimeMillis());
+        cv.put(IndexSchema.TrackResMeta.LAST_MOD, res.getLastMod());
+        cv.put(IndexSchema.TrackResMeta.BITRATE, res.getBitrate());
+        cv.put(IndexSchema.TrackResMeta.DURATION, res.getDuration());
+        return insert(IndexSchema.TrackResMeta.TABLE, null, cv,SQLiteDatabase.CONFLICT_IGNORE);
     }
 
     static void closeCursor(Cursor c) {
