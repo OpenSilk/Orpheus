@@ -114,6 +114,7 @@ public class IndexSchema {
         String TABLE = "track_res_meta";
         String RES_ID = "res_id";
         String TRACK_ID = "track_id";
+        String CONTAINER_ID = "container_id";
         String AUTHORITY = "authority";
         String URI = "uri";
         String SIZE = "size";
@@ -126,7 +127,9 @@ public class IndexSchema {
 
     public interface Containers {
         String TABLE = "containers";
+        String CONTAINER_ID = "container_id";
         String URI = "uri";
+        String PARENT_URI = "parent_uri";
         String AUTHORITY = "authority";
     }
 

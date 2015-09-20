@@ -32,7 +32,7 @@ import javax.inject.Singleton;
 @Singleton
 public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
-    public static final int DB_VERSION = 8;
+    public static final int DB_VERSION = 10;
     public static final String DB_NAME = "music.db";
 
     @Inject
@@ -60,10 +60,11 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
         if (oldVersion < shipVer) {
             //cleanup mistakes prior to 3.0 release
             db.execSQL("DROP TABLE IF EXISTS track_res_meta;");
+            db.execSQL("DROP TABLE IF EXISTS container_uris;");
+            db.execSQL("DROP TABLE IF EXISTS containers;");
             db.execSQL("DROP TABLE IF EXISTS track_meta;");
             db.execSQL("DROP TABLE IF EXISTS album_meta;");
             db.execSQL("DROP TABLE IF EXISTS artist_meta;");
-            db.execSQL("DROP TABLE IF EXISTS container_uris;");
         }
 
         if (oldVersion < shipVer) {
@@ -102,23 +103,26 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "album_id INTEGER REFERENCES album_meta(album_id) ON DELETE CASCADE," +
                     "UNIQUE(artist_id,album_id,track_key,track_number,disc_number) ON CONFLICT IGNORE" +
                     ");");
+            //Containers
+            db.execSQL("CREATE TABLE IF NOT EXISTS containers (" +
+                    "container_id INTEGER PRIMARY KEY, " +
+                    "uri TEXT NOT NULL UNIQUE ON CONFLICT IGNORE, " +
+                    "parent_uri TEXT NOT NULL, " +
+                    "authority TEXT NOT NULL " +
+                    ");");
             //Track resources
             db.execSQL("CREATE TABLE IF NOT EXISTS track_res_meta (" +
                     "res_id INTEGER PRIMARY KEY, " +
                     "track_id INTEGER REFERENCES track_meta(track_id) ON DELETE CASCADE, " +
-                    "authority TEXT NOT NULL, " +
+                    "container_id INTEGER REFERENCES containers(container_id) ON DELETE CASCADE, " +
                     "uri TEXT NOT NULL UNIQUE, " +
+                    "authority TEXT NOT NULL, " +
                     "size INTEGER, " +
                     "mime_type TEXT, " +
                     "date_added INTEGER, " +
                     "last_modified INTEGER, " + //opaque provided by library
                     "bitrate INTEGER, " +
                     "duration INTEGER " +
-                    ");");
-
-            db.execSQL("CREATE TABLE IF NOT EXISTS containers (" +
-                    "uri TEXT NOT NULL UNIQUE ON CONFLICT IGNORE, " +
-                    "authority TEXT NOT NULL" +
                     ");");
 
             db.execSQL("CREATE TABLE IF NOT EXISTS playlists (" +

@@ -26,6 +26,7 @@ import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.index.provider.Methods;
 import org.opensilk.music.library.provider.LibraryExtras;
+import org.opensilk.music.model.Container;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -52,20 +53,20 @@ public class IndexClientImpl implements IndexClient {
     }
 
     @Override
-    public boolean isIndexed(Uri uri) {
-        Bundle args = LibraryExtras.b().putUri(uri).get();
+    public boolean isIndexed(Container container) {
+        Bundle args = LibraryExtras.b().putBundleable(container).get();
         return makeCall(Methods.IS_INDEXED, args);
     }
 
     @Override
-    public boolean add(Uri uri) {
-        Bundle args = LibraryExtras.b().putUri(uri).get();
+    public boolean add(Container container) {
+        Bundle args = LibraryExtras.b().putBundleable(container).get();
         return makeCall(Methods.ADD, args);
     }
 
     @Override
-    public boolean remove(Uri uri) {
-        Bundle args = LibraryExtras.b().putUri(uri).get();
+    public boolean remove(Container container) {
+        Bundle args = LibraryExtras.b().putBundleable(container).get();
         return makeCall(Methods.REMOVE, args);
     }
 

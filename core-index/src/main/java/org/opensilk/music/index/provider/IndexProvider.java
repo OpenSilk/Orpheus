@@ -34,6 +34,7 @@ import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryProvider;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
+import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.spi.Bundleable;
 
@@ -91,17 +92,20 @@ public class IndexProvider extends LibraryProvider {
         LibraryExtras.Builder reply = LibraryExtras.b();
         switch (method) {
             case Methods.IS_INDEXED: {
-                boolean yes = mDataBase.hasContainer(LibraryExtras.getUri(extras));
-                return reply.putOk(yes).get();
+                Container c = LibraryExtras.getBundleable(extras);
+                long id = mDataBase.hasContainer(c.getUri());
+                return reply.putOk((id > 0)).get();
             }
             case Methods.ADD: {
                 Intent i = new Intent(getContext(), ScannerService.class)
-                        .setData(LibraryExtras.getUri(extras));
+                        .putExtra(LibraryExtras.INTENT_KEY, extras);
                 getContext().startService(i);
                 return reply.putOk(true).get();
             }
             case Methods.REMOVE: {
-                return reply.get();
+                Container c = LibraryExtras.getBundleable(extras);
+                int numremoved = mDataBase.removeContainer(c.getUri());
+                return reply.putOk(numremoved > 0).get();
             }
             default: {
                 return super.callCustom(method, arg, extras);

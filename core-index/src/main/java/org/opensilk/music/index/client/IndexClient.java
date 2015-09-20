@@ -19,6 +19,8 @@ package org.opensilk.music.index.client;
 
 import android.net.Uri;
 
+import org.opensilk.music.model.Container;
+
 /**
  * Created by drew on 9/17/15.
  */
@@ -27,19 +29,19 @@ public interface IndexClient {
      * @param uri
      * @return True if uri or any ancestor is indexed
      */
-    boolean isIndexed(Uri uri);
+    boolean isIndexed(Container container);
 
     /**
      *
      * @param uri
      * @return True if succeeded, false on error or if {@link #isIndexed(Uri)} returns true;
      */
-    boolean add(Uri uri);
+    boolean add(Container container);
 
     /**
      *
      * @param uri
      * @return True if success, false on error or if {@link #isIndexed(Uri)} returns false;
      */
-    boolean remove(Uri uri);
+    boolean remove(Container container);
 }

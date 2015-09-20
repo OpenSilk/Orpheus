@@ -23,6 +23,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.provider.BaseColumns;
 
@@ -32,6 +33,8 @@ import org.opensilk.common.core.mortar.MortarIntentService;
 import org.opensilk.music.index.IndexComponent;
 import org.opensilk.music.index.database.IndexDatabase;
 import org.opensilk.music.index.database.IndexSchema;
+import org.opensilk.music.library.provider.LibraryExtras;
+import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.loader.BundleableLoader;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Track;
@@ -107,6 +110,7 @@ public class ScannerService extends MortarIntentService {
     }
 
     void notifySuccess(Uri uri) {
+        Timber.v("Indexed %s", uri);
         numProcessed.incrementAndGet();
         notifSubject.onNext(Status.SCANNING);
     }
@@ -118,6 +122,7 @@ public class ScannerService extends MortarIntentService {
     }
 
     void notifyError(Uri uri) {
+        Timber.w("An error occured while proccessing %s", uri);
         numError.incrementAndGet();
         notifSubject.onNext(Status.SCANNING);
     }
@@ -128,9 +133,14 @@ public class ScannerService extends MortarIntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        final Uri uri = intent.getData();
-        if (uri == null) {
-            Timber.w("ScannerService called without uri");
+        Bundle extras = intent.getBundleExtra(LibraryExtras.INTENT_KEY);
+        if (extras == null) {
+            Timber.e("No extras in intent");
+            return;
+        }
+        Container container = LibraryExtras.getBundleable(extras);
+        if (container == null) {
+            Timber.e("No container in extras");
             return;
         }
         notifSubject = PublishSubject.create();
@@ -150,20 +160,22 @@ public class ScannerService extends MortarIntentService {
                     }
                 });
         notifSubject.onNext(Status.SCANNING);
-        scan2(uri);
+        scan2(container.getUri(), container.getParentUri());
         notifSubject.onNext(Status.COMPLETED);
         notifSubject.onCompleted();
     }
 
-    void scan2(final Uri uri) {
+    void scan2(final Uri uri, final Uri parentUri) {
         Timber.i("scan2(%s)", uri);
-        mIndexDatabase.addContainer(uri);
+
+        insertContainer(uri, parentUri);
+
         BundleableLoader loader = new BundleableLoader(this, uri, null);
         List<Bundleable> bundleables;
         try {
             bundleables = loader.createObservable().toBlocking().first();
         } catch (RuntimeException e) {
-            Timber.e(e, "scan2(%s)", uri);
+            notifyError(uri);
             return;
         }
         for (Bundleable b : bundleables) {
@@ -175,19 +187,23 @@ public class ScannerService extends MortarIntentService {
                     notifySkipped(item.getUri());
                     continue;
                 }
+                boolean success = false;
                 if (trackHasRequiredMeta(item)) {
-                    addMetaToDb(item);
+                    success = addMetaToDb(item);
                 } else {
                     Track t = extractMeta(item);
-                    if (t == null) {
-                        notifyError(item.getUri());
-                        continue;
+                    if (t != null) {
+                        success = addMetaToDb(item);
                     }
-                    addMetaToDb(t);
                 }
-                notifySuccess(item.getUri());
+                if (success) {
+                    notifySuccess(item.getUri());
+                } else {
+                    notifyError(item.getUri());
+                }
             } else if (b instanceof Container) {
-                scan2(b.getUri());
+                Container c = (Container) b;
+                scan2(c.getUri(), c.getParentUri());
             } else {
                 Timber.w("Unsupported bundleable %s at %s", b.getClass(), b.getUri());
             }
@@ -310,13 +326,13 @@ public class ScannerService extends MortarIntentService {
         return null;
     }
 
-    void addMetaToDb(Track track) {
+    boolean addMetaToDb(Track track) {
 
         String albumArtist = resolveAlbumArtist(track);
 
         if (StringUtils.isEmpty(albumArtist)) {
             Timber.w("Cannot process item %s missing albumArtist", track.getUri());
-            return;
+            return false;
         }
 
         long albumArtistId = checkArtist(albumArtist);
@@ -324,7 +340,7 @@ public class ScannerService extends MortarIntentService {
             albumArtistId = lookupArtistInfo(albumArtist);
             if (albumArtistId < 0) {
                 Timber.e("Unable to insert artist %s into db", albumArtist);
-                return;
+                return false;
             }
         }
 
@@ -332,7 +348,7 @@ public class ScannerService extends MortarIntentService {
 
         if (StringUtils.isEmpty(album)) {
             Timber.w("Cannot process item %s missing album", track.getUri());
-            return;
+            return false;
         }
 
         long albumId = checkAlbum(albumArtist, album);
@@ -340,7 +356,7 @@ public class ScannerService extends MortarIntentService {
             albumId = lookupAlbumInfo(albumArtist, album, albumArtistId);
             if (albumId < 0) {
                 Timber.e("Unable to insert album %s into db", album);
-                return;
+                return false;
             }
         }
 
@@ -349,7 +365,7 @@ public class ScannerService extends MortarIntentService {
         long artistId;
         if (StringUtils.isEmpty(artist)) {
             Timber.w("Cannot process item %s missing artist", track.getUri());
-            return;
+            return false;
         } else if (StringUtils.equalsIgnoreCase(artist, albumArtist)) {
             artistId = albumArtistId;
         } else {
@@ -358,7 +374,7 @@ public class ScannerService extends MortarIntentService {
                 artistId = lookupArtistInfo(artist);
                 if (artistId < 0) {
                     Timber.e("Unable to insert artist %s into db", artist);
-                    return;
+                    return false;
                 }
             }
         }
@@ -366,17 +382,26 @@ public class ScannerService extends MortarIntentService {
         long trackId = insertTrack(track, artistId, albumId);
         if (trackId < 0) {
             Timber.e("Unable to insert track %s into db", track.getName());
-            return;
+            return false;
         }
 
-        long resId = insertRes(track.getResources().get(0), trackId);
-        if (trackId < 0) {
-            Timber.e("Unable to insert %s into db", track.getResources().get(0).getUri());
-            return;
+        long containerId = checkContainer(track.getParentUri());
+        if (containerId < 0) {
+            Timber.e("Unable locate parent for track %s", track.getName());
+            return false;
+        }
+
+        for (Track.Res res : track.getResources()) {
+            long resId = insertRes(res, trackId, containerId);
+            if (trackId < 0) {
+                Timber.e("Unable to insert %s into db", res.getUri());
+                return false;
+            }
         }
 
         //TODO artwork
 
+        return true;
     }
 
     @DebugLog
@@ -536,6 +561,15 @@ public class ScannerService extends MortarIntentService {
     }
 
     @DebugLog
+    long checkContainer(Uri uri) {
+        return mIndexDatabase.hasContainer(uri);
+    }
+
+    long insertContainer(Uri uri, Uri parentUri) {
+        return mIndexDatabase.addContainer(uri, parentUri);
+    }
+
+    @DebugLog
     long insertTrack(Track t, long artistId, long albumId) {
         ContentValues cv = new ContentValues(10);
         cv.put(IndexSchema.TrackMeta.TRACK_NAME, t.getName());
@@ -549,9 +583,10 @@ public class ScannerService extends MortarIntentService {
     }
 
     @DebugLog
-    long insertRes(Track.Res res, long trackId) {
+    long insertRes(Track.Res res, long trackId, long containerId) {
         ContentValues cv = new ContentValues(10);
         cv.put(IndexSchema.TrackResMeta.TRACK_ID, trackId);
+        cv.put(IndexSchema.TrackResMeta.CONTAINER_ID, containerId);
         cv.put(IndexSchema.TrackResMeta.AUTHORITY,res.getUri().getAuthority());
         cv.put(IndexSchema.TrackResMeta.URI, res.getUri().toString());
         cv.put(IndexSchema.TrackResMeta.SIZE, res.getSize());

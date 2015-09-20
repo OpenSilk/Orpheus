@@ -40,6 +40,7 @@ public interface IndexDatabase {
     int delete(String table, String whereClause, String[] whereArgs);
     long insert(String table, String nullColumnHack, ContentValues values,int conflictAlgorithm);
     int update(String table, ContentValues values, String whereClause, String[] whereArgs);
-    boolean hasContainer(Uri uri);
-    void addContainer(Uri uri);
+    long hasContainer(Uri uri);
+    long addContainer(Uri uri, Uri parentUri);
+    int removeContainer(Uri uri);
 }

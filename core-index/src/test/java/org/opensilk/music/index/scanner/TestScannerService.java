@@ -85,18 +85,6 @@ public class TestScannerService {
         IndexDatabase db = acc.indexDatabase();
         List<Album> albums = db.getAlbums(AlbumSortOrder.A_Z);
         Assertions.assertThat(albums.isEmpty()).isFalse();
-        Method[] mds = Album.class.getDeclaredMethods();
-        for (Method m : mds) {
-            try {
-                System.out.println(m.getName());
-                System.out.println(m.invoke(albums.get(0)));
-
-            } catch (IllegalAccessException e) {
-
-            } catch (InvocationTargetException e) {
-
-            }
-        }
     }
 
 }

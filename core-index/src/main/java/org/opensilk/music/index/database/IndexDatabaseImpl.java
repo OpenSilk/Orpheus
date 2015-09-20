@@ -23,12 +23,15 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Track;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -239,32 +242,97 @@ public class IndexDatabaseImpl implements IndexDatabase {
         return helper.getWritableDatabase().update(table, values, whereClause, whereArgs);
     }
 
+    static final String[] hasContainerCols = new String[] {
+            IndexSchema.Containers.CONTAINER_ID,
+    };
+    static final String hasContainerSel = IndexSchema.Containers.URI + "=?";
+
     @Override
-    public boolean hasContainer(Uri uri) {
+    public long hasContainer(Uri uri) {
         Cursor c = null;
         try {
-            String sel = IndexSchema.Containers.URI + "=?";
             String[] selArgs = new String[] {uri.toString()};
-            c = query(IndexSchema.Containers.TABLE, new String[] {IndexSchema.Containers.URI},
-                    sel, selArgs, null, null, null);
-            if (c != null && c.getCount() > 0) {
-                return true;
+            c = query(IndexSchema.Containers.TABLE, hasContainerCols,
+                    hasContainerSel, selArgs, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                return c.getLong(0);
             }
         } finally {
             closeCursor(c);
         }
-        return false;
+        return -1;
     }
 
     @Override
-    public void addContainer(Uri uri) {
+    public long addContainer(Uri uri, Uri parentUri) {
         ContentValues cv = new ContentValues(2);
         cv.put(IndexSchema.Containers.URI, uri.toString());
+        cv.put(IndexSchema.Containers.PARENT_URI, parentUri.toString());
         cv.put(IndexSchema.Containers.AUTHORITY, uri.getAuthority());
-        long id = insert(IndexSchema.Containers.TABLE, null, cv,SQLiteDatabase.CONFLICT_IGNORE);
+        long id = insert(IndexSchema.Containers.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
         if (id < 0) {
             Timber.e("Uh oh there was a problem inserting %s", uri);
         }
+        return id;
+    }
+
+    @Override
+    public int removeContainer(Uri uri) {
+        final String[] cols = new String[] {
+                IndexSchema.Containers.CONTAINER_ID,
+        };
+        String[] containers = null;
+        Cursor c = null;
+        try {
+            String sel = IndexSchema.Containers.URI + "=?";
+            String[] selArgs = new String[]{uri.toString()};
+            c = query(IndexSchema.Containers.TABLE, cols, sel, selArgs, null, null, null);
+            if (c == null || !c.moveToFirst()) {
+                return 0;
+            }
+            containers = new String[] {c.getString(0)};
+        } finally {
+            closeCursor(c);
+        }
+        containers = ArrayUtils.addAll(containers, findChildrenUnder(uri));
+        StringBuilder where = new StringBuilder();
+        where.append(IndexSchema.Containers.CONTAINER_ID).append(" IN (");
+        where.append("?");
+        for (int ii=1; ii<containers.length; ii++) {
+            where.append(",?");
+        }
+        where.append(")");
+        return delete(IndexSchema.Containers.TABLE, where.toString(), containers);
+    }
+
+    static final String[] findChildrenUnderCols = new String[] {
+            IndexSchema.Containers.CONTAINER_ID,
+            IndexSchema.Containers.URI,
+    };
+    static final String findChildrenUnderSel = IndexSchema.Containers.PARENT_URI + "=?";
+
+    @DebugLog
+    private String[] findChildrenUnder(Uri uri) {
+        String[] containers = null;
+        HashSet<String> children = new HashSet<>();
+        String[] selArgs = new String[]{uri.toString()};
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.Containers.TABLE, findChildrenUnderCols,
+                    findChildrenUnderSel, selArgs, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                do {
+                    containers = ArrayUtils.add(containers, c.getString(0));
+                    children.add(c.getString(1));
+                } while (c.moveToNext());
+            }
+        } finally {
+            closeCursor(c);
+        }
+        for (String child : children) {
+            ArrayUtils.addAll(containers, findChildrenUnder(Uri.parse(child)));
+        }
+        return containers;
     }
 
     static void closeCursor(Cursor c) {
