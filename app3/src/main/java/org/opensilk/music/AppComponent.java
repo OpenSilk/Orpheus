@@ -26,6 +26,8 @@ import org.opensilk.music.index.IndexProviderAuthorityModule;
 import org.opensilk.music.index.client.IndexClientComponent;
 import org.opensilk.music.index.client.IndexClientModule;
 import org.opensilk.music.library.mediastore.MediaStoreLibraryAuthorityModule;
+import org.opensilk.music.library.upnp.UpnpLibraryAuthorityModule;
+import org.opensilk.music.library.upnp.UpnpLibraryComponent;
 import org.opensilk.music.playback.control.PlaybackController;
 
 import javax.inject.Named;

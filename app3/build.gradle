@@ -36,6 +36,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode versionMajor * 1000000 + versionMinor * 10000 + versionPatch * 100 + versionBuild
         versionName String.format("%d.%d.%d", versionMajor, versionMinor, versionPatch)
+        multiDexEnabled true
     }
 
     sourceSets {
@@ -55,12 +56,15 @@ android {
     packagingOptions {
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/beans.xml'
     }
 
     buildTypes {
         debug {
             applicationIdSuffix ".debug"
             versionNameSuffix "${gitSha()}".isEmpty() ? "-SNAPSHOT" : "-SNAPSHOT-${gitSha()}"
+//            minifyEnabled true
+
         }
     }
 
@@ -153,6 +157,9 @@ dependencies {
     compile project(':common-ui')
     compile project(':library-mediastore')
     compile project(':core-index')
+    compile project(':library-upnp')
+
+    compile 'com.android.support:multidex:1.0.0'
 
     testCompile('junit:junit:4.12')
     testCompile('org.robolectric:robolectric:2.4') {

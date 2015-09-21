@@ -26,6 +26,9 @@ import org.opensilk.music.artwork.provider.ArtworkModule;
 import org.opensilk.music.index.IndexComponent;
 import org.opensilk.music.index.IndexModule;
 import org.opensilk.music.lastfm.LastFMModule;
+import org.opensilk.music.library.upnp.UpnpLibraryAuthorityModule;
+import org.opensilk.music.library.upnp.UpnpLibraryComponent;
+import org.opensilk.music.library.upnp.UpnpLibraryModule;
 
 import javax.inject.Singleton;
 
@@ -41,9 +44,11 @@ import rx.functions.Func1;
                 AppContextModule.class,
                 ArtworkModule.class,
                 IndexModule.class,
+                UpnpLibraryModule.class,
         }
 )
-public interface ProviderComponent extends AppContextComponent, ArtworkComponent, IndexComponent {
+public interface ProviderComponent extends AppContextComponent,
+        ArtworkComponent, IndexComponent, UpnpLibraryComponent {
         Func1<Context, ProviderComponent> FACTORY = new Func1<Context, ProviderComponent>() {
                 @Override
                 public ProviderComponent call(Context context) {

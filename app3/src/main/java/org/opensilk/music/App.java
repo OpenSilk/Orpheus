@@ -18,6 +18,7 @@
 package org.opensilk.music;
 
 import android.content.ComponentCallbacks2;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Environment;
 
@@ -46,6 +47,12 @@ public class App extends BaseApp {
 
     //Only for UiProcess
     @Inject ArtworkRequestManager mArtworkRequestor;
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        android.support.multidex.MultiDex.install(this);
+    }
 
     @Override
     @DebugLog

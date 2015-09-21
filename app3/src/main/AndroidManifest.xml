@@ -194,6 +194,12 @@
             android:name="org.opensilk.music.index.provider.IndexProvider"
             tools:replace="authorities"/>
 
+        <!--Upnp provider-->
+        <provider
+            android:authorities="orpheus.library.${applicationId}.provider.upnp"
+            android:name="org.opensilk.music.library.upnp.provider.UpnpCDProvider"
+            tools:replace="authorities"/>
+
     </application>
 
 </manifest>
