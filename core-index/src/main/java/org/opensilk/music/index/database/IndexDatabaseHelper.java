@@ -32,7 +32,7 @@ import javax.inject.Singleton;
 @Singleton
 public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
-    public static final int DB_VERSION = 14;
+    public static final int DB_VERSION = 19;
     public static final String DB_NAME = "music.db";
 
     @Inject
@@ -64,7 +64,11 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP TABLE IF EXISTS artist_meta;");
             db.execSQL("DROP VIEW IF EXISTS album_info;");
             db.execSQL("DROP VIEW IF EXISTS artist_info;");
+            db.execSQL("DROP VIEW IF EXISTS track_info;");
+            db.execSQL("DROP VIEW IF EXISTS track_full");
             db.execSQL("DROP TRIGGER IF EXISTS tracks_cleanup;");
+            db.execSQL("DROP TRIGGER IF EXISTS albums_cleanup;");
+            db.execSQL("DROP TRIGGER IF EXISTS artists_cleanup;");
             db.execSQL("DROP INDEX IF EXISTS artistkey_idx;");
             db.execSQL("DROP INDEX IF EXISTS albumkey_idx;");
             db.execSQL("DROP INDEX IF EXISTS trackkey_idx;");
@@ -102,7 +106,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "track_id INTEGER PRIMARY KEY, " +
                     "track_name TEXT NOT NULL, " +
                     "track_key TEXT NOT NULL, " +
-                    "track_number INTEGER, " +
+                    "track_number INTEGER DEFAULT 0, " +
                     "disc_number INTEGER DEFAULT 1, " +
                     "genre TEXT, " +
                     "artist_id INTEGER REFERENCES artist_meta(artist_id) ON DELETE CASCADE, " +
@@ -145,10 +149,10 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     ");");
 
             // Provides a unified track/artist/album info view.
-            db.execSQL("CREATE VIEW IF NOT EXISTS track_full as SELECT * FROM track_meta " +
-                    "LEFT OUTER JOIN artist_meta ON track_meta.artist_id = artist_meta.artist_id " +
-                    "LEFT OUTER JOIN album_meta ON track_meta.album_id = album_meta.album_id" +
-                    ";");
+//            db.execSQL("CREATE VIEW IF NOT EXISTS track_full as SELECT * FROM track_meta " +
+//                    "LEFT OUTER JOIN artist_meta ON track_meta.artist_id = artist_meta.artist_id " +
+//                    "LEFT OUTER JOIN album_meta ON track_meta.album_id = album_meta.album_id" +
+//                    ";");
 
             // Provides some extra info about artists, like the number of tracks and albums for this artist
 //            db.execSQL("CREATE VIEW IF NOT EXISTS artist_info AS " +
@@ -162,8 +166,8 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
             db.execSQL("CREATE VIEW IF NOT EXISTS artist_info AS " +
                     "SELECT a1.artist_id AS _id, artist_name as name, artist_key, " +
-                    "COUNT(a2.album_id) AS number_of_albums, " +
-                    "COUNT(t1.track_id) AS number_of_tracks, "+
+                    "COUNT(DISTINCT a2.album_id) AS number_of_albums, " +
+                    "COUNT(DISTINCT t1.track_id) AS number_of_tracks, "+
                     "artist_bio_content as bio, artist_bio_summary as summary, artist_mbid as mbid " +
                     "FROM artist_meta a1 " +
                     "LEFT OUTER JOIN album_meta a2 ON a2.album_artist_id = a1.artist_id " +
@@ -173,13 +177,16 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
             // Provides some extra info about tracks like album artist name and number of resources
             db.execSQL("CREATE VIEW IF NOT EXISTS track_info as SELECT " +
-                    "t1.track_id as _id, track_name as name, track_key as title_key, duration, " +
-                    "artist_name as artist, artist_id, album_name as album, album_id, " +
-                    "album_artist_id, track_number as track, " +
-                    "(select artist_name from artist_meta where artist_id = album_artist_id) as album_artist," +
-                    "uri, size, mime_type, date_added, bitrate, duration " +
-                    "FROM track_full t1 " +
-                    "JOIN track_res_meta tm on t1.track_id = tm.track_id" +
+                    "t1.track_id as _id, t1.track_name as name, t1.track_key as title_key, " +
+                    "a1.artist_name as artist, a1.artist_id, a2.album_name as album, a2.album_id, " +
+                    "a2.album_artist_id, t1.track_number as track, t1.disc_number as disc, " +
+                    "(SELECT artist_name from artist_meta where artist_id = album_artist_id) as album_artist," +
+                    "t2.uri, t2.size, t2.mime_type, t2.date_added, t2.bitrate, t2.duration " +
+                    "FROM track_meta t1 " +
+                    "LEFT OUTER JOIN artist_meta a1 ON t1.artist_id = a1.artist_id " +
+                    "LEFT OUTER JOIN album_meta a2 ON t1.album_id = a2.album_id " +
+                    "LEFT OUTER JOIN track_res_meta t2 ON t1.track_id = t2.track_id " +
+                    "GROUP BY t1.track_id" +
                     ";");
 
             // Provides extra info albums, such as the number of tracks

@@ -356,6 +356,40 @@ public class IndexDatabaseImpl implements IndexDatabase {
         return insert(IndexSchema.TrackMeta.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
     }
 
+    static final String[] checkTrackCols = new String[] {
+            IndexSchema.TrackInfo._ID,
+            IndexSchema.TrackInfo.TRACK,
+            IndexSchema.TrackInfo.DISC,
+    };
+    static final String checkTrackSel = IndexSchema.TrackInfo.TITLE_KEY + "=? AND " +
+            IndexSchema.TrackInfo.ALBUM_ID + "=? AND " + IndexSchema.TrackInfo.ARTIST_ID + "=?";
+
+    @Override
+    public long hasTrack(Track t, long artistId, long albumId) {
+        Cursor c = null;
+        try {
+            String[] selArgs = new String[]{keyFor(t.getName()),
+                    String.valueOf(albumId), String.valueOf(artistId)};
+            c = query(IndexSchema.TrackInfo.TABLE, checkTrackCols, checkTrackSel, selArgs,
+                    null, null, null);
+            if (c != null && c.moveToFirst()) {
+                if (c.getCount() == 1) {
+                    return c.getLong(0);
+                }
+                final int track = t.getTrackNumber() > 0 ? t.getTrackNumber() : 0;
+                final int disc = t.getDiscNumber() > 0 ? t.getDiscNumber() : 1;
+                do {
+                    if ((track == c.getInt(1)) && (disc == c.getInt(2))) {
+                        return c.getLong(0);
+                    }
+                } while (c.moveToNext());
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return -1;
+    }
+
     @Override
     public long insertTrackRes(Track.Res res, long trackId, long containerId) {
         ContentValues cv = new ContentValues(10);
@@ -370,6 +404,47 @@ public class IndexDatabaseImpl implements IndexDatabase {
         cv.put(IndexSchema.TrackResMeta.BITRATE, res.getBitrate());
         cv.put(IndexSchema.TrackResMeta.DURATION, res.getDuration());
         return insert(IndexSchema.TrackResMeta.TABLE, null, cv,SQLiteDatabase.CONFLICT_IGNORE);
+    }
+
+    static final String[] idCols = new String[] {
+            BaseColumns._ID,
+    };
+
+    static final String checkAlbumSel = IndexSchema.AlbumInfo.ALBUM_KEY
+            + "=? AND " + IndexSchema.AlbumInfo.ARTIST_KEY + "=?";
+
+    @Override
+    public long hasAlbum(String albumArtist, String album) {
+        long id = -1;
+        Cursor c = null;
+        try {
+            final String[] selArgs = new String[]{keyFor(album), keyFor(albumArtist)};
+            c = query(IndexSchema.AlbumInfo.TABLE, idCols, checkAlbumSel, selArgs, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                id = c.getLong(0);
+            }
+            return id;
+        } finally {
+            closeCursor(c);
+        }
+    }
+
+    static final String checkArtistSel = IndexSchema.ArtistInfo.ARTIST_KEY + "=?";
+
+    @Override
+    public long hasArtist(String artist) {
+        long id = -1;
+        Cursor c = null;
+        try {
+            final String[] selArgs = new String[]{keyFor(artist)};
+            c = query(IndexSchema.ArtistInfo.TABLE, idCols, checkArtistSel, selArgs, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                id = c.getLong(0);
+            }
+            return id;
+        } finally {
+            closeCursor(c);
+        }
     }
 
     static void closeCursor(Cursor c) {

@@ -17,27 +17,16 @@
 
 package org.opensilk.music.index.scanner;
 
-import org.opensilk.music.index.IndexComponent;
+import android.net.Uri;
 
-import dagger.Component;
-import rx.functions.Func1;
+import org.opensilk.music.model.Metadata;
+import org.opensilk.music.model.Track;
+
+import java.util.Map;
 
 /**
- * Created by drew on 9/16/15.
+ * Created by drew on 9/20/15.
  */
-@ScannerScope
-@Component(
-        dependencies = IndexComponent.class,
-        modules = ScannerModule.class
-)
-public interface ScannerComponent {
-    Func1<IndexComponent, ScannerComponent> FACTORY = new Func1<IndexComponent, ScannerComponent>() {
-        @Override
-        public ScannerComponent call(IndexComponent indexComponent) {
-            return DaggerScannerComponent.builder()
-                    .indexComponent(indexComponent)
-                    .build();
-        }
-    };
-    void inject(ScannerService service);
+public interface MetaExtractor {
+    Metadata extractMetadata(Track.Res res);
 }

@@ -68,6 +68,7 @@ public class IndexSchema {
         String ALBUM_ARTIST = "album_artist";
         String ALBUM_ARTIST_ID = "album_artist_id";
         String TRACK = "track";
+        String DISC = "disc";
         String URI = "uri";
         String SIZE = "size";
         String MIME_TYPE = "mime_type";

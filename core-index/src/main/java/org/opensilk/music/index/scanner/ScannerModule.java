@@ -17,27 +17,16 @@
 
 package org.opensilk.music.index.scanner;
 
-import org.opensilk.music.index.IndexComponent;
-
-import dagger.Component;
-import rx.functions.Func1;
+import dagger.Module;
+import dagger.Provides;
 
 /**
- * Created by drew on 9/16/15.
+ * Created by drew on 9/20/15.
  */
-@ScannerScope
-@Component(
-        dependencies = IndexComponent.class,
-        modules = ScannerModule.class
-)
-public interface ScannerComponent {
-    Func1<IndexComponent, ScannerComponent> FACTORY = new Func1<IndexComponent, ScannerComponent>() {
-        @Override
-        public ScannerComponent call(IndexComponent indexComponent) {
-            return DaggerScannerComponent.builder()
-                    .indexComponent(indexComponent)
-                    .build();
-        }
-    };
-    void inject(ScannerService service);
+@Module
+public class ScannerModule {
+    @Provides
+    MetaExtractor provideMetaExtractor(MetaExtractorImpl impl) {
+        return impl;
+    }
 }

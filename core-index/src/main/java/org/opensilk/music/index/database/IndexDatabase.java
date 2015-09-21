@@ -45,4 +45,7 @@ public interface IndexDatabase {
     int removeContainer(Uri uri);
     long insertTrack(Track t, long artistId, long albumId);
     long insertTrackRes(Track.Res res, long trackId, long containerId);
+    long hasAlbum(String albumArtist, String album);
+    long hasArtist(String artist);
+    long hasTrack(Track t, long artistId, long albumId);
 }

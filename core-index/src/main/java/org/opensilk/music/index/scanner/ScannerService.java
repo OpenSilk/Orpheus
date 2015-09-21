@@ -25,9 +25,10 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
-import android.provider.BaseColumns;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.core.mortar.MortarIntentService;
 import org.opensilk.music.index.IndexComponent;
@@ -36,11 +37,14 @@ import org.opensilk.music.index.database.IndexSchema;
 import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.loader.BundleableLoader;
 import org.opensilk.music.model.Container;
+import org.opensilk.music.model.Metadata;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.index.scanner.NotificationHelper.Status;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -64,6 +68,8 @@ import timber.log.Timber;
 import static android.provider.MediaStore.Audio.keyFor;
 import static org.opensilk.common.core.util.Preconditions.checkNotNullOrBlank;
 
+import static org.opensilk.music.model.Metadata.*;
+
 /**
  * Created by drew on 8/25/15.
  */
@@ -72,6 +78,7 @@ public class ScannerService extends MortarIntentService {
     @Inject LastFM mLastFM;
     @Inject IndexDatabase mIndexDatabase;
     @Inject NotificationHelper mNotifHelper;
+    @Inject MetaExtractor mMetaExtractor;
 
     final AtomicInteger numTotal = new AtomicInteger(0);
     final AtomicInteger numError = new AtomicInteger(0);
@@ -188,7 +195,7 @@ public class ScannerService extends MortarIntentService {
                 } else {
                     Track t = extractMeta(item);
                     if (t != null) {
-                        success = addMetaToDb(item);
+                        success = addMetaToDb(t);
                     }
                 }
                 if (success) {
@@ -205,6 +212,7 @@ public class ScannerService extends MortarIntentService {
         }
     }
 
+    @DebugLog
     static boolean trackHasRequiredMeta(Track track) {
         try {
             final String err = "Null field";
@@ -228,176 +236,112 @@ public class ScannerService extends MortarIntentService {
         return true;
     }
 
+    @DebugLog
     Track extractMeta(Track t) {
+        Track.Res res = t.getResources().get(0);
+        Metadata meta = mMetaExtractor.extractMetadata(res);
 
-        final Track.Res res = t.getResources().get(0);
-        final Uri uri = res.getUri();
-        final Map<String, String> headers = res.getHeaders();
+        Track.Builder tob = Track.builder();
+        tob.setUri(t.getUri());
+        tob.setParentUri(t.getParentUri());
 
-        Track.Builder tob = t.buildUpon();
-        Track.Res.Builder rob = res.buildUpon();
+        tob.setName(meta.getString(KEY_TRACK_NAME));
+        tob.setArtistName(meta.getString(KEY_ARTIST_NAME));
+        tob.setAlbumName(meta.getString(KEY_ALBUM_NAME));
+        tob.setAlbumArtistName(meta.getString(KEY_ALBUM_ARTIST_NAME));
+        tob.setGenre(meta.getString(KEY_GENRE_NAME));
+        tob.setTrackNumber(meta.getInt(KEY_TRACK_NUMBER));
+        tob.setDiscNumber(meta.getInt(KEY_DISC_NUMBER));
+        tob.setIsCompliation(meta.getInt(KEY_IS_COMPILATION) > 0);
 
-        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        try {
-            if (StringUtils.startsWith(uri.getScheme(), "http")) {
-                mmr.setDataSource(uri.toString(), headers);
-            } else if (StringUtils.equals(uri.getScheme(), "content")) {
-                ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(uri, "r");
-                mmr.setDataSource(pfd.getFileDescriptor());
-                pfd.close();
-            } else if (StringUtils.equals(uri.getScheme(), "file")) {
-                mmr.setDataSource(uri.getPath());
-            }
+        Track.Res.Builder resBob = res.buildUpon();
+        resBob.setMimeType(meta.getString(KEY_MIME_TYPE));
+        resBob.setBitrate(meta.getLong(KEY_BITRATE));
+        resBob.setDuration(meta.getLong(KEY_DURATION));
 
-            tob
-                    .setAlbumName(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM))
-                    .setAlbumArtistName(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST))
-                    .setArtistName(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST))
-                    .setGenre(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE))
-                    .setName(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE))
-                    ;
-            rob
-                    .setMimeType(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE))
-                    ;
+        tob.addRes(resBob.build());
 
-            final String bitrate = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE);
-            if (bitrate != null) {
-                try {
-                    rob.setBitrate(Long.parseLong(bitrate));
-                } catch (NumberFormatException e) {
-                    Timber.w(e, "extractMeta(KEY_BITRATE)");
-                }
-            }
-            final String track_num = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER);
-            if (track_num != null) {
-                try {
-                    if (StringUtils.contains(track_num, "/")) {
-                        tob.setTrackNumber(Integer.parseInt(StringUtils.split(track_num, "/")[0]));
-                    } else {
-                        tob.setTrackNumber(Integer.parseInt(track_num));
-                    }
-                } catch (NumberFormatException e) {
-                    Timber.w(e, "extractMeta(CD_TRACK_NUMBER)");
-                }
-            }
-            final String disc_num = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER);
-            if (disc_num != null) {
-                try {
-                    if (StringUtils.contains(disc_num, "/")) {
-                        tob.setDiscNumber(Integer.parseInt(StringUtils.split(disc_num, "/")[0]));
-                    } else {
-                        tob.setDiscNumber(Integer.parseInt(disc_num));
-                    }
-                } catch (NumberFormatException e) {
-                    Timber.w(e, "extractMeta(DISC_NUMBER)");
-                }
-            }
-            final String compilation = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_COMPILATION);
-            if (compilation != null) {
-                try {
-                    tob.setIsCompliation(Integer.parseInt(compilation) > 0);
-                } catch (NumberFormatException e) {
-                    Timber.w(e, "extractMeta(KEY_COMPILATION)");
-                }
-            }
-            final String duration = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-            if (duration != null) {
-                try {
-                    rob.setDuration(Integer.parseInt(duration));
-                    tob.setDuration(Integer.parseInt(duration));
-                } catch (NumberFormatException e) {
-                    Timber.w(e, "extractMeta(KEY_DURATION)");
-                }
-            }
-
-            tob.addRes(rob.build());
-
-            return tob.build();
-        } catch (Exception e) { //setDataSource throws runtimeException
-            Timber.e(e, "extractMeta");
-        } finally {
-            mmr.release();
-        }
-        return null;
+        return tob.build();
     }
 
     boolean addMetaToDb(Track track) {
 
-        String albumArtist = resolveAlbumArtist(track);
+        final String albumArtistName = resolveAlbumArtist(track);
+        final String albumName = track.getAlbumName();
+        final String artistName = resolveTrackArtist(track);
 
-        if (StringUtils.isEmpty(albumArtist)) {
-            Timber.w("Cannot process item %s missing albumArtist", track.getUri());
+        if (StringUtils.isEmpty(albumArtistName)) {
+            Timber.w("Cannot process item %s missing albumArtistName", track.getUri());
+            return false;
+        } else if (StringUtils.isEmpty(albumName)) {
+            Timber.w("Cannot process item %s missing albumName", track.getUri());
+            return false;
+        } else if (StringUtils.isEmpty(artistName)) {
+            Timber.w("Cannot process item %s missing artistName", track.getUri());
             return false;
         }
 
-        long albumArtistId = checkArtist(albumArtist);
+        long albumArtistId = mIndexDatabase.hasArtist(albumArtistName);
         if (albumArtistId < 0) {
-            albumArtistId = lookupArtistInfo(albumArtist);
+            albumArtistId = lookupArtistInfo(albumArtistName);
             if (albumArtistId < 0) {
-                Timber.e("Unable to insert artist %s into db", albumArtist);
+                Timber.e("Unable to insert artist %s into db", albumArtistName);
                 return false;
             }
         }
 
-        String album = track.getAlbumName();
-
-        if (StringUtils.isEmpty(album)) {
-            Timber.w("Cannot process item %s missing album", track.getUri());
-            return false;
-        }
-
-        long albumId = checkAlbum(albumArtist, album);
+        long albumId = mIndexDatabase.hasAlbum(albumArtistName, albumName);
         if (albumId < 0) {
-            albumId = lookupAlbumInfo(albumArtist, album, albumArtistId);
+            albumId = lookupAlbumInfo(albumArtistName, albumName, albumArtistId);
             if (albumId < 0) {
-                Timber.e("Unable to insert album %s into db", album);
+                Timber.e("Unable to insert album %s into db", albumName);
                 return false;
             }
         }
-
-        String artist = resolveTrackArtist(track);
 
         long artistId;
-        if (StringUtils.isEmpty(artist)) {
-            Timber.w("Cannot process item %s missing artist", track.getUri());
-            return false;
-        } else if (StringUtils.equalsIgnoreCase(artist, albumArtist)) {
+        if (StringUtils.equalsIgnoreCase(artistName, albumArtistName)) {
             artistId = albumArtistId;
         } else {
-            artistId = checkArtist(artist);
+            artistId = mIndexDatabase.hasArtist(artistName);
             if (artistId < 0) {
-                artistId = lookupArtistInfo(artist);
+                artistId = lookupArtistInfo(artistName);
                 if (artistId < 0) {
-                    Timber.e("Unable to insert artist %s into db", artist);
+                    Timber.e("Unable to insert artist %s into db", artistName);
                     return false;
                 }
             }
         }
 
-        long trackId = insertTrack(track, artistId, albumId);
+        long trackId = mIndexDatabase.hasTrack(track, artistId, albumId);
         if (trackId < 0) {
-            Timber.e("Unable to insert track %s into db", track.getName());
-            return false;
+            trackId = mIndexDatabase.insertTrack(track, artistId, albumId);
+            if ( trackId <0) {
+                Timber.e("Unable to insert track %s into db", track.getName());
+                return false;
+            }
         }
 
-        long containerId = checkContainer(track.getParentUri());
+        long containerId = mIndexDatabase.hasContainer(track.getParentUri());
         if (containerId < 0) {
             Timber.e("Unable locate parent for track %s", track.getName());
             return false;
         }
 
-        for (Track.Res res : track.getResources()) {
-            long resId = insertRes(res, trackId, containerId);
-            if (trackId < 0) {
-                Timber.e("Unable to insert %s into db", res.getUri());
-                return false;
-            }
+        Track.Res res = track.getResources().get(0);
+        long resId = insertRes(res, trackId, containerId);
+        if (resId < 0) {
+            Timber.e("Unable to insert %s into db", res.getUri());
+            return false;
         }
 
         //TODO artwork
 
         return true;
     }
+
+    HashMap<String, Album> mAlbumCache = new HashMap<>();
+    HashMap<String, Artist> mArtistCache = new HashMap<>();
 
     @DebugLog
     long lookupAlbumInfo(final String albumArtist, final String albumName, final long artistId) {
@@ -413,6 +357,7 @@ public class ScannerService extends MortarIntentService {
             Timber.w("Failed to retrieve album %s", albumName);
             return -1;
         }
+        mAlbumCache.put(keyFor(albumName+albumName), album);
         return insertAlbum(album, artistId);
     }
 
@@ -430,6 +375,7 @@ public class ScannerService extends MortarIntentService {
             Timber.w("Failed to retrieve artist %s", artistName);
             return -1;
         }
+        mArtistCache.put(keyFor(artistName), artist);
         return insertArtist(artist);
     }
 
@@ -460,10 +406,6 @@ public class ScannerService extends MortarIntentService {
             closeCursor(c);
         }
     }
-
-    private static final String[] idCols = new String[] {
-            BaseColumns._ID,
-    };
 
     static String resolveAlbumArtist(Track track) {
         String albumArtist = track.getAlbumArtistName();
@@ -496,19 +438,7 @@ public class ScannerService extends MortarIntentService {
 
     @DebugLog
     long checkArtist(String artist) {
-        long id = -1;
-        Cursor c = null;
-        try {
-            final String sel = IndexSchema.ArtistInfo.ARTIST_KEY + "=?";
-            final String[] selArgs = new String[]{keyFor(artist)};
-            c = mIndexDatabase.query(IndexSchema.ArtistInfo.TABLE, idCols, sel, selArgs, null, null, null);
-            if (c != null && c.moveToFirst()) {
-                id = c.getLong(0);
-            }
-            return id;
-        } finally {
-            closeCursor(c);
-        }
+        return mIndexDatabase.hasArtist(artist);
     }
 
     @DebugLog
@@ -526,19 +456,7 @@ public class ScannerService extends MortarIntentService {
 
     @DebugLog
     long checkAlbum(String albumArtist, String album) {
-        long id = -1;
-        Cursor c = null;
-        try {
-            final String sel = IndexSchema.AlbumInfo.ALBUM_KEY + "=? AND " + IndexSchema.AlbumInfo.ARTIST_KEY + "=?";
-            final String[] selArgs = new String[]{keyFor(album), keyFor(albumArtist)};
-            c = mIndexDatabase.query(IndexSchema.AlbumInfo.TABLE, idCols, sel, selArgs, null, null, null);
-            if (c != null && c.moveToFirst()) {
-                id = c.getLong(0);
-            }
-            return id;
-        } finally {
-            closeCursor(c);
-        }
+        return mIndexDatabase.hasAlbum(albumArtist, album);
     }
 
     @DebugLog
@@ -560,6 +478,7 @@ public class ScannerService extends MortarIntentService {
         return mIndexDatabase.hasContainer(uri);
     }
 
+    @DebugLog
     long insertContainer(Uri uri, Uri parentUri) {
         return mIndexDatabase.insertContainer(uri, parentUri);
     }
