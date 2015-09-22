@@ -33,6 +33,7 @@ import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.index.BuildConfig;
 import org.opensilk.music.index.IndexTestApplication;
 import org.opensilk.music.index.IndexTestComponent;
+import org.opensilk.music.model.Metadata;
 import org.opensilk.music.model.Track;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
@@ -104,26 +105,21 @@ public class DatabaseTest {
         cv.put(IndexSchema.ArtistMeta.ARTIST_MBID, UUID.randomUUID().toString());
         long artistId = mDb.insert(IndexSchema.ArtistMeta.TABLE, null, cv, SQLiteDatabase.CONFLICT_ABORT);
 
-        cv = new ContentValues();
-        cv.put(IndexSchema.TrackMeta.TRACK_NAME, "track1");
-        cv.put(IndexSchema.TrackMeta.TRACK_KEY, MediaStore.Audio.keyFor("track1"));
-        cv.put(IndexSchema.TrackMeta.ARTIST_ID, artistId);
-        cv.put(IndexSchema.TrackMeta.ALBUM_ID, albumId);
-        long trackId = mDb.insert(IndexSchema.TrackMeta.TABLE, null, cv, SQLiteDatabase.CONFLICT_ABORT);
-
         Uri containerUri = Uri.parse("content://sample/foo/bar");
         long containerId = mDb.insertContainer(containerUri, Uri.parse("content://sample/foo"));
 
         long[] resIds = null;
         for (int ii=0; ii<10; ii++) {
-            Track.Res res = Track.Res.builder()
-                    .setUri(Uri.parse("content://sample/track1/res/" + ii))
-                    .build();
-            resIds = ArrayUtils.add(resIds, mDb.insertTrackRes(res, trackId, containerId));
+            Metadata.Builder bob = Metadata.builder()
+                    .putUri(Metadata.KEY_TRACK_URI, Uri.parse("content://sample/track/" + ii))
+                    .putUri(Metadata.KEY_PARENT_URI, containerUri)
+                    .putString(Metadata.KEY_TRACK_NAME, "track" + ii)
+                    ;
+            resIds = ArrayUtils.add(resIds, mDb.insertTrackResource(bob.build(), albumId, artistId, containerId));
         }
 
         StringBuilder where = new StringBuilder();
-        where.append(IndexSchema.TrackResMeta.RES_ID).append(" IN (").append(resIds[0]);
+        where.append(IndexSchema.TrackResMeta._ID).append(" IN (").append(resIds[0]);
         for (int ii=1; ii<resIds.length; ii++) {
             where.append(",").append(resIds[ii]);
         }
@@ -132,22 +128,17 @@ public class DatabaseTest {
         //make sure whe actually have the entries were trying to delete
 
         Cursor c = mDb.query(IndexSchema.TrackResMeta.TABLE,
-                new String[] {IndexSchema.TrackResMeta.RES_ID}, where.toString(), null, null, null, null);
+                new String[] {IndexSchema.TrackResMeta._ID}, where.toString(), null, null, null, null);
         Assertions.assertThat(c).isNotNull();
         Assertions.assertThat(c.getCount()).isEqualTo(10);
 
-        c = mDb.query(IndexSchema.TrackMeta.TABLE, new String[] {IndexSchema.TrackMeta.TRACK_ID},
-                IndexSchema.TrackMeta.TRACK_ID + "=" + trackId, null, null, null, null);
+        c = mDb.query(IndexSchema.AlbumMeta.TABLE, new String[]{IndexSchema.AlbumMeta._ID},
+                IndexSchema.AlbumMeta._ID + "=" + albumId, null, null, null, null);
         Assertions.assertThat(c).isNotNull();
         Assertions.assertThat(c.getCount()).isEqualTo(1);
 
-        c = mDb.query(IndexSchema.AlbumMeta.TABLE, new String[]{IndexSchema.AlbumMeta.ALBUM_ID},
-                IndexSchema.AlbumMeta.ALBUM_ID + "=" + albumId, null, null, null, null);
-        Assertions.assertThat(c).isNotNull();
-        Assertions.assertThat(c.getCount()).isEqualTo(1);
-
-        c = mDb.query(IndexSchema.ArtistMeta.TABLE, new String[]{IndexSchema.ArtistMeta.ARTIST_ID},
-                IndexSchema.ArtistMeta.ARTIST_ID + "=" + artistId, null, null, null, null);
+        c = mDb.query(IndexSchema.ArtistMeta.TABLE, new String[]{IndexSchema.ArtistMeta._ID},
+                IndexSchema.ArtistMeta._ID + "=" + artistId, null, null, null, null);
         Assertions.assertThat(c).isNotNull();
         Assertions.assertThat(c.getCount()).isEqualTo(1);
 
@@ -155,18 +146,18 @@ public class DatabaseTest {
         mDb.removeContainer(containerUri);
 
         //track should have been deleted
-        c = mDb.query(IndexSchema.TrackMeta.TABLE, new String[] {IndexSchema.TrackMeta.TRACK_ID},
-                IndexSchema.TrackMeta.TRACK_ID + "=" + trackId, null, null, null, null);
+        c = mDb.query(IndexSchema.TrackResMeta.TABLE, new String[] {IndexSchema.TrackResMeta._ID},
+                null, null, null, null, null);
         Assertions.assertThat(c).isNotNull();
         Assertions.assertThat(c.getCount()).isEqualTo(0);
         //album should have been deleted
-        c = mDb.query(IndexSchema.AlbumMeta.TABLE, new String[]{IndexSchema.AlbumMeta.ALBUM_ID},
-                IndexSchema.AlbumMeta.ALBUM_ID + "=" + albumId, null, null, null, null);
+        c = mDb.query(IndexSchema.AlbumMeta.TABLE, new String[]{IndexSchema.AlbumMeta._ID},
+                IndexSchema.AlbumMeta._ID + "=" + albumId, null, null, null, null);
         Assertions.assertThat(c).isNotNull();
         Assertions.assertThat(c.getCount()).isEqualTo(0);
         //artist should have been deleted
-        c = mDb.query(IndexSchema.ArtistMeta.TABLE, new String[]{IndexSchema.ArtistMeta.ARTIST_ID},
-                IndexSchema.ArtistMeta.ARTIST_ID + "=" + artistId, null, null, null, null);
+        c = mDb.query(IndexSchema.ArtistMeta.TABLE, new String[]{IndexSchema.ArtistMeta._ID},
+                IndexSchema.ArtistMeta._ID + "=" + artistId, null, null, null, null);
         Assertions.assertThat(c).isNotNull();
         Assertions.assertThat(c.getCount()).isEqualTo(0);
 
@@ -184,71 +175,44 @@ public class DatabaseTest {
         cv.put(IndexSchema.ArtistMeta.ARTIST_KEY, MediaStore.Audio.keyFor("artist2"));
         long artistId = mDb.insert(IndexSchema.ArtistMeta.TABLE, null, cv, SQLiteDatabase.CONFLICT_ABORT);
 
-        cv = new ContentValues();
-        cv.put(IndexSchema.TrackMeta.TRACK_NAME, "track2");
-        cv.put(IndexSchema.TrackMeta.TRACK_KEY, MediaStore.Audio.keyFor("track2"));
-//        cv.put(IndexSchema.TrackMeta.TRACK_NUMBER, 2);
-        cv.put(IndexSchema.TrackMeta.ARTIST_ID, artistId);
-        cv.put(IndexSchema.TrackMeta.ALBUM_ID, albumId);
+        Uri containerUri = Uri.parse("content://sample/foo/bar");
+        long containerId = mDb.insertContainer(containerUri, Uri.parse("content://sample/foo"));
 
-        long trackId = mDb.insert(IndexSchema.TrackMeta.TABLE, null, cv, SQLiteDatabase.CONFLICT_ABORT);
+        Metadata.Builder bob = Metadata.builder()
+                .putUri(Metadata.KEY_TRACK_URI, Uri.parse("content://sample/track/1"))
+                .putString(Metadata.KEY_TRACK_NAME, "track1")
+                ;
+
+        long trackId = mDb.insertTrackResource(bob.build(), albumId, artistId, containerId);
         Assertions.assertThat(trackId).isNotEqualTo(-1);
-        long trackId2 = mDb.insert(IndexSchema.TrackMeta.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
-        Assertions.assertThat(trackId2).isNotEqualTo(-1);
+        long trackId2 = mDb.insertTrackResource(bob.build(), albumId, artistId, containerId);
         Assertions.assertThat(trackId2).isEqualTo(trackId);
     }
 
     @Test
-    public void testHasTrack() {
+    public void testTrackInfoView() {
         ContentValues cv = new ContentValues();
-        cv.put(IndexSchema.AlbumMeta.ALBUM_NAME, "album3");
-        cv.put(IndexSchema.AlbumMeta.ALBUM_KEY, MediaStore.Audio.keyFor("album3"));
+        cv.put(IndexSchema.AlbumMeta.ALBUM_NAME, "album2");
+        cv.put(IndexSchema.AlbumMeta.ALBUM_KEY, MediaStore.Audio.keyFor("album2"));
         long albumId = mDb.insert(IndexSchema.AlbumMeta.TABLE, null, cv, SQLiteDatabase.CONFLICT_ABORT);
 
         cv = new ContentValues();
-        cv.put(IndexSchema.ArtistMeta.ARTIST_NAME, "artist3");
-        cv.put(IndexSchema.ArtistMeta.ARTIST_KEY, MediaStore.Audio.keyFor("artist3"));
+        cv.put(IndexSchema.ArtistMeta.ARTIST_NAME, "artist2");
+        cv.put(IndexSchema.ArtistMeta.ARTIST_KEY, MediaStore.Audio.keyFor("artist2"));
         long artistId = mDb.insert(IndexSchema.ArtistMeta.TABLE, null, cv, SQLiteDatabase.CONFLICT_ABORT);
 
-        cv = new ContentValues();
-        cv.put(IndexSchema.TrackMeta.TRACK_NAME, "track3");
-        cv.put(IndexSchema.TrackMeta.TRACK_KEY, MediaStore.Audio.keyFor("track3"));
-        cv.put(IndexSchema.TrackMeta.TRACK_NUMBER, 1);
-        cv.put(IndexSchema.TrackMeta.ARTIST_ID, artistId);
-        cv.put(IndexSchema.TrackMeta.ALBUM_ID, albumId);
+        Uri containerUri = Uri.parse("content://sample/foo/bar");
+        long containerId = mDb.insertContainer(containerUri, Uri.parse("content://sample/foo"));
 
-        long trackId = mDb.insert(IndexSchema.TrackMeta.TABLE, null, cv, SQLiteDatabase.CONFLICT_ABORT);
-
-        cv.put(IndexSchema.TrackMeta.TRACK_NUMBER, 2);
-        long trackId2 = mDb.insert(IndexSchema.TrackMeta.TABLE, null, cv, SQLiteDatabase.CONFLICT_ABORT);
-
-        Uri containerUri = Uri.parse("content://sample/foo2/bar");
-        long containerId = mDb.insertContainer(containerUri, Uri.parse("content://sample/foo2"));
-
-        long[] resIds = null;
-        for (int ii=0; ii<10; ii++) {
-            Track.Res res = Track.Res.builder()
-                    .setUri(Uri.parse("content://sample/track3/res/" + ii))
-                    .build();
-            resIds = ArrayUtils.add(resIds, mDb.insertTrackRes(res, trackId, containerId));
-        }
-
-        Track.Builder tob = Track.builder()
-                .setUri(Uri.parse("content://sample/track3"))
-                .setName("track3")
-                .setTrackNumber(1)
-                .addRes(Track.Res.builder()
-                        .setUri(Uri.parse("content://sample/track3/res/1"))
-                        .build())
+        Metadata.Builder bob = Metadata.builder()
+                .putUri(Metadata.KEY_TRACK_URI, Uri.parse("content://sample/track/1"))
+                .putString(Metadata.KEY_TRACK_NAME, "track1")
                 ;
 
-        long trackId3 = mDb.hasTrack(tob.build(), artistId, albumId);
-
-        Assertions.assertThat(trackId3).isEqualTo(trackId);
-
-        long trackId4 = mDb.hasTrack(tob.setTrackNumber(2).build(), artistId, albumId);
-
-        Assertions.assertThat(trackId4).isEqualTo(trackId2);
+        long trackId = mDb.insertTrackResource(bob.build(), albumId, artistId, containerId);
+        Assertions.assertThat(trackId).isNotEqualTo(-1);
+        long trackId2 = mDb.insertTrackResource(bob.build(), albumId, artistId, containerId);
+        Assertions.assertThat(trackId2).isEqualTo(trackId);
     }
 
 

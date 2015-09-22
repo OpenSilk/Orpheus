@@ -22,6 +22,7 @@ import android.content.Context;
 import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.common.core.dagger2.AppContextModule;
 import org.opensilk.music.index.database.IndexDatabase;
+import org.opensilk.music.index.provider.LastFMHelper;
 import org.opensilk.music.lastfm.LastFMComponent;
 
 import javax.inject.Named;
@@ -51,4 +52,5 @@ public interface IndexComponent extends AppContextComponent, LastFMComponent {
     };
     IndexDatabase indexDatabase();
     @Named("IndexProviderAuthority") String indexProviderAuthority();
+    LastFMHelper lastFMHelper();
 }

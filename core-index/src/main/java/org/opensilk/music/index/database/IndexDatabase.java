@@ -23,6 +23,7 @@ import android.net.Uri;
 
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
+import org.opensilk.music.model.Metadata;
 import org.opensilk.music.model.Track;
 
 import java.util.List;
@@ -43,9 +44,10 @@ public interface IndexDatabase {
     long hasContainer(Uri uri);
     long insertContainer(Uri uri, Uri parentUri);
     int removeContainer(Uri uri);
-    long insertTrack(Track t, long artistId, long albumId);
-    long insertTrackRes(Track.Res res, long trackId, long containerId);
     long hasAlbum(String albumArtist, String album);
+    long insertAlbum(Metadata meta, long albumArtistId);
     long hasArtist(String artist);
-    long hasTrack(Track t, long artistId, long albumId);
+    long insertArtist(Metadata meta);
+    long hasTrackResource(Uri uri);
+    long insertTrackResource(Metadata metadata, long albumId, long artistId, long containerId);
 }

@@ -60,7 +60,7 @@ public class IndexSchema {
     public interface TrackInfo extends BaseColumns {
         String TABLE = "track_info";
         String TITLE = "name";
-        String TITLE_KEY = "title_key";
+        String TRACK_KEY = "track_key";
         String ARTIST = "artist";
         String ARTIST_ID = "artist_id";
         String ALBUM = "album";
@@ -77,9 +77,8 @@ public class IndexSchema {
         String DURATION = "duration";
     }
 
-    public interface ArtistMeta {
+    public interface ArtistMeta extends BaseColumns {
         String TABLE = "artist_meta";
-        String ARTIST_ID = "artist_id";
         String ARTIST_NAME = "artist_name";
         String ARTIST_KEY = "artist_key";
         String ARTIST_BIO_SUMMARY = "artist_bio_summary";
@@ -88,9 +87,8 @@ public class IndexSchema {
         String ARTIST_MBID = "artist_mbid";
     }
 
-    public interface AlbumMeta {
+    public interface AlbumMeta extends BaseColumns {
         String TABLE = "album_meta";
-        String ALBUM_ID = "album_id";
         String ALBUM_NAME = "album_name";
         String ALBUM_KEY = "album_key";
         String ALBUM_BIO_SUMMARY = "album_bio_summary";
@@ -100,36 +98,32 @@ public class IndexSchema {
         String ALBUM_ARTIST_ID = "album_artist_id";
     }
 
-    public interface TrackMeta {
-        String TABLE = "track_meta";
-        String TRACK_ID = "track_id";
+    public interface TrackResMeta extends BaseColumns {
+        String TABLE = "track_resources";
+        String URI = "uri";
+        String AUTHORITY = "authority";
         String TRACK_NAME = "track_name";
         String TRACK_KEY = "track_key";
-        String TRACK_NUMBER = "track_number";
-        String DISC_NUMBER = "disc_number";
-        String GENRE = "genre";
-        String ARTIST_ID = "artist_id";
-        String ALBUM_ID = "album_id";
-    }
-
-    public interface TrackResMeta {
-        String TABLE = "track_res_meta";
-        String RES_ID = "res_id";
-        String TRACK_ID = "track_id";
-        String CONTAINER_ID = "container_id";
-        String AUTHORITY = "authority";
-        String URI = "uri";
         String SIZE = "size";
         String MIME_TYPE = "mime_type";
         String DATE_ADDED = "date_added";
         String LAST_MOD = "last_modified";
         String BITRATE = "bitrate";
         String DURATION = "duration";
+        String TRACK_NUMBER = "track_number";
+        String DISC_NUMBER = "disc_number";
+        String GENRE = "genre";
+        String ALBUM_NAME = "album_name";
+        String ARTIST_NAME = "artist_name";
+        String ALBUM_ARTIST_NAME = "album_artist_name";
+        String CATEGORY = "category";
+        String ARTIST_ID = "artist_id";
+        String ALBUM_ID = "album_id";
+        String CONTAINER_ID = "container_id";
     }
 
-    public interface Containers {
+    public interface Containers extends BaseColumns {
         String TABLE = "containers";
-        String CONTAINER_ID = "container_id";
         String URI = "uri";
         String PARENT_URI = "parent_uri";
         String AUTHORITY = "authority";
