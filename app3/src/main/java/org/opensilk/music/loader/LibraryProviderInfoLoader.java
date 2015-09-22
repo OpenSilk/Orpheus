@@ -19,8 +19,10 @@ package org.opensilk.music.loader;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -31,6 +33,7 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.library.LibraryCapability;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryProviderInfo;
+import org.opensilk.music.library.provider.LibraryProvider;
 import org.opensilk.music.library.provider.LibraryProviderOld;
 import org.opensilk.music.library.provider.LibraryUris;
 
@@ -141,26 +144,56 @@ public class LibraryProviderInfoLoader {
         });
     }
 
-    public Observable<LibraryConfig> getActiveGalleryProviders() {
-        return getActivePlugins().flatMap(new Func1<List<LibraryProviderInfo>, Observable<LibraryConfig>>() {
+    public Observable<LibraryProviderInfo> makeObservableApi19() {
+        final List<String> disabledPlugins = settings.readDisabledPlugins();
+        return Observable.create(new Observable.OnSubscribe<List<ResolveInfo>>() {
             @Override
-            public Observable<LibraryConfig> call(List<LibraryProviderInfo> libraryProviderInfos) {
-                List<LibraryConfig> configs = new ArrayList<LibraryConfig>(libraryProviderInfos.size());
-                for (LibraryProviderInfo libraryProviderInfo : libraryProviderInfos) {
-                    Bundle b = context.getContentResolver().call(
-                            LibraryUris.call(libraryProviderInfo.authority), CONFIG, null, null);
-                    if (b == null) {
-                        Timber.e("Got null config for %s", libraryProviderInfo.authority);
-                        continue;
-                    }
-                    configs.add(LibraryConfig.materialize(b));
-                }
-                return Observable.from(configs);
+            public void call(Subscriber<? super List<ResolveInfo>> subscriber) {
+                final PackageManager pm = context.getPackageManager();
+                final List<ResolveInfo> resolveInfos = pm.queryIntentContentProviders(
+                        new Intent().setAction(LibraryProvider.ACTION_FILTER), PackageManager.GET_META_DATA);
+                subscriber.onNext(resolveInfos);
+                subscriber.onCompleted();
             }
-        }).filter(new Func1<LibraryConfig, Boolean>() {
+        }).flatMap(new Func1<List<ResolveInfo>, Observable<ResolveInfo>>() {
             @Override
-            public Boolean call(LibraryConfig libraryConfig) {
-                return libraryConfig.hasFlag(LibraryCapability.GALLERY);
+            public Observable<ResolveInfo> call(List<ResolveInfo> providerInfos) {
+                return Observable.from(providerInfos);
+            }
+        }).filter(new Func1<ResolveInfo, Boolean>() {
+            @Override
+            public Boolean call(ResolveInfo resolveInfo) {
+                ProviderInfo providerInfo = resolveInfo.providerInfo;
+                return providerInfo != null
+                        //Ignore non exported providers unless they're ours
+                        && (StringUtils.equals(providerInfo.packageName, context.getPackageName()) || providerInfo.exported);
+            }
+        }).map(new Func1<ResolveInfo, LibraryProviderInfo>() {
+            @Override
+            public LibraryProviderInfo call(ResolveInfo resolveInfo) {
+                ProviderInfo providerInfo = resolveInfo.providerInfo;
+                final PackageManager pm = context.getPackageManager();
+                final String authority = providerInfo.authority;
+                final CharSequence title = providerInfo.loadLabel(pm);
+                final ComponentName cn = new ComponentName(providerInfo.packageName, providerInfo.name);
+                final Drawable icon = providerInfo.loadIcon(pm);
+                CharSequence description;
+                try {
+                    Context packageContext = context.createPackageContext(cn.getPackageName(), 0);
+                    Resources packageRes = packageContext.getResources();
+                    description = packageRes.getString(providerInfo.descriptionRes);
+                } catch (PackageManager.NameNotFoundException e) {
+                    description = "";
+                }
+                final LibraryProviderInfo lpi = new LibraryProviderInfo(title.toString(), description.toString(), authority);
+                lpi.icon = icon;
+                for (String a : disabledPlugins) {
+                    if (a.equals(lpi.authority)) {
+                        lpi.isActive = false;
+                        break;
+                    }
+                }
+                return lpi;
             }
         });
     }
