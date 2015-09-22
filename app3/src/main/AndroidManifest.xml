@@ -176,12 +176,6 @@
             android:name="org.opensilk.music.artwork.provider.ArtworkProvider"
             tools:replace="authorities"/>
 
-        <!--Mediasotore plugin provider-->
-        <provider
-            android:authorities="orpheus.library.${applicationId}.provider.mediaStoreLibrary"
-            android:name="org.opensilk.music.library.mediastore.provider.MediaStoreLibraryProvider"
-            tools:replace="authorities"/>
-
         <!--Folders plugin provider-->
         <provider
             android:authorities="orpheus.library.${applicationId}.provider.foldersLibrary"

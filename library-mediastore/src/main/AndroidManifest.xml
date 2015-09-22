@@ -24,15 +24,6 @@
             android:theme="@android:style/Theme.NoDisplay"
             android:process=":ui"/>
 
-        <provider
-            android:authorities="override_me"
-            android:name=".provider.MediaStoreLibraryProvider"
-            android:icon="@drawable/ic_my_library_music_grey600_24dp"
-            android:label="@string/mediastore_library_label"
-            android:description="@string/mediastore_library_description"
-            android:exported="false"
-            android:process=":prvdr"/>
-
         <activity android:name=".ui.StoragePickerActivity"
             android:theme="@style/FoldersThemeTranslucentDark"
             android:process=":ui"/>
