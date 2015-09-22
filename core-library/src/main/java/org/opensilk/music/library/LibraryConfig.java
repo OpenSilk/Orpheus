@@ -43,6 +43,11 @@ public class LibraryConfig {
      * Scope: Container, Item
      */
     public static final long FLAG_SUPPORTS_DELETE = 1 << 11;
+    /**
+     * Object supports renaming / changing title
+     * Scope: Container, Item
+     */
+    public static final long FLAG_SUPPORTS_RENAME = 1 << 12;
 
     private final int apiVersion;
     private final long flags;
