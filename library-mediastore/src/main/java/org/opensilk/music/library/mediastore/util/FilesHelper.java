@@ -27,6 +27,7 @@ import android.webkit.MimeTypeMap;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.mediastore.BuildConfig;
 import org.opensilk.music.library.mediastore.provider.FoldersUris;
 import org.opensilk.music.library.mediastore.util.StorageLookup.StorageVolume;
@@ -97,8 +98,7 @@ public class FilesHelper {
         return mimeType;
     }
 
-    @NonNull
-    public static String formatDate(long ms) {
+    public static @NonNull String formatDate(long ms) {
         return sDateFormat.format(new Date(ms));
     }
 
@@ -107,8 +107,7 @@ public class FilesHelper {
      * ive been watching so we use relative paths for ids so we don't get screwed
      * up when it changes again
      */
-    @NonNull
-    public static String toRelativePath(File base, File f) {
+    public static @NonNull String toRelativePath(File base, File f) {
         String p = StringUtils.replace(f.getAbsolutePath(), base.getAbsolutePath(), "", 1);
         return !p.startsWith("/") ? p : p.substring(1);
     }
@@ -130,8 +129,7 @@ public class FilesHelper {
         return parentUri;
     }
 
-    @NonNull
-    public static Folder makeFolder(String authority, StorageVolume volume, File dir) {
+    public static @NonNull Folder makeFolder(String authority, StorageVolume volume, File dir) {
         final String[] children = dir.list();
         return Folder.builder()
                 .setUri(FoldersUris.folder(authority, String.valueOf(volume.id), toRelativePath(volume.path, dir)))
@@ -142,13 +140,27 @@ public class FilesHelper {
                 .build();
     }
 
-    public static Track makeTrackFromFile(String authority, StorageVolume volume, File f) {
+    public static @NonNull Track makeTrackFromFile(String authority, StorageVolume volume, File f) {
         return Track.builder()
-                .setUri(FoldersUris.track(authority, String.valueOf(volume.id), toRelativePath(volume.path, f)))
+                .setUri(FoldersUris.track(authority, String.valueOf(volume.id),
+                        toRelativePath(volume.path, f)))
                 .setParentUri(findParentUri(authority, volume, f))
                 .setName(f.getName())
-                .addRes(Track.Res.builder().setUri(Uri.fromFile(f)).setMimeType(guessMimeType(f)).build())
+                .setFlags(getFlags(f))
+                .addRes(Track.Res.builder()
+                                .setUri(Uri.fromFile(f))
+                                .setMimeType(guessMimeType(f))
+                                .setSize(f.length())
+                                .setLastMod(f.lastModified())
+                                .build()
+                )
                 .build();
+    }
+
+    public static long getFlags(@NonNull File f) {
+        return f.canWrite()
+                ? (LibraryConfig.FLAG_SUPPORTS_DELETE|LibraryConfig.FLAG_SUPPORTS_RENAME)
+                : 0;
     }
 
     public static int deleteFiles(File base, List<String> relPaths) {
@@ -216,8 +228,7 @@ public class FilesHelper {
         return success;
     }
 
-    @NonNull
-    public static List<File> filterAudioFiles(Context context, List<File> files) {
+    public static @NonNull List<File> filterAudioFiles(Context context, List<File> files) {
         if (files.size() == 0) {
             return Collections.emptyList();
         }
@@ -234,10 +245,10 @@ public class FilesHelper {
         for (int i = 0; i < size; i++) {
             final File f = files.get(i);
             final String path = f.getAbsolutePath();
-            selection.append("?");
-            if (i < size - 1) {
+            if (i != 0) {
                 selection.append(",");
             }
+            selection.append("?");
             selectionArgs[i] = path;
             pathMap.put(path, f); //Add file to map while where iterating
         }
@@ -279,8 +290,8 @@ public class FilesHelper {
         return audioFiles;
     }
 
-    @NonNull
-    public static List<Track> convertAudioFilesToTracks(Context context, String authority, StorageVolume volume, List<File> audioFiles) {
+    public static @NonNull List<Track> convertAudioFilesToTracks(
+            Context context, String authority, StorageVolume volume, List<File> audioFiles) {
         if (audioFiles.size() == 0) {
             return Collections.emptyList();
         }
@@ -299,10 +310,10 @@ public class FilesHelper {
             for (int i = 0; i < size; i++) {
                 final File f = audioFiles.get(i);
                 final String path = f.getAbsolutePath();
-                selection.append("?");
-                if (i < size - 1) {
+                if (i != 0) {
                     selection.append(",");
                 }
+                selection.append("?");
                 selectionArgs[i] = path;
                 pathMap.put(path, f); //Add file to map while where iterating
             }
@@ -311,7 +322,7 @@ public class FilesHelper {
             //make query
             c = context.getContentResolver().query(
                     Uris.EXTERNAL_MEDIASTORE_MEDIA,
-                    Projections.SONG_FILE,
+                    Projections.AUDIO_FILE,
                     selection.toString(),
                     selectionArgs,
                     null);
@@ -323,24 +334,27 @@ public class FilesHelper {
                             Track.Builder tb = Track.builder()
                                     .setUri(FoldersUris.track(authority, volume.id, c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID))))
                                     .setParentUri(findParentUri(authority, volume, f))
-                                    .setName(getStringOrNull(c, MediaStore.Audio.AudioColumns.DISPLAY_NAME))
+                                    .setDisplayName(getStringOrNull(c, MediaStore.Audio.AudioColumns.DISPLAY_NAME))
+                                    .setName(getStringOrNull(c, MediaStore.Audio.AudioColumns.TITLE))
                                     .setArtistName(getStringOrNull(c, MediaStore.Audio.AudioColumns.ARTIST))
                                     .setAlbumName(getStringOrNull(c, MediaStore.Audio.AudioColumns.ALBUM))
-                                    .setAlbumArtistName(getStringOrNull(c, "album_artist"))
-//                                    .setAlbumIdentity(getStringOrNull(c, MediaStore.Audio.AudioColumns.ALBUM_ID))
-                                    .setDuration((int) (getLongOrZero(c, MediaStore.Audio.AudioColumns.DURATION) / 1000))
+                                    .setDuration(getLongOrZero(c, MediaStore.Audio.AudioColumns.DURATION))
                                     .addRes(Track.Res.builder()
-                                            .setUri(generateDataUri(c.getString(c.getColumnIndexOrThrow(BaseColumns._ID))))
-                                            .setMimeType(getStringOrNull(c, MediaStore.Audio.AudioColumns.MIME_TYPE))
-                                            .setDuration(getLongOrZero(c, MediaStore.Audio.AudioColumns.DURATION))
-                                            .build()
+                                                    .setUri(generateDataUri(c.getString(c.getColumnIndexOrThrow(BaseColumns._ID))))
+                                                    .setMimeType(getStringOrNull(c, MediaStore.Audio.AudioColumns.MIME_TYPE))
+                                                    .setDuration(getLongOrZero(c, MediaStore.Audio.AudioColumns.DURATION))
+                                                    .setLastMod(getLongOrZero(c, MediaStore.Audio.AudioColumns.DATE_MODIFIED))
+                                                    .setSize(getLongOrZero(c, MediaStore.Audio.AudioColumns.SIZE))
+                                                    .build()
                                     )
                                     .setArtworkUri(generateArtworkUri(
                                             c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))))
-                                    .setTrackNumber(getIntOrZero(c, MediaStore.Audio.AudioColumns.TRACK))
+                                    .setFlags(LibraryConfig.FLAG_SUPPORTS_DELETE | LibraryConfig.FLAG_SUPPORTS_RENAME)
                                     ;
                             trackList.add(tb.build());
-                        } catch (IllegalArgumentException ignored) {}
+                        } catch (IllegalArgumentException ignored) {
+                            pathMap.put(c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DATA)), f);
+                        }
                     }
                 } while (c.moveToNext());
             }
@@ -355,6 +369,21 @@ public class FilesHelper {
         } finally {
             closeQuietly(c);
         }
+        return trackList;
+    }
+
+    public static @NonNull List<Track> convertAudioFilesToTracksMinimal(
+            Context context, String authority, StorageVolume volume, List<File> audioFiles) {
+        if (audioFiles.size() == 0) {
+            return Collections.emptyList();
+        }
+
+        final List<Track> trackList = new ArrayList<>(audioFiles.size());
+
+        for (File f : audioFiles) {
+            trackList.add(makeTrackFromFile(authority, volume, f));
+        }
+
         return trackList;
     }
 

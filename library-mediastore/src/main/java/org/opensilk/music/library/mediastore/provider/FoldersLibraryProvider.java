@@ -105,15 +105,36 @@ public class FoldersLibraryProvider extends LibraryProvider {
                 browseFolders(uri.getPathSegments().get(0), uri.getLastPathSegment(), subscriber, args);
                 break;
             }
+            default:
+                Timber.w("Unmatched uri %s", uri);
+                subscriber.onError(new LibraryException(LibraryException.Kind.ILLEGAL_URI,
+                        new IllegalArgumentException("Invalid uri " + uri)));
+        }
+    }
+
+    @Override
+    protected void scanObjs(Uri uri, Subscriber<? super Bundleable> subscriber, Bundle args) {
+        args.putBoolean("fldr.isscan", true);
+        listObjs(uri, subscriber, args);
+    }
+
+    @Override
+    protected void getObj(Uri uri, Subscriber<? super Bundleable> subscriber, Bundle args) {
+        switch (mUriMatcher.match(uri)) {
+            case FoldersUris.M_FOLDER: {
+                browseFolders(uri.getPathSegments().get(0), uri.getLastPathSegment(), subscriber, args);
+                break;
+            }
             case FoldersUris.M_TRACK_MS:
             case FoldersUris.M_TRACK_PTH: {
                 getTrack(uri.getPathSegments().get(0), uri.getLastPathSegment(), subscriber, args);
                 break;
             }
-            default:
+            default: {
                 Timber.w("Unmatched uri %s", uri);
                 subscriber.onError(new LibraryException(LibraryException.Kind.ILLEGAL_URI,
                         new IllegalArgumentException("Invalid uri " + uri)));
+            }
         }
     }
 
@@ -135,11 +156,7 @@ public class FoldersLibraryProvider extends LibraryProvider {
         subscriber.onCompleted();
     }
 
-    @Override
-    protected void scanObjs(Uri uri, Subscriber<? super Bundleable> subscriber, Bundle args) {
-    }
-
-    protected void browseFolders(String library, String identity, Subscriber<? super Bundleable> subscriber, Bundle args) {
+    void browseFolders(String library, String identity, Subscriber<? super Bundleable> subscriber, Bundle args) {
         final StorageLookup.StorageVolume volume;
         final File rootDir;
         try {
@@ -155,8 +172,7 @@ public class FoldersLibraryProvider extends LibraryProvider {
             return;
         }
 
-        final boolean dirsOnly = false;
-        final boolean tracksOnly = false;
+        final boolean isScan = args.getBoolean("fldr.isscan", false);
 
         File[] dirList = rootDir.listFiles();
         List<File> files = new ArrayList<>(dirList.length);
@@ -167,22 +183,28 @@ public class FoldersLibraryProvider extends LibraryProvider {
             if (f.getName().startsWith(".")) {
                 continue;
             }
-            if (f.isDirectory() && !tracksOnly) {
+            if (f.isDirectory()) {
                 subscriber.onNext(FilesHelper.makeFolder(mAuthority, volume, f));
             } else if (f.isFile()) {
                 files.add(f);
             }
         }
         //Save ourselves the trouble
-        if (dirsOnly) {
-            subscriber.onCompleted();
-            return;
-        } else if (subscriber.isUnsubscribed()) {
+        if (subscriber.isUnsubscribed()) {
             return;
         }
         // convert raw file list into something useful
         List<File> audioFiles = FilesHelper.filterAudioFiles(getContext(), files);
-        List<Track> tracks = FilesHelper.convertAudioFilesToTracks(getContext(), mAuthority, volume, audioFiles);
+        List<Track> tracks;
+        if (isScan) {
+            //We want orpheus to extract the meta
+            tracks = FilesHelper.convertAudioFilesToTracksMinimal(getContext(),
+                    mAuthority, volume, audioFiles);
+        } else {
+            //We pull some meta from the medastore to make the display prettier
+            tracks = FilesHelper.convertAudioFilesToTracks(getContext(),
+                    mAuthority, volume, audioFiles);
+        }
         if (subscriber.isUnsubscribed()) {
             return;
         }
