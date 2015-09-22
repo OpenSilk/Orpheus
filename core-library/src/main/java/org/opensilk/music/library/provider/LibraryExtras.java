@@ -28,6 +28,9 @@ import org.opensilk.music.library.internal.IBundleableObserver;
 import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.internal.ResultReceiver;
 import org.opensilk.music.library.sort.BundleableSortOrder;
+import org.opensilk.music.model.ex.BadBundleableException;
+import org.opensilk.music.model.spi.Bundleable;
+import org.opensilk.music.model.util.BundleableUtil;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -37,6 +40,8 @@ import java.util.List;
  * Created by drew on 5/14/15.
  */
 public class LibraryExtras {
+
+    public static final String INTENT_KEY = "orpheus.libraryextras";
 
     /**
      * Request uri: always built with {@link LibraryUris}, never null
@@ -79,6 +84,10 @@ public class LibraryExtras {
 
     public static final String LIBRARY_INFO = "libraryinfo";
     private static final String WRAPPED_LIBRARY_INFO = "wrappedlibraryinfo";
+    /**
+     * A bundleable object
+     */
+    public static final String BUNDLEABLE = "bundleable";
 
     public static Uri getUri(Bundle extras) {
         return extras.getParcelable(URI);
@@ -162,6 +171,15 @@ public class LibraryExtras {
         return b;
     }
 
+    public static <T extends Bundleable> T getBundleable(Bundle extras) {
+        try {
+            extras.setClassLoader(LibraryExtras.class.getClassLoader());
+            return BundleableUtil.materializeBundle(extras.getBundle(BUNDLEABLE));
+        } catch (BadBundleableException ignored) {
+            return null;
+        }
+    }
+
     public static Builder b() {
         return new Builder();
     }
@@ -228,6 +246,11 @@ public class LibraryExtras {
 
         public Builder putExtrasBundle(Bundle extras) {
             b.putBundle(EXTRAS_BUNDLE, extras);
+            return this;
+        }
+
+        public Builder putBundleable(Bundleable bundleable) {
+            b.putBundle(BUNDLEABLE, bundleable.toBundle());
             return this;
         }
 
