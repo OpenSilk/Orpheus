@@ -32,8 +32,9 @@ import java.util.TreeSet;
  */
 public class Genre extends Container {
 
-    protected Genre(@NonNull Uri uri, @NonNull String name, @NonNull Metadata metadata) {
-        super(uri, name, metadata);
+    protected Genre(@NonNull Uri uri, @NonNull Uri parentUri,
+                    @NonNull String name, @NonNull Metadata metadata) {
+        super(uri, parentUri, name, metadata);
     }
 
     public Uri getTracksUri() {
@@ -63,6 +64,7 @@ public class Genre extends Container {
         b.putParcelable("_1", uri);
         b.putString("_2", name);
         b.putParcelable("_3", metadata);
+        b.putParcelable("_4", parentUri);
         return b;
     }
 
@@ -73,6 +75,7 @@ public class Genre extends Container {
         b.setClassLoader(Genre.class.getClassLoader());
         return new Genre(
                 b.<Uri>getParcelable("_1"),
+                b.<Uri>getParcelable("_4"),
                 b.getString("_2"),
                 b.<Metadata>getParcelable("_3")
         );
@@ -92,6 +95,7 @@ public class Genre extends Container {
 
     public static final class Builder  {
         private Uri uri;
+        private Uri parentUri;
         private String name;
         private Metadata.Builder bob = Metadata.builder();
         private TreeSet<ArtInfo> artInfos = new TreeSet<>();
@@ -115,7 +119,7 @@ public class Genre extends Container {
         }
 
         public Builder setParentUri(Uri uri) {
-            bob.putUri(Metadata.KEY_PARENT_URI, uri);
+            this.parentUri = uri;
             return this;
         }
 
@@ -155,11 +159,11 @@ public class Genre extends Container {
         }
 
         public Genre build() {
-            if (uri == null || name == null) {
+            if (uri == null || parentUri == null || name == null) {
                 throw new NullPointerException("uri and name are required");
             }
-            bob.putArtInfos(new ArrayList<>(artInfos).subList(0, 3)); //Only need 4;
-            return new Genre(uri, name, bob.build());
+            bob.putArtInfos(artInfos.size() > 4 ? new ArrayList<>(artInfos).subList(0, 3) : artInfos); //Only need 4;
+            return new Genre(uri, parentUri, name, bob.build());
         }
     }
 }

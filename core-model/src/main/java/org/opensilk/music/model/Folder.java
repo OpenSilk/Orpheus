@@ -29,8 +29,9 @@ import org.opensilk.music.model.spi.Bundleable;
  */
 public class Folder extends Container {
 
-    protected Folder(@NonNull Uri uri, @NonNull String name, @NonNull Metadata metadata) {
-        super(uri, name, metadata);
+    protected Folder(@NonNull Uri uri, @NonNull Uri parentUri,
+                     @NonNull String name, @NonNull Metadata metadata) {
+        super(uri, parentUri, name, metadata);
     }
 
     public int getChildCount() {
@@ -48,6 +49,7 @@ public class Folder extends Container {
         b.putParcelable("_1", uri);
         b.putString("_2", name);
         b.putParcelable("_3", metadata);
+        b.putParcelable("_4", parentUri);
         return b;
     }
 
@@ -58,6 +60,7 @@ public class Folder extends Container {
         b.setClassLoader(Folder.class.getClassLoader());
         return new Folder(
                 b.<Uri>getParcelable("_1"),
+                b.<Uri>getParcelable("_4"),
                 b.getString("_2"),
                 b.<Metadata>getParcelable("_3")
         );
@@ -76,6 +79,7 @@ public class Folder extends Container {
 
     public static final class Builder {
         private Uri uri;
+        private Uri parentUri;
         private String name;
         private Metadata.Builder bob = Metadata.builder();
 
@@ -98,7 +102,7 @@ public class Folder extends Container {
         }
 
         public Builder setParentUri(Uri parentUri) {
-            bob.putUri(Metadata.KEY_PARENT_URI, parentUri);
+            this.parentUri = parentUri;
             return this;
         }
 
@@ -113,10 +117,10 @@ public class Folder extends Container {
         }
 
         public Folder build() {
-            if (uri == null || name == null) {
+            if (uri == null || parentUri == null || name == null) {
                 throw new NullPointerException("uri and name are required");
             }
-            return new Folder(uri, name, bob.build());
+            return new Folder(uri, parentUri, name, bob.build());
         }
     }
 }

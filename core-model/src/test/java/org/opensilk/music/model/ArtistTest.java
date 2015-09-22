@@ -17,6 +17,7 @@
 
 package org.opensilk.music.model;
 
+import android.net.Uri;
 import android.os.Bundle;
 
 import org.junit.Before;
@@ -25,8 +26,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-
+import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Created by drew on 10/20/14.
  */
@@ -40,9 +40,12 @@ public class ArtistTest {
 
     @Before
     public void setUp() {
-        artist1 = Artist.builder().setIdentity("1").setName("Artist1").setTrackCount(25).build();
-        artist1_copy = Artist.builder().setIdentity("1").setName("Artist1").setTrackCount(25).build();
-        artist2 = Artist.builder().setIdentity("2").setName("Artist1").setTrackCount(22).build();
+        artist1 = Artist.builder().setUri(Uri.parse("content://test/m/1"))
+                .setParentUri(Uri.parse("content://test/m")).setName("Artist1").setTrackCount(25).build();
+        artist1_copy = Artist.builder().setUri(Uri.parse("content://test/m/1"))
+                .setParentUri(Uri.parse("content://test/m")).setName("Artist1").setTrackCount(25).build();
+        artist2 = Artist.builder().setUri(Uri.parse("content://test/m/2"))
+                .setParentUri(Uri.parse("content://test/m")).setName("Artist1").setTrackCount(22).build();
     }
 
     @Test
@@ -71,7 +74,8 @@ public class ArtistTest {
 
     @Test(expected = NullPointerException.class)
     public void ensureArtistNullNameThrows() {
-        Artist a = Artist.builder().setIdentity("1").build();;
+        Artist a = Artist.builder().setUri(Uri.parse("content://test/m/1"))
+                .setParentUri(Uri.parse("content://test/m")).build();
     }
 
 }

@@ -17,6 +17,7 @@
 
 package org.opensilk.music.model;
 
+import android.net.Uri;
 import android.os.Bundle;
 
 import org.junit.Before;
@@ -25,8 +26,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-
+import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Created by drew on 10/20/14.
  */
@@ -40,9 +40,12 @@ public class FolderTest {
 
     @Before
     public void setUp() {
-        folder1 = Folder.builder().setIdentity("1").setName("Folder1").setChildCount(25).build();
-        folder1_copy = Folder.builder().setIdentity("1").setName("Folder1").setChildCount(25).build();
-        folder2 = Folder.builder().setIdentity("1").setName("Folder2").setChildCount(25).build();
+        folder1 = Folder.builder().setUri(Uri.parse("content://test/m/1"))
+                .setParentUri(Uri.parse("content://test/m")).setName("Folder1").setChildCount(25).build();
+        folder1_copy = Folder.builder().setUri(Uri.parse("content://test/m/1"))
+                .setParentUri(Uri.parse("content://test/m")).setName("Folder1").setChildCount(25).build();
+        folder2 = Folder.builder().setUri(Uri.parse("content://test/m/2"))
+                .setParentUri(Uri.parse("content://test/m")).setName("Folder2").setChildCount(25).build();
     }
 
     @Test

@@ -33,14 +33,16 @@ import java.util.Map;
  *
  * Created by drew on 9/3/15.
  */
-public abstract class Item implements Bundleable {
+public abstract class Item implements Model {
 
     protected final Uri uri;
+    protected final Uri parentUri;
     protected final String name;
     protected final Metadata metadata;
 
-    protected Item(@NonNull Uri uri, @NonNull String name, @NonNull Metadata metadata) {
+    protected Item(@NonNull Uri uri, @NonNull Uri parentUri, @NonNull String name, @NonNull Metadata metadata) {
         this.uri = uri;
+        this.parentUri = parentUri;
         this.name = name;
         this.metadata = metadata;
     }
@@ -52,7 +54,7 @@ public abstract class Item implements Bundleable {
 
     @Override
     public String getName() {
-        return getDisplayName();
+        return name;
     }
 
     @Override
@@ -60,22 +62,19 @@ public abstract class Item implements Bundleable {
         return uri;
     }
 
+    @NonNull
     @Override
     public String getDisplayName() {
         String disName = metadata.getString(Metadata.KEY_DISPLAY_NAME);
-        return disName != null ? disName : name;
+        return disName != null ? disName : getName();
     }
 
     public Uri getParentUri() {
-        return metadata.getUri(Metadata.KEY_PARENT_URI);
+        return parentUri;
     }
 
-    public long getLastModified() {
-        return metadata.getLong(Metadata.KEY_LAST_MODIFIED);
-    }
-
-    public String getMimeType() {
-        return metadata.getString(Metadata.KEY_MIME_TYPE);
+    public long getFlags() {
+        return metadata.getLong(Metadata.KEY_FLAGS);
     }
 
     @Override

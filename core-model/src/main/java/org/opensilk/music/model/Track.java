@@ -176,7 +176,7 @@ public class Track extends Item {
             /**
              * Opaque value, increase when resource changes
              */
-            public Builder putLastMod(long lastMod) {
+            public Builder setLastMod(long lastMod) {
                 bob.putLong(Metadata.KEY_LAST_MODIFIED, lastMod);
                 return this;
             }
@@ -217,9 +217,9 @@ public class Track extends Item {
 
     private final ArrayList<Res> resList;
 
-    protected Track(@NonNull Uri uri, @NonNull String name,
+    protected Track(@NonNull Uri uri, @NonNull Uri parentUri, @NonNull String name,
                     @NonNull Metadata metadata, @NonNull ArrayList<Res> resList) {
-        super(uri, name, metadata);
+        super(uri, parentUri, name, metadata);
         this.resList = resList;
     }
 
@@ -284,6 +284,7 @@ public class Track extends Item {
         b.putString("_2", name);
         b.putParcelable("_3", metadata);
         b.putParcelableArrayList("_4", resList);
+        b.putParcelable("_5", parentUri);
         return b;
     }
 
@@ -294,6 +295,7 @@ public class Track extends Item {
         b.setClassLoader(Track.class.getClassLoader());
         return new Track(
                 b.<Uri>getParcelable("_1"),
+                b.<Uri>getParcelable("_5"),
                 b.getString("_2"),
                 b.<Metadata>getParcelable("_3"),
                 b.<Res>getParcelableArrayList("_4")
@@ -304,9 +306,6 @@ public class Track extends Item {
         return new Builder();
     }
 
-    /**
-     * Mutate this track minus any resources
-     */
     public Builder buildUpon() {
         return new Builder(this);
     }
@@ -320,6 +319,7 @@ public class Track extends Item {
 
     public static final class Builder {
         private Uri uri;
+        private Uri parentUri;
         private String name;
         private Metadata.Builder bob = Metadata.builder();
         private ArrayList<Res> resList = new ArrayList<>();
@@ -329,9 +329,10 @@ public class Track extends Item {
 
         private Builder(Track t) {
             uri = t.uri;
+            parentUri = t.parentUri;
             name = t.name;
             bob = t.metadata.buildUpon();
-            //ignoring reslist
+            resList.addAll(t.getResources());
         }
 
         public Builder setUri(Uri uri) {
@@ -350,7 +351,7 @@ public class Track extends Item {
         }
 
         public Builder setParentUri(Uri uri) {
-            bob.putUri(Metadata.KEY_PARENT_URI, uri);
+            this.parentUri = uri;
             return this;
         }
 
@@ -379,13 +380,9 @@ public class Track extends Item {
             return this;
         }
 
+        @Deprecated
         public Builder setDuration(long duration) {
             bob.putLong(Metadata.KEY_DURATION, duration);
-            return this;
-        }
-
-        public Builder setDurationS(int durationS) {
-            bob.putLong(Metadata.KEY_DURATION, (long)durationS * 1000);
             return this;
         }
 
@@ -414,16 +411,28 @@ public class Track extends Item {
             return this;
         }
 
+        public Builder setFlags(long flags) {
+            bob.putLong(Metadata.KEY_FLAGS, flags);
+            return this;
+        }
+
         public Builder addRes(Res res) {
             resList.add(res);
             return this;
         }
 
+        /**
+         * @return modifiable list of resources
+         */
+        public List<Res> resList() {
+            return resList;
+        }
+
         public Track build() {
-            if (uri == null || name == null || resList.isEmpty()) {
-                throw new NullPointerException("uri, name, and resList are required");
+            if (uri == null || name == null || parentUri == null || resList.isEmpty()) {
+                throw new NullPointerException("uri, parentUri, name, and resList are required");
             }
-            return new Track(uri, name, bob.build(), resList);
+            return new Track(uri, parentUri, name, bob.build(), resList);
         }
     }
 }

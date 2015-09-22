@@ -26,8 +26,8 @@ import android.support.annotation.NonNull;
  */
 public class Album extends Container {
 
-    protected Album(@NonNull Uri uri, @NonNull String name, @NonNull Metadata metadata) {
-        super(uri, name, metadata);
+    protected Album(@NonNull Uri uri, @NonNull Uri parentUri, @NonNull String name, @NonNull Metadata metadata) {
+        super(uri, parentUri, name, metadata);
     }
 
     public String getArtistName() {
@@ -43,7 +43,7 @@ public class Album extends Container {
     }
 
     public String getYear() {
-        return metadata.getString(Metadata.KEY_YEAR);
+        return metadata.getString(Metadata.KEY_RELEASE_YEAR);
     }
 
     public Uri getArtworkUri() {
@@ -57,6 +57,7 @@ public class Album extends Container {
         b.putParcelable("_1", uri);
         b.putString("_2", name);
         b.putParcelable("_3", metadata);
+        b.putParcelable("_4", parentUri);
         return b;
     }
 
@@ -67,6 +68,7 @@ public class Album extends Container {
         b.setClassLoader(Album.class.getClassLoader());
         return new Album(
                 b.<Uri>getParcelable("_1"),
+                b.<Uri>getParcelable("_4"),
                 b.getString("_2"),
                 b.<Metadata>getParcelable("_3")
         );
@@ -85,6 +87,7 @@ public class Album extends Container {
 
     public static final class Builder {
         private Uri uri;
+        private Uri parentUri;
         private String name;
         private Metadata.Builder bob = Metadata.builder();
 
@@ -107,7 +110,7 @@ public class Album extends Container {
         }
 
         public Builder setParentUri(Uri uri) {
-            bob.putUri(Metadata.KEY_PARENT_URI, uri);
+            this.parentUri = uri;
             return this;
         }
 
@@ -127,7 +130,7 @@ public class Album extends Container {
         }
 
         public Builder setYear(String year) {
-            bob.putString(Metadata.KEY_YEAR, year);
+            bob.putString(Metadata.KEY_RELEASE_YEAR, year);
             return this;
         }
 
@@ -137,10 +140,10 @@ public class Album extends Container {
         }
 
         public Album build() {
-            if (uri == null || name == null) {
+            if (uri == null || parentUri == null || name == null) {
                 throw new NullPointerException("uri and name are required");
             }
-            return new Album(uri, name, bob.build());
+            return new Album(uri, parentUri, name, bob.build());
         }
     }
 

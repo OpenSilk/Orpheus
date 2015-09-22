@@ -17,19 +17,21 @@
 
 package org.opensilk.music.model.util;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.ex.BadBundleableException;
 import org.opensilk.music.model.spi.Bundleable;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Created by drew on 10/20/14.
@@ -40,7 +42,8 @@ public class BundleableUtilTest {
 
     @Test
     public void testMaterilizeBundleWorks() throws Exception {
-        Folder f = Folder.builder().setIdentity("1").setName("Folder1").build();
+        Folder f = Folder.builder().setUri(Uri.parse("content://test/m/1"))
+                .setParentUri(Uri.parse("content://test/m")).setName("Folder1").build();
         Bundle b = f.toBundle();
 
         Parcel p = Parcel.obtain();
@@ -58,8 +61,9 @@ public class BundleableUtilTest {
 
     @Test(expected = BadBundleableException.class)
     public void ensureMalformedBundleThrows() throws Exception {
-        Bundle b =  Folder.builder().setIdentity("1").setName("Folder1").build().toBundle();
-        b.putString("clz", null);
+        Bundle b =  Folder.builder().setUri(Uri.parse("content://test/m/1"))
+                .setParentUri(Uri.parse("content://test/m")).setName("Folder1").build().toBundle();
+        b.putString(Bundleable.CLZ, Artist.class.getName());
         BundleableUtil.materializeBundle(Folder.class, b);
     }
 }

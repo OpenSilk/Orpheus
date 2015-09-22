@@ -28,8 +28,7 @@ import org.robolectric.annotation.Config;
 
 import java.util.Map;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-
+import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Created by drew on 10/20/14.
  */
@@ -43,9 +42,16 @@ public class TrackTest {
 
     @Before
     public void setUp() {
-        song1 = Track.builder().setIdentity("1").setName("Song1").setDataUri(Uri.parse("http://example.com/song1")).build();
-        song1_copy = Track.builder().setIdentity("1").setName("Song1").setDataUri(Uri.parse("http://example.com/song1")).build();
-        song2 = Track.builder().setIdentity("1").setName("Song1").setDataUri(Uri.parse("http://example.com/song1")).setMimeType("audio/mp3").build();
+        song1 = Track.builder().setUri(Uri.parse("content://test/m/1"))
+                .setParentUri(Uri.parse("content://test/m")).setName("Song1")
+                .addRes(Track.Res.builder().setUri(Uri.parse("http://example.com/song1")).build()).build();
+        song1_copy = Track.builder().setUri(Uri.parse("content://test/m/1"))
+                .setParentUri(Uri.parse("content://test/m")).setName("Song1")
+                .addRes(Track.Res.builder().setUri(Uri.parse("http://example.com/song1")).build()).build();
+        song2 = Track.builder().setUri(Uri.parse("content://test/m/2"))
+                .setParentUri(Uri.parse("content://test/m")).setName("Song1")
+                .addRes(Track.Res.builder().setUri(Uri.parse("http://example.com/song1"))
+                        .setMimeType("audio/mp3").build()).build();
     }
 
     @Test
@@ -69,36 +75,43 @@ public class TrackTest {
 
     @Test(expected = NullPointerException.class)
     public void ensureSongNullIdentityThrows() {
-        Track.builder().setName("Song1").setDataUri(Uri.parse("http://example.com/song1")).build();
+        Track.builder().setName("Song1").addRes(Track.Res.builder()
+                .setUri(Uri.parse("http://example.com/song1")).build()).build();
     }
 
     @Test(expected = NullPointerException.class)
     public void ensureSongNullNameThrows() {
-        Track.builder().setIdentity("1").setDataUri(Uri.parse("http://example.com/song1")).build();
+        Track.builder().setUri(Uri.parse("content://test/m/1"))
+                .setParentUri(Uri.parse("content://test/m"))
+                .addRes(Track.Res.builder().setUri(Uri.parse("http://example.com/song1")).build()).build();
     }
 
     @Test(expected = NullPointerException.class)
     public void ensureSongNullDataUriThrows() {
-        Track.builder().setIdentity("1").setName("Song1").build();
+        Track.builder().setUri(Uri.parse("content://test/m/1"))
+                .setParentUri(Uri.parse("content://test/m")).setName("Song1")
+                .addRes(Track.Res.builder().build()).build();
     }
 
     @Test
     public void ensureSongDefaultMimeTypeWasSet() {
-        assertThat(song1.mimeType).isEqualTo(Track.DEFAULT_MIME_TYPE);
+        assertThat(song1.getResources().get(0).getMimeType()).isEqualTo(Track.DEFAULT_MIME_TYPE);
     }
 
     @Test
     public void ensureSongDefaultMimeTypeWasOverridden() {
-        assertThat(song2.mimeType).isNotEqualTo(Track.DEFAULT_MIME_TYPE);
+        assertThat(song2.getResources().get(0).getMimeType()).isNotEqualTo(Track.DEFAULT_MIME_TYPE);
     }
 
     @Test
     public void testHeaderParsing() {
-        Track t = Track.builder().setIdentity("1").setName("1").setDataUri(Uri.parse("http://somedomain/1"))
+        Track t = Track.builder().setUri(Uri.parse("content://test/m/1"))
+                .setParentUri(Uri.parse("content://test/m")).setName("Song1")
+                .addRes(Track.Res.builder().setUri(Uri.parse("http://example.com/song1"))
                 .addHeader("Authorization ", " Bearer aosinaotuhasoniu ")
                 .addHeader("Foo", "Bar; Pie")
-                .build();
-        Map<String, String> m = t.getHeaders();
+                .build()).build();
+        Map<String, String> m = t.getResources().get(0).getHeaders();
         assertThat(m.get("Authorization")).isEqualTo("Bearer aosinaotuhasoniu");
         assertThat(m.get("Foo")).isEqualTo("Bar; Pie");
     }

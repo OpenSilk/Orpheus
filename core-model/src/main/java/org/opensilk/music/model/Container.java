@@ -28,14 +28,17 @@ import org.opensilk.music.model.spi.Bundleable;
  *
  * Created by drew on 9/2/15.
  */
-public abstract class Container implements Bundleable {
+public abstract class Container implements Model {
 
     protected final Uri uri;
+    protected final Uri parentUri;
     protected final String name;
     protected final Metadata metadata;
 
-    protected Container(@NonNull Uri uri, @NonNull String name, @NonNull Metadata metadata) {
+    protected Container(@NonNull Uri uri, @NonNull Uri parentUri,
+                        @NonNull String name, @NonNull Metadata metadata) {
         this.uri = uri;
+        this.parentUri = parentUri;
         this.name = name;
         this.metadata = metadata;
     }
@@ -47,7 +50,7 @@ public abstract class Container implements Bundleable {
 
     @Override
     public String getName() {
-        return getDisplayName();
+        return name;
     }
 
     @Override
@@ -55,14 +58,15 @@ public abstract class Container implements Bundleable {
         return uri;
     }
 
+    @NonNull
     @Override
     public String getDisplayName() {
         String disName = metadata.getString(Metadata.KEY_DISPLAY_NAME);
-        return disName != null ? disName : name;
+        return disName != null ? disName : getName();
     }
 
     public Uri getParentUri() {
-        return metadata.getUri(Metadata.KEY_PARENT_URI);
+        return parentUri;
     }
 
     @Override
@@ -80,7 +84,7 @@ public abstract class Container implements Bundleable {
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 
 }

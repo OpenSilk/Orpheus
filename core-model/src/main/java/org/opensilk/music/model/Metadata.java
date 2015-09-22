@@ -29,59 +29,175 @@ import java.util.List;
 /**
  * Common class for metadata to make parsing and future additions easier
  * Modeled after MediaMetadata. It is essentially a bundle that only allows
- * as specific subset of key value combinations. You should not need to use
+ * as specific subset of key value combinations. librarys should not need to use
  * this directly, as model classes provide getters/setters for metadata they
  * allow.
  *
  * Created by drew on 9/3/15.
  */
 public class Metadata implements Parcelable {
-
+    /**
+     * String: Name of artist
+     */
     public static final String KEY_ARTIST_NAME = "orpheus.artist.name";
+    /**
+     * String: Name of album
+     */
     public static final String KEY_ALBUM_NAME = "orpheus.album.name";
-    public static final String KEY_ALBUM_ART_URI = "orpheus.album.art.uri";
-    public static final String KEY_ARTIST_IMAGE_URI = "orpheus.artist.image.uri";
-    public static final String KEY_YEAR = "orpheus.year";
+    /**
+     * String: Name album artist
+     */
+    public static final String KEY_ALBUM_ARTIST_NAME = "orpheus.album.artist.name";
+    /**
+     * Long: Year Album/track/etc was released
+     */
+    public static final String KEY_RELEASE_YEAR = "orpheus.release.year";
+    /**
+     * Long: (internal use) ms since epoch item was added to index
+     */
     public static final String KEY_DATE_ADDED = "orpheus.date.added";
+    /**
+     * String: Human readable date object was last modified
+     */
     public static final String KEY_DATE_MODIFIED = "orpheus.date.modified";
-    //long
+    /**
+     * Long: Bitrate of {@link org.opensilk.music.model.Track.Res}
+     */
     public static final String KEY_BITRATE = "orpheus.bitrate";
-    public static final String KEY_PLAY_ORDER_INDEX = "orpheus.play.order.index";
+    /**
+     * String: Mime type of {@link org.opensilk.music.model.Track.Res}
+     */
     public static final String KEY_MIME_TYPE = "orpheus.mime.type";
     /**
-     * Size of resource
-     * Used: in display, by scanner as sanity check (will rescan if uri matched but size differs)
-     * TYPE: Long
+     * Long: byte size of {@link org.opensilk.music.model.Track.Res}
      */
     public static final String KEY_SIZE = "orpheus.size";
-
-    public static final String KEY_ALBUM_ARTIST_NAME = "orpheus.album.artist.name";
+    /**
+     * Long: ms duration of {@link org.opensilk.music.model.Track.Res}
+     */
     public static final String KEY_DURATION = "orpheus.duration";
+    /**
+     * Uri: (any scheme) where jpg/png/etc can be fetched containing cover art
+     */
+    public static final String KEY_ALBUM_ART_URI = "orpheus.album.art.uri";
+    /**
+     * Uri: (any scheme) where jpg/png/etc can be fetched containing image of artist or group
+     */
+    public static final String KEY_ARTIST_IMAGE_URI = "orpheus.artist.image.uri";
+    /**
+     * Uri: (content) library provider uri to {@link Album}
+     */
     public static final String KEY_ALBUM_URI = "orpheus.album.uri";
+    /**
+     * Uri: (content) library provider uri to {@link Artist}
+     */
     public static final String KEY_ARTIST_URI = "orpheus.artist.uri";
+    /**
+     * Uri: (any scheme) link to audio file for {@link Track.Res#getUri()}
+     */
     public static final String KEY_RESOURCE_URI = "orpheus.resource.uri";
+    /**
+     * Uri: new line separated headers needed for accessing {@link #KEY_RESOURCE_URI} over http/s
+     */
     public static final String KEY_RESOURCE_HEADERS = "orhpeus.resource.headers";
-
+    /**
+     * Uri: (content) library provider uri to parent {@link Container}
+     */
     public static final String KEY_PARENT_URI = "orpheus.parent.uri";
+    /**
+     * Int: track count in {@link Container}
+     */
     public static final String KEY_CHILD_TRACKS_COUNT = "orpheus.child.track.count";
+    /**
+     * Int: album count in {@link Container}
+     */
     public static final String KEY_CHILD_ALBUMS_COUNT = "orpheus.child.album.count";
+    /**
+     * Int: children of type {@link Container} or {@link Item} in this {@link Container}
+     */
     public static final String KEY_CHILD_COUNT = "orpheus.child.count";
+    /**
+     * Uri: (content) library provider uri where a list of {@link Album}s
+     *      can be fetched contained in this {@link TrackList}
+     */
     public static final String KEY_CHILD_ALBUMS_URI = "orpheus.child.albums.uri";
+    /**
+     * Uri: (content) library provider uri where a last of {@link Track}s
+     *      can be fetched contained in this {@link TrackList}
+     */
     public static final String KEY_CHILD_TRACKS_URI = "orpheus.child.tracks.uri";
+    /**
+     * TODO try and remove this
+     */
     public static final String KEY_ARTINFOS = "orpheus.artinfos";
-    //int
+    /**
+     * Int: value > 0 if part of compilation
+     */
     public static final String KEY_IS_COMPILATION = "orpheus.iscompilation";
+    /**
+     * String: name of genre this {@link Track} belongs to
+     */
     public static final String KEY_GENRE_NAME = "orpheus.genre.name";
+    /**
+     * String: name/title of track
+     */
     public static final String KEY_TRACK_NAME = "orpheus.track.name";
+    /**
+     * Int: position of track in album / playlist / etc
+     */
     public static final String KEY_TRACK_NUMBER = "orpheus.track.number";
+    /**
+     * Int: disc number for track (defaults to 1)
+     */
     public static final String KEY_DISC_NUMBER = "orpheus.disc.number";
     /**
-     * Opaque value provided by library, could be date, version, etc
-     * Used: by scanner to determine if item should be rescanned (along with {@link #KEY_SIZE})
-     * TYPE: Long
+     * Long: Opaque value provided by library provider, could be date, version, etc
      */
     public static final String KEY_LAST_MODIFIED = "orpheus.last.modified";
+    /**
+     * String: TODO still unsure if this should be used
+     */
     public static final String KEY_DISPLAY_NAME = "orpheus.display.name";
+    /**
+     * Long: Bitmask of action flags in LibraryConfig
+     */
+    public static final String KEY_FLAGS = "orpheus.flags";
+    /**
+     * Uri: (content) library provider uri to a {@link Track}
+     */
+    public static final String KEY_TRACK_URI = "orpheus.track.uri";
+    /**
+     * String: artists musicbrainz id
+     */
+    public static final String KEY_ARTIST_MBID = "orpheus.artist.mbid";
+    /**
+     * String: bio/long deescription of artist
+     */
+    public static final String KEY_ARTIST_BIO = "orpheus.artist.mbid";
+    /**
+     * String: brief summary of artist
+     */
+    public static final String KEY_ARTIST_SUMMARY = "orpheus.artist.mbid";
+    /**
+     * Uri: (http) link to last.fm page
+     */
+    public static final String KEY_ARTIST_URL_URI = "orpheus.artist.url.uri";
+    /**
+     * String: artists musicbrainz id
+     */
+    public static final String KEY_ALBUM_MBID = "orpheus.album.mbid";
+    /**
+     * String: bio/long deescription of artist
+     */
+    public static final String KEY_ALBUM_BIO = "orpheus.album.mbid";
+    /**
+     * String: brief summary of artist
+     */
+    public static final String KEY_ALBUM_SUMMARY = "orpheus.album.mbid";
+    /**
+     * Uri: (http) link to last.fm page
+     */
+    public static final String KEY_ALBUM_URL_URI = "orpheus.album.url.uri";
 
     private final Bundle meta;
 
@@ -90,7 +206,7 @@ public class Metadata implements Parcelable {
     }
 
     public String getString(String key) {
-        return meta.getString(key);
+        return meta.getString(key, null);
     }
 
     public int getInt(String key) {

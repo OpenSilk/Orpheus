@@ -37,8 +37,9 @@ import java.util.TreeSet;
  */
 public class Playlist extends Container {
 
-    protected Playlist(@NonNull Uri uri, @NonNull String name, @NonNull Metadata metadata) {
-        super(uri, name, metadata);
+    protected Playlist(@NonNull Uri uri, @NonNull Uri parentUri,
+                       @NonNull String name, @NonNull Metadata metadata) {
+        super(uri, parentUri, name, metadata);
     }
 
     public Uri getTracksUri() {
@@ -60,6 +61,7 @@ public class Playlist extends Container {
         b.putParcelable("_1", uri);
         b.putString("_2", name);
         b.putParcelable("_3", metadata);
+        b.putParcelable("_4", parentUri);
         return b;
     }
 
@@ -70,6 +72,7 @@ public class Playlist extends Container {
         b.setClassLoader(Playlist.class.getClassLoader());
         return new Playlist(
                 b.<Uri>getParcelable("_1"),
+                b.<Uri>getParcelable("_4"),
                 b.getString("_2"),
                 b.<Metadata>getParcelable("_3")
         );
@@ -89,6 +92,7 @@ public class Playlist extends Container {
 
     public static final class Builder {
         private Uri uri;
+        private Uri parentUri;
         private String name;
         private Metadata.Builder bob = Metadata.builder();
         private TreeSet<ArtInfo> artInfos = new TreeSet<>();
@@ -112,7 +116,7 @@ public class Playlist extends Container {
         }
 
         public Builder setParentUri(Uri uri) {
-            bob.putUri(Metadata.KEY_PARENT_URI, uri);
+            this.parentUri = uri;
             return this;
         }
 
@@ -142,11 +146,11 @@ public class Playlist extends Container {
         }
 
         public Playlist build() {
-            if (uri == null || name == null) {
+            if (uri == null || parentUri == null || name == null) {
                 throw new NullPointerException("uri and name are required");
             }
-            bob.putArtInfos(new ArrayList<>(artInfos).subList(0, 3)); //Only need 4;
-            return new Playlist(uri, name, bob.build());
+            bob.putArtInfos(artInfos.size() > 4 ? new ArrayList<>(artInfos).subList(0, 3) : artInfos); //Only need 4;
+            return new Playlist(uri, parentUri, name, bob.build());
         }
     }
 }

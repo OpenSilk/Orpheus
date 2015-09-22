@@ -29,7 +29,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Created by drew on 10/20/14.
@@ -44,9 +44,14 @@ public class AlbumTest {
 
     @Before
     public void setUp() {
-        album1 = Album.builder().setIdentity("1").setName("Album1").setArtworkUri(Uri.parse("http://example.com/Art1")).build();
-        album1_copy = Album.builder().setIdentity("1").setName("Album1").setArtworkUri(Uri.parse("http://example.com/Art1")).build();
-        album2 = Album.builder().setIdentity("2").setName("Album1").build();
+        album1 = Album.builder().setUri(Uri.parse("content://test/m/1"))
+                .setParentUri(Uri.parse("content://test/m")).setName("Album1")
+                .setArtworkUri(Uri.parse("http://example.com/Art1")).build();
+        album1_copy = Album.builder().setUri(Uri.parse("content://test/m/1"))
+                .setParentUri(Uri.parse("content://test/m")).setName("Album1")
+                .setArtworkUri(Uri.parse("http://example.com/Art1")).build();
+        album2 = Album.builder().setUri(Uri.parse("content://test/m/2"))
+                .setParentUri(Uri.parse("content://test/m")).setName("Album1").build();
     }
 
     @Test
@@ -75,7 +80,8 @@ public class AlbumTest {
 
     @Test(expected = NullPointerException.class)
     public void ensureAlbumNullNameThrows() {
-        Album a = Album.builder().setIdentity("1").build();
+        Album a = Album.builder().setUri(Uri.parse("content://test/m/1"))
+                .setParentUri(Uri.parse("content://test/m")).build();
     }
 
 
