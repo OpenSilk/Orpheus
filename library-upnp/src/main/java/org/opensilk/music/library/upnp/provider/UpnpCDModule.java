@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.library.upnp;
+package org.opensilk.music.library.upnp.provider;
 
 import android.app.AlarmManager;
 import android.content.Context;
@@ -30,9 +30,10 @@ import dagger.Provides;
 /**
  * Created by drew on 9/21/15.
  */
-@Module(
-        includes = UpnpLibraryAuthorityModule.class
-)
-public class UpnpLibraryModule {
-
+@Module
+public class UpnpCDModule {
+    @Provides @UpnpCDScope
+    public AlarmManager provideAlarmManager(@ForApplication Context context) {
+        return (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+    }
 }

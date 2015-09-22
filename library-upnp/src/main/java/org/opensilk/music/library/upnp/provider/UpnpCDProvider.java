@@ -17,6 +17,8 @@
 
 package org.opensilk.music.library.upnp.provider;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -34,6 +36,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.fourthline.cling.android.AndroidUpnpService;
 import org.fourthline.cling.model.action.ActionInvocation;
 import org.fourthline.cling.model.message.UpnpResponse;
+import org.fourthline.cling.model.message.header.UDNHeader;
 import org.fourthline.cling.model.meta.Device;
 import org.fourthline.cling.model.meta.DeviceDetails;
 import org.fourthline.cling.model.meta.RemoteDevice;
@@ -57,6 +60,7 @@ import org.fourthline.cling.support.model.item.MusicTrack;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.internal.BundleableSubscriber;
+import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryProvider;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.upnp.R;
@@ -77,14 +81,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import hugo.weaving.DebugLog;
 import rx.Observable;
+import rx.Scheduler;
 import rx.Subscriber;
+import rx.functions.Action0;
 import rx.functions.Func3;
 import rx.schedulers.Schedulers;
+import timber.log.Timber;
 
 /**
  * Created by drew on 9/17/15.
@@ -92,6 +101,8 @@ import rx.schedulers.Schedulers;
 public class UpnpCDProvider extends LibraryProvider {
 
     @Inject @Named("UpnpLibraryBaseAuthority") String mBaseAuthority;
+    @Inject AlarmManager mAlarmManager;
+
     UriMatcher mMatcher;
 
     @Override
@@ -100,6 +111,7 @@ public class UpnpCDProvider extends LibraryProvider {
         UpnpCDComponent.FACTORY.call(app).inject(this);
         super.onCreate();
         mMatcher = UpnpCDUris.makeMatcher(mAuthority);
+        registerListener();
         return true;
     }
 
@@ -117,23 +129,41 @@ public class UpnpCDProvider extends LibraryProvider {
     }
 
     @Override
+    protected Bundle callCustom(String method, String arg, Bundle extras) {
+        switch (method) {
+            case "upnp.rebind":{
+                registerListener();
+                return LibraryExtras.b().putOk(true).get();
+            }
+            default: {
+                return super.callCustom(method, arg, extras);
+            }
+        }
+    }
+
+    @Override
     protected void listObjsInternal(Uri uri, IBinder binder, Bundle args) {
         switch (mMatcher.match(uri)) {
+            case UpnpCDUris.M_DEVICE_ROOT:
             case UpnpCDUris.M_OBJECT: {
 
                 final String device = uri.getPathSegments().get(0);
-                final String folder = uri.getLastPathSegment();
+                final String folder;
+                if (uri.getPathSegments().size() > 1) {
+                    folder = uri.getLastPathSegment();
+                } else {
+                    folder = "";
+                }
 
                 Observable.create(
                         new Observable.OnSubscribe<List<Bundleable>>() {
                             @Override
                             public void call(Subscriber<? super List<Bundleable>> subscriber) {
-                                browseFolders(device, folder, subscriber);
+                                browseFolders(device, folder, subscriber, true);
                             }
                         })
                         .subscribeOn(Schedulers.io())
                         .subscribe(new BundleableSubscriber<Bundleable>(binder));
-
                 break;
             }
             default: {
@@ -144,7 +174,25 @@ public class UpnpCDProvider extends LibraryProvider {
 
     @Override
     protected void getObjInternal(Uri uri, IBinder binder, Bundle args) {
-        super.getObjInternal(uri, binder, args);
+        switch (mMatcher.match(uri)) {
+            case UpnpCDUris.M_OBJECT: {
+                final String device = uri.getPathSegments().get(0);
+                final String folder = uri.getPathSegments().get(1);
+                Observable.create(
+                        new Observable.OnSubscribe<List<Bundleable>>() {
+                            @Override
+                            public void call(Subscriber<? super List<Bundleable>> subscriber) {
+                                browseFolders(device, folder, subscriber, false);
+                            }
+                        })
+                        .subscribeOn(Schedulers.io())
+                        .subscribe(new BundleableSubscriber<Bundleable>(binder));
+                break;
+            }
+            default: {
+                super.getObjInternal(uri, binder, args);
+            }
+        }
     }
 
     @Override
@@ -164,7 +212,7 @@ public class UpnpCDProvider extends LibraryProvider {
             public void call(final Subscriber<? super Folder> subscriber) {
                 final UpnpServiceServiceConnection connection;
                 try {
-                    connection = bindService(getContext());
+                    connection = bindService();
                 } catch (InterruptedException e) {
                     subscriber.onError(e);
                     return;
@@ -173,15 +221,7 @@ public class UpnpCDProvider extends LibraryProvider {
                 Collection<Device> devices = connection.getService().getRegistry().getDevices();
                 if (devices.size() > 0) {
                     for (Device device : devices) {
-                        final String id = device.getIdentity().getUdn().getIdentifierString();
-                        final String label = !StringUtils.isEmpty(device.getDetails().getFriendlyName()) ?
-                                device.getDetails().getFriendlyName() : device.getDisplayString();
-                        Folder folder = Folder.builder()
-                                .setUri(UpnpCDUris.makeUri(mAuthority, id, "0"))
-                                .setParentUri(LibraryUris.rootUri(mAuthority))
-                                .setName(label)
-                                .build();
-                        subscriber.onNext(folder);
+                        subscriber.onNext(ModelUtil.parseDevice(mAuthority, device));
                     }
                     subscriber.onCompleted();
                     connection.close();
@@ -192,16 +232,7 @@ public class UpnpCDProvider extends LibraryProvider {
                     @Override
                     public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
                         try {
-                            final String id = device.getIdentity().getUdn().getIdentifierString();
-                            final String label = !StringUtils.isEmpty(device.getDetails().getFriendlyName()) ?
-                                    device.getDetails().getFriendlyName() : device.getDisplayString();
-                            Folder folder = Folder.builder()
-                                    .setUri(UpnpCDUris.makeUri(mAuthority, id, "0"))
-                                    .setParentUri(LibraryUris.rootUri(mAuthority))
-                                    .setName(label)
-                                    .build();
-
-                            subscriber.onNext(folder);
+                            subscriber.onNext(ModelUtil.parseDevice(mAuthority, device));
                             subscriber.onCompleted();
                         } finally {
                             connection.getService().getRegistry().removeListener(this);
@@ -211,6 +242,7 @@ public class UpnpCDProvider extends LibraryProvider {
                 };
 
                 connection.getService().getRegistry().addListener(registryListener);
+                connection.getService().getControlPoint().search();
             }
         }).toList().subscribe(subscriber);
 
@@ -219,21 +251,24 @@ public class UpnpCDProvider extends LibraryProvider {
     protected void browseFolders(
             @NonNull final String libraryIdentity,
             @Nullable String folderIdentity,
-            Subscriber<? super List<Bundleable>> subscription
+            Subscriber<? super List<Bundleable>> subscription,
+            final boolean listing
     ) {
         final UpnpServiceServiceConnection connection;
         try {
-            connection = bindService(getContext());
+            connection = bindService();
         } catch (InterruptedException e) {
             subscription.onError(e);
             return;
         }
         try {
             final AndroidUpnpService upnpService = connection.getService();
-            final RemoteService rs = acquireContentDirectoryService(upnpService, libraryIdentity);
-            if (rs == null) {
+            Observable<RemoteService> rso = connectToCDService(upnpService, libraryIdentity);
+            final RemoteService rs;
+            try {
+                 rs = rso.toBlocking().first();
+            } catch (RuntimeException e) {
                 subscription.onError(new NullPointerException("Unable to obtain service id=" + libraryIdentity));
-                connection.close();
                 return;
             }
             List<Bundleable> lst;
@@ -243,12 +278,13 @@ public class UpnpCDProvider extends LibraryProvider {
                 lst = requestFeaturesSync(upnpService, rs, new Command() {
                     @Override
                     public List<Bundleable> call(AndroidUpnpService androidUpnpService, Service service, String s) {
-                        return doBrowseSync(androidUpnpService, service, s);
+                        return doBrowseSync(androidUpnpService, service, s,
+                                listing ? BrowseFlag.DIRECT_CHILDREN : BrowseFlag.METADATA);
                     }
                 });
-
             } else {
-                lst = doBrowseSync(upnpService, rs, folderIdentity);
+                lst = doBrowseSync(upnpService, rs, folderIdentity,
+                        listing ? BrowseFlag.DIRECT_CHILDREN : BrowseFlag.METADATA);
             }
             subscription.onNext(lst);
             subscription.onCompleted();
@@ -259,22 +295,40 @@ public class UpnpCDProvider extends LibraryProvider {
         }
     }
 
-    private RemoteService acquireContentDirectoryService(
+    Observable<RemoteService> connectToCDService(
             final AndroidUpnpService upnpService,
-            final String deviceIdentity
+            final String deviceId
     ) {
-        RemoteDevice rd = upnpService.getRegistry().getRemoteDevice(UDN.valueOf(deviceIdentity), false);
-        if (rd != null) {
-            RemoteService rs = rd.findService(new UDAServiceType("ContentDirectory", 1));
-            if (rs != null) {
-                return rs;
+        return Observable.create(new Observable.OnSubscribe<RemoteService>() {
+            @Override
+            public void call(final Subscriber<? super RemoteService> subscriber) {
+                final UDN udn = UDN.valueOf(deviceId);
+                RemoteDevice rd = upnpService.getRegistry().getRemoteDevice(udn, false);
+                if (rd != null) {
+                    RemoteService rs = rd.findService(new UDAServiceType("ContentDirectory", 1));
+                    if (rs != null) {
+                        subscriber.onNext(rs);
+                        subscriber.onCompleted();
+                        return;
+                    }
+                }
+                upnpService.getRegistry().addListener(new DefaultRegistryListener() {
+                    @Override
+                    public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
+                        if (device.getIdentity().getUdn().equals(udn)) {
+                            RemoteService rs = device.findService(new UDAServiceType("ContentDirectory", 1));
+                            if (rs != null) {
+                                subscriber.onNext(rs);
+                                subscriber.onCompleted();
+                            } else {
+                                subscriber.onError(new UnknownError("Unable to locate ContentDirectory on device " + deviceId));
+                            }
+                        }
+                    }
+                });
+                upnpService.getControlPoint().search(new UDNHeader(udn));
             }
-        }
-        return null;
-    }
-
-    static abstract class Command implements Func3 <AndroidUpnpService, Service, String, List<Bundleable>> {
-
+        });
     }
 
     private List<Bundleable> requestFeaturesSync(
@@ -283,17 +337,22 @@ public class UpnpCDProvider extends LibraryProvider {
             final Command command
     ) {
         GetFeatureListSync req = new GetFeatureListSync(service);
+        req.setControlPoint(upnpService.getControlPoint());
         req.run(); //Long running;
         if (req.features != null) {
             Feature feature = req.features.getFeature(Feature.SEC_BASICVIEW, 1);
             if (feature != null) {
                 String id = feature.getContainerIdOf(AudioItem.CLASS);
                 if (id != null) {
-                    return command.call(upnpService, service, null);
+                    return command.call(upnpService, service, id);
                 }
             }
         }
         return command.call(upnpService, service, UpnpCDUris.DEFAULT_ROOT_FOLDER);
+    }
+
+    static abstract class Command implements Func3 <AndroidUpnpService, Service, String, List<Bundleable>> {
+
     }
 
     static class GetFeatureListSync extends GetFeatureList {
@@ -307,12 +366,14 @@ public class UpnpCDProvider extends LibraryProvider {
         String errorMsg;
 
         @Override
+        @DebugLog
         public void received(ActionInvocation actionInvocation, Features features) {
             this.actionInvocation = actionInvocation;
             this.features = features;
         }
 
         @Override
+        @DebugLog
         public void failure(ActionInvocation invocation, UpnpResponse operation, String defaultMsg) {
             this.actionInvocation = invocation;
             this.upnpResponse = operation;
@@ -323,10 +384,11 @@ public class UpnpCDProvider extends LibraryProvider {
     private List<Bundleable> doBrowseSync(
             final AndroidUpnpService upnpService,
             final Service rs,
-            final String folderIdentity
+            final String folderIdentity,
+            final BrowseFlag browseFlag
     ) {
 
-        final BrowseSync browse = new BrowseSync(rs, folderIdentity, BrowseFlag.DIRECT_CHILDREN);
+        final BrowseSync browse = new BrowseSync(rs, folderIdentity, browseFlag);
         browse.setControlPoint(upnpService.getControlPoint());
         browse.run();//Long running op
         if (browse.status == null || browse.status != Browse.Status.OK) {
@@ -406,6 +468,58 @@ public class UpnpCDProvider extends LibraryProvider {
         }
     }
 
+    static class UpnpRegisterListener extends DefaultRegistryListener {
+        final String authority;
+        final Context context;
+        public UpnpRegisterListener(String authority, Context context) {
+            this.authority = authority;
+            this.context = context;
+        }
+        @Override public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
+            notifyUri();
+        }
+        @Override public void remoteDeviceUpdated(Registry registry, RemoteDevice device) {
+            notifyUri();
+        }
+        @Override public void remoteDeviceRemoved(Registry registry, RemoteDevice device) {
+            notifyUri();
+        }
+        @DebugLog
+        void notifyUri() {
+            context.getContentResolver().notifyChange(LibraryUris.rootUri(authority), null);
+        }
+    }
+
+    final AtomicInteger reglcal = new AtomicInteger(0);
+    @DebugLog
+    void registerListener() {
+        if (reglcal.getAndIncrement() > 0) {
+            Timber.e("registerListener called %d times", reglcal.get() - 1);
+            return;
+        }
+        final Scheduler.Worker worker = Schedulers.io().createWorker();
+        worker.schedule(new Action0() {
+            @Override
+            public void call() {
+                getContext().startService(new Intent(getContext(), UpnpServiceService.class));
+                UpnpServiceServiceConnection conn = null;
+                try {
+                    conn = bindService();
+                    //we really dont really have a mechanism to unregister so we dont keep our own copy
+                    RegistryListener l = new UpnpRegisterListener(mAuthority, getContext());
+                    conn.getService().getRegistry().addListener(l);
+                    conn.getService().getControlPoint().search();
+                } catch (InterruptedException ignored) {
+                } finally {
+                    if (conn != null) {
+                        conn.close();
+                    }
+                    worker.unsubscribe();
+                }
+            }
+        });
+    }
+
     public final static class UpnpServiceServiceConnection implements Closeable {
         private final Context context;
         private final ServiceConnection serviceConnection;
@@ -427,12 +541,10 @@ public class UpnpCDProvider extends LibraryProvider {
         }
     }
 
-    public static UpnpServiceServiceConnection bindService(Context context) throws InterruptedException {
-        if (context == null) {
-            throw new NullPointerException("context == null");
-        }
+    public UpnpServiceServiceConnection bindService() throws InterruptedException {
+        final Context context = getContext();
         ensureNotOnMainThread(context);
-        final BlockingQueue<AndroidUpnpService> q = new LinkedBlockingQueue<AndroidUpnpService>(1);
+        final BlockingQueue<AndroidUpnpService> q = new LinkedBlockingQueue<>(1);
         ServiceConnection keyChainServiceConnection = new ServiceConnection() {
             volatile boolean mConnectedAtLeastOnce = false;
 
@@ -449,13 +561,14 @@ public class UpnpCDProvider extends LibraryProvider {
             }
             @Override public void onServiceDisconnected(ComponentName name) {}
         };
-        Intent intent = new Intent(context, UpnpServiceService.class);
-        boolean isBound = context.bindService(intent,
+        context.startService(new Intent(context, UpnpServiceService.class));
+        boolean isBound = context.bindService(new Intent(context, UpnpServiceService.class),
                 keyChainServiceConnection,
                 Context.BIND_AUTO_CREATE);
         if (!isBound) {
             throw new AssertionError("could not bind to KeyChainService");
         }
+        scheduleServiceShutdown();
         return new UpnpServiceServiceConnection(context, keyChainServiceConnection, q.take());
     }
 
@@ -466,4 +579,26 @@ public class UpnpCDProvider extends LibraryProvider {
                     "calling this from your main thread can lead to deadlock");
         }
     }
+
+    private void scheduleServiceShutdown() {
+        cancelShutdown();
+        Context context = getContext();
+        PendingIntent pendingIntent = PendingIntent.getService(context, 0,
+                new Intent(context, UpnpServiceService.class).setAction("shutdown"),
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        mAlarmManager.set(AlarmManager.RTC, getNextInterval(), pendingIntent);
+    }
+
+    private void cancelShutdown() {
+        Context context = getContext();
+        PendingIntent pendingIntent = PendingIntent.getService(context, 0,
+                new Intent(context, UpnpServiceService.class).setAction("shutdown"),
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        mAlarmManager.set(AlarmManager.RTC, getNextInterval(), pendingIntent);
+    }
+
+    private static long getNextInterval() {
+        return System.currentTimeMillis() + (60000 * 10);
+    }
+
 }

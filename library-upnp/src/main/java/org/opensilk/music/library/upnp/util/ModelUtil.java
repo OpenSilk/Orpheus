@@ -20,6 +20,8 @@ package org.opensilk.music.library.upnp.util;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import org.apache.commons.lang3.StringUtils;
+import org.fourthline.cling.model.meta.Device;
 import org.fourthline.cling.support.model.DIDLObject;
 import org.fourthline.cling.support.model.PersonWithRole;
 import org.fourthline.cling.support.model.Res;
@@ -27,6 +29,7 @@ import org.fourthline.cling.support.model.container.Container;
 import org.fourthline.cling.support.model.container.MusicAlbum;
 import org.fourthline.cling.support.model.container.MusicArtist;
 import org.fourthline.cling.support.model.item.MusicTrack;
+import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.upnp.provider.UpnpCDUris;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
@@ -48,6 +51,17 @@ import hugo.weaving.DebugLog;
  * Created by drew on 6/18/14.
  */
 public class ModelUtil {
+
+    public static Folder parseDevice(String authority, Device device) {
+        final String id = device.getIdentity().getUdn().getIdentifierString();
+        final String label = !StringUtils.isEmpty(device.getDetails().getFriendlyName()) ?
+                device.getDetails().getFriendlyName() : device.getDisplayString();
+        return Folder.builder()
+                .setUri(UpnpCDUris.makeUri(authority, id, null))
+                .setParentUri(LibraryUris.rootUri(authority))
+                .setName(label)
+                .build();
+    }
 
     public static Folder parseFolder(String authority, String device, Container c) {
         final Folder.Builder folder = Folder.builder();
@@ -143,7 +157,7 @@ public class ModelUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return track.build();
+        return track.addRes(res.build()).build();
     }
 
     public static int parseDuration(String dur) {

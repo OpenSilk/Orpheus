@@ -27,7 +27,8 @@ import rx.functions.Func1;
  */
 @UpnpCDScope
 @Component(
-        dependencies = UpnpLibraryComponent.class
+        dependencies = UpnpLibraryComponent.class,
+        modules = UpnpCDModule.class
 )
 public interface UpnpCDComponent {
     Func1<UpnpLibraryComponent, UpnpCDComponent> FACTORY = new Func1<UpnpLibraryComponent, UpnpCDComponent>() {
