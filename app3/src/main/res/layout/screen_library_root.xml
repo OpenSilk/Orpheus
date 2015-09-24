@@ -16,7 +16,7 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<android.support.v7.widget.CardView
+<org.opensilk.music.ui3.library.LibraryRootScreenView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -53,6 +53,13 @@
                 android:text="Login"
                 style="?android:buttonStyleSmall"/>
 
+            <Button
+                android:id="@+id/btn_retry"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="retry"
+                style="?android:buttonStyleSmall"/>
+
             <org.opensilk.common.ui.widget.TintImageButton
                 android:id="@+id/tile_overflow"
                 android:layout_height="wrap_content"
@@ -78,4 +85,4 @@
 
     </LinearLayout>
 
-</android.support.v7.widget.CardView>
+</org.opensilk.music.ui3.library.LibraryRootScreenView>

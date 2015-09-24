@@ -70,7 +70,7 @@ public class App extends BaseApp {
             DaggerService.<AppComponent>getDaggerComponent(this).inject(this);
             registerComponentCallbacks(mUiComponentCallbacks);
         } else if (isProviderProcess()) {
-            // STOPSHIP: 9/19/15  
+            // STOPSHIP: 9/19/15
             File db = getDatabasePath("music.db");
             Timber.e("Database path = %s", db);
             try {

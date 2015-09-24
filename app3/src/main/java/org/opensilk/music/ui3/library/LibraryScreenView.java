@@ -19,10 +19,9 @@ package org.opensilk.music.ui3.library;
 
 import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
+import android.view.ViewGroup;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarConfig;
@@ -41,10 +40,9 @@ public class LibraryScreenView extends CoordinatorLayout {
 
     @Inject LibraryScreenPresenter mPresenter;
     @Inject ToolbarOwner mToolbarOwner;
-    @Inject LibraryScreenViewAdapter mAdapter;
 
     @InjectView(R.id.toolbar) Toolbar mToolbar;
-    @InjectView(R.id.recyclerview) RecyclerView mList;
+    @InjectView(R.id.plugins_container) ViewGroup mContent;
 
     public LibraryScreenView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -58,9 +56,6 @@ public class LibraryScreenView extends CoordinatorLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         ButterKnife.inject(this);
-        mList.setLayoutManager(new LinearLayoutManager(getContext()));
-        mList.setAdapter(mAdapter);
-        mList.setHasFixedSize(false);
         mToolbarOwner.attachToolbar(mToolbar);
         mToolbarOwner.setConfig(ActionBarConfig.builder().setTitle("Libraries").build());
         mPresenter.takeView(this);
@@ -73,7 +68,7 @@ public class LibraryScreenView extends CoordinatorLayout {
         mToolbarOwner.detachToolbar(mToolbar);
     }
 
-    public LibraryScreenViewAdapter getAdapter() {
-        return mAdapter;
+    public ViewGroup getContentContainer() {
+        return mContent;
     }
 }

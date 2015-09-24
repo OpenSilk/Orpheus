@@ -44,4 +44,5 @@ public interface LibraryScreenComponent extends FooterScreenComponent {
                 }
             };
     void inject(LibraryScreenView view);
+    LibraryRootScreenComponent rootScreenComponent(LibraryRootScreenModule module);
 }
