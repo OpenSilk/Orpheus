@@ -36,7 +36,10 @@ import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.model.spi.Bundleable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -54,7 +57,6 @@ import static org.opensilk.music.library.provider.LibraryMethods.*;
 /**
  * Created by drew on 5/2/15.
  */
-@ScreenScope
 public class BundleableLoader implements RxLoader<Bundleable> {
 
     class UriObserver extends ContentObserver {
@@ -74,10 +76,10 @@ public class BundleableLoader implements RxLoader<Bundleable> {
         }
     }
 
-    final List<ContentChangedListener> contentChangedListeners;
+    final Set<ContentChangedListener> contentChangedListeners = new LinkedHashSet<>();
     final Context context;
-    final Uri uri;
 
+    Uri uri;
     String sortOrder;
     String method = LIST;
 
@@ -87,15 +89,12 @@ public class BundleableLoader implements RxLoader<Bundleable> {
     Observable<List<Bundleable>> cachedObservable;
 
     @Inject
-    public BundleableLoader(
-            @ForApplication Context context,
-            @Named("loader_uri") Uri uri,
-            @Named("loader_sortorder") String sortOrder
-    ) {
+    public BundleableLoader(@ForApplication Context context) {
         this.context = context;
-        this.uri = uri;
-        this.sortOrder = sortOrder;
-        contentChangedListeners = new ArrayList<>();
+    }
+
+    public static BundleableLoader create(Context context) {
+        return new BundleableLoader(context.getApplicationContext());
     }
 
     public Observable<List<Bundleable>> getListObservable() {
@@ -186,8 +185,14 @@ public class BundleableLoader implements RxLoader<Bundleable> {
         contentChangedListeners.remove(l);
     }
 
-    public void setSortOrder(String sortOrder) {
+    public BundleableLoader setUri(Uri uri) {
+        this.uri = uri;
+        return this;
+    }
+
+    public BundleableLoader setSortOrder(String sortOrder) {
         this.sortOrder = sortOrder;
+        return this;
     }
 
     public BundleableLoader setMethod(String method) {
@@ -195,8 +200,9 @@ public class BundleableLoader implements RxLoader<Bundleable> {
         return this;
     }
 
-    public void setObserveOnScheduler(Scheduler scheduler) {
+    public BundleableLoader setObserveOnScheduler(Scheduler scheduler) {
         this.observeOnScheduler = Preconditions.checkNotNull(scheduler, "Scheduler must not be null");
+        return this;
     }
 
     protected void emmitError(Throwable t, Subscriber<? super Bundleable> subscriber) {

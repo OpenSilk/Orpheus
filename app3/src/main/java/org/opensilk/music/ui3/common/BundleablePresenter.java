@@ -18,6 +18,7 @@
 package org.opensilk.music.ui3.common;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.PopupMenu;
 
@@ -39,6 +40,7 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
@@ -76,11 +78,13 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
             ArtworkRequestManager requestor,
             BundleableLoader loader,
             FragmentManagerOwner fm,
-            BundleablePresenterConfig config
+            BundleablePresenterConfig config,
+            @Named("loader_uri") Uri uri,
+            @Named("loader_sortorder") String sortOrder
     ) {
         this.preferences = preferences;
         this.requestor = requestor;
-        this.loader = loader;
+        this.loader = loader.setUri(uri).setSortOrder(sortOrder);
         this.fm = fm;
         this.wantGrid = config.wantsGrid;
         this.itemClickListener = config.itemClickListener;
