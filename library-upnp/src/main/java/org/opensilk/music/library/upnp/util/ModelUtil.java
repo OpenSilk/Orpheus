@@ -132,6 +132,7 @@ public class ModelUtil {
         // mandatory fields
         try {
             track.setUri(UpnpCDUris.makeUri(authority, device, mt.getId()));
+            track.setParentUri(UpnpCDUris.makeUri(authority, device, mt.getParentID()));
             track.setName(mt.getTitle());
             final Res firstResource = mt.getFirstResource();
             res.setUri(Uri.parse(firstResource.getValue()));
@@ -148,7 +149,7 @@ public class ModelUtil {
             track.setArtistName(artist);
             final Res firstResource = mt.getFirstResource();
             final int duration = parseDuration(firstResource.getDuration());
-            res.setDuration(duration);
+            res.setDurationS(duration);
             final URI artURI = mt.getFirstPropertyValue(DIDLObject.Property.UPNP.ALBUM_ART_URI.class);
             final Uri artUri = artURI != null ? Uri.parse(artURI.toASCIIString()) : null;
             track.setArtworkUri(artUri);
@@ -161,9 +162,13 @@ public class ModelUtil {
     }
 
     public static int parseDuration(String dur) {
-        if (TextUtils.isEmpty(dur)) return 0;
+        if (TextUtils.isEmpty(dur)) {
+            return -1;
+        }
         String[] strings = dur.split(":");
-        if (strings.length != 3) return 0;
+        if (strings.length != 3) {
+            return -1;
+        }
         try {
             int sec = 0;
             if (!TextUtils.isEmpty(strings[0])) {
@@ -173,7 +178,7 @@ public class ModelUtil {
             sec += TimeUnit.SECONDS.convert(Integer.decode(strings[2].substring(0, 2)), TimeUnit.SECONDS);
             return sec;
         } catch (NumberFormatException e) {
-            return 0;
+            return -1;
         }
 
     }

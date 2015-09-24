@@ -17,6 +17,7 @@
 
 package org.opensilk.music.library.upnp;
 
+import android.content.Context;
 import android.content.Intent;
 
 import org.apache.commons.lang3.StringUtils;
@@ -26,13 +27,16 @@ import org.fourthline.cling.android.AndroidUpnpServiceImpl;
 import org.fourthline.cling.model.UnsupportedDataException;
 import org.fourthline.cling.model.action.ActionInvocation;
 import org.fourthline.cling.model.message.control.ActionResponseMessage;
+import org.fourthline.cling.model.meta.RemoteDevice;
 import org.fourthline.cling.model.types.ServiceType;
 import org.fourthline.cling.model.types.UDAServiceType;
+import org.fourthline.cling.registry.DefaultRegistryListener;
 import org.fourthline.cling.registry.Registry;
 import org.fourthline.cling.transport.impl.RecoveringSOAPActionProcessorImpl;
 import org.fourthline.cling.transport.spi.SOAPActionProcessor;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.library.provider.LibraryUris;
+import org.opensilk.music.library.upnp.provider.UpnpCDUris;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,7 +48,11 @@ import hugo.weaving.DebugLog;
  */
 public class UpnpServiceService extends AndroidUpnpServiceImpl {
 
+    String mUpnpCDAuthority;
+    UpnpRegistryListener mRegistryListener;
+
     @Override
+    @DebugLog
     public void onCreate() {
         super.onCreate();
         // Fix the logging integration between java.util.logging and Android internal logging
@@ -57,19 +65,28 @@ public class UpnpServiceService extends AndroidUpnpServiceImpl {
         Logger.getLogger("org.fourthline.cling.protocol.ProtocolFactory").setLevel(Level.INFO);
         Logger.getLogger("org.fourthline.cling.model.message.UpnpHeaders").setLevel(Level.INFO);
 //            Logger.getLogger("org.fourthline.cling.transport.spi.SOAPActionProcessor").setLevel(Level.FINER);
+
+        UpnpLibraryComponent cmp = DaggerService.getDaggerComponent(getApplicationContext());
+        mUpnpCDAuthority = cmp.unpnAuthority();
+        mRegistryListener = new UpnpRegistryListener();
+        binder.getRegistry().addListener(mRegistryListener);
+        binder.getControlPoint().search();
+    }
+
+    @Override
+    public void onDestroy() {
+        binder.getRegistry().removeListener(mRegistryListener);
+        super.onDestroy();
     }
 
     @Override
     @DebugLog
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null) {
-            //We were killed and restarted, notify the content provider
-            UpnpLibraryComponent cmp = DaggerService.getDaggerComponent(getApplicationContext());
-            String authority = cmp.unpnAuthority();
-            getContentResolver().call(LibraryUris.call(authority), "upnp.rebind", null, null);
+            //
         } else {
             final Registry registry = binder.getRegistry();
-            if ("shutdown".equals(intent.getAction())) {
+            if ("registry.pause".equals(intent.getAction())) {
                 if (!registry.isPaused()) {
                     registry.pause();
                 }
@@ -116,5 +133,22 @@ public class UpnpServiceService extends AndroidUpnpServiceImpl {
                 return 2500;//10000;
             }
         };
+    }
+
+    class UpnpRegistryListener extends DefaultRegistryListener {
+        @Override public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
+            notifyUri(device.getIdentity().getUdn().getIdentifierString());
+        }
+        @Override public void remoteDeviceUpdated(Registry registry, RemoteDevice device) {
+//            notifyUri(device.getIdentity().getUdn().getIdentifierString());
+        }
+        @Override public void remoteDeviceRemoved(Registry registry, RemoteDevice device) {
+            notifyUri(device.getIdentity().getUdn().getIdentifierString());
+        }
+        @DebugLog
+        void notifyUri(String deviceId) {
+            getContentResolver().notifyChange(UpnpCDUris.makeUri(mUpnpCDAuthority, deviceId, null), null);
+            getContentResolver().notifyChange(LibraryUris.rootUri(mUpnpCDAuthority), null);
+        }
     }
 }
