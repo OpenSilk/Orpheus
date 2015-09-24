@@ -118,6 +118,7 @@ public class LibraryRootScreenView extends CardView {
     }
 
     void addRoots(List<Container> roots) {
+        clearRoots();
         for (final Container c : roots) {
             TextView tv = ViewUtils.inflate(rootsContainer.getContext(),
                     R.layout.mtrl_list_item_oneline_text, rootsContainer, false);
