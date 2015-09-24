@@ -50,7 +50,7 @@ public class LibraryHelper {
 
     public Track getTrack(Uri uri) {
         try {
-            return new BundleableLoader(context, uri, null)
+            return new BundleableLoader(context).setUri(uri)
                     .createObservable().flatMap(new Func1<List<Bundleable>, Observable<? extends Bundleable>>() {
                         @Override
                         public Observable<? extends Bundleable> call(List<Bundleable> bundleables) {
