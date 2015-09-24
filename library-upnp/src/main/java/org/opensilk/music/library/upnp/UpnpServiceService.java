@@ -82,19 +82,9 @@ public class UpnpServiceService extends AndroidUpnpServiceImpl {
     @Override
     @DebugLog
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent == null) {
-            //
-        } else {
-            final Registry registry = binder.getRegistry();
-            if ("registry.pause".equals(intent.getAction())) {
-                if (!registry.isPaused()) {
-                    registry.pause();
-                }
-            } else {
-                if (registry.isPaused()) {
-                    registry.resume();
-                }
-            }
+        final Registry registry = binder.getRegistry();
+        if (registry.isPaused()) {
+            registry.resume();
         }
         return START_STICKY;
     }

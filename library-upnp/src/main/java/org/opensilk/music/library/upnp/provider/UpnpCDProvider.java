@@ -431,12 +431,15 @@ public class UpnpCDProvider extends LibraryProvider {
             context.unbindService(serviceConnection);
         }
         public AndroidUpnpService getService() {
-            resumeRegistry(service);
             return service;
         }
     }
 
     public UpnpServiceServiceConnection bindService() throws InterruptedException {
+        return bindService(false);
+    }
+
+    public UpnpServiceServiceConnection bindService(boolean ismaintenance) throws InterruptedException {
         final Context context = getContext();
         ensureNotOnMainThread(context);
         final BlockingQueue<AndroidUpnpService> q = new LinkedBlockingQueue<>(1);
@@ -464,7 +467,9 @@ public class UpnpCDProvider extends LibraryProvider {
         if (!isBound) {
             throw new AssertionError("could not bind to KeyChainService");
         }
-        scheduleServiceShutdown();
+        if (!ismaintenance){
+            scheduleServiceShutdown();
+        }
         return new UpnpServiceServiceConnection(context, keyChainServiceConnection, q.take());
     }
 
@@ -486,12 +491,13 @@ public class UpnpCDProvider extends LibraryProvider {
         mShutdownWorker.schedule(new Action0() {
             @Override
             public void call() {
-                //noinspection ConstantConditions
                 UpnpServiceServiceConnection conn = null;
                 try {
-                    conn = bindService();
+                    conn = bindService(true);
                     AndroidUpnpService service = conn.getService();
-                    pauseRegistry(service);
+                    if (!service.getRegistry().isPaused()) {
+                        service.getRegistry().pause();
+                    }
                 } catch (InterruptedException ignored) {
                 } finally {
                     if (conn != null) {
@@ -508,18 +514,6 @@ public class UpnpCDProvider extends LibraryProvider {
                 getContext().stopService(intent);
             }
         }, 20, TimeUnit.MINUTES);
-    }
-
-    private static void pauseRegistry(AndroidUpnpService service) {
-        if (!service.getRegistry().isPaused()) {
-            service.getRegistry().pause();
-        }
-    }
-
-    private static void resumeRegistry(AndroidUpnpService service) {
-        if (!service.getRegistry().isPaused()) {
-            service.getRegistry().resume();
-        }
     }
 
 }

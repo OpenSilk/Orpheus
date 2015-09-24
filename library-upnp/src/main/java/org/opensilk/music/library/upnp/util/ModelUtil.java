@@ -143,18 +143,42 @@ public class ModelUtil {
         // optional fields
         try {
             final String album = mt.getAlbum();
-            track.setAlbumName(album);
+            if (album != null) {
+                track.setAlbumName(album);
+            }
             final PersonWithRole firstArtist = mt.getFirstArtist();
-            final String artist = firstArtist != null ? firstArtist.getName() : null;
-            track.setArtistName(artist);
+            if (firstArtist != null) {
+                track.setArtistName(firstArtist.getName());
+            }
+            final String genre = mt.getFirstGenre();
+            if (genre != null) {
+                track.setGenre(genre);
+            }
+            final URI artURI = mt.getFirstPropertyValue(DIDLObject.Property.UPNP.ALBUM_ART_URI.class);
+            if (artURI != null) {
+                track.setArtworkUri(Uri.parse(artURI.toString()));
+            }
+            int trackNum = mt.getOriginalTrackNumber();
+            if (trackNum > 0) {
+                track.setTrackNumber(trackNum);
+            }
             final Res firstResource = mt.getFirstResource();
             final int duration = parseDuration(firstResource.getDuration());
-            res.setDurationS(duration);
-            final URI artURI = mt.getFirstPropertyValue(DIDLObject.Property.UPNP.ALBUM_ART_URI.class);
-            final Uri artUri = artURI != null ? Uri.parse(artURI.toASCIIString()) : null;
-            track.setArtworkUri(artUri);
+            if (duration > 0) {
+                res.setDurationS(duration);
+            }
+            long bitrate = firstResource.getBitrate();
+            if (bitrate > 0) {
+                res.setBitrate(bitrate);
+            }
             final String mimeType = firstResource.getProtocolInfo().getContentFormatMimeType().getType();
-            res.setMimeType(mimeType);
+            if (mimeType != null) {
+                res.setMimeType(mimeType);
+            }
+            final long size = firstResource.getSize();
+            if (size > 0) {
+                res.setSize(size);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
