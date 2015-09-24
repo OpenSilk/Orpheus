@@ -32,6 +32,5 @@ public interface RxLoader<T> {
     Observable<List<T>> getListObservable();
     void addContentChangedListener(ContentChangedListener l);
     void removeContentChangedListener(ContentChangedListener l);
-    void setSortOrder(String sortOrder);
     void reset();
 }

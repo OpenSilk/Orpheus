@@ -76,8 +76,7 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
     protected Observable<T> cachedObservable;
 
     public RxCursorLoader(Context context) {
-        contentChangedListeners = new ArrayList<>();
-        this.context = context;
+        this(context, null, null, null, null, null);
     }
 
     public RxCursorLoader(Context context,
@@ -203,32 +202,39 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
         contentChangedListeners.remove(l);
     }
 
-    public void setUri(Uri uri) {
+    public RxCursorLoader<T> setUri(Uri uri) {
         this.uri = Preconditions.checkNotNull(uri, "Uri must not be null");
+        return this;
     }
 
-    public void setProjection(String[] projection) {
+    public RxCursorLoader<T> setProjection(String[] projection) {
         this.projection = projection;
+        return this;
     }
 
-    public void setSelection(String selection) {
+    public RxCursorLoader<T> setSelection(String selection) {
         this.selection = selection;
+        return this;
     }
 
-    public void setSelectionArgs(String[] selectionArgs) {
+    public RxCursorLoader<T> setSelectionArgs(String[] selectionArgs) {
         this.selectionArgs = selectionArgs;
+        return this;
     }
 
-    public void setSortOrder(String sortOrder) {
+    public RxCursorLoader<T> setSortOrder(String sortOrder) {
         this.sortOrder = sortOrder;
+        return this;
     }
 
-    public void setSubscribeScheduler(Scheduler scheduler) {
+    public RxCursorLoader<T> setSubscribeScheduler(Scheduler scheduler) {
         this.subscribeScheduler = Preconditions.checkNotNull(scheduler, "Scheduler must not be null");
+        return this;
     }
 
-    public void setObserveOnScheduler(Scheduler scheduler) {
+    public RxCursorLoader<T> setObserveOnScheduler(Scheduler scheduler) {
         this.observeOnScheduler = Preconditions.checkNotNull(scheduler, "Scheduler must not be null");
+        return this;
     }
 
     protected void emmitError(Throwable t, Subscriber<? super T> subscriber) {
