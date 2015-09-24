@@ -21,6 +21,7 @@ import android.content.Context;
 import android.net.Uri;
 
 import org.opensilk.common.core.dagger2.ForApplication;
+import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.loader.BundleableLoader;
 import org.opensilk.music.model.Track;
@@ -34,6 +35,7 @@ import javax.inject.Inject;
 
 import rx.Observable;
 import rx.functions.Action2;
+import rx.functions.Func0;
 import rx.functions.Func1;
 import timber.log.Timber;
 
@@ -50,7 +52,7 @@ public class LibraryHelper {
 
     public Track getTrack(Uri uri) {
         try {
-            return new BundleableLoader(context).setUri(uri)
+            return new BundleableLoader(context).setUri(uri).setMethod(LibraryMethods.GET)
                     .createObservable().flatMap(new Func1<List<Bundleable>, Observable<? extends Bundleable>>() {
                         @Override
                         public Observable<? extends Bundleable> call(List<Bundleable> bundleables) {
@@ -64,26 +66,30 @@ public class LibraryHelper {
     }
 
     public List<Uri> getTracks(final Uri uri, String sortorder) {
-//        try {
-//            final String authority = uri.getAuthority();
-//            final String library = uri.getPathSegments().get(0);
-//            return new BundleableLoader(context, uri, sortorder)
-//                    .createObservable().flatMap(new Func1<List<Bundleable>, Observable<Bundleable>>() {
-//                        @Override
-//                        public Observable<Bundleable> call(List<Bundleable> bundleables) {
-//                            return Observable.from(bundleables);
-//                        }
-//                    }).collect(new ArrayList<Uri>(), new Action2<ArrayList<Uri>, Bundleable>() {
-//                        @Override
-//                        public void call(ArrayList<Uri> uris, Bundleable bundleable) {
-//                            uris.add(LibraryUris.track(authority, library, bundleable.getIdentity()));
-//                        }
-//                    }).toBlocking().first();
-//        } catch (Exception e) {
-//            Timber.e(e, "getTracks");
-//            return Collections.emptyList();
-//        }
-        return Collections.emptyList();
+        try {
+            final String authority = uri.getAuthority();
+            final String library = uri.getPathSegments().get(0);
+            return new BundleableLoader(context).setUri(uri).setSortOrder(sortorder)
+                    .createObservable().flatMap(new Func1<List<Bundleable>, Observable<Bundleable>>() {
+                        @Override
+                        public Observable<Bundleable> call(List<Bundleable> bundleables) {
+                            return Observable.from(bundleables);
+                        }
+                    }).collect(new Func0<ArrayList<Uri>>() {
+                        @Override
+                        public ArrayList<Uri> call() {
+                            return new ArrayList<Uri>();
+                        }
+                    }, new Action2<ArrayList<Uri>, Bundleable>() {
+                        @Override
+                        public void call(ArrayList<Uri> uris, Bundleable bundleable) {
+                            uris.add(LibraryUris.track(authority, library, bundleable.getIdentity()));
+                        }
+                    }).toBlocking().first();
+        } catch (Exception e) {
+            Timber.e(e, "getTracks");
+            return Collections.emptyList();
+        }
     }
 
 }
