@@ -41,8 +41,6 @@ import java.util.List;
  */
 public class LibraryExtras {
 
-    public static final String INTENT_KEY = "orpheus.libraryextras";
-
     /**
      * Request uri: always built with {@link LibraryUris}, never null
      */
