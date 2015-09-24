@@ -22,6 +22,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.provider.BaseColumns;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.util.Pair;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -32,16 +35,15 @@ import org.opensilk.music.model.Metadata;
 import org.opensilk.music.model.Track;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import javax.xml.datatype.Duration;
 
 import hugo.weaving.DebugLog;
 import timber.log.Timber;
@@ -54,6 +56,7 @@ import static android.provider.MediaStore.Audio.keyFor;
 @Singleton
 public class IndexDatabaseImpl implements IndexDatabase {
 
+    final ReadWriteLock mLock = new ReentrantReadWriteLock(true);
     final IndexDatabaseHelper helper;
     final String indexAuthority;
 
@@ -78,26 +81,23 @@ public class IndexDatabaseImpl implements IndexDatabase {
         List<Artist> lst = new ArrayList<>();
         Cursor c = null;
         try {
-            SQLiteDatabase db = helper.getReadableDatabase();
-            if (db != null) {
-                c = db.query(IndexSchema.ArtistInfo.TABLE, artists_cols, null, null, null, null, sortOrder);
-                if (c != null && c.moveToFirst()) {
-                    final Uri parentUri = IndexUris.artists(indexAuthority);
-                    do {
-                        final String id = c.getString(0);
-                        final String name = c.getString(1);
-                        final int num_albums = c.getInt(2);
-                        final int num_tracks = c.getInt(3);
-                        final Artist a = Artist.builder()
-                                .setUri(IndexUris.artist(indexAuthority, id))
-                                .setParentUri(parentUri)
-                                .setName(name)
-                                .setAlbumCount(num_albums)
-                                .setTrackCount(num_tracks)
-                                .build();
-                        lst.add(a);
-                    } while (c.moveToNext());
-                }
+            c = query(IndexSchema.ArtistInfo.TABLE, artists_cols, null, null, null, null, sortOrder);
+            if (c != null && c.moveToFirst()) {
+                final Uri parentUri = IndexUris.artists(indexAuthority);
+                do {
+                    final String id = c.getString(0);
+                    final String name = c.getString(1);
+                    final int num_albums = c.getInt(2);
+                    final int num_tracks = c.getInt(3);
+                    final Artist a = Artist.builder()
+                            .setUri(IndexUris.artist(indexAuthority, id))
+                            .setParentUri(parentUri)
+                            .setName(name)
+                            .setAlbumCount(num_albums)
+                            .setTrackCount(num_tracks)
+                            .build();
+                    lst.add(a);
+                } while (c.moveToNext());
             }
         } finally {
             closeCursor(c);
@@ -118,29 +118,26 @@ public class IndexDatabaseImpl implements IndexDatabase {
         List<Album> lst = new ArrayList<>();
         Cursor c = null;
         try {
-            SQLiteDatabase db = helper.getReadableDatabase();
-            if (db != null) {
-                c = db.query(IndexSchema.AlbumInfo.TABLE, albums_cols, null, null, null, null, sortOrder);
-                if (c != null && c.moveToFirst()) {
-                    final Uri parentUri = IndexUris.albums(indexAuthority);
-                    do {
-                        final String id = c.getString(0);
-                        final String name = c.getString(1);
-                        final String artistName = c.getString(2);
-                        final String artistId = c.getString(3);
-                        final int trackNum = c.getInt(4);
-                        final Album a = Album.builder()
-                                .setUri(IndexUris.album(indexAuthority, id))
-                                .setParentUri(parentUri)
-                                .setName(name)
-                                .setArtistName(artistName)
-                                .setArtistUri(IndexUris.artist(indexAuthority, artistId))
-                                .setTrackCount(trackNum)
-                                        //.setArtworkUri()//TODO
-                                .build();
-                        lst.add(a);
-                    } while (c.moveToNext());
-                }
+            c = query(IndexSchema.AlbumInfo.TABLE, albums_cols, null, null, null, null, sortOrder);
+            if (c != null && c.moveToFirst()) {
+                final Uri parentUri = IndexUris.albums(indexAuthority);
+                do {
+                    final String id = c.getString(0);
+                    final String name = c.getString(1);
+                    final String artistName = c.getString(2);
+                    final String artistId = c.getString(3);
+                    final int trackNum = c.getInt(4);
+                    final Album a = Album.builder()
+                            .setUri(IndexUris.album(indexAuthority, id))
+                            .setParentUri(parentUri)
+                            .setName(name)
+                            .setArtistName(artistName)
+                            .setArtistUri(IndexUris.artist(indexAuthority, artistId))
+                            .setTrackCount(trackNum)
+                                    //.setArtworkUri()//TODO
+                            .build();
+                    lst.add(a);
+                } while (c.moveToNext());
             }
         } finally {
             closeCursor(c);
@@ -172,56 +169,53 @@ public class IndexDatabaseImpl implements IndexDatabase {
         List<Track> lst = new ArrayList<>();
         Cursor c = null;
         try {
-            SQLiteDatabase db = helper.getReadableDatabase();
-            if (db != null) {
-                c = db.query(IndexSchema.TrackInfo.TABLE, tracks_cols, null, null, null, null, sortOrder);
-                if (c != null && c.moveToFirst()) {
-                    LinkedHashMap<String, Track.Builder> tobs = new LinkedHashMap<>(c.getCount());
-                    do {
-                        //concatenation of title_key,artist_id,album_id,track,disc
-                        final String key = c.getString(14);
-                        //we only need to constuct track once
-                        if (!tobs.containsKey(key)) {
-                            final String id = c.getString(0);
-                            final String name = c.getString(1);
-                            final String artist = c.getString(2);
-                            final String artistId = c.getString(3);
-                            final String album = c.getString(4);
-                            final String albumId = c.getString(5);
-                            final String albumArtist = c.getString(6);
+            c = query(IndexSchema.TrackInfo.TABLE, tracks_cols, null, null, null, null, sortOrder);
+            if (c != null && c.moveToFirst()) {
+                LinkedHashMap<String, Track.Builder> tobs = new LinkedHashMap<>(c.getCount());
+                do {
+                    //concatenation of title_key,artist_id,album_id,track,disc
+                    final String key = c.getString(14);
+                    //we only need to constuct track once
+                    if (!tobs.containsKey(key)) {
+                        final String id = c.getString(0);
+                        final String name = c.getString(1);
+                        final String artist = c.getString(2);
+                        final String artistId = c.getString(3);
+                        final String album = c.getString(4);
+                        final String albumId = c.getString(5);
+                        final String albumArtist = c.getString(6);
 //                        final String albumArtistId = c.getString(7);
-                            final int trackPos = c.getInt(8);
-                            final Track.Builder tob = Track.builder()
-                                    .setUri(IndexUris.track(indexAuthority, id))
-                                    .setParentUri(IndexUris.tracks(indexAuthority))
-                                    .setName(name)
-                                    .setArtistName(artist)
-                                    .setArtistUri(IndexUris.artist(indexAuthority, artistId))
-                                    .setAlbumName(album)
-                                    .setAlbumUri(IndexUris.album(indexAuthority, albumId))
-                                    .setAlbumArtistName(albumArtist)
-                                    .setTrackNumber(trackPos);
-                            tobs.put(key, tob);
-                        }
-                        //attach resource to track
-                        final Uri uri = Uri.parse(c.getString(9));
-                        final int size = c.getInt(10);
-                        final String mime = c.getString(11);
-                        final long bitrate = c.getLong(12);
-                        final int duration = c.getInt(13);
-                        final Track.Res res = Track.Res.builder()
-                                .setUri(uri)
-                                .setSize(size)
-                                .setMimeType(mime)
-                                .setBitrate(bitrate)
-                                .setDuration(duration)
-                                .build();
-                        tobs.get(key).addRes(res);
-                    } while (c.moveToNext());
-                    //add all tracks to list
-                    for (Track.Builder tob : tobs.values()) {
-                        lst.add(tob.build());
+                        final int trackPos = c.getInt(8);
+                        final Track.Builder tob = Track.builder()
+                                .setUri(IndexUris.track(indexAuthority, id))
+                                .setParentUri(IndexUris.tracks(indexAuthority))
+                                .setName(name)
+                                .setArtistName(artist)
+                                .setArtistUri(IndexUris.artist(indexAuthority, artistId))
+                                .setAlbumName(album)
+                                .setAlbumUri(IndexUris.album(indexAuthority, albumId))
+                                .setAlbumArtistName(albumArtist)
+                                .setTrackNumber(trackPos);
+                        tobs.put(key, tob);
                     }
+                    //attach resource to track
+                    final Uri uri = Uri.parse(c.getString(9));
+                    final int size = c.getInt(10);
+                    final String mime = c.getString(11);
+                    final long bitrate = c.getLong(12);
+                    final int duration = c.getInt(13);
+                    final Track.Res res = Track.Res.builder()
+                            .setUri(uri)
+                            .setSize(size)
+                            .setMimeType(mime)
+                            .setBitrate(bitrate)
+                            .setDuration(duration)
+                            .build();
+                    tobs.get(key).addRes(res);
+                } while (c.moveToNext());
+                //add all tracks to list
+                for (Track.Builder tob : tobs.values()) {
+                    lst.add(tob.build());
                 }
             }
         } finally {
@@ -233,34 +227,58 @@ public class IndexDatabaseImpl implements IndexDatabase {
     @Override
     @DebugLog
     public Cursor query(String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy) {
-        return helper.getReadableDatabase().query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
+        try {
+            mLock.readLock().lock();
+            return helper.getReadableDatabase().query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
+        } finally {
+            mLock.readLock().unlock();
+        }
     }
 
     @Override
     public int delete(String table, String whereClause, String[] whereArgs) {
-        return helper.getWritableDatabase().delete(table, whereClause, whereArgs);
+        try {
+            mLock.writeLock().lock();
+            return helper.getWritableDatabase().delete(table, whereClause, whereArgs);
+        } finally {
+            mLock.writeLock().unlock();
+        }
     }
 
     @Override
     @DebugLog
     public long insert(String table, String nullColumnHack, ContentValues values, int conflictAlgorithm) {
-        return helper.getWritableDatabase().insertWithOnConflict(table, nullColumnHack, values, conflictAlgorithm);
+        try {
+            mLock.writeLock().lock();
+            return helper.getWritableDatabase().insertWithOnConflict(table, nullColumnHack, values, conflictAlgorithm);
+        } finally {
+            mLock.writeLock().unlock();
+        }
     }
 
     @Override
     public int update(String table, ContentValues values, String whereClause, String[] whereArgs) {
-        return helper.getWritableDatabase().update(table, values, whereClause, whereArgs);
+        try {
+            mLock.writeLock().lock();
+            return helper.getWritableDatabase().update(table, values, whereClause, whereArgs);
+        } finally {
+            mLock.writeLock().unlock();
+        }
     }
 
-    static final String hasContainerSel = IndexSchema.Containers.URI + "=?";
+    static final String containerUriSel = IndexSchema.Containers.URI + "=?";
+
+    Cursor getContainer(Uri uri) {
+        String[] selArgs = new String[] {uri.toString()};
+        return query(IndexSchema.Containers.TABLE, idCols,
+                containerUriSel, selArgs, null, null, null);
+    }
 
     @Override
     public long hasContainer(Uri uri) {
         Cursor c = null;
         try {
-            String[] selArgs = new String[] {uri.toString()};
-            c = query(IndexSchema.Containers.TABLE, idCols,
-                    hasContainerSel, selArgs, null, null, null);
+            c = getContainer(uri);
             if (c != null && c.moveToFirst()) {
                 return c.getLong(0);
             }
@@ -270,17 +288,80 @@ public class IndexDatabaseImpl implements IndexDatabase {
         return -1;
     }
 
+    static final String[] findToplevelContainersCols = new String[] {
+            IndexSchema.Containers.URI,
+            IndexSchema.Containers.PARENT_URI,
+    };
+
+    @Override
+    public @NonNull List<Pair<Uri, Uri>> findTopLevelContainers(String authority) {
+        List<Pair<Uri,Uri>> topLevel = new ArrayList<>();
+        Cursor c = null;
+        try {
+            final String sel = authority != null ? IndexSchema.Containers.AUTHORITY + "=?" : null;
+            final String[] selArgs = authority != null ? new String[] {authority} : null;
+            c = query(IndexSchema.Containers.TABLE, findToplevelContainersCols,
+                    sel, selArgs, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                do {
+                    final Uri uri = Uri.parse(c.getString(0));
+                    final Uri parentUri = Uri.parse(c.getString(1));
+                    if (hasContainer(parentUri) == -1) {
+                        //Our parent wasn't found, we are topLevel
+                        topLevel.add(Pair.create(uri, parentUri));
+                    }
+                } while (c.moveToNext());
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return topLevel;
+    }
+
+    static final String[] containerUriCols = new String[] {
+            IndexSchema.Containers.URI,
+    };
+
+    @Override
+    public int removeContainersInError(@Nullable String authority) {
+        Cursor c = null;
+        try {
+            String sel = IndexSchema.Containers.IN_ERROR + "=?";
+            if (authority != null) {
+                sel += " AND " + IndexSchema.Containers.AUTHORITY + "=?";
+            }
+            String[] selArgs = authority != null ?
+                    new String[] {"1", authority} : new String[] {"1"};
+            c = query(IndexSchema.Containers.TABLE, containerUriCols,
+                    sel, selArgs, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                int numRemoved = 0;
+                do {
+                    numRemoved += removeContainer(Uri.parse(c.getString(0)));
+                } while (c.moveToNext());
+                return numRemoved;
+            }
+            return 0;
+        } finally {
+            closeCursor(c);
+        }
+    }
+
+    @Override
+    public boolean markContainerInError(Uri uri) {
+        ContentValues cv = new ContentValues();
+        cv.put(IndexSchema.Containers.IN_ERROR, 1);
+        return update(IndexSchema.Containers.TABLE, cv,
+                containerUriSel, new String[]{uri.toString()}) == 1;
+    }
+
     @Override
     public long insertContainer(Uri uri, Uri parentUri) {
-        ContentValues cv = new ContentValues(2);
+        ContentValues cv = new ContentValues(5);
         cv.put(IndexSchema.Containers.URI, uri.toString());
         cv.put(IndexSchema.Containers.PARENT_URI, parentUri.toString());
         cv.put(IndexSchema.Containers.AUTHORITY, uri.getAuthority());
-        long id = insert(IndexSchema.Containers.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
-        if (id < 0) {
-            Timber.e("Uh oh there was a problem inserting %s", uri);
-        }
-        return id;
+        return insert(IndexSchema.Containers.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
     }
 
     static final String removeContainerSel = IndexSchema.Containers.URI + "=?";
@@ -290,7 +371,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
         String[] containers = null;
         Cursor c = null;
         try {
-            String[] selArgs = new String[]{uri.toString()};
+            final String[] selArgs = new String[]{uri.toString()};
             c = query(IndexSchema.Containers.TABLE, idCols,
                     removeContainerSel, selArgs, null, null, null);
             if (c == null || !c.moveToFirst()) {
@@ -326,7 +407,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
         HashSet<String> children = new HashSet<>();
         Cursor c = null;
         try {
-            String[] selArgs = new String[]{uri.toString()};
+            final String[] selArgs = new String[]{uri.toString()};
             c = query(IndexSchema.Containers.TABLE, findChildrenUnderCols,
                     findChildrenUnderSel, selArgs, null, null, null);
             if (c != null && c.moveToFirst()) {
@@ -379,7 +460,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
          *
          * Some possible scenarios:
          * Album has multiple tracks with same name, but position will be different
-         * Album has multiple discs with tracks with same name possible same position on each disc
+         * Album has multiple discs with tracks with same name possibly same position on each disc
          * Multiple albums have tracks with same name and same artist possibly same position
          * Track has same name with different artist possible on same album
          *
@@ -409,8 +490,12 @@ public class IndexDatabaseImpl implements IndexDatabase {
         if (duration > 0) {
             cv.put(IndexSchema.TrackResMeta.DURATION, duration);
         }
-        cv.put(IndexSchema.TrackResMeta.ARTIST_ID, artistId);
-        cv.put(IndexSchema.TrackResMeta.ALBUM_ID, albumId);
+        if (artistId > 0) {
+            cv.put(IndexSchema.TrackResMeta.ARTIST_ID, artistId);
+        }
+        if (albumId > 0) {
+            cv.put(IndexSchema.TrackResMeta.ALBUM_ID, albumId);
+        }
         cv.put(IndexSchema.TrackResMeta.CONTAINER_ID, containerId);
         return insert(IndexSchema.TrackResMeta.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
     }
@@ -423,12 +508,31 @@ public class IndexDatabaseImpl implements IndexDatabase {
             + "=? AND " + IndexSchema.AlbumInfo.ARTIST_KEY + "=?";
 
     @Override
-    public long hasAlbum(String albumArtist, String album) {
+    public long hasAlbumMeta(String albumArtist, String album) {
         long id = -1;
         Cursor c = null;
         try {
             final String[] selArgs = new String[]{keyFor(album), keyFor(albumArtist)};
-            c = query(IndexSchema.AlbumInfo.TABLE, idCols, checkAlbumSel, selArgs, null, null, null);
+            c = query(IndexSchema.AlbumMeta.TABLE, idCols, checkAlbumSel, selArgs, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                id = c.getLong(0);
+            }
+            return id;
+        } finally {
+            closeCursor(c);
+        }
+    }
+
+    static final String checkAlbumSel2 = IndexSchema.AlbumInfo.ALBUM_KEY
+            + "=? AND " + IndexSchema.AlbumInfo.ARTIST_ID + "=?";
+
+    @Override
+    public long hasAlbumMeta(String album, long albumArtistId) {
+        long id = -1;
+        Cursor c = null;
+        try {
+            final String[] selArgs = new String[]{keyFor(album), String.valueOf(albumArtistId)};
+            c = query(IndexSchema.AlbumInfo.TABLE, idCols, checkAlbumSel2, selArgs, null, null, null);
             if (c != null && c.moveToFirst()) {
                 id = c.getLong(0);
             }
@@ -444,10 +548,10 @@ public class IndexDatabaseImpl implements IndexDatabase {
         ContentValues cv = new ContentValues(10);
         cv.put(IndexSchema.AlbumMeta.ALBUM_NAME, meta.getString(Metadata.KEY_ALBUM_NAME));
         cv.put(IndexSchema.AlbumMeta.ALBUM_KEY, keyFor(meta.getString(Metadata.KEY_ALBUM_NAME)));
-        cv.put(IndexSchema.AlbumMeta.ALBUM_MBID, meta.getString(Metadata.KEY_MBID));
+        cv.put(IndexSchema.AlbumMeta.ALBUM_MBID, meta.getString(Metadata.KEY_ALBUM_MBID));
         cv.put(IndexSchema.AlbumMeta.ALBUM_ARTIST_ID, albumArtistId);
-        String bioSummary = meta.getString(Metadata.KEY_SUMMARY);
-        String bioContent = meta.getString(Metadata.KEY_BIO);
+        String bioSummary = meta.getString(Metadata.KEY_ALBUM_SUMMARY);
+        String bioContent = meta.getString(Metadata.KEY_ALBUM_BIO);
         long lastMod = meta.getLong(Metadata.KEY_LAST_MODIFIED);
         if (!StringUtils.isEmpty(bioSummary) && !StringUtils.isEmpty(bioContent)) {
             cv.put(IndexSchema.AlbumMeta.ALBUM_BIO_SUMMARY, bioSummary);
@@ -481,9 +585,9 @@ public class IndexDatabaseImpl implements IndexDatabase {
         ContentValues cv = new ContentValues(10);
         cv.put(IndexSchema.ArtistMeta.ARTIST_NAME, meta.getString(Metadata.KEY_ARTIST_NAME));
         cv.put(IndexSchema.ArtistMeta.ARTIST_KEY, keyFor(meta.getString(Metadata.KEY_ARTIST_NAME)));
-        cv.put(IndexSchema.ArtistMeta.ARTIST_MBID, meta.getString(Metadata.KEY_MBID));
-        String bioSummary = meta.getString(Metadata.KEY_SUMMARY);
-        String bioContent = meta.getString(Metadata.KEY_BIO);
+        cv.put(IndexSchema.ArtistMeta.ARTIST_MBID, meta.getString(Metadata.KEY_ARTIST_MBID));
+        String bioSummary = meta.getString(Metadata.KEY_ARTIST_SUMMARY);
+        String bioContent = meta.getString(Metadata.KEY_ARTIST_BIO);
         long lastMod = meta.getLong(Metadata.KEY_LAST_MODIFIED);
         if (!StringUtils.isEmpty(bioSummary) && !StringUtils.isEmpty(bioContent)) {
             cv.put(IndexSchema.ArtistMeta.ARTIST_BIO_SUMMARY, bioSummary);

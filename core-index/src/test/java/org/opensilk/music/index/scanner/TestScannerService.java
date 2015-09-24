@@ -59,10 +59,6 @@ import java.util.List;
 )
 public class TestScannerService {
 
-    static {
-        ShadowLog.stream = System.out;
-    }
-
     @Test
     public void testServiceStarts() {
         RuntimeEnvironment.application.startService(new Intent(RuntimeEnvironment.application, ScannerService.class));

@@ -20,6 +20,9 @@ package org.opensilk.music.index.database;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.util.Pair;
 
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
@@ -42,9 +45,13 @@ public interface IndexDatabase {
     long insert(String table, String nullColumnHack, ContentValues values,int conflictAlgorithm);
     int update(String table, ContentValues values, String whereClause, String[] whereArgs);
     long hasContainer(Uri uri);
+    @NonNull List<Pair<Uri, Uri>> findTopLevelContainers(@Nullable String authority);
+    int removeContainersInError(@Nullable String authority);
+    boolean markContainerInError(Uri uri);
     long insertContainer(Uri uri, Uri parentUri);
     int removeContainer(Uri uri);
-    long hasAlbum(String albumArtist, String album);
+    long hasAlbumMeta(String albumArtist, String album);
+    long hasAlbumMeta(String album, long albumArtistId);
     long insertAlbum(Metadata meta, long albumArtistId);
     long hasArtist(String artist);
     long insertArtist(Metadata meta);

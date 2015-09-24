@@ -31,6 +31,10 @@ import dagger.Provides;
  */
 @Module
 public class IndexProviderAuthorityModule {
+    @Provides @Named("IndexProviderBaseAuthority")
+    public String provideIndexProviderBaseAuthority(@ForApplication Context appContext){
+        return appContext.getPackageName() + ".provider.index";
+    }
     @Provides @Named("IndexProviderAuthority")
     public String provideIndexProviderAuthority(@ForApplication Context appContext){
         return appContext.getPackageName() + ".provider.index";

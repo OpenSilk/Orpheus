@@ -17,18 +17,13 @@
 
 package org.opensilk.music.index.scanner;
 
-import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.ParcelFileDescriptor;
+import android.util.Pair;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.core.mortar.MortarIntentService;
 import org.opensilk.music.index.IndexComponent;
@@ -36,7 +31,6 @@ import org.opensilk.music.index.database.IndexDatabase;
 import org.opensilk.music.index.database.IndexSchema;
 import org.opensilk.music.index.provider.LastFMHelper;
 import org.opensilk.music.library.provider.LibraryExtras;
-import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.loader.BundleableLoader;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Metadata;
@@ -44,32 +38,23 @@ import org.opensilk.music.model.Track;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.index.scanner.NotificationHelper.Status;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
-import de.umass.lastfm.Album;
-import de.umass.lastfm.Artist;
-import de.umass.lastfm.LastFM;
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
-import retrofit.Call;
-import retrofit.Response;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.subjects.PublishSubject;
 import rx.subjects.Subject;
 import timber.log.Timber;
-
-import static android.provider.MediaStore.Audio.keyFor;
-import static org.opensilk.common.core.util.Preconditions.checkNotNullOrBlank;
 
 import static org.opensilk.music.model.Metadata.*;
 
@@ -78,10 +63,15 @@ import static org.opensilk.music.model.Metadata.*;
  */
 public class ScannerService extends MortarIntentService {
 
+    public static final String ACTION_RESCAN = "rescan";
+    public static final String EXTRA_AUTHORITY = "authority";
+    public static final String EXTRA_LIBRARY_EXTRAS = "libraryextras";
+
     @Inject LastFMHelper mLastFM;
     @Inject IndexDatabase mIndexDatabase;
     @Inject NotificationHelper mNotifHelper;
     @Inject MetaExtractor mMetaExtractor;
+    @Inject Provider<BundleableLoader> mBundlelableLoaderProvider;
 
     final AtomicInteger numTotal = new AtomicInteger(0);
     final AtomicInteger numError = new AtomicInteger(0);
@@ -136,18 +126,13 @@ public class ScannerService extends MortarIntentService {
         mNotifHelper.updateNotification(status, numProcessed.get(), numError.get(), numTotal.get());
     }
 
+    static final String[] rescanContainerCols = new String[] {
+            IndexSchema.Containers.URI,
+            IndexSchema.Containers.PARENT_URI,
+    };
+
     @Override
     protected void onHandleIntent(Intent intent) {
-        Bundle extras = intent.getBundleExtra(LibraryExtras.INTENT_KEY);
-        if (extras == null) {
-            Timber.e("No extras in intent");
-            return;
-        }
-        Container container = LibraryExtras.getBundleable(extras);
-        if (container == null) {
-            Timber.e("No container in extras");
-            return;
-        }
         notifSubject = PublishSubject.create();
         notifSubject.asObservable().debounce(1, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
@@ -165,46 +150,104 @@ public class ScannerService extends MortarIntentService {
                     }
                 });
         notifSubject.onNext(Status.SCANNING);
-        scan2(container.getUri(), container.getParentUri());
+        String authority = intent.getStringExtra(EXTRA_AUTHORITY);
+        if (ACTION_RESCAN.equals(intent.getAction())) {
+            List<Pair<Uri, Uri>> topLevel = mIndexDatabase.findTopLevelContainers(authority);
+            for (Pair<Uri,Uri> p : topLevel) {
+                scan2(p.first, p.second);
+            }
+        } else {
+            Bundle extras = intent.getBundleExtra(EXTRA_LIBRARY_EXTRAS);
+            if (extras == null) {
+                Timber.e("No extras in intent");
+                return;
+            }
+            Container container = LibraryExtras.getBundleable(extras);
+            if (container == null) {
+                Timber.e("No container in extras");
+                return;
+            }
+            scan2(container.getUri(), container.getParentUri());
+
+        }
         notifSubject.onNext(Status.COMPLETED);
         notifSubject.onCompleted();
+        mIndexDatabase.removeContainersInError(authority);
     }
 
     void scan2(final Uri uri, final Uri parentUri) {
         Timber.i("scan2(%s)", uri);
-        BundleableLoader loader = new BundleableLoader(this, uri, null);
+        BundleableLoader loader = mBundlelableLoaderProvider.get().setUri(uri);
         List<Bundleable> bundleables;
         try {
             bundleables = loader.createObservable().toBlocking().first();
         } catch (RuntimeException e) {
+            //TODO first we should check if this is a transient failure
+            mIndexDatabase.markContainerInError(uri);
             notifyError(uri);
             return;
         }
         mIndexDatabase.insertContainer(uri, parentUri);
+        //first extract metadata from all tracks in container
+        List<Pair<Track,Metadata>> trackMeta = new ArrayList<>(bundleables.size());
         for (Bundleable b : bundleables) {
             if (b instanceof Track) {
                 numTotal.incrementAndGet();
-                Track item = (Track) b;
-                Timber.i("indexing %s, %s", item.getName(), item.getUri());
-                if (!needsScan(item)) {
-                    notifySkipped(item.getUri());
-                    continue;
-                }
-                boolean success = false;
-                Metadata meta = extractMeta(item);
-                if (meta != null) {
-                    success = addMetaToDb(meta);
-                }
-                if (success) {
-                    notifySuccess(item.getUri());
+                final Track item = (Track) b;
+                if (needsScan(item)) {
+                    final Metadata meta = extractMeta(item);
+                    trackMeta.add(Pair.create(item, meta));
                 } else {
-                    notifyError(item.getUri());
+                    notifySkipped(item.getUri());
                 }
-            } else if (b instanceof Container) {
+            }
+        }
+        //Second fixup any descrepancies with albumartist/trackartist
+        Set<String> albumArtists = new HashSet<>();
+        Set<String> artists = new HashSet<>();
+        for (Pair<Track,Metadata> pair : trackMeta) {
+            String albumArtist = pair.second.getString(KEY_ALBUM_ARTIST_NAME);
+            if (!StringUtils.isEmpty(albumArtist)) {
+                albumArtists.add(albumArtist);
+            }
+            String artist = pair.second.getString(KEY_ARTIST_NAME);
+            if (!StringUtils.isEmpty(artist)) {
+                artists.add(artist);
+            }
+        }
+        //not all the tracks had album artist set,
+        //but we only have one artist, so use that as album artist for everyone
+        if (albumArtists.size() != trackMeta.size() && artists.size() == 1) {
+            final String artist = artists.toArray(new String[1])[0]; //FIXME ugly
+            final List<Pair<Track,Metadata>> oldTrackMeta = new ArrayList<>();
+            oldTrackMeta.addAll(trackMeta);
+            trackMeta.clear();
+            for (Pair<Track,Metadata> pair : oldTrackMeta) {
+                Metadata m = pair.second.buildUpon()
+                        .putString(KEY_ALBUM_ARTIST_NAME, artist)
+                        .putString(KEY_ARTIST_NAME, artist)
+                        .build();
+                trackMeta.add(Pair.create(pair.first, m));
+            }
+        }
+        //add everyone to the db
+        for (Pair<Track,Metadata> pair : trackMeta) {
+            boolean success = false;
+            if (pair.second != null) {
+                success = addMetaToDb(pair.first, pair.second);
+            } else {
+                //TODO add orphan
+            }
+            if (success) {
+                notifySuccess(pair.first.getUri());
+            } else {
+                notifyError(pair.first.getUri());
+            }
+        }
+        for (Bundleable b : bundleables) {
+            if (b instanceof Container) {
                 Container c = (Container) b;
                 scan2(c.getUri(), c.getParentUri());
-            } else {
-                Timber.w("Unsupported bundleable %s at %s", b.getClass(), b.getUri());
             }
         }
     }
@@ -215,90 +258,106 @@ public class ScannerService extends MortarIntentService {
         return meta.buildUpon()
                 .putUri(KEY_TRACK_URI, track.getUri())
                 .putUri(KEY_PARENT_URI, track.getParentUri())
+                .putUri(KEY_ALBUM_ART_URI, track.getArtworkUri())
                 .putLong(KEY_SIZE, res.getSize())
                 .putString(KEY_MIME_TYPE, res.getMimeType())
                 .putLong(KEY_LAST_MODIFIED, res.getLastMod())
                 .build();
     }
 
-    boolean addMetaToDb(Metadata meta) {
+    boolean addMetaToDb(Track track, Metadata meta) {
 
-        final Uri trackUri = meta.getUri(KEY_TRACK_URI);
+        final Uri trackUri = track.getUri();
+
+        long containerId = mIndexDatabase.hasContainer(track.getParentUri());
+        if (containerId < 0) {
+            Timber.e("Unable locate parent for track %s", track.getName());
+            return false;
+        }
 
         final String albumArtistName = meta.getString(KEY_ALBUM_ARTIST_NAME);
         final String albumName = meta.getString(KEY_ALBUM_NAME);
         final String artistName = meta.getString(KEY_ARTIST_NAME);
 
-        if (StringUtils.isEmpty(albumArtistName)) {
-            Timber.w("Cannot process item %s missing albumArtistName", trackUri);
-            return false;
-        } else if (StringUtils.isEmpty(albumName)) {
-            Timber.w("Cannot process item %s missing albumName", trackUri);
-            return false;
-        } else if (StringUtils.isEmpty(artistName)) {
-            Timber.w("Cannot process item %s missing artistName", trackUri);
-            return false;
-        }
+        long albumId = -1;
+        long artistId = -1;
 
-        long albumArtistId = mIndexDatabase.hasArtist(albumArtistName);
-        if (albumArtistId < 0) {
-            Metadata artistMeta = mLastFM.lookupArtistInfo(albumArtistName);
-            if (artistMeta == null) {
-                //Straight lookup failed, maybe we can fudge it.
-                artistMeta = mLastFM.lookupArtistInfo(
-                        LastFMHelper.resolveAlbumArtistFromTrackArtist(artistName));
-            }
-            if (artistMeta != null) {
-                albumArtistId = mIndexDatabase.insertArtist(artistMeta);
-            }
+        if (!StringUtils.isEmpty(albumArtistName)
+            && !StringUtils.isEmpty(albumName)
+            && !StringUtils.isEmpty(artistName)) {
+
+            long albumArtistId = mIndexDatabase.hasArtist(albumArtistName);
             if (albumArtistId < 0) {
-                Timber.e("Unable to insert artist %s into db", albumArtistName);
-                return false;
-            }
-        }
-
-        long albumId = mIndexDatabase.hasAlbum(albumArtistName, albumName);
-        if (albumId < 0) {
-            Metadata albumMeta = mLastFM.lookupAlbumInfo(albumArtistName, albumName);
-            if (albumMeta != null) {
-                albumId = mIndexDatabase.insertAlbum(albumMeta, albumArtistId);
-            }
-            if (albumId < 0) {
-                Timber.e("Unable to insert album %s into db", albumName);
-                return false;
-            }
-        }
-
-        long artistId;
-        if (StringUtils.equalsIgnoreCase(artistName, albumArtistName)) {
-            artistId = albumArtistId;
-        } else {
-            artistId = mIndexDatabase.hasArtist(artistName);
-            if (artistId < 0) {
-                Metadata artistMeta = mLastFM.lookupArtistInfo(artistName);
+                Metadata artistMeta = mLastFM.lookupArtistInfo(albumArtistName);
+//                if (artistMeta == null && LastFMHelper.hasFeaturedArtist(albumArtistName)) {
+//                    //Straight lookup failed, maybe we can fudge it.
+//                    artistMeta = mLastFM.lookupArtistInfo(
+//                            LastFMHelper.resolveAlbumArtistFromTrackArtist(artistName));
+//                }
                 if (artistMeta == null) {
-                    artistMeta = mLastFM.lookupArtistInfo(
-                            LastFMHelper.resolveTrackArtist(artistName));
+                    //couldnt find it on lastfm
+                    artistMeta = Metadata.builder()
+                            .putString(KEY_ARTIST_NAME, albumArtistName)
+                            .build();
                 }
-                if (artistMeta != null) {
-                    artistId = mIndexDatabase.insertArtist(artistMeta);
-                }
-                if (artistId < 0) {
-                    Timber.e("Unable to insert artist %s into db", artistName);
-                    return false;
+                albumArtistId = mIndexDatabase.insertArtist(artistMeta);
+                if (albumArtistId < 0) {
+                    Timber.e("Unable to insert artist %s into db", albumArtistName);
                 }
             }
-        }
 
-        long containerId = mIndexDatabase.hasContainer(meta.getUri(KEY_PARENT_URI));
-        if (containerId < 0) {
-            Timber.e("Unable locate parent for track %s", meta.getUri(KEY_TRACK_NAME));
-            return false;
+            if (albumArtistId > 0) {
+                albumId = mIndexDatabase.hasAlbumMeta(albumName, albumArtistId);
+                if (albumId < 0) {
+                    Metadata albumMeta = mLastFM.lookupAlbumInfo(albumArtistName, albumName);
+//                    if (albumMeta == null && LastFMHelper.hasFeaturedArtist(albumArtistName)) {
+//                        //Straight lookup failed, maybe we can fudge it.
+//                        albumMeta = mLastFM.lookupAlbumInfo(
+//                                LastFMHelper.resolveAlbumArtistFromTrackArtist(albumArtistName), albumName);
+//                    }
+                    if (albumMeta == null) {
+                        //couldnt find it on lastfm
+                        albumMeta = Metadata.builder()
+                                .putString(KEY_ALBUM_NAME, albumName)
+                                .build();
+                    }
+                    albumId = mIndexDatabase.insertAlbum(albumMeta, albumArtistId);
+                    if (albumId < 0) {
+                        Timber.e("Unable to insert album %s into db", albumName);
+                    }
+                }
+            }
+
+            if (StringUtils.equalsIgnoreCase(artistName, albumArtistName)) {
+                artistId = albumArtistId;
+            } else {
+                artistId = mIndexDatabase.hasArtist(artistName);
+                if (artistId < 0) {
+                    Metadata artistMeta = mLastFM.lookupArtistInfo(artistName);
+//                    if (artistMeta == null && LastFMHelper.hasFeaturedArtist(artistName)) {
+//                        //Straight lookup failed, maybe we can fudge it.
+////                        artistMeta = mLastFM.lookupArtistInfo(
+////                                LastFMHelper.resolveTrackArtist(artistName));
+//                        artistMeta = mLastFM.lookupArtistInfo(
+//                                LastFMHelper.resolveAlbumArtistFromTrackArtist(artistName));
+//                    }
+                    if (artistMeta == null) {
+                        //couldnt find it on lastfm
+                        artistMeta = Metadata.builder()
+                                .putString(KEY_ARTIST_NAME, artistName)
+                                .build();
+                    }
+                    artistId = mIndexDatabase.insertArtist(artistMeta);
+                    if (artistId < 0) {
+                        Timber.e("Unable to insert artist %s into db", artistName);
+                    }
+                }
+            }
         }
 
         long trackId = mIndexDatabase.insertTrackResource(meta, artistId, albumId, containerId);
         if ( trackId <0) {
-            Timber.e("Unable to insert track %s into db", meta.getUri(KEY_TRACK_NAME));
+            Timber.e("Unable to insert track %s into db", track.getName());
             return false;
         }
 

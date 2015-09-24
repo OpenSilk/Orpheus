@@ -32,7 +32,7 @@ import javax.inject.Singleton;
 @Singleton
 public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
-    public static final int DB_VERSION = 22;
+    public static final int DB_VERSION = 23;
     public static final String DB_NAME = "music.db";
 
     @Inject
@@ -85,6 +85,10 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP TABLE IF EXISTS containers;");
             //end mistakes cleanup
 
+            //Scanner meta
+            db.execSQL("CREATE TABLE IF NOT EXISTS scanner_meta (" +
+                    "rescan_count INTEGER DEFAULT 0" +
+                    ");");
             //Artist metadata
             db.execSQL("CREATE TABLE IF NOT EXISTS artist_meta (" +
                     "_id INTEGER PRIMARY KEY, " +
@@ -113,7 +117,8 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "_id INTEGER PRIMARY KEY, " +
                     "uri TEXT NOT NULL UNIQUE, " +
                     "parent_uri TEXT NOT NULL, " +
-                    "authority TEXT NOT NULL " +
+                    "authority TEXT NOT NULL, " +
+                    "in_error INTEGER DEFAULT 0 " +
                     ");");
             //Track resources
             db.execSQL("CREATE TABLE IF NOT EXISTS track_resources (" +
@@ -131,9 +136,6 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "track_number INTEGER, " +
                     "disc_number INTEGER DEFAULT 1, " +
                     "genre TEXT, " +
-                    "album_name TEXT, " +
-                    "artist_name TEXT, " +
-                    "album_artist_name TEXT, " +
                     "category INTEGER NOT NULL DEFAULT 1, " + //Music 1, Podcast 2, AudioBook 3
                     "artist_id INTEGER REFERENCES artist_meta(_id) ON DELETE CASCADE, " +
                     "album_id INTEGER REFERENCES album_meta(_id) ON DELETE CASCADE, " +
@@ -160,7 +162,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
 //                    ";");
 
             db.execSQL("CREATE VIEW IF NOT EXISTS artist_info AS " +
-                    "SELECT a1._id, a1.artist_name as name, artist_key, " +
+                    "SELECT a1._id, a1.artist_name as name, a1.artist_key, " +
                     "COUNT(DISTINCT a2._id) AS number_of_albums, " +
                     "COUNT(DISTINCT t1.track_key) AS number_of_tracks, "+
                     "artist_bio_content as bio, artist_bio_summary as summary, artist_mbid as mbid " +
@@ -171,8 +173,8 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     ";");
 
             db.execSQL("CREATE VIEW IF NOT EXISTS album_info AS " +
-                    "SELECT a1._id, a1.album_name as name, album_key, " +
-                    "a2.artist_name as artist, album_artist_id as artist_id, artist_key, " +
+                    "SELECT a1._id, a1.album_name as name, a1.album_key, " +
+                    "a2.artist_name as artist, album_artist_id as artist_id, a2.artist_key, " +
                     "COUNT(DISTINCT t1.track_key) as track_count, " +
                     "album_bio_content as bio, album_bio_summary as summary, album_mbid as mbid " +
                     "FROM album_meta a1 " +
@@ -184,9 +186,9 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
             // Provides some extra info about tracks like album artist name and number of resources
             db.execSQL("CREATE VIEW IF NOT EXISTS track_info as SELECT " +
                     "t1._id, track_name as name, track_key, " +
-                    "a1.artist_name as artist, artist_id, a2.album_name as album, album_id, " +
+                    "a1.artist_name as artist, t1.artist_id, a2.album_name as album, t1.album_id, " +
                     "a2.album_artist_id, track_number as track, disc_number as disc, " +
-                    "(SELECT artist_name from artist_meta where _id = album_artist_id) as album_artist," +
+                    "(SELECT artist_name from artist_meta aa1 where aa1._id = a2.album_artist_id) as album_artist," +
                     "uri, size, mime_type, date_added, bitrate, duration " +
                     "FROM track_resources t1 " +
                     "LEFT OUTER JOIN artist_meta a1 ON t1.artist_id = a1._id " +

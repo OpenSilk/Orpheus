@@ -43,6 +43,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
 import static org.opensilk.music.index.provider.IndexUris.M_ALBUMS;
@@ -55,7 +56,6 @@ import static org.opensilk.music.index.provider.IndexUris.makeMatcher;
  * Created by drew on 7/11/15.
  */
 public class IndexProvider extends LibraryProvider {
-    static final boolean TESTING = false; //for when the tester app doesnt use mortar
 
     @Inject @Named("IndexProviderAuthority") String mRealAuthority;
     @Inject IndexDatabase mDataBase;
@@ -63,14 +63,9 @@ public class IndexProvider extends LibraryProvider {
     private UriMatcher mUriMatcher;
 
     @Override
+    @DebugLog
     public boolean onCreate() {
-        final IndexComponent acc;
-        if (TESTING) {
-            Timber.plant(new Timber.DebugTree());
-            acc = IndexComponent.FACTORY.call(getContext());
-        } else {
-            acc = DaggerService.getDaggerComponent(getContext());
-        }
+        final IndexComponent acc = DaggerService.getDaggerComponent(getContext());
         IndexProviderComponent.FACTORY.call(acc).inject(this);
         super.onCreate();
         //override authority to avoid discover-ability
@@ -98,7 +93,7 @@ public class IndexProvider extends LibraryProvider {
             }
             case Methods.ADD: {
                 Intent i = new Intent(getContext(), ScannerService.class)
-                        .putExtra(LibraryExtras.INTENT_KEY, extras);
+                        .putExtra(ScannerService.EXTRA_LIBRARY_EXTRAS, extras);
                 getContext().startService(i);
                 return reply.putOk(true).get();
             }

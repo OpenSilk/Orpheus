@@ -18,6 +18,7 @@
 package org.opensilk.music.index;
 
 import org.opensilk.common.core.app.BaseApp;
+import org.robolectric.shadows.ShadowLog;
 
 import timber.log.Timber;
 
@@ -25,6 +26,10 @@ import timber.log.Timber;
  * Created by drew on 9/16/15.
  */
 public class IndexTestApplication extends BaseApp {
+
+    static {
+        ShadowLog.stream = System.out;
+    }
 
     @Override
     public void onCreate() {

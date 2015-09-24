@@ -55,7 +55,6 @@ public class LastFmHelperTest {
 
     LastFMHelper mHelper;
 
-
     @Before
     public void setup() {
         IndexComponent cmp = DaggerService.getDaggerComponent(RuntimeEnvironment.application);
@@ -86,7 +85,7 @@ public class LastFmHelperTest {
 //        Assertions.assertThat(id2).isNotEqualTo(-1);
 //        long id3 =service.mIndexDatabase.hasArtist("foxes");
 //        Assertions.assertThat(id3).isNotEqualTo(-1);
-//        long id4 = service.mIndexDatabase.hasAlbum("foxes", "glorious");
+//        long id4 = service.mIndexDatabase.hasAlbumMeta("foxes", "glorious");
 //        Assertions.assertThat(id4).isNotEqualTo(-1);
 //
 //        IndexComponent acc = DaggerService.getDaggerComponent(RuntimeEnvironment.application);

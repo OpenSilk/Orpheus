@@ -37,14 +37,7 @@ import retrofit.Response;
 import timber.log.Timber;
 
 import static android.provider.MediaStore.Audio.keyFor;
-import static org.opensilk.music.model.Metadata.KEY_ALBUM_ARTIST_NAME;
-import static org.opensilk.music.model.Metadata.KEY_ALBUM_NAME;
-import static org.opensilk.music.model.Metadata.KEY_ARTIST_NAME;
-import static org.opensilk.music.model.Metadata.KEY_BIO;
-import static org.opensilk.music.model.Metadata.KEY_LAST_MODIFIED;
-import static org.opensilk.music.model.Metadata.KEY_MBID;
-import static org.opensilk.music.model.Metadata.KEY_SUMMARY;
-import static org.opensilk.music.model.Metadata.KEY_URL_URI;
+import static org.opensilk.music.model.Metadata.*;
 
 /**
  * Created by drew on 9/21/15.
@@ -76,14 +69,14 @@ public class LastFMHelper {
         Metadata.Builder bob = Metadata.builder();
         bob.putString(KEY_ALBUM_NAME, album.getName());
         bob.putString(KEY_ALBUM_ARTIST_NAME, album.getArtist());
-        bob.putString(KEY_SUMMARY, album.getWikiSummary());
-        bob.putString(KEY_BIO, album.getWikiText());
+        bob.putString(KEY_ALBUM_SUMMARY, album.getWikiSummary());
+        bob.putString(KEY_ALBUM_BIO, album.getWikiText());
         Date lastChanged = album.getWikiLastChanged();
         if (lastChanged != null) {
             bob.putLong(KEY_LAST_MODIFIED, lastChanged.getTime());
         }
-        bob.putUri(KEY_URL_URI, Uri.parse(album.getUrl()));
-        bob.putString(KEY_MBID, album.getMbid());
+        bob.putUri(KEY_ALBUM_URL_URI, Uri.parse(album.getUrl()));
+        bob.putString(KEY_ALBUM_MBID, album.getMbid());
         return bob.build();
     }
 
@@ -103,17 +96,20 @@ public class LastFMHelper {
         }
         Metadata.Builder bob = Metadata.builder();
         bob.putString(KEY_ARTIST_NAME, artist.getName());
-        bob.putString(KEY_SUMMARY, artist.getWikiSummary());
-        bob.putString(KEY_BIO, artist.getWikiText());
+        bob.putString(KEY_ARTIST_SUMMARY, artist.getWikiSummary());
+        bob.putString(KEY_ARTIST_BIO, artist.getWikiText());
         Date lastChanged = artist.getWikiLastChanged();
         if (lastChanged != null) {
             bob.putLong(KEY_LAST_MODIFIED, lastChanged.getTime());
         }
-        bob.putUri(KEY_URL_URI, Uri.parse(artist.getUrl()));
-        bob.putString(KEY_MBID, artist.getMbid());
+        bob.putUri(KEY_ARTIST_URL_URI, Uri.parse(artist.getUrl()));
+        bob.putString(KEY_ARTIST_MBID, artist.getMbid());
         return bob.build();
     }
 
+    public static boolean hasFeaturedArtist(String artist) {
+        return StringUtils.containsIgnoreCase(artist, "feat.");
+    }
 
     public static String resolveAlbumArtistFromTrackArtist(String trackArtist) {
         if (StringUtils.containsIgnoreCase(trackArtist, "feat.")) {

@@ -113,13 +113,14 @@ public class IndexSchema {
         String TRACK_NUMBER = "track_number";
         String DISC_NUMBER = "disc_number";
         String GENRE = "genre";
-        String ALBUM_NAME = "album_name";
-        String ARTIST_NAME = "artist_name";
-        String ALBUM_ARTIST_NAME = "album_artist_name";
         String CATEGORY = "category";
         String ARTIST_ID = "artist_id";
         String ALBUM_ID = "album_id";
         String CONTAINER_ID = "container_id";
+
+        int CATEGORY_MUSIC = 1;
+        int CATEGORY_PODCAST = 2;
+        int CATEGORY_AUDIOBOOK = 3;
     }
 
     public interface Containers extends BaseColumns {
@@ -127,6 +128,7 @@ public class IndexSchema {
         String URI = "uri";
         String PARENT_URI = "parent_uri";
         String AUTHORITY = "authority";
+        String IN_ERROR = "in_error";
     }
 
 }
