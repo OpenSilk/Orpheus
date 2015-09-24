@@ -328,7 +328,8 @@ public class FilesHelper {
                     null);
             if (c != null && c.moveToFirst()) {
                 do {
-                    final File f = pathMap.remove(c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DATA)));
+                    final String path = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DATA));
+                    final File f = pathMap.remove(path);
                     if (f != null) {
                         try {
                             Track.Builder tb = Track.builder()
@@ -338,7 +339,6 @@ public class FilesHelper {
                                     .setName(getStringOrNull(c, MediaStore.Audio.AudioColumns.TITLE))
                                     .setArtistName(getStringOrNull(c, MediaStore.Audio.AudioColumns.ARTIST))
                                     .setAlbumName(getStringOrNull(c, MediaStore.Audio.AudioColumns.ALBUM))
-                                    .setDuration(getLongOrZero(c, MediaStore.Audio.AudioColumns.DURATION))
                                     .addRes(Track.Res.builder()
                                                     .setUri(generateDataUri(c.getString(c.getColumnIndexOrThrow(BaseColumns._ID))))
                                                     .setMimeType(getStringOrNull(c, MediaStore.Audio.AudioColumns.MIME_TYPE))
@@ -349,11 +349,11 @@ public class FilesHelper {
                                     )
                                     .setArtworkUri(generateArtworkUri(
                                             c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))))
-                                    .setFlags(LibraryConfig.FLAG_SUPPORTS_DELETE | LibraryConfig.FLAG_SUPPORTS_RENAME)
+                                    .setFlags(getFlags(f))
                                     ;
                             trackList.add(tb.build());
                         } catch (IllegalArgumentException ignored) {
-                            pathMap.put(c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DATA)), f);
+                            pathMap.put(path, f);
                         }
                     }
                 } while (c.moveToNext());
