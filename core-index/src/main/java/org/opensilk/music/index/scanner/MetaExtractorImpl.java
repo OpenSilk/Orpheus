@@ -50,6 +50,26 @@ public class MetaExtractorImpl implements MetaExtractor {
         this.appContext = appContext;
     }
 
+    MediaMetadataRetriever newMediaMetadataRetriever() {
+        return new MediaMetadataRetriever();
+    }
+
+    static int parseTrackNum(String track_num) throws NumberFormatException {
+        if (StringUtils.contains(track_num, "/")) {
+            return Integer.parseInt(StringUtils.split(track_num, "/")[0]);
+        } else {
+            return Integer.parseInt(track_num);
+        }
+    }
+
+    static int parseDiskNum(String disc_num) throws  NumberFormatException {
+        if (StringUtils.contains(disc_num, "/")) {
+            return Integer.parseInt(StringUtils.split(disc_num, "/")[0]);
+        } else {
+            return Integer.parseInt(disc_num);
+        }
+    }
+
     @Override
     public Metadata extractMetadata(Track.Res res) {
 
@@ -58,7 +78,7 @@ public class MetaExtractorImpl implements MetaExtractor {
 
         Metadata.Builder bob = Metadata.builder();
 
-        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+        MediaMetadataRetriever mmr = newMediaMetadataRetriever();
         try {
             if (StringUtils.startsWith(uri.getScheme(), "http")) {
                 mmr.setDataSource(uri.toString(), headers);
@@ -88,11 +108,7 @@ public class MetaExtractorImpl implements MetaExtractor {
             final String track_num = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER);
             if (track_num != null) {
                 try {
-                    if (StringUtils.contains(track_num, "/")) {
-                        bob.putInt(KEY_TRACK_NUMBER, Integer.parseInt(StringUtils.split(track_num, "/")[0]));
-                    } else {
-                        bob.putInt(KEY_TRACK_NUMBER, Integer.parseInt(track_num));
-                    }
+                    bob.putInt(KEY_TRACK_NUMBER, parseTrackNum(track_num));
                 } catch (NumberFormatException e) {
                     Timber.w(e, "extractMeta(CD_TRACK_NUMBER)");
                 }
@@ -100,11 +116,7 @@ public class MetaExtractorImpl implements MetaExtractor {
             final String disc_num = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER);
             if (disc_num != null) {
                 try {
-                    if (StringUtils.contains(disc_num, "/")) {
-                        bob.putInt(KEY_DISC_NUMBER, Integer.parseInt(StringUtils.split(disc_num, "/")[0]));
-                    } else {
-                        bob.putInt(KEY_DISC_NUMBER, Integer.parseInt(disc_num));
-                    }
+                    bob.putInt(KEY_DISC_NUMBER, parseDiskNum(disc_num));
                 } catch (NumberFormatException e) {
                     Timber.w(e, "extractMeta(DISC_NUMBER)");
                 }
