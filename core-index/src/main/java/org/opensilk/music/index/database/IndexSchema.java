@@ -33,94 +33,114 @@ public class IndexSchema {
      */
     public static final String UNKNOWN_STRING = "<unknown>";
 
-    public interface ArtistInfo extends BaseColumns {
-        String TABLE = "artist_info";
-        String ARTIST = "name";
-        String ARTIST_KEY = "artist_key";
-        String NUMBER_OF_ALBUMS = "number_of_albums";
-        String NUMBER_OF_TRACKS = "number_of_tracks";
-        String BIO = "bio";
-        String SUMMARY = "summary";
-        String MBID = "mbid";
+    public interface Info {
+
+        interface Artist extends BaseColumns {
+            String TABLE = "artist_info";
+            String TITLE = "name";
+            String ARTIST_KEY = "artist_key";
+            String NUMBER_OF_ALBUMS = "number_of_albums";
+            String NUMBER_OF_TRACKS = "number_of_tracks";
+            String BIO = "bio";
+            String SUMMARY = "summary";
+            String MBID = "mbid";
+        }
+
+        interface Album extends BaseColumns {
+            String TABLE = "album_info";
+            String TITLE = "name";
+            String ALBUM_KEY = "album_key";
+            String ARTIST = "artist";
+            String ARTIST_KEY = "artist_key";
+            String ARTIST_ID = "artist_id";
+            String TRACK_COUNT = "track_count";
+            String BIO = "bio";
+            String SUMMARY = "summary";
+            String MBID = "mbid";
+        }
+
+        interface Genre extends BaseColumns {
+            String TABLE = "genre_info";
+            String TITLE = "name";
+            String GENRE_KEY = "genre_key";
+            String NUMBER_OF_ARTISTS = "number_of_artists";
+            String NUMBER_OF_ALBUMS = "number_of_albums";
+            String NUMBER_OF_TRACKS = "number_of_tracks";
+        }
+
+        interface Track extends BaseColumns {
+            String TABLE = "track_info";
+            String URI = "uri";
+            String PARENT_URI = "parent_uri";
+            String TITLE = "name";
+            String TRACK_KEY = "track_key";
+            String ARTIST = "artist";
+            String ARTIST_ID = "artist_id";
+            String ALBUM = "album";
+            String ALBUM_ID = "album_id";
+            String ALBUM_ARTIST = "album_artist";
+            String ALBUM_ARTIST_ID = "album_artist_id";
+            String TRACK = "track";
+            String DISC = "disc";
+            String COMPILATION = "compilation";
+            String GENRE = "genre";
+            String GENRE_ID = "genre_id";
+            String RES_URI = "res_uri";
+            String RES_HEADERS = "res_headers";
+            String RES_SIZE = "res_size";
+            String RES_MIME_TYPE = "res_mime_type";
+            String RES_BITRATE = "res_bitrate";
+            String RES_DURATION = "res_duration";
+            String DATE_ADDED = "date_added";
+        }
+
     }
 
-    public interface AlbumInfo extends BaseColumns {
-        String TABLE = "album_info";
-        String ALBUM = "name";
-        String ALBUM_KEY = "album_key";
-        String ARTIST = "artist";
-        String ARTIST_KEY = "artist_key";
-        String ARTIST_ID = "artist_id";
-        String TRACK_COUNT = "track_count";
-        String BIO = "bio";
-        String SUMMARY = "summary";
-        String MBID = "mbid";
-    }
+    public interface Meta {
 
-    public interface TrackInfo extends BaseColumns {
-        String TABLE = "track_info";
-        String TITLE = "name";
-        String TRACK_KEY = "track_key";
-        String ARTIST = "artist";
-        String ARTIST_ID = "artist_id";
-        String ALBUM = "album";
-        String ALBUM_ID = "album_id";
-        String ALBUM_ARTIST = "album_artist";
-        String ALBUM_ARTIST_ID = "album_artist_id";
-        String TRACK = "track";
-        String DISC = "disc";
-        String URI = "uri";
-        String SIZE = "size";
-        String MIME_TYPE = "mime_type";
-        String DATE_ADDED = "date_added";
-        String BITRATE = "bitrate";
-        String DURATION = "duration";
-    }
+        interface Artist extends BaseColumns {
+            String TABLE = "artist_meta";
+            String ARTIST_NAME = "artist_name";
+            String ARTIST_KEY = "artist_key";
+            String ARTIST_BIO_SUMMARY = "artist_bio_summary";
+            String ARTIST_BIO_CONTENT = "artist_bio_content";
+            String ARTIST_BIO_DATE_MOD = "artist_bio_date_modified";
+            String ARTIST_MBID = "artist_mbid";
+        }
 
-    public interface ArtistMeta extends BaseColumns {
-        String TABLE = "artist_meta";
-        String ARTIST_NAME = "artist_name";
-        String ARTIST_KEY = "artist_key";
-        String ARTIST_BIO_SUMMARY = "artist_bio_summary";
-        String ARTIST_BIO_CONTENT = "artist_bio_content";
-        String ARTIST_BIO_DATE_MOD = "artist_bio_date_modified";
-        String ARTIST_MBID = "artist_mbid";
-    }
+        interface Album extends BaseColumns {
+            String TABLE = "album_meta";
+            String ALBUM_NAME = "album_name";
+            String ALBUM_KEY = "album_key";
+            String ALBUM_BIO_SUMMARY = "album_bio_summary";
+            String ALBUM_BIO_CONTENT = "album_bio_content";
+            String ALBUM_BIO_DATE_MOD = "album_bio_date_modified";
+            String ALBUM_MBID = "album_mbid";
+            String ALBUM_ARTIST_ID = "album_artist_id";
+        }
 
-    public interface AlbumMeta extends BaseColumns {
-        String TABLE = "album_meta";
-        String ALBUM_NAME = "album_name";
-        String ALBUM_KEY = "album_key";
-        String ALBUM_BIO_SUMMARY = "album_bio_summary";
-        String ALBUM_BIO_CONTENT = "album_bio_content";
-        String ALBUM_BIO_DATE_MOD = "album_bio_date_modified";
-        String ALBUM_MBID = "album_mbid";
-        String ALBUM_ARTIST_ID = "album_artist_id";
-    }
+        interface Genre extends BaseColumns {
+            String TABLE = "genre_meta";
+            String GENRE_NAME = "genre_name";
+            String GENRE_KEY = "genre_key";
+        }
 
-    public interface TrackResMeta extends BaseColumns {
-        String TABLE = "track_resources";
-        String URI = "uri";
-        String AUTHORITY = "authority";
-        String TRACK_NAME = "track_name";
-        String TRACK_KEY = "track_key";
-        String SIZE = "size";
-        String MIME_TYPE = "mime_type";
-        String DATE_ADDED = "date_added";
-        String LAST_MOD = "last_modified";
-        String BITRATE = "bitrate";
-        String DURATION = "duration";
-        String TRACK_NUMBER = "track_number";
-        String DISC_NUMBER = "disc_number";
-        String GENRE = "genre";
-        String CATEGORY = "category";
-        String ARTIST_ID = "artist_id";
-        String ALBUM_ID = "album_id";
-        String CONTAINER_ID = "container_id";
+        interface Track extends BaseColumns {
+            String TABLE = "track_meta";
+            String TRACK_ID = "track_id";
+            String ARTIST_ID = "artist_id";
+            String ALBUM_ID = "album_id";
+            String GENRE_ID = "genre_id";
+            String TRACK_NAME = "track_name";
+            String TRACK_KEY = "track_key";
+            String TRACK_NUMBER = "track_number";
+            String DISC_NUMBER = "disc_number";
+            String COMPILATION = "compilation";
+            String MIME_TYPE = "mime_type";
+            String BITRATE = "bitrate";
+            String DURATION = "duration";
+        }
 
-        int CATEGORY_MUSIC = 1;
-        int CATEGORY_PODCAST = 2;
-        int CATEGORY_AUDIOBOOK = 3;
     }
 
     public interface Containers extends BaseColumns {
@@ -131,4 +151,31 @@ public class IndexSchema {
         String IN_ERROR = "in_error";
     }
 
+    public interface Tracks extends BaseColumns {
+        String TABLE = "tracks";
+        String CONTAINER_ID = "container_id";
+        String URI = "uri";
+        String AUTHORITY = "authority";
+        String TRACK_NAME = "track_name";
+        String TRACK_KEY = "track_key";
+        String ARTIST_NAME = "artist_name";
+        String ARTIST_KEY = "artist_KEY";
+        String ALBUM_NAME = "album_name";
+        String ALBUM_KEY = "album_key";
+        String ALBUM_ARTIST_NAME = "album_artist_name";
+        String ALBUM_ARTIST_KEY = "album_artist_key";
+        String TRACK_NUMBER = "track_number";
+        String DISC_NUMBER = "disc_number";
+        String COMPILATION = "compilation";
+        String GENRE = "genre";
+        String GENRE_KEY = "genre_key";
+        String RES_URI = "res_uri";
+        String RES_HEADERS = "res_headers";
+        String RES_SIZE = "res_size";
+        String RES_MIME_TYPE = "res_mime_type";
+        String RES_LAST_MOD = "res_last_modified";
+        String RES_BITRATE = "res_bitrate";
+        String RES_DURATION = "res_duration";
+        String DATE_ADDED = "date_added";
+    }
 }

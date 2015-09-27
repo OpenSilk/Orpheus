@@ -35,6 +35,7 @@ import org.opensilk.music.library.provider.LibraryProvider;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Container;
+import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.spi.Bundleable;
 
@@ -44,12 +45,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import hugo.weaving.DebugLog;
-import timber.log.Timber;
 
 import static org.opensilk.music.index.provider.IndexUris.M_ALBUMS;
 import static org.opensilk.music.index.provider.IndexUris.M_ARTISTS;
+import static org.opensilk.music.index.provider.IndexUris.M_GENRES;
 import static org.opensilk.music.index.provider.IndexUris.M_TRACKS;
-import static org.opensilk.music.index.provider.IndexUris.details;
 import static org.opensilk.music.index.provider.IndexUris.makeMatcher;
 
 /**
@@ -57,7 +57,7 @@ import static org.opensilk.music.index.provider.IndexUris.makeMatcher;
  */
 public class IndexProvider extends LibraryProvider {
 
-    @Inject @Named("IndexProviderAuthority") String mRealAuthority;
+    @Inject @Named("IndexProviderAuthority") String mAuthority;
     @Inject IndexDatabase mDataBase;
 
     private UriMatcher mUriMatcher;
@@ -68,8 +68,6 @@ public class IndexProvider extends LibraryProvider {
         final IndexComponent acc = DaggerService.getDaggerComponent(getContext());
         IndexProviderComponent.FACTORY.call(acc).inject(this);
         super.onCreate();
-        //override authority to avoid discover-ability
-        mAuthority = mRealAuthority;
         mUriMatcher = makeMatcher(mAuthority);
         return true;
     }
@@ -80,6 +78,11 @@ public class IndexProvider extends LibraryProvider {
                 .setAuthority(mAuthority)
                 .setLabel("index") //Not used but can't be null.
                 .build();
+    }
+
+    @Override
+    protected String getAuthority() {
+        return mAuthority;
     }
 
     @Override
@@ -132,6 +135,15 @@ public class IndexProvider extends LibraryProvider {
             case M_TRACKS: {
                 final BundleableSubscriber<Track> subscriber = new BundleableSubscriber<>(binder);
                 final List<Track> lst = mDataBase.getTracks(LibraryExtras.getSortOrder(args), false);
+                if (!subscriber.isUnsubscribed()) {
+                    subscriber.onNext(lst);
+                    subscriber.onCompleted();
+                }
+                break;
+            }
+            case M_GENRES: {
+                final BundleableSubscriber<Genre> subscriber = new BundleableSubscriber<>(binder);
+                final List<Genre> lst = mDataBase.getGenres(LibraryExtras.getSortOrder(args));
                 if (!subscriber.isUnsubscribed()) {
                     subscriber.onNext(lst);
                     subscriber.onCompleted();

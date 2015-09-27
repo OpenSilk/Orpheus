@@ -17,9 +17,14 @@
 
 package org.opensilk.music.index.client;
 
+import android.media.browse.MediaBrowser;
 import android.net.Uri;
+import android.service.media.MediaBrowserService;
+import android.support.annotation.NonNull;
 
 import org.opensilk.music.model.Container;
+
+import java.util.List;
 
 /**
  * Created by drew on 9/17/15.
@@ -44,4 +49,6 @@ public interface IndexClient {
      * @return True if success, false on error or if {@link #isIndexed(Uri)} returns false;
      */
     boolean remove(Container container);
+
+    void loadChildren(@NonNull String parentId, @NonNull MediaBrowserService.Result<List<MediaBrowser.MediaItem>> result);
 }

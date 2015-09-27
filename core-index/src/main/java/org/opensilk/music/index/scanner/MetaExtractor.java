@@ -18,6 +18,7 @@
 package org.opensilk.music.index.scanner;
 
 import android.net.Uri;
+import android.support.annotation.NonNull;
 
 import org.opensilk.music.model.Metadata;
 import org.opensilk.music.model.Track;
@@ -28,5 +29,5 @@ import java.util.Map;
  * Created by drew on 9/20/15.
  */
 public interface MetaExtractor {
-    Metadata extractMetadata(Track.Res res);
+    @NonNull Metadata extractMetadata(Track.Res res);
 }

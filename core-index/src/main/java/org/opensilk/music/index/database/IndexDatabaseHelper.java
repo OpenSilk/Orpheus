@@ -32,7 +32,7 @@ import javax.inject.Singleton;
 @Singleton
 public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
-    public static final int DB_VERSION = 23;
+    public static final int DB_VERSION = 25;
     public static final String DB_NAME = "music.db";
 
     @Inject
@@ -60,6 +60,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP TRIGGER IF EXISTS tracks_cleanup;");
             db.execSQL("DROP TRIGGER IF EXISTS albums_cleanup;");
             db.execSQL("DROP TRIGGER IF EXISTS artists_cleanup;");
+            db.execSQL("DROP TRIGGER IF EXISTS genres_cleanup;");
 
             db.execSQL("DROP VIEW IF EXISTS album_info;");
             db.execSQL("DROP VIEW IF EXISTS artist_info;");
@@ -67,26 +68,36 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP VIEW IF EXISTS track_full");
             db.execSQL("DROP VIEW IF EXISTS artists_albums_map");
             db.execSQL("DROP VIEW IF EXISTS genre_info");
+            db.execSQL("DROP VIEW IF EXISTS track_parent_map;");
 
-            db.execSQL("DROP INDEX IF EXISTS artistkey_idx;");
-            db.execSQL("DROP INDEX IF EXISTS albumkey_idx;");
-            db.execSQL("DROP INDEX IF EXISTS trackkey_idx;");
-            db.execSQL("DROP INDEX IF EXISTS artistid_idx;");
-            db.execSQL("DROP INDEX IF EXISTS albumid_idx;");
-            db.execSQL("DROP INDEX IF EXISTS trackid_idx;");
-            db.execSQL("DROP INDEX IF EXISTS trackresuri_idx;");
+            db.execSQL("DROP INDEX IF EXISTS artist_key_idx;");
+            db.execSQL("DROP INDEX IF EXISTS album_key_idx;");
+            db.execSQL("DROP INDEX IF EXISTS track_key_idx;");
+            db.execSQL("DROP INDEX IF EXISTS genre_key_idx;");
+            db.execSQL("DROP INDEX IF EXISTS artist_id_idx;");
+            db.execSQL("DROP INDEX IF EXISTS album_id_idx;");
+            db.execSQL("DROP INDEX IF EXISTS track_id_idx;");
+            db.execSQL("DROP INDEX IF EXISTS track_res_id_idx;");
+            db.execSQL("DROP INDEX IF EXISTS containers_uri_idx;");
 
-            db.execSQL("DROP TABLE IF EXISTS track_meta;");
+
+            db.execSQL("DROP TABLE IF EXISTS extracted_meta;");
             db.execSQL("DROP TABLE IF EXISTS track_resources;");
+            db.execSQL("DROP TABLE IF EXISTS track_meta;");
             db.execSQL("DROP TABLE IF EXISTS album_meta;");
             db.execSQL("DROP TABLE IF EXISTS artist_meta;");
+            db.execSQL("DROP TABLE IF EXISTS genre_meta;");
             db.execSQL("DROP TABLE IF EXISTS tracks_playlists_map;");
             db.execSQL("DROP TABLE IF EXISTS playlists;");
             db.execSQL("DROP TABLE IF EXISTS containers;");
+            db.execSQL("DROP TABLE IF EXISTS tracks;");
+            db.execSQL("DROP TABLE IF EXISTS scanner_meta;");
+            db.execSQL("DROP TABLE IF EXISTS scanner_settings;");
+
             //end mistakes cleanup
 
             //Scanner meta
-            db.execSQL("CREATE TABLE IF NOT EXISTS scanner_meta (" +
+            db.execSQL("CREATE TABLE IF NOT EXISTS scanner_settings (" +
                     "rescan_count INTEGER DEFAULT 0" +
                     ");");
             //Artist metadata
@@ -109,8 +120,14 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "album_bio_content TEXT, " +
                     "album_bio_date_modified INTEGER, " +
                     "album_mbid TEXT COLLATE NOCASE, " +
-                    "album_artist_id INTEGER REFERENCES artist_meta(_id) ON DELETE CASCADE," +
+                    "album_artist_id INTEGER REFERENCES artist_meta(_id) ON DELETE CASCADE ON UPDATE CASCADE, " +
                     "UNIQUE(album_key,album_mbid)" +
+                    ");");
+            //
+            db.execSQL("CREATE TABLE IF NOT EXISTS genre_meta (" +
+                    "_id INTEGER PRIMARY KEY, " +
+                    "genre_name TEXT NOT NULL, " +
+                    "genre_key TEXT NOT NULL UNIQUE " +
                     ");");
             //Containers
             db.execSQL("CREATE TABLE IF NOT EXISTS containers (" +
@@ -121,25 +138,48 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "in_error INTEGER DEFAULT 0 " +
                     ");");
             //Track resources
-            db.execSQL("CREATE TABLE IF NOT EXISTS track_resources (" +
+            db.execSQL("CREATE TABLE IF NOT EXISTS tracks (" +
                     "_id INTEGER PRIMARY KEY, " +
                     "uri TEXT NOT NULL UNIQUE, " +
+                    "container_id INTEGER NOT NULL REFERENCES containers(_id) ON DELETE CASCADE ON UPDATE CASCADE, " +
                     "authority TEXT NOT NULL, " +
                     "track_name TEXT NOT NULL, " +
                     "track_key TEXT NOT NULL, " +
-                    "size INTEGER, " +
-                    "mime_type TEXT, " +
-                    "date_added INTEGER, " +
-                    "last_modified INTEGER, " + //opaque provided by library
-                    "bitrate INTEGER, " +
-                    "duration INTEGER, " +
+                    "artist_name TEXT, " +
+                    "artist_key TEXT, " +
+                    "album_name TEXT, " +
+                    "album_key TEXT, " +
+                    "album_artist_name TEXT, " +
+                    "album_artist_key TEXT, " +
                     "track_number INTEGER, " +
-                    "disc_number INTEGER DEFAULT 1, " +
+                    "disc_number INTEGER, " +
+                    "compilation INTEGER, " +
                     "genre TEXT, " +
-                    "category INTEGER NOT NULL DEFAULT 1, " + //Music 1, Podcast 2, AudioBook 3
-                    "artist_id INTEGER REFERENCES artist_meta(_id) ON DELETE CASCADE, " +
-                    "album_id INTEGER REFERENCES album_meta(_id) ON DELETE CASCADE, " +
-                    "container_id INTEGER REFERENCES containers(_id) ON DELETE CASCADE " +
+                    "genre_key TEXT, " +
+                    "res_uri TEXT NOT NULL, " +
+                    "res_headers TEXT, " +
+                    "res_size INTEGER, " +
+                    "res_mime_type TEXT, " +
+                    "res_last_modified INTEGER, " + //opaque provided by library
+                    "res_bitrate INTEGER, " +
+                    "res_duration INTEGER, " +
+                    "date_added INTEGER NOT NULL " +
+                    ");");
+
+            db.execSQL("CREATE TABLE IF NOT EXISTS track_meta (" +
+                    "_id INTEGER PRIMARY KEY, " +
+                    "track_id INTEGER REFERENCES tracks(_id) ON DELETE CASCADE ON UPDATE CASCADE, " +
+                    "artist_id INTEGER REFERENCES artist_meta(_id) ON DELETE CASCADE ON UPDATE CASCADE, " +
+                    "album_id INTEGER REFERENCES album_meta(_id) ON DELETE CASCADE ON UPDATE CASCADE, " +
+                    "genre_id INTEGER REFERENCES genre_meta(_id) ON DELETE CASCADE ON UPDATE CASCADE, " +
+                    "track_name TEXT, " +
+                    "track_key TEXT, " +
+                    "track_number INTEGER, " +
+                    "disc_number INTEGER, " +
+                    "compilation INTEGER, " +
+                    "mime_type TEXT, " +
+                    "bitrate INTEGER, " +
+                    "duration INTEGER " +
                     ");");
 
 //            db.execSQL("CREATE TABLE IF NOT EXISTS playlists (" +
@@ -161,75 +201,124 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
 //                    "LEFT OUTER JOIN album_meta ON track_meta.album_id = album_meta.album_id" +
 //                    ";");
 
-            db.execSQL("CREATE VIEW IF NOT EXISTS artist_info AS " +
-                    "SELECT a1._id, a1.artist_name as name, a1.artist_key, " +
+            db.execSQL("CREATE VIEW IF NOT EXISTS artist_info AS SELECT " +
+                    "a1._id, " +
+                    "a1.artist_name as name, " +
+                    "a1.artist_key, " +
                     "COUNT(DISTINCT a2._id) AS number_of_albums, " +
-                    "COUNT(DISTINCT t1.track_key) AS number_of_tracks, "+
-                    "artist_bio_content as bio, artist_bio_summary as summary, artist_mbid as mbid " +
+                    "COUNT(DISTINCT t1._id) AS number_of_tracks, "+
+                    "artist_bio_content as bio, " +
+                    "artist_bio_summary as summary, " +
+                    "artist_mbid as mbid " +
                     "FROM artist_meta a1 " +
                     "LEFT OUTER JOIN album_meta a2 ON a2.album_artist_id = a1._id " +
-                    "LEFT OUTER JOIN track_resources t1 ON t1.artist_id = a1._id " +
+                    "LEFT OUTER JOIN track_meta t1 ON t1.artist_id = a1._id " +
                     "GROUP BY a1._id" +
                     ";");
 
-            db.execSQL("CREATE VIEW IF NOT EXISTS album_info AS " +
-                    "SELECT a1._id, a1.album_name as name, a1.album_key, " +
-                    "a2.artist_name as artist, album_artist_id as artist_id, a2.artist_key, " +
-                    "COUNT(DISTINCT t1.track_key) as track_count, " +
-                    "album_bio_content as bio, album_bio_summary as summary, album_mbid as mbid " +
+            db.execSQL("CREATE VIEW IF NOT EXISTS album_info AS SELECT " +
+                    "a1._id, " +
+                    "a1.album_name as name, " +
+                    "a1.album_key, " +
+                    "a2.artist_name as artist, " +
+                    "album_artist_id as artist_id, " +
+                    "a2.artist_key, " +
+                    "COUNT(DISTINCT t1._id) as track_count, " +
+                    "album_bio_content as bio, " +
+                    "album_bio_summary as summary, " +
+                    "album_mbid as mbid " +
                     "FROM album_meta a1 " +
                     "LEFT OUTER JOIN artist_meta a2 on a1.album_artist_id = a2._id " +
-                    "LEFT OUTER JOIN track_resources t1 on a1._id = t1.album_id " +
+                    "LEFT OUTER JOIN track_meta t1 on a1._id = t1.album_id " +
                     "GROUP BY a1._id" +
                     ";");
 
-            // Provides some extra info about tracks like album artist name and number of resources
+            db.execSQL("CREATE VIEW IF NOT EXISTS genre_info AS SELECT " +
+                    "g1.genre_name as name, " +
+                    "g1.genre_key, " +
+                    "COUNT(t1._id) as number_of_tracks, " +
+                    "COUNT(DISTINCT t1.album_id) as number_of_albums, " +
+                    "COUNT(DISTINCT t1.artist_id) as number_of_artists " +
+                    "FROM genre_meta g1 " +
+                    "LEFT OUTER JOIN track_meta t1 ON g1._id = t1.genre_id " +
+                    ";");
+
+            db.execSQL("CREATE VIEW IF NOT EXISTS track_parent_map as SELECT " +
+                    "t1._id, " +
+                    "c1.uri " +
+                    "FROM tracks t1 " +
+                    "INNER JOIN containers c1 ON t1.container_id = c1._id" +
+                    ";");
+
             db.execSQL("CREATE VIEW IF NOT EXISTS track_info as SELECT " +
-                    "t1._id, track_name as name, track_key, " +
-                    "a1.artist_name as artist, t1.artist_id, a2.album_name as album, t1.album_id, " +
-                    "a2.album_artist_id, track_number as track, disc_number as disc, " +
-                    "(SELECT artist_name from artist_meta aa1 where aa1._id = a2.album_artist_id) as album_artist," +
-                    "uri, size, mime_type, date_added, bitrate, duration " +
-                    "FROM track_resources t1 " +
-                    "LEFT OUTER JOIN artist_meta a1 ON t1.artist_id = a1._id " +
-                    "LEFT OUTER JOIN album_meta a2 ON t1.album_id = a2._id " +
-                    "GROUP BY t1._id" +
+                    "t2.uri, " +
+                    "tpm.uri as parent_uri, " +
+                    "t1._id," +
+                    "coalesce(t1.track_name, t2.track_name) as name, " +
+                    "coalesce(t1.track_key, t2.track_key) as track_key, " +
+                    "coalesce(a1.name, t2.artist_name) as artist," +
+                    "t1.artist_id, " +
+                    "coalesce(a2.name, t2.album_name) as album, " +
+                    "t1.album_id, " +
+                    "coalesce(a2.artist, t2.album_artist_name) as album_artist, " +
+                    "a2.artist_id as album_artist_id, " +
+                    "coalesce(t1.track_number, t2.track_number) as track, " +
+                    "coalesce(t1.disc_number, t2.disc_number) as disc, " +
+                    "coalesce(t1.compilation, t2.compilation) as compilation, " +
+                    "coalesce(g1.genre_name, t2.genre) as genre, " +
+                    "t1.genre_id, " +
+                    "t2.res_uri, " +
+                    "t2.res_headers, " +
+                    "t2.res_size, " +
+                    "coalesce(t1.mime_type, t2.res_mime_type) as res_mime_type, " +
+                    "coalesce(t1.bitrate, t2.res_bitrate) as res_bitrate, " +
+                    "coalesce(t1.duration, t2.res_duration) as res_duration, " +
+                    "t2.date_added " +
+                    "FROM track_meta t1 " +
+                    "LEFT OUTER JOIN tracks t2 ON t1.track_id = t2._id " +
+                    "LEFT OUTER JOIN track_parent_map tpm ON t1.track_id = tpm._id " +
+                    "LEFT OUTER JOIN artist_info a1 ON t1.artist_id = a1._id " +
+                    "LEFT OUTER JOIN album_info a2 ON t1.album_id = a2._id " +
+                    "LEFT OUTER JOIN genre_meta g1 ON t1.genre_id = g1._id " +
                     ";");
 
 
             // For a given artist_id, provides the album_id for albums on
             // which the artist appears.
-            db.execSQL("CREATE VIEW IF NOT EXISTS artists_albums_map AS " +
-                    "SELECT DISTINCT artist_id, album_id FROM track_resources" +
-                    ";");
-
-            db.execSQL("CREATE VIEW IF NOT EXISTS genre_info AS " +
-                    "SELECT DISTINCT genre, " +
-                    "COUNT(_id) as number_of_tracks, " +
-                    "COUNT(DISTINCT album_id) as number_of_albums " +
-                    "FROM track_resources GROUP BY genre" +
-                    ";");
+//            db.execSQL("CREATE VIEW IF NOT EXISTS artists_albums_map AS " +
+//                    "SELECT DISTINCT artist_id, album_id FROM track_meta" +
+//                    ";");
 
             db.execSQL("CREATE INDEX IF NOT EXISTS artist_key_idx on artist_meta(artist_key);");
             db.execSQL("CREATE INDEX IF NOT EXISTS album_key_idx on album_meta(album_key);");
-            db.execSQL("CREATE INDEX IF NOT EXISTS track_key_idx on track_resources(track_key);");
+            db.execSQL("CREATE INDEX IF NOT EXISTS genre_key_idx on genre_meta(genre_key);");
             db.execSQL("CREATE INDEX IF NOT EXISTS artist_id_idx on artist_meta(_id);");
             db.execSQL("CREATE INDEX IF NOT EXISTS album_id_idx on album_meta(_id);");
-            db.execSQL("CREATE INDEX IF NOT EXISTS track_id_idx on track_resources(_id);");
+            db.execSQL("CREATE INDEX IF NOT EXISTS track_id_idx on track_meta(_id);");
+            db.execSQL("CREATE INDEX IF NOT EXISTS tracks_id_idx on tracks(_id);");
+            db.execSQL("CREATE INDEX IF NOT EXISTS containers_uri_idx on containers(uri);");
+
 
             //Cleanup albums when tracks are deleted
-            db.execSQL("CREATE TRIGGER IF NOT EXISTS albums_cleanup AFTER DELETE ON track_resources " +
+            db.execSQL("CREATE TRIGGER IF NOT EXISTS albums_cleanup AFTER DELETE ON track_meta " +
                     "FOR EACH ROW " +
-                    "WHEN (SELECT COUNT(_id) FROM track_resources WHERE album_id=OLD.album_id) = 0 " +
+                    "WHEN (SELECT COUNT(_id) FROM track_meta WHERE album_id=OLD.album_id) = 0 " +
                     "BEGIN " +
                     "DELETE FROM album_meta WHERE _id=OLD.album_id; " +
                     "END");
             //Cleanup artists when tracks are deleted
-            db.execSQL("CREATE TRIGGER IF NOT EXISTS artists_cleanup AFTER DELETE ON track_resources " +
+            db.execSQL("CREATE TRIGGER IF NOT EXISTS artists_cleanup AFTER DELETE ON track_meta " +
                     "FOR EACH ROW " +
-                    "WHEN (SELECT COUNT(_id) FROM track_resources WHERE artist_id=OLD.artist_id) = 0 " +
+                    "WHEN (SELECT COUNT(_id) FROM track_meta WHERE artist_id=OLD.artist_id) = 0 " +
                     "BEGIN " +
                     "DELETE FROM artist_meta WHERE _id=OLD.artist_id; " +
+                    "END");
+            //Cleanup genres when tracks are deleted
+            db.execSQL("CREATE TRIGGER IF NOT EXISTS genres_cleanup AFTER DELETE ON track_meta " +
+                    "FOR EACH ROW " +
+                    "WHEN (SELECT COUNT(_id) FROM track_meta WHERE genre_id=OLD.genre_id) = 0 " +
+                    "BEGIN " +
+                    "DELETE FROM genre_meta WHERE _id=OLD.genre_id; " +
                     "END");
         }
 

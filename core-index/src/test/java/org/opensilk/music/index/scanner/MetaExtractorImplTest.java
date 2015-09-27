@@ -22,7 +22,6 @@ import android.os.Build;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.opensilk.music.index.BuildConfig;
 import org.opensilk.music.index.IndexTestApplication;
 import org.robolectric.RobolectricGradleTestRunner;

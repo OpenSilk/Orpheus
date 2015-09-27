@@ -21,6 +21,7 @@ import android.content.Context;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.support.annotation.NonNull;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
@@ -71,7 +72,7 @@ public class MetaExtractorImpl implements MetaExtractor {
     }
 
     @Override
-    public Metadata extractMetadata(Track.Res res) {
+    public @NonNull Metadata extractMetadata(Track.Res res) {
 
         final Uri uri = res.getUri();
         final Map<String, String> headers = res.getHeaders();
@@ -148,14 +149,12 @@ public class MetaExtractorImpl implements MetaExtractor {
                 }
                 Timber.i(sb.toString());
             }
-            return bob.build();
         } catch (Exception e) { //setDataSource throws runtimeException
             Timber.e(e, "extractMeta");
         } finally {
             mmr.release();
         }
-        return null;
-
+        return bob.build();
     }
 
 }

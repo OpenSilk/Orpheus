@@ -26,6 +26,7 @@ import android.util.Pair;
 
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
+import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.Metadata;
 import org.opensilk.music.model.Track;
 
@@ -35,26 +36,24 @@ import java.util.List;
  * Created by drew on 9/13/15.
  */
 public interface IndexDatabase {
-    List<Artist> getArtists(String sortOrder);
-    List<Album> getAlbums(String sortOrder);
-    List<Track> getTracks(String sortOrder, boolean excludeOrphaned);
     Cursor query(String table, String[] columns, String selection,
                  String[] selectionArgs, String groupBy, String having,
                  String orderBy);
     int delete(String table, String whereClause, String[] whereArgs);
     long insert(String table, String nullColumnHack, ContentValues values,int conflictAlgorithm);
     int update(String table, ContentValues values, String whereClause, String[] whereArgs);
+    List<Artist> getArtists(String sortOrder);
+    List<Album> getAlbums(String sortOrder);
+    List<Track> getTracks(String sortOrder);
+    List<Track> getTracks(String sortOrder, boolean excludeOrphaned);
+    List<Genre> getGenres(String sortOrder);
+
     long hasContainer(Uri uri);
     @NonNull List<Pair<Uri, Uri>> findTopLevelContainers(@Nullable String authority);
     int removeContainersInError(@Nullable String authority);
     boolean markContainerInError(Uri uri);
     long insertContainer(Uri uri, Uri parentUri);
     int removeContainer(Uri uri);
-    long hasAlbumMeta(String albumArtist, String album);
-    long hasAlbumMeta(String album, long albumArtistId);
-    long insertAlbum(Metadata meta, long albumArtistId);
-    long hasArtist(String artist);
-    long insertArtist(Metadata meta);
-    long hasTrackResource(Uri uri);
-    long insertTrackResource(Metadata metadata, long albumId, long artistId, long containerId);
+    long insertTrack(Track track, Metadata metadata);
+    boolean trackNeedsScan(Track track);
 }

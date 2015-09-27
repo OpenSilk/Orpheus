@@ -18,6 +18,7 @@
 package org.opensilk.music.index.database;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
@@ -28,16 +29,20 @@ import android.util.Pair;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.index.provider.IndexUris;
+import org.opensilk.music.index.provider.LastFMHelper;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
+import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.Metadata;
 import org.opensilk.music.model.Track;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -46,7 +51,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import hugo.weaving.DebugLog;
-import timber.log.Timber;
 
 import static android.provider.MediaStore.Audio.keyFor;
 
@@ -59,177 +63,33 @@ public class IndexDatabaseImpl implements IndexDatabase {
     final ReadWriteLock mLock = new ReentrantReadWriteLock(true);
     final IndexDatabaseHelper helper;
     final String indexAuthority;
+    final LastFMHelper mLastFM;
+    final Context mAppContext;
 
     @Inject
     public IndexDatabaseImpl(
             IndexDatabaseHelper helper,
-            @Named("IndexProviderAuthority") String indexAuthority
+            @Named("IndexProviderAuthority") String indexAuthority,
+            LastFMHelper lastFMHelper,
+            @ForApplication Context context
     ) {
         this.helper = helper;
         this.indexAuthority = indexAuthority;
+        this.mLastFM = lastFMHelper;
+        this.mAppContext = context;
     }
 
-    static final String[] artists_cols = new String[] {
-            IndexSchema.ArtistInfo._ID,
-            IndexSchema.ArtistInfo.ARTIST,
-            IndexSchema.ArtistInfo.NUMBER_OF_ALBUMS,
-            IndexSchema.ArtistInfo.NUMBER_OF_TRACKS,
+    static final String[] idCols = new String[] {
+            BaseColumns._ID,
     };
 
     @Override
-    public List<Artist> getArtists(String sortOrder) {
-        List<Artist> lst = new ArrayList<>();
-        Cursor c = null;
-        try {
-            c = query(IndexSchema.ArtistInfo.TABLE, artists_cols, null, null, null, null, sortOrder);
-            if (c != null && c.moveToFirst()) {
-                final Uri parentUri = IndexUris.artists(indexAuthority);
-                do {
-                    final String id = c.getString(0);
-                    final String name = c.getString(1);
-                    final int num_albums = c.getInt(2);
-                    final int num_tracks = c.getInt(3);
-                    final Artist a = Artist.builder()
-                            .setUri(IndexUris.artist(indexAuthority, id))
-                            .setParentUri(parentUri)
-                            .setName(name)
-                            .setAlbumCount(num_albums)
-                            .setTrackCount(num_tracks)
-                            .build();
-                    lst.add(a);
-                } while (c.moveToNext());
-            }
-        } finally {
-            closeCursor(c);
-        }
-        return lst;
-    }
-
-    static final String[] albums_cols = new String[] {
-            IndexSchema.AlbumInfo._ID,
-            IndexSchema.AlbumInfo.ALBUM,
-            IndexSchema.AlbumInfo.ARTIST,
-            IndexSchema.AlbumInfo.ARTIST_ID,
-            IndexSchema.AlbumInfo.TRACK_COUNT
-    };
-
-    @Override
-    public List<Album> getAlbums(String sortOrder) {
-        List<Album> lst = new ArrayList<>();
-        Cursor c = null;
-        try {
-            c = query(IndexSchema.AlbumInfo.TABLE, albums_cols, null, null, null, null, sortOrder);
-            if (c != null && c.moveToFirst()) {
-                final Uri parentUri = IndexUris.albums(indexAuthority);
-                do {
-                    final String id = c.getString(0);
-                    final String name = c.getString(1);
-                    final String artistName = c.getString(2);
-                    final String artistId = c.getString(3);
-                    final int trackNum = c.getInt(4);
-                    final Album a = Album.builder()
-                            .setUri(IndexUris.album(indexAuthority, id))
-                            .setParentUri(parentUri)
-                            .setName(name)
-                            .setArtistName(artistName)
-                            .setArtistUri(IndexUris.artist(indexAuthority, artistId))
-                            .setTrackCount(trackNum)
-                                    //.setArtworkUri()//TODO
-                            .build();
-                    lst.add(a);
-                } while (c.moveToNext());
-            }
-        } finally {
-            closeCursor(c);
-        }
-        return lst;
-    }
-
-    static final String[] tracks_cols = new String[] {
-            IndexSchema.TrackInfo._ID,
-            IndexSchema.TrackInfo.TITLE,
-            IndexSchema.TrackInfo.ARTIST,
-            IndexSchema.TrackInfo.ARTIST_ID,
-            IndexSchema.TrackInfo.ALBUM,
-            IndexSchema.TrackInfo.ALBUM_ID,
-            IndexSchema.TrackInfo.ALBUM_ARTIST,
-            IndexSchema.TrackInfo.ALBUM_ARTIST_ID,
-            IndexSchema.TrackInfo.TRACK,
-            IndexSchema.TrackInfo.URI,
-            IndexSchema.TrackInfo.SIZE,
-            IndexSchema.TrackInfo.MIME_TYPE,
-            IndexSchema.TrackInfo.BITRATE,
-            IndexSchema.TrackInfo.DURATION,
-            IndexSchema.TrackInfo.TRACK_KEY,
-            IndexSchema.TrackInfo.DISC, //15
-    };
-
-    @Override
-    public List<Track> getTracks(String sortOrder, boolean excludeOrphaned) {
-        List<Track> lst = new ArrayList<>();
-        Cursor c = null;
-        try {
-            c = query(IndexSchema.TrackInfo.TABLE, tracks_cols, null, null, null, null, sortOrder);
-            if (c != null && c.moveToFirst()) {
-                LinkedHashMap<String, Track.Builder> tobs = new LinkedHashMap<>(c.getCount());
-                do {
-                    //concatenation of title_key,artist_id,album_id,track,disc
-                    final String key = c.getString(14);
-                    //we only need to constuct track once
-                    if (!tobs.containsKey(key)) {
-                        final String id = c.getString(0);
-                        final String name = c.getString(1);
-                        final String artist = c.getString(2);
-                        final String artistId = c.getString(3);
-                        final String album = c.getString(4);
-                        final String albumId = c.getString(5);
-                        final String albumArtist = c.getString(6);
-//                        final String albumArtistId = c.getString(7);
-                        final int trackPos = c.getInt(8);
-                        final Track.Builder tob = Track.builder()
-                                .setUri(IndexUris.track(indexAuthority, id))
-                                .setParentUri(IndexUris.tracks(indexAuthority))
-                                .setName(name)
-                                .setArtistName(artist)
-                                .setArtistUri(IndexUris.artist(indexAuthority, artistId))
-                                .setAlbumName(album)
-                                .setAlbumUri(IndexUris.album(indexAuthority, albumId))
-                                .setAlbumArtistName(albumArtist)
-                                .setTrackNumber(trackPos);
-                        tobs.put(key, tob);
-                    }
-                    //attach resource to track
-                    final Uri uri = Uri.parse(c.getString(9));
-                    final int size = c.getInt(10);
-                    final String mime = c.getString(11);
-                    final long bitrate = c.getLong(12);
-                    final int duration = c.getInt(13);
-                    final Track.Res res = Track.Res.builder()
-                            .setUri(uri)
-                            .setSize(size)
-                            .setMimeType(mime)
-                            .setBitrate(bitrate)
-                            .setDuration(duration)
-                            .build();
-                    tobs.get(key).addRes(res);
-                } while (c.moveToNext());
-                //add all tracks to list
-                for (Track.Builder tob : tobs.values()) {
-                    lst.add(tob.build());
-                }
-            }
-        } finally {
-            closeCursor(c);
-        }
-        return lst;
-    }
-
-    @Override
-    @DebugLog
-    public Cursor query(String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy) {
+    public Cursor query(String table, String[] columns, String selection, String[] selectionArgs,
+                        String groupBy, String having, String orderBy) {
         try {
             mLock.readLock().lock();
-            return helper.getReadableDatabase().query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
+            return helper.getReadableDatabase().query(table, columns, selection,
+                    selectionArgs, groupBy, having, orderBy);
         } finally {
             mLock.readLock().unlock();
         }
@@ -246,11 +106,12 @@ public class IndexDatabaseImpl implements IndexDatabase {
     }
 
     @Override
-    @DebugLog
-    public long insert(String table, String nullColumnHack, ContentValues values, int conflictAlgorithm) {
+    public long insert(String table, String nullColumnHack, ContentValues values,
+                       int conflictAlgorithm) {
         try {
             mLock.writeLock().lock();
-            return helper.getWritableDatabase().insertWithOnConflict(table, nullColumnHack, values, conflictAlgorithm);
+            return helper.getWritableDatabase().insertWithOnConflict(table, nullColumnHack,
+                    values, conflictAlgorithm);
         } finally {
             mLock.writeLock().unlock();
         }
@@ -266,9 +127,258 @@ public class IndexDatabaseImpl implements IndexDatabase {
         }
     }
 
-    static final String containerUriSel = IndexSchema.Containers.URI + "=?";
+    static final String[] artists_cols = new String[] {
+            IndexSchema.Info.Artist._ID,
+            IndexSchema.Info.Artist.TITLE,
+            IndexSchema.Info.Artist.NUMBER_OF_ALBUMS,
+            IndexSchema.Info.Artist.NUMBER_OF_TRACKS,
+    };
 
-    Cursor getContainer(Uri uri) {
+    @Override
+    public List<Artist> getArtists(String sortOrder) {
+        List<Artist> lst = new ArrayList<>();
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.Info.Artist.TABLE, artists_cols, null, null, null, null, sortOrder);
+            if (c != null && c.moveToFirst()) {
+                final Uri parentUri = IndexUris.artists(indexAuthority);
+                do {
+                    lst.add(buildArtist(c, parentUri));
+                } while (c.moveToNext());
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return lst;
+    }
+
+    Artist buildArtist(Cursor c, Uri parentUri) {
+        final String id = c.getString(0);
+        final String name = c.getString(1);
+        final int num_albums = c.getInt(2);
+        final int num_tracks = c.getInt(3);
+        return Artist.builder()
+                .setUri(IndexUris.artist(indexAuthority, id))
+                .setParentUri(parentUri)
+                .setName(name)
+                .setAlbumCount(num_albums)
+                .setTrackCount(num_tracks)
+                .build();
+    }
+
+    static final String[] albums_cols = new String[] {
+            IndexSchema.Info.Album._ID,
+            IndexSchema.Info.Album.TITLE,
+            IndexSchema.Info.Album.ARTIST,
+            IndexSchema.Info.Album.ARTIST_ID,
+            IndexSchema.Info.Album.TRACK_COUNT
+    };
+
+    @Override
+    public List<Album> getAlbums(String sortOrder) {
+        List<Album> lst = new ArrayList<>();
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.Info.Album.TABLE, albums_cols, null, null, null, null, sortOrder);
+            if (c != null && c.moveToFirst()) {
+                final Uri parentUri = IndexUris.albums(indexAuthority);
+                do {
+                    lst.add(buildAlbum(c, parentUri));
+                } while (c.moveToNext());
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return lst;
+    }
+
+    Album buildAlbum(Cursor c, Uri parentUri) {
+        final String id = c.getString(0);
+        final String name = c.getString(1);
+        final String artistName = c.getString(2);
+        final String artistId = c.getString(3);
+        final int trackNum = c.getInt(4);
+        return Album.builder()
+                .setUri(IndexUris.album(indexAuthority, id))
+                .setParentUri(parentUri)
+                .setName(name)
+                .setArtistName(artistName)
+                .setArtistUri(IndexUris.artist(indexAuthority, artistId))
+                .setTrackCount(trackNum)
+                .build();
+    }
+
+    static final String[] genres_cols = new String[] {
+            IndexSchema.Info.Genre._ID,
+            IndexSchema.Info.Genre.TITLE,
+            IndexSchema.Info.Genre.NUMBER_OF_ARTISTS,
+            IndexSchema.Info.Genre.NUMBER_OF_ALBUMS,
+            IndexSchema.Info.Genre.NUMBER_OF_TRACKS,
+    };
+
+    @Override
+    public List<Genre> getGenres(String sortOrder) {
+        List<Genre> lst = new ArrayList<>();
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.Info.Genre.TABLE, genres_cols, null, null, null, null, sortOrder);
+            if (c != null && c.moveToFirst()) {
+                final Uri parentUri = IndexUris.genres(indexAuthority);
+                do {
+                    lst.add(buildGenre(c, parentUri));
+                } while (c.moveToNext());
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return lst;
+    }
+
+    Genre buildGenre(Cursor c, Uri parentUri) {
+        final String id = c.getString(0);
+        final String name = c.getString(1);
+        //2
+        final int albumNum = c.getInt(3);
+        final int trackNum = c.getInt(4);
+        return Genre.builder()
+                .setUri(IndexUris.genre(indexAuthority, id))
+                .setParentUri(parentUri)
+                .setName(name)
+                .setAlbumCount(albumNum)
+                .setAlbumsUri(IndexUris.genreAlbums(indexAuthority, id))
+                .setTrackCount(trackNum)
+                .setTracksUri(IndexUris.genreTracks(indexAuthority, id))
+                .build();
+    }
+
+    static final String[] tracks_cols = new String[] {
+            IndexSchema.Info.Track._ID,
+            IndexSchema.Info.Track.URI,
+            IndexSchema.Info.Track.PARENT_URI,
+            IndexSchema.Info.Track.TITLE,
+            IndexSchema.Info.Track.ARTIST,
+            IndexSchema.Info.Track.ARTIST_ID, //5
+            IndexSchema.Info.Track.ALBUM,
+            IndexSchema.Info.Track.ALBUM_ID,
+            IndexSchema.Info.Track.ALBUM_ARTIST,
+            IndexSchema.Info.Track.ALBUM_ARTIST_ID,
+            IndexSchema.Info.Track.TRACK, //10
+            IndexSchema.Info.Track.DISC,
+            IndexSchema.Info.Track.COMPILATION,
+            IndexSchema.Info.Track.GENRE,
+            IndexSchema.Info.Track.GENRE_ID,
+            IndexSchema.Info.Track.RES_URI, //15
+            IndexSchema.Info.Track.RES_HEADERS,
+            IndexSchema.Info.Track.RES_SIZE,
+            IndexSchema.Info.Track.RES_MIME_TYPE,
+            IndexSchema.Info.Track.RES_BITRATE,
+            IndexSchema.Info.Track.RES_DURATION, //20
+    };
+
+    @Override
+    public List<Track> getTracks(String sortOrder) {
+        return getTracks(sortOrder, false);
+    }
+
+    @Override
+    public List<org.opensilk.music.model.Track> getTracks(String sortOrder, boolean excludeOrphaned) {
+        List<Track> lst = new ArrayList<>();
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.Info.Track.TABLE, tracks_cols, null, null, null, null, sortOrder);
+            if (c != null && c.moveToFirst()) {
+                do {
+                    lst.add(buildTrack(c));
+                } while (c.moveToNext());
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return lst;
+    }
+
+    Track buildTrack(Cursor c) {
+        Track.Builder bob = Track.builder();
+        bob.setUri(Uri.parse(c.getString(1)))
+                .setParentUri(Uri.parse(c.getString(2)))
+                .setName(c.getString(3))
+        ;
+        String artistName = getStringOrNull(c, 4);
+        if (!StringUtils.isEmpty(artistName)) {
+            bob.setArtistName(artistName);
+        }
+        String artistId = getStringOrNull(c, 5);
+        if (!StringUtils.isEmpty(artistId)) {
+            bob.setArtistUri(IndexUris.artist(indexAuthority, artistId));
+        }
+        String albumName = getStringOrNull(c, 6);
+        if (!StringUtils.isEmpty(albumName)) {
+            bob.setAlbumName(albumName);
+        }
+        String albumId = getStringOrNull(c, 7);
+        if (!StringUtils.isEmpty(albumId)) {
+            bob.setAlbumUri(IndexUris.album(indexAuthority, albumId));
+        }
+        String albumArtistName = getStringOrNull(c, 8);
+        if (!StringUtils.isEmpty(albumArtistName)) {
+            bob.setAlbumArtistName(albumArtistName);
+        }
+        //9
+        int track = getIntOrNeg(c, 10);
+        if (track > 0) {
+            bob.setTrackNumber(track);
+        }
+        int disc = getIntOrNeg(c, 11);
+        if (disc > 0) {
+            bob.setDiscNumber(disc);
+        }
+        int comp = getIntOrNeg(c, 12);
+        if (comp > 0) {
+            bob.setIsCompliation(true);
+        }
+        String genre = getStringOrNull(c, 13);
+        if (!StringUtils.isEmpty(genre)) {
+            bob.setGenre(genre);
+        }
+        //14
+        Track.Res.Builder rob = Track.Res.builder();
+        rob.setUri(Uri.parse(c.getString(15)));
+        String headers = getStringOrNull(c, 16);
+        if (!StringUtils.isEmpty(headers)) {
+            String[] lns = StringUtils.split(headers, '\n');
+            if (lns != null && lns.length > 0) {
+                for (String ln : lns) {
+                    String[] kv = StringUtils.split(ln, ':');
+                    if (kv != null && kv.length == 2) {
+                        rob.addHeader(kv[0], kv[1]);
+                    }
+                }
+            }
+        }
+        long size = getLongOrNeg(c, 17);
+        if (size > 0) {
+            rob.setSize(size);
+        }
+        String mime = c.getString(18);
+        if(!StringUtils.isEmpty(mime)) {
+            rob.setMimeType(mime);
+        }
+        long bitrate = getLongOrNeg(c, 19);
+        if (bitrate > 0) {
+            rob.setBitrate(bitrate);
+        }
+        long dur = getLongOrNeg(c, 20);
+        if (dur > 0) {
+            rob.setDuration(dur);
+        }
+        bob.addRes(rob.build());
+        return bob.build();
+    }
+
+    static final String containerUriSel = IndexSchema.Containers.URI + "=?";
+    static final Map<Uri, Long> sConainerIdsCache = new HashMap<>();
+
+    Cursor getContainerCursor(Uri uri) {
         String[] selArgs = new String[] {uri.toString()};
         return query(IndexSchema.Containers.TABLE, idCols,
                 containerUriSel, selArgs, null, null, null);
@@ -276,11 +386,22 @@ public class IndexDatabaseImpl implements IndexDatabase {
 
     @Override
     public long hasContainer(Uri uri) {
+        synchronized (sConainerIdsCache) {
+            if (sConainerIdsCache.containsKey(uri)) {
+                return sConainerIdsCache.get(uri);
+            }
+        }
         Cursor c = null;
         try {
-            c = getContainer(uri);
+            c = getContainerCursor(uri);
             if (c != null && c.moveToFirst()) {
-                return c.getLong(0);
+                long id = c.getLong(0);
+                if (id > 0) {
+                    synchronized (sConainerIdsCache) {
+                        sConainerIdsCache.put(uri, id);
+                    }
+                }
+                return id;
             }
         } finally {
             closeCursor(c);
@@ -425,116 +546,211 @@ public class IndexDatabaseImpl implements IndexDatabase {
         return containers;
     }
 
-    static final String checkTrackSel = IndexSchema.TrackInfo.URI + "=?";
-
-    @Override
-    public long hasTrackResource(Uri uri) {
+    public boolean trackNeedsScan(Track track) {
+        /*
         Cursor c = null;
         try {
-            String[] selArgs = new String[]{uri.toString()};
-            c = query(IndexSchema.TrackInfo.TABLE, idCols,
-                    checkTrackSel, selArgs, null, null, null);
+            final Track.Res res = track.getResources().get(0);
+            final String sel = IndexSchema.TrackResMeta.URI + "=?";
+            final String[] selArgs = new String[] {track.getUri().toString()};
+            c = mIndexDatabase.query(IndexSchema.TrackResMeta.TABLE, resMetaCols, sel, selArgs, null, null, null);
             if (c != null && c.moveToFirst()) {
-                return c.getLong(0);
+                final long size = c.getLong(0);
+                final long lastMod = c.getLong(1);
+                //if size or lastmod has changed we need to rescan
+                if (res.getSize() != size || res.getLastMod() != lastMod) {
+                    mIndexDatabase.delete(IndexSchema.TrackResMeta.TABLE, sel, selArgs);
+                    return true;
+                }
+                return false;
             }
+            return true;
         } finally {
             closeCursor(c);
         }
-        return -1;
+        */
+        return true;
     }
 
     @Override
-    public long insertTrackResource(Metadata metadata, long albumId, long artistId, long containerId) {
-        ContentValues cv = new ContentValues(20);
+    public long insertTrack(Track track, Metadata metadata) {
+        ContentValues cv = new ContentValues(10);
+
+        long trackId = insertTrack(track);
+        if (trackId < 0) {
+            return -1;
+        }
+        cv.put(IndexSchema.Meta.Track.TRACK_ID, trackId);
+
+        long artistId = getArtistIdForName(metadata.getString(Metadata.KEY_ARTIST_NAME));
+        if (artistId > 0) {
+            cv.put(IndexSchema.Meta.Track.ARTIST_ID, artistId);
+        }
+
+        long albumId = getAlbumIdForName(metadata.getString(Metadata.KEY_ALBUM_ARTIST_NAME),
+                metadata.getString(Metadata.KEY_ALBUM_NAME));
+        if (albumId > 0) {
+            cv.put(IndexSchema.Meta.Track.ALBUM_ID, albumId);
+        }
+
+        long genreId = getGenreIdForName(metadata.getString(Metadata.KEY_GENRE_NAME));
+        if (genreId > 0) {
+            cv.put(IndexSchema.Meta.Track.GENRE_ID, genreId);
+        }
+
         String trackName = metadata.getString(Metadata.KEY_TRACK_NAME);
-        cv.put(IndexSchema.TrackResMeta.TRACK_NAME, trackName);
+        if (!StringUtils.isEmpty(trackName)) {
+            cv.put(IndexSchema.Meta.Track.TRACK_NAME, trackName);
+            cv.put(IndexSchema.Meta.Track.TRACK_KEY, keyFor(trackName));
+        }
+
         int trackNum = metadata.getInt(Metadata.KEY_TRACK_NUMBER);
         if (trackNum > 0) {
-            cv.put(IndexSchema.TrackResMeta.TRACK_NUMBER, trackNum);
+            cv.put(IndexSchema.Meta.Track.TRACK_NUMBER, trackNum);
         }
+
         int discNum = metadata.getInt(Metadata.KEY_DISC_NUMBER);
         if (discNum > 0) {
-            cv.put(IndexSchema.TrackResMeta.DISC_NUMBER, discNum);
+            cv.put(IndexSchema.Meta.Track.DISC_NUMBER, discNum);
         }
-        /* This is really the only way i can think of to ensure uniqueness
-         *
-         * Some possible scenarios:
-         * Album has multiple tracks with same name, but position will be different
-         * Album has multiple discs with tracks with same name possibly same position on each disc
-         * Multiple albums have tracks with same name and same artist possibly same position
-         * Track has same name with different artist possible on same album
-         *
-         * But it seems unlikely that non identical tracks will have
-         * the same name, same album, same artist and same position on the same disc
-         */
-        cv.put(IndexSchema.TrackResMeta.TRACK_KEY, keyFor(trackName + albumId + artistId + trackNum + discNum));
-        cv.put(IndexSchema.TrackResMeta.GENRE, metadata.getString(Metadata.KEY_GENRE_NAME));
-        Uri trackUri = metadata.getUri(Metadata.KEY_TRACK_URI);
-        cv.put(IndexSchema.TrackResMeta.AUTHORITY, trackUri.getAuthority());
-        cv.put(IndexSchema.TrackResMeta.URI, trackUri.toString());
-        long size = metadata.getLong(Metadata.KEY_SIZE);
-        if (size > 0) {
-            cv.put(IndexSchema.TrackResMeta.SIZE, size);
+
+        int compilation = metadata.getInt(Metadata.KEY_IS_COMPILATION);
+        if (compilation >= 0) {
+            cv.put(IndexSchema.Meta.Track.COMPILATION, compilation);
         }
-        cv.put(IndexSchema.TrackResMeta.MIME_TYPE, metadata.getString(Metadata.KEY_MIME_TYPE));
-        cv.put(IndexSchema.TrackResMeta.DATE_ADDED, System.currentTimeMillis());
-        long lastmod = metadata.getLong(Metadata.KEY_LAST_MODIFIED);
-        if (lastmod > 0) {
-            cv.put(IndexSchema.TrackResMeta.LAST_MOD, lastmod);
+
+        String mime = metadata.getString(Metadata.KEY_MIME_TYPE);
+        if (!StringUtils.isEmpty(mime)) {
+            cv.put(IndexSchema.Meta.Track.MIME_TYPE, mime);
         }
+
         long bitrate = metadata.getLong(Metadata.KEY_BITRATE);
         if (bitrate > 0) {
-            cv.put(IndexSchema.TrackResMeta.BITRATE, bitrate);
+            cv.put(IndexSchema.Meta.Track.BITRATE, bitrate);
         }
         long duration = metadata.getLong(Metadata.KEY_DURATION);
         if (duration > 0) {
-            cv.put(IndexSchema.TrackResMeta.DURATION, duration);
+            cv.put(IndexSchema.Meta.Track.DURATION, duration);
         }
-        if (artistId > 0) {
-            cv.put(IndexSchema.TrackResMeta.ARTIST_ID, artistId);
-        }
-        if (albumId > 0) {
-            cv.put(IndexSchema.TrackResMeta.ALBUM_ID, albumId);
-        }
-        cv.put(IndexSchema.TrackResMeta.CONTAINER_ID, containerId);
-        return insert(IndexSchema.TrackResMeta.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+
+        return insert(IndexSchema.Meta.Track.TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
     }
 
-    static final String[] idCols = new String[] {
-            BaseColumns._ID,
-    };
+    long insertTrack(Track track) {
+        ContentValues cv = new ContentValues(20);
 
-    static final String checkAlbumSel = IndexSchema.AlbumInfo.ALBUM_KEY
-            + "=? AND " + IndexSchema.AlbumInfo.ARTIST_KEY + "=?";
+        long containerId = hasContainer(track.getParentUri());
+        if (containerId < 0) {
+            return -1;
+        }
+        cv.put(IndexSchema.Tracks.CONTAINER_ID, containerId);
+        cv.put(IndexSchema.Tracks.URI, track.getUri().toString());
+        cv.put(IndexSchema.Tracks.AUTHORITY, track.getUri().getAuthority());
+        cv.put(IndexSchema.Tracks.TRACK_NAME, track.getName());
+        cv.put(IndexSchema.Tracks.TRACK_KEY, keyFor(track.getName()));
+        String artistName = track.getArtistName();
+        if (!StringUtils.isEmpty(artistName)) {
+            cv.put(IndexSchema.Tracks.ARTIST_NAME, artistName);
+            cv.put(IndexSchema.Tracks.ARTIST_KEY, keyFor(artistName));
+        }
+        String albumName = track.getAlbumName();
+        if (!StringUtils.isEmpty(albumName)) {
+            cv.put(IndexSchema.Tracks.ALBUM_NAME, albumName);
+            cv.put(IndexSchema.Tracks.ALBUM_KEY, keyFor(albumName));
+        }
+        String albumArtistName = track.getAlbumArtistName();
+        if (!StringUtils.isEmpty(albumArtistName)) {
+            cv.put(IndexSchema.Tracks.ALBUM_ARTIST_NAME, albumArtistName);
+            cv.put(IndexSchema.Tracks.ALBUM_ARTIST_KEY, keyFor(albumArtistName));
+        }
+        int trackNum = track.getTrackNumber();
+        if (trackNum > 0) {
+            cv.put(IndexSchema.Tracks.TRACK_NUMBER, trackNum);
+        }
+        int discNum = track.getDiscNumber();
+        if (discNum > 0) {
+            cv.put(IndexSchema.Tracks.DISC_NUMBER, discNum);
+        }
+        cv.put(IndexSchema.Tracks.COMPILATION, track.isCompilation() ? 1 : 0);
+        String genre = track.getGenre();
+        if (!StringUtils.isEmpty(genre)) {
+            cv.put(IndexSchema.Tracks.GENRE, genre);
+            cv.put(IndexSchema.Tracks.GENRE_KEY, keyFor(genre));
+        }
+        org.opensilk.music.model.Track.Res res = track.getResources().get(0);
+        cv.put(IndexSchema.Tracks.RES_URI, res.getUri().toString());
+        Map<String,String> headers = res.getHeaders();
+        if (!headers.isEmpty()) {
+            StringBuilder sb = new StringBuilder(10);
+            for (Map.Entry<String,String> entry : headers.entrySet()) {
+                sb.append(entry.getKey()).append(":").append(entry.getValue()).append("\n");
+            }
+            cv.put(IndexSchema.Tracks.RES_HEADERS, sb.toString());
+        }
+        long size = res.getSize();
+        if (size > 0) {
+            cv.put(IndexSchema.Tracks.RES_SIZE, size);
+        }
+        cv.put(IndexSchema.Tracks.RES_MIME_TYPE, res.getMimeType());
+        long bitrate = res.getBitrate();
+        if (bitrate > 0) {
+            cv.put(IndexSchema.Tracks.RES_BITRATE, bitrate);
+        }
+        long lastmod = res.getLastMod();
+        if (lastmod > 0) {
+            cv.put(IndexSchema.Tracks.RES_LAST_MOD, lastmod);
+        }
+        long duration = res.getDuration();
+        if (duration > 0) {
+            cv.put(IndexSchema.Tracks.RES_DURATION, duration);
+        }
+        cv.put(IndexSchema.Tracks.DATE_ADDED, System.currentTimeMillis());
+        return insert(IndexSchema.Tracks.TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
+    }
 
-    @Override
-    public long hasAlbumMeta(String albumArtist, String album) {
+    static final String checkAlbumSel = IndexSchema.Info.Album.ALBUM_KEY
+            + "=? AND " + IndexSchema.Info.Album.ARTIST_KEY + "=?";
+    static final Map<String, Long> sAlbumIdsCache = new HashMap<>();
+
+    public long getAlbumIdForName(String albumArtist, String album) {
+        if (StringUtils.isEmpty(albumArtist) || StringUtils.isEmpty(album)) {
+            return -1;
+        }
+        synchronized (sAlbumIdsCache) {
+            if (sAlbumIdsCache.containsKey(albumArtist+album)) {
+                return sAlbumIdsCache.get(albumArtist+album);
+            }
+        }
+        albumArtist = StringUtils.trim(albumArtist);
+        album = StringUtils.trim(album);
         long id = -1;
         Cursor c = null;
         try {
             final String[] selArgs = new String[]{keyFor(album), keyFor(albumArtist)};
-            c = query(IndexSchema.AlbumMeta.TABLE, idCols, checkAlbumSel, selArgs, null, null, null);
+            c = query(IndexSchema.Info.Album.TABLE, idCols, checkAlbumSel, selArgs, null, null, null);
             if (c != null && c.moveToFirst()) {
                 id = c.getLong(0);
+            } else {
+                long artistId = getArtistIdForName(albumArtist);
+                //try to populate from lastfm info
+                Metadata albumMeta = mLastFM.lookupAlbumInfo(albumArtist, album);
+                if (albumMeta == null) {
+                    //lookup failed, used bare minimum
+                    albumMeta = Metadata.builder()
+                            .putString(Metadata.KEY_ALBUM_NAME, album)
+                            .putString(Metadata.KEY_ARTIST_NAME, albumArtist)
+                            .build();
+                }
+                id = insertAlbum(albumMeta, artistId);
+                if (id > 0) {
+                    mAppContext.getContentResolver().notifyChange(
+                            IndexUris.album(indexAuthority, String.valueOf(id)), null);
+                }
             }
-            return id;
-        } finally {
-            closeCursor(c);
-        }
-    }
-
-    static final String checkAlbumSel2 = IndexSchema.AlbumInfo.ALBUM_KEY
-            + "=? AND " + IndexSchema.AlbumInfo.ARTIST_ID + "=?";
-
-    @Override
-    public long hasAlbumMeta(String album, long albumArtistId) {
-        long id = -1;
-        Cursor c = null;
-        try {
-            final String[] selArgs = new String[]{keyFor(album), String.valueOf(albumArtistId)};
-            c = query(IndexSchema.AlbumInfo.TABLE, idCols, checkAlbumSel2, selArgs, null, null, null);
-            if (c != null && c.moveToFirst()) {
-                id = c.getLong(0);
+            if (id > 0) {
+                synchronized (sAlbumIdsCache) {
+                    sAlbumIdsCache.put(albumArtist+album, id);
+                }
             }
             return id;
         } finally {
@@ -543,35 +759,71 @@ public class IndexDatabaseImpl implements IndexDatabase {
     }
 
     @DebugLog
-    @Override
-    public long insertAlbum(Metadata meta, long albumArtistId) {
+    long insertAlbum(Metadata meta, long albumArtistId) {
         ContentValues cv = new ContentValues(10);
-        cv.put(IndexSchema.AlbumMeta.ALBUM_NAME, meta.getString(Metadata.KEY_ALBUM_NAME));
-        cv.put(IndexSchema.AlbumMeta.ALBUM_KEY, keyFor(meta.getString(Metadata.KEY_ALBUM_NAME)));
-        cv.put(IndexSchema.AlbumMeta.ALBUM_MBID, meta.getString(Metadata.KEY_ALBUM_MBID));
-        cv.put(IndexSchema.AlbumMeta.ALBUM_ARTIST_ID, albumArtistId);
+        cv.put(IndexSchema.Meta.Album.ALBUM_NAME, meta.getString(Metadata.KEY_ALBUM_NAME));
+        cv.put(IndexSchema.Meta.Album.ALBUM_KEY, keyFor(meta.getString(Metadata.KEY_ALBUM_NAME)));
+        cv.put(IndexSchema.Meta.Album.ALBUM_MBID, meta.getString(Metadata.KEY_ALBUM_MBID));
+        cv.put(IndexSchema.Meta.Album.ALBUM_ARTIST_ID, albumArtistId);
         String bioSummary = meta.getString(Metadata.KEY_ALBUM_SUMMARY);
         String bioContent = meta.getString(Metadata.KEY_ALBUM_BIO);
         long lastMod = meta.getLong(Metadata.KEY_LAST_MODIFIED);
         if (!StringUtils.isEmpty(bioSummary) && !StringUtils.isEmpty(bioContent)) {
-            cv.put(IndexSchema.AlbumMeta.ALBUM_BIO_SUMMARY, bioSummary);
-            cv.put(IndexSchema.AlbumMeta.ALBUM_BIO_CONTENT, bioContent);
-            cv.put(IndexSchema.AlbumMeta.ALBUM_BIO_DATE_MOD, lastMod > 0 ? lastMod : System.currentTimeMillis());
+            cv.put(IndexSchema.Meta.Album.ALBUM_BIO_SUMMARY, bioSummary);
+            cv.put(IndexSchema.Meta.Album.ALBUM_BIO_CONTENT, bioContent);
+            cv.put(IndexSchema.Meta.Album.ALBUM_BIO_DATE_MOD, lastMod > 0 ? lastMod : System.currentTimeMillis());
         }
-        return insert(IndexSchema.AlbumMeta.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+        return insert(IndexSchema.Meta.Album.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
     }
 
-    static final String checkArtistSel = IndexSchema.ArtistInfo.ARTIST_KEY + "=?";
+    static final String checkArtistSel = IndexSchema.Info.Artist.ARTIST_KEY + "=?";
+    static final Map<String, Long> sArtistIdsCache = new HashMap<>();
 
-    @Override
-    public long hasArtist(String artist) {
+    public long getArtistIdForName(String artist) {
+        if (StringUtils.isEmpty(artist)) {
+            return -1;
+        }
+        artist = StringUtils.trim(artist);
+        synchronized (sArtistIdsCache) {
+            if (sArtistIdsCache.containsKey(artist)) {
+                return sArtistIdsCache.get(artist);
+            }
+        }
         long id = -1;
         Cursor c = null;
         try {
             final String[] selArgs = new String[]{keyFor(artist)};
-            c = query(IndexSchema.ArtistInfo.TABLE, idCols, checkArtistSel, selArgs, null, null, null);
+            c = query(IndexSchema.Info.Artist.TABLE, idCols, checkArtistSel, selArgs, null, null, null);
             if (c != null && c.moveToFirst()) {
                 id = c.getLong(0);
+            } else {
+                //try to populate from lastfm info
+                Metadata artistMeta = mLastFM.lookupArtistInfo(artist);
+                if (artistMeta == null) {
+                    //lookup failed, use bare minimum
+                    artistMeta = Metadata.builder()
+                            .putString(Metadata.KEY_ARTIST_NAME, artist)
+                            .build();
+                } else {
+                    String lfmname = artistMeta.getString(Metadata.KEY_ARTIST_NAME);
+                    if (StringUtils.equalsIgnoreCase(artist, lfmname)) {
+                        // unless we were auto corrected we will prefer our name
+                        // this is to preserve capitalization in CHVRCHES
+                        artistMeta = artistMeta.buildUpon()
+                                .putString(Metadata.KEY_ARTIST_NAME, artist)
+                                .build();
+                    }
+                }
+                id = insertArtist(artistMeta);
+                if (id > 0) {
+                    mAppContext.getContentResolver().notifyChange(
+                            IndexUris.artist(indexAuthority, String.valueOf(id)), null);
+                }
+            }
+            if (id > 0) {
+                synchronized (sArtistIdsCache) {
+                    sArtistIdsCache.put(artist, id);
+                }
             }
             return id;
         } finally {
@@ -580,21 +832,93 @@ public class IndexDatabaseImpl implements IndexDatabase {
     }
 
     @DebugLog
-    @Override
-    public long insertArtist(Metadata meta) {
+    long insertArtist(Metadata meta) {
         ContentValues cv = new ContentValues(10);
-        cv.put(IndexSchema.ArtistMeta.ARTIST_NAME, meta.getString(Metadata.KEY_ARTIST_NAME));
-        cv.put(IndexSchema.ArtistMeta.ARTIST_KEY, keyFor(meta.getString(Metadata.KEY_ARTIST_NAME)));
-        cv.put(IndexSchema.ArtistMeta.ARTIST_MBID, meta.getString(Metadata.KEY_ARTIST_MBID));
+        cv.put(IndexSchema.Meta.Artist.ARTIST_NAME, meta.getString(Metadata.KEY_ARTIST_NAME));
+        cv.put(IndexSchema.Meta.Artist.ARTIST_KEY, keyFor(meta.getString(Metadata.KEY_ARTIST_NAME)));
+        cv.put(IndexSchema.Meta.Artist.ARTIST_MBID, meta.getString(Metadata.KEY_ARTIST_MBID));
         String bioSummary = meta.getString(Metadata.KEY_ARTIST_SUMMARY);
         String bioContent = meta.getString(Metadata.KEY_ARTIST_BIO);
         long lastMod = meta.getLong(Metadata.KEY_LAST_MODIFIED);
         if (!StringUtils.isEmpty(bioSummary) && !StringUtils.isEmpty(bioContent)) {
-            cv.put(IndexSchema.ArtistMeta.ARTIST_BIO_SUMMARY, bioSummary);
-            cv.put(IndexSchema.ArtistMeta.ARTIST_BIO_CONTENT, bioContent);
-            cv.put(IndexSchema.ArtistMeta.ARTIST_BIO_DATE_MOD, lastMod > 0 ? lastMod : System.currentTimeMillis());
+            cv.put(IndexSchema.Meta.Artist.ARTIST_BIO_SUMMARY, bioSummary);
+            cv.put(IndexSchema.Meta.Artist.ARTIST_BIO_CONTENT, bioContent);
+            cv.put(IndexSchema.Meta.Artist.ARTIST_BIO_DATE_MOD, lastMod > 0 ? lastMod : System.currentTimeMillis());
         }
-        return insert(IndexSchema.ArtistMeta.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+        return insert(IndexSchema.Meta.Artist.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+    }
+
+    static final String checkGenreSel = IndexSchema.Info.Genre.GENRE_KEY + "=?";
+    static final Map<String, Long> sGenreIdsCache = new HashMap<>();
+
+    public long getGenreIdForName(String genre) {
+        if (StringUtils.isEmpty(genre)) {
+            return -1;
+        }
+        synchronized (sGenreIdsCache) {
+            if(sGenreIdsCache.containsKey(genre)) {
+                return sGenreIdsCache.get(genre);
+            }
+        }
+        long id = -1;
+        Cursor c = null;
+        try {
+            final String[] selArgs = new String[]{keyFor(genre)};
+            c = query(IndexSchema.Info.Genre.TABLE, idCols, checkGenreSel, selArgs, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                id = c.getLong(0);
+            } else {
+                //try to populate from lastfm info
+                Metadata genreMeta = Metadata.builder()
+                        .putString(Metadata.KEY_GENRE_NAME, genre)
+                        .build();
+                id = insertGenre(genreMeta);
+                if (id > 0) {
+                    mAppContext.getContentResolver().notifyChange(
+                            IndexUris.genre(indexAuthority, String.valueOf(id)), null);
+                }
+            }
+            if (id > 0) {
+                synchronized (sGenreIdsCache) {
+                    sGenreIdsCache.put(genre, id);
+                }
+            }
+            return id;
+        } finally {
+            closeCursor(c);
+        }
+    }
+
+    long insertGenre(Metadata meta) {
+        ContentValues cv = new ContentValues(2);
+        String name = meta.getString(Metadata.KEY_GENRE_NAME);
+        cv.put(IndexSchema.Meta.Genre.GENRE_NAME, name);
+        cv.put(IndexSchema.Meta.Genre.GENRE_KEY, keyFor(name));
+        return insert(IndexSchema.Meta.Genre.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+    }
+
+    public static String getStringOrNull(Cursor c, int idx) {
+        try {
+            return c.getString(idx);
+        } catch (IllegalArgumentException|NullPointerException e) {
+            return null;
+        }
+    }
+
+    public static long getLongOrNeg(Cursor c, int idx) {
+        try {
+            return c.getLong(idx);
+        } catch (IllegalArgumentException|NullPointerException e) {
+            return -1;
+        }
+    }
+
+    public static int getIntOrNeg(Cursor c, int idx) {
+        try {
+            return c.getInt(idx);
+        } catch (IllegalArgumentException|NullPointerException e) {
+            return -1;
+        }
     }
 
     public static void closeCursor(Cursor c) {

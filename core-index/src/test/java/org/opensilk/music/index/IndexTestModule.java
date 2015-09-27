@@ -84,7 +84,7 @@ public class IndexTestModule {
                             return retrofit.Response.success(
                                     ResponseBuilder.buildItem(result, Artist.class)
                             );
-                        } catch (SAXException e) {
+                        } catch (SAXException|NullPointerException e) {
                             throw  new IOException(e);
                         }
                     }
@@ -118,7 +118,7 @@ public class IndexTestModule {
                             return retrofit.Response.success(
                                     ResponseBuilder.buildItem(result, Album.class)
                             );
-                        } catch (SAXException e) {
+                        } catch (SAXException|NullPointerException e) {
                             throw new IOException(e);
                         }
                     }

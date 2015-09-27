@@ -19,14 +19,19 @@ package org.opensilk.music.index.client;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.media.browse.MediaBrowser;
 import android.net.Uri;
 import android.os.Bundle;
+import android.service.media.MediaBrowserService;
+import android.support.annotation.NonNull;
 
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.index.provider.Methods;
 import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.model.Container;
+
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -79,4 +84,8 @@ public class IndexClientImpl implements IndexClient {
         return LibraryExtras.getOk(result);
     }
 
+    @Override
+    public void loadChildren(@NonNull String parentId, @NonNull MediaBrowserService.Result<List<MediaBrowser.MediaItem>> result) {
+
+    }
 }
