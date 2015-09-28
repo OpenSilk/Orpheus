@@ -24,6 +24,9 @@ import android.support.v4.media.session.MediaSessionCompat;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.opensilk.music.index.client.IndexClient;
+import org.opensilk.music.playback.service.PlaybackService;
 import org.opensilk.music.playback.service.PlaybackServiceComponent;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
@@ -31,38 +34,23 @@ import org.robolectric.annotation.Config;
 import java.util.ArrayList;
 import java.util.List;
 
+import rx.schedulers.Schedulers;
+
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @RunWith(RobolectricTestRunner.class)
 @Config( manifest = Config.NONE)
 public class PlaybackQueueTest {
-
-
-    PlaybackPreferences mSettings;
-    MediaMetadataHelper mMetaHelper;
+    
     PlaybackQueue mPlaybackQueue;
 
     @Before
     public void setup() {
-        mSettings = mock(PlaybackPreferences.class);
-        List<Uri> savedQueue = new ArrayList<>();
-        for (int ii=0; ii<20; ii++) {
-            savedQueue.add(Uri.parse("content://someauthority1/lib1/id"+ii));
-        }
-        when(mSettings.getQueue()).thenReturn(savedQueue);
-        when(mSettings.getInt(PlaybackPreferences.CURRENT_POS, 0)).thenReturn(5);
-        mMetaHelper = mock(MediaMetadataHelper.class);
-        for (int ii=0; ii<20; ii++) {
-//            when(mMetaHelper.buildQueueItem(Uri.parse("content://someauthority1/lib1/id"+ii), ii))
-//                    .thenReturn(new MediaSessionCompat.QueueItem(
-//                            new MediaDescriptionCompat.Builder()
-//                                .setTitle("title"+ii)
-//                            .setSubtitle("subtitle" + ii)
-//                            .setMediaId(Uri.parse("content://someauthority1/lib1/id" + ii).toString())
-//                            .build(), ii));
-        }
-        mPlaybackQueue = new PlaybackQueue(mSettings, mMetaHelper);
+        IndexClient client = Mockito.mock(IndexClient.class);
+        PlaybackService service = Mockito.mock(PlaybackService.class);
+        Mockito.when(service.getScheduler()).thenReturn(Schedulers.immediate());
+        mPlaybackQueue = new PlaybackQueue(client, service);
         mPlaybackQueue.load();
     }
 

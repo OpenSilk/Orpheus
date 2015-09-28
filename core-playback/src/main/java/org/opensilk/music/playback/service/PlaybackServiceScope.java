@@ -17,28 +17,11 @@
 
 package org.opensilk.music.playback.service;
 
-import android.media.session.MediaSession;
-import android.os.RemoteException;
-
-import java.lang.ref.WeakReference;
+import javax.inject.Scope;
 
 /**
- * Created by drew on 5/7/15.
+ * Created by drew on 9/26/15.
  */
-public class PlaybackServiceBinder extends IPlaybackService.Stub {
-    private final WeakReference<PlaybackService> mService;
-
-    public PlaybackServiceBinder(PlaybackService service) {
-        mService = new WeakReference<PlaybackService>(service);
-    }
-
-    @Override
-    public MediaSession.Token getToken() throws RemoteException {
-        return mService.get().getMediaSession().getSessionToken();
-    }
-
-    @Override
-    public int getAudioSessionId() throws RemoteException {
-        return mService.get().getAudioSessionId();
-    }
+@Scope
+public @interface PlaybackServiceScope {
 }

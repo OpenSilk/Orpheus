@@ -21,26 +21,22 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.audiofx.AudioEffect;
+import android.media.browse.MediaBrowser;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
-import org.apache.commons.lang3.builder.RecursiveToStringStyle;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.playback.BundleHelper;
 import org.opensilk.music.playback.PlaybackConstants;
@@ -48,11 +44,8 @@ import org.opensilk.music.playback.PlaybackConstants.CMD;
 import org.opensilk.music.playback.service.IPlaybackService;
 import org.opensilk.music.playback.service.PlaybackService;
 
-import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -74,7 +67,6 @@ import static android.support.v4.media.session.PlaybackStateCompat.STATE_SKIPPIN
  * Created by drew on 5/6/15.
  */
 @Singleton
-@SuppressWarnings("NewApi")
 public class PlaybackController {
 
     final Context mAppContext;
@@ -86,9 +78,15 @@ public class PlaybackController {
     MediaController mMediaController;
     MediaController.TransportControls mTransportControls;
 
+    MediaBrowser mMediaBrowser;
+
     @Inject
     public PlaybackController(@ForApplication Context mAppContext) {
         this.mAppContext = new ContextWrapper(mAppContext);
+        this.mMediaBrowser = new MediaBrowser(
+                this.mAppContext, new ComponentName(this.mAppContext, PlaybackService.class),
+                mConnectionCallback, null
+        );
     }
 
     public void notifyForegroundStateChanged(boolean inForeground) {
@@ -127,6 +125,10 @@ public class PlaybackController {
         return false;
     }
 
+    public static boolean isActive(PlaybackState state) {
+        return isActive(PlaybackStateCompat.fromPlaybackState(state));
+    }
+
     public static boolean isPlayingOrSimilar(PlaybackStateCompat state) {
         switch (state.getState()) {
             case STATE_FAST_FORWARDING:
@@ -137,6 +139,10 @@ public class PlaybackController {
                 return true;
         }
         return false;
+    }
+
+    public static boolean isPlayingOrSimilar(PlaybackState state) {
+        return isPlayingOrSimilar(PlaybackStateCompat.fromPlaybackState(state));
     }
 
     public static boolean isPlaying(PlaybackStateCompat state) {
@@ -248,7 +254,7 @@ public class PlaybackController {
     }
 
     public void shuffleQueue() {
-        sendCustomAction(CMD.SHUFFLE_QUEUE, null);
+        sendCustomAction(CMD.TOGGLE_SHUFFLE_MODE, null);
     }
 
     public void enqueueAll(List<Uri> queue, int where) {
@@ -410,9 +416,7 @@ public class PlaybackController {
 
     boolean hasController() {
         if (mMediaController == null) {
-            if (!mWaitingForService) {
-                connect();
-            }
+            connect();
             return false;
         } else {
             return true;
@@ -427,16 +431,15 @@ public class PlaybackController {
     }
 
     public void connect() {
-        if (mMediaController != null || mWaitingForService) {
+        if (mMediaBrowser.isConnected() || mWaitingForService) {
             return;
         }
         mWaitingForService = true;
-        mAppContext.startService(new Intent(mAppContext, PlaybackService.class));
-        mAppContext.bindService(new Intent(mAppContext, PlaybackService.class), mServiceConnection, Context.BIND_IMPORTANT);
+        mMediaBrowser.connect();
     }
 
     public void disconnect() {
-        mAppContext.unbindService(mServiceConnection);
+        mMediaBrowser.disconnect();
         onDisconnect();
     }
 
@@ -447,113 +450,52 @@ public class PlaybackController {
         mWaitingForService = false;
     }
 
-    final ServiceConnection mServiceConnection = new ServiceConnection() {
+    final MediaBrowser.ConnectionCallback mConnectionCallback = new MediaBrowser.ConnectionCallback() {
         @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            try {
-                mPlaybackService = IPlaybackService.Stub.asInterface(service);
-                mMediaController = new MediaController(mAppContext, mPlaybackService.getToken());
-                mMediaController.registerCallback(mCallback, mCallbackHandler);
-                mTransportControls = mMediaController.getTransportControls();
-                final PlaybackState state = mMediaController.getPlaybackState();
-                if (state != null) {
-                    mCallbackHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mCallback.onPlaybackStateChanged(state);
-                        }
-                    });
-                }
-                final MediaMetadata meta = mMediaController.getMetadata();
-                if (meta != null) {
-                    mCallbackHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mCallback.onMetadataChanged(meta);
-                        }
-                    });
-                }
-                final List<MediaSession.QueueItem> queue = mMediaController.getQueue();
-                if (queue != null) {
-                    mCallbackHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mCallback.onQueueChanged(queue);
-                        }
-                    });
-                }
-            } catch (RemoteException e) {
-                Timber.e(e, "Bind service");
-                mMediaController = null;
-                mTransportControls = null;
-            } finally {
-                mWaitingForService = false;
+        public void onConnected() {
+            mMediaController = new MediaController(mAppContext, mMediaBrowser.getSessionToken());
+            mMediaController.registerCallback(mCallback, mCallbackHandler);
+            mTransportControls = mMediaController.getTransportControls();
+            mWaitingForService = false;
+            final PlaybackState state = mMediaController.getPlaybackState();
+            if (state != null) {
+                mCallbackHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mCallback.onPlaybackStateChanged(state);
+                    }
+                });
+            }
+            final MediaMetadata meta = mMediaController.getMetadata();
+            if (meta != null) {
+                mCallbackHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mCallback.onMetadataChanged(meta);
+                    }
+                });
+            }
+            final List<MediaSession.QueueItem> queue = mMediaController.getQueue();
+            if (queue != null) {
+                mCallbackHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mCallback.onQueueChanged(queue);
+                    }
+                });
             }
         }
 
         @Override
-        public void onServiceDisconnected(ComponentName name) {
+        public void onConnectionSuspended() {
             onDisconnect();
         }
+
+        @Override
+        public void onConnectionFailed() {
+            mWaitingForService = false;
+            Timber.e(new IllegalStateException("Shouldn't be here"), "onConnectionFailed()");
+        }
     };
-
-    public final static class PlaybackServiceConnection implements Closeable {
-        private final Context context;
-        private final ServiceConnection serviceConnection;
-        private final IPlaybackService service;
-        private PlaybackServiceConnection(Context context,
-                                          ServiceConnection serviceConnection,
-                                          IPlaybackService service) {
-            this.context = context;
-            this.serviceConnection = serviceConnection;
-            this.service = service;
-        }
-        @Override public void close() {
-            context.unbindService(serviceConnection);
-        }
-        public IPlaybackService getService() {
-            return service;
-        }
-    }
-
-    public static PlaybackServiceConnection bindService(Context context) throws InterruptedException {
-        if (context == null) {
-            throw new NullPointerException("context == null");
-        }
-        ensureNotOnMainThread(context);
-        final BlockingQueue<IPlaybackService> q = new LinkedBlockingQueue<IPlaybackService>(1);
-        ServiceConnection keyChainServiceConnection = new ServiceConnection() {
-            volatile boolean mConnectedAtLeastOnce = false;
-
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                if (!mConnectedAtLeastOnce) {
-                    mConnectedAtLeastOnce = true;
-                    try {
-                        q.put(IPlaybackService.Stub.asInterface(service));
-                    } catch (InterruptedException e) {
-                        // will never happen, since the queue starts with one available slot
-                    }
-                }
-            }
-            @Override public void onServiceDisconnected(ComponentName name) {}
-        };
-        Intent intent = new Intent(context, PlaybackService.class);
-        boolean isBound = context.bindService(intent,
-                keyChainServiceConnection,
-                Context.BIND_AUTO_CREATE);
-        if (!isBound) {
-            throw new AssertionError("could not bind to KeyChainService");
-        }
-        return new PlaybackServiceConnection(context, keyChainServiceConnection, q.take());
-    }
-
-    private static void ensureNotOnMainThread(Context context) {
-        Looper looper = Looper.myLooper();
-        if (looper != null && looper == context.getMainLooper()) {
-            throw new IllegalStateException(
-                    "calling this from your main thread can lead to deadlock");
-        }
-    }
 
 }

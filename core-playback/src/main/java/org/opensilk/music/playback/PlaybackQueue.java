@@ -17,15 +17,15 @@
 
 package org.opensilk.music.playback;
 
+import android.media.MediaDescription;
 import android.media.session.MediaSession.QueueItem;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Handler;
-import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.MediaDescriptionCompat;
 
 import org.apache.commons.lang3.StringUtils;
+import org.opensilk.music.index.client.IndexClient;
+import org.opensilk.music.playback.service.PlaybackService;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,6 +35,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.inject.Inject;
 
 import hugo.weaving.DebugLog;
+import rx.Subscription;
+import rx.functions.Action1;
 import timber.log.Timber;
 
 /**
@@ -42,49 +44,57 @@ import timber.log.Timber;
  */
 public class PlaybackQueue {
 
-    final PlaybackPreferences mSettings;
-    final MediaMetadataHelper mMetaHelper;
+    final IndexClient mIndexClient;
+    final PlaybackService mService;
     final List<Uri> mQueue = new ArrayList<>();
     List<QueueItem> mQueueMeta;
 
     int mCurrentPos = -1;
+    int mRepeatMode = PlaybackConstants.REPEAT_ALL;
+    int mShuffleMode = PlaybackConstants.SHUFFLE_NONE;
     QueueChangeListener mListener;
-    Handler mCallbackHandler;
     final AtomicLong mIdGenerator = new AtomicLong(1);
+    Subscription mLookupSub;
 
     @Inject
     public PlaybackQueue(
-            PlaybackPreferences mSettings,
-            MediaMetadataHelper mMetaHelper
+            IndexClient mIndexClient,
+            PlaybackService mService
     ) {
-        this.mSettings = mSettings;
-        this.mMetaHelper = mMetaHelper;
+        this.mIndexClient = mIndexClient;
+        this.mService = mService;
     }
 
     @DebugLog
     public void load() {
         mQueue.clear();
-        mQueue.addAll(mSettings.getQueue());
-        mCurrentPos = mSettings.getInt(PlaybackPreferences.CURRENT_POS, 0);
+        mQueue.addAll(mIndexClient.getLastQueue());
+        mCurrentPos = mIndexClient.getLastQueuePosition();
         if (mQueue.isEmpty()) {
             mCurrentPos = -1;
         } else if (mCurrentPos >= mQueue.size()) {
             mCurrentPos = 0; //just start over
         }
-        updateQueueMeta();
+        mRepeatMode = mIndexClient.getLastQueueRepeateMode();
+        mShuffleMode = mIndexClient.getLastQueueShuffleMode();
+        notifyCurrentPosChanged();
     }
 
     public static class Snapshot {
         public final List<Uri> q;
         public final int pos;
-        public Snapshot(List<Uri> q, int pos) {
+        public final int repeat;
+        public final int shuffle;
+        public Snapshot(List<Uri> q, int pos, int repeat, int shuffle) {
             this.q = new ArrayList<>(q);
             this.pos = pos;
+            this.repeat = repeat;
+            this.shuffle = shuffle;
         }
     }
 
     public Snapshot snapshot() {
-        return new Snapshot(mQueue, mCurrentPos);
+        return new Snapshot(mQueue, mCurrentPos, mRepeatMode, mShuffleMode);
     }
 
     public void addNext(List<Uri> list) {
@@ -105,7 +115,14 @@ public class PlaybackQueue {
 
     public void addEnd(List<Uri> list) {
         mQueue.addAll(list);
-        notifyQueueChanged();
+        switch (mShuffleMode) {
+            case PlaybackConstants.SHUFFLE_NORMAL:
+                shuffle();
+                break;
+            default:
+                notifyQueueChanged();
+                break;
+        }
     }
 
     public void replace(List<Uri> list) {
@@ -119,12 +136,14 @@ public class PlaybackQueue {
             notifyCurrentPosChanged();
         } else {
             mQueue.addAll(list);
-            if (startpos == -1) {
-                mCurrentPos = -1;
-                shuffle();
-            } else {
-                mCurrentPos = clamp(startpos);
-                notifyCurrentPosChanged();
+            mCurrentPos = clamp(startpos);
+            switch (mShuffleMode) {
+                case PlaybackConstants.SHUFFLE_NORMAL:
+                    shuffle();
+                    break;
+                default:
+                    notifyCurrentPosChanged();
+                    break;
             }
         }
     }
@@ -172,12 +191,19 @@ public class PlaybackQueue {
             //same as wenttonext, but we also need to reload
             //the current so we notify current changed
             if (++mCurrentPos >= mQueue.size()) {
-                mCurrentPos = 0;
+                switch (mRepeatMode) {
+                    case PlaybackConstants.REPEAT_ALL:
+                        mCurrentPos = 0;
+                        notifyCurrentPosChanged();
+                        return; //skip extra notify
+                    default:
+                        mCurrentPos = -1;
+                        notifyQueueChanged();
+                        break;
+                }
             }
-            notifyCurrentPosChanged();
-        } else {
-            notifyQueueChanged();
         }
+        notifyQueueChanged();
     }
 
     public void moveItem(Uri uri, int to) {
@@ -233,30 +259,59 @@ public class PlaybackQueue {
         notifyCurrentPosChanged();
     }
 
-    public void wentToNext() {
+    public void moveToNext() {
         if (++mCurrentPos >= mQueue.size()) {
-            mCurrentPos = 0;
+            switch (mRepeatMode) {
+                case PlaybackConstants.REPEAT_ALL:
+                    mCurrentPos = 0;
+                    notifyWentToNext();
+                    break;
+                default:
+                    mCurrentPos = -1;
+                    break;
+            }
         }
-        notifyWentToNext();
     }
 
+    /**
+     * negative means cant go forward
+     */
     public int getNextPos() {
-        if (mRepeatCurrent) {
-            return mCurrentPos;
-        } else if (mCurrentPos + 1 >= mQueue.size()) {
-            return 0;
-        } else {
-            return mCurrentPos + 1;
+        switch (mRepeatMode) {
+            case PlaybackConstants.REPEAT_CURRENT:
+                return mCurrentPos;
+            case PlaybackConstants.REPEAT_ALL:
+            case PlaybackConstants.REPEAT_NONE:
+            default:
+                if (mCurrentPos + 1 >= mQueue.size()) {
+                    switch (mRepeatMode) {
+                        case PlaybackConstants.REPEAT_ALL:
+                            return 0;
+                        default:
+                            return -1;
+                    }
+                } else {
+                    return mCurrentPos + 1;
+                }
         }
     }
 
+    /**
+     * negative value means cant go back
+     */
     public int getPrevious() {
-        if (mRepeatCurrent) {
-            return mCurrentPos;
-        } else if (mCurrentPos - 1 < 0) {
-            return mQueue.size() - 1;
-        } else {
-            return mCurrentPos - 1;
+        switch (mRepeatMode) {
+            case PlaybackConstants.REPEAT_CURRENT:
+                return mCurrentPos;
+            case PlaybackConstants.REPEAT_ALL:
+                if (mCurrentPos - 1 < 0) {
+                    return mQueue.size() - 1;
+                } else {
+                    return mCurrentPos - 1;
+                }
+            case PlaybackConstants.REPEAT_NONE:
+            default:
+                return (mCurrentPos - 1);
         }
     }
 
@@ -298,11 +353,64 @@ public class PlaybackQueue {
         return mQueue.get(getNextPos());
     }
 
-    boolean mRepeatCurrent;
+    public int getRepeatMode() {
+        return mRepeatMode;
+    }
 
     public void toggleRepeat() {
-        mRepeatCurrent = !mRepeatCurrent;
-        //TODO notify
+        int newMode = mRepeatMode;
+        switch (mRepeatMode) {
+            case PlaybackConstants.REPEAT_NONE:
+                newMode = PlaybackConstants.REPEAT_ALL;
+                break;
+            case PlaybackConstants.REPEAT_ALL:
+                newMode = PlaybackConstants.REPEAT_CURRENT;
+                break;
+            case PlaybackConstants.REPEAT_CURRENT:
+                newMode = PlaybackConstants.REPEAT_NONE;
+                break;
+        }
+        setRepeatMode(newMode);
+    }
+
+    public void setRepeatMode(int newMode) {
+        if (mRepeatMode == newMode) {
+            return;
+        }
+        mRepeatMode = newMode;
+        notifyQueueChanged();
+    }
+
+    public int getShuffleMode() {
+        return mShuffleMode;
+    }
+
+    public void toggleShuffle() {
+        int newMode = mShuffleMode;
+        switch (mShuffleMode) {
+            case PlaybackConstants.SHUFFLE_NONE:
+                newMode = PlaybackConstants.SHUFFLE_NORMAL;
+                break;
+            case PlaybackConstants.SHUFFLE_NORMAL:
+                newMode = PlaybackConstants.SHUFFLE_NONE;
+                break;
+        }
+        setShuffleMode(newMode);
+    }
+
+    public void setShuffleMode(int newMode) {
+        if (mShuffleMode == newMode) {
+            return;
+        }
+        mShuffleMode = newMode;
+        switch (newMode) {
+            case PlaybackConstants.SHUFFLE_NONE:
+                //todo or how?
+                break;
+            case PlaybackConstants.SHUFFLE_NORMAL:
+                shuffle();
+                break;
+        }
     }
 
     int clamp(int pos) {
@@ -317,7 +425,15 @@ public class PlaybackQueue {
         }
     }
 
-    public void updateQueueMeta() {
+    public QueueItem getCurrentQueueItem() {
+        if (mQueueMeta == null || mQueueMeta.size() < mCurrentPos || mCurrentPos < 0) {
+            return null;
+        } else {
+            return mQueueMeta.get(mCurrentPos);
+        }
+    }
+
+    public void updateQueueMeta(List<MediaDescriptionCompat> descriptions) {
         List<QueueItem> qm;
         if (mQueueMeta == null) {
             qm = new ArrayList<>(mQueue.size());
@@ -353,9 +469,8 @@ public class PlaybackQueue {
                 }
             }
             if (queueItem == null) {
-                //new item, fetch the meta from the provider
-                //todo it would be great to fetch all at once
-                queueItem = mMetaHelper.buildQueueItem(uri, mIdGenerator.getAndIncrement());
+                //new item
+                queueItem = makeNewQueueItem(uri, descriptions);
             }
             if (queueItem == null) {
                 //item was removed externally todo this might fuckup currentpos
@@ -374,77 +489,79 @@ public class PlaybackQueue {
         mCurrentPos = clamp(mCurrentPos); //safety, todo check proper
         mQueueMeta = qm;
 
-        if (mQueue.size() != mQueueMeta.size()) {
-            Timber.e("Queues don't match");
+        if (BuildConfig.DEBUG) {
+            if (mQueue.size() != mQueueMeta.size()) {
+                Timber.e("Queues don't match");
+            }
+            qi = mQueue.listIterator();
+            qmi = mQueueMeta.listIterator();
+            int ii=0;
+            while (qi.hasNext() && qmi.hasNext()) {
+                Uri uri = qi.next();
+                QueueItem queueItem = qmi.next();
+                Timber.v("%d -> %s\n%d -> %s", ii++, uri, queueItem.getQueueId(), queueItem.getDescription().getMediaId());
+            }
         }
-        qi = mQueue.listIterator();
-        qmi = mQueueMeta.listIterator();
-        int ii=0;
-        while (qi.hasNext() && qmi.hasNext()) {
-            Uri uri = qi.next();
-            QueueItem queueItem = qmi.next();
-            Timber.v("%d -> %s\n%d -> %s", ii++, uri, queueItem.getQueueId(), queueItem.getDescription().getMediaId());
+    }
+
+    QueueItem makeNewQueueItem(Uri uri, List<MediaDescriptionCompat> descriptions) {
+        for (MediaDescriptionCompat desc : descriptions) {
+            if (uri.equals(desc.getMediaUri())) {
+                return new QueueItem((MediaDescription)desc.getMediaDescription(), mIdGenerator.incrementAndGet());
+            }
         }
+        return null;
     }
 
     void notifyCurrentPosChanged() {
-        updateQueueMeta();
-        if (mListener != null) {
-            if (mCallbackHandler != null) {
-                final QueueChangeListener l = mListener;
-                mCallbackHandler.post(new Runnable() {
+        if (mLookupSub != null) {
+            mLookupSub.unsubscribe();
+        }
+        mLookupSub = mIndexClient.getDescriptions(mQueue)
+                .observeOn(mService.getScheduler())
+                .subscribe(new Action1<List<MediaDescriptionCompat>>() {
                     @Override
-                    public void run() {
-                        l.onCurrentPosChanged();
+                    public void call(List<MediaDescriptionCompat> mediaDescriptionCompats) {
+                        updateQueueMeta(mediaDescriptionCompats);
+                        if (mListener != null) {
+                            mListener.onCurrentPosChanged();
+                        }
+                        mLookupSub = null;
                     }
                 });
-            } else {
-                mListener.onCurrentPosChanged();
-            }
-        }
     }
 
     void notifyQueueChanged() {
-        updateQueueMeta();
-        if (mListener != null) {
-            if (mCallbackHandler != null) {
-                final QueueChangeListener l = mListener;
-                mCallbackHandler.post(new Runnable() {
+        if (mLookupSub != null) {
+            mLookupSub.unsubscribe();
+        }
+        mLookupSub = mIndexClient.getDescriptions(mQueue)
+                .observeOn(mService.getScheduler())
+                .subscribe(new Action1<List<MediaDescriptionCompat>>() {
                     @Override
-                    public void run() {
-                        l.onQueueChanged();
+                    public void call(List<MediaDescriptionCompat> mediaDescriptionCompats) {
+                        updateQueueMeta(mediaDescriptionCompats);
+                        if (mListener != null) {
+                            mListener.onQueueChanged();
+                        }
+                        mLookupSub = null;
                     }
                 });
-            } else {
-                mListener.onQueueChanged();
-            }
-        }
     }
 
     void notifyWentToNext() {
         if (mListener != null) {
-            if (mCallbackHandler != null) {
-                final QueueChangeListener l = mListener;
-                mCallbackHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        l.wentToNext();
-                    }
-                });
-            } else {
-                mListener.wentToNext();
-            }
+            mListener.onMovedToNext();
         }
     }
 
-    public synchronized void setListener(QueueChangeListener l, Handler h) {
+    public synchronized void setListener(QueueChangeListener l) {
         mListener = l;
-        mCallbackHandler = h;
     }
 
     public interface QueueChangeListener {
         void onCurrentPosChanged();
         void onQueueChanged();
-        void wentToNext();
+        void onMovedToNext();
     }
 }

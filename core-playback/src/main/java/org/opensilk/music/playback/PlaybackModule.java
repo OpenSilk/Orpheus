@@ -21,9 +21,11 @@ import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.media.AudioManager;
+import android.net.wifi.WifiManager;
 import android.os.PowerManager;
 
 import org.opensilk.common.core.dagger2.ForApplication;
+import org.opensilk.music.artwork.service.ArtworkProviderHelperModule;
 
 import javax.inject.Singleton;
 
@@ -31,10 +33,14 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * Created by drew on 5/6/15.
+ * Created by drew on 9/26/15.
  */
-@Module
-public class SystemServicesModule {
+@Module(
+        includes = {
+                ArtworkProviderHelperModule.class,
+        }
+)
+public class PlaybackModule {
     @Provides @Singleton
     public NotificationManager provideNotificationManager(@ForApplication Context context) {
         return (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -50,5 +56,9 @@ public class SystemServicesModule {
     @Provides @Singleton
     public PowerManager providePowerManager(@ForApplication Context context) {
         return (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+    }
+    @Provides @Singleton
+    public WifiManager provideWifiManager(@ForApplication Context context) {
+        return (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
     }
 }

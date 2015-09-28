@@ -27,8 +27,6 @@ import com.google.gson.reflect.TypeToken;
 import org.opensilk.common.core.app.PreferencesWrapper;
 import org.opensilk.common.core.dagger2.ForApplication;
 
-import java.io.IOError;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 

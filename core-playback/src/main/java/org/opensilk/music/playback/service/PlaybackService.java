@@ -17,133 +17,149 @@
 
 package org.opensilk.music.playback.service;
 
-import android.app.Service;
 import android.content.Intent;
 import android.media.Rating;
 import android.media.audiofx.AudioEffect;
+import android.media.browse.MediaBrowser;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
+import android.media.session.PlaybackState;
 import android.net.Uri;
-import android.os.*;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.PowerManager;
+import android.os.ResultReceiver;
+import android.os.SystemClock;
+import android.service.media.MediaBrowserService;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.KeyEvent;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.artwork.service.ArtworkProviderHelper;
+import org.opensilk.music.index.client.IndexClient;
 import org.opensilk.music.model.Track;
-import org.opensilk.music.playback.AlarmManagerHelper;
 import org.opensilk.music.playback.AudioManagerHelper;
 import org.opensilk.music.playback.BundleHelper;
-import org.opensilk.music.playback.LibraryHelper;
-import org.opensilk.music.playback.MediaMetadataHelper;
-import org.opensilk.music.playback.NotificationHelper;
-
-import javax.inject.Inject;
-
+import org.opensilk.music.playback.DefaultMediaPlayer;
+import org.opensilk.music.playback.NotificationHelper2;
+import org.opensilk.music.playback.Playback;
+import org.opensilk.music.playback.PlaybackComponent;
 import org.opensilk.music.playback.PlaybackConstants;
 import org.opensilk.music.playback.PlaybackConstants.CMD;
 import org.opensilk.music.playback.PlaybackConstants.EVENT;
-import org.opensilk.music.playback.PlaybackPreferences;
 import org.opensilk.music.playback.PlaybackQueue;
-import org.opensilk.music.playback.PlaybackStateHelper;
-import org.opensilk.music.playback.mediaplayer.MultiPlayer;
-import org.opensilk.music.playback.player.IPlayer;
-import org.opensilk.music.playback.player.IPlayerCallback;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import hugo.weaving.DebugLog;
+import rx.Scheduler;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.android.schedulers.HandlerScheduler;
 import timber.log.Timber;
 
-import static org.opensilk.music.playback.PlaybackConstants.*;
+import static org.opensilk.music.playback.PlaybackConstants.CMDNAME;
+import static org.opensilk.music.playback.PlaybackConstants.CMDNEXT;
+import static org.opensilk.music.playback.PlaybackConstants.CMDPAUSE;
+import static org.opensilk.music.playback.PlaybackConstants.CMDPLAY;
+import static org.opensilk.music.playback.PlaybackConstants.CMDPREVIOUS;
+import static org.opensilk.music.playback.PlaybackConstants.CMDSTOP;
+import static org.opensilk.music.playback.PlaybackConstants.CMDTOGGLEPAUSE;
+import static org.opensilk.music.playback.PlaybackConstants.FROM_MEDIA_BUTTON;
+import static org.opensilk.music.playback.PlaybackConstants.NEXT_ACTION;
+import static org.opensilk.music.playback.PlaybackConstants.NOW_IN_FOREGROUND;
+import static org.opensilk.music.playback.PlaybackConstants.PAUSE_ACTION;
+import static org.opensilk.music.playback.PlaybackConstants.PREVIOUS_ACTION;
+import static org.opensilk.music.playback.PlaybackConstants.REPEAT_ACTION;
+import static org.opensilk.music.playback.PlaybackConstants.REWIND_INSTEAD_PREVIOUS_THRESHOLD;
+import static org.opensilk.music.playback.PlaybackConstants.SERVICECMD;
+import static org.opensilk.music.playback.PlaybackConstants.SHUFFLE_ACTION;
+import static org.opensilk.music.playback.PlaybackConstants.STOP_ACTION;
+import static org.opensilk.music.playback.PlaybackConstants.TOGGLEPAUSE_ACTION;
 
 /**
  * Created by drew on 5/6/15.
  */
-@SuppressWarnings("NewApi")
-public class PlaybackService extends Service {
+public class PlaybackService extends MediaBrowserService {
     public static final String NAME = PlaybackService.class.getName();
 
-    final PlaybackServiceBinder mBinder = new PlaybackServiceBinder(this);
-
-    @Inject NotificationHelper mNotificationHelper;
-    @Inject AlarmManagerHelper mAlarmManagerHelper;
+    @Inject NotificationHelper2 mNotificationHelper;
+    @Inject DelayedShutdownHandler mDelayedShutdownHandler;
     @Inject AudioManagerHelper mAudioManagerHelper;
     @Inject PlaybackQueue mQueue;
     @Inject HandlerThread mHandlerThread;
-    @Inject MediaSession mMediaSession;
-    @Inject PlaybackStateHelper mPlaybackStateHelper;
-    @Inject MediaMetadataHelper mMediaMetaHelper;
-    @Inject LibraryHelper mLibraryHelper;
-    @Inject PlaybackPreferences mSettings;
     @Inject PowerManager.WakeLock mWakeLock;
     @Inject ArtworkProviderHelper mArtworkProviderHelper;
+    @Inject MediaSessionHolder mSessionHolder;
+    @Inject IndexClient mIndexClient;
+    @Inject Playback mPlayback;
 
     int mAudioSessionId;
-    Handler mHandler;
-    IPlayer mPlayer;
+    private Handler mHandler;
+    private Scheduler mHandlerScheduler;
 
     //currently playing track
     Track mCurrentTrack;
-    Uri mCurrentUri;
     //next track to load
     Track mNextTrack;
-    Uri mNextUri;
-    //trou if we should start playing again when we regain audio focus
-    boolean mPausedByTransientLossOfFocus;
     //true if we should start playing when loading finishes
     boolean mPlayWhenReady;
     //
     boolean mQueueReloaded;
     //
-    boolean mAnyActivityInForeground;
-    int mConnectedClients;
+    boolean mServiceStarted = false;
+
+    Subscription mCurrentTrackSub;
+    Subscription mNextTrackSub;
+    Subscription mQueueListSub;
 
     @Override
     public void onCreate() {
+        PlaybackComponent parent = DaggerService.getDaggerComponent(getApplicationContext());
+        parent.playbackServiceComponent(PlaybackServiceModule.create(this)).inject(this);
         super.onCreate();
-
-        PlaybackServiceComponent component = DaggerService.getDaggerComponent(getApplicationContext());
-        component.inject(this);
 
         acquireWakeLock();
 
         //fire up thread and init handler
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
+        mHandlerScheduler = HandlerScheduler.from(mHandler);
 
         //tell everyone about ourselves
-        mNotificationHelper.setService(this, mHandler);
-        mAudioManagerHelper.setChangeListener(mAudioFocusChangeListener, mHandler);
-        mQueue.setListener(mQueueChangeListener, mHandler);
-        mMediaSession.setCallback(mMediaSessionCallback, mHandler);
-        mMediaSession.setPlaybackState(mPlaybackStateHelper.getState());
+        mQueue.setListener(new PlaybackQueueQueueChangeListener());
 
-        mMediaMetaHelper.setMediaSession(mMediaSession, mHandler);
+        getMediaSession().setCallback(new MediaSessionCallback(), mHandler);
+        setSessionToken(mSessionHolder.getSessionToken());
+        updatePlaybackState(null);
+
+        mPlayback.setState(PlaybackState.STATE_NONE);
+        mPlayback.setCallback(new PlaybackCallback());
+        mPlayback.start();
 
         mAudioSessionId = mAudioManagerHelper.getAudioSessionId();
-        //init default player
-        mPlayer = new MultiPlayer(this, mAudioSessionId);
-        mPlayer.setCallback(mPlayerCallback, mHandler);
-
         mHandler.post(mLoadQueueRunnable);
     }
 
     @Override
     public void onDestroy() {
+        saveState(); //fire early as possible
         super.onDestroy();
-        saveState();
-
-        mMediaSession.release();
 
         mNotificationHelper.killNotification();
-        mAlarmManagerHelper.cancelDelayedShutdown();
-        mAudioManagerHelper.abandonFocus();
+        mDelayedShutdownHandler.cancelDelayedShutdown();
 
-        mPlayer.release();
+        mPlayback.stop(false);
+        mSessionHolder.release();
 
         mHandler.removeCallbacksAndMessages(null);
-        mHandlerThread.getLooper().quit();
+        mHandlerThread.getLooper().quitSafely();
 
         // Remove any sound effects
         final Intent audioEffectsIntent = new Intent(
@@ -157,24 +173,14 @@ public class PlaybackService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        mConnectedClients++;
-        mAlarmManagerHelper.cancelDelayedShutdown();
-        return mBinder;
+        mDelayedShutdownHandler.cancelDelayedShutdown();
+        return super.onBind(intent);
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
-        mConnectedClients--;
-        if (!mPlaybackStateHelper.isPlaying()
-                && !mPlayWhenReady
-                && !mPausedByTransientLossOfFocus) {
-            mAlarmManagerHelper.scheduleDelayedShutdown();
-            if (!mAnyActivityInForeground) {
-                updateNotification();
-            }
-        }
         saveState();
-        return false;
+        return super.onUnbind(intent);
     }
 
     @Override
@@ -193,19 +199,12 @@ public class PlaybackService extends Service {
 
             String action = intent.getAction();
 
-            if (SHUTDOWN.equals(action)) {
-                mAlarmManagerHelper.onRecievedShutdownIntent();
-                maybeStopService();
-                return START_NOT_STICKY;
-            }
-
             if (intent.hasExtra(NOW_IN_FOREGROUND)) {
-                mAnyActivityInForeground = intent.getBooleanExtra(NOW_IN_FOREGROUND, false);
-                updateNotification();
+                mNotificationHelper.setActivityInForeground(intent.getBooleanExtra(NOW_IN_FOREGROUND, false));
             }
 
             if (Intent.ACTION_MEDIA_BUTTON.equals(action)) {
-                mMediaSession.getController().dispatchMediaButtonEvent(
+                mSessionHolder.getController().dispatchMediaButtonEvent(
                         intent.<KeyEvent>getParcelableExtra(Intent.EXTRA_KEY_EVENT));
             } else {
                 handleIntentCommand(intent);
@@ -215,6 +214,7 @@ public class PlaybackService extends Service {
                 MediaButtonIntentReceiver.completeWakefulIntent(intent);
             }
         }
+        mServiceStarted = true;
         return START_STICKY;
     }
 
@@ -222,7 +222,7 @@ public class PlaybackService extends Service {
         final String action = intent.getAction();
         final String command = SERVICECMD.equals(action) ? intent.getStringExtra(CMDNAME) : null;
         Timber.v("handleIntentCommand: action = %s, command = %s", action, command);
-        MediaController controller = mMediaSession.getController();
+        MediaController controller = mSessionHolder.getController();
         MediaController.TransportControls controls = controller.getTransportControls();
         if (CMDNEXT.equals(command) || NEXT_ACTION.equals(action)) {
             controls.skipToNext();
@@ -239,59 +239,88 @@ public class PlaybackService extends Service {
         } else if (REPEAT_ACTION.equals(action)) {
             controls.sendCustomAction(CMD.CYCLE_REPEAT, null);
         } else if (SHUFFLE_ACTION.equals(action)) {
-            controls.sendCustomAction(CMD.SHUFFLE_QUEUE, null);
-        }
-    }
-
-    void maybeStopService() {
-        if (mPlaybackStateHelper.isPlaying() || mPlayWhenReady || mPausedByTransientLossOfFocus) {
-            return;
-        }
-        if (!mAnyActivityInForeground) {
-            mNotificationHelper.killNotification();
-        }
-        if (mConnectedClients <= 0) {
-            stopSelf();
+            controls.sendCustomAction(CMD.TOGGLE_SHUFFLE_MODE, null);
         }
     }
 
     void updateMeta() {
-        mMediaMetaHelper.updateMeta(mCurrentTrack, mCurrentUri);
-        updateNotification();
-        mMediaSession.setPlaybackState(mPlaybackStateHelper.getState());
+        //TODO
     }
 
-    void updateNotification() {
-        //we show notification when playing even if activity is showing
-        //this is for lockscreen so it doesnt disappear when whe turn on the screen
-        if (!mAnyActivityInForeground || mPlaybackStateHelper.isPlaying()) {
-            mNotificationHelper.buildNotification(mCurrentTrack,
-                    mPlaybackStateHelper.shouldShowPauseButton(), mMediaSession.getSessionToken());
-        } else {
-            mNotificationHelper.killNotification();
+    void updatePlaybackState(String error) {
+        Timber.d("updatePlaybackState, playback state=%d", mPlayback.getState());
+
+        long position = PlaybackState.PLAYBACK_POSITION_UNKNOWN;
+        long duration = PlaybackState.PLAYBACK_POSITION_UNKNOWN;
+        if (mPlayback.isConnected()) {
+            position = mPlayback.getCurrentStreamPosition();
+            duration = mPlayback.getDuration();
+        }
+
+        PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
+                .setActions(getAvailableActions());
+
+        int state = mPlayback.getState();
+
+        // If there is an error message, send it to the playback state:
+        if (error != null) {
+            // Error states are really only supposed to be used for errors that cause playback to
+            // stop unexpectedly and persist until the user takes action to fix it.
+            stateBuilder.setErrorMessage(error);
+            state = PlaybackState.STATE_ERROR;
+        }
+        stateBuilder.setState(state, position, 1.0f, SystemClock.elapsedRealtime());
+        stateBuilder.setExtras(BundleHelper.builder().putLong(duration).get());
+
+        // Set the activeQueueItemId if the current index is valid.
+        MediaSession.QueueItem item = mQueue.getCurrentQueueItem();
+        if (item != null) {
+            stateBuilder.setActiveQueueItemId(item.getQueueId());
+        }
+
+        getMediaSession().setPlaybackState(stateBuilder.build());
+
+        if (state == PlaybackState.STATE_PLAYING || state == PlaybackState.STATE_PAUSED) {
+            mNotificationHelper.startNotification();
         }
     }
 
-    void updatePlaybackState() {
-        mMediaSession.setPlaybackState(mPlaybackStateHelper.getState());
-        mNotificationHelper.updatePlayState(mPlaybackStateHelper.isActive());
+    private long getAvailableActions() {
+        long actions = PlaybackState.ACTION_PLAY | PlaybackState.ACTION_PLAY_FROM_MEDIA_ID |
+                PlaybackState.ACTION_PLAY_FROM_SEARCH;
+        if (mQueue.notEmpty()) {
+            if (mPlayback.isPlaying()) {
+                actions |= PlaybackState.ACTION_PAUSE;
+            }
+            if (mQueue.getPrevious() >= 0) {
+                actions |= PlaybackState.ACTION_SKIP_TO_PREVIOUS;
+            }
+            if (mQueue.getNextPos() >= 0) {
+                actions |= PlaybackState.ACTION_SKIP_TO_NEXT;
+            }
+        }
+        return actions;
     }
 
     void saveState() {
         final PlaybackQueue.Snapshot qSnapshot = mQueue.snapshot();
-        final long seekPos = mPlaybackStateHelper.getPosition();
+        PlaybackState state = getMediaSession().getController().getPlaybackState();
+        final long seekPos;
+        if (state != null) {
+            seekPos = state.getPosition();
+        } else {
+            seekPos = 0;
+        }
         //Use async to avoid making new thread
         new AsyncTask<Object, Void, Void>() {
             @Override
             @DebugLog
             protected Void doInBackground(Object... params) {
-                mSettings.saveQueue(qSnapshot.q);
-                if (qSnapshot.pos != -1) {
-                    mSettings.putInt(PlaybackPreferences.CURRENT_POS, qSnapshot.pos);
-                }
-                if (seekPos > 0) {
-                    mSettings.putLong(PlaybackPreferences.SEEK_POS, seekPos);
-                }
+                mIndexClient.saveQueue(qSnapshot.q);
+                mIndexClient.saveQueuePosition(qSnapshot.pos);
+                mIndexClient.saveQueueRepeatMode(qSnapshot.repeat);
+                mIndexClient.saveQueueShuffleMode(qSnapshot.shuffle);
+                mIndexClient.saveLastSeekPosition(seekPos);
                 return null;
             }
         }.execute();
@@ -299,15 +328,8 @@ public class PlaybackService extends Service {
 
     void resetState() {
         mCurrentTrack = null;
-        mCurrentUri = null;
         mNextTrack = null;
-        mNextUri = null;
-        mPausedByTransientLossOfFocus = false;
         mPlayWhenReady = false;
-
-        mPlaybackStateHelper.updateDuration(-1);
-        mPlaybackStateHelper.updatePosition(-1);
-        mPlaybackStateHelper.gotoStopped();
     }
 
     void acquireWakeLock() {
@@ -321,15 +343,41 @@ public class PlaybackService extends Service {
         }
     }
 
+    public Scheduler getScheduler() {
+        return mHandlerScheduler;
+    }
+
+    public Handler getHandler() {
+        return mHandler;
+    }
+
     public MediaSession getMediaSession() {
-        return mMediaSession;
+        return mSessionHolder.getSession();
     }
 
     public int getAudioSessionId() {
         return mAudioSessionId;
     }
 
-    final MediaSession.Callback mMediaSessionCallback = new MediaSession.Callback() {
+    @Nullable @Override
+    public BrowserRoot onGetRoot(@NonNull String clientPackageName, int clientUid, Bundle rootHints) {
+        return mIndexClient.browserGetRoot(clientPackageName, clientUid, rootHints);
+    }
+
+    @Override
+    public void onLoadChildren(@NonNull String parentId, @NonNull Result<List<MediaBrowser.MediaItem>> result) {
+        result.detach();
+        mIndexClient.browserLoadChildren(parentId, result);
+    }
+
+    private void handleStop() {
+        mPlayback.stop(false);
+        mHandler.removeCallbacks(mProgressCheckRunnable);
+        mDelayedShutdownHandler.cancelDelayedShutdown();
+        stopSelf();
+    }
+
+    class MediaSessionCallback extends MediaSession.Callback {
         @Override
         public void onCommand(String command, Bundle args, ResultReceiver cb) {
             super.onCommand(command, args, cb);
@@ -343,25 +391,22 @@ public class PlaybackService extends Service {
         @Override
         @DebugLog
         public void onPlay() {
-            if (mPlaybackStateHelper.isPaused()) {
-                if (mAudioManagerHelper.requestFocus()) {
-                    mPlayer.play();
-                    mPlaybackStateHelper.gotoPlaying();
-                    updatePlaybackState();
-                    mHandler.removeCallbacks(mProgressCheckRunnable);
-                    mHandler.post(mProgressCheckRunnable);
+            mDelayedShutdownHandler.cancelDelayedShutdown();
+            if (!mServiceStarted) {
+                startService(new Intent(PlaybackService.this, PlaybackService.class));
+                mServiceStarted = true;
+            }
+            if (!getMediaSession().isActive()) {
+                getMediaSession().setActive(true);
+            }
+            if (mQueue.notEmpty()) {
+                if (mPlayback.getState() == PlaybackState.STATE_CONNECTING) {
+                    mPlayWhenReady = true;
+                } else if (!mPlayback.isPlaying()) {
+                    mPlayback.play();
                 }
-                //update always
-                mAlarmManagerHelper.cancelDelayedShutdown();
-                updateNotification();
-            } else if (mPlaybackStateHelper.isLoading()) {
-                Timber.d("Player is loading. Request ignored and play when loading set");
-                mPlayWhenReady = true;
-            } else if (mQueue.notEmpty()) {
-                Timber.e("In a bad state, current queue item not loaded");
             } else {
-                Timber.i("Queue is empty");
-                //TODO start autoshuffle
+                //TODO
             }
         }
 
@@ -377,16 +422,12 @@ public class PlaybackService extends Service {
 
         @Override
         public void onSkipToQueueItem(long id) {
-            if (mPlaybackStateHelper.isLoadingOrSkipping()) {
-                Timber.w("Ignoring onSkipToQueueItem while loading/skipping");
-                return;
-            }
             int pos = mQueue.getPosOfId(id);
             if (mQueue.getCurrentPos() != pos) {
                 if (mQueue.getNextPos() == pos) {
                     onSkipToNext();
                 } else {
-                    onPause();
+                    mPlayback.prepareForTrack();
                     mPlayWhenReady = true;
                     mQueue.goToItem(pos);
                 }
@@ -396,86 +437,45 @@ public class PlaybackService extends Service {
         @Override
         @DebugLog
         public void onPause() {
-            if (mPlaybackStateHelper.isPlaying()) {
-                Timber.i("Pausing playback");
-                mHandler.removeCallbacks(mProgressCheckRunnable);
-                mPlayer.pause();
-                mPlaybackStateHelper.gotoPaused();
-                updatePlaybackState();
-                mAudioManagerHelper.abandonFocus();
-                saveState();
-            } else if (mPlaybackStateHelper.isLoading()) {
-                Timber.w("Player is still loading... Setting playWhenReady to false");
-                mPlayWhenReady = false;
-            } else {
-                Timber.w("Ignoring onPause");
-            }
+            mHandler.removeCallbacks(mProgressCheckRunnable);
+            mPlayback.pause();
+            saveState();
         }
 
         @Override
         @DebugLog
         public void onSkipToNext() {
-            if (mPlaybackStateHelper.isLoadingOrSkipping()) {
-                Timber.w("Ignoring skipToNext while skipping/loading");
-                return;
+            if (mPlayback.hasNext()) {
+                mPlayback.goToNext();
+            } else {
+                mPlayback.prepareForTrack();
+                mPlayWhenReady = true;
+                mQueue.moveToNext();
             }
-            mPlaybackStateHelper.gotoSkippingNext();
-            updatePlaybackState();
-            //Will callback to WENT_TO_NEXT
-            mPlayer.skipToNext();
         }
 
         @Override
         public void onSkipToPrevious() {
-            if (mPlaybackStateHelper.isLoadingOrSkipping()) {
-                Timber.w("Ignoring skipToPrevious while skipping/loading");
-                return;
-            }
-            if (mPlaybackStateHelper.getPosition() > REWIND_INSTEAD_PREVIOUS_THRESHOLD) {
+            if (mPlayback.getCurrentStreamPosition() > REWIND_INSTEAD_PREVIOUS_THRESHOLD) {
                 onSeekTo(0);
             } else {
-                mPlaybackStateHelper.gotoSkippingPrevious();
-                updatePlaybackState();
+                mPlayback.prepareForTrack();
+                mPlayWhenReady = true;
                 //will callback to onCurrentPosChanged
                 mQueue.goToItem(mQueue.getPrevious());
             }
         }
 
         @Override
-        public void onFastForward() {
-            super.onFastForward();
-        }
-
-        @Override
-        public void onRewind() {
-            super.onRewind();
-        }
-
-        @Override
         @DebugLog
         public void onStop() {
-            if (mPlaybackStateHelper.isPlaying()) {
-                mPlayer.stop();
-            }
-            mAudioManagerHelper.abandonFocus();
-            resetState();
-            updatePlaybackState();
-            //Reload the current item
-            mQueueChangeListener.onCurrentPosChanged();
-            mAlarmManagerHelper.scheduleDelayedShutdown();
-            saveState();
+            handleStop();
         }
 
         @Override
         public void onSeekTo(long pos) {
             mHandler.removeCallbacks(mProgressCheckRunnable);
-            if (mPlayer.seekTo(pos)) {
-                mPlaybackStateHelper.updatePosition(pos);
-                updatePlaybackState();
-                if (mPlaybackStateHelper.isPlaying()) {
-                    mHandler.postDelayed(mProgressCheckRunnable, 2000);
-                }
-            } //else TODO
+            mPlayback.seekTo(pos);
         }
 
         @Override
@@ -490,6 +490,8 @@ public class PlaybackService extends Service {
             switch (action) {
                 case CMD.CYCLE_REPEAT: {
                     mQueue.toggleRepeat();
+                    getMediaSession().sendSessionEvent(EVENT.REPEAT_CHANGED,
+                            BundleHelper.builder().putInt(mQueue.getRepeatMode()).get());
                     break;
                 }
                 case CMD.ENQUEUE: {
@@ -505,38 +507,69 @@ public class PlaybackService extends Service {
                 case CMD.ENQUEUE_TRACKS_FROM: {
                     Uri uri = BundleHelper.getUri(extras);
                     String sort = BundleHelper.getString(extras);
-                    int where = BundleHelper.getInt(extras);
-                    List<Uri> list = mLibraryHelper.getTracks(uri, sort);
-                    if (where == PlaybackConstants.ENQUEUE_LAST) {
-                        mQueue.addEnd(list);
-                    } else if (where == PlaybackConstants.ENQUEUE_NEXT) {
-                        mQueue.addNext(list);
+                    final int where = BundleHelper.getInt(extras);
+                    if (mQueueListSub != null) {
+                        mQueueListSub.unsubscribe();
                     }
+                    mQueueListSub = mIndexClient.getTrackUris(uri, sort)
+                            .first()
+                            .observeOn(getScheduler())
+                            .subscribe(new Subscriber<List<Uri>>() {
+                                @Override public void onCompleted() {
+                                    mQueueListSub = null;
+                                }
+                                @Override public void onError(Throwable e) {
+                                    mQueueListSub = null;
+                                    ///TODO
+                                }
+                                @Override public void onNext(List<Uri> uris) {
+                                    if (where == PlaybackConstants.ENQUEUE_LAST) {
+                                        mQueue.addEnd(uris);
+                                    } else if (where == PlaybackConstants.ENQUEUE_NEXT) {
+                                        mQueue.addNext(uris);
+                                    }
+                                }
+                            });
                     break;
                 }
                 case CMD.PLAY_ALL: {
-                    mPlaybackStateHelper.gotoConnecting();
-                    updatePlaybackState();
                     List<Uri> list = BundleHelper.getList(extras);
                     int startpos = BundleHelper.getInt(extras);
+                    mPlayback.prepareForTrack();
                     mQueue.replace(list, startpos);
                     mPlayWhenReady = true;
                     break;
                 }
                 case CMD.PLAY_TRACKS_FROM: {
-                    mPlaybackStateHelper.gotoConnecting();
-                    updatePlaybackState();
                     Uri uri = BundleHelper.getUri(extras);
                     String sort = BundleHelper.getString(extras);
-                    int startpos = BundleHelper.getInt(extras);
-                    List<Uri> list = mLibraryHelper.getTracks(uri, sort);
-                    mQueue.replace(list, startpos);
-                    mPlayWhenReady = true;
+                    final int startpos = BundleHelper.getInt(extras);
+                    mPlayback.prepareForTrack();
+                    if (mQueueListSub != null) {
+                        mQueueListSub.unsubscribe();
+                    }
+                    mQueueListSub = mIndexClient.getTrackUris(uri, sort)
+                            .first()
+                            .observeOn(getScheduler())
+                            .subscribe(new Subscriber<List<Uri>>() {
+                                @Override public void onCompleted() {
+                                    mQueueListSub = null;
+                                }
+                                @Override public void onError(Throwable e) {
+                                    mQueueListSub = null;
+                                    ///TODO
+                                }
+                                @Override public void onNext(List<Uri> uris) {
+                                    mQueue.replace(uris, startpos);
+                                    mPlayWhenReady = true;
+                                }
+                            });
                     break;
                 }
-                case CMD.SHUFFLE_QUEUE: {
-                    mQueue.shuffle();
-                    mMediaSession.sendSessionEvent(EVENT.QUEUE_SHUFFLED, null);
+                case CMD.TOGGLE_SHUFFLE_MODE: {
+                    mQueue.toggleShuffle();
+                    getMediaSession().sendSessionEvent(EVENT.QUEUE_SHUFFLED,
+                            BundleHelper.builder().putInt(mQueue.getShuffleMode()).get());
                     break;
                 }
                 case CMD.REMOVE_QUEUE_ITEM: {
@@ -571,204 +604,168 @@ public class PlaybackService extends Service {
                     break;
                 }
                 case CMD.TOGGLE_PLAYBACK: {
-                    if (mPlaybackStateHelper.isPlaying()) {
+                    if (mPlayback.isPlaying()) {
                         onPause();
-                    } else if (mPlaybackStateHelper.isPaused()) {
+                    } else {
                         onPlay();
-                    } else if (mPlaybackStateHelper.isLoading()) {
-                        mPlayWhenReady = !mPlayWhenReady;
-                    } else if (mPlaybackStateHelper.isStopped()) {
-                        Timber.w("Shouldnt be here");
                     }
                     break;
                 }
             }
         }
-    };
+    }
 
-    final AudioManagerHelper.OnFocusChangedListener mAudioFocusChangeListener =
-            new AudioManagerHelper.OnFocusChangedListener() {
+    class PlaybackQueueQueueChangeListener implements PlaybackQueue.QueueChangeListener {
+        @Override
+        public void onCurrentPosChanged() {
+            mHandler.post(new Runnable() {
                 @Override
-                public void onFocusLost() {
-                    mPausedByTransientLossOfFocus = false;
-                    mMediaSessionCallback.onPause();
+                public void run() {
+                    onCurrentPosChangedReal();
                 }
+            });
+        }
 
+        @Override
+        public void onQueueChanged() {
+            mHandler.post(new Runnable() {
                 @Override
-                public void onFocusLostTransient() {
-                    mPausedByTransientLossOfFocus = true;
-                    mMediaSessionCallback.onPause();
+                public void run() {
+                    onQueueChangedReal();
                 }
+            });
+        }
 
+        @Override
+        public void onMovedToNext() {
+            mHandler.post(new Runnable() {
                 @Override
-                public void onFocusLostDuck() {
-                    if (mPlaybackStateHelper.isPlaying()) {
-                        mPlayer.duck(true);
-                    }
+                public void run() {
+                    onMovedToNextReal();
                 }
+            });
+        }
 
-                @Override
-                public void onFocusGain() {
-                    if (mPausedByTransientLossOfFocus) {
-                        mPausedByTransientLossOfFocus = false;
-                        mMediaSessionCallback.onPlay();
-                    } else {
-                        mPlayer.duck(false);
-                    }
+        @DebugLog
+        void onCurrentPosChangedReal() {
+            if (mQueue.notEmpty()) {
+                getMediaSession().setQueue(mQueue.getQueueItems());
+                mHandler.removeCallbacks(mProgressCheckRunnable);
+
+                final Uri uri = mQueue.getCurrentUri();
+                if (mCurrentTrack != null && mCurrentTrack.getUri().equals(uri)) {
+                    Timber.e("Uris match, what should i do? reloading anyway");
                 }
-            };
-
-    final PlaybackQueue.QueueChangeListener mQueueChangeListener =
-            new PlaybackQueue.QueueChangeListener() {
-                @Override
-                @DebugLog
-                public void onCurrentPosChanged() {
-                    if (mQueue.notEmpty()) {
-                        mHandler.removeCallbacks(mProgressCheckRunnable);
-                        Uri uri = mQueue.getCurrentUri();
-                        Track track = mLibraryHelper.getTrack(uri);
-                        if (track == null) {
-                            //will callback in here
-                            mQueue.remove(mQueue.getCurrentPos());
-                        } else {
-                            if (track.equals(mCurrentTrack)) {
-                                Timber.w("Current track matches queue");
+                mPlayback.prepareForTrack();
+                if (mCurrentTrackSub != null) {
+                    mCurrentTrackSub.unsubscribe();
+                }
+                mCurrentTrackSub = mIndexClient.getTrack(uri)
+                        .first()
+                        .observeOn(getScheduler())
+                        .subscribe(new Subscriber<Track>() {
+                            @Override
+                            public void onCompleted() {
+                                mCurrentTrackSub = null;
                             }
-                            mCurrentTrack = track;
-                            mCurrentUri = uri;
-                            if (mPlaybackStateHelper.isPlaying()) {
-                                mPlayWhenReady = true;
+
+                            @Override
+                            public void onError(Throwable e) {
+                                mCurrentTrackSub = null;
+                                //will callback in here
+                                mQueue.remove(mQueue.getCurrentPos());
                             }
-                            mPlaybackStateHelper.gotoConnecting();
-                            mPlayer.setDataSource(track.getResources().get(0).getUri());//TODO FixME
-                            mMediaSession.setQueue(mQueue.getQueueItems());
+
+                            @Override
+                            public void onNext(Track track) {
+                                mCurrentTrack = track;
+                                mPlayback.loadTrack(track.getResources().get(0),
+                                        new DefaultMediaPlayer.Factory());
+                                if (mPlayWhenReady) {
+                                    mPlayback.play();
+                                    mPlayWhenReady = false;
+                                }
+                                updateMeta();
+                            }
+                        });
+            } else {
+                Timber.i("Queue is gone. stopping playback");
+                handleStop();
+            }
+        }
+
+        void onQueueChangedReal() {
+            if (mQueue.notEmpty()) {
+                getMediaSession().setQueue(mQueue.getQueueItems());
+                setNextTrack();
+            } else {
+                Timber.e(new IllegalStateException("Got onQueueChanged with empty queue but " +
+                                "should have got onCurrentPosChanged"), "fix this");
+                handleStop();
+            }
+        }
+
+        void onMovedToNextReal() {
+            mCurrentTrack = mNextTrack;
+            mNextTrack = null;
+            setNextTrack();
+        }
+
+        private void setNextTrack() {
+            final Uri uri = mQueue.getNextUri();
+            if (mNextTrack != null && mNextTrack.getUri().equals(uri) && mPlayback.hasNext()) {
+                Timber.i("Next track is up to date");
+                return;
+            }
+            mPlayback.prepareForNextTrack();
+            if (mNextTrackSub != null) {
+                mNextTrackSub.unsubscribe();
+            }
+            mNextTrackSub = mIndexClient.getTrack(uri)
+                    .first()
+                    .observeOn(getScheduler())
+                    .subscribe(new Subscriber<Track>() {
+                        @Override
+                        public void onCompleted() {
+                            mNextTrackSub = null;
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            //will callback into onQueueChanged
+                            mQueue.remove(mQueue.getNextPos());
+                            mNextTrackSub = null;
+                        }
+
+                        @Override
+                        public void onNext(Track track) {
+                            mNextTrack = track;
+                            mPlayback.loadNextTrack(track.getResources().get(0),
+                                    new DefaultMediaPlayer.Factory());
                             updateMeta();
                         }
-                    } else if (mPlaybackStateHelper.isPlaying()) {
-                        stopAndResetState();
-                    }
-                }
+                    });
+        }
 
-                @Override
-                @DebugLog
-                public void onQueueChanged() {
-                    if (mQueue.notEmpty()) {
-                        setNextTrack();
-                        mMediaSession.setQueue(mQueue.getQueueItems());
-                    } else if (mPlaybackStateHelper.isPlaying()) {
-                        Timber.e("Got onQueueChanged with empty queue");
-                        stopAndResetState();
-                    }
-                }
+    }
 
-                @Override
-                @DebugLog
-                public void wentToNext() {
-                    mCurrentTrack = mNextTrack;
-                    mNextTrack = null;
-                    mCurrentUri = mNextUri;
-                    mNextUri = null;
-                    if (!mPlaybackStateHelper.isPlaying()) {
-                        mPlaybackStateHelper.gotoPlaying();
-                    }
-                    updateMeta();
-                    setNextTrack();
-                }
-
-                private void setNextTrack() {
-                    Uri uri = mQueue.getNextUri();
-                    Track track = mLibraryHelper.getTrack(uri);
-                    if (track == null) {
-                        //will callback into onQueueChanged
-                        mQueue.remove(mQueue.getNextPos());
-                    } else if (!track.equals(mNextTrack)) {
-                        mNextTrack = track;
-                        mNextUri = uri;
-                        mPlayer.setNextDataSource(track.getResources().get(0).getUri());//TODO fixme
-                    } else {
-                        Timber.i("Next track is still up to date");
-                    }
-                }
-
-                private void stopAndResetState() {
-                    Timber.i("Queue is gone. stopping playback");
-                    mMediaSessionCallback.onStop();
-                    mNotificationHelper.killNotification();
-                }
-            };
-
-    final IPlayerCallback mPlayerCallback = new IPlayerCallback() {
-
+    class PlaybackCallback implements Playback.Callback {
         @Override
-        @DebugLog
-        public void onLoading() {
-            mPlaybackStateHelper.gotoBuffering();
-            updatePlaybackState();
+        public void onPlaybackStatusChanged(int state) {
+            updatePlaybackState(null);
         }
 
         @Override
         @DebugLog
-        public void onReady() {
-            long duration = mPlayer.getDuration();
-            mPlaybackStateHelper.updateDuration(duration);
-            if (mQueueReloaded) {
-                mQueueReloaded = false;
-                long pos = mPlaybackStateHelper.getPosition();
-                if (pos > 0 && pos < duration) {
-                    mPlayer.seekTo(pos);//TODO what to do on failure?
-                }
-            }
-            mPlaybackStateHelper.gotoPaused();
-            if (mPlayWhenReady) {
-                mPlayWhenReady = false;
-                mMediaSessionCallback.onPlay();
-            } else {
-                updatePlaybackState();
-            }
-            //Will load the next track
-            mQueueChangeListener.onQueueChanged();
-        }
+        public void onCompletion() {
 
-        @Override
-        @DebugLog
-        public void onPlaying() {
-            if (!mPlaybackStateHelper.isPlaying()) {
-                Timber.e("Player started playing unexpectedly");
-                mMediaSessionCallback.onPause();
-            }
-        }
-
-        @Override
-        @DebugLog
-        public void onPaused() {
-            if (!mPlaybackStateHelper.isPaused()) {
-                Timber.e("Player paused unexpectedly");
-                //TODO
-            }
-        }
-
-        @Override
-        @DebugLog
-        public void onStopped() {
-            if (mPlaybackStateHelper.isSkippingNext()) {
-                //player failed to go next, manually move it
-                mQueue.goToItem(mQueue.getNextPos());
-            } else if (!mPlaybackStateHelper.isStopped()) {
-                Timber.e("Player stopped unexpectedly");
-                resetState();
-                updatePlaybackState();
-                //reload the current and see what happens
-                mQueueChangeListener.onCurrentPosChanged();
-            } else {
-                //TODO anything?
-            }
         }
 
         @Override
         @DebugLog
         public void onWentToNext() {
-            //will call into wentToNext
-            mQueue.wentToNext();
+            //will call into moveToNext
+            mQueue.moveToNext();
         }
 
         @Override
@@ -785,17 +782,19 @@ public class PlaybackService extends Service {
             mQueue.remove(mQueue.getNextPos());
         }
 
-    };
+        @Override
+        @DebugLog
+        public void onError(String error) {
+
+        }
+    }
 
     final Runnable mLoadQueueRunnable = new Runnable() {
         @Override
         public void run() {
             resetState();
-            mPlaybackStateHelper.updatePosition(mSettings.getLong(PlaybackPreferences.SEEK_POS, -1));
             mQueue.load();
-            mQueueReloaded = true;
-            mQueueChangeListener.onCurrentPosChanged();
-            mMediaSession.setActive(true);
+            mPlayback.seekTo(mIndexClient.getLastSeekPosition());
         }
     };
 
@@ -803,10 +802,8 @@ public class PlaybackService extends Service {
         @Override
         public void run() {
             mHandler.removeCallbacks(this);
-            long pos = mPlayer.getPosition();
-            mPlaybackStateHelper.updatePosition(pos);
-            updatePlaybackState();
-            if (mPlaybackStateHelper.isPlaying()) {
+            updatePlaybackState(null);
+            if (mPlayback.isPlaying()) {
                 mHandler.postDelayed(this, 2000);
             }
         }

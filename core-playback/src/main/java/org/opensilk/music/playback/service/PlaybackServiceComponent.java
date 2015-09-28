@@ -17,38 +17,19 @@
 
 package org.opensilk.music.playback.service;
 
-import android.content.Context;
-
-import org.opensilk.common.core.dagger2.AppContextModule;
-import org.opensilk.music.artwork.service.ArtworkProviderHelperModule;
-import org.opensilk.music.playback.SystemServicesModule;
-
 import javax.inject.Singleton;
 
-import dagger.Component;
-import rx.functions.Func1;
+import dagger.Subcomponent;
 
 /**
  * Created by drew on 5/6/15.
  */
-@Singleton
-@Component(
+@PlaybackServiceScope
+@Subcomponent(
         modules = {
-                AppContextModule.class,
                 PlaybackServiceModule.class,
-                ArtworkProviderHelperModule.class,
-                SystemServicesModule.class,
         }
 )
 public interface PlaybackServiceComponent {
-    Func1<Context, PlaybackServiceComponent> FACTORY =
-            new Func1<Context, PlaybackServiceComponent>() {
-                @Override
-                public PlaybackServiceComponent call(Context context) {
-                    return DaggerPlaybackServiceComponent.builder()
-                            .appContextModule(new AppContextModule(context))
-                            .build();
-                }
-            };
     void inject(PlaybackService service);
 }

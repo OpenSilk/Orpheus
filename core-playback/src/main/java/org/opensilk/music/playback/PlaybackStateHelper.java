@@ -18,14 +18,33 @@
 package org.opensilk.music.playback;
 
 import android.media.session.PlaybackState;
-import android.os.Bundle;
 import android.os.SystemClock;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
+
+import static android.media.session.PlaybackState.ACTION_PAUSE;
+import static android.media.session.PlaybackState.ACTION_PLAY;
+import static android.media.session.PlaybackState.ACTION_PLAY_PAUSE;
+import static android.media.session.PlaybackState.ACTION_SEEK_TO;
+import static android.media.session.PlaybackState.ACTION_SKIP_TO_NEXT;
+import static android.media.session.PlaybackState.ACTION_SKIP_TO_PREVIOUS;
+import static android.media.session.PlaybackState.ACTION_SKIP_TO_QUEUE_ITEM;
+import static android.media.session.PlaybackState.ACTION_STOP;
+import static android.media.session.PlaybackState.PLAYBACK_POSITION_UNKNOWN;
+import static android.media.session.PlaybackState.STATE_BUFFERING;
+import static android.media.session.PlaybackState.STATE_CONNECTING;
+import static android.media.session.PlaybackState.STATE_ERROR;
+import static android.media.session.PlaybackState.STATE_FAST_FORWARDING;
+import static android.media.session.PlaybackState.STATE_NONE;
+import static android.media.session.PlaybackState.STATE_PAUSED;
+import static android.media.session.PlaybackState.STATE_PLAYING;
+import static android.media.session.PlaybackState.STATE_REWINDING;
+import static android.media.session.PlaybackState.STATE_SKIPPING_TO_NEXT;
+import static android.media.session.PlaybackState.STATE_SKIPPING_TO_PREVIOUS;
+import static android.media.session.PlaybackState.STATE_SKIPPING_TO_QUEUE_ITEM;
+import static android.media.session.PlaybackState.STATE_STOPPED;
 
 //import static android.support.v4.media.session.PlaybackStateCompat.*;
-import static android.media.session.PlaybackState.*;
 
 /**
  * Created by drew on 4/23/15.
@@ -227,6 +246,49 @@ public class PlaybackStateHelper {
             default:
                 return false;
         }
+    }
+
+
+    public static boolean isStopped(PlaybackState state) {
+        return state.getState() == STATE_STOPPED;
+    }
+
+
+    public static boolean isPaused(PlaybackState state) {
+        return state.getState() == STATE_PAUSED;
+    }
+
+
+    public static boolean isPlaying(PlaybackState state) {
+        return state.getState() == STATE_PLAYING;
+    }
+
+    public static boolean isFastForwarding(PlaybackState state) {
+        return state.getState() == STATE_FAST_FORWARDING;
+    }
+
+    public static boolean isRewinding(PlaybackState state) {
+        return state.getState() == STATE_REWINDING;
+    }
+
+    public static boolean isBuffering(PlaybackState state) {
+        return state.getState() == STATE_BUFFERING;
+    }
+
+    public static boolean isError(PlaybackState state) {
+        return state.getState() == STATE_ERROR;
+    }
+
+    public static boolean isConnecting(PlaybackState state) {
+        return state.getState() == STATE_CONNECTING;
+    }
+
+    public static boolean isSkippingPrevious(PlaybackState state) {
+        return state.getState() == STATE_SKIPPING_TO_PREVIOUS;
+    }
+
+    public static boolean isSkippingNext(PlaybackState state) {
+        return state.getState() == STATE_SKIPPING_TO_NEXT;
     }
 
 }

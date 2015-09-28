@@ -17,20 +17,9 @@
 
 package org.opensilk.music.playback.service;
 
-import android.app.PendingIntent;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.media.session.MediaSession;
-import android.os.*;
+import android.os.HandlerThread;
+import android.os.PowerManager;
 import android.os.Process;
-
-import org.opensilk.common.core.dagger2.AppContextComponent;
-import org.opensilk.common.core.dagger2.AppContextModule;
-import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.music.artwork.service.ArtworkProviderHelperModule;
-import org.opensilk.music.playback.NavUtils;
-import org.opensilk.music.playback.SystemServicesModule;
 
 import dagger.Module;
 import dagger.Provides;
@@ -38,41 +27,33 @@ import dagger.Provides;
 /**
  * Created by drew on 5/6/15.
  */
-@Module(
-        includes = {
-        }
-)
+@Module
 public class PlaybackServiceModule {
-    @Provides
+    final PlaybackService mService;
+
+    private PlaybackServiceModule(PlaybackService mService) {
+        this.mService = mService;
+    }
+
+    public static PlaybackServiceModule create(PlaybackService service) {
+        return new PlaybackServiceModule(service);
+    }
+
+    @Provides @PlaybackServiceScope
+    public PlaybackService providePlaybackService() {
+        return mService;
+    }
+
+    @Provides @PlaybackServiceScope
     public HandlerThread provideServiceHandlerTHread() {
         return new HandlerThread(PlaybackService.NAME, Process.THREAD_PRIORITY_BACKGROUND);
     }
-    @Provides
-    public MediaSession provideMediaSession(@ForApplication Context context) {
-        MediaSession mMediaSession = new MediaSession(context, PlaybackService.NAME);
-        mMediaSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS
-                | MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
-//        mMediaSession.setMediaButtonReceiver(PendingIntent.getBroadcast(
-//                this,
-//                1,
-//                new Intent(this, MediaButtonIntentReceiver.class),
-//                PendingIntent.FLAG_UPDATE_CURRENT
-//        ));
-        mMediaSession.setSessionActivity(PendingIntent.getActivity(context,
-                2, NavUtils.makeLauncherIntent(context), PendingIntent.FLAG_UPDATE_CURRENT));
-        final ComponentName mediaButtonReceiverComponent
-                = new ComponentName(context, MediaButtonIntentReceiver.class);
-        final Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON)
-                .setComponent(mediaButtonReceiverComponent);
-        final PendingIntent mediaButtonReceiverIntent = PendingIntent.getBroadcast(context,
-                0, mediaButtonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        mMediaSession.setMediaButtonReceiver(mediaButtonReceiverIntent);
-        return mMediaSession;
-    }
-    @Provides
+
+    @Provides @PlaybackServiceScope
     public PowerManager.WakeLock provideWakeLock(PowerManager powerManager) {
         PowerManager.WakeLock w = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, PlaybackService.NAME);
         w.setReferenceCounted(false);
         return w;
     }
+
 }

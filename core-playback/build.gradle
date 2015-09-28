@@ -33,7 +33,7 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 15
+        minSdkVersion 22
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode versionMajor * 1000000 + versionMinor * 10000 + versionPatch * 100 + versionBuild
         versionName String.format("%d.%d.%d-SNAPSHOT", versionMajor, versionMinor, versionPatch)
@@ -55,6 +55,7 @@ dependencies {
     compile project(':core-model')
     compile project(':core-loader')
     compile project(':core-translations')
+    compile project(':core-index')
     compile(group:'org.apache.commons', name:'commons-lang3', version: rootProject.ext.commonsLangVersion)
     compile(group:'io.reactivex', name: 'rxandroid', version: rootProject.ext.rxAndroidVersion)
 
