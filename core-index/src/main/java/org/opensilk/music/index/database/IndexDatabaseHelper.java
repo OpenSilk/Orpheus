@@ -32,7 +32,7 @@ import javax.inject.Singleton;
 @Singleton
 public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
-    public static final int DB_VERSION = 25;
+    public static final int DB_VERSION = 26;
     public static final String DB_NAME = "music.db";
 
     @Inject
@@ -93,12 +93,19 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP TABLE IF EXISTS tracks;");
             db.execSQL("DROP TABLE IF EXISTS scanner_meta;");
             db.execSQL("DROP TABLE IF EXISTS scanner_settings;");
+            db.execSQL("DROP TABLE IF EXISTS playback_settings;");
 
             //end mistakes cleanup
 
             //Scanner meta
             db.execSQL("CREATE TABLE IF NOT EXISTS scanner_settings (" +
                     "rescan_count INTEGER DEFAULT 0" +
+                    ");");
+            //playback
+            db.execSQL("CREATE TABLE IF NOT EXISTS playback_settings (" +
+                    "key VARCHAR(32) NOT NULL UNIQUE ON CONFLICT REPLACE, " +
+                    "intVal INTEGER, " +
+                    "textVal TEXT " +
                     ");");
             //Artist metadata
             db.execSQL("CREATE TABLE IF NOT EXISTS artist_meta (" +

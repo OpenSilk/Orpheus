@@ -178,4 +178,22 @@ public class IndexSchema {
         String RES_DURATION = "res_duration";
         String DATE_ADDED = "date_added";
     }
+
+    public interface PlaybackSettings {
+        String TABLE = "playback_settings";
+        String KEY = "key";
+        String INT_VALUE = "intVal";
+        String TEXT_VALUE = "textVal";
+        //TEXT
+        String KEY_LAST_QUEUE_LIST = "last_queue_list";
+        //INT
+        String KEY_LAST_QUEUE_POS = "last_queue_pos";
+        //INT
+        String KEY_LAST_QUEUE_REPEAT = "last_queue_repeat";
+        //INT
+        String KEY_LAST_QUEUE_SHUFFLE = "last_queue_shuffle";
+        //LONG
+        String KEY_LAST_SEEK_POS = "last_seek_pos";
+    }
+
 }

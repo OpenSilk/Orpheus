@@ -22,6 +22,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.media.MediaDescriptionCompat;
 import android.util.Pair;
 
 import org.opensilk.music.model.Album;
@@ -31,6 +32,8 @@ import org.opensilk.music.model.Metadata;
 import org.opensilk.music.model.Track;
 
 import java.util.List;
+
+import rx.Observable;
 
 /**
  * Created by drew on 9/13/15.
@@ -56,4 +59,16 @@ public interface IndexDatabase {
     int removeContainer(Uri uri);
     long insertTrack(Track track, Metadata metadata);
     boolean trackNeedsScan(Track track);
+
+    List<Uri> getLastQueue();
+    void saveQueue(List<Uri> queue);
+    int getLastQueuePosition();
+    void saveQueuePosition(int pos);
+    int getLastQueueShuffleMode();
+    void saveQueueShuffleMode(int mode);
+    int getLastQueueRepeatMode();
+    void saveQueueRepeatMode(int mode);
+    long getLastSeekPosition();
+    void saveLastSeekPosition(long pos);
+
 }

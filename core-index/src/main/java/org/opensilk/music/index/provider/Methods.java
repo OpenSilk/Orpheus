@@ -24,4 +24,19 @@ public interface Methods {
     String IS_INDEXED = "idx.is_indexed";
     String ADD = "idx.add";
     String REMOVE = "idx.remove";
+    String LAST_QUEUE_LIST = "idx.lastqueue.list";
+    String LAST_QUEUE_POSITION = "idx.lastqueue.position";
+    String LAST_QUEUE_REPEAT = "idx.lastqueue.repeat";
+    String LAST_QUEUE_SHUFFLE = "idx.lastqueu.shuffle";
+    String SAVE_QUEUE_LIST = "idx.savequeue.list";
+    String SAVE_QUEUE_POSITION = "idx.savequeue.position";
+    String SAVE_QUEUE_REPEAT = "idx.savequeue.repeat";
+    String SAVE_QUEUE_SHUFFLE = "idx.savequeue.shuffle";
+    String MEDIA_DESCRIPTIONS = "idx.mediadescriptions";
+    String LAST_SEEK_POSITION = "idx.lastseekposition";
+    String SAVE_SEEK_POSITION = "idx.saveseekposition";
+    String GET_TRACK = "idx.get.track";
+    String GET_TRACK_LIST = "idx.get.track.list";
+    String GET_TRACK_URI_LIST = "idx.get.track.list.uri";
+
 }

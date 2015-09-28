@@ -39,6 +39,7 @@ import org.opensilk.music.model.Metadata;
 import org.opensilk.music.model.Track;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -895,6 +896,173 @@ public class IndexDatabaseImpl implements IndexDatabase {
         cv.put(IndexSchema.Meta.Genre.GENRE_NAME, name);
         cv.put(IndexSchema.Meta.Genre.GENRE_KEY, keyFor(name));
         return insert(IndexSchema.Meta.Genre.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+    }
+
+    static final String playbackSettingsSel = IndexSchema.PlaybackSettings.KEY + "=?";
+    static final String[] intValCols = new String[] {
+            IndexSchema.PlaybackSettings.INT_VALUE,
+    };
+    static final String[] textValCols = new String[] {
+            IndexSchema.PlaybackSettings.TEXT_VALUE,
+    };
+    static final String[] lastQueueListKey = new String[] {
+            IndexSchema.PlaybackSettings.KEY_LAST_QUEUE_LIST,
+    };
+    static final String[] lastQueuePosKey = new String[] {
+            IndexSchema.PlaybackSettings.KEY_LAST_QUEUE_POS,
+    };
+    static final String[] lastQueueRepeatKey = new String[] {
+            IndexSchema.PlaybackSettings.KEY_LAST_QUEUE_REPEAT,
+    };
+    static final String[] lastQueueShuffleKey = new String[] {
+            IndexSchema.PlaybackSettings.KEY_LAST_QUEUE_SHUFFLE,
+    };
+    static final String[] lastSeekPosKey = new String[] {
+            IndexSchema.PlaybackSettings.KEY_LAST_SEEK_POS,
+    };
+
+
+    public List<Uri> getLastQueue() {
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.PlaybackSettings.TABLE, textValCols,
+                    playbackSettingsSel, lastQueueListKey, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                String q = c.getString(0);
+                if (!StringUtils.isEmpty(q)) {
+                    String[] strings = StringUtils.split(q, ',');
+                    List<Uri> lst = new ArrayList<>(strings.length);
+                    for (String s : strings) {
+                        lst.add(Uri.parse(s));
+                    }
+                    return lst;
+                }
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public void saveQueue(List<Uri> queue) {
+        if (queue != null && queue.size() > 0) {
+            ContentValues cv = new ContentValues(2);
+            cv.put(IndexSchema.PlaybackSettings.KEY, IndexSchema.PlaybackSettings.KEY_LAST_QUEUE_LIST);
+            String q = StringUtils.join(queue, ',');
+            cv.put(IndexSchema.PlaybackSettings.TEXT_VALUE, q);
+            insert(IndexSchema.PlaybackSettings.TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
+        } else {
+            delete(IndexSchema.PlaybackSettings.TABLE, playbackSettingsSel, lastQueueListKey);
+        }
+    }
+
+    @Override
+    public int getLastQueuePosition() {
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.PlaybackSettings.TABLE, intValCols,
+                    playbackSettingsSel, lastQueuePosKey, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                return c.getInt(0);
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return -1;
+    }
+
+    @Override
+    public void saveQueuePosition(int pos) {
+        if (pos < 0) {
+            delete(IndexSchema.PlaybackSettings.TABLE, playbackSettingsSel, lastQueuePosKey);
+        } else {
+            ContentValues cv = new ContentValues(2);
+            cv.put(IndexSchema.PlaybackSettings.KEY, IndexSchema.PlaybackSettings.KEY_LAST_QUEUE_POS);
+            cv.put(IndexSchema.PlaybackSettings.INT_VALUE, pos);
+            insert(IndexSchema.PlaybackSettings.TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
+        }
+    }
+
+    @Override
+    public int getLastQueueShuffleMode() {
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.PlaybackSettings.TABLE, intValCols,
+                    playbackSettingsSel, lastQueueShuffleKey, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                return c.getInt(0);
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return -1;
+    }
+
+    @Override
+    public void saveQueueShuffleMode(int mode) {
+        if (mode < 0) {
+            delete(IndexSchema.PlaybackSettings.TABLE, playbackSettingsSel, lastQueueShuffleKey);
+        } else {
+            ContentValues cv = new ContentValues(2);
+            cv.put(IndexSchema.PlaybackSettings.KEY, IndexSchema.PlaybackSettings.KEY_LAST_QUEUE_SHUFFLE);
+            cv.put(IndexSchema.PlaybackSettings.INT_VALUE, mode);
+            insert(IndexSchema.PlaybackSettings.TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
+        }
+    }
+
+    @Override
+    public int getLastQueueRepeatMode() {
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.PlaybackSettings.TABLE, intValCols,
+                    playbackSettingsSel, lastQueueRepeatKey, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                return c.getInt(0);
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return -1;
+    }
+
+    @Override
+    public void saveQueueRepeatMode(int mode) {
+        if (mode < 0) {
+            delete(IndexSchema.PlaybackSettings.TABLE, playbackSettingsSel, lastQueueRepeatKey);
+        } else {
+            ContentValues cv = new ContentValues(2);
+            cv.put(IndexSchema.PlaybackSettings.KEY, IndexSchema.PlaybackSettings.KEY_LAST_QUEUE_REPEAT);
+            cv.put(IndexSchema.PlaybackSettings.INT_VALUE, mode);
+            insert(IndexSchema.PlaybackSettings.TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
+        }
+    }
+
+    @Override
+    public long getLastSeekPosition() {
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.PlaybackSettings.TABLE, intValCols,
+                    playbackSettingsSel, lastSeekPosKey, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                return c.getLong(0);
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return -1;
+    }
+
+    @Override
+    public void saveLastSeekPosition(long pos) {
+        if (pos < 0) {
+            delete(IndexSchema.PlaybackSettings.TABLE, playbackSettingsSel, lastSeekPosKey);
+        } else {
+            ContentValues cv = new ContentValues(2);
+            cv.put(IndexSchema.PlaybackSettings.KEY, IndexSchema.PlaybackSettings.KEY_LAST_SEEK_POS);
+            cv.put(IndexSchema.PlaybackSettings.INT_VALUE, pos);
+            insert(IndexSchema.PlaybackSettings.TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
+        }
     }
 
     public static String getStringOrNull(Cursor c, int idx) {

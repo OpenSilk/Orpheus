@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.music.index.IndexComponent;
 import org.opensilk.music.index.database.IndexDatabase;
 import org.opensilk.music.index.scanner.ScannerService;
@@ -104,6 +105,83 @@ public class IndexProvider extends LibraryProvider {
                 Container c = LibraryExtras.getBundleable(extras);
                 int numremoved = mDataBase.removeContainer(c.getUri());
                 return reply.putOk(numremoved > 0).get();
+            }
+            case Methods.LAST_QUEUE_LIST: {
+                final List<Uri> queue = mDataBase.getLastQueue();
+                if (queue.isEmpty()) {
+                    return reply.putOk(false).get();
+                } else {
+                    return BundleHelper.from(reply.putOk(true).get())
+                            .putList(queue).get();
+                }
+            }
+            case Methods.LAST_QUEUE_POSITION: {
+                final int pos = mDataBase.getLastQueuePosition();
+                if (pos < 0) {
+                    return reply.putOk(false).get();
+                } else {
+                    return BundleHelper.from(reply.putOk(false).get())
+                            .putInt(pos).get();
+                }
+            }
+            case Methods.LAST_QUEUE_REPEAT: {
+                final int rep = mDataBase.getLastQueueRepeatMode();
+                if (rep < 0) {
+                    return reply.putOk(false).get();
+                } else {
+                    return BundleHelper.from(reply.putOk(false).get())
+                            .putInt(rep).get();
+                }
+            }
+            case Methods.LAST_QUEUE_SHUFFLE: {
+                final int shuf = mDataBase.getLastQueueShuffleMode();
+                if (shuf < 0) {
+                    return reply.putOk(false).get();
+                } else {
+                    return BundleHelper.from(reply.putOk(false).get())
+                            .putInt(shuf).get();
+                }
+            }
+            case Methods.SAVE_QUEUE_LIST: {
+                mDataBase.saveQueue(BundleHelper.<Uri>getList(extras));
+                return reply.putOk(true).get();
+            }
+            case Methods.SAVE_QUEUE_POSITION: {
+                mDataBase.saveQueuePosition(BundleHelper.getInt(extras));
+                return reply.putOk(true).get();
+            }
+            case Methods.SAVE_QUEUE_REPEAT: {
+                mDataBase.saveQueueRepeatMode(BundleHelper.getInt(extras));
+                return reply.putOk(true).get();
+            }
+            case Methods.SAVE_QUEUE_SHUFFLE: {
+                mDataBase.saveQueueShuffleMode(BundleHelper.getInt(extras));
+                return reply.putOk(true).get();
+            }
+            case Methods.LAST_SEEK_POSITION: {
+                final long pos = mDataBase.getLastSeekPosition();
+                if (pos < 0) {
+                    return reply.putOk(false).get();
+                } else {
+                    return BundleHelper.from(reply.putOk(false).get())
+                            .putLong(pos).get();
+                }
+            }
+            case Methods.SAVE_SEEK_POSITION: {
+                mDataBase.saveLastSeekPosition(BundleHelper.getLong(extras));
+                return reply.putOk(true).get();
+            }
+            case Methods.MEDIA_DESCRIPTIONS: {
+                return null;
+            }
+            case Methods.GET_TRACK: {
+                return null;
+            }
+            case Methods.GET_TRACK_LIST: {
+                return null;
+            }
+            case Methods.GET_TRACK_URI_LIST: {
+                return null;
             }
             default: {
                 return super.callCustom(method, arg, extras);

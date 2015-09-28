@@ -17,14 +17,21 @@
 
 package org.opensilk.music.index.client;
 
+import android.media.MediaDescription;
+import android.media.MediaMetadata;
 import android.media.browse.MediaBrowser;
 import android.net.Uri;
+import android.os.Bundle;
 import android.service.media.MediaBrowserService;
 import android.support.annotation.NonNull;
+import android.support.v4.media.MediaDescriptionCompat;
 
 import org.opensilk.music.model.Container;
+import org.opensilk.music.model.Track;
 
 import java.util.List;
+
+import rx.Observable;
 
 /**
  * Created by drew on 9/17/15.
@@ -50,5 +57,27 @@ public interface IndexClient {
      */
     boolean remove(Container container);
 
-    void loadChildren(@NonNull String parentId, @NonNull MediaBrowserService.Result<List<MediaBrowser.MediaItem>> result);
+    MediaBrowserService.BrowserRoot browserGetRoot(@NonNull String clientPackageName, int clientUid, Bundle rootHints);
+    void browserLoadChildren(@NonNull String parentId, @NonNull MediaBrowserService.Result<List<MediaBrowser.MediaItem>> result);
+
+
+    List<Uri> getLastQueue();
+    int getLastQueuePosition();
+    int getLastQueueShuffleMode();
+    int getLastQueueRepeatMode();
+
+    void saveQueue(List<Uri> queue);
+    void saveQueuePosition(int pos);
+    void saveQueueShuffleMode(int mode);
+    void saveQueueRepeatMode(int mode);
+
+    Observable<List<MediaDescriptionCompat>> getDescriptions(List<Uri> queue);
+
+    long getLastSeekPosition();
+    void saveLastSeekPosition(long pos);
+
+    Observable<Track> getTrack(Uri uri);
+    Observable<List<Track>> getTracks(Uri uri, String sortOrder);
+    Observable<List<Uri>> getTrackUris(Uri uri, String sordOrder);
+    MediaMetadata convertToMediaMetadata(Track track);
 }
