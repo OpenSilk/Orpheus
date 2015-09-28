@@ -102,7 +102,6 @@ public class NotificationHelper2 extends BroadcastReceiver {
         mNotificationManager = notificationManager;
         mArtworkHelper = artworkHelper;
         mService = service;
-        updateSessionToken();
 
         String pkg = mService.getPackageName();
         mPauseIntent = PendingIntent.getBroadcast(mContext, REQUEST_CODE,
@@ -128,6 +127,7 @@ public class NotificationHelper2 extends BroadcastReceiver {
      */
     public void startNotification() {
         if (!mStarted) {
+            updateSessionToken();
             mMetadata = mController.getMetadata();
             mPlaybackState = mController.getPlaybackState();
             // The notification must be updated after setting started to true

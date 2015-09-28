@@ -18,6 +18,7 @@
 package org.opensilk.music.playback.service;
 
 import android.content.Intent;
+import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.audiofx.AudioEffect;
 import android.media.browse.MediaBrowser;
@@ -39,11 +40,11 @@ import android.support.annotation.Nullable;
 import android.view.KeyEvent;
 
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.music.artwork.service.ArtworkProviderHelper;
 import org.opensilk.music.index.client.IndexClient;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.playback.AudioManagerHelper;
-import org.opensilk.music.playback.BundleHelper;
 import org.opensilk.music.playback.DefaultMediaPlayer;
 import org.opensilk.music.playback.NotificationHelper2;
 import org.opensilk.music.playback.Playback;
@@ -244,7 +245,8 @@ public class PlaybackService extends MediaBrowserService {
     }
 
     void updateMeta() {
-        //TODO
+        MediaMetadata meta = mIndexClient.convertToMediaMetadata(mCurrentTrack);
+        getMediaSession().setMetadata(meta);
     }
 
     void updatePlaybackState(String error) {
@@ -286,11 +288,15 @@ public class PlaybackService extends MediaBrowserService {
     }
 
     private long getAvailableActions() {
-        long actions = PlaybackState.ACTION_PLAY | PlaybackState.ACTION_PLAY_FROM_MEDIA_ID |
-                PlaybackState.ACTION_PLAY_FROM_SEARCH;
+        long actions = PlaybackState.ACTION_PLAY | PlaybackState.ACTION_PLAY_PAUSE
+                //| PlaybackState.ACTION_PLAY_FROM_MEDIA_ID
+                //| PlaybackState.ACTION_PLAY_FROM_SEARCH
+                ;
         if (mQueue.notEmpty()) {
+            actions |= PlaybackState.ACTION_SEEK_TO | PlaybackState.ACTION_SKIP_TO_QUEUE_ITEM;
             if (mPlayback.isPlaying()) {
                 actions |= PlaybackState.ACTION_PAUSE;
+                actions &= ~PlaybackState.ACTION_PLAY;
             }
             if (mQueue.getPrevious() >= 0) {
                 actions |= PlaybackState.ACTION_SKIP_TO_PREVIOUS;
@@ -651,7 +657,10 @@ public class PlaybackService extends MediaBrowserService {
             if (mQueue.notEmpty()) {
                 getMediaSession().setQueue(mQueue.getQueueItems());
                 mHandler.removeCallbacks(mProgressCheckRunnable);
-
+                if (mQueue.getCurrentPos() < 0) {
+                    handleStop();
+                    return;
+                }
                 final Uri uri = mQueue.getCurrentUri();
                 if (mCurrentTrack != null && mCurrentTrack.getUri().equals(uri)) {
                     Timber.e("Uris match, what should i do? reloading anyway");
@@ -712,6 +721,13 @@ public class PlaybackService extends MediaBrowserService {
         }
 
         private void setNextTrack() {
+            if (mQueue.getNextPos() < 0) {
+                if (mPlayback.hasNext()) {
+                    //removes the next player
+                    mPlayback.prepareForNextTrack();
+                }
+                return;
+            }
             final Uri uri = mQueue.getNextUri();
             if (mNextTrack != null && mNextTrack.getUri().equals(uri) && mPlayback.hasNext()) {
                 Timber.i("Next track is up to date");

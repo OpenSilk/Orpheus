@@ -42,7 +42,7 @@ import static org.mockito.Mockito.*;
 @RunWith(RobolectricTestRunner.class)
 @Config( manifest = Config.NONE)
 public class PlaybackQueueTest {
-    
+
     PlaybackQueue mPlaybackQueue;
 
     @Before

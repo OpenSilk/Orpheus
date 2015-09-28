@@ -38,7 +38,7 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
 import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.music.playback.BundleHelper;
+import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.music.playback.PlaybackConstants;
 import org.opensilk.music.playback.PlaybackConstants.CMD;
 import org.opensilk.music.playback.service.IPlaybackService;
