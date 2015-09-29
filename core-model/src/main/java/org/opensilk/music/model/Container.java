@@ -18,10 +18,7 @@
 package org.opensilk.music.model;
 
 import android.net.Uri;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
-
-import org.opensilk.music.model.spi.Bundleable;
 
 /**
  * A Container has one or more children descending from Item or Container
@@ -49,23 +46,22 @@ public abstract class Container implements Model {
     }
 
     @Override
-    public String getName() {
+    public @NonNull String getName() {
         return name;
     }
 
     @Override
-    public Uri getUri() {
+    public @NonNull Uri getUri() {
         return uri;
     }
 
-    @NonNull
     @Override
-    public String getDisplayName() {
-        String disName = metadata.getString(Metadata.KEY_DISPLAY_NAME);
+    public @NonNull String getSortName() {
+        String disName = metadata.getString(Metadata.KEY_SORT_NAME);
         return disName != null ? disName : getName();
     }
 
-    public Uri getParentUri() {
+    public @NonNull Uri getParentUri() {
         return parentUri;
     }
 

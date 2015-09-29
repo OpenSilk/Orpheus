@@ -20,9 +20,6 @@ package org.opensilk.music.model;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
-import org.opensilk.music.model.spi.Bundleable;
 
 /**
  * Created by drew on 6/10/14.
@@ -96,8 +93,8 @@ public class Folder extends Container {
             return this;
         }
 
-        public Builder setDisplayName(String name) {
-            bob.putString(Metadata.KEY_DISPLAY_NAME, name);
+        public Builder setSortName(String name) {
+            bob.putString(Metadata.KEY_SORT_NAME, name);
             return this;
         }
 

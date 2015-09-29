@@ -23,7 +23,6 @@ import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -113,8 +112,8 @@ public class Genre extends Container {
             return this;
         }
 
-        public Builder setDisplayName(String name) {
-            bob.putString(Metadata.KEY_DISPLAY_NAME, name);
+        public Builder setSortName(String name) {
+            bob.putString(Metadata.KEY_SORT_NAME, name);
             return this;
         }
 

@@ -157,7 +157,7 @@ public class Metadata implements Parcelable {
     /**
      * String: TODO still unsure if this should be used
      */
-    public static final String KEY_DISPLAY_NAME = "orpheus.display.name";
+    public static final String KEY_SORT_NAME = "orpheus.display.name";
     /**
      * Long: Bitmask of action flags in LibraryConfig
      */

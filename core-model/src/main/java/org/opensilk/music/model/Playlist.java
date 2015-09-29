@@ -19,16 +19,10 @@ package org.opensilk.music.model;
 
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
-import org.opensilk.music.model.spi.Bundleable;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -110,8 +104,8 @@ public class Playlist extends Container {
             return this;
         }
 
-        public Builder setDisplayName(String name) {
-            bob.putString(Metadata.KEY_DISPLAY_NAME, name);
+        public Builder setSortName(String name) {
+            bob.putString(Metadata.KEY_SORT_NAME, name);
             return this;
         }
 

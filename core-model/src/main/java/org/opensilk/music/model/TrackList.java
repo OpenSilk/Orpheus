@@ -114,8 +114,8 @@ public class TrackList extends Container {
             return this;
         }
 
-        public Builder setDisplayName(String name) {
-            bob.putString(Metadata.KEY_DISPLAY_NAME, name);
+        public Builder setSortName(String name) {
+            bob.putString(Metadata.KEY_SORT_NAME, name);
             return this;
         }
 

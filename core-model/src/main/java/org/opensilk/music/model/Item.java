@@ -18,15 +18,7 @@
 package org.opensilk.music.model;
 
 import android.net.Uri;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
-
-import org.opensilk.music.model.spi.Bundleable;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Describes a single object
@@ -53,23 +45,22 @@ public abstract class Item implements Model {
     }
 
     @Override
-    public String getName() {
+    public @NonNull String getName() {
         return name;
     }
 
     @Override
-    public Uri getUri() {
+    public @NonNull Uri getUri() {
         return uri;
     }
 
-    @NonNull
     @Override
-    public String getDisplayName() {
-        String disName = metadata.getString(Metadata.KEY_DISPLAY_NAME);
+    public @NonNull String getSortName() {
+        String disName = metadata.getString(Metadata.KEY_SORT_NAME);
         return disName != null ? disName : getName();
     }
 
-    public Uri getParentUri() {
+    public @NonNull Uri getParentUri() {
         return parentUri;
     }
 

@@ -31,8 +31,5 @@ public interface Bundleable {
     }
 
     @Deprecated String getIdentity();
-    @Deprecated String getName();
 
-    Uri getUri();
-    String getDisplayName();
 }

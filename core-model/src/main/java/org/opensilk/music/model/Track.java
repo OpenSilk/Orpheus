@@ -25,8 +25,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import org.opensilk.music.model.spi.Bundleable;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -354,8 +352,8 @@ public class Track extends Item {
             return this;
         }
 
-        public Builder setDisplayName(String name) {
-            bob.putString(Metadata.KEY_DISPLAY_NAME, name);
+        public Builder setSortName(String name) {
+            bob.putString(Metadata.KEY_SORT_NAME, name);
             return this;
         }
 
