@@ -169,10 +169,17 @@ public class LibraryExtras {
         return b;
     }
 
+    public static Bundle sanitize(Bundle extras) {
+        extras.remove(BUNDLE_SUBSCRIBER_CALLBACK);
+        extras.remove(RESULT_RECEIVER_CALLBACK);
+        return extras;
+    }
+
     public static <T extends Bundleable> T getBundleable(Bundle extras) {
         try {
-            extras.setClassLoader(LibraryExtras.class.getClassLoader());
-            return BundleableUtil.materializeBundle(extras.getBundle(BUNDLEABLE));
+            Bundle b = extras.getBundle(BUNDLEABLE);
+            b.setClassLoader(LibraryExtras.class.getClassLoader());
+            return BundleableUtil.materializeBundle(b);
         } catch (BadBundleableException ignored) {
             return null;
         }
