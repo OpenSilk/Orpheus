@@ -156,7 +156,10 @@ public class ControlsScreenPresenter extends ViewPresenter<ControlsScreenView>
                         boolean playing = playbackState.getState() == STATE_PLAYING;
                         if (hasView()) {
                             getView().setPlayChecked(PlaybackController.isPlayingOrSimilar(playbackState));
-                            //TODO shuffle/repeat
+                            if (VersionUtils.hasApi22()) {
+                                getView().setRepeatLevel(BundleHelper.getInt(playbackState.getExtras()));
+                                getView().setShuffleLevel(BundleHelper.getInt2(playbackState.getExtras()));
+                            } //TODO api21 maybe track events?
                         }
                         isPlaying = playing;
                         long position = playbackState.getPosition();

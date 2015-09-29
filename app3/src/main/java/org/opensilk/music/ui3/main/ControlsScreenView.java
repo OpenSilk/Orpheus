@@ -114,6 +114,14 @@ public class ControlsScreenView extends RelativeLayout {
         seekBar.setProgress(progress);
     }
 
+    public void setRepeatLevel(int mode) {
+        repeat.setImageLevel(mode);
+    }
+
+    public void setShuffleLevel(int mode) {
+        shuffle.setImageLevel(mode);
+    }
+
     void setup() {
         seekBar.setOnSeekBarChangeListener(new CircularSeekBar.OnCircularSeekBarChangeListener() {
             @Override
