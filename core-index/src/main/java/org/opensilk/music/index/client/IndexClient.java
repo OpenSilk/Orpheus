@@ -71,7 +71,7 @@ public interface IndexClient {
     void saveQueueShuffleMode(int mode);
     void saveQueueRepeatMode(int mode);
 
-    Observable<List<MediaDescriptionCompat>> getDescriptions(List<Uri> queue);
+    Observable<List<MediaDescription>> getDescriptions(List<Uri> queue);
 
     long getLastSeekPosition();
     void saveLastSeekPosition(long pos);

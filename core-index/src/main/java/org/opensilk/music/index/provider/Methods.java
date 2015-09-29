@@ -37,6 +37,5 @@ public interface Methods {
     String SAVE_SEEK_POSITION = "idx.saveseekposition";
     String GET_TRACK = "idx.get.track";
     String GET_TRACK_LIST = "idx.get.track.list";
-    String GET_TRACK_URI_LIST = "idx.get.track.list.uri";
 
 }

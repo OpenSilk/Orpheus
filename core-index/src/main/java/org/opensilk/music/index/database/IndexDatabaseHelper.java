@@ -32,7 +32,7 @@ import javax.inject.Singleton;
 @Singleton
 public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
-    public static final int DB_VERSION = 26;
+    public static final int DB_VERSION = 27;
     public static final String DB_NAME = "music.db";
 
     @Inject
@@ -79,6 +79,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP INDEX IF EXISTS track_id_idx;");
             db.execSQL("DROP INDEX IF EXISTS track_res_id_idx;");
             db.execSQL("DROP INDEX IF EXISTS containers_uri_idx;");
+            db.execSQL("DROP INDEX IF EXISTS playback_settings_key_idx;");
 
 
             db.execSQL("DROP TABLE IF EXISTS extracted_meta;");
@@ -241,6 +242,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     ";");
 
             db.execSQL("CREATE VIEW IF NOT EXISTS genre_info AS SELECT " +
+                    "g1._id, " +
                     "g1.genre_name as name, " +
                     "g1.genre_key, " +
                     "COUNT(t1._id) as number_of_tracks, " +
@@ -304,6 +306,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("CREATE INDEX IF NOT EXISTS track_id_idx on track_meta(_id);");
             db.execSQL("CREATE INDEX IF NOT EXISTS tracks_id_idx on tracks(_id);");
             db.execSQL("CREATE INDEX IF NOT EXISTS containers_uri_idx on containers(uri);");
+            db.execSQL("CREATE INDEX IF NOT EXISTS playback_settings_key_idx on playback_settings(key);");
 
 
             //Cleanup albums when tracks are deleted

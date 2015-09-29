@@ -17,11 +17,15 @@
 
 package org.opensilk.music.index.client;
 
+import android.content.ContentProviderClient;
 import android.content.Context;
+import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.browse.MediaBrowser;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.service.media.MediaBrowserService;
 import android.support.annotation.NonNull;
 import android.support.v4.media.MediaDescriptionCompat;
@@ -31,10 +35,18 @@ import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.index.provider.Methods;
+import org.opensilk.music.library.internal.BundleableListSlice;
+import org.opensilk.music.library.internal.IBundleableObserver;
+import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.provider.LibraryExtras;
+import org.opensilk.music.library.provider.LibraryMethods;
+import org.opensilk.music.loader.BundleableLoader;
+import org.opensilk.music.loader.TypedBundleableLoader;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Track;
+import org.opensilk.music.model.spi.Bundleable;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -43,6 +55,9 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import rx.Observable;
+import rx.Subscriber;
+import rx.functions.Func1;
+import rx.subjects.AsyncSubject;
 import timber.log.Timber;
 
 import static android.media.MediaMetadata.METADATA_KEY_ALBUM;
@@ -61,6 +76,7 @@ public class IndexClientImpl implements IndexClient {
 
     final Context appContext;
     final Uri callUri;
+    ContentProviderClient client;
 
     @Inject
     public IndexClientImpl(
@@ -173,7 +189,20 @@ public class IndexClientImpl implements IndexClient {
 
     @Override
     public Observable<Track> getTrack(Uri uri) {
-        return Observable.empty();
+        Bundle repl = makeCall(Methods.GET_TRACK, BundleHelper.b().putUri(uri).get());
+        if (checkCall(repl)) {
+            return Observable.just(LibraryExtras.<Track>getBundleable(repl));
+        }
+        return TypedBundleableLoader.<Track>create(appContext)
+                .setUri(uri)
+                .setMethod(LibraryMethods.GET)
+                .createObservable()
+                .flatMap(new Func1<List<Track>, Observable<Track>>() {
+                    @Override
+                    public Observable<Track> call(List<Track> tracks) {
+                        return Observable.from(tracks);
+                    }
+                });
     }
 
     @Override
@@ -187,8 +216,85 @@ public class IndexClientImpl implements IndexClient {
     }
 
     @Override
-    public Observable<List<MediaDescriptionCompat>> getDescriptions(List<Uri> queue) {
-        return Observable.empty();
+    public Observable<List<MediaDescription>> getDescriptions(final List<Uri> queue) {
+        return Observable.create(new Observable.OnSubscribe<List<Track>>() {
+            @Override
+            public void call(final Subscriber<? super List<Track>> subscriber) {
+                final IBundleableObserver o = new IBundleableObserver.Stub() {
+                    @Override public void onNext(BundleableListSlice slice) throws RemoteException {
+                        List<Track> list = new ArrayList<>(slice.getList());
+                        if (!subscriber.isUnsubscribed()) {
+                            subscriber.onNext(list);
+                        }
+                    }
+                    @Override public void onError(LibraryException e) throws RemoteException {
+                        if (!subscriber.isUnsubscribed()) {
+                            subscriber.onError(e);
+                        }
+                    }
+                    @Override public void onCompleted() throws RemoteException {
+                        if (!subscriber.isUnsubscribed()) {
+                            subscriber.onCompleted();
+                        }
+                    }
+                };
+
+                final Bundle extras = LibraryExtras.b()
+                        .putUriList(queue)
+                        .putBundleableObserverCallback(o)
+                        .get();
+
+                Bundle repl = makeCall(Methods.GET_TRACK_LIST, extras);
+                if (!checkCall(repl) && !subscriber.isUnsubscribed()) {
+                    subscriber.onError(new Exception("Call failed"));
+                }
+            }
+        }).flatMap(new Func1<List<Track>, Observable<List<Track>>>() {
+            @Override
+            public Observable<List<Track>> call(List<Track> tracks) {
+                if (tracks.size() == queue.size()) {
+                    return Observable.just(tracks);
+                }
+                //some of them werent found in the db
+                List<Uri> unknowns = new ArrayList<Uri>(queue.size() - tracks.size());
+                for (Uri uri : queue) {
+                    boolean found = false;
+                    for (Track track : tracks) {
+                        if (track.getUri().equals(uri)) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        unknowns.add(uri);
+                    }
+                }
+                //todo throw multiget into the mix
+                //xxx this is *probably* very very bad
+                List<Observable<List<Track>>> loaders = new ArrayList<>(unknowns.size());
+                for (Uri uri : unknowns) {
+                    loaders.add(TypedBundleableLoader.<Track>create(appContext)
+                            .setUri(uri).setMethod(LibraryMethods.GET)
+                            .createObservable());
+                }
+                return Observable.merge(loaders);
+            }
+        }).map(new Func1<List<Track>, List<MediaDescription>>() {
+            @Override
+            public List<MediaDescription> call(List<Track> tracks) {
+                List<MediaDescription> descs = new ArrayList<MediaDescription>(tracks.size());
+                for (Track track : tracks) {
+                    MediaDescription description = new MediaDescription.Builder()
+                            .setTitle(track.getName())
+                            .setSubtitle(track.getArtistName())
+                            .setMediaId(track.getUri().toString())
+                            //.setIconUri()TODO
+                            .build();
+                    descs.add(description);
+                }
+                return descs;
+            }
+        });
     }
 
     @Override
@@ -224,7 +330,24 @@ public class IndexClientImpl implements IndexClient {
     }
 
     private Bundle makeCall(String method, Bundle args) {
-        return appContext.getContentResolver().call(callUri, method, null, args);
+        if (client == null) {
+            synchronized (this) {
+                if (client == null) {
+                    //XXX we are using an unstable provider since we never actually release it
+                    // but we *need* this cached as it greatly improves performance
+                    client = appContext.getContentResolver().acquireUnstableContentProviderClient(callUri);
+                }
+            }
+        }
+        try {
+            return client.call(method, null, args);
+        } catch (RemoteException e) {
+            synchronized (this) {
+                client.release();
+                client = null;
+            }
+            return makeCall(method, args);
+        }
     }
 
     private static boolean checkCall(Bundle result) {

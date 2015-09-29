@@ -40,6 +40,7 @@ import org.opensilk.music.model.Track;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -193,6 +194,26 @@ public class IndexDatabaseImpl implements IndexDatabase {
         return lst;
     }
 
+    static final String albumTracksSel = IndexSchema.Info.Track.ALBUM_ID + "=?";
+
+    @Override
+    public List<Track> getAlbumTracks(String id, String sortOrder) {
+        List<Track> lst = new ArrayList<>();
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.Info.Track.TABLE, tracks_cols,
+                    albumTracksSel, new String[]{id}, null, null, sortOrder);
+            if (c != null && c.moveToFirst()) {
+                do {
+                    lst.add(buildTrack(c));
+                } while (c.moveToNext());
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return lst;
+    }
+
     Album buildAlbum(Cursor c, Uri parentUri) {
         final String id = c.getString(0);
         final String name = c.getString(1);
@@ -282,7 +303,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
     }
 
     @Override
-    public List<org.opensilk.music.model.Track> getTracks(String sortOrder, boolean excludeOrphaned) {
+    public List<Track> getTracks(String sortOrder, boolean excludeOrphaned) {
         List<Track> lst = new ArrayList<>();
         Cursor c = null;
         try {
@@ -292,6 +313,62 @@ public class IndexDatabaseImpl implements IndexDatabase {
                     lst.add(buildTrack(c));
                 } while (c.moveToNext());
             }
+        } finally {
+            closeCursor(c);
+        }
+        return lst;
+    }
+
+    static final String trackUriSel = IndexSchema.Info.Track.URI + "=?";
+
+    @Override
+    public Track getTrack(Uri uri) {
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.Info.Track.TABLE, tracks_cols, trackUriSel,
+                    new String[]{uri.toString()}, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                return buildTrack(c);
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return null;
+    }
+
+    @Override
+    public List<Track> getTracksInList(final List<Uri> uris) {
+        List<Track> lst = new ArrayList<>(uris.size());
+        Cursor c = null;
+        try {
+            StringBuilder sel = new StringBuilder(IndexSchema.Info.Track.URI)
+                    .append(" IN (");
+            String[] selArgs = new String[uris.size()];
+            int ii=0;
+            for (Uri u : uris) {
+                selArgs[ii] = u.toString();
+                if (ii++ > 0) {
+                    sel.append(",");
+                }
+                sel.append("?");
+            }
+            sel.append(")");
+            c = query(IndexSchema.Info.Track.TABLE, tracks_cols,
+                    sel.toString(), selArgs, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                do {
+                    lst.add(buildTrack(c));
+                } while (c.moveToNext());
+            }
+            //get them in the same order as the passed list
+            Collections.sort(lst, new Comparator<Track>() {
+                @Override
+                public int compare(Track lhs, Track rhs) {
+                    int idx1 = uris.indexOf(lhs.getUri());
+                    int idx2 = uris.indexOf(rhs.getUri());
+                    return idx1 - idx2;
+                }
+            });
         } finally {
             closeCursor(c);
         }
@@ -548,28 +625,13 @@ public class IndexDatabaseImpl implements IndexDatabase {
     }
 
     public boolean trackNeedsScan(Track track) {
-        /*
-        Cursor c = null;
-        try {
-            final Track.Res res = track.getResources().get(0);
-            final String sel = IndexSchema.TrackResMeta.URI + "=?";
-            final String[] selArgs = new String[] {track.getUri().toString()};
-            c = mIndexDatabase.query(IndexSchema.TrackResMeta.TABLE, resMetaCols, sel, selArgs, null, null, null);
-            if (c != null && c.moveToFirst()) {
-                final long size = c.getLong(0);
-                final long lastMod = c.getLong(1);
-                //if size or lastmod has changed we need to rescan
-                if (res.getSize() != size || res.getLastMod() != lastMod) {
-                    mIndexDatabase.delete(IndexSchema.TrackResMeta.TABLE, sel, selArgs);
-                    return true;
-                }
-                return false;
-            }
-            return true;
-        } finally {
-            closeCursor(c);
+        Track t = getTrack(track.getUri());
+        //TODO compare meta
+        if (t != null) {
+            //always update with new info
+            insertTrack(track);
+            return false;
         }
-        */
         return true;
     }
 

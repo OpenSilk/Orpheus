@@ -47,8 +47,11 @@ public interface IndexDatabase {
     int update(String table, ContentValues values, String whereClause, String[] whereArgs);
     List<Artist> getArtists(String sortOrder);
     List<Album> getAlbums(String sortOrder);
+    List<Track> getAlbumTracks(String id, String sortOrder);
     List<Track> getTracks(String sortOrder);
     List<Track> getTracks(String sortOrder, boolean excludeOrphaned);
+    List<Track> getTracksInList(List<Uri> uris);
+    Track getTrack(Uri uri);
     List<Genre> getGenres(String sortOrder);
 
     long hasContainer(Uri uri);

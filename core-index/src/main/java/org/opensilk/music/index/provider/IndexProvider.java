@@ -40,16 +40,25 @@ import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.spi.Bundleable;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import hugo.weaving.DebugLog;
+import rx.Observable;
+import rx.Subscriber;
+import rx.schedulers.Schedulers;
 
+import static org.opensilk.music.index.provider.IndexUris.M_ALBUM;
 import static org.opensilk.music.index.provider.IndexUris.M_ALBUMS;
+import static org.opensilk.music.index.provider.IndexUris.M_ALBUM_TRACKS;
+import static org.opensilk.music.index.provider.IndexUris.M_ARTIST;
 import static org.opensilk.music.index.provider.IndexUris.M_ARTISTS;
+import static org.opensilk.music.index.provider.IndexUris.M_GENRE;
 import static org.opensilk.music.index.provider.IndexUris.M_GENRES;
+import static org.opensilk.music.index.provider.IndexUris.M_TRACK;
 import static org.opensilk.music.index.provider.IndexUris.M_TRACKS;
 import static org.opensilk.music.index.provider.IndexUris.makeMatcher;
 
@@ -120,7 +129,7 @@ public class IndexProvider extends LibraryProvider {
                 if (pos < 0) {
                     return reply.putOk(false).get();
                 } else {
-                    return BundleHelper.from(reply.putOk(false).get())
+                    return BundleHelper.from(reply.putOk(true).get())
                             .putInt(pos).get();
                 }
             }
@@ -129,7 +138,7 @@ public class IndexProvider extends LibraryProvider {
                 if (rep < 0) {
                     return reply.putOk(false).get();
                 } else {
-                    return BundleHelper.from(reply.putOk(false).get())
+                    return BundleHelper.from(reply.putOk(true).get())
                             .putInt(rep).get();
                 }
             }
@@ -138,7 +147,7 @@ public class IndexProvider extends LibraryProvider {
                 if (shuf < 0) {
                     return reply.putOk(false).get();
                 } else {
-                    return BundleHelper.from(reply.putOk(false).get())
+                    return BundleHelper.from(reply.putOk(true).get())
                             .putInt(shuf).get();
                 }
             }
@@ -163,7 +172,7 @@ public class IndexProvider extends LibraryProvider {
                 if (pos < 0) {
                     return reply.putOk(false).get();
                 } else {
-                    return BundleHelper.from(reply.putOk(false).get())
+                    return BundleHelper.from(reply.putOk(true).get())
                             .putLong(pos).get();
                 }
             }
@@ -175,13 +184,21 @@ public class IndexProvider extends LibraryProvider {
                 return null;
             }
             case Methods.GET_TRACK: {
-                return null;
+                Track track = mDataBase.getTrack(BundleHelper.getUri(extras));
+                if (track == null) {
+                    return reply.putOk(false).get();
+                } else {
+                    return reply.putOk(true).putBundleable(track).get();
+                }
             }
             case Methods.GET_TRACK_LIST: {
-                return null;
-            }
-            case Methods.GET_TRACK_URI_LIST: {
-                return null;
+                IBinder binder = LibraryExtras.getBundleableObserverBinder(extras);
+                if (!binder.isBinderAlive()) {
+                    return reply.putOk(false).get();
+                }
+                getTracksInList(LibraryExtras.getUriList(extras),
+                        binder, LibraryExtras.sanitize(extras));
+                return reply.putOk(true).get();
             }
             default: {
                 return super.callCustom(method, arg, extras);
@@ -195,6 +212,17 @@ public class IndexProvider extends LibraryProvider {
             case M_ALBUMS: {
                 final BundleableSubscriber<Album> subscriber = new BundleableSubscriber<>(binder);
                 final List<Album> lst = mDataBase.getAlbums(LibraryExtras.getSortOrder(args));
+                if (!subscriber.isUnsubscribed()) {
+                    subscriber.onNext(lst);
+                    subscriber.onCompleted();
+                }
+                break;
+            }
+            case M_ALBUM_TRACKS: {
+                final BundleableSubscriber<Track> subscriber = new BundleableSubscriber<>(binder);
+                List<String> segments = uri.getPathSegments();
+                String id = segments.get(segments.size() - 2);
+                final List<Track> lst = mDataBase.getAlbumTracks(id, LibraryExtras.getSortOrder(args));
                 if (!subscriber.isUnsubscribed()) {
                     subscriber.onNext(lst);
                     subscriber.onCompleted();
@@ -236,4 +264,55 @@ public class IndexProvider extends LibraryProvider {
         }
     }
 
+    @Override
+    protected void getObjInternal(Uri uri, IBinder binder, Bundle args) {
+        switch (mUriMatcher.match(uri)) {
+//            case M_ALBUM: {
+//                final BundleableSubscriber<Album> subscriber = new BundleableSubscriber<>(binder);
+//                final List<Album> lst = mDataBase.getAlbums(LibraryExtras.getSortOrder(args));
+//                if (!subscriber.isUnsubscribed()) {
+//                    subscriber.onNext(lst);
+//                    subscriber.onCompleted();
+//                }
+//                break;
+//            }
+//            case M_ARTIST: {
+//                final BundleableSubscriber<Artist> subscriber = new BundleableSubscriber<>(binder);
+//                final List<Artist> lst = mDataBase.getArtists(LibraryExtras.getSortOrder(args));
+//                if (!subscriber.isUnsubscribed()) {
+//                    subscriber.onNext(lst);
+//                    subscriber.onCompleted();
+//                }
+//                break;
+//            }
+//            case M_GENRE: {
+//                final BundleableSubscriber<Genre> subscriber = new BundleableSubscriber<>(binder);
+//                final List<Genre> lst = mDataBase.getGenres(LibraryExtras.getSortOrder(args));
+//                if (!subscriber.isUnsubscribed()) {
+//                    subscriber.onNext(lst);
+//                    subscriber.onCompleted();
+//                }
+//                break;
+//            }
+            default: {
+                final BundleableSubscriber<Bundleable> subscriber = new BundleableSubscriber<>(binder);
+                subscriber.onError(new LibraryException(LibraryException.Kind.ILLEGAL_URI,
+                        new IllegalArgumentException("Unknown uri: " + uri.toString())));
+            }
+        }
+    }
+
+    void getTracksInList(final List<Uri> uris, IBinder binder, Bundle args) {
+        final BundleableSubscriber<Track> subscriber = new BundleableSubscriber<>(binder);
+        Observable.create(new Observable.OnSubscribe<List<Track>>() {
+            @Override
+            public void call(Subscriber<? super List<Track>> subscriber) {
+                List<Track> tracks = mDataBase.getTracksInList(uris);
+                if (!subscriber.isUnsubscribed()) {
+                    subscriber.onNext(tracks);
+                    subscriber.onCompleted();
+                }
+            }
+        }).subscribeOn(Schedulers.computation()).subscribe(subscriber);
+    }
 }

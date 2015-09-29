@@ -77,7 +77,8 @@ public class IndexUris {
     public static Uri albumDetails(Album a) {
         final String authority = a.getUri().getAuthority();
         final String id = a.getUri().getLastPathSegment();
-        return modelBase(authority).appendPath(album).appendPath(id).appendPath(details).build();
+        return albumTracks(authority, id);
+//        return modelBase(authority).appendPath(album).appendPath(id).appendPath(details).build();
     }
 
     public static Uri artists(String authority) {
