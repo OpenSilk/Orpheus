@@ -28,5 +28,7 @@ import dagger.Provides;
 @Module
 public class PauseAndResumeModule {
     @Provides @ActivityScope
+    PauseAndResumePresenter providePauseAndResumePresenter() { return new PauseAndResumePresenter(); }
+    @Provides @ActivityScope
     PauseAndResumeRegistrar providePauseAndResumeRegistar(PauseAndResumePresenter presenter) { return presenter; }
 }

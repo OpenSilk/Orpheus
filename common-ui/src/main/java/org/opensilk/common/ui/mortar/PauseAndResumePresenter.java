@@ -17,13 +17,11 @@ import mortar.bundler.BundleService;
  * Presenter to be registered by the {@link PauseAndResumeActivity}.
  * http://stackoverflow.com/a/25065080
  */
-@ActivityScope
 public class PauseAndResumePresenter extends Presenter<PauseAndResumeActivity>
         implements PauseAndResumeRegistrar {
 
     private final Set<Registration> registrations = new HashSet<>();
 
-    @Inject
     public PauseAndResumePresenter() {
     }
 
