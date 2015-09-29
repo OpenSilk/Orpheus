@@ -23,7 +23,6 @@ import android.os.Bundle;
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.model.Container;
-import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.ex.BadBundleableException;
 import org.opensilk.music.model.util.BundleableUtil;
 import org.opensilk.music.ui3.common.BundleableFragment;
@@ -35,7 +34,7 @@ public class FoldersScreenFragment extends BundleableFragment {
     public static final String NAME = FoldersScreenFragment.class.getName();
 
     public static FoldersScreenFragment ni(Context context, LibraryConfig config, Container container) {
-        Bundle args = makeCommonArgsBundle(config, container.getDisplayName());
+        Bundle args = makeCommonArgsBundle(config, container.getName());
         args.putBundle("fldr", container.toBundle());
         return factory(context, NAME, args);
     }

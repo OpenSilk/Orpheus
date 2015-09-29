@@ -20,33 +20,13 @@ package org.opensilk.music.index.scanner;
 import android.content.Intent;
 import android.os.Build;
 
-import org.apache.commons.io.IOUtils;
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.common.core.util.Preconditions;
 import org.opensilk.music.index.BuildConfig;
-import org.opensilk.music.index.IndexComponent;
 import org.opensilk.music.index.IndexTestApplication;
-import org.opensilk.music.index.database.IndexDatabase;
-import org.opensilk.music.library.sort.AlbumSortOrder;
-import org.opensilk.music.library.sort.ArtistSortOrder;
-import org.opensilk.music.model.Album;
-import org.opensilk.music.model.Artist;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowLog;
-import org.robolectric.shadows.ShadowService;
-import org.robolectric.util.ServiceController;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.List;
 
 /**
  * Created by drew on 9/16/15.

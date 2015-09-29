@@ -25,14 +25,10 @@ import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.LibraryInfo;
-import org.opensilk.music.library.provider.LibraryUris;
-import org.opensilk.music.library.sort.TrackSortOrder;
-import org.opensilk.music.model.Track;
+import org.opensilk.music.model.sort.TrackSortOrder;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
 import org.opensilk.music.ui3.common.OverflowHandler;
-import org.opensilk.music.ui3.common.ItemClickDelegate;
 import org.opensilk.music.ui3.common.OverflowAction;
 import org.opensilk.music.ui3.common.OverflowClickListener;
 

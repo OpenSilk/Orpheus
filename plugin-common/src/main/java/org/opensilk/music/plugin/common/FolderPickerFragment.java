@@ -28,7 +28,7 @@ import android.widget.Toast;
 import org.opensilk.music.library.LibraryConstants;
 import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.library.provider.LibraryUris;
-import org.opensilk.music.library.sort.BundleableSortOrder;
+import org.opensilk.music.model.sort.BundleableSortOrder;
 import org.opensilk.music.loader.BundleableLoader;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;

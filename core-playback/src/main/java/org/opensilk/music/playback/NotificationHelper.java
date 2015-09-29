@@ -35,10 +35,7 @@ import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.playback.service.PlaybackService;
 
-import java.lang.ref.WeakReference;
-
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import rx.Scheduler;
 import rx.Subscription;
@@ -182,7 +179,7 @@ public class NotificationHelper {
                 R.layout.notification_template_base);
 
         // Set up the content view
-        initCollapsedLayout(mCurrentInfo.track.getDisplayName(),
+        initCollapsedLayout(mCurrentInfo.track.getName(),
                 mCurrentInfo.track.getArtistName(), mCurrentInfo.bitmap);
 
         // Notification Builder
@@ -204,7 +201,7 @@ public class NotificationHelper {
             // Control playback from the notification
             initExpandedPlaybackActions(mCurrentInfo.isPlaying);
             // Set up the expanded content view
-            initExpandedLayout(mCurrentInfo.track.getDisplayName(), mCurrentInfo.track.getAlbumName(),
+            initExpandedLayout(mCurrentInfo.track.getName(), mCurrentInfo.track.getAlbumName(),
                     mCurrentInfo.track.getArtistName(), mCurrentInfo.bitmap);
         }
 

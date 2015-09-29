@@ -17,12 +17,8 @@
 
 package org.opensilk.music.index.database;
 
-import android.content.ContentValues;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Build;
-import android.provider.MediaStore;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.assertj.core.api.Assertions;
@@ -33,17 +29,11 @@ import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.index.BuildConfig;
 import org.opensilk.music.index.IndexTestApplication;
 import org.opensilk.music.index.IndexTestComponent;
-import org.opensilk.music.library.sort.AlbumSortOrder;
-import org.opensilk.music.library.sort.ArtistSortOrder;
-import org.opensilk.music.library.sort.TrackSortOrder;
 import org.opensilk.music.model.Metadata;
 import org.opensilk.music.model.Track;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-
-import java.util.List;
-import java.util.UUID;
 
 /**
  * Created by drew on 9/20/15.

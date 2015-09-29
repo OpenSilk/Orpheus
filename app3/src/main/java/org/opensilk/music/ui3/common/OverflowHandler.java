@@ -19,7 +19,6 @@ package org.opensilk.music.ui3.common;
 
 import android.content.Context;
 import android.net.Uri;
-import android.view.Menu;
 import android.widget.PopupMenu;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
@@ -29,8 +28,9 @@ import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryCapability;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.provider.LibraryUris;
-import org.opensilk.music.library.sort.FolderTrackSortOrder;
-import org.opensilk.music.library.sort.TrackSortOrder;
+import org.opensilk.music.model.Model;
+import org.opensilk.music.model.sort.FolderTrackSortOrder;
+import org.opensilk.music.model.sort.TrackSortOrder;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Folder;
@@ -167,7 +167,7 @@ public class OverflowHandler implements OverflowClickListener {
     static class LibInfo {
         final String authority;
         final String libraryId;
-        LibInfo(Bundleable item) {
+        LibInfo(Model item) {
             authority = item.getUri().getAuthority();
             libraryId = item.getUri().getPathSegments().get(0);
         }
@@ -175,7 +175,7 @@ public class OverflowHandler implements OverflowClickListener {
 
     @Override
     public boolean onItemClicked(Context context, OverflowAction action, Bundleable item) {
-        final LibInfo libraryInfo = new LibInfo(item);
+        final LibInfo libraryInfo = new LibInfo((Model) item);
         Uri uri;
         String sortOrder;
         if (item instanceof Album) {

@@ -122,7 +122,7 @@ public class LibraryRootScreenView extends CardView {
         for (final Container c : roots) {
             TextView tv = ViewUtils.inflate(rootsContainer.getContext(),
                     R.layout.mtrl_list_item_oneline_text, rootsContainer, false);
-            tv.setText(c.getDisplayName());
+            tv.setText(c.getName());
             clicksSubs.add(RxView.clickEvents(tv).subscribe(
                     new Action1<ViewClickEvent>() {
                         @Override

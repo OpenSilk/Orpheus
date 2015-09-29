@@ -27,10 +27,7 @@ import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.LibraryInfo;
-import org.opensilk.music.library.provider.LibraryUris;
-import org.opensilk.music.library.sort.PlaylistSortOrder;
-import org.opensilk.music.model.Playlist;
+import org.opensilk.music.model.sort.PlaylistSortOrder;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.ui3.common.ActionBarMenuBaseHandler;
 import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
@@ -38,7 +35,6 @@ import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
-import org.opensilk.music.ui3.playlistsprofile.PlaylistsProfileScreen;
 
 import javax.inject.Named;
 

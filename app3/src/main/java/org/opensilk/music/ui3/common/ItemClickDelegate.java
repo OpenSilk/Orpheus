@@ -24,6 +24,7 @@ import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.provider.LibraryUris;
+import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.playback.control.PlaybackController;
@@ -56,14 +57,14 @@ public class ItemClickDelegate {
         List<Uri> toPlay = new ArrayList<>(adapterItems.size());
         for (Bundleable b : adapterItems) {
             if (b instanceof Track) {
-                toPlay.add(b.getUri());
+                toPlay.add(((Track) b).getUri());
             }
         }
         if (toPlay.isEmpty()) {
             return;//TODO toast?
         }
         //lazy way to find its new pos in case there were folders before it in the adapteritems
-        int pos = toPlay.indexOf(clickedItem.getUri());
+        int pos = toPlay.indexOf(((Model) clickedItem).getUri());
 
         playbackController.playAll(toPlay, pos);
     }

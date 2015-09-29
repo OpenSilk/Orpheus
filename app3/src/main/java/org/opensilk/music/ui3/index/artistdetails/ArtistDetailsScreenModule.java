@@ -30,7 +30,7 @@ import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.index.provider.IndexUris;
-import org.opensilk.music.library.sort.AlbumSortOrder;
+import org.opensilk.music.model.sort.AlbumSortOrder;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.TrackList;
@@ -99,7 +99,7 @@ public class ArtistDetailsScreenModule {
 
     @Provides @Named("profile_title")
     public String provideProfileTitle() {
-        return screen.artist.getDisplayName();
+        return screen.artist.getName();
     }
 
     @Provides @Named("profile_subtitle")

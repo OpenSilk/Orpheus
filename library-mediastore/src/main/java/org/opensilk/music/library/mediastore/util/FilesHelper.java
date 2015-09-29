@@ -31,6 +31,7 @@ import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.mediastore.BuildConfig;
 import org.opensilk.music.library.mediastore.provider.FoldersUris;
 import org.opensilk.music.library.mediastore.util.StorageLookup.StorageVolume;
+import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Track;
 
@@ -126,6 +127,14 @@ public class FilesHelper {
             parentUri = FoldersUris.folder(authority, String.valueOf(volume.id), toRelativePath(volume.path, parent));
         }
         return parentUri;
+    }
+
+    public static @NonNull Folder makeRoot(String authority, StorageVolume volume) {
+        return Folder.builder()
+                .setUri(FoldersUris.folders(authority, String.valueOf(volume.id)))
+                .setParentUri(LibraryUris.rootUri(authority))
+                .setName(volume.description)
+                .build();
     }
 
     public static @NonNull Folder makeFolder(String authority, StorageVolume volume, File dir) {
@@ -331,25 +340,7 @@ public class FilesHelper {
                     final File f = pathMap.remove(path);
                     if (f != null) {
                         try {
-                            Track.Builder tb = Track.builder()
-                                    .setUri(FoldersUris.track(authority, volume.id, c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID))))
-                                    .setParentUri(findParentUri(authority, volume, f))
-                                    .setDisplayName(getStringOrNull(c, MediaStore.Audio.AudioColumns.DISPLAY_NAME))
-                                    .setName(getStringOrNull(c, MediaStore.Audio.AudioColumns.TITLE))
-                                    .setArtistName(getStringOrNull(c, MediaStore.Audio.AudioColumns.ARTIST))
-                                    .setAlbumName(getStringOrNull(c, MediaStore.Audio.AudioColumns.ALBUM))
-                                    .addRes(Track.Res.builder()
-                                                    .setUri(generateDataUri(c.getString(c.getColumnIndexOrThrow(BaseColumns._ID))))
-                                                    .setMimeType(getStringOrNull(c, MediaStore.Audio.AudioColumns.MIME_TYPE))
-                                                    .setDuration(getLongOrZero(c, MediaStore.Audio.AudioColumns.DURATION))
-                                                    .setLastMod(getLongOrZero(c, MediaStore.Audio.AudioColumns.DATE_MODIFIED))
-                                                    .setSize(getLongOrZero(c, MediaStore.Audio.AudioColumns.SIZE))
-                                                    .build()
-                                    )
-                                    .setArtworkUri(generateArtworkUri(
-                                            c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))))
-                                    .setFlags(getFlags(f))
-                                    ;
+                            Track.Builder tb = makeTrackFromCursor(authority, volume, f, c);
                             trackList.add(tb.build());
                         } catch (IllegalArgumentException ignored) {
                             pathMap.put(path, f);
@@ -371,19 +362,43 @@ public class FilesHelper {
         return trackList;
     }
 
-    public static @NonNull List<Track> convertAudioFilesToTracksMinimal(
-            Context context, String authority, StorageVolume volume, List<File> audioFiles) {
-        if (audioFiles.size() == 0) {
-            return Collections.emptyList();
+    public static Track findTrack(Context context, String authority, StorageVolume volume, String id) {
+        Cursor c = null;
+        try {
+            Uri uri = CursorHelpers.appendId(Uris.EXTERNAL_MEDIASTORE_MEDIA, id);
+            c = context.getContentResolver().query(uri, Projections.AUDIO_FILE, null, null, null);
+            if (c!= null && c.moveToFirst()) {
+                File f = new File(c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DATA)));
+                Track.Builder bob = makeTrackFromCursor(authority, volume, f, c);
+                return bob.build();
+            }
+        } finally {
+            closeQuietly(c);
         }
+        return null;
+    }
 
-        final List<Track> trackList = new ArrayList<>(audioFiles.size());
-
-        for (File f : audioFiles) {
-            trackList.add(makeTrackFromFile(authority, volume, f));
-        }
-
-        return trackList;
+    public static Track.Builder makeTrackFromCursor(String authority, StorageVolume volume, File f, Cursor c) {
+        Track.Builder tb = Track.builder()
+                .setUri(FoldersUris.track(authority, volume.id, c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID))))
+                .setParentUri(findParentUri(authority, volume, f))
+                .setSortName(getStringOrNull(c, MediaStore.Audio.AudioColumns.DISPLAY_NAME))
+                .setName(getStringOrNull(c, MediaStore.Audio.AudioColumns.TITLE))
+                .setArtistName(getStringOrNull(c, MediaStore.Audio.AudioColumns.ARTIST))
+                .setAlbumName(getStringOrNull(c, MediaStore.Audio.AudioColumns.ALBUM))
+                .addRes(Track.Res.builder()
+                                .setUri(generateDataUri(c.getString(c.getColumnIndexOrThrow(BaseColumns._ID))))
+                                .setMimeType(getStringOrNull(c, MediaStore.Audio.AudioColumns.MIME_TYPE))
+                                .setDuration(getLongOrZero(c, MediaStore.Audio.AudioColumns.DURATION))
+                                .setLastMod(getLongOrZero(c, MediaStore.Audio.AudioColumns.DATE_MODIFIED))
+                                .setSize(getLongOrZero(c, MediaStore.Audio.AudioColumns.SIZE))
+                                .build()
+                )
+                .setArtworkUri(generateArtworkUri(
+                        c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))))
+                .setFlags(getFlags(f))
+                ;
+        return tb;
     }
 
     public static void closeQuietly(Cursor c) {

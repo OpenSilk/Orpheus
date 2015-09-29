@@ -24,11 +24,9 @@ import android.media.MediaMetadata;
 import android.media.browse.MediaBrowser;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.media.MediaBrowserService;
 import android.support.annotation.NonNull;
-import android.support.v4.media.MediaDescriptionCompat;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
@@ -40,11 +38,9 @@ import org.opensilk.music.library.internal.IBundleableObserver;
 import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryMethods;
-import org.opensilk.music.loader.BundleableLoader;
 import org.opensilk.music.loader.TypedBundleableLoader;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Track;
-import org.opensilk.music.model.spi.Bundleable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,7 +53,6 @@ import javax.inject.Singleton;
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Func1;
-import rx.subjects.AsyncSubject;
 import timber.log.Timber;
 
 import static android.media.MediaMetadata.METADATA_KEY_ALBUM;
@@ -302,8 +297,8 @@ public class IndexClientImpl implements IndexClient {
         Track t = track;
         Track.Res r = track.getResources().get(0);
         MediaMetadata m = new MediaMetadata.Builder()
-                .putString(METADATA_KEY_TITLE, t.getDisplayName())
-                .putString(METADATA_KEY_DISPLAY_TITLE, t.getDisplayName())
+                .putString(METADATA_KEY_TITLE, t.getName())
+                .putString(METADATA_KEY_DISPLAY_TITLE, t.getName())
                 .putString(METADATA_KEY_ARTIST, t.getArtistName())
                 .putString(METADATA_KEY_DISPLAY_SUBTITLE, t.getArtistName())
                         //.putString(METADATA_KEY_DISPLAY_DESCRIPTION, TODO)

@@ -20,27 +20,23 @@ package org.opensilk.music.ui3.library;
 import android.content.Context;
 import android.net.Uri;
 
-import org.aspectj.lang.annotation.Pointcut;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.sort.FolderTrackSortOrder;
+import org.opensilk.music.model.sort.FolderTrackSortOrder;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.ui3.common.ActionBarMenuBaseHandler;
-import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
 import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickDelegate;
 import org.opensilk.music.ui3.common.ItemClickListener;
-import org.opensilk.music.ui3.common.OverflowAction;
-import org.opensilk.music.ui3.common.OverflowHandler;
 
 import javax.inject.Named;
 
@@ -78,7 +74,7 @@ public class FoldersScreenModule {
 
     @Provides @Named("folders_title")
     public String provideTitle() {
-        return screen.container.getDisplayName();
+        return screen.container.getName();
     }
 
     @Provides
@@ -115,17 +111,12 @@ public class FoldersScreenModule {
 
     @Provides @ScreenScope
     public ActionBarMenuConfig provideMenuConfig(
-            AppPreferences appPreferences,
-            ActionBarMenuConfigWrapper wrapper,
-            final OverflowHandler foldersOverflowHandler
+            final AppPreferences appPreferences
     ) {
 
         ActionBarMenuConfig.Builder builder = ActionBarMenuConfig.builder();
 
         builder.withMenu(R.menu.folder_sort_by);
-//        if (screen.libraryInfo.folderId != null) {
-//            builder.withMenus(ActionBarMenuConfig.toObject(OverflowHandler.FOLDERS));
-//        }
 
         Func2<Context, Integer, Boolean> handler = new ActionBarMenuBaseHandler(
                 screen.libraryConfig,
@@ -146,16 +137,11 @@ public class FoldersScreenModule {
                         setNewSortOrder(presenter, FolderTrackSortOrder.Z_A);
                         return true;
                     default:
-                        try {
-                            return foldersOverflowHandler.onItemClicked(context,
-                                    OverflowAction.valueOf(integer), screen.container);
-                        } catch (IllegalArgumentException e) {
-                            return false;
-                        }
+                        return false;
                 }
             }
         };
 
-        return wrapper.injectCommonItems(builder.setActionHandler(handler).build());
+        return builder.setActionHandler(handler).build();
     }
 }

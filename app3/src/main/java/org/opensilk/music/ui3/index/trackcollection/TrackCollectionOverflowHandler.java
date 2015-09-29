@@ -23,7 +23,7 @@ import android.widget.PopupMenu;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.library.sort.TrackSortOrder;
+import org.opensilk.music.model.sort.TrackSortOrder;
 import org.opensilk.music.model.TrackList;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.playback.control.PlaybackController;

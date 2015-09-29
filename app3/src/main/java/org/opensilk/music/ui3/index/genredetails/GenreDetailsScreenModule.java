@@ -28,7 +28,7 @@ import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.index.provider.IndexUris;
-import org.opensilk.music.library.sort.AlbumSortOrder;
+import org.opensilk.music.model.sort.AlbumSortOrder;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.TrackList;
@@ -96,7 +96,7 @@ public class GenreDetailsScreenModule {
 
     @Provides @Named("profile_title")
     public String provideProfileTitle() {
-        return screen.genre.getDisplayName();
+        return screen.genre.getName();
     }
 
     @Provides @Named("profile_subtitle")

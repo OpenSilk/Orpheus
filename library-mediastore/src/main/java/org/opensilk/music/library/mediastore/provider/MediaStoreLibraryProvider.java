@@ -124,7 +124,7 @@ public class MediaStoreLibraryProvider extends LibraryProviderOld {
                 .doOnNext(new Action1<Track>() {
                     @Override
                     public void call(Track track) {
-                        Timber.v("Track name=%s artist=%s albumArtist=%s", track.getDisplayName(), track.getArtistName(), track.getAlbumArtistName());
+                        Timber.v("Track name=%s artist=%s albumArtist=%s", track.getSortName(), track.getArtistName(), track.getAlbumArtistName());
                     }
                 }).subscribe(subscriber);
     }
@@ -158,7 +158,7 @@ public class MediaStoreLibraryProvider extends LibraryProviderOld {
                 .doOnNext(new Action1<Track>() {
                     @Override
                     public void call(Track track) {
-                        Timber.v("Track name=%s artist=%s albumArtist=%s", track.getDisplayName(), track.getArtistName(), track.getAlbumArtistName());
+                        Timber.v("Track name=%s artist=%s albumArtist=%s", track.getSortName(), track.getArtistName(), track.getAlbumArtistName());
                     }
                 }).subscribe(subscriber);
     }
@@ -206,7 +206,7 @@ public class MediaStoreLibraryProvider extends LibraryProviderOld {
         l.createObservable().doOnNext(new Action1<Track>() {
             @Override
             public void call(Track track) {
-                Timber.v("Track name=%s artist=%s albumArtist=%s", track.getDisplayName(), track.getArtistName(), track.getAlbumArtistName());
+                Timber.v("Track name=%s artist=%s albumArtist=%s", track.getSortName(), track.getArtistName(), track.getAlbumArtistName());
             }
         }).subscribe(subscriber);
     }
@@ -235,7 +235,7 @@ public class MediaStoreLibraryProvider extends LibraryProviderOld {
         l.createObservable().doOnNext(new Action1<Track>() {
             @Override
             public void call(Track track) {
-                Timber.v("Track name=%s artist=%s albumArtist=%s", track.getDisplayName(), track.getArtistName(), track.getAlbumArtistName());
+                Timber.v("Track name=%s artist=%s albumArtist=%s", track.getSortName(), track.getArtistName(), track.getAlbumArtistName());
             }
         }).subscribe(subscriber);
     }
@@ -253,7 +253,7 @@ public class MediaStoreLibraryProvider extends LibraryProviderOld {
         l.createObservable().doOnNext(new Action1<Track>() {
             @Override
             public void call(Track track) {
-                Timber.v("Track name=%s artist=%s albumArtist=%s", track.getDisplayName(), track.getArtistName(), track.getAlbumArtistName());
+                Timber.v("Track name=%s artist=%s albumArtist=%s", track.getSortName(), track.getArtistName(), track.getAlbumArtistName());
             }
         }).subscribe(subscriber);
     }

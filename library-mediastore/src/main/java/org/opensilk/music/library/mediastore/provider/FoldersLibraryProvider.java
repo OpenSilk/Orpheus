@@ -38,6 +38,7 @@ import org.opensilk.music.library.provider.LibraryProvider;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Folder;
+import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.spi.Bundleable;
 
@@ -62,7 +63,6 @@ public class FoldersLibraryProvider extends LibraryProvider {
 
     @Inject @Named("foldersLibraryAuthority") String mAuthority;
     @Inject StorageLookup mStorageLookup;
-    @Inject Provider<TracksLoader> mTracksLoaderProvider;
 
     UriMatcher mUriMatcher;
 
@@ -95,7 +95,7 @@ public class FoldersLibraryProvider extends LibraryProvider {
     }
 
     @Override
-    protected void listObjs(Uri uri, Subscriber<? super Bundleable> subscriber, Bundle args) {
+    protected void listObjs(Uri uri, Subscriber<? super Model> subscriber, Bundle args) {
         switch (mUriMatcher.match(uri)) {
             case FoldersUris.M_FOLDERS: {
                 browseFolders(uri.getPathSegments().get(0), null, subscriber, args);
@@ -113,16 +113,20 @@ public class FoldersLibraryProvider extends LibraryProvider {
     }
 
     @Override
-    protected void scanObjs(Uri uri, Subscriber<? super Bundleable> subscriber, Bundle args) {
+    protected void scanObjs(Uri uri, Subscriber<? super Model> subscriber, Bundle args) {
         args.putBoolean("fldr.isscan", true);
         listObjs(uri, subscriber, args);
     }
 
     @Override
-    protected void getObj(Uri uri, Subscriber<? super Bundleable> subscriber, Bundle args) {
+    protected void getObj(Uri uri, Subscriber<? super Model> subscriber, Bundle args) {
         switch (mUriMatcher.match(uri)) {
+            case FoldersUris.M_FOLDERS: {
+                getRoot(uri.getPathSegments().get(0), subscriber, args);
+                break;
+            }
             case FoldersUris.M_FOLDER: {
-                browseFolders(uri.getPathSegments().get(0), uri.getLastPathSegment(), subscriber, args);
+                getFolder(uri.getPathSegments().get(0), uri.getLastPathSegment(), subscriber, args);
                 break;
             }
             case FoldersUris.M_TRACK_MS:
@@ -142,21 +146,22 @@ public class FoldersLibraryProvider extends LibraryProvider {
     protected void listRoots(Uri uri, Subscriber<? super Container> subscriber, Bundle args) {
         List<StorageLookup.StorageVolume> volumes = mStorageLookup.getStorageVolumes();
         if (volumes == null || volumes.size() == 0) {
+            if (!subscriber.isUnsubscribed()) {
+                subscriber.onError(new Exception("No storage volumes found"));
+            }
+        } else {
+            for (StorageLookup.StorageVolume v : volumes) {
+                Folder f = FilesHelper.makeRoot(mAuthority, v);
+                if (subscriber.isUnsubscribed()) {
+                    return;
+                }
+                subscriber.onNext(f);
+            }
             subscriber.onCompleted();
-            return;
         }
-        for (StorageLookup.StorageVolume v : volumes) {
-            Folder f = Folder.builder()
-                    .setUri(FoldersUris.folders(mAuthority, String.valueOf(v.id)))
-                    .setParentUri(LibraryUris.rootUri(mAuthority))
-                    .setName(v.description)
-                    .build();
-            subscriber.onNext(f);
-        }
-        subscriber.onCompleted();
     }
 
-    void browseFolders(String library, String identity, Subscriber<? super Bundleable> subscriber, Bundle args) {
+    void browseFolders(String library, String identity, Subscriber<? super Model> subscriber, Bundle args) {
         final StorageLookup.StorageVolume volume;
         final File rootDir;
         try {
@@ -168,7 +173,9 @@ public class FoldersLibraryProvider extends LibraryProvider {
                 throw new IllegalArgumentException("Can't access path " + rootDir.getPath());
             }
         } catch (IllegalArgumentException e) {
-            subscriber.onError(e);
+            if (!subscriber.isUnsubscribed()) {
+                subscriber.onError(e);
+            }
             return;
         }
 
@@ -196,15 +203,8 @@ public class FoldersLibraryProvider extends LibraryProvider {
         // convert raw file list into something useful
         List<File> audioFiles = FilesHelper.filterAudioFiles(getContext(), files);
         List<Track> tracks;
-        if (isScan) {
-            //We want orpheus to extract the meta
-            tracks = FilesHelper.convertAudioFilesToTracksMinimal(getContext(),
+        tracks = FilesHelper.convertAudioFilesToTracks(getContext(),
                     mAuthority, volume, audioFiles);
-        } else {
-            //We pull some meta from the medastore to make the display prettier
-            tracks = FilesHelper.convertAudioFilesToTracks(getContext(),
-                    mAuthority, volume, audioFiles);
-        }
         if (subscriber.isUnsubscribed()) {
             return;
         }
@@ -214,29 +214,84 @@ public class FoldersLibraryProvider extends LibraryProvider {
         subscriber.onCompleted();
     }
 
-    protected void getTrack(String library, String identity, Subscriber<? super Track> subscriber, Bundle args) {
-        if (StringUtils.isNumeric(identity)) {
-            TracksLoader l = mTracksLoaderProvider.get();
-            l.setUri(appendId(Uris.EXTERNAL_MEDIASTORE_MEDIA, identity));
-            l.createObservable().doOnNext(new Action1<Track>() {
-                @Override
-                public void call(Track track) {
-                    Timber.v("Track name=%s artist=%s albumArtist=%s", track.getDisplayName(), track.getArtistName(), track.getAlbumArtistName());
-                }
-            }).subscribe(subscriber);
-        } else {
-            try {
-                final StorageLookup.StorageVolume volume = mStorageLookup.getStorageVolume(library);
-                final File base = new File(volume.path);
-                final File f = new File(base, identity);
-                if (!f.exists() || !f.isFile() || !f.canRead()) {
-                    Timber.e("Can't access file %s", f.getPath());
-                    throw new IllegalArgumentException("Can't access file " + f.getPath());
-                }
-                subscriber.onNext(FilesHelper.makeTrackFromFile(mAuthority, volume, f));
-                subscriber.onCompleted();
-            } catch (Exception e) {
+    protected void getRoot(String library, Subscriber<? super Model> subscriber, Bundle args) {
+        final StorageLookup.StorageVolume volume;
+        try {
+            volume = mStorageLookup.getStorageVolume(library);
+            final File rootDir = new File(volume.path);
+            if (!rootDir.exists() || !rootDir.isDirectory() || !rootDir.canRead()) {
+                Timber.e("Can't access path %s", rootDir.getPath());
+                throw new IllegalArgumentException("Can't access path " + rootDir.getPath());
+            }
+        } catch (IllegalArgumentException e) {
+            if (!subscriber.isUnsubscribed()) {
                 subscriber.onError(e);
+            }
+            return;
+        }
+        if (!subscriber.isUnsubscribed()) {
+            subscriber.onNext(FilesHelper.makeRoot(mAuthority, volume));
+            subscriber.onCompleted();
+        }
+    }
+
+    protected void getFolder(String library, String identity, Subscriber<? super Model> subscriber, Bundle args) {
+        final StorageLookup.StorageVolume volume;
+        final File rootDir;
+        try {
+            volume = mStorageLookup.getStorageVolume(library);
+            final File base = new File(volume.path);
+            rootDir = new File(base, identity);
+            if (!rootDir.exists() || !rootDir.isDirectory() || !rootDir.canRead()) {
+                Timber.e("Can't access path %s", rootDir.getPath());
+                throw new IllegalArgumentException("Can't access path " + rootDir.getPath());
+            }
+        } catch (IllegalArgumentException e) {
+            if (!subscriber.isUnsubscribed()) {
+                subscriber.onError(e);
+            }
+            return;
+        }
+        if (!subscriber.isUnsubscribed()) {
+            subscriber.onNext(FilesHelper.makeFolder(mAuthority, volume, rootDir));
+            subscriber.onCompleted();
+        }
+    }
+
+    protected void getTrack(String library, String identity, Subscriber<? super Track> subscriber, Bundle args) {
+        final StorageLookup.StorageVolume volume;
+        try {
+            volume = mStorageLookup.getStorageVolume(library);
+            final File rootDir = new File(volume.path);
+            if (!rootDir.exists() || !rootDir.isDirectory() || !rootDir.canRead()) {
+                Timber.e("Can't access path %s", rootDir.getPath());
+                throw new IllegalArgumentException("Can't access path " + rootDir.getPath());
+            }
+        } catch (IllegalArgumentException e) {
+            if (!subscriber.isUnsubscribed()) {
+                subscriber.onError(e);
+            }
+            return;
+        }
+        if (StringUtils.isNumeric(identity)) {
+            Track track = FilesHelper.findTrack(getContext(), mAuthority, volume, identity);
+            if (!subscriber.isUnsubscribed()) {
+                if (track == null) {
+                    subscriber.onError(new IllegalArgumentException("Unable to find track id=" + identity));
+                } else {
+                    subscriber.onNext(track);
+                    subscriber.onCompleted();
+                }
+            }
+        } else {
+            final File f = new File(volume.path, identity);
+            if(!subscriber.isUnsubscribed()) {
+                if (!f.exists() || !f.isFile() || !f.canRead()) {
+                    subscriber.onError(new IllegalArgumentException("Can't access file " + f.getPath()));
+                } else {
+                    subscriber.onNext(FilesHelper.makeTrackFromFile(mAuthority, volume, f));
+                    subscriber.onCompleted();
+                }
             }
         }
     }

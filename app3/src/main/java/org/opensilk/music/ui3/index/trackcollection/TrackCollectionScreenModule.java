@@ -27,7 +27,7 @@ import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.library.sort.TrackSortOrder;
+import org.opensilk.music.model.sort.TrackSortOrder;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.ui3.common.BundleableComponent;
@@ -87,7 +87,7 @@ public class TrackCollectionScreenModule {
 
     @Provides @Named("profile_title")
     public String provideProfileTitle() {
-        return screen.trackList.getDisplayName();
+        return screen.trackList.getName();
     }
 
     @Provides @Named("profile_subtitle")

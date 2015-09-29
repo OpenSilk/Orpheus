@@ -27,20 +27,10 @@ import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.index.BuildConfig;
 import org.opensilk.music.index.IndexComponent;
 import org.opensilk.music.index.IndexTestApplication;
-import org.opensilk.music.index.database.IndexDatabase;
-import org.opensilk.music.index.scanner.ScannerService;
-import org.opensilk.music.library.sort.AlbumSortOrder;
-import org.opensilk.music.library.sort.ArtistSortOrder;
-import org.opensilk.music.model.Album;
-import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Metadata;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-import org.robolectric.util.ServiceController;
-
-import java.util.List;
 
 /**
  * Created by drew on 9/21/15.

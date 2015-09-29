@@ -25,6 +25,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
+import android.support.v4.content.ContextCompat;
 
 import com.google.gson.Gson;
 
@@ -79,12 +80,24 @@ public class ArtworkProviderHelper {
         mGson = gson;
     }
 
+    public Observable<Bitmap> getArtwork(Uri uri) {
+        return Observable.create(new Observable.OnSubscribe<Bitmap>() {
+            @Override
+            public void call(Subscriber<? super Bitmap> subscriber) {
+                subscriber.onNext(getDefaultArt());
+                subscriber.onCompleted();
+            }
+        });
+    }
+
     public Observable<Bitmap> getArtwork(final ArtInfo artInfo, final ArtworkType artworkType) {
         return Observable.create(new Observable.OnSubscribe<Bitmap>() {
             @Override
             public void call(Subscriber<? super Bitmap> subscriber) {
                 if (artInfo == ArtInfo.NULLINSTANCE) {
                     subscriber.onNext(getDefaultArt());
+                    subscriber.onCompleted();
+                    return;
                 }
                 final String cacheKey = UtilsArt.getCacheKey(artInfo, artworkType);
                 final Uri artworkUri = makeUri(artInfo, artworkType);
@@ -164,7 +177,7 @@ public class ArtworkProviderHelper {
     }
 
     private Bitmap getDefaultArt() {
-        return ((BitmapDrawable) mContext.getResources().getDrawable(R.drawable.default_artwork)).getBitmap();
+        return ((BitmapDrawable) ContextCompat.getDrawable(mContext, R.drawable.default_artwork)).getBitmap();
     }
 
     class Notifyer extends ContentObserver implements Subscription {
