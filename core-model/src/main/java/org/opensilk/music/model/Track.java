@@ -42,16 +42,16 @@ public class Track extends Item {
     public static final String DEFAULT_MIME_TYPE = "audio/*";
 
     public static class Res implements Parcelable {
-        private final Uri uri;
+        private final Uri dataUri;
         private final Metadata metadata;
 
-        protected Res(Uri uri, Metadata metadata) {
-            this.uri = uri;
+        protected Res(Uri dataUri, Metadata metadata) {
+            this.dataUri = dataUri;
             this.metadata = metadata;
         }
 
         public Uri getUri() {
-            return uri;
+            return dataUri;
         }
 
         public String getMimeType() {
@@ -96,6 +96,10 @@ public class Track extends Item {
             return hdrs;
         }
 
+        public @Nullable String getHeaderString() {
+            return metadata.getString(Metadata.KEY_RESOURCE_HEADERS);
+        }
+
         public static Builder builder() {
             return new Builder();
         }
@@ -111,16 +115,16 @@ public class Track extends Item {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeParcelable(uri, flags);
+            dest.writeParcelable(dataUri, flags);
             dest.writeParcelable(metadata, flags);
         }
 
         public static final Creator<Res> CREATOR = new Creator<Res>() {
             @Override
             public Res createFromParcel(Parcel source) {
-                final Uri uri = source.readParcelable(Res.class.getClassLoader());
+                final Uri dataUri = source.readParcelable(Res.class.getClassLoader());
                 final Metadata metadata = source.readParcelable(Res.class.getClassLoader());
-                return new Res(uri, metadata);
+                return new Res(dataUri, metadata);
             }
 
             @Override
@@ -130,7 +134,7 @@ public class Track extends Item {
         };
 
         public static class Builder {
-            private Uri uri;
+            private Uri dataUri;
             private Metadata.Builder bob = Metadata.builder();
             private String headers = "";
 
@@ -138,13 +142,16 @@ public class Track extends Item {
             }
 
             private Builder(Res res) {
-                this.uri = res.uri;
+                this.dataUri = res.dataUri;
                 this.bob = res.metadata.buildUpon();
                 this.headers = res.metadata.getString(Metadata.KEY_RESOURCE_HEADERS);
             }
 
+            /**
+             * Set uri pointing to data
+             */
             public Builder setUri(Uri uri) {
-                this.uri = uri;
+                this.dataUri = uri;
                 return this;
             }
 
@@ -174,7 +181,7 @@ public class Track extends Item {
             }
 
             /**
-             * Opaque value, increase when resource changes
+             * Opaque value must be > 1, increase when resource changes
              */
             public Builder setLastMod(long lastMod) {
                 bob.putLong(Metadata.KEY_LAST_MODIFIED, lastMod);
@@ -206,10 +213,10 @@ public class Track extends Item {
             public Res build() {
                 bob.putString(Metadata.KEY_RESOURCE_HEADERS, headers);
                 Metadata metadata = bob.build();
-                if (uri == null) {
+                if (dataUri == null) {
                     throw new NullPointerException("uri is required");
                 }
-                return new Res(uri, metadata);
+                return new Res(dataUri, metadata);
             }
 
         }
@@ -243,10 +250,12 @@ public class Track extends Item {
         return metadata.getUri(Metadata.KEY_ARTIST_URI);
     }
 
+    @Deprecated
     public long getDuration() {
         return metadata.getLong(Metadata.KEY_DURATION);
     }
 
+    @Deprecated
     public int getDurationS() {
         long duration = getDuration();
         return duration != 0 ? (int) (duration / 1000) : 0;
