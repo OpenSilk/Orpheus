@@ -69,11 +69,11 @@ public class BundleHelper {
     }
 
     public static long getLong(Bundle b) {
-        return b.getInt(LONG_ARG);
+        return b.getLong(LONG_ARG);
     }
 
     public static long getLong2(Bundle b) {
-        return b.getInt(LONG_ARG2);
+        return b.getLong(LONG_ARG2);
     }
 
     public static <T extends Parcelable> List<T> getList(Bundle b) {
@@ -88,6 +88,10 @@ public class BundleHelper {
 
     public static Builder b() {
         return builder();
+    }
+
+    public static Builder from(Bundle b) {
+        return new Builder(b);
     }
 
     @Deprecated //Cant refactor cause too common of name
