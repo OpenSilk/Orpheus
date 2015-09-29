@@ -28,18 +28,18 @@ import android.util.Log;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.music.library.LibraryInfo;
-import org.opensilk.music.library.compare.AlbumCompare;
-import org.opensilk.music.library.compare.ArtistCompare;
-import org.opensilk.music.library.compare.BundleableCompare;
-import org.opensilk.music.library.compare.FolderTrackCompare;
-import org.opensilk.music.library.compare.TrackCompare;
+import org.opensilk.music.model.compare.AlbumCompare;
+import org.opensilk.music.model.compare.ArtistCompare;
+import org.opensilk.music.model.compare.BaseCompare;
+import org.opensilk.music.model.compare.FolderTrackCompare;
+import org.opensilk.music.model.compare.TrackCompare;
 import org.opensilk.music.library.internal.BundleableListTransformer;
 import org.opensilk.music.library.internal.BundleableSubscriber;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.internal.DeleteSubscriber;
 import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.internal.ResultReceiver;
-import org.opensilk.music.library.sort.BundleableSortOrder;
+import org.opensilk.music.model.sort.BaseSortOrder;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Folder;
@@ -54,7 +54,6 @@ import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscriber;
-import rx.functions.Action0;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
@@ -144,7 +143,7 @@ public abstract class LibraryProviderOld extends ContentProvider {
                 String sortOrder = extras.getString(LibraryExtras.SORTORDER);
                 final Bundle args = LibraryExtras.b()
                         .putUri(uri)
-                        .putSortOrder(sortOrder != null ? sortOrder : BundleableSortOrder.A_Z)
+                        .putSortOrder(sortOrder != null ? sortOrder : BaseSortOrder.A_Z)
                         .get();
 
                 switch (mMatcher.match(uri)) {
@@ -354,7 +353,7 @@ public abstract class LibraryProviderOld extends ContentProvider {
                 }
             });
         }
-        o.compose(new BundleableListTransformer<Bundleable>(FolderTrackCompare.func(LibraryExtras.getSortOrder(args))))
+        o.compose(new BundleableListTransformer<Bundleable>(null))
                 .subscribe(subscriber);
     }
 
@@ -460,7 +459,7 @@ public abstract class LibraryProviderOld extends ContentProvider {
                     }
                 })
                 .subscribeOn(scheduler)
-                .compose(new BundleableListTransformer<Genre>(BundleableCompare.<Genre>func(LibraryExtras.getSortOrder(args))))
+                .compose(new BundleableListTransformer<Genre>(BaseCompare.<Genre>func(LibraryExtras.getSortOrder(args))))
                 .subscribe(subscriber);
     }
 
@@ -513,7 +512,7 @@ public abstract class LibraryProviderOld extends ContentProvider {
                     }
                 })
                 .subscribeOn(scheduler)
-                .compose(new BundleableListTransformer<Playlist>(BundleableCompare.<Playlist>func(LibraryExtras.getSortOrder(args))))
+                .compose(new BundleableListTransformer<Playlist>(BaseCompare.<Playlist>func(LibraryExtras.getSortOrder(args))))
                 .subscribe(subscriber);
     }
 

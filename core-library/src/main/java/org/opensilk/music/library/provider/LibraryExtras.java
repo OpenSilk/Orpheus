@@ -27,7 +27,7 @@ import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.library.internal.IBundleableObserver;
 import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.internal.ResultReceiver;
-import org.opensilk.music.library.sort.BundleableSortOrder;
+import org.opensilk.music.model.sort.BaseSortOrder;
 import org.opensilk.music.model.ex.BadBundleableException;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.model.util.BundleableUtil;
@@ -96,7 +96,7 @@ public class LibraryExtras {
     }
 
     public static String getSortOrder(Bundle extras) {
-        return extras.getString(SORTORDER, BundleableSortOrder.A_Z);
+        return extras.getString(SORTORDER, BaseSortOrder.A_Z);
     }
 
     public static List<Uri> getUriList(Bundle extras) {

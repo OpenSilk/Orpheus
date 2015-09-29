@@ -19,7 +19,6 @@ package org.opensilk.music.library.provider;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
-import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,19 +26,18 @@ import android.os.IBinder;
 import android.util.Log;
 
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.compare.FolderTrackCompare;
+import org.opensilk.music.model.Model;
+import org.opensilk.music.model.compare.FolderTrackCompare;
 import org.opensilk.music.library.internal.BundleableListTransformer;
 import org.opensilk.music.library.internal.BundleableSubscriber;
 import org.opensilk.music.library.internal.DeleteSubscriber;
 import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.internal.ResultReceiver;
-import org.opensilk.music.library.sort.BundleableSortOrder;
+import org.opensilk.music.model.sort.BaseSortOrder;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.spi.Bundleable;
 
 import java.util.List;
-
-import javax.security.auth.callback.UnsupportedCallbackException;
 
 import rx.Observable;
 import rx.Scheduler;
@@ -108,7 +106,7 @@ public abstract class LibraryProvider extends ContentProvider {
                 final List<Uri> uriList = LibraryExtras.getUriList(extras);
                 LibraryExtras.Builder eb = LibraryExtras.b();
                 eb.putUri(uri)
-                        .putSortOrder(sortOrder != null ? sortOrder : BundleableSortOrder.A_Z);
+                        .putSortOrder(sortOrder != null ? sortOrder : BaseSortOrder.A_Z);
                 if (uriList != null) {
                     eb.putUriList(uriList);
                 }
@@ -186,49 +184,49 @@ public abstract class LibraryProvider extends ContentProvider {
      */
 
     protected void listObjsInternal(final Uri uri, final IBinder binder, final Bundle args){
-        final BundleableSubscriber<Bundleable> subscriber = new BundleableSubscriber<>(binder);
-        Observable<Bundleable> o = Observable.create(
-                new Observable.OnSubscribe<Bundleable>() {
+        final BundleableSubscriber<Model> subscriber = new BundleableSubscriber<>(binder);
+        Observable<Model> o = Observable.create(
+                new Observable.OnSubscribe<Model>() {
                     @Override
-                    public void call(Subscriber<? super Bundleable> subscriber) {
+                    public void call(Subscriber<? super Model> subscriber) {
                         listObjs(uri, subscriber, args);
                     }
                 })
                 .subscribeOn(scheduler);
         o.compose(
-                new BundleableListTransformer<Bundleable>(FolderTrackCompare.func(LibraryExtras.getSortOrder(args)))
+                new BundleableListTransformer<Model>(FolderTrackCompare.func(LibraryExtras.getSortOrder(args)))
         ).subscribe(subscriber);
     }
 
     protected void getObjInternal(final Uri uri, final IBinder binder, final Bundle args){
-        final BundleableSubscriber<Bundleable> subscriber = new BundleableSubscriber<>(binder);
-        Observable<Bundleable> o = Observable.create(
-                new Observable.OnSubscribe<Bundleable>() {
+        final BundleableSubscriber<Model> subscriber = new BundleableSubscriber<>(binder);
+        Observable<Model> o = Observable.create(
+                new Observable.OnSubscribe<Model>() {
                     @Override
-                    public void call(Subscriber<? super Bundleable> subscriber) {
+                    public void call(Subscriber<? super Model> subscriber) {
                         getObj(uri, subscriber, args);
                     }
                 })
                 .subscribeOn(scheduler);
         o.compose(
-                new BundleableListTransformer<Bundleable>(null)
+                new BundleableListTransformer<Model>(null)
         ).subscribe(subscriber);
     }
 
     protected void multiGetObjsInternal(final List<Uri> uriList, final IBinder binder,final Bundle args) {
-        final BundleableSubscriber<Bundleable> subscriber = new BundleableSubscriber<>(binder);
-        Observable<Bundleable> o = Observable.create(
-                new Observable.OnSubscribe<Bundleable>() {
+        final BundleableSubscriber<Model> subscriber = new BundleableSubscriber<>(binder);
+        Observable<Model> o = Observable.create(
+                new Observable.OnSubscribe<Model>() {
                     @Override
-                    public void call(Subscriber<? super Bundleable> subscriber) {
+                    public void call(Subscriber<? super Model> subscriber) {
                         multiGetObjs(uriList, subscriber, args);
                     }
                 })
                 .subscribeOn(scheduler);
         o.compose(
-                new BundleableListTransformer<Bundleable>(new Func2<Bundleable, Bundleable, Integer>() {
+                new BundleableListTransformer<Model>(new Func2<Model, Model, Integer>() {
                     @Override
-                    public Integer call(Bundleable bundleable, Bundleable bundleable2) {
+                    public Integer call(Model bundleable, Model bundleable2) {
                         int idx1 = uriList.indexOf(bundleable.getUri());
                         int idx2 = uriList.indexOf(bundleable2.getUri());
                         return idx1 - idx2;
@@ -238,17 +236,17 @@ public abstract class LibraryProvider extends ContentProvider {
     }
 
     protected void scanObjsInternal(final Uri uri, final IBinder binder, final Bundle args){
-        final BundleableSubscriber<Bundleable> subscriber = new BundleableSubscriber<>(binder);
-        Observable<Bundleable> o = Observable.create(
-                new Observable.OnSubscribe<Bundleable>() {
+        final BundleableSubscriber<Model> subscriber = new BundleableSubscriber<>(binder);
+        Observable<Model> o = Observable.create(
+                new Observable.OnSubscribe<Model>() {
                     @Override
-                    public void call(Subscriber<? super Bundleable> subscriber) {
+                    public void call(Subscriber<? super Model> subscriber) {
                         scanObjs(uri, subscriber, args);
                     }
                 })
                 .subscribeOn(scheduler);
         o.compose(
-                new BundleableListTransformer<Bundleable>(null)
+                new BundleableListTransformer<Model>(null)
         ).subscribe(subscriber);
     }
 
@@ -273,22 +271,22 @@ public abstract class LibraryProvider extends ContentProvider {
      * You must call subscriber.onComplete after emitting the list
      */
 
-    protected void listObjs(Uri uri, Subscriber<? super Bundleable> subscriber, Bundle args) {
+    protected void listObjs(Uri uri, Subscriber<? super Model> subscriber, Bundle args) {
         subscriber.onError(new UnsupportedOperationException());
     }
 
-    protected void getObj(Uri uri, Subscriber<? super Bundleable> subscriber, Bundle args) {
+    protected void getObj(Uri uri, Subscriber<? super Model> subscriber, Bundle args) {
         subscriber.onError(new UnsupportedOperationException());
     }
 
     /**
      * Emitted items need not be sorted
      */
-    protected void multiGetObjs(List<Uri> uriList, Subscriber<? super Bundleable> subscriber, Bundle args) {
+    protected void multiGetObjs(List<Uri> uriList, Subscriber<? super Model> subscriber, Bundle args) {
         subscriber.onError(new UnsupportedOperationException());
     }
 
-    protected void scanObjs(Uri uri, Subscriber<? super Bundleable> subscriber, Bundle args) {
+    protected void scanObjs(Uri uri, Subscriber<? super Model> subscriber, Bundle args) {
         subscriber.onError(new UnsupportedOperationException());
     }
 

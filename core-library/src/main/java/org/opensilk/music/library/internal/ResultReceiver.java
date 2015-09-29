@@ -35,6 +35,7 @@ import android.os.RemoteException;
  * the system that your process needs to continue running), the connection will
  * break if your process goes away for any reason, etc.</p>
  */
+@Deprecated //use platform one (thought it was hidden for some reason)
 public class ResultReceiver implements Parcelable {
     final boolean mLocal;
     final Handler mHandler;
