@@ -31,6 +31,7 @@ import org.opensilk.music.library.sort.TrackSortOrder;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.ui3.common.BundleableComponent;
+import org.opensilk.music.ui3.common.BundleableModule;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickDelegate;
@@ -51,7 +52,9 @@ import rx.functions.Func2;
 /**
  * Created by drew on 5/12/15.
  */
-@Module
+@Module(
+        includes = BundleableModule.class
+)
 public class TrackCollectionScreenModule {
     final TrackCollectionScreen screen;
 

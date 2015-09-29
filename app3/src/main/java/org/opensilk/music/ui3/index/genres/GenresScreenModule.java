@@ -30,6 +30,7 @@ import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.sort.GenreSortOrder;
 import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.spi.Bundleable;
+import org.opensilk.music.ui3.common.BundleableModule;
 import org.opensilk.music.ui3.index.IndexBaseMenuHandler;
 import org.opensilk.music.ui3.profile.ProfileActivity;
 import org.opensilk.music.ui3.common.ActionBarMenuBaseHandler;
@@ -50,7 +51,9 @@ import rx.functions.Func2;
 /**
  * Created by drew on 5/5/15.
  */
-@Module
+@Module(
+        includes = BundleableModule.class
+)
 public class GenresScreenModule {
     final GenresScreen screen;
 

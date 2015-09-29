@@ -15,23 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.library;
+package org.opensilk.music.ui3.common;
 
-import org.opensilk.common.ui.mortar.Screen;
-import org.opensilk.common.ui.mortarfragment.MortarFragment;
-import org.opensilk.common.ui.mortarfragment.PauseAndResumeFragment;
+import org.opensilk.common.ui.mortar.PauseAndResumeModule;
+
+import dagger.Module;
 
 /**
- * Created by drew on 9/6/15.
+ * Created by drew on 9/28/15.
  */
-public class LibraryScreenFragment extends PauseAndResumeFragment {
-
-    public static LibraryScreenFragment ni() {
-        return new LibraryScreenFragment();
-    }
-
-    @Override
-    protected Screen newScreen() {
-        return new LibraryScreen();
-    }
+@Module(
+        includes = PauseAndResumeModule.class
+)
+public class BundleableModule {
 }

@@ -35,6 +35,7 @@ import org.opensilk.music.model.Album;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.TrackList;
 import org.opensilk.music.model.spi.Bundleable;
+import org.opensilk.music.ui3.common.BundleableModule;
 import org.opensilk.music.ui3.index.IndexBaseMenuHandler;
 import org.opensilk.music.ui3.index.IndexOverflowHandler;
 import org.opensilk.music.ui3.profile.ProfileActivity;
@@ -63,7 +64,9 @@ import rx.functions.Func2;
 /**
  * Created by drew on 5/5/15.
  */
-@Module
+@Module(
+        includes = BundleableModule.class
+)
 public class ArtistDetailsScreenModule {
     final ArtistDetailsScreen screen;
 

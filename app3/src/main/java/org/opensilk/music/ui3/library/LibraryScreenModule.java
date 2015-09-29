@@ -18,6 +18,7 @@
 package org.opensilk.music.ui3.library;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.ui.mortarfragment.PauseAndResumeFragmentModule;
 
 import dagger.Module;
 import dagger.Provides;
@@ -25,7 +26,9 @@ import dagger.Provides;
 /**
  * Created by drew on 9/6/15.
  */
-@Module
+@Module(
+        includes = PauseAndResumeFragmentModule.class
+)
 public class LibraryScreenModule {
     final LibraryScreen screen;
 
