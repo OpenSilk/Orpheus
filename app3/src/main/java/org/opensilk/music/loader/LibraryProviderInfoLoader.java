@@ -68,7 +68,7 @@ public class LibraryProviderInfoLoader {
     }
 
     public Observable<List<LibraryProviderInfo>> getActivePlugins() {
-        return makeObservable()
+        return makeObservableApi19()
                 .filter(new Func1<LibraryProviderInfo, Boolean>() {
                     @Override
                     public Boolean call(LibraryProviderInfo libraryProviderInfo) {
@@ -84,7 +84,7 @@ public class LibraryProviderInfoLoader {
     }
 
     public Observable<List<LibraryProviderInfo>> getPlugins() {
-        return makeObservable()
+        return makeObservableApi19()
                 .toSortedList(new Func2<LibraryProviderInfo, LibraryProviderInfo, Integer>() {
                     @Override
                     public Integer call(LibraryProviderInfo libraryProviderInfo, LibraryProviderInfo libraryProviderInfo2) {

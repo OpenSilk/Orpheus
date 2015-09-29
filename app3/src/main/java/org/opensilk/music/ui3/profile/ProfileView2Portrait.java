@@ -25,6 +25,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
+import android.view.View;
+
+import com.jakewharton.rxbinding.view.RxView;
+import com.jakewharton.rxbinding.view.ViewClickEvent;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarConfig;
@@ -40,6 +44,8 @@ import javax.inject.Named;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import rx.functions.Action1;
+import rx.subscriptions.CompositeSubscription;
 
 /**
  * Created by drew on 9/3/15.
@@ -56,6 +62,9 @@ public class ProfileView2Portrait extends CoordinatorLayout implements Bundleabl
     @InjectView(R.id.toolbar) Toolbar mToolbar;
     @InjectView(R.id.collapsing_toolbar) CollapsingToolbarLayout mCollapsingToolbar;
     @InjectView(R.id.recyclerview) RecyclerView mList;
+    @InjectView(R.id.floating_action_button) View mFab;
+
+    CompositeSubscription mClicks = new CompositeSubscription();
 
     public ProfileView2Portrait(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -76,6 +85,7 @@ public class ProfileView2Portrait extends CoordinatorLayout implements Bundleabl
 //        mCollapsingToolbar.addView(hero, 0);
         mCollapsingToolbar.setTitle(mTitleText);
         initRecyclerView();
+        subscribeClicks();
         if (!isInEditMode()) {
             mToolbarOwner.attachToolbar(mToolbar);
             mToolbarOwner.setConfig(ActionBarConfig.builder().setMenuConfig(mPresenter.getMenuConfig()).build());
@@ -86,8 +96,18 @@ public class ProfileView2Portrait extends CoordinatorLayout implements Bundleabl
     @Override
     public void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        mClicks.clear();
         mToolbarOwner.detachToolbar(mToolbar);
         mPresenter.dropView(this);
+    }
+
+    void subscribeClicks(){
+        mClicks.add(RxView.clickEvents(mFab).subscribe(new Action1<ViewClickEvent>() {
+            @Override
+            public void call(ViewClickEvent viewClickEvent) {
+                mPresenter.onFabClicked(viewClickEvent.view());
+            }
+        }));
     }
 
     protected void initRecyclerView() {

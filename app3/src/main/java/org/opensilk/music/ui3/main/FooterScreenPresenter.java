@@ -28,6 +28,8 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.core.util.BundleHelper;
+import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.ui.mortar.PausesAndResumes;
 import org.opensilk.music.AppPreferences;
@@ -167,7 +169,12 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
                             setProgress(-1);
                         } else {
                             long position = playbackState.getPosition();
-                            long duration = playbackState.getBufferedPosition();
+                            long duration;
+                            if (VersionUtils.hasApi22()) {
+                                duration = BundleHelper.getLong(playbackState.getExtras());
+                            } else {
+                                duration = playbackState.getBufferedPosition();
+                            }
                             if (position < 0 || duration <= 0) {
                                 setProgress(1000);
                             } else {

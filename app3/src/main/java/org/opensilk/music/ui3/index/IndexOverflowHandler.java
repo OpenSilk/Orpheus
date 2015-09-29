@@ -19,6 +19,8 @@ package org.opensilk.music.ui3.index;
 
 import android.content.Context;
 import android.net.Uri;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.widget.PopupMenu;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
@@ -29,10 +31,13 @@ import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Genre;
+import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
+import org.opensilk.music.model.TrackList;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.playback.control.PlaybackController;
+import org.opensilk.music.ui3.common.MenuAction;
 import org.opensilk.music.ui3.common.OverflowAction;
 import org.opensilk.music.ui3.common.OverflowClickListener;
 
@@ -118,38 +123,46 @@ public class IndexOverflowHandler implements OverflowClickListener {
         this.loaderUri = loaderUri;
     }
 
+    public void onBuildMenu(Model item, MenuInflater inflater, Menu menu) {
+        if (item instanceof Album) {
+
+        } else if (item instanceof Artist) {
+
+        } else if (item instanceof Genre) {
+
+        } else if (item instanceof TrackList) {
+
+        } else if (item instanceof Track) {
+
+        } else if (item instanceof Folder) {
+
+        } else if (item instanceof Playlist) {
+
+        }
+    }
+
+    public boolean onMenuItemClick(Context context, MenuAction action, Model item) {
+        if (item instanceof Album) {
+
+        } else if (item instanceof Artist) {
+
+        } else if (item instanceof Genre) {
+
+        } else if (item instanceof TrackList) {
+
+        } else if (item instanceof Track) {
+
+        } else if (item instanceof Folder) {
+
+        } else if (item instanceof Playlist) {
+
+        }
+        return false;
+    }
+
     @Override
     public void onBuildMenu(Context context, PopupMenu m, Bundleable item) {
-        int[] menus;
-        boolean adddelete = true;
-        if (item instanceof Album) {
-            menus = ALBUMS;
-        } else if (item instanceof Artist) {
-            menus = ARTISTS;
-        } else if (item instanceof Folder) {
-            menus = FOLDERS;
-        } else if (item instanceof Genre) {
-            menus = GENRES;
-            adddelete = false;
-//        } else if (item instanceof Playlist) {
-//            menus = PLAYLISTS;
-//            if (!libraryConfig.hasFlag(LibraryCapability.EDIT_PLAYLISTS)) {
-//                adddelete = false;
-//            }
-        } else if (item instanceof Track) {
-            menus = TRACKS;
-        } else {
-            return;
-        }
-        for (int ii : menus) {
-            m.inflate(ii);
-        }
-        //Add delete here, cause i dont know what do to about the profiles
-        //action bar overflow. currently deleting has no way of telling the profile
-        //activity to finish so just making them not have a delete button. TODO fix
-//        if (adddelete && libraryConfig.hasFlag(LibraryCapability.DELETE)) {
-//            m.inflate(R.menu.popup_delete);
-//        }
+
     }
 
     @Override
@@ -168,7 +181,7 @@ public class IndexOverflowHandler implements OverflowClickListener {
 //            uri = LibraryUris.artistTracks(libraryConfig.authority,
 //                    libraryInfo.libraryId, item.getIdentity());
 //            sortOrder = appPreferences.getString(appPreferences.makePluginPrefKey(libraryConfig,
-//                    AppPreferences.ARTIST_TRACK_SORT_ORDER), TrackSortOrder.ALBUM);
+//                    AppPreferences.ARTIST_TRACK_SORT_ORDER), TrackSortOrder.TITLE);
         } else if (item instanceof Folder) {
 //            uri = LibraryUris.folderTracks(libraryConfig.authority,
 //                    libraryInfo.libraryId, item.getIdentity());
@@ -178,7 +191,7 @@ public class IndexOverflowHandler implements OverflowClickListener {
 //            uri = LibraryUris.genreTracks(libraryConfig.authority,
 //                    libraryInfo.libraryId, item.getIdentity());
 //            sortOrder = appPreferences.getString(appPreferences.makePluginPrefKey(libraryConfig,
-//                    AppPreferences.GENRE_TRACK_SORT_ORDER), TrackSortOrder.ALBUM);
+//                    AppPreferences.GENRE_TRACK_SORT_ORDER), TrackSortOrder.TITLE);
         } else if (item instanceof Playlist) {
 //            uri = LibraryUris.playlistTracks(libraryConfig.authority,
 //                    libraryInfo.libraryId, item.getIdentity());

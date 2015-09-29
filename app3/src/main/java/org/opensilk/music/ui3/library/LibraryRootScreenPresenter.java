@@ -151,8 +151,12 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
                             if (e.getCode() == LibraryException.Kind.AUTH_FAILURE) {
                                 if (hasView()) {
                                     getView().setNeedsAuth();
+                                    return;
                                 }
                             }
+                        }
+                        if (hasView()) {
+                            getView().setRetry();
                         }
                     }
                 }));

@@ -178,7 +178,7 @@
 
         <!--Folders plugin provider-->
         <provider
-            android:authorities="orpheus.library.${applicationId}.provider.foldersLibrary"
+            android:authorities="${applicationId}.provider.foldersLibrary"
             android:name="org.opensilk.music.library.mediastore.provider.FoldersLibraryProvider"
             tools:replace="authorities"/>
 
@@ -190,7 +190,7 @@
 
         <!--Upnp provider-->
         <provider
-            android:authorities="orpheus.library.${applicationId}.provider.upnp"
+            android:authorities="${applicationId}.provider.upnp"
             android:name="org.opensilk.music.library.upnp.provider.UpnpCDProvider"
             tools:replace="authorities"/>
 

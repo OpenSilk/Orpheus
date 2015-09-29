@@ -28,6 +28,8 @@ import android.support.v4.widget.DrawerLayout;
 import android.view.View;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.core.util.BundleHelper;
+import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.common.ui.mortar.DrawerOwner;
 import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.ui.mortar.PausesAndResumes;
@@ -158,7 +160,12 @@ public class ControlsScreenPresenter extends ViewPresenter<ControlsScreenView>
                         }
                         isPlaying = playing;
                         long position = playbackState.getPosition();
-                        long duration = playbackState.getBufferedPosition();
+                        long duration;
+                        if (VersionUtils.hasApi22()) {
+                            duration = BundleHelper.getLong(playbackState.getExtras());
+                        } else {
+                            duration = playbackState.getBufferedPosition();
+                        }
                         updateProgress(position, duration);
                         if (duration != lastDuration) {
                             setTotalTimeText(duration);

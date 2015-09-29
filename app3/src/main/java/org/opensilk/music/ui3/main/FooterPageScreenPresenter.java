@@ -26,29 +26,24 @@ import android.support.v4.view.GravityCompat;
 import android.view.View;
 
 import org.opensilk.common.core.dagger2.SubScreenScope;
+import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.common.ui.mortar.DrawerOwner;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.model.ArtInfo;
-import org.opensilk.music.playback.BundleHelper;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.nowplaying.NowPlayingActivity;
 
 import javax.inject.Inject;
 
-import hugo.weaving.DebugLog;
 import mortar.ViewPresenter;
 import rx.Subscription;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
-import timber.log.Timber;
 
-import static android.support.v4.media.session.PlaybackStateCompat.STATE_BUFFERING;
-import static android.support.v4.media.session.PlaybackStateCompat.STATE_CONNECTING;
 import static android.support.v4.media.session.PlaybackStateCompat.STATE_NONE;
-import static android.support.v4.media.session.PlaybackStateCompat.STATE_PLAYING;
 
 /**
  * Created by drew on 9/17/15.
@@ -129,10 +124,10 @@ public class FooterPageScreenPresenter extends ViewPresenter<FooterPageScreenVie
     boolean handleClick(String action, View view) {
         switch (action) {
             case AppPreferences.ACTION_OPEN_QUEUE:
-                NowPlayingActivity.startSelf(view.getContext(), true);
+//                NowPlayingActivity.startSelf(view.getContext(), true);
                 return true;
             case AppPreferences.ACTION_OPEN_NOW_PLAYING:
-                NowPlayingActivity.startSelf(view.getContext(), false);
+//                NowPlayingActivity.startSelf(view.getContext(), false);
                 return true;
             case AppPreferences.ACTION_NONE:
             default:

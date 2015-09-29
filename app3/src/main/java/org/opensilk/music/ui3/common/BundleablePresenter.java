@@ -20,6 +20,7 @@ package org.opensilk.music.ui3.common;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.PopupMenu;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
@@ -278,5 +279,9 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
 
     public FragmentManagerOwner getFm() {
         return fm;
+    }
+
+    public void onFabClicked(View view) {
+
     }
 }

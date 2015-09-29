@@ -37,6 +37,7 @@ import rx.functions.Func2;
  * Created by drew on 5/9/15.
  */
 @ScreenScope
+@Deprecated
 public class ActionBarMenuConfigWrapper {
 
     final LibraryConfig libraryConfig;

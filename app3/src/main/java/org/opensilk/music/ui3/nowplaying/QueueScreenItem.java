@@ -19,8 +19,8 @@ package org.opensilk.music.ui3.nowplaying;
 
 import android.support.v4.media.session.MediaSessionCompat;
 
+import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.music.model.ArtInfo;
-import org.opensilk.music.playback.BundleHelper;
 
 /**
  * Created by drew on 5/15/15.
