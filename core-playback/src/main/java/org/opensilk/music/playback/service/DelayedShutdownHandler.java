@@ -23,6 +23,7 @@ import android.os.Handler;
 import android.os.Message;
 
 import org.opensilk.common.core.dagger2.ForApplication;
+import org.opensilk.music.playback.PlaybackStateHelper;
 
 import java.lang.ref.WeakReference;
 
@@ -35,6 +36,7 @@ import static org.opensilk.music.playback.PlaybackConstants.IDLE_DELAY;
 /**
  * Created by drew on 4/22/15.
  */
+@PlaybackServiceScope
 public class DelayedShutdownHandler extends Handler {
 
     static final int MSG_STOP = 1;
@@ -45,33 +47,26 @@ public class DelayedShutdownHandler extends Handler {
             case MSG_STOP: {
                 mShutdownScheduled = false;
                 PlaybackService s = mService.get();
-                if (s == null) {
-                    return;
-                }
-                PlaybackState state = s.getMediaSession()
-                                .getController().getPlaybackState();
-                if (state == null) {
-                    return;
-                }
-                if (state.getState() == PlaybackState.STATE_PAUSED
-                        || state.getState() == PlaybackState.STATE_STOPPED
-                        || state.getState() == PlaybackState.STATE_ERROR) {
-                    s.stopSelf();
+                if (s != null) {
+                    PlaybackState state =
+                            s.getMediaSession().getController().getPlaybackState();
+                    if (state == null
+                            || PlaybackStateHelper.isStoppedOrInactive(state)
+                            || PlaybackStateHelper.isPaused(state)) {
+                        s.stopSelf();
+                    }
                 }
             }
         }
     }
 
-    final Context mContext;
     WeakReference<PlaybackService> mService;
     boolean mShutdownScheduled;
 
     @Inject
     public DelayedShutdownHandler(
-            @ForApplication Context context,
             PlaybackService service
     ) {
-        mContext = context;
         mService = new WeakReference<PlaybackService>(service);
     }
 

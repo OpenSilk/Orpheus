@@ -35,7 +35,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.inject.Inject;
 
 import hugo.weaving.DebugLog;
+import rx.Scheduler;
 import rx.Subscription;
+import rx.functions.Action0;
 import rx.functions.Action1;
 import timber.log.Timber;
 
@@ -69,14 +71,25 @@ public class PlaybackQueue {
     public void load() {
         mQueue.clear();
         mQueue.addAll(mIndexClient.getLastQueue());
-        mCurrentPos = mIndexClient.getLastQueuePosition();
+        int pos = mIndexClient.getLastQueuePosition();
+        if (pos >= 0) {
+            mCurrentPos = pos;
+        }
         if (mQueue.isEmpty()) {
             mCurrentPos = -1;
         } else if (mCurrentPos >= mQueue.size()) {
             mCurrentPos = 0; //just start over
         }
-        mRepeatMode = mIndexClient.getLastQueueRepeateMode();
-        mShuffleMode = mIndexClient.getLastQueueShuffleMode();
+        int rep = mIndexClient.getLastQueueRepeatMode();
+        if (rep >= PlaybackConstants.REPEAT_NONE
+                && rep <= PlaybackConstants.REPEAT_ALL) {
+            mRepeatMode = rep;
+        }
+        int shuf = mIndexClient.getLastQueueShuffleMode();
+        if (shuf >= PlaybackConstants.SHUFFLE_NONE
+                && rep <= PlaybackConstants.SHUFFLE_NORMAL) {
+            mShuffleMode = shuf;
+        }
         notifyCurrentPosChanged();
     }
 
@@ -264,13 +277,13 @@ public class PlaybackQueue {
             switch (mRepeatMode) {
                 case PlaybackConstants.REPEAT_ALL:
                     mCurrentPos = 0;
-                    notifyWentToNext();
                     break;
                 default:
                     mCurrentPos = -1;
                     break;
             }
         }
+        notifyWentToNext();
     }
 
     /**
@@ -426,16 +439,18 @@ public class PlaybackQueue {
     }
 
     public QueueItem getCurrentQueueItem() {
-        if (mQueueMeta == null || mQueueMeta.size() < mCurrentPos || mCurrentPos < 0) {
+        if (mQueueMeta == null || mQueueMeta.isEmpty()
+                || mQueueMeta.size() < mCurrentPos
+                || mCurrentPos < 0) {
             return null;
         } else {
             return mQueueMeta.get(mCurrentPos);
         }
     }
 
-    public void updateQueueMeta(List<MediaDescriptionCompat> descriptions) {
+    public void updateQueueMeta(List<MediaDescription> descriptions) {
         List<QueueItem> qm;
-        if (mQueueMeta == null) {
+        if (mQueueMeta == null || mQueueMeta.isEmpty()) {
             qm = new ArrayList<>(mQueue.size());
         } else if (mQueue.size() < mQueueMeta.size()) {
             qm = mQueueMeta.subList(0, mQueue.size() - 1);
@@ -489,7 +504,7 @@ public class PlaybackQueue {
         mCurrentPos = clamp(mCurrentPos); //safety, todo check proper
         mQueueMeta = qm;
 
-        if (BuildConfig.DEBUG) {
+        if (false) {
             if (mQueue.size() != mQueueMeta.size()) {
                 Timber.e("Queues don't match");
             }
@@ -499,54 +514,78 @@ public class PlaybackQueue {
             while (qi.hasNext() && qmi.hasNext()) {
                 Uri uri = qi.next();
                 QueueItem queueItem = qmi.next();
-                Timber.v("%d -> %s\n%d -> %s", ii++, uri, queueItem.getQueueId(), queueItem.getDescription().getMediaId());
+                Timber.v("q %d -> %s\nm %d -> %s", ii++, uri, queueItem.getQueueId(), queueItem.getDescription().getMediaId());
             }
         }
     }
 
-    QueueItem makeNewQueueItem(Uri uri, List<MediaDescriptionCompat> descriptions) {
-        for (MediaDescriptionCompat desc : descriptions) {
-            if (uri.equals(desc.getMediaUri())) {
-                return new QueueItem((MediaDescription)desc.getMediaDescription(), mIdGenerator.incrementAndGet());
+    QueueItem makeNewQueueItem(Uri uri, List<MediaDescription> descriptions) {
+        for (MediaDescription desc : descriptions) {
+            if (uri.toString().equals(desc.getMediaId())) {
+                return new QueueItem(desc, mIdGenerator.incrementAndGet());
             }
         }
         return null;
     }
 
-    void notifyCurrentPosChanged() {
+    void updateDescriptions(final Action0 callbackaction) {
         if (mLookupSub != null) {
             mLookupSub.unsubscribe();
         }
-        mLookupSub = mIndexClient.getDescriptions(mQueue)
-                .observeOn(mService.getScheduler())
-                .subscribe(new Action1<List<MediaDescriptionCompat>>() {
-                    @Override
-                    public void call(List<MediaDescriptionCompat> mediaDescriptionCompats) {
-                        updateQueueMeta(mediaDescriptionCompats);
-                        if (mListener != null) {
-                            mListener.onCurrentPosChanged();
-                        }
-                        mLookupSub = null;
+        List<Uri> urisToFetch = new ArrayList<>();
+        if (mQueueMeta != null && !mQueueMeta.isEmpty()) {
+            for (Uri uri : mQueue) {
+                boolean found = false;
+                for (QueueItem item : mQueueMeta) {
+                    if (uri.toString().equals(item.getDescription().getMediaId())) {
+                        found = true;
+                        break;
                     }
-                });
+                }
+                if (!found) {
+                    urisToFetch.add(uri);
+                }
+            }
+        } else {
+            urisToFetch.addAll(mQueue);
+        }
+        if (urisToFetch.isEmpty()) {
+            updateQueueMeta(Collections.<MediaDescription>emptyList());
+            callbackaction.call();
+        } else {
+            mLookupSub = mIndexClient.getDescriptions(urisToFetch)
+                    .observeOn(mService.getScheduler())
+                    .subscribe(new Action1<List<MediaDescription>>() {
+                        @Override
+                        public void call(List<MediaDescription> mediaDescriptions) {
+                            updateQueueMeta(mediaDescriptions);
+                            callbackaction.call();
+                            mLookupSub = null;
+                        }
+                    });
+        }
+    }
+
+    void notifyCurrentPosChanged() {
+        updateDescriptions(new Action0() {
+            @Override
+            public void call() {
+                if (mListener != null) {
+                    mListener.onCurrentPosChanged();
+                }
+            }
+        });
     }
 
     void notifyQueueChanged() {
-        if (mLookupSub != null) {
-            mLookupSub.unsubscribe();
-        }
-        mLookupSub = mIndexClient.getDescriptions(mQueue)
-                .observeOn(mService.getScheduler())
-                .subscribe(new Action1<List<MediaDescriptionCompat>>() {
-                    @Override
-                    public void call(List<MediaDescriptionCompat> mediaDescriptionCompats) {
-                        updateQueueMeta(mediaDescriptionCompats);
-                        if (mListener != null) {
-                            mListener.onQueueChanged();
-                        }
-                        mLookupSub = null;
-                    }
-                });
+        updateDescriptions(new Action0() {
+            @Override
+            public void call() {
+                if (mListener != null) {
+                    mListener.onQueueChanged();
+                }
+            }
+        });
     }
 
     void notifyWentToNext() {

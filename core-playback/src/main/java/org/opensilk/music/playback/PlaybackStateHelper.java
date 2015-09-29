@@ -51,244 +51,181 @@ import static android.media.session.PlaybackState.STATE_STOPPED;
  */
 public class PlaybackStateHelper {
 
-    private int mState;
-    private long mPosition;
-    private long mBufferedPosition;
-    private float mSpeed;
-    private long mActions;
-    private CharSequence mErrorMessage;
-    private long mUpdateTime;
-    private long mQueuePos;
-
     public static final float PLAYBACK_SPEED = 1.0f;
 
-    @Inject
-    public PlaybackStateHelper() {
-        mState = STATE_NONE;
-        mPosition = PLAYBACK_POSITION_UNKNOWN;
-        mSpeed = PLAYBACK_SPEED;
-        mBufferedPosition = PLAYBACK_POSITION_UNKNOWN;
-        mActions = ACTION_PLAY
-                | ACTION_PAUSE
-                | ACTION_PLAY_PAUSE
-                | ACTION_STOP
-                | ACTION_SEEK_TO
-                | ACTION_SKIP_TO_NEXT
-                | ACTION_SKIP_TO_PREVIOUS
-                | ACTION_SKIP_TO_QUEUE_ITEM;
-        mErrorMessage = "";
-        mUpdateTime = 0;
-        mQueuePos = -1;
+    private PlaybackStateHelper() {}
+
+    public static boolean isInactive(PlaybackState state) {
+        return isInactive(state.getState());
     }
 
-    public PlaybackState getState() {
-        return new PlaybackState.Builder()
-                .setActions(mActions)
-                .setState(mState, mPosition, mSpeed, mUpdateTime)
-                .setErrorMessage(mErrorMessage)
-                .setBufferedPosition(mBufferedPosition)
-                .setActiveQueueItemId(mQueuePos)
-                //.setExtras(mExtras)
-                .build();
+    public static boolean isInactive(int state) {
+        return state == STATE_NONE;
     }
-
-    public void updatePosition(long position) {
-        mPosition = position;
-        //mBufferedPosition = position;
-        mUpdateTime = SystemClock.elapsedRealtime();
-    }
-
-    public long getPosition() {
-        return mPosition;
-    }
-
-    public void updateDuration(long duration) {
-        //mExtras.putLong(PlaybackConstants.EXTRA.DURATION, duration);
-        mBufferedPosition = duration;
-    }
-
-    public void updateQueuePos(int pos) {
-        mQueuePos = pos;
-    }
-
-    public void gotoStopped() {
-        mState = STATE_STOPPED;
-    }
-
-    public boolean isStopped() {
-        return mState == STATE_STOPPED;
-    }
-
-    public void gotoPaused() {
-        mState = STATE_PAUSED;
-    }
-
-    public boolean isPaused() {
-        return mState == STATE_PAUSED;
-    }
-
-    public void gotoPlaying() {
-        mState = STATE_PLAYING;
-    }
-
-    public boolean isPlaying() {
-        return mState == STATE_PLAYING;
-    }
-
-    public void gotoFastForwarding() {
-        mState = STATE_FAST_FORWARDING;
-    }
-
-    public boolean isFastForwarding() {
-        return mState == STATE_FAST_FORWARDING;
-    }
-
-    public void gotoRewinding() {
-        mState = STATE_REWINDING;
-    }
-
-    public boolean isRewinding() {
-        return mState == STATE_REWINDING;
-    }
-
-    public void gotoBuffering() {
-        mState = STATE_BUFFERING;
-    }
-
-    public boolean isBuffering() {
-        return mState == STATE_BUFFERING;
-    }
-
-    public void gotoError(CharSequence msg) {
-        mState = STATE_ERROR;
-        mErrorMessage = msg != null ? msg : "";
-    }
-
-    public boolean isError() {
-        return mState == STATE_ERROR;
-    }
-
-    public CharSequence getError() {
-        return mErrorMessage;
-    }
-
-    public void gotoConnecting() {
-        mState = STATE_CONNECTING;
-    }
-
-    public boolean isConnecting() {
-        return mState == STATE_CONNECTING;
-    }
-
-    public void gotoSkippingPrevious() {
-        mState = STATE_SKIPPING_TO_PREVIOUS;
-    }
-
-    public boolean isSkippingPrevious() {
-        return mState == STATE_SKIPPING_TO_PREVIOUS;
-    }
-
-    public void gotoSkippingNext() {
-        mState = STATE_SKIPPING_TO_NEXT;
-    }
-
-    public boolean isSkippingNext() {
-        return mState == STATE_SKIPPING_TO_NEXT;
-    }
-
-    public boolean isActive() {
-        switch (mState) {
-            case STATE_FAST_FORWARDING:
-            case STATE_REWINDING:
-            case STATE_SKIPPING_TO_PREVIOUS:
-            case STATE_SKIPPING_TO_NEXT:
-            case STATE_BUFFERING:
-            case STATE_CONNECTING:
-            case STATE_PLAYING:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-
-    public boolean isLoading() {
-        switch (mState) {
-            case STATE_CONNECTING:
-            case STATE_BUFFERING:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    public boolean isLoadingOrSkipping() {
-        switch (mState) {
-            case STATE_SKIPPING_TO_NEXT:
-            case STATE_SKIPPING_TO_PREVIOUS:
-            case STATE_SKIPPING_TO_QUEUE_ITEM:
-            case STATE_CONNECTING:
-            case STATE_BUFFERING:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    public boolean shouldShowPauseButton() {
-        switch (mState) {
-            case STATE_FAST_FORWARDING:
-            case STATE_REWINDING:
-            case STATE_SKIPPING_TO_PREVIOUS:
-            case STATE_SKIPPING_TO_NEXT:
-            case STATE_PLAYING:
-                return true;
-            default:
-                return false;
-        }
-    }
-
 
     public static boolean isStopped(PlaybackState state) {
-        return state.getState() == STATE_STOPPED;
+        return isStopped(state.getState());
     }
 
+    public static boolean isStopped(int state) {
+        return state == STATE_STOPPED;
+    }
 
     public static boolean isPaused(PlaybackState state) {
-        return state.getState() == STATE_PAUSED;
+        return isPaused(state.getState());
     }
 
+    public static boolean isPaused(int state) {
+        return state == STATE_PAUSED;
+    }
 
     public static boolean isPlaying(PlaybackState state) {
-        return state.getState() == STATE_PLAYING;
+        return isPlaying(state.getState());
+    }
+
+    public static boolean isPlaying(int state) {
+        return state == STATE_PLAYING;
     }
 
     public static boolean isFastForwarding(PlaybackState state) {
-        return state.getState() == STATE_FAST_FORWARDING;
+        return isFastForwarding(state.getState());
+    }
+
+    public static boolean isFastForwarding(int state) {
+        return state == STATE_FAST_FORWARDING;
     }
 
     public static boolean isRewinding(PlaybackState state) {
-        return state.getState() == STATE_REWINDING;
+        return isRewinding(state.getState());
+    }
+
+    public static boolean isRewinding(int state) {
+        return state == STATE_REWINDING;
     }
 
     public static boolean isBuffering(PlaybackState state) {
-        return state.getState() == STATE_BUFFERING;
+        return isBuffering(state.getState());
+    }
+
+    public static boolean isBuffering(int state) {
+        return state == STATE_BUFFERING;
     }
 
     public static boolean isError(PlaybackState state) {
-        return state.getState() == STATE_ERROR;
+        return isError(state.getState());
+    }
+
+    public static boolean isError(int state) {
+        return state == STATE_ERROR;
     }
 
     public static boolean isConnecting(PlaybackState state) {
-        return state.getState() == STATE_CONNECTING;
+        return isConnecting(state.getState());
+    }
+
+    public static boolean isConnecting(int state) {
+        return state == STATE_CONNECTING;
     }
 
     public static boolean isSkippingPrevious(PlaybackState state) {
-        return state.getState() == STATE_SKIPPING_TO_PREVIOUS;
+        return isSkippingPrevious(state.getState());
+    }
+
+    public static boolean isSkippingPrevious(int state) {
+        return state == STATE_SKIPPING_TO_PREVIOUS;
     }
 
     public static boolean isSkippingNext(PlaybackState state) {
-        return state.getState() == STATE_SKIPPING_TO_NEXT;
+        return isSkippingNext(state.getState());
+    }
+
+    public static boolean isSkippingNext(int state) {
+        return state == STATE_SKIPPING_TO_NEXT;
+    }
+
+    public static boolean isLoading(PlaybackState state) {
+        return isLoading(state.getState());
+    }
+
+    public static boolean isPlayingOrPaused(PlaybackState state) {
+        return isPlayingOrPaused(state.getState());
+    }
+
+    public static boolean isPlayingOrPaused(int state) {
+        return isPlaying(state) || isPaused(state);
+    }
+
+    public static boolean isStoppedOrInactive(PlaybackState state) {
+        return isStoppedOrInactive(state.getState());
+    }
+
+    public static boolean isStoppedOrInactive(int state) {
+        return isStopped(state) || isInactive(state);
+    }
+
+    public static boolean isLoading(int state) {
+        return isConnecting(state) || isBuffering(state);
+    }
+
+    public static boolean isLoadingOrSkipping(PlaybackState state) {
+        return isLoadingOrSkipping(state.getState());
+    }
+
+    public static boolean isLoadingOrSkipping(int state) {
+        switch (state) {
+            case STATE_SKIPPING_TO_NEXT:
+            case STATE_SKIPPING_TO_PREVIOUS:
+            case STATE_SKIPPING_TO_QUEUE_ITEM:
+                return true;
+            default:
+                return isLoading(state);
+        }
+    }
+
+    public static boolean shouldShowPauseButton(PlaybackState state) {
+        return shouldShowPauseButton(state.getState());
+    }
+
+    public static boolean shouldShowPauseButton(int state) {
+        switch (state) {
+            case STATE_FAST_FORWARDING:
+            case STATE_REWINDING:
+            case STATE_PLAYING:
+                return true;
+            default:
+                return isLoadingOrSkipping(state);
+        }
+    }
+
+    public static String stringifyState(int state) {
+        switch (state) {
+            case STATE_NONE:
+                return "STATE_NONE";
+            case STATE_STOPPED:
+                return "STATE_STOPPED";
+            case STATE_PAUSED:
+                return "STATE_PAUSED";
+            case STATE_PLAYING:
+                return "STATE_PLAYING";
+            case STATE_FAST_FORWARDING:
+                return "STATE_FAST_FORWARDING";
+            case STATE_REWINDING:
+                return "STATE_REWINDING";
+            case STATE_BUFFERING:
+                return "STATE_BUFFERING";
+            case STATE_ERROR:
+                return "STATE_ERROR";
+            case STATE_CONNECTING:
+                return "STATE_CONNECTING";
+            case STATE_SKIPPING_TO_PREVIOUS:
+                return "STATE_SKIPPING_TO_PREVIOUS";
+            case STATE_SKIPPING_TO_NEXT:
+                return "STATE_SKIPPING_TO_NEXT";
+            case STATE_SKIPPING_TO_QUEUE_ITEM:
+                return "STATE_SKIPPING_TO_QUEUE_ITEM";
+            default:
+                return "UNKNOWN #" + state;
+        }
     }
 
 }

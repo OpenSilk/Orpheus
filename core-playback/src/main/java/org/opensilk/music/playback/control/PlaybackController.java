@@ -50,6 +50,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import hugo.weaving.DebugLog;
 import rx.Subscription;
 import rx.functions.Action1;
 import rx.subjects.BehaviorSubject;
@@ -269,6 +270,7 @@ public class PlaybackController {
         enqueueAll(list, PlaybackConstants.ENQUEUE_LAST);
     }
 
+    @DebugLog
     public void playAll(List<Uri> list, int startpos) {
         sendCustomAction(CMD.PLAY_ALL, BundleHelper.builder().putList(list).putInt(startpos).get());
     }

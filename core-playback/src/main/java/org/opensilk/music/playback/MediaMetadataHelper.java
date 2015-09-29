@@ -27,6 +27,7 @@ import static android.media.MediaMetadata.METADATA_KEY_ARTIST;
 import static android.media.MediaMetadata.METADATA_KEY_ART_URI;
 import static android.media.MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI;
 import static android.media.MediaMetadata.METADATA_KEY_DISPLAY_TITLE;
+import static android.media.MediaMetadata.METADATA_KEY_DURATION;
 import static android.media.MediaMetadata.METADATA_KEY_TITLE;
 
 /**
@@ -35,6 +36,10 @@ import static android.media.MediaMetadata.METADATA_KEY_TITLE;
 public class MediaMetadataHelper {
 
     private MediaMetadataHelper(){}
+
+    public static long getDuration(MediaMetadata meta) {
+        return meta.getLong(METADATA_KEY_DURATION);
+    }
 
     public static String getDisplayName(MediaMetadata meta) {
         String name = meta.getString(METADATA_KEY_DISPLAY_TITLE);

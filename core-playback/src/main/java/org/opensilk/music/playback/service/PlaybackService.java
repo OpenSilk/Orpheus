@@ -17,7 +17,9 @@
 
 package org.opensilk.music.playback.service;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.drm.DrmStore;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.audiofx.AudioEffect;
@@ -41,11 +43,14 @@ import android.view.KeyEvent;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.core.util.BundleHelper;
+import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.artwork.service.ArtworkProviderHelper;
 import org.opensilk.music.index.client.IndexClient;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.playback.AudioManagerHelper;
 import org.opensilk.music.playback.DefaultMediaPlayer;
+import org.opensilk.music.playback.IMediaPlayer;
+import org.opensilk.music.playback.MediaMetadataHelper;
 import org.opensilk.music.playback.NotificationHelper2;
 import org.opensilk.music.playback.Playback;
 import org.opensilk.music.playback.PlaybackComponent;
@@ -53,7 +58,9 @@ import org.opensilk.music.playback.PlaybackConstants;
 import org.opensilk.music.playback.PlaybackConstants.CMD;
 import org.opensilk.music.playback.PlaybackConstants.EVENT;
 import org.opensilk.music.playback.PlaybackQueue;
+import org.opensilk.music.playback.PlaybackStateHelper;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -115,6 +122,7 @@ public class PlaybackService extends MediaBrowserService {
     boolean mQueueReloaded;
     //
     boolean mServiceStarted = false;
+    volatile int mConnectedClients = 0;
 
     Subscription mCurrentTrackSub;
     Subscription mNextTrackSub;
@@ -175,12 +183,14 @@ public class PlaybackService extends MediaBrowserService {
     @Override
     public IBinder onBind(Intent intent) {
         mDelayedShutdownHandler.cancelDelayedShutdown();
+        mConnectedClients++;
         return super.onBind(intent);
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
         saveState();
+        mConnectedClients--;
         return super.onUnbind(intent);
     }
 
@@ -244,20 +254,10 @@ public class PlaybackService extends MediaBrowserService {
         }
     }
 
-    void updateMeta() {
-        MediaMetadata meta = mIndexClient.convertToMediaMetadata(mCurrentTrack);
-        getMediaSession().setMetadata(meta);
-    }
-
+    @DebugLog
     void updatePlaybackState(String error) {
-        Timber.d("updatePlaybackState, playback state=%d", mPlayback.getState());
-
-        long position = PlaybackState.PLAYBACK_POSITION_UNKNOWN;
-        long duration = PlaybackState.PLAYBACK_POSITION_UNKNOWN;
-        if (mPlayback.isConnected()) {
-            position = mPlayback.getCurrentStreamPosition();
-            duration = mPlayback.getDuration();
-        }
+        Timber.d("updatePlaybackState(%s) err=%s",
+                PlaybackStateHelper.stringifyState(mPlayback.getState()), error);
 
         PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
                 .setActions(getAvailableActions());
@@ -271,8 +271,37 @@ public class PlaybackService extends MediaBrowserService {
             stateBuilder.setErrorMessage(error);
             state = PlaybackState.STATE_ERROR;
         }
-        stateBuilder.setState(state, position, 1.0f, SystemClock.elapsedRealtime());
-        stateBuilder.setExtras(BundleHelper.builder().putLong(duration).get());
+
+        long position = PlaybackState.PLAYBACK_POSITION_UNKNOWN;
+        long duration = PlaybackState.PLAYBACK_POSITION_UNKNOWN;
+        if (PlaybackStateHelper.isPlayingOrPaused(mPlayback.getState())) {
+            position = mPlayback.getCurrentStreamPosition();
+            duration = mPlayback.getDuration();
+        }
+
+        if (duration > 0) {
+            //make sure meta has the right duration
+            MediaMetadata current = getMediaSession().getController().getMetadata();
+            if (current != null) {
+                if (MediaMetadataHelper.getDuration(current) != duration) {
+                    current = new MediaMetadata.Builder(current)
+                            .putLong(MediaMetadata.METADATA_KEY_DURATION, duration)
+                            .build();
+                    getMediaSession().setMetadata(current);
+                }
+            }
+        }
+
+        stateBuilder.setState(state, position,
+                PlaybackStateHelper.PLAYBACK_SPEED, SystemClock.elapsedRealtime());
+        if (VersionUtils.hasApi22()) {
+            stateBuilder.setExtras(BundleHelper.b()
+                    .putLong(duration)
+                    .putInt(mQueue.getRepeatMode())
+                    .putInt2(mQueue.getShuffleMode()).get());
+        } else {
+            stateBuilder.setBufferedPosition(duration);
+        }
 
         // Set the activeQueueItemId if the current index is valid.
         MediaSession.QueueItem item = mQueue.getCurrentQueueItem();
@@ -282,21 +311,30 @@ public class PlaybackService extends MediaBrowserService {
 
         getMediaSession().setPlaybackState(stateBuilder.build());
 
-        if (state == PlaybackState.STATE_PLAYING || state == PlaybackState.STATE_PAUSED) {
+        if (PlaybackStateHelper.isPlayingOrPaused(state)) {
             mNotificationHelper.startNotification();
+        }
+
+        mHandler.removeCallbacks(mProgressCheckRunnable);
+        if (PlaybackStateHelper.isPlaying(state)) {
+            mHandler.postDelayed(mProgressCheckRunnable, 2000);
         }
     }
 
     private long getAvailableActions() {
-        long actions = PlaybackState.ACTION_PLAY | PlaybackState.ACTION_PLAY_PAUSE
+        long actions = PlaybackState.ACTION_PLAY
+                | PlaybackState.ACTION_PLAY_PAUSE
                 //| PlaybackState.ACTION_PLAY_FROM_MEDIA_ID
                 //| PlaybackState.ACTION_PLAY_FROM_SEARCH
                 ;
         if (mQueue.notEmpty()) {
-            actions |= PlaybackState.ACTION_SEEK_TO | PlaybackState.ACTION_SKIP_TO_QUEUE_ITEM;
+            actions |= (PlaybackState.ACTION_SEEK_TO | PlaybackState.ACTION_SKIP_TO_QUEUE_ITEM);
             if (mPlayback.isPlaying()) {
                 actions |= PlaybackState.ACTION_PAUSE;
                 actions &= ~PlaybackState.ACTION_PLAY;
+            }
+            if (PlaybackStateHelper.isPlayingOrPaused(mPlayback.getState())) {
+                actions |= PlaybackState.ACTION_STOP;
             }
             if (mQueue.getPrevious() >= 0) {
                 actions |= PlaybackState.ACTION_SKIP_TO_PREVIOUS;
@@ -306,6 +344,11 @@ public class PlaybackService extends MediaBrowserService {
             }
         }
         return actions;
+    }
+
+    void updateMeta() {
+        MediaMetadata meta = mIndexClient.convertToMediaMetadata(mCurrentTrack);
+        getMediaSession().setMetadata(meta);
     }
 
     void saveState() {
@@ -380,7 +423,113 @@ public class PlaybackService extends MediaBrowserService {
         mPlayback.stop(false);
         mHandler.removeCallbacks(mProgressCheckRunnable);
         mDelayedShutdownHandler.cancelDelayedShutdown();
-        stopSelf();
+        resetState();
+        if (mConnectedClients > 0) {
+            //we cant stop so try going to paused
+            if (mQueue.notEmpty()) {
+                mPlayWhenReady = false;
+                setTrack();
+            } else {
+                mPlayback.setState(PlaybackState.STATE_NONE);
+                updatePlaybackState(null);
+            }
+        } else {
+            //we aren't bound by anyone so we can stop
+            stopSelf();
+        }
+    }
+
+    IMediaPlayer.Factory resolveMediaPlayer(Track track) {
+        return new DefaultMediaPlayer.Factory();
+    }
+
+    private void setTrack() {
+        if (!mQueue.notEmpty()){
+            throw new IllegalStateException("Can't setTrack() with no queue");
+        }
+        final Uri uri = mQueue.getCurrentUri();
+        if (mCurrentTrack != null && mCurrentTrack.getUri().equals(uri)) {
+            Timber.e("Uris match, what should i do? reloading anyway");
+        }
+        mHandler.removeCallbacks(mProgressCheckRunnable);
+        mPlayback.prepareForTrack();
+        if (mCurrentTrackSub != null) {
+            mCurrentTrackSub.unsubscribe();
+        }
+        mCurrentTrackSub = mIndexClient.getTrack(uri)
+                .first()
+                .observeOn(getScheduler())
+                .subscribe(new Subscriber<Track>() {
+                    @Override public void onCompleted() {
+                        mCurrentTrackSub = null;
+                    }
+                    @Override public void onError(Throwable e) {
+                        mCurrentTrackSub = null;
+                        //will callback in here
+                        mQueue.remove(mQueue.getCurrentPos());
+                    }
+                    @Override public void onNext(Track track) {
+                        mCurrentTrack = track;
+                        mPlayback.loadTrack(track.getResources().get(0),
+                                resolveMediaPlayer(track));
+                        if (mQueueReloaded) {
+                            mQueueReloaded = false;
+                            long seek = mIndexClient.getLastSeekPosition();
+                            if (seek > 0) {
+                                mPlayback.seekTo(0);
+                            }
+                        }
+                        if (mPlayWhenReady) {
+                            mPlayWhenReady = false;
+                            mPlayback.play();
+                        }
+                        updateMeta();
+                        setNextTrack();
+                    }
+                });
+    }
+
+    private void setNextTrack() {
+        if (mQueue.getNextPos() < 0) {
+            Timber.i("No next track in queue");
+            if (mPlayback.hasNext()) {
+                //removes the next player
+                mPlayback.prepareForNextTrack();
+            }
+            return;
+        }
+        final Uri uri = mQueue.getNextUri();
+        if (mNextTrack != null && mNextTrack.getUri().equals(uri) && mPlayback.hasNext()) {
+            Timber.i("Next track is up to date");
+            return;
+        }
+        mPlayback.prepareForNextTrack();
+        if (mNextTrackSub != null) {
+            mNextTrackSub.unsubscribe();
+        }
+        mNextTrackSub = mIndexClient.getTrack(uri)
+                .first()
+                .observeOn(getScheduler())
+                .subscribe(new Subscriber<Track>() {
+                    @Override
+                    public void onCompleted() {
+                        mNextTrackSub = null;
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        //will callback into onQueueChanged
+                        mQueue.remove(mQueue.getNextPos());
+                        mNextTrackSub = null;
+                    }
+
+                    @Override
+                    public void onNext(Track track) {
+                        mNextTrack = track;
+                        mPlayback.loadNextTrack(track.getResources().get(0),
+                                resolveMediaPlayer(track));
+                    }
+                });
     }
 
     class MediaSessionCallback extends MediaSession.Callback {
@@ -397,6 +546,7 @@ public class PlaybackService extends MediaBrowserService {
         @Override
         @DebugLog
         public void onPlay() {
+            mHandler.removeCallbacks(mProgressCheckRunnable);
             mDelayedShutdownHandler.cancelDelayedShutdown();
             if (!mServiceStarted) {
                 startService(new Intent(PlaybackService.this, PlaybackService.class));
@@ -406,13 +556,15 @@ public class PlaybackService extends MediaBrowserService {
                 getMediaSession().setActive(true);
             }
             if (mQueue.notEmpty()) {
-                if (mPlayback.getState() == PlaybackState.STATE_CONNECTING) {
+                if (PlaybackStateHelper.isConnecting(mPlayback.getState())) {
+                    //we are still fetching the current track, tell it to
+                    //play when it arrives
                     mPlayWhenReady = true;
                 } else if (!mPlayback.isPlaying()) {
                     mPlayback.play();
                 }
             } else {
-                //TODO
+                //TODO make random queue
             }
         }
 
@@ -429,14 +581,18 @@ public class PlaybackService extends MediaBrowserService {
         @Override
         public void onSkipToQueueItem(long id) {
             int pos = mQueue.getPosOfId(id);
-            if (mQueue.getCurrentPos() != pos) {
-                if (mQueue.getNextPos() == pos) {
-                    onSkipToNext();
-                } else {
-                    mPlayback.prepareForTrack();
-                    mPlayWhenReady = true;
-                    mQueue.goToItem(pos);
+            if (pos >= 0) {
+                if (mQueue.getCurrentPos() != pos) {
+                    if (mQueue.getNextPos() == pos) {
+                        onSkipToNext();
+                    } else {
+                        mPlayback.prepareForTrack();
+                        mPlayWhenReady = true;
+                        mQueue.goToItem(pos);
+                    }
                 }
+            } else {
+                //no longer in queue TODO
             }
         }
 
@@ -444,6 +600,7 @@ public class PlaybackService extends MediaBrowserService {
         @DebugLog
         public void onPause() {
             mHandler.removeCallbacks(mProgressCheckRunnable);
+            mPlayWhenReady = false;
             mPlayback.pause();
             saveState();
         }
@@ -451,24 +608,32 @@ public class PlaybackService extends MediaBrowserService {
         @Override
         @DebugLog
         public void onSkipToNext() {
+            mHandler.removeCallbacks(mProgressCheckRunnable);
             if (mPlayback.hasNext()) {
                 mPlayback.goToNext();
             } else {
-                mPlayback.prepareForTrack();
-                mPlayWhenReady = true;
-                mQueue.moveToNext();
+                int next = mQueue.getNextPos();
+                if (next >= 0) {
+                    mPlayback.prepareForTrack();
+                    mPlayWhenReady = true;
+                    mQueue.goToItem(next);
+                }//else ignore
             }
         }
 
         @Override
         public void onSkipToPrevious() {
+            mHandler.removeCallbacks(mProgressCheckRunnable);
             if (mPlayback.getCurrentStreamPosition() > REWIND_INSTEAD_PREVIOUS_THRESHOLD) {
                 onSeekTo(0);
             } else {
-                mPlayback.prepareForTrack();
-                mPlayWhenReady = true;
-                //will callback to onCurrentPosChanged
-                mQueue.goToItem(mQueue.getPrevious());
+                int prev = mQueue.getPrevious();
+                if (prev >= 0) {
+                    mPlayback.prepareForTrack();
+                    mPlayWhenReady = true;
+                    //will callback to onCurrentPosChanged
+                    mQueue.goToItem(prev);
+                }//else ignore
             }
         }
 
@@ -485,19 +650,26 @@ public class PlaybackService extends MediaBrowserService {
         }
 
         @Override
-        public void onSetRating(Rating rating) {
+        public void onSetRating(@NonNull Rating rating) {
             super.onSetRating(rating);
         }
 
         @Override
         @DebugLog
-        public void onCustomAction(String action, Bundle extras) {
-            if (action == null) return;
+        public void onCustomAction(@NonNull String action, Bundle extras) {
             switch (action) {
                 case CMD.CYCLE_REPEAT: {
                     mQueue.toggleRepeat();
                     getMediaSession().sendSessionEvent(EVENT.REPEAT_CHANGED,
                             BundleHelper.builder().putInt(mQueue.getRepeatMode()).get());
+                    updatePlaybackState(null);
+                    break;
+                }
+                case CMD.TOGGLE_SHUFFLE_MODE: {
+                    mQueue.toggleShuffle();
+                    getMediaSession().sendSessionEvent(EVENT.QUEUE_SHUFFLED,
+                            BundleHelper.builder().putInt(mQueue.getShuffleMode()).get());
+                    updatePlaybackState(null);
                     break;
                 }
                 case CMD.ENQUEUE: {
@@ -541,9 +713,19 @@ public class PlaybackService extends MediaBrowserService {
                 case CMD.PLAY_ALL: {
                     List<Uri> list = BundleHelper.getList(extras);
                     int startpos = BundleHelper.getInt(extras);
-                    mPlayback.prepareForTrack();
-                    mQueue.replace(list, startpos);
-                    mPlayWhenReady = true;
+                    if (!list.equals(mQueue.get())) {
+                        mPlayback.prepareForTrack();
+                        mPlayWhenReady = true;
+                        mQueue.replace(list, startpos);
+                    } else if (startpos != mQueue.getCurrentPos()) {
+                        if (startpos == mQueue.getNextPos()) {
+                            onSkipToNext();
+                        } else {
+                            mPlayback.prepareForTrack();
+                            mPlayWhenReady = true;
+                            mQueue.goToItem(startpos);
+                        }
+                    } //else no change, ignore
                     break;
                 }
                 case CMD.PLAY_TRACKS_FROM: {
@@ -570,12 +752,6 @@ public class PlaybackService extends MediaBrowserService {
                                     mPlayWhenReady = true;
                                 }
                             });
-                    break;
-                }
-                case CMD.TOGGLE_SHUFFLE_MODE: {
-                    mQueue.toggleShuffle();
-                    getMediaSession().sendSessionEvent(EVENT.QUEUE_SHUFFLED,
-                            BundleHelper.builder().putInt(mQueue.getShuffleMode()).get());
                     break;
                 }
                 case CMD.REMOVE_QUEUE_ITEM: {
@@ -610,7 +786,7 @@ public class PlaybackService extends MediaBrowserService {
                     break;
                 }
                 case CMD.TOGGLE_PLAYBACK: {
-                    if (mPlayback.isPlaying()) {
+                    if (mPlayback.isPlaying() || mPlayWhenReady) {
                         onPause();
                     } else {
                         onPlay();
@@ -656,53 +832,19 @@ public class PlaybackService extends MediaBrowserService {
         void onCurrentPosChangedReal() {
             if (mQueue.notEmpty()) {
                 getMediaSession().setQueue(mQueue.getQueueItems());
-                mHandler.removeCallbacks(mProgressCheckRunnable);
                 if (mQueue.getCurrentPos() < 0) {
-                    handleStop();
+                    Timber.e(new IllegalStateException("Current pos is " + mQueue.getCurrentPos()),
+                            "This should not happen while queue has items");
                     return;
                 }
-                final Uri uri = mQueue.getCurrentUri();
-                if (mCurrentTrack != null && mCurrentTrack.getUri().equals(uri)) {
-                    Timber.e("Uris match, what should i do? reloading anyway");
-                }
-                mPlayback.prepareForTrack();
-                if (mCurrentTrackSub != null) {
-                    mCurrentTrackSub.unsubscribe();
-                }
-                mCurrentTrackSub = mIndexClient.getTrack(uri)
-                        .first()
-                        .observeOn(getScheduler())
-                        .subscribe(new Subscriber<Track>() {
-                            @Override
-                            public void onCompleted() {
-                                mCurrentTrackSub = null;
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-                                mCurrentTrackSub = null;
-                                //will callback in here
-                                mQueue.remove(mQueue.getCurrentPos());
-                            }
-
-                            @Override
-                            public void onNext(Track track) {
-                                mCurrentTrack = track;
-                                mPlayback.loadTrack(track.getResources().get(0),
-                                        new DefaultMediaPlayer.Factory());
-                                if (mPlayWhenReady) {
-                                    mPlayback.play();
-                                    mPlayWhenReady = false;
-                                }
-                                updateMeta();
-                            }
-                        });
+                setTrack();
             } else {
                 Timber.i("Queue is gone. stopping playback");
                 handleStop();
             }
         }
 
+        @DebugLog
         void onQueueChangedReal() {
             if (mQueue.notEmpty()) {
                 getMediaSession().setQueue(mQueue.getQueueItems());
@@ -714,53 +856,12 @@ public class PlaybackService extends MediaBrowserService {
             }
         }
 
+        @DebugLog
         void onMovedToNextReal() {
             mCurrentTrack = mNextTrack;
             mNextTrack = null;
+            updateMeta();
             setNextTrack();
-        }
-
-        private void setNextTrack() {
-            if (mQueue.getNextPos() < 0) {
-                if (mPlayback.hasNext()) {
-                    //removes the next player
-                    mPlayback.prepareForNextTrack();
-                }
-                return;
-            }
-            final Uri uri = mQueue.getNextUri();
-            if (mNextTrack != null && mNextTrack.getUri().equals(uri) && mPlayback.hasNext()) {
-                Timber.i("Next track is up to date");
-                return;
-            }
-            mPlayback.prepareForNextTrack();
-            if (mNextTrackSub != null) {
-                mNextTrackSub.unsubscribe();
-            }
-            mNextTrackSub = mIndexClient.getTrack(uri)
-                    .first()
-                    .observeOn(getScheduler())
-                    .subscribe(new Subscriber<Track>() {
-                        @Override
-                        public void onCompleted() {
-                            mNextTrackSub = null;
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-                            //will callback into onQueueChanged
-                            mQueue.remove(mQueue.getNextPos());
-                            mNextTrackSub = null;
-                        }
-
-                        @Override
-                        public void onNext(Track track) {
-                            mNextTrack = track;
-                            mPlayback.loadNextTrack(track.getResources().get(0),
-                                    new DefaultMediaPlayer.Factory());
-                            updateMeta();
-                        }
-                    });
         }
 
     }
@@ -782,6 +883,7 @@ public class PlaybackService extends MediaBrowserService {
         public void onWentToNext() {
             //will call into moveToNext
             mQueue.moveToNext();
+            updatePlaybackState(null);
         }
 
         @Override
@@ -810,18 +912,15 @@ public class PlaybackService extends MediaBrowserService {
         public void run() {
             resetState();
             mQueue.load();
-            mPlayback.seekTo(mIndexClient.getLastSeekPosition());
+            mQueueReloaded = true;
+            updatePlaybackState(null);
         }
     };
 
     final Runnable mProgressCheckRunnable = new Runnable() {
         @Override
         public void run() {
-            mHandler.removeCallbacks(this);
             updatePlaybackState(null);
-            if (mPlayback.isPlaying()) {
-                mHandler.postDelayed(this, 2000);
-            }
         }
     };
 

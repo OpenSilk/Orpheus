@@ -86,7 +86,6 @@ public class NotificationHelper2 extends BroadcastReceiver {
     private RemoteViews mNotificationTemplate;
     private RemoteViews mExpandedView;
     private Subscription mArtworkSubscription;
-    private Scheduler oScheduler;
     private boolean mAnyActivityInForeground;
 
     private boolean mStarted = false;
@@ -230,9 +229,8 @@ public class NotificationHelper2 extends BroadcastReceiver {
         @Override
         public void onPlaybackStateChanged(PlaybackState state) {
             mPlaybackState = state;
-            Timber.d("Received new playback state", state);
-            if (state != null && (state.getState() == PlaybackState.STATE_STOPPED ||
-                    state.getState() == PlaybackState.STATE_NONE)) {
+            Timber.d("Received new playback state %s", state);
+            if (state != null && PlaybackStateHelper.isStoppedOrInactive(state)) {
                 killNotification();
             } else {
                 buildNotification();
@@ -282,11 +280,8 @@ public class NotificationHelper2 extends BroadcastReceiver {
         if (mArtworkSubscription != null) {
             mArtworkSubscription.unsubscribe();
         }
-        if (oScheduler == null) {
-            oScheduler = HandlerScheduler.from(mService.getHandler());
-        }
         mArtworkSubscription = mArtworkHelper.getArtwork(artUri)
-                .observeOn(oScheduler)
+                .observeOn(mService.getScheduler())
                 .subscribe(new Action1<Bitmap>() {
                     @Override
                     public void call(Bitmap bitmap) {
@@ -307,11 +302,11 @@ public class NotificationHelper2 extends BroadcastReceiver {
     }
 
     private void buildNotificationInternal(Bitmap icon) {
-        if (mService == null || mMetadata == null) {
+        if (mMetadata == null || mPlaybackState == null) {
             return;
         }
 
-        final boolean isPlaying = PlaybackController.isActive(mPlaybackState);
+        final boolean isPlaying = PlaybackStateHelper.shouldShowPauseButton(mPlaybackState);
 
         // Default notfication layout
         if (mNotificationTemplate == null) {
@@ -340,8 +335,7 @@ public class NotificationHelper2 extends BroadcastReceiver {
                 .addExtras(extras)
                 .setContent(mNotificationTemplate)
                 .build();
-        // Control playback from the notification
-        initPlaybackActions(isPlaying);
+
         if (VersionUtils.hasJellyBean()) {
             // Expanded notifiction style
             if (mExpandedView == null) {

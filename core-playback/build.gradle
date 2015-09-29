@@ -33,7 +33,7 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 22
+        minSdkVersion 21
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode versionMajor * 1000000 + versionMinor * 10000 + versionPatch * 100 + versionBuild
         versionName String.format("%d.%d.%d-SNAPSHOT", versionMajor, versionMinor, versionPatch)
