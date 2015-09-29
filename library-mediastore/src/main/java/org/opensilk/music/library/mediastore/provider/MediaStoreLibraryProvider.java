@@ -66,7 +66,7 @@ import static org.opensilk.music.library.mediastore.util.CursorHelpers.appendId;
 public class MediaStoreLibraryProvider extends LibraryProviderOld {
     static final boolean TESTING = false; //for when the tester app doesnt use mortar
 
-    @Inject @Named("mediaStoreLibraryBaseAuthority") String mBaseAuthority;
+    @Inject @Named("mediaStoreLibraryAuthority") String mAuthority;
     @Inject Provider<AlbumsLoader> mAlbumsLoaderProvider;
     @Inject Provider<ArtistsLoader> mArtistsLoaderProvider;
     @Inject Provider<TracksLoader> mTracksLoaderProvider;
@@ -98,7 +98,7 @@ public class MediaStoreLibraryProvider extends LibraryProviderOld {
 
     @Override
     protected String getBaseAuthority() {
-        return mBaseAuthority;
+        return mAuthority;
     }
 
     @Override

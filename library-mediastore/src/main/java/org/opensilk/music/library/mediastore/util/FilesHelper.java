@@ -49,7 +49,6 @@ import timber.log.Timber;
 
 import static org.opensilk.music.library.mediastore.util.CursorHelpers.generateArtworkUri;
 import static org.opensilk.music.library.mediastore.util.CursorHelpers.generateDataUri;
-import static org.opensilk.music.library.mediastore.util.CursorHelpers.getIntOrZero;
 import static org.opensilk.music.library.mediastore.util.CursorHelpers.getLongOrZero;
 import static org.opensilk.music.library.mediastore.util.CursorHelpers.getStringOrNull;
 

@@ -22,7 +22,6 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 
-import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.rx.RxCursorLoader;
 import org.opensilk.music.library.mediastore.util.Projections;
@@ -38,7 +37,6 @@ import static org.opensilk.music.library.mediastore.util.CursorHelpers.generateA
 import static org.opensilk.music.library.mediastore.util.CursorHelpers.generateDataUri;
 import static org.opensilk.music.library.mediastore.util.CursorHelpers.getIntOrZero;
 import static org.opensilk.music.library.mediastore.util.CursorHelpers.getLongOrZero;
-import static org.opensilk.music.library.mediastore.util.CursorHelpers.getStringOrEmpty;
 import static org.opensilk.music.library.mediastore.util.CursorHelpers.getStringOrNull;
 
 /**

@@ -55,7 +55,7 @@ public class PlaylistsLoader extends RxCursorLoader<Playlist> {
     @Inject
     public PlaylistsLoader(
             @ForApplication Context context,
-            @Named("mediaStoreLibraryBaseAuthority") String baseAuthority,
+            @Named("mediaStoreLibraryAuthority") String baseAuthority,
             Provider<TracksLoader> tracksLoaderProvider
     ) {
         super(context);

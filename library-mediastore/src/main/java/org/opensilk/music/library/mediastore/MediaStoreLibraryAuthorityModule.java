@@ -33,20 +33,12 @@ import static org.opensilk.music.library.provider.LibraryProviderOld.AUTHORITY_P
  */
 @Module
 public class MediaStoreLibraryAuthorityModule {
-    @Provides @Named("mediaStoreLibraryBaseAuthority")
-    public String provideMediaStoreLibraryBaseAuthority(@ForApplication Context context) {
+    @Provides @Named("mediaStoreLibraryAuthority")
+    public String provideMediaStoreLibraryAuthority(@ForApplication Context context) {
         return context.getPackageName() + ".provider.mediaStoreLibrary";
     }
-    @Provides @Named("mediaStoreLibraryAuthority")
-    public String provideMediaStoreLibraryAuthority(@Named("mediaStoreLibraryBaseAuthority") String baseAuthority) {
-        return AUTHORITY_PFX + baseAuthority;
-    }
-    @Provides @Named("foldersLibraryBaseAuthority")
-    public String provideFoldersLibraryBaseAuthority(@ForApplication Context context) {
-        return context.getPackageName() + ".provider.foldersLibrary";
-    }
     @Provides @Named("foldersLibraryAuthority")
-    public String provideFoldersLibraryAuthority(@Named("foldersLibraryBaseAuthority") String baseAuthority) {
-        return AUTHORITY_PFX + baseAuthority;
+    public String provideFoldersLibraryAuthority(@ForApplication Context context) {
+        return context.getPackageName() + ".provider.foldersLibrary";
     }
 }

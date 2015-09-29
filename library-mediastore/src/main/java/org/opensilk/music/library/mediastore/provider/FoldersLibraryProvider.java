@@ -60,7 +60,7 @@ import static org.opensilk.music.library.mediastore.util.CursorHelpers.appendId;
  */
 public class FoldersLibraryProvider extends LibraryProvider {
 
-    @Inject @Named("foldersLibraryBaseAuthority") String mBaseAuthority;
+    @Inject @Named("foldersLibraryAuthority") String mAuthority;
     @Inject StorageLookup mStorageLookup;
     @Inject Provider<TracksLoader> mTracksLoaderProvider;
 
@@ -90,8 +90,8 @@ public class FoldersLibraryProvider extends LibraryProvider {
     }
 
     @Override
-    protected String getBaseAuthority() {
-        return mBaseAuthority;
+    protected String getAuthority() {
+        return mAuthority;
     }
 
     @Override

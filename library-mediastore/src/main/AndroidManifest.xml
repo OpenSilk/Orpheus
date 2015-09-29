@@ -35,7 +35,11 @@
             android:label="@string/folders_library_label"
             android:description="@string/folders_library_description"
             android:exported="false"
-            android:process=":prvdr"/>
+            android:process=":prvdr">
+            <intent-filter>
+                <action android:name="org.opensilk.music.action.LIBRARY_PROVIDER"/>
+            </intent-filter>
+        </provider>
 
     </application>
 
