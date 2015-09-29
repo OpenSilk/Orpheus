@@ -100,7 +100,10 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
 
     @Override
     protected void onExitScope() {
+        Timber.v("onExitScope()");
         super.onExitScope();
+        unsubscribeBroadcasts();
+        unsubscribeProgress();
     }
 
     @Override

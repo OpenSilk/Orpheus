@@ -46,8 +46,5 @@ public interface FooterScreenComponent {
                 }
             };
     void inject(FooterScreenView view);
-    AppPreferences appPreferences();
-    PlaybackController playbackController();
-    ArtworkRequestManager artworkRequestManager();
-    DrawerOwner drawerOwner();
+    FooterPageScreenComponent footerPageScreenComponent(FooterPageScreenModule module);
 }

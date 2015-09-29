@@ -20,14 +20,14 @@ package org.opensilk.music.ui3.main;
 import org.opensilk.common.core.dagger2.SubScreenScope;
 
 import dagger.Component;
+import dagger.Subcomponent;
 import rx.functions.Func2;
 
 /**
  * Created by drew on 9/17/15.
  */
 @SubScreenScope
-@Component(
-        dependencies = FooterScreenComponent.class,
+@Subcomponent(
         modules = FooterPageScreenModule.class
 )
 public interface FooterPageScreenComponent {
@@ -35,10 +35,7 @@ public interface FooterPageScreenComponent {
             new Func2<FooterScreenComponent, FooterPageScreen, FooterPageScreenComponent>() {
                 @Override
                 public FooterPageScreenComponent call(FooterScreenComponent musicActivityComponent, FooterPageScreen footerPageScreen) {
-                    return DaggerFooterPageScreenComponent.builder()
-                            .footerScreenComponent(musicActivityComponent)
-                            .footerPageScreenModule(new FooterPageScreenModule(footerPageScreen))
-                            .build();
+                    return musicActivityComponent.footerPageScreenComponent(new FooterPageScreenModule(footerPageScreen));
                 }
             };
     void inject(FooterPageScreenView view);
