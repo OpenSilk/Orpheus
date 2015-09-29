@@ -15,10 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.library.compare;
+package org.opensilk.music.model.compare;
 
-import org.opensilk.music.library.sort.TrackSortOrder;
 import org.opensilk.music.model.Track;
+import org.opensilk.music.model.sort.TrackSortOrder;
 
 import java.util.Comparator;
 
@@ -44,10 +44,10 @@ public class TrackCompare {
                 return new Comparator<Track>() {
                     @Override
                     public int compare(Track lhs, Track rhs) {
-                        int c = BundleableCompare.compareAZ(lhs.getArtistName(), rhs.getArtistName());
+                        int c = BaseCompare.compareAZ(lhs.getArtistName(), rhs.getArtistName());
                         //TODO throw albumArtist into the mix?
                         if (c == 0) {
-                            return BundleableCompare.compareNameAZ(lhs, rhs);
+                            return BaseCompare.compareNameAZ(lhs, rhs);
                         }
                         return c;
                     }
@@ -56,7 +56,7 @@ public class TrackCompare {
                 return new Comparator<Track>() {
                     @Override
                     public int compare(Track lhs, Track rhs) {
-                        int c = BundleableCompare.compareAZ(lhs.getAlbumName(), rhs.getAlbumName());
+                        int c = BaseCompare.compareAZ(lhs.getAlbumName(), rhs.getAlbumName());
                         if (c == 0) {
                             return lhs.getTrackNumber() - rhs.getTrackNumber();
                         }
@@ -70,7 +70,7 @@ public class TrackCompare {
                         //reversed
                         long c = rhs.getDuration() - lhs.getDuration();
                         if (c == 0) {
-                            return BundleableCompare.compareNameAZ(lhs, rhs);
+                            return BaseCompare.compareNameAZ(lhs, rhs);
                         }
                         return (int)c;
                     }
@@ -83,7 +83,7 @@ public class TrackCompare {
                     }
                 };
             default:
-                return BundleableCompare.comparator(sort);
+                return BaseCompare.comparator(sort);
         }
     }
 }

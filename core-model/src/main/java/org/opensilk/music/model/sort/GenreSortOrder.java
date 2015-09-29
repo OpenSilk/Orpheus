@@ -15,11 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.library.sort;
+package org.opensilk.music.model.sort;
 
 /**
- * Created by drew on 4/26/15.
+ * Fields must match index columns exactly!
+ * Created by drew on 5/3/15.
  */
-public interface FolderTrackSortOrder extends BundleableSortOrder {
+public interface GenreSortOrder extends BaseSortOrder {
 
 }

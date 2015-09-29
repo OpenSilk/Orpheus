@@ -15,9 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.library.compare;
+package org.opensilk.music.model.compare;
 
 import org.opensilk.music.model.Folder;
+import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.spi.Bundleable;
 
@@ -30,19 +31,19 @@ import rx.functions.Func2;
  */
 public class FolderTrackCompare {
 
-    public static Func2<Bundleable, Bundleable, Integer> func(final String sort) {
-        return new Func2<Bundleable, Bundleable, Integer>() {
+    public static Func2<Model, Model, Integer> func(final String sort) {
+        return new Func2<Model, Model, Integer>() {
             @Override
-            public Integer call(Bundleable bundleable, Bundleable bundleable2) {
+            public Integer call(Model bundleable, Model bundleable2) {
                 return comparator(sort).compare(bundleable, bundleable2);
             }
         };
     }
 
-    public static Comparator<Bundleable> comparator(final String sort) {
-        return new Comparator<Bundleable>() {
+    public static Comparator<Model> comparator(final String sort) {
+        return new Comparator<Model>() {
             @Override
-            public int compare(Bundleable lhs, Bundleable rhs) {
+            public int compare(Model lhs, Model rhs) {
                 if (lhs instanceof Folder && rhs instanceof Folder) {
                     Comparator<Folder> cf = FolderCompare.comparator(sort);
                     return cf.compare((Folder) lhs, (Folder) rhs);

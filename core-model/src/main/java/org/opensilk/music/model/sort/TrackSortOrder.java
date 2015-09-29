@@ -15,12 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.library.sort;
+package org.opensilk.music.model.sort;
 
 /**
+ * Fields must match index columns exactly!
  * Created by drew on 4/26/15.
  */
-public interface BundleableSortOrder {
-    String A_Z = "name";
-    String Z_A = "name DESC";
+public interface TrackSortOrder extends BaseSortOrder {
+    String ARTIST = "artist";
+    String ALBUM = "album";
+    String LONGEST = "duration DESC";
+    String PLAYORDER = "track";
 }

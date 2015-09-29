@@ -15,13 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.library.sort;
+package org.opensilk.music.model.sort;
 
 /**
  * Created by drew on 4/26/15.
  */
-public interface AlbumSortOrder extends BundleableSortOrder {
-    String MOST_TRACKS = "track_count DESC";
-    String ARTIST = "artist";
-    String NEWEST = "date_added DESC";
+public interface FolderSortOrder extends BaseSortOrder {
+    String MOST_CHILDREN = "childCount DESC";
+    String NEWEST = "date DESC";
 }

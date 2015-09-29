@@ -15,11 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.library.compare;
+package org.opensilk.music.model.compare;
 
 import org.apache.commons.lang3.ObjectUtils;
-import org.opensilk.music.library.sort.AlbumSortOrder;
 import org.opensilk.music.model.Album;
+import org.opensilk.music.model.sort.AlbumSortOrder;
 
 import java.util.Comparator;
 
@@ -48,7 +48,7 @@ public class AlbumCompare {
                         //reversed
                         int c = rhs.getTrackCount() - lhs.getTrackCount();
                         if (c == 0) {
-                            return BundleableCompare.compareNameAZ(lhs, rhs);
+                            return BaseCompare.compareNameAZ(lhs, rhs);
                         }
                         return c;
                     }
@@ -59,7 +59,7 @@ public class AlbumCompare {
                     public int compare(Album lhs, Album rhs) {
                         int c = ObjectUtils.compare(lhs.getArtistName(), rhs.getArtistName());
                         if (c == 0) {
-                            return BundleableCompare.compareNameAZ(lhs, rhs);
+                            return BaseCompare.compareNameAZ(lhs, rhs);
                         }
                         return c;
                     }
@@ -71,13 +71,13 @@ public class AlbumCompare {
                         //reversed
                         int c = ObjectUtils.compare(rhs.getYear(), lhs.getYear());
                         if (c == 0) {
-                            return BundleableCompare.compareNameAZ(lhs, rhs);
+                            return BaseCompare.compareNameAZ(lhs, rhs);
                         }
                         return c;
                     }
                 };
             default:
-                return BundleableCompare.comparator(sort);
+                return BaseCompare.comparator(sort);
         }
     }
 }

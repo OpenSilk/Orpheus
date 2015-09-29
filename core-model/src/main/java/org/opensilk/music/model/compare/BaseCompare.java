@@ -15,9 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.library.compare;
+package org.opensilk.music.model.compare;
 
-import org.opensilk.music.library.sort.BundleableSortOrder;
+import org.opensilk.music.model.Model;
+import org.opensilk.music.model.sort.BaseSortOrder;
 import org.opensilk.music.model.spi.Bundleable;
 
 import java.util.Comparator;
@@ -27,9 +28,9 @@ import rx.functions.Func2;
 /**
  * Created by drew on 4/26/15.
  */
-public class BundleableCompare {
+public class BaseCompare {
 
-    public static <T extends Bundleable> Func2<T, T, Integer> func(final String sort) {
+    public static <T extends Model> Func2<T, T, Integer> func(final String sort) {
         return new Func2<T, T, Integer>() {
             @Override
             public Integer call(T t, T t2) {
@@ -38,16 +39,16 @@ public class BundleableCompare {
         };
     }
 
-    public static <T extends Bundleable> Comparator<T> comparator(String sort) {
+    public static <T extends Model> Comparator<T> comparator(String sort) {
         switch (sort) {
-            case BundleableSortOrder.A_Z:
+            case BaseSortOrder.A_Z:
                 return new Comparator<T>() {
                     @Override
                     public int compare(T lhs, T rhs) {
                         return compareNameAZ(lhs, rhs);
                     }
                 };
-            case BundleableSortOrder.Z_A:
+            case BaseSortOrder.Z_A:
                 return new Comparator<T>() {
                     @Override
                     public int compare(T lhs, T rhs) {
@@ -66,16 +67,16 @@ public class BundleableCompare {
 
     private static final AlphanumComparator sComparator = new AlphanumComparator();
 
-    public static <T extends Bundleable> int compareNameAZ(T lhs, T rhs) {
-        return compareAZ(lhs.getName(), rhs.getName());
+    public static <T extends Model> int compareNameAZ(T lhs, T rhs) {
+        return compareAZ(lhs.getSortName(), rhs.getSortName());
     }
 
     public static int compareAZ(String lhs, String rhs) {
         return sComparator.compare(lhs, rhs);
     }
 
-    public static <T extends Bundleable> int compareNameZA(T lhs, T rhs) {
-        return compareZA(lhs.getName(), rhs.getName());
+    public static <T extends Model> int compareNameZA(T lhs, T rhs) {
+        return compareZA(lhs.getSortName(), rhs.getSortName());
     }
 
     public static int compareZA(String lhs, String rhs) {

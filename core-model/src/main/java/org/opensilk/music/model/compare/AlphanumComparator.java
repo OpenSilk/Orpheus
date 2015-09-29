@@ -22,7 +22,7 @@
  *
  */
 
-package org.opensilk.music.library.compare;
+package org.opensilk.music.model.compare;
 
 import java.util.Comparator;
 

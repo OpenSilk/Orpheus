@@ -15,10 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.library.compare;
+package org.opensilk.music.model.compare;
 
-import org.opensilk.music.library.sort.ArtistSortOrder;
-import org.opensilk.music.model.Artist;
+import org.opensilk.music.model.Folder;
+import org.opensilk.music.model.sort.FolderSortOrder;
 
 import java.util.Comparator;
 
@@ -27,45 +27,44 @@ import rx.functions.Func2;
 /**
  * Created by drew on 4/26/15.
  */
-public class ArtistCompare {
-
-    public static Func2<Artist, Artist, Integer> func(final String sort) {
-        return new Func2<Artist, Artist, Integer>() {
+public class FolderCompare {
+    public static Func2<Folder, Folder, Integer> func(final String sort) {
+        return new Func2<Folder, Folder, Integer>() {
             @Override
-            public Integer call(Artist artist, Artist artist2) {
-                return comparator(sort).compare(artist, artist2);
+            public Integer call(Folder folder, Folder folder2) {
+                return comparator(sort).compare(folder, folder2);
             }
         };
     }
 
-    public static Comparator<Artist> comparator(String sort) {
+    public static Comparator<Folder> comparator(String sort) {
         switch (sort) {
-            case ArtistSortOrder.MOST_TRACKS:
-                return new Comparator<Artist>() {
+            case FolderSortOrder.MOST_CHILDREN:
+                return new Comparator<Folder>() {
                     @Override
-                    public int compare(Artist lhs, Artist rhs) {
-                        //reversed
-                        int c = rhs.getTrackCount() - lhs.getTrackCount();
+                    public int compare(Folder lhs, Folder rhs) {
+                        //Reversed
+                        int c = rhs.getChildCount() - lhs.getChildCount();
                         if (c == 0) {
-                            return BundleableCompare.compareNameAZ(lhs, rhs);
+                            return BaseCompare.compareNameAZ(lhs, rhs);
                         }
                         return c;
                     }
                 };
-            case ArtistSortOrder.MOST_ALBUMS:
-                return new Comparator<Artist>() {
+            case FolderSortOrder.NEWEST:
+                return new Comparator<Folder>() {
                     @Override
-                    public int compare(Artist lhs, Artist rhs) {
-                        //reversed
-                        int c = rhs.getAlbumCount() - lhs.getAlbumCount();
+                    public int compare(Folder lhs, Folder rhs) {
+                        //Z-A
+                        int c = BaseCompare.compareZA(lhs.getDateModified(), rhs.getDateModified());
                         if (c == 0) {
-                            return BundleableCompare.compareNameAZ(lhs, rhs);
+                            return BaseCompare.compareNameAZ(lhs, rhs);
                         }
                         return c;
                     }
                 };
             default:
-                return BundleableCompare.comparator(sort);
+                return BaseCompare.comparator(sort);
         }
     }
 }
