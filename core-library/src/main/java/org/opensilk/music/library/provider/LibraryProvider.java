@@ -27,7 +27,6 @@ import android.os.IBinder;
 import android.util.Log;
 
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.library.compare.FolderTrackCompare;
 import org.opensilk.music.library.internal.BundleableListTransformer;
 import org.opensilk.music.library.internal.BundleableSubscriber;
@@ -40,18 +39,17 @@ import org.opensilk.music.model.spi.Bundleable;
 
 import java.util.List;
 
+import javax.security.auth.callback.UnsupportedCallbackException;
+
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscriber;
 import rx.functions.Action0;
+import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 
 import static org.opensilk.music.library.internal.LibraryException.Kind.BAD_BINDER;
-import static org.opensilk.music.library.internal.LibraryException.Kind.ILLEGAL_URI;
 import static org.opensilk.music.library.internal.LibraryException.Kind.METHOD_NOT_IMPLEMENTED;
-import static org.opensilk.music.library.provider.LibraryUris.M_FOLDER;
-import static org.opensilk.music.library.provider.LibraryUris.M_PLAYLIST;
-import static org.opensilk.music.library.provider.LibraryUris.M_TRACKS;
 
 /**
  * Created by drew on 4/26/15.
@@ -59,36 +57,19 @@ import static org.opensilk.music.library.provider.LibraryUris.M_TRACKS;
 public abstract class LibraryProvider extends ContentProvider {
     public static final String TAG = LibraryProvider.class.getSimpleName();
 
-    /**
-     * Authority prefix all libraries must start with to be discoverable by orpheus
-     */
-    public static final String AUTHORITY_PFX = "orpheus.library.";
-
     public static final String ACTION_FILTER = "org.opensilk.music.action.LIBRARY_PROVIDER";
 
-    /**
-     * Our full authority
-     */
-    protected String mAuthority;
-
-    private UriMatcher mMatcher;
     private Scheduler scheduler = Schedulers.computation();
 
     @Override
     public boolean onCreate() {
-        mAuthority = AUTHORITY_PFX + getBaseAuthority();
-        mMatcher = LibraryUris.makeMatcher(mAuthority);
         return true;
     }
 
     /**
-     * Base authority for library appended to {@link #AUTHORITY_PFX}
-     * default is package name, this is usually sufficient unless package contains
-     * multiple libraries
+     * This providers authority
      */
-    protected String getBaseAuthority() {
-        return getContext().getPackageName();
-    }
+    protected abstract String getAuthority();
 
     /**
      * @return This libraries config
@@ -105,6 +86,7 @@ public abstract class LibraryProvider extends ContentProvider {
         switch (method) {
             case LibraryMethods.LIST:
             case LibraryMethods.GET:
+            case LibraryMethods.MULTI_GET:
             case LibraryMethods.SCAN:
             case LibraryMethods.ROOTS: {
                 extras.setClassLoader(getClass().getClassLoader());
@@ -120,12 +102,17 @@ public abstract class LibraryProvider extends ContentProvider {
                     return ok.get();
                 }
 
+                //Rebuild the extras to remove the binder;
                 final Uri uri = LibraryExtras.getUri(extras);
-                final String sortOrder = extras.getString(LibraryExtras.SORTORDER);
-                final Bundle args = LibraryExtras.b()
-                        .putUri(uri)
-                        .putSortOrder(sortOrder != null ? sortOrder : BundleableSortOrder.A_Z)
-                        .get();
+                final String sortOrder = LibraryExtras.getSortOrder(extras);
+                final List<Uri> uriList = LibraryExtras.getUriList(extras);
+                LibraryExtras.Builder eb = LibraryExtras.b();
+                eb.putUri(uri)
+                        .putSortOrder(sortOrder != null ? sortOrder : BundleableSortOrder.A_Z);
+                if (uriList != null) {
+                    eb.putUriList(uriList);
+                }
+                final Bundle args = eb.get();
 
                 switch (method) {
                     case LibraryMethods.LIST: {
@@ -135,6 +122,9 @@ public abstract class LibraryProvider extends ContentProvider {
                     case LibraryMethods.GET: {
                         getObjInternal(uri, binder, args);
                         break;
+                    }
+                    case LibraryMethods.MULTI_GET: {
+                        multiGetObjsInternal(uriList, binder, args);
                     }
                     case LibraryMethods.SCAN: {
                         scanObjsInternal(uri, binder, args);
@@ -225,6 +215,28 @@ public abstract class LibraryProvider extends ContentProvider {
         ).subscribe(subscriber);
     }
 
+    protected void multiGetObjsInternal(final List<Uri> uriList, final IBinder binder,final Bundle args) {
+        final BundleableSubscriber<Bundleable> subscriber = new BundleableSubscriber<>(binder);
+        Observable<Bundleable> o = Observable.create(
+                new Observable.OnSubscribe<Bundleable>() {
+                    @Override
+                    public void call(Subscriber<? super Bundleable> subscriber) {
+                        multiGetObjs(uriList, subscriber, args);
+                    }
+                })
+                .subscribeOn(scheduler);
+        o.compose(
+                new BundleableListTransformer<Bundleable>(new Func2<Bundleable, Bundleable, Integer>() {
+                    @Override
+                    public Integer call(Bundleable bundleable, Bundleable bundleable2) {
+                        int idx1 = uriList.indexOf(bundleable.getUri());
+                        int idx2 = uriList.indexOf(bundleable2.getUri());
+                        return idx1 - idx2;
+                    }
+                })
+        ).subscribe(subscriber);
+    }
+
     protected void scanObjsInternal(final Uri uri, final IBinder binder, final Bundle args){
         final BundleableSubscriber<Bundleable> subscriber = new BundleableSubscriber<>(binder);
         Observable<Bundleable> o = Observable.create(
@@ -266,6 +278,13 @@ public abstract class LibraryProvider extends ContentProvider {
     }
 
     protected void getObj(Uri uri, Subscriber<? super Bundleable> subscriber, Bundle args) {
+        subscriber.onError(new UnsupportedOperationException());
+    }
+
+    /**
+     * Emitted items need not be sorted
+     */
+    protected void multiGetObjs(List<Uri> uriList, Subscriber<? super Bundleable> subscriber, Bundle args) {
         subscriber.onError(new UnsupportedOperationException());
     }
 

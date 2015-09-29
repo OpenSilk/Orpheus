@@ -33,6 +33,10 @@ public interface LibraryMethods {
      */
     String GET = "get";
     /**
+     * Return whatever object the uri list describes
+     */
+    String MULTI_GET = "multi_get";
+    /**
      * List children of container, returned objects need not be sorted
      */
     String SCAN = "scan";

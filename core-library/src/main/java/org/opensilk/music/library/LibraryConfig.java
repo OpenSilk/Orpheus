@@ -39,6 +39,11 @@ public class LibraryConfig {
      */
     public static final long FLAG_REQUIRES_AUTH = 1 << 2;
     /**
+     * Library supports {@link org.opensilk.music.library.provider.LibraryMethods#MULTI_GET}
+     * Scope: Global
+     */
+    public static final long FLAG_MULTI_GET_SUPPORT = 1 << 3;
+    /**
      * Object supports deletion
      * Scope: Container, Item
      */
