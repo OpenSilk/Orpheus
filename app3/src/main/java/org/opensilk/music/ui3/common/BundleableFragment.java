@@ -20,13 +20,12 @@ package org.opensilk.music.ui3.common;
 import android.os.Bundle;
 
 import org.opensilk.common.ui.mortarfragment.MortarFragment;
-import org.opensilk.common.ui.mortarfragment.PauseAndResumeFragment;
 import org.opensilk.music.library.LibraryConfig;
 
 /**
  * Created by drew on 5/5/15.
  */
-public abstract class BundleableFragment extends PauseAndResumeFragment {
+public abstract class BundleableFragment extends MortarFragment {
 
     protected LibraryConfig mLibraryConfig;
     protected String mTitle;

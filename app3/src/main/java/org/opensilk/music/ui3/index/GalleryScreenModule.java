@@ -17,19 +17,13 @@
 
 package org.opensilk.music.ui3.index;
 
-import org.opensilk.common.ui.mortarfragment.PauseAndResumeFragment;
-import org.opensilk.common.ui.mortarfragment.PauseAndResumeFragmentModule;
-import org.opensilk.music.ui3.common.BundleableModule;
-
 import dagger.Module;
 import dagger.Provides;
 
 /**
  * Created by drew on 4/20/15.
  */
-@Module(
-        includes = PauseAndResumeFragmentModule.class
-)
+@Module
 public class GalleryScreenModule {
         final GalleryScreen screen;
 

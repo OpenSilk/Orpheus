@@ -22,7 +22,6 @@ import android.os.Bundle;
 
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortarfragment.MortarFragment;
-import org.opensilk.common.ui.mortarfragment.PauseAndResumeFragment;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.ui3.common.BundleableFragment;
@@ -33,7 +32,7 @@ import java.util.List;
 /**
  * Created by drew on 5/5/15.
  */
-public class GalleryScreenFragment extends PauseAndResumeFragment {
+public class GalleryScreenFragment extends MortarFragment {
     public static final String NAME = GalleryScreenFragment.class.getName();
 
     public static GalleryScreenFragment ni(Context context) {

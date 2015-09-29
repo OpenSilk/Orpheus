@@ -17,14 +17,13 @@
 
 package org.opensilk.music.ui3.common;
 
-import org.opensilk.common.ui.mortarfragment.PauseAndResumeFragmentComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.playback.control.PlaybackController;
 
 /**
  * Created by drew on 5/2/15.
  */
-public interface BundleableComponent extends PauseAndResumeFragmentComponent {
+public interface BundleableComponent {
     void inject(BundleableRecyclerView view);
     PlaybackController playbackController();
     AppPreferences appPreferences();

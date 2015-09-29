@@ -19,12 +19,11 @@ package org.opensilk.music.ui3.library;
 
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortarfragment.MortarFragment;
-import org.opensilk.common.ui.mortarfragment.PauseAndResumeFragment;
 
 /**
  * Created by drew on 9/6/15.
  */
-public class LibraryScreenFragment extends PauseAndResumeFragment {
+public class LibraryScreenFragment extends MortarFragment {
 
     public static LibraryScreenFragment ni() {
         return new LibraryScreenFragment();
