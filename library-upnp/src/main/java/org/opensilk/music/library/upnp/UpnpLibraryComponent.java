@@ -38,6 +38,5 @@ import dagger.Component;
         }
 )
 public interface UpnpLibraryComponent extends AppContextComponent {
-    @Named("UpnpLibraryBaseAuthority") String upnpBaseAuthority();
     @Named("UpnpLibraryAuthority") String unpnAuthority();
 }

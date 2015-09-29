@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.fourthline.cling.model.meta.Device;
 import org.fourthline.cling.support.model.DIDLObject;
 import org.fourthline.cling.support.model.PersonWithRole;
+import org.fourthline.cling.support.model.Protocol;
 import org.fourthline.cling.support.model.Res;
 import org.fourthline.cling.support.model.container.Container;
 import org.fourthline.cling.support.model.container.MusicAlbum;
@@ -37,15 +38,7 @@ import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Track;
 
 import java.net.URI;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
-
-import hugo.weaving.DebugLog;
 
 /**
  * Created by drew on 6/18/14.
@@ -135,6 +128,10 @@ public class ModelUtil {
             track.setParentUri(UpnpCDUris.makeUri(authority, device, mt.getParentID()));
             track.setName(mt.getTitle());
             final Res firstResource = mt.getFirstResource();
+            if (firstResource.getProtocolInfo().getProtocol() != Protocol.HTTP_GET) {
+                //Orpheus can only support http-get for now
+                return null;
+            }
             res.setUri(Uri.parse(firstResource.getValue()));
         } catch (Exception e) {
             e.printStackTrace();

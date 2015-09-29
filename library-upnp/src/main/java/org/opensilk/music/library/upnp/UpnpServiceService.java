@@ -19,9 +19,11 @@ package org.opensilk.music.library.upnp;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.IBinder;
 
 import org.apache.commons.lang3.StringUtils;
 import org.fourthline.cling.UpnpServiceConfiguration;
+import org.fourthline.cling.android.AndroidUpnpService;
 import org.fourthline.cling.android.AndroidUpnpServiceConfiguration;
 import org.fourthline.cling.android.AndroidUpnpServiceImpl;
 import org.fourthline.cling.model.UnsupportedDataException;
@@ -32,16 +34,22 @@ import org.fourthline.cling.model.types.ServiceType;
 import org.fourthline.cling.model.types.UDAServiceType;
 import org.fourthline.cling.registry.DefaultRegistryListener;
 import org.fourthline.cling.registry.Registry;
+import org.fourthline.cling.transport.impl.DatagramIOImpl;
 import org.fourthline.cling.transport.impl.RecoveringSOAPActionProcessorImpl;
+import org.fourthline.cling.transport.spi.DatagramIO;
 import org.fourthline.cling.transport.spi.SOAPActionProcessor;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.upnp.provider.UpnpCDUris;
 
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import hugo.weaving.DebugLog;
+import rx.Scheduler;
+import rx.functions.Action0;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by drew on 6/8/14.
@@ -50,6 +58,8 @@ public class UpnpServiceService extends AndroidUpnpServiceImpl {
 
     String mUpnpCDAuthority;
     UpnpRegistryListener mRegistryListener;
+    volatile Scheduler.Worker mShutdownWorker;
+    boolean mStarted;
 
     @Override
     @DebugLog
@@ -60,8 +70,9 @@ public class UpnpServiceService extends AndroidUpnpServiceImpl {
                 new org.seamless.android.FixedAndroidLogHandler()
         );
         // enable logging as needed for various categories of Cling:
-        Logger.getLogger("org.fourthline.cling").setLevel(Level.FINE);
+        Logger.getLogger("org.fourthline.cling").setLevel(Level.INFO);//.FINE);
         Logger.getLogger("org.fourthline.cling.transport.spi.DatagramProcessor").setLevel(Level.INFO);
+        Logger.getLogger("org.fourthline.cling.transport.spi.DatagramIO").setLevel(Level.INFO);
         Logger.getLogger("org.fourthline.cling.protocol.ProtocolFactory").setLevel(Level.INFO);
         Logger.getLogger("org.fourthline.cling.model.message.UpnpHeaders").setLevel(Level.INFO);
 //            Logger.getLogger("org.fourthline.cling.transport.spi.SOAPActionProcessor").setLevel(Level.FINER);
@@ -77,16 +88,32 @@ public class UpnpServiceService extends AndroidUpnpServiceImpl {
     public void onDestroy() {
         binder.getRegistry().removeListener(mRegistryListener);
         super.onDestroy();
+        cancelServiceShutdown();
+    }
+
+    @Override
+    @DebugLog
+    public IBinder onBind(Intent intent) {
+        final Registry registry = binder.getRegistry();
+        if (registry.isPaused()) {
+            registry.resume();
+        }
+        cancelServiceShutdown();
+        pokeService();
+        return super.onBind(intent);
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        scheduleServiceShutdown();
+        return super.onUnbind(intent);
     }
 
     @Override
     @DebugLog
     public int onStartCommand(Intent intent, int flags, int startId) {
-        final Registry registry = binder.getRegistry();
-        if (registry.isPaused()) {
-            registry.resume();
-        }
-        return START_STICKY;
+        mStarted = true;
+        return START_NOT_STICKY;
     }
 
     @Override
@@ -140,5 +167,39 @@ public class UpnpServiceService extends AndroidUpnpServiceImpl {
             getContentResolver().notifyChange(UpnpCDUris.makeUri(mUpnpCDAuthority, deviceId, null), null);
             getContentResolver().notifyChange(LibraryUris.rootUri(mUpnpCDAuthority), null);
         }
+    }
+
+    private void pokeService() {
+        if (!mStarted) {
+            startService(new Intent(this, UpnpServiceService.class));
+            mStarted = true;
+        }
+    }
+
+    private void cancelServiceShutdown() {
+        if (mShutdownWorker != null) {
+            mShutdownWorker.unsubscribe();
+            mShutdownWorker = null;
+        }
+    }
+
+    private void scheduleServiceShutdown() {
+        cancelServiceShutdown();
+        mShutdownWorker = Schedulers.computation().createWorker();
+        mShutdownWorker.schedule(new Action0() {
+            @Override
+            public void call() {
+                AndroidUpnpService service = binder;
+                if (!service.getRegistry().isPaused()) {
+                    service.getRegistry().pause();
+                }
+            }
+        }, 10, TimeUnit.MINUTES);
+        mShutdownWorker.schedule(new Action0() {
+            @Override
+            public void call() {
+                stopSelf();
+            }
+        }, 20, TimeUnit.MINUTES);
     }
 }

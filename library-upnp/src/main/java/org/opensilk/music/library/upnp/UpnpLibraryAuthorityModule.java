@@ -33,12 +33,8 @@ import dagger.Provides;
  */
 @Module
 public class UpnpLibraryAuthorityModule {
-    @Provides @Named("UpnpLibraryBaseAuthority")
-    public String provideUpnpLibraryBaseAuthority(@ForApplication Context context) {
-        return context.getPackageName() + ".provider.upnp";
-    }
     @Provides @Named("UpnpLibraryAuthority")
-    public String provideUpnpLibraryAuthority(@Named("UpnpLibraryBaseAuthority") String base) {
-        return LibraryProvider.AUTHORITY_PFX + base;
+    public String provideUpnpLibraryAuthority(@ForApplication Context context) {
+        return context.getPackageName() + ".provider.upnp";
     }
 }
