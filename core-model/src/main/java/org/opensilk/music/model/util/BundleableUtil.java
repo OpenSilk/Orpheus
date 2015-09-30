@@ -70,8 +70,9 @@ public class BundleableUtil {
     @NonNull @SuppressWarnings("unchecked")
     public static <T extends Bundleable> T materializeBundle(String name, Bundle b) throws BadBundleableException {
         try {
-            return (T) getCreator(name, b).fromBundle(b);
+            return (T) getCreator(name).fromBundle(b);
         } catch (IllegalArgumentException|ClassCastException e) {
+            sCreatorCache.remove(name);
             throw new BadBundleableException(e);
         }
     }
@@ -100,7 +101,7 @@ public class BundleableUtil {
     }
 
     private static final HashMap<String, Bundleable.BundleCreator> sCreatorCache = new HashMap<>();
-    private static Bundleable.BundleCreator getCreator(String name, Bundle b) throws BadBundleableException {
+    private static Bundleable.BundleCreator getCreator(String name) throws BadBundleableException {
         if (name == null) {
             throw new BadBundleableException(new NullPointerException("clz not found in bundle"));
         }
@@ -109,7 +110,7 @@ public class BundleableUtil {
             creator = sCreatorCache.get(name);
             if (creator == null) {
                 try {
-                    Class clz = Class.forName(b.getString(Bundleable.CLZ));
+                    Class clz = Class.forName(name);
                     Field f = clz.getDeclaredField("BUNDLE_CREATOR");
                     creator = (Bundleable.BundleCreator)f.get(null);
                 } catch (Exception e) {

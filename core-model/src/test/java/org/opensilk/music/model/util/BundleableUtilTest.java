@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class BundleableUtilTest {
 
     @Test
-    public void testMaterilizeBundleWorks() throws Exception {
+    public void testMaterializeBundleWorks() throws Exception {
         Folder f = Folder.builder().setUri(Uri.parse("content://test/m/1"))
                 .setParentUri(Uri.parse("content://test/m")).setName("Folder1").build();
         Bundle b = f.toBundle();
@@ -54,16 +54,27 @@ public class BundleableUtilTest {
         Bundleable b2 = BundleableUtil.materializeBundle(b1);
         Assert.assertTrue((b2 instanceof Folder));
         assertThat((Folder) b2).isEqualTo(f);
+    }
+
+    @Test
+    public void testMaterializeBundleWorks2() throws Exception {
+        Folder f = Folder.builder().setUri(Uri.parse("content://test/m/1"))
+                .setParentUri(Uri.parse("content://test/m")).setName("Folder1").build();
+        Bundle b = f.toBundle();
+
+        Parcel p = Parcel.obtain();
+        b.writeToParcel(p, 0);
+        p.setDataPosition(0);
+        Bundle b1 = p.readBundle();
 
         Folder f2 = BundleableUtil.materializeBundle(Folder.class, b);
         assertThat(f).isEqualTo(f2);
     }
 
     @Test(expected = BadBundleableException.class)
-    public void ensureMalformedBundleThrows() throws Exception {
+    public void testWrongClassThrows() throws Exception {
         Bundle b =  Folder.builder().setUri(Uri.parse("content://test/m/1"))
                 .setParentUri(Uri.parse("content://test/m")).setName("Folder1").build().toBundle();
-        b.putString(Bundleable.CLZ, Artist.class.getName());
-        BundleableUtil.materializeBundle(Folder.class, b);
+        BundleableUtil.materializeBundle(Artist.class.getName(), b);
     }
 }
