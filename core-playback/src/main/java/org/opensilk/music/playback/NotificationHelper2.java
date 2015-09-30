@@ -31,6 +31,7 @@ import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.widget.RemoteViews;
 
@@ -151,7 +152,6 @@ public class NotificationHelper2 extends BroadcastReceiver {
             mStarted = false;
             mController.unregisterCallback(mCb);
             try {
-                mNotificationManager.cancel(NOTIFICATION_ID);
                 mContext.unregisterReceiver(this);
             } catch (IllegalArgumentException ex) {
                 // ignore if the receiver is not registered.
@@ -214,7 +214,7 @@ public class NotificationHelper2 extends BroadcastReceiver {
             mController = new MediaController(mContext, mSessionToken);
             mTransportControls = mController.getTransportControls();
             if (mStarted) {
-                mController.registerCallback(mCb);
+                mController.registerCallback(mCb, mService.getHandler());
             }
         }
     }
@@ -227,13 +227,18 @@ public class NotificationHelper2 extends BroadcastReceiver {
 
     private final MediaController.Callback mCb = new MediaController.Callback() {
         @Override
-        public void onPlaybackStateChanged(PlaybackState state) {
+        public void onPlaybackStateChanged(@NonNull PlaybackState state) {
+            PlaybackState oldstate = mPlaybackState;
             mPlaybackState = state;
-            Timber.d("Received new playback state %s", state);
-            if (state != null && PlaybackStateHelper.isStoppedOrInactive(state)) {
-                killNotification();
+            if (oldstate != null && oldstate.getState() == state.getState()) {
+                Timber.d("Ignoring playback state update: no change");
             } else {
-                buildNotification();
+                Timber.d("Received new playback state %s", state);
+                if (PlaybackStateHelper.isStoppedOrInactive(state)) {
+                    killNotification();
+                } else {
+                    buildNotification();
+                }
             }
         }
 
