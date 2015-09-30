@@ -36,6 +36,11 @@ ext.butterKnifeVersion = "6.0.0"
 ext.commonsIoVersion = "2.4"
 ext.gsonVersion = "2.3"
 
+ext.testJunitVersion = "4.12"
+ext.testAssertJVersion = "1.7.0"
+ext.testRobolectricVersion = "3.0"
+ext.testMockitoVersion = "1.10.19"
+
 def gitSha() {
     return 'git rev-parse --short HEAD'.execute().text.trim()
 }

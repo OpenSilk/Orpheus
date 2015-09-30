@@ -56,10 +56,10 @@ dependencies {
     compile project(':core-lastfm')
     compile project(':core-loader')
 
-    testCompile "junit:junit:4.10"
-    testCompile "org.assertj:assertj-core:1.7.0"
-    testCompile 'com.squareup.assertj:assertj-android:1.1.0'
-    testCompile "org.robolectric:robolectric:3.0"
+    testCompile (group:"junit", name:"junit", version: rootProject.ext.testJunitVersion)
+    testCompile (group:"org.assertj", name:"assertj-core", version: rootProject.ext.testAssertJVersion)
+    testCompile (group:"org.robolectric", name:"robolectric", version : rootProject.ext.testRobolectricVersion)
+    testCompile (group:"org.mockito", name:"mockito-core", version: rootProject.ext.testMockitoVersion)
     testCompile "commons-io:commons-io:2.4"
     testCompile 'com.squareup.okhttp:mockwebserver:2.5.0'
 }

@@ -69,7 +69,8 @@ dependencies {
     compile 'org.seamless:seamless-xml:1.0-alpha3'
 
 
-    testCompile "junit:junit:4.10"
-    testCompile "org.assertj:assertj-core:1.7.0"
-    testCompile "org.robolectric:robolectric:3.0"
+    testCompile (group:"junit", name:"junit", version: rootProject.ext.testJunitVersion)
+    testCompile (group:"org.assertj", name:"assertj-core", version: rootProject.ext.testAssertJVersion)
+    testCompile (group:"org.robolectric", name:"robolectric", version : rootProject.ext.testRobolectricVersion)
+    testCompile (group:"org.mockito", name:"mockito-core", version: rootProject.ext.testMockitoVersion)
 }

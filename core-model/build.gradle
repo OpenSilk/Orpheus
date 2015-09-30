@@ -50,7 +50,8 @@ dependencies {
     compile (group: 'io.reactivex', name: 'rxjava', version: rootProject.ext.rxJavaVersion)
     compile(group:'org.apache.commons', name:'commons-lang3', version: rootProject.ext.commonsLangVersion)
 
-    testCompile "junit:junit:4.10"
-    testCompile "org.assertj:assertj-core:1.7.0"
-    testCompile "org.robolectric:robolectric:3.0"
+    testCompile (group:"junit", name:"junit", version: rootProject.ext.testJunitVersion)
+    testCompile (group:"org.assertj", name:"assertj-core", version: rootProject.ext.testAssertJVersion)
+    testCompile (group:"org.robolectric", name:"robolectric", version : rootProject.ext.testRobolectricVersion)
+    testCompile (group:"org.mockito", name:"mockito-core", version: rootProject.ext.testMockitoVersion)
 }

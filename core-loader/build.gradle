@@ -54,11 +54,8 @@ dependencies {
     compile project(':core-model')
     compile project(':core-library')
 
-    testCompile('junit:junit:4.12')
-    testCompile('org.robolectric:robolectric:2.4') {
-        exclude module: 'commons-logging'
-        exclude module: 'httpclient'
-    }
-    testCompile('com.squareup:fest-android:1.0.0')
-    testCompile('org.mockito:mockito-core:1.10.0')
+    testCompile (group:"junit", name:"junit", version: rootProject.ext.testJunitVersion)
+    testCompile (group:"org.assertj", name:"assertj-core", version: rootProject.ext.testAssertJVersion)
+    testCompile (group:"org.robolectric", name:"robolectric", version : rootProject.ext.testRobolectricVersion)
+    testCompile (group:"org.mockito", name:"mockito-core", version: rootProject.ext.testMockitoVersion)
 }
