@@ -50,9 +50,13 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Subscriber;
+import rx.functions.Action2;
+import rx.functions.Func0;
 import rx.functions.Func1;
+import rx.functions.Func2;
 import timber.log.Timber;
 
 import static android.media.MediaMetadata.METADATA_KEY_ALBUM;
@@ -210,12 +214,19 @@ public class IndexClientImpl implements IndexClient {
         return Observable.empty();
     }
 
+    /**
+     * Convert a list of uris into a list of mediadescriptions
+     * Emitted list is not guaranteed (or event tries) to retain the order of the passed list
+     */
     @Override
+    @DebugLog
     public Observable<List<MediaDescription>> getDescriptions(final List<Uri> queue) {
+        //first we ask the index what it knows
         return Observable.create(new Observable.OnSubscribe<List<Track>>() {
             @Override
             public void call(final Subscriber<? super List<Track>> subscriber) {
                 final IBundleableObserver o = new IBundleableObserver.Stub() {
+                    @DebugLog
                     @Override public void onNext(BundleableListSlice slice) throws RemoteException {
                         List<Track> list = new ArrayList<>(slice.getList());
                         if (!subscriber.isUnsubscribed()) {
@@ -247,47 +258,70 @@ public class IndexClientImpl implements IndexClient {
         }).flatMap(new Func1<List<Track>, Observable<List<Track>>>() {
             @Override
             public Observable<List<Track>> call(List<Track> tracks) {
+                //if the index had all of them we pass them through
                 if (tracks.size() == queue.size()) {
                     return Observable.just(tracks);
                 }
                 //some of them werent found in the db
                 List<Uri> unknowns = new ArrayList<Uri>(queue.size() - tracks.size());
-                for (Uri uri : queue) {
-                    boolean found = false;
-                    for (Track track : tracks) {
-                        if (track.getUri().equals(uri)) {
-                            found = true;
-                            break;
+                if (tracks.size() == 0) {
+                    //all of them werent found
+                    unknowns.addAll(queue);
+                } else {
+                    //filter out the found ones
+                    for (Uri uri : queue) {
+                        boolean found = false;
+                        for (Track track : tracks) {
+                            if (track.getUri().equals(uri)) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            unknowns.add(uri);
                         }
                     }
-                    if (!found) {
-                        unknowns.add(uri);
-                    }
+                }
+                List<Observable<List<Track>>> loaders = new ArrayList<>(unknowns.size());
+                //start with the tracks we have
+                if (!tracks.isEmpty()) {
+                    loaders.add(Observable.just(tracks));
                 }
                 //todo throw multiget into the mix
-                //xxx this is *probably* very very bad
-                List<Observable<List<Track>>> loaders = new ArrayList<>(unknowns.size());
                 for (Uri uri : unknowns) {
+                    Timber.d("Fetching from library uri=%s", uri);
                     loaders.add(TypedBundleableLoader.<Track>create(appContext)
                             .setUri(uri).setMethod(LibraryMethods.GET)
                             .createObservable());
                 }
+                //we make requests for all the remaining uris and
+                //merge them into the same stream
                 return Observable.merge(loaders);
+
             }
-        }).map(new Func1<List<Track>, List<MediaDescription>>() {
+            //we use collect here instead of map because the merge will
+        }).collect(new Func0<List<MediaDescription>>() {
+            //we use collect here instead of map because the merge above
+            //will emmit several lists and we only want one onNext call to
+            //the subscriber
             @Override
-            public List<MediaDescription> call(List<Track> tracks) {
-                List<MediaDescription> descs = new ArrayList<MediaDescription>(tracks.size());
+            public List<MediaDescription> call() {
+                return new ArrayList<MediaDescription>();
+            }
+        }, new Action2<List<MediaDescription>, List<Track>>() {
+            @Override
+            public void call(List<MediaDescription> mediaDescriptions, List<Track> tracks) {
+                //convert tracks to descriptions on the fly then add them all to the final list
                 for (Track track : tracks) {
+                    Timber.d("track=%s", track.toString());
                     MediaDescription description = new MediaDescription.Builder()
                             .setTitle(track.getName())
                             .setSubtitle(track.getArtistName())
                             .setMediaId(track.getUri().toString())
-                            //.setIconUri()TODO
+                                    //.setIconUri()TODO
                             .build();
-                    descs.add(description);
+                    mediaDescriptions.add(description);
                 }
-                return descs;
             }
         });
     }
