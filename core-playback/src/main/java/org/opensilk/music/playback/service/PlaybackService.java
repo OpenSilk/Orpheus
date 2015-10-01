@@ -146,11 +146,12 @@ public class PlaybackService extends MediaBrowserService {
 
         getMediaSession().setCallback(new MediaSessionCallback(), mHandler);
         setSessionToken(mSessionHolder.getSessionToken());
-        updatePlaybackState(null);
 
         mPlayback.setState(PlaybackState.STATE_NONE);
         mPlayback.setCallback(new PlaybackCallback());
         mPlayback.start();
+
+        updatePlaybackState(null);
 
         mAudioSessionId = mAudioManagerHelper.getAudioSessionId();
         mHandler.post(mLoadQueueRunnable);
@@ -158,7 +159,7 @@ public class PlaybackService extends MediaBrowserService {
 
     @Override
     public void onDestroy() {
-        saveState(); //fire early as possible
+        saveState(true); //fire early as possible
         super.onDestroy();
 
         mNotificationHelper.killNotification();
@@ -189,7 +190,7 @@ public class PlaybackService extends MediaBrowserService {
 
     @Override
     public boolean onUnbind(Intent intent) {
-        saveState();
+        saveState(true);
         mConnectedClients--;
         return super.onUnbind(intent);
     }
@@ -199,7 +200,7 @@ public class PlaybackService extends MediaBrowserService {
         super.onTrimMemory(level);
         if (level >= TRIM_MEMORY_COMPLETE) {
             mArtworkProviderHelper.evictL1();
-            saveState();
+            saveState(true);
         }
     }
 
@@ -317,7 +318,7 @@ public class PlaybackService extends MediaBrowserService {
 
         mHandler.removeCallbacks(mProgressCheckRunnable);
         if (PlaybackStateHelper.isPlaying(state)) {
-            mHandler.postDelayed(mProgressCheckRunnable, 2000);
+            mHandler.postDelayed(mProgressCheckRunnable, 10000);
         }
     }
 
@@ -351,7 +352,7 @@ public class PlaybackService extends MediaBrowserService {
         getMediaSession().setMetadata(meta);
     }
 
-    void saveState() {
+    void saveState(final boolean full) {
         final PlaybackQueue.Snapshot qSnapshot = mQueue.snapshot();
         PlaybackState state = getMediaSession().getController().getPlaybackState();
         final long seekPos;
@@ -365,7 +366,9 @@ public class PlaybackService extends MediaBrowserService {
             @Override
             @DebugLog
             protected Void doInBackground(Object... params) {
-                mIndexClient.saveQueue(qSnapshot.q);
+                if (full) {
+                    mIndexClient.saveQueue(qSnapshot.q);
+                }
                 mIndexClient.saveQueuePosition(qSnapshot.pos);
                 mIndexClient.saveQueueRepeatMode(qSnapshot.repeat);
                 mIndexClient.saveQueueShuffleMode(qSnapshot.shuffle);
@@ -443,13 +446,21 @@ public class PlaybackService extends MediaBrowserService {
         return new DefaultMediaPlayer.Factory();
     }
 
+    @DebugLog
     private void setTrack() {
         if (!mQueue.notEmpty()){
             throw new IllegalStateException("Can't setTrack() with no queue");
         }
         final Uri uri = mQueue.getCurrentUri();
-        if (mCurrentTrack != null && mCurrentTrack.getUri().equals(uri)) {
-            Timber.e("Uris match, what should i do? reloading anyway");
+        if (uri == null) {
+            throw new IllegalStateException("Current uri is null for pos " + mQueue.getCurrentPos());
+        }
+        if (mCurrentTrack != null && mCurrentTrack.getUri().equals(uri) && mPlayback.hasPlayer()) {
+            Timber.e("Current track is up to date");
+            if (mPlayWhenReady && !mPlayback.isPlaying()) {
+                mPlayWhenReady = false;
+                mPlayback.play();
+            }
         }
         mHandler.removeCallbacks(mProgressCheckRunnable);
         mPlayback.prepareForTrack();
@@ -476,7 +487,7 @@ public class PlaybackService extends MediaBrowserService {
                             mQueueReloaded = false;
                             long seek = mIndexClient.getLastSeekPosition();
                             if (seek > 0) {
-                                mPlayback.seekTo(0);
+                                mPlayback.seekTo(seek);
                             }
                         }
                         if (mPlayWhenReady) {
@@ -489,6 +500,7 @@ public class PlaybackService extends MediaBrowserService {
                 });
     }
 
+    @DebugLog
     private void setNextTrack() {
         if (mQueue.getNextPos() < 0) {
             Timber.i("No next track in queue");
@@ -511,20 +523,15 @@ public class PlaybackService extends MediaBrowserService {
                 .first()
                 .observeOn(getScheduler())
                 .subscribe(new Subscriber<Track>() {
-                    @Override
-                    public void onCompleted() {
+                    @Override public void onCompleted() {
                         mNextTrackSub = null;
                     }
-
-                    @Override
-                    public void onError(Throwable e) {
+                    @Override public void onError(Throwable e) {
                         //will callback into onQueueChanged
                         mQueue.remove(mQueue.getNextPos());
                         mNextTrackSub = null;
                     }
-
-                    @Override
-                    public void onNext(Track track) {
+                    @Override public void onNext(Track track) {
                         mNextTrack = track;
                         mPlayback.loadNextTrack(track.getResources().get(0),
                                 resolveMediaPlayer(track));
@@ -602,7 +609,7 @@ public class PlaybackService extends MediaBrowserService {
             mHandler.removeCallbacks(mProgressCheckRunnable);
             mPlayWhenReady = false;
             mPlayback.pause();
-            saveState();
+            saveState(true);
         }
 
         @Override
@@ -622,6 +629,7 @@ public class PlaybackService extends MediaBrowserService {
         }
 
         @Override
+        @DebugLog
         public void onSkipToPrevious() {
             mHandler.removeCallbacks(mProgressCheckRunnable);
             if (mPlayback.getCurrentStreamPosition() > REWIND_INSTEAD_PREVIOUS_THRESHOLD) {
@@ -832,6 +840,9 @@ public class PlaybackService extends MediaBrowserService {
         void onCurrentPosChangedReal() {
             if (mQueue.notEmpty()) {
                 getMediaSession().setQueue(mQueue.getQueueItems());
+                if (mQueueReloaded) {
+                    updatePlaybackState(null);
+                }
                 if (mQueue.getCurrentPos() < 0) {
                     Timber.e(new IllegalStateException("Current pos is " + mQueue.getCurrentPos()),
                             "This should not happen while queue has items");
@@ -852,7 +863,6 @@ public class PlaybackService extends MediaBrowserService {
             } else {
                 Timber.e(new IllegalStateException("Got onQueueChanged with empty queue but " +
                                 "should have got onCurrentPosChanged"), "fix this");
-                handleStop();
             }
         }
 
@@ -862,12 +872,14 @@ public class PlaybackService extends MediaBrowserService {
             mNextTrack = null;
             updateMeta();
             setNextTrack();
+            saveState(false);
         }
 
     }
 
     class PlaybackCallback implements Playback.Callback {
         @Override
+        @DebugLog
         public void onPlaybackStatusChanged(int state) {
             updatePlaybackState(null);
         }
@@ -875,7 +887,14 @@ public class PlaybackService extends MediaBrowserService {
         @Override
         @DebugLog
         public void onCompletion() {
-
+            mPlayWhenReady = false;
+            if (mQueue.notEmpty()) {
+                //we've finished the list, go back to start
+                mQueue.goToItem(0);
+                updatePlaybackState(null);
+            } else {
+                handleStop();
+            }
         }
 
         @Override
@@ -903,7 +922,7 @@ public class PlaybackService extends MediaBrowserService {
         @Override
         @DebugLog
         public void onError(String error) {
-
+            updatePlaybackState(error);
         }
     }
 
@@ -913,7 +932,6 @@ public class PlaybackService extends MediaBrowserService {
             resetState();
             mQueue.load();
             mQueueReloaded = true;
-            updatePlaybackState(null);
         }
     };
 
