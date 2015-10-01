@@ -149,22 +149,6 @@ public class ControlsScreenPresenter extends ViewPresenter<ControlsScreenView>
         if (isSubscribed(broadcastSubscription)){
             return;
         }
-        Subscription s = playbackController.subscribeProgressChanges(
-                new Action1<Triple<Long, Long, Long>>() {
-                    @Override
-                    public void call(Triple<Long, Long, Long> tuple) {
-                        Timber.v("Position discrepancy = %d",
-                                tuple.getLeft() - mProgressUpdater.getLastFakedPosition());
-                        mProgressUpdater.setLastKnownPosition(tuple.getLeft());
-                        long duration = tuple.getMiddle();
-                        if (mProgressUpdater.getLastKnownDuration() != duration) {
-                            setTotalTimeText(duration);
-                        }
-                        mProgressUpdater.setLastKnownDuration(duration);
-                        mProgressUpdater.setLastUpdateTime(tuple.getRight());
-                    }
-                }
-        );
         Subscription s1 = playbackController.subscribePlayStateChanges(
                 new Action1<PlaybackStateCompat>() {
                     @Override
@@ -176,13 +160,13 @@ public class ControlsScreenPresenter extends ViewPresenter<ControlsScreenView>
                                 getView().setShuffleLevel(BundleHelper.getInt2(playbackState.getExtras()));
                             } //TODO api21 maybe track events?
                         }
+                        mProgressUpdater.subscribeProgress(playbackState);
                         isPlaying = PlaybackStateHelper.isPlaying(playbackState.getState());
-                        mProgressUpdater.subscribeProgress(isPlaying);
-                        subscribeBlinking(isPlaying);
+                        subscribeBlinking();
                     }
                 }
         );
-        broadcastSubscription = new CompositeSubscription(s, s1);
+        broadcastSubscription = new CompositeSubscription(s1);
     }
 
     void unsubscribeBroadcasts() {
@@ -192,7 +176,7 @@ public class ControlsScreenPresenter extends ViewPresenter<ControlsScreenView>
         }
     }
 
-    void subscribeBlinking(boolean isPlaying) {
+    void subscribeBlinking() {
         if (!isPlaying && isSubscribed(blinkingSubscription)) {
             return;
         } else if (isPlaying) {

@@ -111,7 +111,14 @@ public class ControlsScreenView extends RelativeLayout {
     }
 
     public void setProgress(int progress) {
-        seekBar.setProgress(progress);
+        if (progress < 0 || progress > 1000) {
+            //were in a loading state disable seeking
+            seekBar.setIsTouchEnabled(false);
+            seekBar.setProgress(1000);
+        } else {
+            seekBar.setIsTouchEnabled(true);
+            seekBar.setProgress(progress);
+        }
     }
 
     public void setRepeatLevel(int mode) {
