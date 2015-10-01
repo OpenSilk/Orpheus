@@ -29,6 +29,7 @@ import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.playback.player.IPlayer;
 import org.opensilk.music.playback.service.PlaybackService;
+import org.opensilk.music.playback.service.PlaybackServiceScope;
 
 import java.io.IOException;
 
@@ -40,6 +41,7 @@ import timber.log.Timber;
 /**
  * A class that implements local media playback using {@link android.media.MediaPlayer}
  */
+@PlaybackServiceScope
 public class Playback implements AudioManager.OnAudioFocusChangeListener, IMediaPlayer.Callback {
 
     // The volume we set the media player to when we lose audio focus, but are
@@ -56,9 +58,7 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
     private static final int AUDIO_FOCUSED  = 2;
 
     private final Context mContext;
-    private final PlaybackService mService;
     private final AudioManager mAudioManager;
-    private final WifiManager.WifiLock mWifiLock;
     private int mState;
     private boolean mPlayOnFocusGain;
     private Callback mCallback;
@@ -83,7 +83,7 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
                     Intent i = new Intent(context, PlaybackService.class);
                     i.setAction(PlaybackConstants.SERVICECMD);
                     i.putExtra(PlaybackConstants.CMDNAME, PlaybackConstants.CMDPAUSE);
-                    mService.startService(i);
+                    mContext.startService(i);
                 }
             }
         }
@@ -92,28 +92,26 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
     @Inject
     public Playback(
             @ForApplication Context context,
-            PlaybackService service,
-            AudioManager audioManager,
-            WifiManager wifiManager
+            AudioManager audioManager
     ) {
         this.mContext = context;
-        this.mService = service;
         this.mAudioManager = audioManager;
-        this.mWifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "OrpheusPlayback");
-        this.mWifiLock.setReferenceCounted(false);
     }
 
     public void start() {
     }
 
     public void stop(boolean notifyListeners) {
-        mState = PlaybackState.STATE_STOPPED;
-        mCurrentPosition = getCurrentStreamPosition();
+        if (hasPlayer()) {
+            mCurrentPosition = getCurrentStreamPosition();
+        }
         // Give up Audio focus
         giveUpAudioFocus();
         unregisterAudioNoisyReceiver();
         // Relax all resources
-        relaxResources(true);
+        releaseMediaPlayer(true);
+        mPlayOnFocusGain = false;
+        mState = PlaybackState.STATE_STOPPED;
         if (notifyListeners && mCallback != null) {
             mCallback.onPlaybackStatusChanged(mState);
         }
@@ -128,24 +126,24 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
     }
 
     public boolean isPlaying() {
-        return mPlayOnFocusGain || (mMediaPlayer != null && mMediaPlayer.isPlaying());
+        return mPlayOnFocusGain || (hasPlayer() && mMediaPlayer.isPlaying());
     }
 
     public long getCurrentStreamPosition() {
-        if (mMediaPlayer == null || !mPlayerPrepared) {
+        if (!hasPlayer() || !mPlayerPrepared) {
             Timber.e("Shouldn't be calling getCurrentStreamPosition() in state %s",
                     PlaybackStateHelper.stringifyState(mState));
         }
-        return (mMediaPlayer != null && mPlayerPrepared) ?
+        return (hasPlayer() && mPlayerPrepared) ?
                 mMediaPlayer.getCurrentPosition() : mCurrentPosition;
     }
 
     public long getDuration() {
-        if (mMediaPlayer == null || !mPlayerPrepared) {
+        if (!hasPlayer() || !mPlayerPrepared) {
             Timber.e("Shouldn't be calling getDuration() in state %s",
                     PlaybackStateHelper.stringifyState(mState));
         }
-        return (mMediaPlayer != null && mPlayerPrepared) ?
+        return (hasPlayer() && mPlayerPrepared) ?
                 mMediaPlayer.getDuration() : PlaybackState.PLAYBACK_POSITION_UNKNOWN;
     }
 
@@ -163,8 +161,6 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
         if (mState != PlaybackState.STATE_CONNECTING) {
             throw  new IllegalStateException("Must call prepareForTrack() first");
         }
-        relaxResources(true); // release everything
-        mPlayOnFocusGain = false;
         try {
             mMediaPlayer = factory.create(mContext);
             mMediaPlayer.setCallback(this);
@@ -180,16 +176,6 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
             // we *cannot* call start() on it!
             mMediaPlayer.prepareAsync();
 
-            // If we are streaming from the internet, we want to hold a
-            // Wifi lock, which prevents the Wifi radio from going to
-            // sleep while the song is playing.
-            String scheme = item.getUri().getScheme();
-            if (StringUtils.startsWith(scheme, "http")) {
-                mWifiLock.acquire();
-            } else if (mWifiLock.isHeld()) {
-                mWifiLock.release();
-            }
-
             if (mCallback != null) {
                 mCallback.onPlaybackStatusChanged(mState);
             }
@@ -203,20 +189,15 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
     }
 
     public void prepareForNextTrack() {
-        if (mNextMediaPlayer != null) {
-            mNextMediaPlayer.reset();
-            mNextMediaPlayer.release();
-            mNextMediaPlayer = null;
-            mNextPlayerPrepared = false;
-        }
+        releaseNextMediaPlayer();
     }
 
     @DebugLog
     public void loadNextTrack(Track.Res item, IMediaPlayer.Factory factory) {
-        if (mMediaPlayer == null) {
+        if (!hasPlayer()) {
             throw new IllegalStateException("called loadNextTrack with no current track");
         }
-        if (mNextMediaPlayer != null) {
+        if (hasNext()) {
             throw new IllegalStateException("Must call prepareForNextTrack() first");
         }
         try {
@@ -245,9 +226,13 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
         mPlayOnFocusGain = true;
         tryToGetAudioFocus();
         registerAudioNoisyReceiver();
-        if (mState == PlaybackState.STATE_PAUSED && mMediaPlayer != null && mPlayerPrepared) {
+        if (mState == PlaybackState.STATE_PAUSED && hasPlayer() && mPlayerPrepared) {
             configMediaPlayerState();
         } //else wait for prepared
+    }
+
+    public boolean hasPlayer() {
+        return mMediaPlayer != null;
     }
 
     public boolean hasNext() {
@@ -258,10 +243,7 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
         if (!hasNext()) {
             throw  new IllegalStateException("Next player not initialized");
         }
-        if (mMediaPlayer != null) {
-            mMediaPlayer.reset();
-            mMediaPlayer.release();
-        }
+        releaseMediaPlayer(false);
         mCurrentPosition = 0;
         mMediaPlayer = mNextMediaPlayer;
         mNextMediaPlayer = null;
@@ -272,6 +254,7 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
             configMediaPlayerState();
         } else {
             mState = PlaybackState.STATE_BUFFERING;
+            //and wait for prepared
         }
         if (mCallback != null) {
             mCallback.onWentToNext();
@@ -285,10 +268,9 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
                 mMediaPlayer.pause();
                 mCurrentPosition = mMediaPlayer.getCurrentPosition();
             }
-            // while paused, retain the MediaPlayer but give up audio focus
-            relaxResources(false);
-            giveUpAudioFocus();
         }
+        // while paused, retain the MediaPlayer but give up audio focus
+        giveUpAudioFocus();
         mPlayOnFocusGain = false;
         unregisterAudioNoisyReceiver();
         mState = PlaybackState.STATE_PAUSED;
@@ -297,10 +279,9 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
         }
     }
 
+    @DebugLog
     public void seekTo(long position) {
-        Timber.d("seekTo called with %d", position);
-
-        if (mMediaPlayer == null || !mPlayerPrepared) {
+        if (!hasPlayer() || !mPlayerPrepared) {
             // If we do not have a current media player, simply update the current position
             mCurrentPosition = position;
         } else {
@@ -321,8 +302,8 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
     /**
      * Try to get the system audio focus.
      */
+    @DebugLog
     private void tryToGetAudioFocus() {
-        Timber.d("tryToGetAudioFocus");
         if (mAudioFocus != AUDIO_FOCUSED) {
             int result = mAudioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC,
                     AudioManager.AUDIOFOCUS_GAIN);
@@ -335,8 +316,8 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
     /**
      * Give up the audio focus.
      */
+    @DebugLog
     private void giveUpAudioFocus() {
-        Timber.d("giveUpAudioFocus");
         if (mAudioFocus == AUDIO_FOCUSED) {
             if (mAudioManager.abandonAudioFocus(this) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
                 mAudioFocus = AUDIO_NO_FOCUS_NO_DUCK;
@@ -362,21 +343,23 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
             pause();
         } else {  // we have audio focus:
             if (mAudioFocus == AUDIO_NO_FOCUS_CAN_DUCK) {
-                mMediaPlayer.setVolume(VOLUME_DUCK, VOLUME_DUCK); // we'll be relatively quiet
+                if (hasPlayer()) {
+                    mMediaPlayer.setVolume(VOLUME_DUCK, VOLUME_DUCK); // we'll be relatively quiet
+                }
             } else {
-                if (mMediaPlayer != null) {
+                if (hasPlayer()) {
                     mMediaPlayer.setVolume(VOLUME_NORMAL, VOLUME_NORMAL); // we can be loud again
                 } // else do something for remote client.
             }
             // If we were playing when we lost focus, we need to resume playing.
             if (mPlayOnFocusGain) {
-                if (mMediaPlayer != null && !mMediaPlayer.isPlaying()) {
-                    Timber.d("configMediaPlayerState startMediaPlayer. seeking to ",
-                            mCurrentPosition);
+                if (hasPlayer() && !mMediaPlayer.isPlaying()) {
                     if (mCurrentPosition == mMediaPlayer.getCurrentPosition()) {
                         mMediaPlayer.start();
                         mState = PlaybackState.STATE_PLAYING;
                     } else {
+                        Timber.d("configMediaPlayerState startMediaPlayer. " +
+                                        "seeking to %s", mCurrentPosition);
                         mMediaPlayer.seekTo(mCurrentPosition);
                         mState = PlaybackState.STATE_BUFFERING;
                     }
@@ -416,7 +399,7 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
                 mPlayOnFocusGain = true;
             }
         } else {
-            Timber.d("onAudioFocusChange: Ignoring unsupported focusChange: ", focusChange);
+            Timber.d("onAudioFocusChange: Ignoring unsupported focusChange: %d", focusChange);
         }
         configMediaPlayerState();
     }
@@ -427,8 +410,8 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
      * @see android.media.MediaPlayer.OnSeekCompleteListener
      */
     @Override
+    @DebugLog
     public void onSeekComplete(IMediaPlayer player) {
-        Timber.d("onSeekComplete from MediaPlayer: %s", player.getCurrentPosition());
         if (player == mMediaPlayer) {
             mCurrentPosition = player.getCurrentPosition();
             if (mState == PlaybackState.STATE_BUFFERING) {
@@ -447,14 +430,14 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
      * @see android.media.MediaPlayer.OnCompletionListener
      */
     @Override
+    @DebugLog
     public void onCompletion(IMediaPlayer player) {
-        Timber.d("onCompletion from MediaPlayer");
         if (player == mMediaPlayer) {
             if (hasNext()) {
                 goToNext();
             } else {
                 // The media player finished playing the current song
-                pause();
+                stop(false);
                 mCurrentPosition = 0;
                 if (mCallback != null) {
                     mCallback.onCompletion();
@@ -469,8 +452,8 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
      * @see android.media.MediaPlayer.OnPreparedListener
      */
     @Override
+    @DebugLog
     public void onPrepared(IMediaPlayer player) {
-        Timber.d("onPrepared from MediaPlayer");
         if (player == mMediaPlayer) {
             mPlayerPrepared = true;
             // The media player is done preparing. That means we can start playing if we
@@ -496,6 +479,7 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
      * @see android.media.MediaPlayer.OnErrorListener
      */
     @Override
+    @DebugLog
     public boolean onError(IMediaPlayer mp, int what, int extra) {
         Timber.d("Media player error: what=" + what + ", extra=" + extra);
         stop(false);
@@ -509,24 +493,25 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
     /**
      * Releases resources used by the service for playback.
      */
-    private void relaxResources(boolean releaseMediaPlayer) {
-        Timber.d("relaxResources. releaseMediaPlayer=%s", releaseMediaPlayer);
-
+    private void releaseMediaPlayer(boolean andNext) {
         // stop and release the Media Player, if it's available
-        if (releaseMediaPlayer && mMediaPlayer != null) {
+        if (mMediaPlayer != null) {
             mMediaPlayer.reset();
             mMediaPlayer.release();
             mMediaPlayer = null;
             mPlayerPrepared = false;
         }
-
-        if (releaseMediaPlayer && mNextMediaPlayer != null) {
-            prepareForNextTrack();
+        if (andNext) {
+            releaseNextMediaPlayer();
         }
+    }
 
-        // we can also release the Wifi lock, if we're holding it
-        if (mWifiLock.isHeld()) {
-            mWifiLock.release();
+    private void releaseNextMediaPlayer() {
+        if (mNextMediaPlayer != null) {
+            mNextMediaPlayer.reset();
+            mNextMediaPlayer.release();
+            mNextMediaPlayer = null;
+            mNextPlayerPrepared = false;
         }
     }
 
