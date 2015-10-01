@@ -38,6 +38,7 @@ import javax.inject.Inject;
 
 import hugo.weaving.DebugLog;
 import rx.Scheduler;
+import rx.Subscriber;
 import rx.Subscription;
 import rx.functions.Action0;
 import rx.functions.Action1;
@@ -156,6 +157,7 @@ public class PlaybackQueue {
         replace(list, 0);
     }
 
+    @DebugLog
     public void replace(List<Uri> list, int startpos) {
         int oldsize = mQueue.size();
         mQueue.clear();
@@ -549,10 +551,17 @@ public class PlaybackQueue {
             callbackaction.call();
         } else {
             mLookupSub = mIndexClient.getDescriptions(urisToFetch)
+                    .first()
                     .observeOn(mService.getScheduler())
-                    .subscribe(new Action1<List<MediaDescription>>() {
-                        @Override
-                        public void call(List<MediaDescription> mediaDescriptions) {
+                    .subscribe(new Subscriber<List<MediaDescription>>() {
+                        @Override public void onCompleted() {
+                            mLookupSub = null;
+                        }
+                        @Override public void onError(Throwable e) {
+                            Timber.e(e, "What to do?");
+                            mLookupSub = null;
+                        }
+                        @Override public void onNext(List<MediaDescription> mediaDescriptions) {
                             updateQueueMeta(mediaDescriptions);
                             callbackaction.call();
                             mLookupSub = null;
