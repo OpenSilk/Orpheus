@@ -18,6 +18,12 @@
 package org.opensilk.music.ui3.main;
 
 import android.os.SystemClock;
+import android.support.v4.media.session.PlaybackStateCompat;
+
+import org.apache.commons.lang3.tuple.Triple;
+import org.opensilk.common.core.util.BundleHelper;
+import org.opensilk.common.core.util.VersionUtils;
+import org.opensilk.music.playback.PlaybackStateHelper;
 
 import java.util.concurrent.TimeUnit;
 
@@ -68,9 +74,9 @@ public class ProgressUpdater {
         return lastFakedPosition;
     }
 
-    void doUpdate() {
+    private void doUpdate() {
         if (lastKnownPosition <= 0 || lastKnownDuration <= 0) {
-            setAction.call(1000);
+            setAction.call(1001);
         } else {
             lastFakedPosition = lastKnownPosition +
                     (SystemClock.elapsedRealtime() - lastUpdateTime);
@@ -78,10 +84,35 @@ public class ProgressUpdater {
         }
     }
 
-    void subscribeProgress(boolean playing) {
-        if (!playing) {
+    public void subscribeProgress(PlaybackStateCompat state) {
+        if (PlaybackStateHelper.isLoading(state.getState())) {
+            setLastKnownPosition(-1);
+            setLastKnownDuration(-1);
+            setLastUpdateTime(-1);
+        } else {
+            long position = state.getPosition();
+            long duration;
+            if (VersionUtils.hasApi22()) {
+                duration = BundleHelper.getLong(state.getExtras());
+            } else {
+                duration = state.getBufferedPosition();
+            }
+            if (position < 0 || duration <= 0) {
+                setLastKnownPosition(-1);
+                setLastKnownDuration(-1);
+            } else {
+                setLastKnownPosition(position);
+                setLastKnownDuration(duration);
+            }
+            setLastUpdateTime(state.getLastPositionUpdateTime());
+        }
+        if (!PlaybackStateHelper.isPlaying(state.getState())) {
             unsubscribeProgress();
-            doUpdate();
+            if (PlaybackStateHelper.isLoading(state.getState())) {
+                setAction.call(-1);
+            } else {
+                doUpdate();
+            }
             return;
         } else if (isSubscribed(progressSubscription))  {
             return;

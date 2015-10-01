@@ -371,12 +371,6 @@ public class PlaybackController {
         return mQueueSubject.asObservable().subscribe(onNext);
     }
 
-    final BehaviorSubject<Triple<Long, Long, Long>> mProgressSubject = BehaviorSubject.create();
-
-    public Subscription subscribeProgressChanges(Action1<Triple<Long, Long, Long>> onNext) {
-        return mProgressSubject.asObservable().subscribe(onNext);
-    }
-
     /*
      * end subscriptions
      */
@@ -395,25 +389,6 @@ public class PlaybackController {
 
         @Override
         public void onPlaybackStateChanged(@NonNull PlaybackState state) {
-            //do progress first so it will be up to date
-            if (PlaybackStateHelper.isLoading(state.getState())) {
-                mProgressSubject.onNext(Triple.of((long)-1,(long)-1,
-                        state.getLastPositionUpdateTime()));
-            } else {
-                long position = state.getPosition();
-                long duration;
-                long updateTim = state.getLastPositionUpdateTime();
-                if (VersionUtils.hasApi22()) {
-                    duration = BundleHelper.getLong(state.getExtras());
-                } else {
-                    duration = state.getBufferedPosition();
-                }
-                if (position < 0 || duration <= 0) {
-                    mProgressSubject.onNext(Triple.of((long)-1, (long)-1, updateTim));
-                } else {
-                    mProgressSubject.onNext(Triple.of(position, duration, updateTim));
-                }
-            }
             mPlayStateSubject.onNext(PlaybackStateCompat.fromPlaybackState(state));
         }
 
