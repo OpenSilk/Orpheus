@@ -18,8 +18,11 @@
 package org.opensilk.music.ui3.main;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import org.opensilk.common.ui.mortar.MortarPagerAdapter;
+
+import java.util.List;
 
 /**
  * Created by drew on 9/17/15.
@@ -30,4 +33,11 @@ public class FooterScreenViewAdapter extends MortarPagerAdapter<FooterPageScreen
         super(context);
     }
 
+    public FooterScreenViewAdapter(@NonNull Context context, @NonNull List<FooterPageScreen> screens) {
+        super(context, screens);
+    }
+
+    public static FooterScreenViewAdapter create(Context context, List<FooterPageScreen> screens) {
+        return new FooterScreenViewAdapter(context, screens);
+    }
 }

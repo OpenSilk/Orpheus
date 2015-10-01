@@ -31,6 +31,7 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.playback.PlaybackStateHelper;
 import org.opensilk.music.playback.control.PlaybackController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -58,6 +59,8 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
     final AppPreferences settings;
 
     CompositeSubscription broadcastSubscriptions;
+    final ArrayList<FooterPageScreen> screens = new ArrayList<>();
+    long lastPlayingId;
 
     final ProgressUpdater mProgressUpdater = new ProgressUpdater(new Action1<Integer>() {
         @Override
@@ -130,6 +133,10 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
     void init() {
         //progress is always updated
         subscribeBroadcasts();
+        if(!screens.isEmpty()) {
+            getView().onNewItems(screens);
+            updatePagerWithCurrentItem(lastPlayingId);
+        }
     }
 
     void teardown() {
@@ -137,9 +144,21 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
         mProgressUpdater.unsubscribeProgress();
     }
 
-    void goToQueueItem(MediaSessionCompat.QueueItem item) {
-        long id = item.getQueueId();
-        playbackController.skipToQueueItem(id);
+    void skipToQueueItem(int pos) {
+        if (pos > 0  && pos < screens.size()) {
+            long id = screens.get(pos).queueItem.getQueueId();
+            playbackController.skipToQueueItem(id);
+        }
+    }
+
+    void updatePagerWithCurrentItem(long id) {
+        if (hasView()) {
+            for (FooterPageScreen s : screens) {
+                if (s.queueItem.getQueueId() == id) {
+                    getView().goTo(screens.indexOf(s));
+                }
+            }
+        }
     }
 
     void setProgress(int progress) {
@@ -153,26 +172,14 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
         if (isSubscribed(broadcastSubscriptions)) {
             return;
         }
-        final Subscription s = playbackController.subscribeProgressChanges(
-                new Action1<Triple<Long, Long, Long>>() {
-                    @Override
-                    public void call(Triple<Long, Long, Long> tuple) {
-                        Timber.v("Position discrepancy = %d",
-                                tuple.getLeft() - mProgressUpdater.getLastFakedPosition());
-                        mProgressUpdater.setLastKnownPosition(tuple.getLeft());
-                        mProgressUpdater.setLastKnownDuration(tuple.getMiddle());
-                        mProgressUpdater.setLastUpdateTime(tuple.getRight());
-                    }
-                }
-        );
         final Subscription s1 = playbackController.subscribePlayStateChanges(
                 new Action1<PlaybackStateCompat>() {
                     @Override
+                    @DebugLog
                     public void call(PlaybackStateCompat playbackState) {
-                        mProgressUpdater.subscribeProgress(PlaybackStateHelper.isPlaying(playbackState.getState()));
-                        if (hasView()) {
-                            getView().goToCurrent(playbackState.getActiveQueueItemId());
-                        }
+                        mProgressUpdater.subscribeProgress(playbackState);
+                        lastPlayingId = playbackState.getActiveQueueItemId();
+                        updatePagerWithCurrentItem(lastPlayingId);
                     }
                 }
         );
@@ -181,18 +188,19 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
                     @Override
                     @DebugLog
                     public void call(List<MediaSessionCompat.QueueItem> queueItems) {
-                        if (hasView()) {
-                            List<FooterPageScreen> screens = getView().getAdapter().screens();
-                            screens.clear();
-                            for (MediaSessionCompat.QueueItem item : queueItems) {
-                                screens.add(new FooterPageScreen(item));
-                            }
-                            getView().getAdapter().notifyDataSetChanged();
+                        screens.clear();
+                        for (MediaSessionCompat.QueueItem item : queueItems) {
+                            screens.add(new FooterPageScreen(item));
                         }
+                        screens.trimToSize();
+                        if (hasView()) {
+                            getView().onNewItems(screens);
+                        }
+                        updatePagerWithCurrentItem(lastPlayingId);
                     }
                 }
         );
-        broadcastSubscriptions = new CompositeSubscription(s, s1, s2);
+        broadcastSubscriptions = new CompositeSubscription(s1, s2);
     }
 
     void unsubscribeBroadcasts() {

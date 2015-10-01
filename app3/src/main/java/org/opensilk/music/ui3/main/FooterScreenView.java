@@ -18,22 +18,14 @@
 package org.opensilk.music.ui3.main;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
 import android.support.v4.view.ViewPager;
-import android.support.v7.graphics.Palette;
 import android.util.AttributeSet;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.util.ThemeUtils;
-import org.opensilk.common.ui.widget.ForegroundLinearLayout;
 import org.opensilk.common.ui.widget.ForegroundRelativeLayout;
 import org.opensilk.music.R;
-import org.opensilk.music.artwork.PaletteResponse;
 
 import java.util.List;
 
@@ -52,7 +44,6 @@ public class FooterScreenView extends ForegroundRelativeLayout {
     @InjectView(R.id.footer_progress) ProgressBar progressBar;
     @InjectView(R.id.footer_pager) ViewPager mViewPager;
 
-    final FooterScreenViewAdapter mAdapter;
     final boolean lightTheme;
     boolean selfChange;
 
@@ -63,7 +54,6 @@ public class FooterScreenView extends ForegroundRelativeLayout {
             component.inject(this);
         }
         lightTheme = ThemeUtils.isLightTheme(getContext());
-        mAdapter = new FooterScreenViewAdapter(getContext());
     }
 
     @Override
@@ -74,7 +64,6 @@ public class FooterScreenView extends ForegroundRelativeLayout {
             ThemeUtils.themeProgressBar(progressBar, R.attr.colorAccent);
             mViewPager.setOffscreenPageLimit(2);
             mViewPager.addOnPageChangeListener(new PageChangeListener());
-            mViewPager.setAdapter(mAdapter);
             presenter.takeView(this);
         }
     }
@@ -91,26 +80,15 @@ public class FooterScreenView extends ForegroundRelativeLayout {
         if (!isInEditMode()) presenter.dropView(this);
     }
 
-    FooterScreenViewAdapter getAdapter() {
-        return mAdapter;
+    void onNewItems(List<FooterPageScreen> screens) {
+        mViewPager.setAdapter(FooterScreenViewAdapter.create(getContext(), screens));
     }
 
-    void goToCurrent(long qId) {
-        int pos = getPosForID(qId);
+    void goTo(int pos) {
         if (pos >= 0 && pos != mViewPager.getCurrentItem()) {
             selfChange = true;
             mViewPager.setCurrentItem(pos, true);
         }
-    }
-
-    int getPosForID(long qId) {
-        List<FooterPageScreen> screens = mAdapter.screens();
-        for (FooterPageScreen s : screens) {
-            if (s.queueItem.getQueueId() == qId) {
-                return screens.indexOf(s);
-            }
-        }
-        return -1;
     }
 
     class PageChangeListener extends ViewPager.SimpleOnPageChangeListener {
@@ -120,8 +98,7 @@ public class FooterScreenView extends ForegroundRelativeLayout {
                 selfChange = false;
                 return;
             }
-            FooterPageScreen screen = mAdapter.screens().get(position);
-            presenter.goToQueueItem(screen.queueItem);
+            presenter.skipToQueueItem(position);
         }
     }
 
