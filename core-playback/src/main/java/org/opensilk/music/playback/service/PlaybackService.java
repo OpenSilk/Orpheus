@@ -257,13 +257,13 @@ public class PlaybackService extends MediaBrowserService {
 
     @DebugLog
     void updatePlaybackState(String error) {
+        int state = mPlayback.getState();
         Timber.d("updatePlaybackState(%s) err=%s",
-                PlaybackStateHelper.stringifyState(mPlayback.getState()), error);
+                PlaybackStateHelper.stringifyState(state), error);
 
         PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
                 .setActions(getAvailableActions());
 
-        int state = mPlayback.getState();
 
         // If there is an error message, send it to the playback state:
         if (error != null) {
@@ -273,18 +273,17 @@ public class PlaybackService extends MediaBrowserService {
             state = PlaybackState.STATE_ERROR;
         }
 
-        long position = PlaybackState.PLAYBACK_POSITION_UNKNOWN;
-        long duration = PlaybackState.PLAYBACK_POSITION_UNKNOWN;
-        if (PlaybackStateHelper.isPlayingOrPaused(mPlayback.getState())) {
-            position = mPlayback.getCurrentStreamPosition();
-            duration = mPlayback.getDuration();
-        }
+        long position = mPlayback.getCurrentStreamPosition();
+        long duration = mPlayback.getDuration();
 
         if (duration > 0) {
             //make sure meta has the right duration
             MediaMetadata current = getMediaSession().getController().getMetadata();
             if (current != null) {
-                if (MediaMetadataHelper.getDuration(current) != duration) {
+                long metaDuration = MediaMetadataHelper.getDuration(current);
+                if (metaDuration != duration) {
+                    Timber.d("Updating meta with proper duration old=%d, new=%d",
+                            metaDuration, duration);
                     current = new MediaMetadata.Builder(current)
                             .putLong(MediaMetadata.METADATA_KEY_DURATION, duration)
                             .build();
@@ -871,6 +870,7 @@ public class PlaybackService extends MediaBrowserService {
             mCurrentTrack = mNextTrack;
             mNextTrack = null;
             updateMeta();
+            updatePlaybackState(null);
             setNextTrack();
             saveState(false);
         }
@@ -902,7 +902,6 @@ public class PlaybackService extends MediaBrowserService {
         public void onWentToNext() {
             //will call into moveToNext
             mQueue.moveToNext();
-            updatePlaybackState(null);
         }
 
         @Override

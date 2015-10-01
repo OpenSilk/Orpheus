@@ -130,19 +130,13 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
     }
 
     public long getCurrentStreamPosition() {
-        if (!hasPlayer() || !mPlayerPrepared) {
-            Timber.e("Shouldn't be calling getCurrentStreamPosition() in state %s",
-                    PlaybackStateHelper.stringifyState(mState));
-        }
-        return (hasPlayer() && mPlayerPrepared) ?
+        //we don't actually seek to the saved position until playback starts
+        //so we only ask the player where it is if we are playing
+        return (hasPlayer() && PlaybackStateHelper.isPlaying(mState)) ?
                 mMediaPlayer.getCurrentPosition() : mCurrentPosition;
     }
 
     public long getDuration() {
-        if (!hasPlayer() || !mPlayerPrepared) {
-            Timber.e("Shouldn't be calling getDuration() in state %s",
-                    PlaybackStateHelper.stringifyState(mState));
-        }
         return (hasPlayer() && mPlayerPrepared) ?
                 mMediaPlayer.getDuration() : PlaybackState.PLAYBACK_POSITION_UNKNOWN;
     }
