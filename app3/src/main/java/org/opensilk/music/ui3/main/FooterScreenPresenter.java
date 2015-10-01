@@ -18,46 +18,32 @@
 package org.opensilk.music.ui3.main;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.media.session.MediaSession;
 import android.os.Bundle;
-import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Triple;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
-import org.opensilk.common.core.util.BundleHelper;
-import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.ui.mortar.PausesAndResumes;
 import org.opensilk.music.AppPreferences;
-import org.opensilk.music.R;
-import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
+import org.opensilk.music.playback.PlaybackStateHelper;
 import org.opensilk.music.playback.control.PlaybackController;
-import org.opensilk.music.ui3.nowplaying.NowPlayingActivity;
-import org.opensilk.music.ui3.nowplaying.QueueScreenItem;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
-import rx.Observable;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 import static org.opensilk.common.core.rx.RxUtils.isSubscribed;
-import static android.support.v4.media.MediaMetadataCompat.*;
-import static android.support.v4.media.session.PlaybackStateCompat.*;
 
 
 /**
@@ -71,12 +57,14 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
     final PauseAndResumeRegistrar pauseAndResumeRegistrar;
     final AppPreferences settings;
 
-    long lastPosition;
-    long lastDuration;
-    boolean lastPosSynced;
-
     CompositeSubscription broadcastSubscriptions;
-    Subscription progressSubscription;
+
+    final ProgressUpdater mProgressUpdater = new ProgressUpdater(new Action1<Integer>() {
+        @Override
+        public void call(Integer integer) {
+            setProgress(integer);
+        }
+    });
 
     @Inject
     public FooterScreenPresenter(
@@ -102,8 +90,7 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
     protected void onExitScope() {
         Timber.v("onExitScope()");
         super.onExitScope();
-        unsubscribeBroadcasts();
-        unsubscribeProgress();
+        teardown();
     }
 
     @Override
@@ -122,8 +109,7 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
         super.onSave(outState);
         if (pauseAndResumeRegistrar.isRunning()) {
             Timber.v("missed onPause()");
-            unsubscribeBroadcasts();
-            unsubscribeProgress();
+            teardown();
         }
     }
 
@@ -138,13 +124,17 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
     @Override
     public void onPause() {
         Timber.v("onPause");
-        unsubscribeBroadcasts();
-        unsubscribeProgress();
+        teardown();
     }
 
     void init() {
         //progress is always updated
         subscribeBroadcasts();
+    }
+
+    void teardown() {
+        unsubscribeBroadcasts();
+        mProgressUpdater.unsubscribeProgress();
     }
 
     void goToQueueItem(MediaSessionCompat.QueueItem item) {
@@ -163,32 +153,23 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
         if (isSubscribed(broadcastSubscriptions)) {
             return;
         }
-        final Subscription s = playbackController.subscribePlayStateChanges(
+        final Subscription s = playbackController.subscribeProgressChanges(
+                new Action1<Triple<Long, Long, Long>>() {
+                    @Override
+                    public void call(Triple<Long, Long, Long> tuple) {
+                        Timber.v("Position discrepancy = %d",
+                                tuple.getLeft() - mProgressUpdater.getLastFakedPosition());
+                        mProgressUpdater.setLastKnownPosition(tuple.getLeft());
+                        mProgressUpdater.setLastKnownDuration(tuple.getMiddle());
+                        mProgressUpdater.setLastUpdateTime(tuple.getRight());
+                    }
+                }
+        );
+        final Subscription s1 = playbackController.subscribePlayStateChanges(
                 new Action1<PlaybackStateCompat>() {
                     @Override
                     public void call(PlaybackStateCompat playbackState) {
-                        final int state = playbackState.getState();
-                        if (state == STATE_BUFFERING || state == STATE_CONNECTING) {
-                            setProgress(-1);
-                        } else {
-                            long position = playbackState.getPosition();
-                            long duration;
-                            if (VersionUtils.hasApi22()) {
-                                duration = BundleHelper.getLong(playbackState.getExtras());
-                            } else {
-                                duration = playbackState.getBufferedPosition();
-                            }
-                            if (position < 0 || duration <= 0) {
-                                setProgress(1000);
-                            } else {
-                                setProgress((int) (1000 * position / duration));
-                            }
-                            Timber.v("Position discrepancy = %d", lastPosition - position);
-                            lastPosition = position;
-                            lastDuration = duration;
-                            lastPosSynced = true;
-                            subscribeProgress(state == STATE_PLAYING);
-                        }
+                        mProgressUpdater.subscribeProgress(PlaybackStateHelper.isPlaying(playbackState.getState()));
                         if (hasView()) {
                             getView().goToCurrent(playbackState.getActiveQueueItemId());
                         }
@@ -211,50 +192,13 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
                     }
                 }
         );
-        broadcastSubscriptions = new CompositeSubscription(s, s2);
+        broadcastSubscriptions = new CompositeSubscription(s, s1, s2);
     }
 
     void unsubscribeBroadcasts() {
         if (isSubscribed(broadcastSubscriptions)) {
             broadcastSubscriptions.unsubscribe();
             broadcastSubscriptions = null;
-        }
-    }
-
-    void subscribeProgress(boolean playing) {
-        if (!playing) {
-            unsubscribeProgress();
-            return;
-        } else if (isSubscribed(progressSubscription))  {
-            return;
-        }
-        final long interval = 250;
-        progressSubscription = Observable.interval(interval, TimeUnit.MILLISECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Long>() {
-                    @Override
-                    public void call(Long aLong) {
-                        long position = lastPosition;
-                        if (lastPosSynced) {
-                            lastPosSynced = false;
-                        } else {
-                            position += interval + 10;
-                            lastPosition = position;
-                        }
-                        long duration = lastDuration;
-                        if (position < 0 || duration <= 0) {
-                            setProgress(1000);
-                        } else {
-                            setProgress((int) (1000 * position / duration));
-                        }
-                    }
-                });
-    }
-
-    void unsubscribeProgress() {
-        if (isSubscribed(progressSubscription)) {
-            progressSubscription.unsubscribe();
-            progressSubscription = null;
         }
     }
 

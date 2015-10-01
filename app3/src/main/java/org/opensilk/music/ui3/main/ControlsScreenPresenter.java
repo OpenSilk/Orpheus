@@ -17,25 +17,20 @@
 
 package org.opensilk.music.ui3.main;
 
-import android.content.Context;
-import android.media.audiofx.AudioEffect;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.view.View;
 
+import org.apache.commons.lang3.tuple.Triple;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.common.ui.mortar.DrawerOwner;
 import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.ui.mortar.PausesAndResumes;
-import org.opensilk.music.AppPreferences;
-import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
-import org.opensilk.music.model.ArtInfo;
+import org.opensilk.music.playback.PlaybackStateHelper;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.common.UtilsCommon;
 
@@ -53,12 +48,6 @@ import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
-import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_ALBUM;
-import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST;
-import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_ARTIST;
-import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_ART_URI;
-import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_TITLE;
-import static android.support.v4.media.session.PlaybackStateCompat.STATE_PLAYING;
 import static org.opensilk.common.core.rx.RxUtils.isSubscribed;
 
 /**
@@ -73,16 +62,21 @@ public class ControlsScreenPresenter extends ViewPresenter<ControlsScreenView>
     final DrawerOwner drawerOwner;
 
     CompositeSubscription broadcastSubscription;
+    Subscription blinkingSubscription;
 
     long posOverride = -1;
     long lastSeekEventTime;
     boolean fromTouch = false;
     boolean isPlaying;
-    long lastPosition = -1;
-    long lastDuration = -1;
-    boolean lastPosSynced;
     long lastBlinkTime;
     boolean drawerOpen;
+
+    final ProgressUpdater mProgressUpdater = new ProgressUpdater(new Action1<Integer>() {
+        @Override
+        public void call(Integer integer) {
+            setProgress(integer);
+        }
+    });
 
     @Inject
     public ControlsScreenPresenter(
@@ -100,6 +94,12 @@ public class ControlsScreenPresenter extends ViewPresenter<ControlsScreenView>
         super.onEnterScope(scope);
         pauseAndResumeRegistrar.register(scope, this);
         drawerOwner.register(scope, this);
+    }
+
+    @Override
+    protected void onExitScope() {
+        super.onExitScope();
+        teardown();
     }
 
     @Override
@@ -135,25 +135,40 @@ public class ControlsScreenPresenter extends ViewPresenter<ControlsScreenView>
 
     @DebugLog
     void setup() {
-        setCurrentTimeText(lastPosition);
-        setTotalTimeText(lastDuration);
         subscribeBroadcasts();
     }
 
     @DebugLog
     void teardown() {
         unsubscribeBroadcasts();
+        mProgressUpdater.unsubscribeProgress();
+        unsubscribeBlinking();
     }
 
     void subscribeBroadcasts() {
         if (isSubscribed(broadcastSubscription)){
             return;
         }
+        Subscription s = playbackController.subscribeProgressChanges(
+                new Action1<Triple<Long, Long, Long>>() {
+                    @Override
+                    public void call(Triple<Long, Long, Long> tuple) {
+                        Timber.v("Position discrepancy = %d",
+                                tuple.getLeft() - mProgressUpdater.getLastFakedPosition());
+                        mProgressUpdater.setLastKnownPosition(tuple.getLeft());
+                        long duration = tuple.getMiddle();
+                        if (mProgressUpdater.getLastKnownDuration() != duration) {
+                            setTotalTimeText(duration);
+                        }
+                        mProgressUpdater.setLastKnownDuration(duration);
+                        mProgressUpdater.setLastUpdateTime(tuple.getRight());
+                    }
+                }
+        );
         Subscription s1 = playbackController.subscribePlayStateChanges(
                 new Action1<PlaybackStateCompat>() {
                     @Override
                     public void call(PlaybackStateCompat playbackState) {
-                        boolean playing = playbackState.getState() == STATE_PLAYING;
                         if (hasView()) {
                             getView().setPlayChecked(PlaybackController.isPlayingOrSimilar(playbackState));
                             if (VersionUtils.hasApi22()) {
@@ -161,49 +176,44 @@ public class ControlsScreenPresenter extends ViewPresenter<ControlsScreenView>
                                 getView().setShuffleLevel(BundleHelper.getInt2(playbackState.getExtras()));
                             } //TODO api21 maybe track events?
                         }
-                        isPlaying = playing;
-                        long position = playbackState.getPosition();
-                        long duration;
-                        if (VersionUtils.hasApi22()) {
-                            duration = BundleHelper.getLong(playbackState.getExtras());
-                        } else {
-                            duration = playbackState.getBufferedPosition();
-                        }
-                        updateProgress(position, duration);
-                        if (duration != lastDuration) {
-                            setTotalTimeText(duration);
-                        }
-                        Timber.v("Position discrepancy = %d", lastPosition - position);
-                        lastPosition = position;
-                        lastDuration = duration;
-                        lastPosSynced = true;
+                        isPlaying = PlaybackStateHelper.isPlaying(playbackState.getState());
+                        mProgressUpdater.subscribeProgress(isPlaying);
+                        subscribeBlinking(isPlaying);
                     }
                 }
         );
-        final long interval = 250;
-        Subscription s3 = Observable.interval(interval, TimeUnit.MILLISECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Long>() {
-                    @Override
-                    public void call(Long aLong) {
-                        long position = lastPosition;
-                        if (lastPosSynced) {
-                            lastPosSynced = false;
-                        } else if (isPlaying) {
-                            position += interval + 10;
-                            lastPosition = position;
-                        }
-                        long duration = lastDuration;
-                        updateProgress(position, duration);
-                    }
-                });
-        broadcastSubscription = new CompositeSubscription(s1, s3);
+        broadcastSubscription = new CompositeSubscription(s, s1);
     }
 
     void unsubscribeBroadcasts() {
         if (isSubscribed(broadcastSubscription)) {
             broadcastSubscription.unsubscribe();
             broadcastSubscription = null;
+        }
+    }
+
+    void subscribeBlinking(boolean isPlaying) {
+        if (!isPlaying && isSubscribed(blinkingSubscription)) {
+            return;
+        } else if (isPlaying) {
+            unsubscribeBlinking();
+            doBlinky();
+            return;
+        }
+        final long interval = 250;
+        blinkingSubscription = Observable.interval(interval,
+                TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Long>() {
+                    @Override
+                    public void call(Long aLong) {
+                        doBlinky();
+                    }
+                });
+    }
+
+    void unsubscribeBlinking() {
+        if (isSubscribed(blinkingSubscription)) {
+            blinkingSubscription.unsubscribe();
         }
     }
 
@@ -245,10 +255,12 @@ public class ControlsScreenPresenter extends ViewPresenter<ControlsScreenView>
         final long now = SystemClock.elapsedRealtime();
         if (now > lastSeekEventTime + 30) {
             lastSeekEventTime = now;
-            posOverride = (lastDuration * progress) / 1000;
+            posOverride = (mProgressUpdater.getLastKnownDuration() * progress) / 1000;
             if (posOverride < 0 || !fromTouch) {
                 posOverride = -1;
             } else {
+                mProgressUpdater.setLastKnownPosition(posOverride);
+                mProgressUpdater.setLastUpdateTime(now);
                 setCurrentTimeText(posOverride);
             }
         }
@@ -265,37 +277,33 @@ public class ControlsScreenPresenter extends ViewPresenter<ControlsScreenView>
         fromTouch = false;
         if (posOverride != -1) {
             playbackController.seekTo(posOverride);
-            updateProgress(posOverride, lastDuration);
         }
         posOverride = -1;
     }
     /*end seekbars*/
 
-    void updateProgress(long position, long duration) {
-        if (position < 0 || duration <= 0) {
-            setProgress(1000);
-            setCurrentTimeText(-1);
-        } else {
-            if (!fromTouch) {
-                setCurrentTimeText(position);
-                setProgress((int) (1000 * position / duration));
-                if (isPlaying) {
-                    setCurrentTimeVisibile();
-                } else {
-                    //blink the counter
-                    long now = SystemClock.elapsedRealtime();
-                    if (now >= lastBlinkTime + 500) {
-                        lastBlinkTime = now;
-                        toggleCurrentTimeVisiblility();
-                    }
-                }
+    void setProgress(int progress) {
+        if (!fromTouch) {
+            doBlinky();
+            if (hasView()) {
+                getView().setProgress(progress);
             }
         }
     }
 
-    void setProgress(int progress) {
-        if (hasView()) {
-            getView().setProgress(progress);
+    void doBlinky() {
+        if (!fromTouch) {
+            setCurrentTimeText(mProgressUpdater.getLastFakedPosition());
+            if (isPlaying) {
+                setCurrentTimeVisibile();
+            } else {
+                //blink the counter
+                long now = SystemClock.elapsedRealtime();
+                if (now >= lastBlinkTime + 500) {
+                    lastBlinkTime = now;
+                    toggleCurrentTimeVisiblility();
+                }
+            }
         }
     }
 
