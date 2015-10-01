@@ -33,17 +33,23 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
+import org.apache.commons.lang3.tuple.Triple;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.util.BundleHelper;
+import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.playback.PlaybackConstants;
 import org.opensilk.music.playback.PlaybackConstants.CMD;
+import org.opensilk.music.playback.PlaybackStateHelper;
 import org.opensilk.music.playback.service.IPlaybackService;
 import org.opensilk.music.playback.service.PlaybackService;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -365,6 +371,12 @@ public class PlaybackController {
         return mQueueSubject.asObservable().subscribe(onNext);
     }
 
+    final BehaviorSubject<Triple<Long, Long, Long>> mProgressSubject = BehaviorSubject.create();
+
+    public Subscription subscribeProgressChanges(Action1<Triple<Long, Long, Long>> onNext) {
+        return mProgressSubject.asObservable().subscribe(onNext);
+    }
+
     /*
      * end subscriptions
      */
@@ -376,12 +388,32 @@ public class PlaybackController {
         }
 
         @Override
+        @DebugLog
         public void onSessionEvent(String event, Bundle extras) {
             super.onSessionEvent(event, extras);
         }
 
         @Override
-        public void onPlaybackStateChanged(PlaybackState state) {
+        public void onPlaybackStateChanged(@NonNull PlaybackState state) {
+            //do progress first so it will be up to date
+            if (PlaybackStateHelper.isLoading(state.getState())) {
+                mProgressSubject.onNext(Triple.of((long)-1,(long)-1,
+                        state.getLastPositionUpdateTime()));
+            } else {
+                long position = state.getPosition();
+                long duration;
+                long updateTim = state.getLastPositionUpdateTime();
+                if (VersionUtils.hasApi22()) {
+                    duration = BundleHelper.getLong(state.getExtras());
+                } else {
+                    duration = state.getBufferedPosition();
+                }
+                if (position < 0 || duration <= 0) {
+                    mProgressSubject.onNext(Triple.of((long)-1, (long)-1, updateTim));
+                } else {
+                    mProgressSubject.onNext(Triple.of(position, duration, updateTim));
+                }
+            }
             mPlayStateSubject.onNext(PlaybackStateCompat.fromPlaybackState(state));
         }
 
