@@ -559,7 +559,7 @@ public class CircularSeekBar extends View {
      */
     public void setProgress(int progress) {
         if (mProgress != progress) {
-            mProgress = progress;
+            mProgress = Math.max(0, Math.min(progress, mMax));
             if (mOnCircularSeekBarChangeListener != null) {
                 mOnCircularSeekBarChangeListener.onProgressChanged(this, progress, false);
             }
