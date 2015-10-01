@@ -84,8 +84,6 @@ public class NotificationHelper2 extends BroadcastReceiver {
     private PendingIntent mStopIntent;
 
     private int mNotificationColor;
-    private RemoteViews mNotificationTemplate;
-    private RemoteViews mExpandedView;
     private Subscription mArtworkSubscription;
     private boolean mAnyActivityInForeground;
 
@@ -156,8 +154,6 @@ public class NotificationHelper2 extends BroadcastReceiver {
             } catch (IllegalArgumentException ex) {
                 // ignore if the receiver is not registered.
             }
-            mNotificationTemplate = null;
-            mExpandedView = null;
             mService.stopForeground(true);
         }
         if (mArtworkSubscription != null) {
@@ -314,15 +310,13 @@ public class NotificationHelper2 extends BroadcastReceiver {
         final boolean isPlaying = PlaybackStateHelper.shouldShowPauseButton(mPlaybackState);
 
         // Default notfication layout
-        if (mNotificationTemplate == null) {
-            mNotificationTemplate = new RemoteViews(mContext.getPackageName(),
+        RemoteViews mNotificationTemplate = new RemoteViews(mContext.getPackageName(),
                     R.layout.notification_template_base);
-        }
 
         // Set up the content view
-        initCollapsedLayout(MediaMetadataHelper.getDisplayName(mMetadata),
+        initCollapsedLayout(mNotificationTemplate, MediaMetadataHelper.getDisplayName(mMetadata),
                 MediaMetadataHelper.getArtistName(mMetadata), icon);
-        initPlaybackActions(isPlaying);
+        initPlaybackActions(mNotificationTemplate, isPlaying);
 
         Bundle extras = new Bundle();
         if (VersionUtils.hasApi21()) {
@@ -343,17 +337,15 @@ public class NotificationHelper2 extends BroadcastReceiver {
 
         if (VersionUtils.hasJellyBean()) {
             // Expanded notifiction style
-            if (mExpandedView == null) {
-                mExpandedView = new RemoteViews(mContext.getPackageName(),
+            RemoteViews mExpandedView = new RemoteViews(mContext.getPackageName(),
                         R.layout.notification_template_expanded_base);
-            }
             notification.bigContentView = mExpandedView;
             // Set up the expanded content view
-            initExpandedLayout(MediaMetadataHelper.getDisplayName(mMetadata),
+            initExpandedLayout(mExpandedView, MediaMetadataHelper.getDisplayName(mMetadata),
                     MediaMetadataHelper.getAlbumName(mMetadata),
                     MediaMetadataHelper.getArtistName(mMetadata), icon);
             // Control playback from the notification
-            initExpandedPlaybackActions(isPlaying);
+            initExpandedPlaybackActions(mExpandedView, isPlaying);
         }
 
         notifyNotification(notification);
@@ -363,7 +355,7 @@ public class NotificationHelper2 extends BroadcastReceiver {
      * Lets the buttons in the remote view control playback in the expanded
      * layout
      */
-    private void initExpandedPlaybackActions(boolean isPlaying) {
+    private void initExpandedPlaybackActions(RemoteViews mExpandedView, boolean isPlaying) {
         // Play and pause
         mExpandedView.setOnClickPendingIntent(R.id.notification_expanded_base_play,
                 isPlaying ? mPauseIntent : mPlayIntent);
@@ -388,7 +380,7 @@ public class NotificationHelper2 extends BroadcastReceiver {
     /**
      * Lets the buttons in the remote view control playback in the normal layout
      */
-    private void initPlaybackActions(boolean isPlaying) {
+    private void initPlaybackActions(RemoteViews mNotificationTemplate, boolean isPlaying) {
         // Play and pause
         mNotificationTemplate.setOnClickPendingIntent(R.id.notification_base_play,
                 isPlaying ? mPauseIntent : mPlayIntent);
@@ -409,8 +401,8 @@ public class NotificationHelper2 extends BroadcastReceiver {
     /**
      * Sets the track name, artist name, and album art in the normal layout
      */
-    private void initCollapsedLayout(final String trackName, final String artistName,
-                                     final Bitmap albumArt) {
+    private void initCollapsedLayout(RemoteViews mNotificationTemplate, final String trackName,
+                                     final String artistName, final Bitmap albumArt) {
         // Track name (line one)
         mNotificationTemplate.setTextViewText(R.id.notification_base_line_one, trackName);
         // Artist name (line two)
@@ -423,8 +415,8 @@ public class NotificationHelper2 extends BroadcastReceiver {
      * Sets the track name, album name, artist name, and album art in the
      * expanded layout
      */
-    private void initExpandedLayout(final String trackName, final String artistName,
-                                    final String albumName, final Bitmap albumArt) {
+    private void initExpandedLayout(RemoteViews mExpandedView, final String trackName,
+                                    final String artistName, final String albumName, final Bitmap albumArt) {
         // Track name (line one)
         mExpandedView.setTextViewText(R.id.notification_expanded_base_line_one, trackName);
         // Album name (line two)
