@@ -10,4 +10,3 @@ email me if you have questions
 
 TODOS
     remove LibraryProviderOld and other deprecated classes
-    move bundleablelistslice and friends into its own module (see model readme)

@@ -29,7 +29,7 @@ import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.sort.TrackSortOrder;
-import org.opensilk.music.model.spi.Bundleable;
+import org.opensilk.bundleable.Bundleable;
 import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;

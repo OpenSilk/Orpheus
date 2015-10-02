@@ -31,7 +31,6 @@ import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.model.compare.AlbumCompare;
 import org.opensilk.music.model.compare.ArtistCompare;
 import org.opensilk.music.model.compare.BaseCompare;
-import org.opensilk.music.model.compare.FolderTrackCompare;
 import org.opensilk.music.model.compare.TrackCompare;
 import org.opensilk.music.library.internal.BundleableListTransformer;
 import org.opensilk.music.library.internal.BundleableSubscriber;
@@ -46,7 +45,7 @@ import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
-import org.opensilk.music.model.spi.Bundleable;
+import org.opensilk.bundleable.Bundleable;
 
 import java.util.List;
 

@@ -15,6 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.library.internal;
+package org.opensilk.bundleable;
 
 parcelable BundleableListSlice;

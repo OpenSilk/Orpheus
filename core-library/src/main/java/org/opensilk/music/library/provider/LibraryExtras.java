@@ -28,9 +28,9 @@ import org.opensilk.music.library.internal.IBundleableObserver;
 import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.internal.ResultReceiver;
 import org.opensilk.music.model.sort.BaseSortOrder;
-import org.opensilk.music.model.ex.BadBundleableException;
-import org.opensilk.music.model.spi.Bundleable;
-import org.opensilk.music.model.util.BundleableUtil;
+import org.opensilk.bundleable.BadBundleableException;
+import org.opensilk.bundleable.Bundleable;
+import org.opensilk.bundleable.BundleableUtil;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

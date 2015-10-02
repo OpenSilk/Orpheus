@@ -23,8 +23,8 @@ import android.os.Bundle;
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.model.Container;
-import org.opensilk.music.model.ex.BadBundleableException;
-import org.opensilk.music.model.util.BundleableUtil;
+import org.opensilk.bundleable.BadBundleableException;
+import org.opensilk.bundleable.BundleableUtil;
 import org.opensilk.music.ui3.common.BundleableFragment;
 
 /**

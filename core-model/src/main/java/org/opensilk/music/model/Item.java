@@ -39,11 +39,6 @@ public abstract class Item implements Model {
         this.metadata = metadata;
     }
 
-    @Override @Deprecated
-    public String getIdentity() {
-        return uri.toString();
-    }
-
     @Override
     public @NonNull String getName() {
         return name;

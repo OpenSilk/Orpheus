@@ -15,19 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.model.util;
+package org.opensilk.bundleable;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opensilk.music.model.Artist;
-import org.opensilk.music.model.Folder;
-import org.opensilk.music.model.ex.BadBundleableException;
-import org.opensilk.music.model.spi.Bundleable;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -42,9 +36,8 @@ public class BundleableUtilTest {
 
     @Test
     public void testMaterializeBundleWorks() throws Exception {
-        Folder f = Folder.builder().setUri(Uri.parse("content://test/m/1"))
-                .setParentUri(Uri.parse("content://test/m")).setName("Folder1").build();
-        Bundle b = f.toBundle();
+        TestBundleable t = new TestBundleable("fred", 26);
+        Bundle b = t.toBundle();
 
         Parcel p = Parcel.obtain();
         b.writeToParcel(p, 0);
@@ -52,29 +45,28 @@ public class BundleableUtilTest {
         Bundle b1 = p.readBundle();
 
         Bundleable b2 = BundleableUtil.materializeBundle(b1);
-        Assert.assertTrue((b2 instanceof Folder));
-        assertThat((Folder) b2).isEqualTo(f);
+        assertThat((b2 instanceof TestBundleable)).isTrue();
+        assertThat((TestBundleable) b2).isEqualTo(t);
     }
 
     @Test
     public void testMaterializeBundleWorks2() throws Exception {
-        Folder f = Folder.builder().setUri(Uri.parse("content://test/m/1"))
-                .setParentUri(Uri.parse("content://test/m")).setName("Folder1").build();
-        Bundle b = f.toBundle();
+        TestBundleable t = new TestBundleable("sally", 23);
+        Bundle b = t.toBundle();
 
         Parcel p = Parcel.obtain();
         b.writeToParcel(p, 0);
         p.setDataPosition(0);
         Bundle b1 = p.readBundle();
 
-        Folder f2 = BundleableUtil.materializeBundle(Folder.class, b);
-        assertThat(f).isEqualTo(f2);
+        TestBundleable f2 = BundleableUtil.materializeBundle(TestBundleable.class, b1);
+        assertThat(t).isEqualTo(f2);
     }
 
     @Test(expected = BadBundleableException.class)
     public void testWrongClassThrows() throws Exception {
-        Bundle b =  Folder.builder().setUri(Uri.parse("content://test/m/1"))
-                .setParentUri(Uri.parse("content://test/m")).setName("Folder1").build().toBundle();
-        BundleableUtil.materializeBundle(Artist.class.getName(), b);
+        TestBundleable t = new TestBundleable("alice", 32);
+        Bundle b = t.toBundle();
+        BundleableUtil.materializeBundle("org.opensilk.Foo", b);
     }
 }

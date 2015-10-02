@@ -31,14 +31,13 @@ import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.loader.BundleableLoader;
 import org.opensilk.music.model.Container;
-import org.opensilk.music.model.spi.Bundleable;
+import org.opensilk.bundleable.Bundleable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import de.umass.lastfm.Library;
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;

@@ -43,15 +43,14 @@ android {
         targetCompatibility JavaVersion.VERSION_1_7
     }
 
+    defaultPublishConfig "debug"
+
 }
 
 dependencies {
-    compile project(':common-bundleable')
-    compile (group: 'io.reactivex', name: 'rxjava', version: rootProject.ext.rxJavaVersion)
-    compile(group:'org.apache.commons', name:'commons-lang3', version: rootProject.ext.commonsLangVersion)
+    compile (group:'com.android.support', name: 'support-annotations', version: rootProject.ext.supportLibVersion)
 
     testCompile (group:"junit", name:"junit", version: rootProject.ext.testJunitVersion)
     testCompile (group:"org.assertj", name:"assertj-core", version: rootProject.ext.testAssertJVersion)
     testCompile (group:"org.robolectric", name:"robolectric", version : rootProject.ext.testRobolectricVersion)
-    testCompile (group:"org.mockito", name:"mockito-core", version: rootProject.ext.testMockitoVersion)
 }

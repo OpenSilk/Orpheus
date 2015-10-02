@@ -15,19 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.model.util;
+package org.opensilk.bundleable;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
-import org.opensilk.music.model.ex.BadBundleableException;
-import org.opensilk.music.model.spi.Bundleable;
-
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Created by drew on 4/25/15.
@@ -35,10 +29,10 @@ import java.util.List;
 public class BundleableUtil {
 
     /**
-     * Transforms Bundles passed to Orpheus into a {@link org.opensilk.music.model.spi.Bundleable} object
+     * Transforms Bundles passed to Orpheus into a {@link Bundleable} object
      *
-     * @param b Bundle created with {@link org.opensilk.music.model.spi.Bundleable#toBundle()}
-     * @return {@link org.opensilk.music.model.spi.Bundleable}
+     * @param b Bundle created with {@link Bundleable#toBundle()}
+     * @return {@link Bundleable}
      * @throws BadBundleableException if bundle is malformed
      */
     @NonNull
@@ -50,8 +44,8 @@ public class BundleableUtil {
      * Transforms Bundles passed to Orpheus into their real class
      *
      * @param cls Class this bundle is created from
-     * @param b Bundle created with {@link org.opensilk.music.model.spi.Bundleable#toBundle()}
-     * @return {@link org.opensilk.music.model.spi.Bundleable}
+     * @param b Bundle created with {@link Bundleable#toBundle()}
+     * @return {@link Bundleable}
      * @throws BadBundleableException if bundle is malformed
      */
     @NonNull @SuppressWarnings("unchecked")
@@ -63,8 +57,8 @@ public class BundleableUtil {
      * Transforms Bundles passed to Orpheus into their real class
      *
      * @param name Class name this bundle is created from
-     * @param b Bundle created with {@link org.opensilk.music.model.spi.Bundleable#toBundle()}
-     * @return {@link org.opensilk.music.model.spi.Bundleable}
+     * @param b Bundle created with {@link Bundleable#toBundle()}
+     * @return {@link Bundleable}
      * @throws BadBundleableException if bundle is malformed
      */
     @NonNull @SuppressWarnings("unchecked")
@@ -75,29 +69,6 @@ public class BundleableUtil {
             sCreatorCache.remove(name);
             throw new BadBundleableException(e);
         }
-    }
-
-    //Laziness need to just make everything parcelable.
-    public static void flatten(@NonNull Bundle outState, @NonNull List<Bundleable> bundleables) {
-        ArrayList<ParcelableBundleable> pbs = new ArrayList<>(bundleables.size());
-        for (Bundleable b : bundleables) {
-            pbs.add(new ParcelableBundleable(b));
-        }
-        outState.putParcelableArrayList("wrapped", pbs);
-    }
-
-    public static List<Bundleable> unflatten(@NonNull Bundle savedInstanceState) {
-        if (savedInstanceState.containsKey("wrapped")) {
-            ArrayList<ParcelableBundleable> pbs = savedInstanceState.getParcelableArrayList("wrapped");
-            if (pbs != null) {
-                ArrayList<Bundleable> bundleables = new ArrayList<>(pbs.size());
-                for (ParcelableBundleable pb : pbs) {
-                    bundleables.add(pb.bundleable);
-                }
-                return bundleables;
-            }
-        }
-        return Collections.emptyList();
     }
 
     private static final HashMap<String, Bundleable.BundleCreator> sCreatorCache = new HashMap<>();

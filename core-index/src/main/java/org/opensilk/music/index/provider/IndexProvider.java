@@ -38,9 +38,8 @@ import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.Track;
-import org.opensilk.music.model.spi.Bundleable;
+import org.opensilk.bundleable.Bundleable;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -51,14 +50,10 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.schedulers.Schedulers;
 
-import static org.opensilk.music.index.provider.IndexUris.M_ALBUM;
 import static org.opensilk.music.index.provider.IndexUris.M_ALBUMS;
 import static org.opensilk.music.index.provider.IndexUris.M_ALBUM_TRACKS;
-import static org.opensilk.music.index.provider.IndexUris.M_ARTIST;
 import static org.opensilk.music.index.provider.IndexUris.M_ARTISTS;
-import static org.opensilk.music.index.provider.IndexUris.M_GENRE;
 import static org.opensilk.music.index.provider.IndexUris.M_GENRES;
-import static org.opensilk.music.index.provider.IndexUris.M_TRACK;
 import static org.opensilk.music.index.provider.IndexUris.M_TRACKS;
 import static org.opensilk.music.index.provider.IndexUris.makeMatcher;
 

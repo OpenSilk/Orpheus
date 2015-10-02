@@ -20,7 +20,6 @@ package org.opensilk.music.model.compare;
 import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Track;
-import org.opensilk.music.model.spi.Bundleable;
 
 import java.util.Comparator;
 

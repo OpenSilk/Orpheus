@@ -18,7 +18,6 @@
 package org.opensilk.music.index.scanner;
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Pair;
@@ -28,14 +27,13 @@ import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.core.mortar.MortarIntentService;
 import org.opensilk.music.index.IndexComponent;
 import org.opensilk.music.index.database.IndexDatabase;
-import org.opensilk.music.index.database.IndexSchema;
 import org.opensilk.music.index.provider.LastFMHelper;
 import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.loader.BundleableLoader;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Metadata;
 import org.opensilk.music.model.Track;
-import org.opensilk.music.model.spi.Bundleable;
+import org.opensilk.bundleable.Bundleable;
 import org.opensilk.music.index.scanner.NotificationHelper.Status;
 
 import java.util.ArrayList;

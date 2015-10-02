@@ -36,7 +36,7 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.loader.BundleableLoader;
-import org.opensilk.music.model.spi.Bundleable;
+import org.opensilk.bundleable.Bundleable;
 
 import java.util.ArrayList;
 import java.util.Collection;

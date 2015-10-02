@@ -19,7 +19,7 @@ package org.opensilk.music.ui3.common;
 
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.common.ui.mortar.ActionBarMenuHandler;
-import org.opensilk.music.model.spi.Bundleable;
+import org.opensilk.bundleable.Bundleable;
 
 import java.util.ArrayList;
 import java.util.Collection;

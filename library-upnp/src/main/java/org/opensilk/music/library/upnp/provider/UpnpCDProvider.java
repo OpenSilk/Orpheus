@@ -17,24 +17,18 @@
 
 package org.opensilk.music.library.upnp.provider;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.UriMatcher;
-import android.media.ResourceBusyException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.util.ArrayMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.fourthline.cling.android.AndroidUpnpService;
@@ -42,7 +36,6 @@ import org.fourthline.cling.model.action.ActionInvocation;
 import org.fourthline.cling.model.message.UpnpResponse;
 import org.fourthline.cling.model.message.header.UDNHeader;
 import org.fourthline.cling.model.meta.Device;
-import org.fourthline.cling.model.meta.DeviceDetails;
 import org.fourthline.cling.model.meta.RemoteDevice;
 import org.fourthline.cling.model.meta.RemoteService;
 import org.fourthline.cling.model.meta.Service;
@@ -65,16 +58,13 @@ import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.internal.BundleableSubscriber;
 import org.opensilk.music.library.internal.LibraryException;
-import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryProvider;
-import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.upnp.R;
 import org.opensilk.music.library.upnp.UpnpLibraryComponent;
 import org.opensilk.music.library.upnp.UpnpServiceService;
 import org.opensilk.music.library.upnp.util.ModelUtil;
-import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Track;
-import org.opensilk.music.model.spi.Bundleable;
+import org.opensilk.bundleable.Bundleable;
 import org.opensilk.upnp.contentdirectory.Feature;
 import org.opensilk.upnp.contentdirectory.Features;
 import org.opensilk.upnp.contentdirectory.callback.GetFeatureList;
@@ -82,32 +72,22 @@ import org.opensilk.upnp.contentdirectory.callback.GetFeatureList;
 import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import hugo.weaving.DebugLog;
 import rx.Observable;
-import rx.Scheduler;
 import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Action4;
-import rx.functions.Func3;
-import rx.observables.BlockingObservable;
-import rx.schedulers.NewThreadScheduler;
 import rx.schedulers.Schedulers;
-import rx.subjects.AsyncSubject;
 import rx.subscriptions.Subscriptions;
-import timber.log.Timber;
 
 /**
  * Created by drew on 9/17/15.

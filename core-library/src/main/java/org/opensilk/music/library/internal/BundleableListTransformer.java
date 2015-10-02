@@ -17,7 +17,7 @@
 
 package org.opensilk.music.library.internal;
 
-import org.opensilk.music.model.spi.Bundleable;
+import org.opensilk.bundleable.Bundleable;
 
 import java.util.List;
 

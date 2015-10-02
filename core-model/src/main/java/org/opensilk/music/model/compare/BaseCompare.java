@@ -19,7 +19,6 @@ package org.opensilk.music.model.compare;
 
 import org.opensilk.music.model.Model;
 import org.opensilk.music.model.sort.BaseSortOrder;
-import org.opensilk.music.model.spi.Bundleable;
 
 import java.util.Comparator;
 

@@ -21,7 +21,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
-import org.opensilk.music.model.spi.Bundleable;
+import org.opensilk.bundleable.Bundleable;
+import org.opensilk.bundleable.BundleableListSlice;
 
 import java.util.List;
 

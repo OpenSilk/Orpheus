@@ -20,7 +20,7 @@ package org.opensilk.music.model;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
-import org.opensilk.music.model.spi.Bundleable;
+import org.opensilk.bundleable.Bundleable;
 
 /**
  * Created by drew on 9/21/15.

@@ -17,7 +17,7 @@
 
 package org.opensilk.music.library.internal;
 
-import org.opensilk.music.library.internal.BundleableListSlice;
+import org.opensilk.bundleable.BundleableListSlice;
 import org.opensilk.music.library.internal.LibraryException;
 
 oneway interface IBundleableObserver {

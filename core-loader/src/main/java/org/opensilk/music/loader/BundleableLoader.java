@@ -21,7 +21,7 @@ import android.content.Context;
 import android.net.Uri;
 
 import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.music.model.spi.Bundleable;
+import org.opensilk.bundleable.Bundleable;
 
 import javax.inject.Inject;
 

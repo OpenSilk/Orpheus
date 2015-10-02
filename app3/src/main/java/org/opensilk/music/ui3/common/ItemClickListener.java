@@ -19,7 +19,7 @@ package org.opensilk.music.ui3.common;
 
 import android.content.Context;
 
-import org.opensilk.music.model.spi.Bundleable;
+import org.opensilk.bundleable.Bundleable;
 
 /**
  * Created by drew on 5/2/15.

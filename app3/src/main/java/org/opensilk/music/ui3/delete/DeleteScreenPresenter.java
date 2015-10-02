@@ -32,22 +32,13 @@ import org.opensilk.music.library.internal.ResultReceiver;
 import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.library.provider.LibraryUris;
-import org.opensilk.music.loader.BundleableLoader;
-import org.opensilk.music.model.spi.Bundleable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import mortar.ViewPresenter;
-import rx.Observable;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Action2;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 import static org.opensilk.common.core.rx.RxUtils.isSubscribed;

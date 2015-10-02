@@ -33,7 +33,7 @@ import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.index.provider.Methods;
-import org.opensilk.music.library.internal.BundleableListSlice;
+import org.opensilk.bundleable.BundleableListSlice;
 import org.opensilk.music.library.internal.IBundleableObserver;
 import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.provider.LibraryExtras;
@@ -56,7 +56,6 @@ import rx.Subscriber;
 import rx.functions.Action2;
 import rx.functions.Func0;
 import rx.functions.Func1;
-import rx.functions.Func2;
 import timber.log.Timber;
 
 import static android.media.MediaMetadata.METADATA_KEY_ALBUM;

@@ -35,7 +35,6 @@ import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.internal.ResultReceiver;
 import org.opensilk.music.model.sort.BaseSortOrder;
 import org.opensilk.music.model.Container;
-import org.opensilk.music.model.spi.Bundleable;
 
 import java.util.List;
 

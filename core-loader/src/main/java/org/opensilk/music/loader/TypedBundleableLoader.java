@@ -28,11 +28,11 @@ import android.os.RemoteException;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.rx.RxLoader;
 import org.opensilk.common.core.util.Preconditions;
-import org.opensilk.music.library.internal.BundleableListSlice;
+import org.opensilk.bundleable.BundleableListSlice;
 import org.opensilk.music.library.internal.IBundleableObserver;
 import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.provider.LibraryExtras;
-import org.opensilk.music.model.spi.Bundleable;
+import org.opensilk.bundleable.Bundleable;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;

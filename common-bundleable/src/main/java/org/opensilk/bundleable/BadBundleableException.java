@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.model.ex;
+package org.opensilk.bundleable;
 
 /**
  * Created by drew on 4/25/15.

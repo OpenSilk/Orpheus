@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.library.internal;
+package org.opensilk.bundleable;
 
 import android.os.Binder;
 import android.os.Bundle;
@@ -23,11 +23,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
-
-import org.opensilk.music.library.BuildConfig;
-import org.opensilk.music.model.ex.BadBundleableException;
-import org.opensilk.music.model.spi.Bundleable;
-import org.opensilk.music.model.util.BundleableUtil;
 
 import java.util.ArrayList;
 import java.util.List;

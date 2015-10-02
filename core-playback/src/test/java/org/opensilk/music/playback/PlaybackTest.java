@@ -17,13 +17,28 @@
 
 package org.opensilk.music.playback;
 
+import android.content.Context;
+import android.media.AudioManager;
+import android.media.session.PlaybackState;
+import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.os.Handler;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.stubbing.Answer;
+import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.index.*;
+import org.opensilk.music.playback.service.PlaybackService;
+import org.opensilk.music.playback.service.PlaybackServiceModule;
+import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by drew on 9/30/15.
@@ -32,11 +47,28 @@ import org.robolectric.annotation.Config;
 @Config(
         constants = org.opensilk.music.index.BuildConfig.class,
         sdk = Build.VERSION_CODES.LOLLIPOP
+//        application = PlaybackTestApplication.class
 )
 public class PlaybackTest {
 
-        @Test
-        public void testStub() {
+    AudioManager mAudiomanager;
+    Playback mPlayback;
+    Playback.Callback mCallback;
 
-        }
+    @Before
+    public void setup() {
+        mAudiomanager = mock(AudioManager.class);
+        mPlayback = new Playback(
+                RuntimeEnvironment.application,
+                mAudiomanager
+        );
+        mPlayback.setState(PlaybackState.STATE_NONE);
+        mCallback = mock(Playback.Callback.class);
+        mPlayback.setCallback(mCallback);
+    }
+
+    @Test
+    public void testIdleState() {
+        assertThat(mPlayback.getState()).isEqualTo(PlaybackState.STATE_NONE);
+    }
 }

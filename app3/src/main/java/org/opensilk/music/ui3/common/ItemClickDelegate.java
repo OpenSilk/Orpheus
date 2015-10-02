@@ -21,12 +21,9 @@ import android.content.Context;
 import android.net.Uri;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
-import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Track;
-import org.opensilk.music.model.spi.Bundleable;
+import org.opensilk.bundleable.Bundleable;
 import org.opensilk.music.playback.control.PlaybackController;
 
 import java.util.ArrayList;

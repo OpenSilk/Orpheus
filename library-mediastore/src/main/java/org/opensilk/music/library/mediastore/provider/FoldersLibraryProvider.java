@@ -28,19 +28,15 @@ import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.mediastore.MediaStoreLibraryComponent;
 import org.opensilk.music.library.mediastore.R;
-import org.opensilk.music.library.mediastore.loader.TracksLoader;
 import org.opensilk.music.library.mediastore.util.CursorHelpers;
 import org.opensilk.music.library.mediastore.util.FilesHelper;
 import org.opensilk.music.library.mediastore.util.StorageLookup;
-import org.opensilk.music.library.mediastore.util.Uris;
 import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryProvider;
-import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Track;
-import org.opensilk.music.model.spi.Bundleable;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -48,13 +44,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Provider;
 
 import rx.Subscriber;
-import rx.functions.Action1;
 import timber.log.Timber;
-
-import static org.opensilk.music.library.mediastore.util.CursorHelpers.appendId;
 
 /**
  * Created by drew on 5/17/15.
