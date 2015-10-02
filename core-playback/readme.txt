@@ -50,6 +50,5 @@ IMediaPlayer:
 TODOS:
     remove player/mediaplayer packages
     remove AudioManagerHelper and find another way to propagate audioSessionIds
-    remove NotificationHelper (1)
     remove PlaybackPreferences its function is now provided by index
     test test test This is all brand new code and needs extensive tests written

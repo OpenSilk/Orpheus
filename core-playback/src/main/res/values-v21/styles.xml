@@ -17,6 +17,31 @@
   -->
 
 <resources>
+
+    <style name="NotificationContainer">
+        <item name="android:background">#00000000</item>
+    </style>
+
+    <style name="NotificationArtwork">
+        <item name="android:paddingTop">12dip</item>
+        <item name="android:paddingBottom">12dip</item>
+        <item name="android:paddingStart">12dip</item>
+        <item name="android:paddingEnd">12dip</item>
+        <item name="android:scaleType">centerInside</item>
+    </style>
+
+    <style name="NotificationArtworkBig">
+        <item name="android:paddingTop">4dip</item>
+        <item name="android:paddingBottom">4dip</item>
+        <item name="android:paddingStart">4dip</item>
+        <item name="android:paddingEnd">4dip</item>
+        <item name="android:scaleType">fitXY</item>
+    </style>
+
+    <style name="NotificationTextContainer">
+        <!--<item name="android:paddingStart">@dimen/notification_info_container_padding_left</item>-->
+    </style>
+
     <!-- Notification bar event text -->
 
     <style name="NotificationText.Title">
@@ -31,14 +56,17 @@
         <item name="android:background">@android:drawable/divider_horizontal_bright</item>
     </style>
 
+    <style name="NotificationActionContainerBig">
+
+    </style>
+
     <!-- Notification bar actions -->
-    <style name="NotificationAction" parent="@android:style/Widget.Material.ImageButton">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:minWidth">@dimen/notification_action_width</item>
-        <item name="android:minHeight">@dimen/notification_action_height</item>
-        <item name="android:padding">@dimen/notification_action_padding</item>
-        <item name="android:scaleType">centerInside</item>
+    <style name="NotificationAction" parent="android:Widget.Material.ImageButton">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_marginStart">2dp</item>
+        <item name="android:layout_marginEnd">2dp</item>
+        <item name="android:gravity">center</item>
         <item name="android:background">?android:selectableItemBackgroundBorderless</item>
     </style>
 

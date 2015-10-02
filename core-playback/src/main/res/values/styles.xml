@@ -15,6 +15,18 @@
  -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <style name="NotificationContainer">
+
+    </style>
+
+    <style name="NotificationArtwork">
+
+    </style>
+
+    <style name="NotificationTextContainer">
+        <item name="android:paddingLeft">@dimen/notification_info_container_padding_left</item>
+    </style>
+
     <!-- Notification bar event text -->
     <style name="NotificationText">
         <item name="android:layout_width">match_parent</item>
@@ -30,10 +42,6 @@
 
     <style name="NotificationText.Content">
         <item name="android:textAppearance">@android:style/TextAppearance.StatusBar.EventContent</item>
-    </style>
-
-    <style name="NotificationDividerHorizontal">
-        <item name="android:background">@android:drawable/divider_horizontal_dark</item>
     </style>
 
     <!-- Notification bar actions -->

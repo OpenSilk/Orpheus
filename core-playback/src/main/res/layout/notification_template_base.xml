@@ -18,16 +18,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/notification_base"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="64dp"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    tools:ignore="ContentDescription" >
+    style="@style/NotificationContainer"
+    tools:ignore="ContentDescription">
 
     <ImageView
         android:id="@+id/notification_base_image"
-        android:layout_width="@dimen/notification_big_icon_width"
-        android:layout_height="@dimen/notification_big_icon_height"
+        android:layout_width="@android:dimen/notification_large_icon_height"
+        android:layout_height="@android:dimen/notification_large_icon_width"
         android:gravity="center"
+        android:layout_weight="0"
+        style="@style/NotificationArtwork"
         tools:src="@drawable/default_artwork"/>
 
     <LinearLayout
@@ -36,7 +39,7 @@
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:paddingLeft="@dimen/notification_info_container_padding_left">
+        style="@style/NotificationTextContainer">
 
         <TextView
             android:id="@+id/notification_base_line_one"
@@ -57,9 +60,5 @@
     <ImageButton
         android:id="@+id/notification_base_next"
         style="@style/NotificationAction.Next" />
-
-    <ImageButton
-        android:id="@+id/notification_base_collapse"
-        style="@style/NotificationAction.Collapse" />
 
 </LinearLayout>

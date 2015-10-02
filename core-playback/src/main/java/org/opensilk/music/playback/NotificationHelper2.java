@@ -135,6 +135,7 @@ public class NotificationHelper2 extends BroadcastReceiver {
             filter.addAction(ACTION_PAUSE);
             filter.addAction(ACTION_PLAY);
             filter.addAction(ACTION_PREV);
+            filter.addAction(ACTION_STOP);
             mContext.registerReceiver(this, filter);
             mStarted = true;
             buildNotification();
@@ -392,10 +393,6 @@ public class NotificationHelper2 extends BroadcastReceiver {
         // Skip tracks
         mNotificationTemplate.setOnClickPendingIntent(R.id.notification_base_next,
                 mNextIntent);
-
-        // Stop and collapse the notification
-        mNotificationTemplate.setOnClickPendingIntent(R.id.notification_base_collapse,
-                mPreviousIntent);
     }
 
     /**
