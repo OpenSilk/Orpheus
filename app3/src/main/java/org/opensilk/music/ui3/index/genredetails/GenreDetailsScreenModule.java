@@ -19,7 +19,6 @@ package org.opensilk.music.ui3.index.genredetails;
 
 import android.content.Context;
 import android.net.Uri;
-import android.widget.PopupMenu;
 
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
@@ -28,25 +27,21 @@ import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.index.provider.IndexUris;
-import org.opensilk.music.model.sort.AlbumSortOrder;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.TrackList;
+import org.opensilk.music.model.sort.AlbumSortOrder;
 import org.opensilk.music.model.spi.Bundleable;
-import org.opensilk.music.ui3.index.IndexBaseMenuHandler;
-import org.opensilk.music.ui3.index.IndexOverflowHandler;
-import org.opensilk.music.ui3.profile.ProfileActivity;
-import org.opensilk.music.ui3.index.albumdetails.AlbumDetailsScreen;
 import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
-import org.opensilk.music.ui3.common.OverflowAction;
-import org.opensilk.music.ui3.common.OverflowClickListener;
-import org.opensilk.music.ui3.common.OverflowHandler;
+import org.opensilk.music.ui3.common.MenuHandlerImpl;
 import org.opensilk.music.ui3.common.UtilsCommon;
-import org.opensilk.music.ui3.index.trackcollection.TrackCollectionOverflowHandler;
+import org.opensilk.music.ui3.index.IndexBaseMenuHandler;
+import org.opensilk.music.ui3.index.albumdetails.AlbumDetailsScreen;
 import org.opensilk.music.ui3.index.trackcollection.TrackCollectionScreen;
+import org.opensilk.music.ui3.profile.ProfileActivity;
 
 import java.util.List;
 
@@ -110,7 +105,6 @@ public class GenreDetailsScreenModule {
             @ForApplication Context context,
             AppPreferences preferences,
             ItemClickListener itemClickListener,
-            OverflowClickListener overflowClickListener,
             ActionBarMenuConfig menuConfig
     ) {
         boolean grid = preferences.isGrid(preferences.makePrefKey(AppPreferences.KEY_INDEX,
@@ -126,7 +120,6 @@ public class GenreDetailsScreenModule {
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(grid)
                 .setItemClickListener(itemClickListener)
-                .setOverflowClickListener(overflowClickListener)
                 .setMenuConfig(menuConfig)
 //                .addLoaderSeed(allTracks)
                 .build();
@@ -148,37 +141,8 @@ public class GenreDetailsScreenModule {
     }
 
     @Provides @ScreenScope
-    public OverflowClickListener provideOverflowClickListener(
-            final IndexOverflowHandler albumsOverflowHandler,
-            final TrackCollectionOverflowHandler trackCollectionOverflowHandler
-    ) {
-        return new OverflowClickListener() {
-            @Override
-            public void onBuildMenu(Context context, PopupMenu m, Bundleable item) {
-                if (item instanceof Album) {
-                    albumsOverflowHandler.onBuildMenu(context, m, item);
-                } else if (item instanceof TrackList) {
-                    trackCollectionOverflowHandler.onBuildMenu(context, m, item);
-                }
-            }
-
-            @Override
-            public boolean onItemClicked(Context context, OverflowAction action, Bundleable item) {
-                if (item instanceof Album) {
-                    return albumsOverflowHandler.onItemClicked(context, action, item);
-                } else if (item instanceof TrackList) {
-                    return trackCollectionOverflowHandler.onItemClicked(context, action, item);
-                } else {
-                    return false;
-                }
-            }
-        };
-    }
-
-    @Provides @ScreenScope
     public ActionBarMenuConfig provideMenuConfig(
-            AppPreferences appPreferences,
-            final IndexOverflowHandler genresOverflowHandler
+            AppPreferences appPreferences
     ) {
 
         Func2<Context, Integer, Boolean> handler = new IndexBaseMenuHandler(
@@ -211,12 +175,7 @@ public class GenreDetailsScreenModule {
                         updateLayout(presenter, AppPreferences.GRID);
                         return true;
                     default:
-                        try {
-                            return genresOverflowHandler.onItemClicked(context,
-                                    OverflowAction.valueOf(integer), screen.genre);
-                        } catch (IllegalArgumentException e) {
                             return false;
-                        }
                 }
             }
         };
@@ -224,7 +183,7 @@ public class GenreDetailsScreenModule {
         return ActionBarMenuConfig.builder()
                 .withMenu(R.menu.genre_album_sort_by)
                 .withMenu(R.menu.view_as)
-                .withMenus(ActionBarMenuConfig.toObject(OverflowHandler.GENRES))
+                .withMenus(ActionBarMenuConfig.toObject(MenuHandlerImpl.GENRES))
                 .setActionHandler(handler)
                 .build();
     }

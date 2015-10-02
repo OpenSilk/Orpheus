@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,6 +29,9 @@ import android.widget.Button;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.core.util.VersionUtils;
+import org.opensilk.common.ui.mortar.ActionModeActivity;
+import org.opensilk.common.ui.mortar.ActionModeDelegateCallback;
+import org.opensilk.common.ui.mortar.ActionModePresenter;
 import org.opensilk.common.ui.mortar.ActivityResultsActivity;
 import org.opensilk.common.ui.mortar.ActivityResultsOwner;
 import org.opensilk.common.ui.mortar.DrawerOwner;
@@ -44,21 +48,25 @@ import org.opensilk.music.playback.control.PlaybackController;
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
+import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 
 /**
  * Created by drew on 5/1/15.
  */
 public abstract class MusicActivity extends MortarFragmentActivity
-        implements ActivityResultsActivity, ToolbarOwnerDelegate.Callback {
+        implements ActivityResultsActivity, ToolbarOwnerDelegate.Callback, ActionModeActivity {
 
     @Inject protected ActivityResultsOwner mActivityResultsOwner;
     @Inject protected PlaybackController mPlaybackController;
     @Inject protected ToolbarOwner mToolbarOwner;
     @Inject protected DrawerOwner mDrawerOwner;
+    @Inject protected ActionModePresenter mActionModePresenter;
 
     protected ToolbarOwnerDelegate<MusicActivity> mToolbarOwnerDelegate;
     protected DrawerOwnerDelegate<MusicActivity> mDrawerOwnerDelegate;
+
+    private ActionMode mActionMode;
 
     protected abstract void setupContentView();
     protected abstract void themeActivity(AppPreferences preferences);
@@ -85,6 +93,7 @@ public abstract class MusicActivity extends MortarFragmentActivity
             mToolbarOwnerDelegate = new ToolbarOwnerDelegate<>(this, mToolbarOwner, this);
         }
         mToolbarOwnerDelegate.onCreate();
+        mActionModePresenter.takeView(this);
     }
 
     @Override
@@ -99,6 +108,8 @@ public abstract class MusicActivity extends MortarFragmentActivity
         mActivityResultsOwner.dropView(this);
         mToolbarOwnerDelegate.onDestroy();
         if (mDrawerOwnerDelegate != null) mDrawerOwnerDelegate.onDestroy();
+        mActionModePresenter.dropView(this);
+        cancelActionMode();
     }
 
     @Override
@@ -137,6 +148,25 @@ public abstract class MusicActivity extends MortarFragmentActivity
             return;
         }
         super.onBackPressed();
+    }
+
+    @Override
+    public ActionMode startSupportActionMode(ActionMode.Callback callback) {
+        mActionMode = super.startSupportActionMode(new ActionModeDelegateCallback(callback) {
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                super.onDestroyActionMode(mode);
+                mActionMode = null;
+            }
+        });
+        return mActionMode;
+    }
+
+    @Override
+    public void cancelActionMode() {
+        if (mActionMode != null) {
+            mActionMode.finish();
+        }
     }
 
     /*

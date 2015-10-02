@@ -53,11 +53,4 @@
 
     </LinearLayout>
 
-    <org.opensilk.common.ui.widget.TintImageButton
-        android:id="@+id/tile_overflow"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:src="@drawable/ic_menu_moreoverflow_mtrl_alpha"
-        style="@style/TileOverflow"/>
-
 </org.opensilk.music.ui.widget.GridTileDescription>

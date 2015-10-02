@@ -20,9 +20,7 @@ package org.opensilk.music.ui3.index;
 import android.content.Context;
 
 import org.apache.commons.lang3.StringUtils;
-import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.AppPreferences;
-import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 
 import rx.functions.Func2;

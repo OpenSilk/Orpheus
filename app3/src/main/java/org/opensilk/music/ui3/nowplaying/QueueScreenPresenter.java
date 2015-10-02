@@ -29,7 +29,6 @@ import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.ui.mortar.PausesAndResumes;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.playback.control.PlaybackController;
-import org.opensilk.music.ui3.common.OverflowAction;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -26,19 +26,17 @@ import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.index.provider.IndexUris;
-import org.opensilk.music.model.sort.TrackSortOrder;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.ArtInfo;
+import org.opensilk.music.model.sort.TrackSortOrder;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickDelegate;
 import org.opensilk.music.ui3.common.ItemClickListener;
-import org.opensilk.music.ui3.common.OverflowAction;
-import org.opensilk.music.ui3.common.OverflowHandler;
+import org.opensilk.music.ui3.common.MenuHandlerImpl;
 import org.opensilk.music.ui3.index.IndexBaseMenuHandler;
-import org.opensilk.music.ui3.index.IndexOverflowHandler;
 
 import java.util.Collections;
 import java.util.List;
@@ -118,8 +116,7 @@ public class AlbumDetailsScreenModule {
 
     @Provides @ScreenScope
     public ActionBarMenuConfig provideMenuConfig(
-            AppPreferences preferences,
-            final IndexOverflowHandler albumsOverflowHandler
+            AppPreferences preferences
     ) {
 
     Func2<Context, Integer, Boolean> handler = new IndexBaseMenuHandler(
@@ -149,20 +146,14 @@ public class AlbumDetailsScreenModule {
                     setNewSortOrder(presenter, TrackSortOrder.ARTIST);
                     return true;
                 default:
-                    try {
-                        OverflowAction action = OverflowAction.valueOf(integer);
-                        boolean handled = albumsOverflowHandler.onItemClicked(context, action, screen.album);
-                        return handled;
-                    } catch (IllegalArgumentException e) {
                         return false;
-                    }
             }
         }
     };
 
     return ActionBarMenuConfig.builder()
             .withMenu(R.menu.album_song_sort_by)
-            .withMenus(ActionBarMenuConfig.toObject(OverflowHandler.ALBUMS))
+            .withMenus(ActionBarMenuConfig.toObject(MenuHandlerImpl.ALBUMS))
             .setActionHandler(handler)
             .build();
     }

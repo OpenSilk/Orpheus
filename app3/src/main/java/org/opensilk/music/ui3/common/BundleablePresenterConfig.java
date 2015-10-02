@@ -31,20 +31,17 @@ import java.util.List;
 public class BundleablePresenterConfig {
     public final boolean wantsGrid;
     public final ItemClickListener itemClickListener;
-    public final OverflowClickListener overflowClickListener;
     public final ActionBarMenuHandler menuConfig;
     public final List<Bundleable> loaderSeed;
 
     public BundleablePresenterConfig(
             boolean wantsGrid,
             ItemClickListener itemClickListener,
-            OverflowClickListener overflowClickListener,
             ActionBarMenuHandler menuConfig,
             List<Bundleable> loaderSeed
     ) {
         this.wantsGrid = wantsGrid;
         this.itemClickListener = itemClickListener;
-        this.overflowClickListener = overflowClickListener;
         this.menuConfig = menuConfig;
         this.loaderSeed = loaderSeed;
     }
@@ -56,7 +53,6 @@ public class BundleablePresenterConfig {
     public static class Builder {
         boolean wantsGrid;
         ItemClickListener itemClickListener;
-        OverflowClickListener overflowClickListener;
         ActionBarMenuConfig menuConfig;
         List<Bundleable> loaderSeed = new ArrayList<>();
 
@@ -67,11 +63,6 @@ public class BundleablePresenterConfig {
 
         public Builder setItemClickListener(ItemClickListener itemClickListener) {
             this.itemClickListener = itemClickListener;
-            return this;
-        }
-
-        public Builder setOverflowClickListener(OverflowClickListener overflowClickListener) {
-            this.overflowClickListener = overflowClickListener;
             return this;
         }
 
@@ -92,7 +83,7 @@ public class BundleablePresenterConfig {
 
 
         public BundleablePresenterConfig build() {
-            return new BundleablePresenterConfig(wantsGrid, itemClickListener, overflowClickListener, menuConfig, loaderSeed);
+            return new BundleablePresenterConfig(wantsGrid, itemClickListener, menuConfig, loaderSeed);
         }
     }
 }

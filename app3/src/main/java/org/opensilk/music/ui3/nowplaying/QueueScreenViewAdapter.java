@@ -26,7 +26,6 @@ import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui.widget.PlayingIndicator;
-import org.opensilk.music.ui3.common.OverflowAction;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -154,38 +153,6 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueScreenItem,
 //    @Override
     protected void onItemClicked(Context context, QueueScreenItem item) {
         playbackController.skipToQueueItem(item.getQueueId());
-    }
-
-//    @Override
-    protected void onOverflowClicked(Context context, PopupMenu menu, QueueScreenItem item) {
-        menu.inflate(R.menu.popup_play_next);
-        menu.inflate(R.menu.popup_add_to_playlist);
-        menu.inflate(R.menu.popup_more_by_artist);
-        menu.inflate(R.menu.popup_set_ringtone);
-        menu.inflate(R.menu.popup_delete);
-    }
-
-//    @Override
-    protected boolean onOverflowActionClicked(Context context, OverflowAction action, QueueScreenItem item) {
-        switch (action) {
-            case PLAY_NEXT:
-                playbackController.moveQueueItemToNext((int)item.getQueueId());
-                return true;
-            case ADD_TO_PLAYLIST:
-                Toast.makeText(context, R.string.err_unimplemented, Toast.LENGTH_SHORT).show();
-                return true;
-            case MORE_BY_ARTIST:
-                Toast.makeText(context, R.string.err_unimplemented, Toast.LENGTH_SHORT).show();
-                return true;
-            case SET_RINGTONE:
-                Toast.makeText(context, R.string.err_unimplemented, Toast.LENGTH_SHORT).show();
-                return true;
-            case DELETE:
-                Toast.makeText(context, R.string.err_unimplemented, Toast.LENGTH_SHORT).show();
-                return true;
-            default:
-                return false;
-        }
     }
 
 }

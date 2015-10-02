@@ -28,10 +28,8 @@ import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortar.WithComponentFactory;
 import org.opensilk.common.ui.mortarfragment.MortarFragment;
 import org.opensilk.music.R;
-import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.model.Artist;
 import org.opensilk.music.ui3.MusicActivityComponent;
-import org.opensilk.music.ui3.common.BundleableScreen;
 import org.opensilk.music.ui3.profile.ProfileScreen;
 
 import mortar.MortarScope;

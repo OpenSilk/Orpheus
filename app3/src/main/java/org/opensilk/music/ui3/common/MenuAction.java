@@ -35,7 +35,7 @@ public enum MenuAction {
 
     private final int resourceId;
 
-    private MenuAction(int resourceId) {
+    MenuAction(int resourceId) {
         this.resourceId = resourceId;
     }
 

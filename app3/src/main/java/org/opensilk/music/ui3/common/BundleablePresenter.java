@@ -20,14 +20,16 @@ package org.opensilk.music.ui3.common;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.PopupMenu;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.rx.RxLoader;
 import org.opensilk.common.core.rx.SimpleObserver;
-import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.common.ui.mortar.ActionBarMenuHandler;
+import org.opensilk.common.ui.mortar.ActionModePresenter;
 import org.opensilk.common.ui.mortar.HasOptionsMenu;
 import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.AppPreferences;
@@ -64,9 +66,9 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
     protected final BundleableLoader loader;
     protected final FragmentManagerOwner fm;
     protected final ItemClickListener itemClickListener;
-    protected final OverflowClickListener overflowClickListener;
     protected final ActionBarMenuHandler menuConfig;
     protected final List<Bundleable> loaderSeed;
+    protected final ActionModePresenter actionModePresenter;
 
     protected Boolean wantGrid;
 
@@ -81,7 +83,8 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
             FragmentManagerOwner fm,
             BundleablePresenterConfig config,
             @Named("loader_uri") Uri uri,
-            @Named("loader_sortorder") String sortOrder
+            @Named("loader_sortorder") String sortOrder,
+            ActionModePresenter actionModePresenter
     ) {
         this.preferences = preferences;
         this.requestor = requestor;
@@ -89,9 +92,9 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
         this.fm = fm;
         this.wantGrid = config.wantsGrid;
         this.itemClickListener = config.itemClickListener;
-        this.overflowClickListener = config.overflowClickListener;
         this.menuConfig = config.menuConfig;
         this.loaderSeed = config.loaderSeed;
+        this.actionModePresenter = actionModePresenter;
     }
 
     @Override
@@ -260,14 +263,6 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
         if (itemClickListener != null) itemClickListener.onItemClicked(this, context, item);
     }
 
-    public void onOverflowClicked(Context context, PopupMenu m, Bundleable item) {
-        if (overflowClickListener != null) overflowClickListener.onBuildMenu(context, m, item);
-    }
-
-    public boolean onOverflowActionClicked(Context context, OverflowAction action, Bundleable item) {
-        return overflowClickListener != null && overflowClickListener.onItemClicked(context, action, item);
-    }
-
     @Override
     public ActionBarMenuHandler getMenuConfig() {
         return menuConfig;
@@ -283,5 +278,66 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
 
     public void onFabClicked(View view) {
 
+    }
+
+    private ActionMode actionMode;
+
+    public void onItemClicked(BundleableRecyclerAdapter.ViewHolder viewHolder, Bundleable item) {
+        if (itemClickListener != null) itemClickListener.onItemClicked(this, viewHolder.itemView.getContext(), item);
+    }
+
+    public boolean onItemLongClicked(BundleableRecyclerAdapter.ViewHolder viewHolder, Bundleable item) {
+        return false;
+    }
+
+    public void onItemSelected() {
+        if (actionMode != null) actionMode.invalidate();
+    }
+
+    public void onItemUnselected() {
+        if (actionMode != null) {
+            if (getView().getAdapter().getSelectedItems().isEmpty()) {
+                actionMode.finish();
+            } else {
+                actionMode.invalidate();
+            }
+        }
+    }
+
+    public void onStartSelectionMode(BundleableRecyclerAdapter.OnSelectionModeEnded callback) {
+        actionMode = actionModePresenter.startActionMode(new ActionModeCallback(callback));
+    }
+
+    class ActionModeCallback implements ActionMode.Callback {
+        final BundleableRecyclerAdapter.OnSelectionModeEnded callback;
+
+        public ActionModeCallback(BundleableRecyclerAdapter.OnSelectionModeEnded callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        @DebugLog
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            return overflowClickListener != null;
+        }
+
+        @Override
+        @DebugLog
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            List<Bundleable> items = getView().getAdapter().getSelectedItems();
+            return true;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            return false;
+        }
+
+        @Override
+        @DebugLog
+        public void onDestroyActionMode(ActionMode mode) {
+            callback.onEndSelectionMode();
+            actionMode = null;
+        }
     }
 }

@@ -27,15 +27,14 @@ import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.model.sort.TrackSortOrder;
 import org.opensilk.music.model.ArtInfo;
+import org.opensilk.music.model.sort.TrackSortOrder;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickDelegate;
 import org.opensilk.music.ui3.common.ItemClickListener;
-import org.opensilk.music.ui3.common.OverflowAction;
 import org.opensilk.music.ui3.common.UtilsCommon;
 import org.opensilk.music.ui3.index.IndexBaseMenuHandler;
 
@@ -120,8 +119,7 @@ public class TrackCollectionScreenModule {
 
     @Provides @ScreenScope
     public ActionBarMenuConfig provideMenuConfig(
-            AppPreferences appPreferences,
-            final TrackCollectionOverflowHandler trackCollectionOverflowHandler
+            AppPreferences appPreferences
     ) {
 
         Func2<Context, Integer, Boolean> handler = new IndexBaseMenuHandler(
@@ -163,12 +161,7 @@ public class TrackCollectionScreenModule {
                         //TODO
                         return true;
                     default:
-                        try {
-                            return trackCollectionOverflowHandler.onItemClicked(context,
-                                    OverflowAction.valueOf(integer), screen.trackList);
-                        } catch (IllegalArgumentException e) {
                             return false;
-                        }
                 }
             }
         };

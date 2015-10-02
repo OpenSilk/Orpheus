@@ -20,7 +20,6 @@ package org.opensilk.music.ui3.index;
 import android.content.Context;
 import android.view.ViewGroup;
 
-import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.common.ui.mortar.ActionBarMenuHandler;
 import org.opensilk.common.ui.mortar.MortarPagerAdapter;
 import org.opensilk.common.ui.mortar.Screen;

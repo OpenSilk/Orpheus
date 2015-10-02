@@ -19,18 +19,12 @@ package org.opensilk.music.ui3.playlistsprofile;
 
 import android.content.Context;
 import android.net.Uri;
-import android.widget.PopupMenu;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
-import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.model.sort.TrackSortOrder;
-import org.opensilk.music.model.spi.Bundleable;
-import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
-import org.opensilk.music.ui3.common.OverflowHandler;
-import org.opensilk.music.ui3.common.OverflowAction;
-import org.opensilk.music.ui3.common.OverflowClickListener;
+import org.opensilk.music.ui3.common.MenuHandlerImpl;
 
 import javax.inject.Named;
 
@@ -64,78 +58,21 @@ public class PlaylistsProfileScreenModule {
         return TrackSortOrder.PLAYORDER;
     }
 
-//    @Provides @ScreenScope
-//    public TracksDragSwipePresenterConfig providePresenterConfig(
-//            TrackItemClickListener itemClickListener,
-//            OverflowClickListener overflowClickListener,
-//            ActionBarMenuConfig menuConfig,
-//            TrackDragSwipeEventListener eventListener
-//    ) {
-//        return TracksDragSwipePresenterConfig.builder()
-//                .setItemClickListener(itemClickListener)
-//                .setOverflowClickListener(overflowClickListener)
-//                .setMenuConfig(menuConfig)
-//                .setDragSwipeEventListener(eventListener)
-//                .build();
-//    }
-//
-//    @Provides @ScreenScope
-//    public TrackItemClickListener provideItemClickListener(final ItemClickDelegate delegate) {
-//        return new TrackItemClickListener() {
-//            @Override
-//            public void onItemClicked(TracksDragSwipePresenter presenter, Context context, Bundleable item) {
-//                delegate.playAllItems(context, presenter.getItems(), item);
-//            }
-//        };
-//    }
-
-    @Provides @ScreenScope
-    public OverflowClickListener provideOverflowClickListener(final OverflowHandler delegate) {
-        return new OverflowClickListener() {
-            @Override
-            public void onBuildMenu(Context context, PopupMenu m, Bundleable item) {
-                delegate.onBuildMenu(context, m, item);
-                m.getMenu().removeItem(R.id.popup_delete); //No delete for playlists
-            }
-
-            @Override
-            public boolean onItemClicked(Context context, OverflowAction action, Bundleable item) {
-                return delegate.onItemClicked(context, action, item);
-            }
-        };
-    }
-
     @Provides @ScreenScope
     public ActionBarMenuConfig provideMenuConfig(
-            ActionBarMenuConfigWrapper wrapper,
-            final OverflowHandler playlistsOverflowHandler
     ) {
 
         Func2<Context, Integer, Boolean> handler = new Func2<Context, Integer, Boolean>() {
             @Override
             public Boolean call(Context context, Integer integer) {
-                try {
-                    return playlistsOverflowHandler.onItemClicked(context,
-                            OverflowAction.valueOf(integer), screen.playlist);
-                } catch (IllegalArgumentException e) {
-                    return false;
-                }
+                return false;
             }
         };
 
-        return wrapper.injectCommonItems(ActionBarMenuConfig.builder()
-                .withMenus(ActionBarMenuConfig.toObject(OverflowHandler.PLAYLISTS))
+        return ActionBarMenuConfig.builder()
+                .withMenus(ActionBarMenuConfig.toObject(MenuHandlerImpl.PLAYLISTS))
                 .setActionHandler(handler)
-                .build());
+                .build();
     }
 
-//    @Provides @ScreenScope
-//    public TrackDragSwipeEventListener provideDragSwipeEventListener() {
-//        return new TrackDragSwipeEventListener() {
-//            @Override
-//            public void onItemRemoved(Context context, Track track) {
-//
-//            }
-//        };
-//    }
 }

@@ -26,16 +26,16 @@ import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.index.provider.IndexUris;
-import org.opensilk.music.model.sort.AlbumSortOrder;
 import org.opensilk.music.model.Album;
+import org.opensilk.music.model.sort.AlbumSortOrder;
 import org.opensilk.music.model.spi.Bundleable;
-import org.opensilk.music.ui3.index.IndexBaseMenuHandler;
-import org.opensilk.music.ui3.profile.ProfileActivity;
-import org.opensilk.music.ui3.index.albumdetails.AlbumDetailsScreen;
 import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
+import org.opensilk.music.ui3.index.IndexBaseMenuHandler;
+import org.opensilk.music.ui3.index.albumdetails.AlbumDetailsScreen;
+import org.opensilk.music.ui3.profile.ProfileActivity;
 
 import javax.inject.Named;
 

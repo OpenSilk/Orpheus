@@ -21,6 +21,7 @@ import android.content.Context;
 
 import org.opensilk.common.core.dagger2.ActivityScope;
 import org.opensilk.common.core.dagger2.ForApplication;
+import org.opensilk.common.ui.mortar.ActionModePresenter;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.common.ui.mortar.DrawerController;
 import org.opensilk.common.ui.mortar.DrawerListenerRegistrar;
@@ -54,4 +55,5 @@ public interface MusicActivityComponent extends MortarFragmentActivityComponent 
     IndexClient indexClient();
     //TODO figure out why i cant use DrawerController/DrawerListenerRegistrar here
     DrawerOwner drawerOwner();
+    ActionModePresenter actionModePresenter();
 }

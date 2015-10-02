@@ -19,13 +19,11 @@ package org.opensilk.music.ui3.index;
 
 import android.content.Context;
 import android.os.Parcelable;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
-import android.widget.ImageView;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ToolbarOwner;
@@ -95,6 +93,12 @@ public class GalleryScreenView extends CoordinatorLayout {
         mTabBar.setTabMode(TabLayout.MODE_SCROLLABLE);
         mTabBar.setupWithViewPager(mViewPager);
         mViewPager.setCurrentItem(startPage);
+        mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override
+            public void onPageSelected(int position) {
+                mPresenter.actionModePresenter.cancelActionMode();
+            }
+        });
     }
 
 }

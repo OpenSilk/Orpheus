@@ -19,25 +19,22 @@ package org.opensilk.music.ui3.common;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.view.MenuItem;
+import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 
-
-import com.jakewharton.rxbinding.view.RxView;
-import com.jakewharton.rxbinding.view.ViewClickEvent;
-
-import org.opensilk.common.core.rx.SimpleObserver;
 import org.opensilk.common.ui.recycler.DragSwipeViewHolder;
+import org.opensilk.common.ui.recycler.ItemClickSupport;
 import org.opensilk.common.ui.recycler.RecyclerListAdapter;
 import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.common.ui.widget.LetterTileDrawable;
 import org.opensilk.music.R;
+import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.PaletteObserver;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.model.Album;
@@ -47,37 +44,51 @@ import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
-import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.model.TrackList;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.ui.widget.GridTileDescription;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.Optional;
-import rx.Observer;
-import rx.Subscription;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 /**
  * Created by drew on 10/20/14.
  */
-public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, BundleableRecyclerAdapter.ViewHolder> {
+public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, BundleableRecyclerAdapter.ViewHolder>
+        implements ItemClickSupport.OnItemClickListener, ItemClickSupport.OnItemLongClickListener {
+
+    public interface OnSelectionModeEnded {
+        void onEndSelectionMode();
+    }
 
     final BundleablePresenter presenter;
+    //todo clear when dataset changes
+    final SparseBooleanArray selectedItems = new SparseBooleanArray();
+    private boolean inSelectionMode;
+    private final OnSelectionModeEnded selectionEndedListener = new OnSelectionModeEnded() {
+        @Override
+        public void onEndSelectionMode() {
+            for (int ii=0; ii<getItemCount(); ii++) {
+                if (selectedItems.get(ii)) {
+                    selectedItems.put(ii, false);
+                    notifyItemChanged(ii);
+                }
+            }
+            selectedItems.clear();
+            inSelectionMode = false;
+        }
+    };
 
     boolean gridStyle;
     boolean dragableList;
-
-    final Map<View, SubCont> itemClickSubscriptions = new WeakHashMap<>();
-    final Map<View, SubCont> overflowClickSubscriptions = new WeakHashMap<>();
 
     @Inject
     public BundleableRecyclerAdapter(
@@ -88,12 +99,25 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
     }
 
     @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        ItemClickSupport.addTo(recyclerView)
+                .setOnItemClickListener(this)
+                .setOnItemLongClickListener(this);
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
+        ItemClickSupport.removeFrom(recyclerView);
+    }
+
+    @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new ViewHolder(inflate(parent, viewType));
     }
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
+        viewHolder.reset();
         final Bundleable b = getItem(position);
         if (b instanceof Album) {
             bindAlbum(viewHolder, (Album) b);
@@ -112,10 +136,9 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         } else {
             Timber.e("Somehow an invalid Bundleable slipped through.");
         }
-        itemClickSubscriptions.put(viewHolder.itemView,
-                SubCont.ni(position, RxView.clickEvents(viewHolder.itemView).subscribe(itemClickObserver)));
-        overflowClickSubscriptions.put(viewHolder.overflow,
-                SubCont.ni(position, RxView.clickEvents(viewHolder.overflow).subscribe(overflowClickObserver)));
+        if (inSelectionMode && selectedItems.get(position)) {
+            viewHolder.onItemSelected();
+        }
     }
 
     void bindAlbum(ViewHolder holder, Album album) {
@@ -233,22 +256,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
 
     @Override
     public void onViewRecycled(ViewHolder holder) {
-        SubCont c = itemClickSubscriptions.remove(holder.itemView);
-        if (c != null) {
-            c.sub.unsubscribe();
-        }
-        c = overflowClickSubscriptions.remove(holder.overflow);
-        if (c != null) {
-            c.sub.unsubscribe();
-        }
         holder.reset();
-    }
-
-    @Override
-    public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
-        super.onDetachedFromRecyclerView(recyclerView);
-        itemClickSubscriptions.clear();
-        overflowClickSubscriptions.clear();
     }
 
     @Override
@@ -301,54 +309,46 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         UtilsCommon.loadMultiArtwork(requestor, cs, artwork, artwork2, artwork3, artwork4, artInfos, artworkType);
     }
 
-    final Observer<ViewClickEvent> itemClickObserver = new SimpleObserver<ViewClickEvent>() {
-        @Override
-        public void onNext(ViewClickEvent onClickEvent) {
-            SubCont c = itemClickSubscriptions.get(onClickEvent.view());
-            if (c != null) {
-                Context context = onClickEvent.view().getContext();
-                presenter.onItemClicked(context, getItem(c.pos));
+    @Override
+    public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+        if (inSelectionMode) {
+            boolean selected = selectedItems.get(position);
+            if (selected) {
+                selectedItems.put(position, false);
+                presenter.onItemUnselected();
+                notifyItemChanged(position);
+            } else {
+                selectedItems.put(position, true);
+                presenter.onItemSelected();
+                notifyItemChanged(position);
+            }
+        } else {
+            ViewHolder holder = (ViewHolder) recyclerView.getChildViewHolder(v);
+            presenter.onItemClicked(holder, getItem(position));
+        }
+    }
+
+    @Override
+    public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
+        if (inSelectionMode) {
+            return false;
+        } else {
+            selectedItems.put(position, true);
+            inSelectionMode = true;
+            presenter.onStartSelectionMode(selectionEndedListener);
+            notifyItemChanged(position);
+            return true;
+        }
+    }
+
+    public List<Bundleable> getSelectedItems() {
+        List<Bundleable> lst = new ArrayList<>();
+        for (int ii=0; ii<getItemCount(); ii++) {
+            if (selectedItems.get(ii)) {
+                lst.add(getItem(ii));
             }
         }
-    };
-
-    final Observer<ViewClickEvent> overflowClickObserver = new SimpleObserver<ViewClickEvent>() {
-        @Override
-        public void onNext(ViewClickEvent onClickEvent) {
-            SubCont c = overflowClickSubscriptions.get(onClickEvent.view());
-            if (c != null) {
-                final Context context = onClickEvent.view().getContext();
-                final Bundleable bundleable = getItem(c.pos);
-                PopupMenu m = new PopupMenu(context, onClickEvent.view());
-                presenter.onOverflowClicked(context, m, bundleable);
-                m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        try {
-                            OverflowAction action = OverflowAction.valueOf(item.getItemId());
-                            return presenter.onOverflowActionClicked(context, action, bundleable);
-                        } catch (IllegalArgumentException e) {
-                            return false;
-                        }
-                    }
-                });
-                m.show();
-            }
-        }
-    };
-
-    public static class SubCont {
-        final int pos;
-        final Subscription sub;
-
-        public SubCont(int pos, Subscription sub) {
-            this.pos = pos;
-            this.sub = sub;
-        }
-
-        public static SubCont ni(int pos, Subscription sub) {
-            return new SubCont(pos, sub);
-        }
+        return lst;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements DragSwipeViewHolder {
@@ -360,7 +360,6 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         @InjectView(R.id.tile_title) TextView title;
         @InjectView(R.id.tile_subtitle) TextView subtitle;
         @InjectView(R.id.tile_info) @Optional TextView extraInfo;
-        @InjectView(R.id.tile_overflow) ImageButton overflow;
         @InjectView(R.id.drag_handle) @Optional View dragHandle;
 
         final CompositeSubscription subscriptions;
@@ -380,16 +379,35 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
             if (artwork4 != null) artwork4.setImageBitmap(null);
             if (descriptionContainer != null) descriptionContainer.resetBackground();
             if (extraInfo != null && extraInfo.getVisibility() != View.GONE) extraInfo.setVisibility(View.GONE);
+            unselectedBackground = null;
+            itemView.setBackground(null);
         }
+
+        Drawable unselectedBackground;
 
         @Override
         public void onItemSelected() {
-
+            itemView.setElevation(23);
+            itemView.setSelected(true);
+            if (descriptionContainer != null) {
+                unselectedBackground = descriptionContainer.getBackground();
+                descriptionContainer.setBackgroundColor(Color.BLUE);
+            } else {
+                unselectedBackground = itemView.getBackground();
+                itemView.setBackgroundColor(Color.BLUE);
+            }
         }
 
         @Override
         public void onItemClear() {
-
+            itemView.setElevation(0);
+            itemView.setSelected(false);
+            if (descriptionContainer != null) {
+                descriptionContainer.setBackground(unselectedBackground);
+            } else {
+                itemView.setBackground(unselectedBackground);
+            }
+            unselectedBackground = null;
         }
 
         @Override

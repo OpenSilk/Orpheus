@@ -99,4 +99,5 @@ public class BundleableRecyclerView extends RecyclerListFrame implements Bundlea
     public BundleablePresenter getPresenter() {
         return mPresenter;
     }
+
 }

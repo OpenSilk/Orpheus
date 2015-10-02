@@ -19,8 +19,6 @@ package org.opensilk.music.ui3.common;
 
 import android.content.Context;
 
-import org.opensilk.common.ui.recycler.RecyclerListAdapter;
-
 /**
  * Created by drew on 9/3/15.
  */
