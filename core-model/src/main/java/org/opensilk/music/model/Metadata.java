@@ -107,11 +107,11 @@ public class Metadata implements Parcelable {
     /**
      * Int: track count in {@link Container}
      */
-    public static final String KEY_CHILD_TRACKS_COUNT = "orpheus.child.track.count";
+    public static final String KEY_CHILD_TRACKS_COUNT = "orpheus.child.tracks.count";
     /**
      * Int: album count in {@link Container}
      */
-    public static final String KEY_CHILD_ALBUMS_COUNT = "orpheus.child.album.count";
+    public static final String KEY_CHILD_ALBUMS_COUNT = "orpheus.child.albums.count";
     /**
      * Int: children of type {@link Container} or {@link Item} in this {@link Container}
      */
@@ -157,7 +157,7 @@ public class Metadata implements Parcelable {
     /**
      * String: TODO still unsure if this should be used
      */
-    public static final String KEY_SORT_NAME = "orpheus.display.name";
+    public static final String KEY_SORT_NAME = "orpheus.sort.name";
     /**
      * Long: Bitmask of action flags in LibraryConfig
      */
@@ -173,11 +173,11 @@ public class Metadata implements Parcelable {
     /**
      * String: bio/long deescription of artist
      */
-    public static final String KEY_ARTIST_BIO = "orpheus.artist.mbid";
+    public static final String KEY_ARTIST_BIO = "orpheus.artist.bio";
     /**
      * String: brief summary of artist
      */
-    public static final String KEY_ARTIST_SUMMARY = "orpheus.artist.mbid";
+    public static final String KEY_ARTIST_SUMMARY = "orpheus.artist.summary";
     /**
      * Uri: (http) link to last.fm page
      */
@@ -189,11 +189,11 @@ public class Metadata implements Parcelable {
     /**
      * String: bio/long deescription of artist
      */
-    public static final String KEY_ALBUM_BIO = "orpheus.album.mbid";
+    public static final String KEY_ALBUM_BIO = "orpheus.album.bio";
     /**
      * String: brief summary of artist
      */
-    public static final String KEY_ALBUM_SUMMARY = "orpheus.album.mbid";
+    public static final String KEY_ALBUM_SUMMARY = "orpheus.album.summary";
     /**
      * Uri: (http) link to last.fm page
      */
