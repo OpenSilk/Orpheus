@@ -32,7 +32,7 @@ import javax.inject.Singleton;
 @Singleton
 public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
-    public static final int DB_VERSION = 27;
+    public static final int DB_VERSION = 29;
     public static final String DB_NAME = "music.db";
 
     @Inject
@@ -250,6 +250,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "COUNT(DISTINCT t1.artist_id) as number_of_artists " +
                     "FROM genre_meta g1 " +
                     "LEFT OUTER JOIN track_meta t1 ON g1._id = t1.genre_id " +
+                    "GROUP BY g1._id" +
                     ";");
 
             db.execSQL("CREATE VIEW IF NOT EXISTS track_parent_map as SELECT " +
