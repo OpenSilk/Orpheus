@@ -54,4 +54,8 @@ dependencies {
     compile (group: 'com.jakewharton', name: 'butterknife', version: rootProject.ext.butterKnifeVersion)
     compile 'com.jakewharton.rxbinding:rxbinding:0.2.0'
     compile project(':common-core')
+
+    testCompile (group:"junit", name:"junit", version: rootProject.ext.testJunitVersion)
+    testCompile (group:"org.assertj", name:"assertj-core", version: rootProject.ext.testAssertJVersion)
+    testCompile (group:"org.robolectric", name:"robolectric", version : rootProject.ext.testRobolectricVersion)
 }

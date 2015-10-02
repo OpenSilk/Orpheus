@@ -26,6 +26,7 @@ import android.graphics.Paint.Align;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import junit.framework.Assert;
@@ -54,6 +55,7 @@ public class LetterTileDrawable extends Drawable {
     private static final char[] sFirstChar = new char[1];
 
     private String mIdentifier;
+    private char mDrawableChar;
     private float mScale = 1.0f;
     private float mOffset = 0.0f;
     private boolean mIsCircle = true;
@@ -127,9 +129,9 @@ public class LetterTileDrawable extends Drawable {
         }
 
         // Draw letter/digit only if the first character is an english letter
-        if (!TextUtils.isEmpty(mIdentifier) && isEnglishLetter(mIdentifier.charAt(0))) {
+        if (!TextUtils.isEmpty(mIdentifier) && isEnglishLetter(mDrawableChar)) {
             // Draw letter or digit.
-            sFirstChar[0] = Character.toUpperCase(mIdentifier.charAt(0));
+            sFirstChar[0] = Character.toUpperCase(mDrawableChar);
 
             // Scale text by canvas bounds and user selected scaling factor
             sPaint.setTextSize(mScale * sLetterToTileRatio * minDimension);
@@ -161,18 +163,36 @@ public class LetterTileDrawable extends Drawable {
         if (TextUtils.isEmpty(identifier)) {
             return sDefaultColor;
         }
-        int idx = 0;
-        while (!isEnglishLetter(identifier.charAt(idx))) {
-            if (++idx == identifier.length()) {
-                return sDefaultColor;
-            }
+        if (!isEnglishLetter(mDrawableChar)) {
+            return sDefaultColor;
         }
-        final int color = Math.abs(identifier.charAt(idx)) % sColors.length();
+        final int color = Math.abs(mDrawableChar) % sColors.length();
         return sColors.getColor(color, sDefaultColor);
     }
 
+    //visible for testing
+    static char findFirstUsableCharacter(final @NonNull String identifier) {
+        int idx = 0;
+        while (!isEnglishLetter(identifier.charAt(idx))) {
+            if (++idx == identifier.length()) {
+                return '@';
+            }
+        }
+        if (idx == 0 && identifier.length() > 1
+                && identifier.charAt(0) == '0' && isDigit(identifier.charAt(1))) {
+            //for numbered files eg 001 File.txt we want to continue looping
+            //until we find a non zero digit unless we run out of numbers
+            return findFirstUsableCharacter(identifier.substring(1));
+        }
+        return identifier.charAt(idx);
+    }
+
+    private static boolean isDigit(final char c) {
+        return ('0' <= c && c <= '9');
+    }
+
     private static boolean isEnglishLetter(final char c) {
-        return ('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z');
+        return ('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z') || isDigit(c);
     }
 
     @Override
@@ -218,7 +238,12 @@ public class LetterTileDrawable extends Drawable {
     }
 
     public LetterTileDrawable setText(final String identifier) {
-        mIdentifier = identifier;
+        mIdentifier = null;
+        mDrawableChar = 0;
+        if (!TextUtils.isEmpty(identifier)) {
+            mIdentifier = identifier;
+            mDrawableChar = findFirstUsableCharacter(identifier);
+        }
         return this;
     }
 
