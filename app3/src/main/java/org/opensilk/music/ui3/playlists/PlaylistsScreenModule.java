@@ -30,7 +30,6 @@ import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.model.sort.PlaylistSortOrder;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.ui3.common.ActionBarMenuBaseHandler;
-import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
 import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
@@ -97,8 +96,7 @@ public class PlaylistsScreenModule {
 
     @Provides @ScreenScope
     public ActionBarMenuConfig provideMenuConfig(
-            AppPreferences appPreferences,
-            ActionBarMenuConfigWrapper wrapper
+            AppPreferences appPreferences
     ) {
 
         Func2<Context, Integer, Boolean> handler = new ActionBarMenuBaseHandler(
@@ -135,10 +133,10 @@ public class PlaylistsScreenModule {
             }
         };
 
-        return wrapper.injectCommonItems(ActionBarMenuConfig.builder()
+        return ActionBarMenuConfig.builder()
                 .withMenu(R.menu.playlist_sort_by)
                 .withMenu(R.menu.view_as)
                 .setActionHandler(handler)
-                .build());
+                .build();
     }
 }

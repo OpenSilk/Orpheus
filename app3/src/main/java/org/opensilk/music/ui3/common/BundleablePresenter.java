@@ -318,7 +318,7 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
         @Override
         @DebugLog
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            return overflowClickListener != null;
+            return true;
         }
 
         @Override
