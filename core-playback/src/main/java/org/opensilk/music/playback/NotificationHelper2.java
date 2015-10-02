@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Icon;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
@@ -425,7 +426,11 @@ public class NotificationHelper2 extends BroadcastReceiver {
     }
 
     private int getPlayPauseIcon(boolean isPlaying) {
-        return isPlaying ? R.drawable.ic_pause_white_36dp : R.drawable.ic_play_arrow_white_36dp;
+        if (VersionUtils.hasApi21()) {
+            return isPlaying ? R.drawable.ic_pause_black_vector_36dp : R.drawable.ic_play_arrow_black_vector_36dp;
+        } else {
+            return isPlaying ? R.drawable.ic_pause_white_36dp : R.drawable.ic_play_arrow_white_36dp;
+        }
     }
 
 }

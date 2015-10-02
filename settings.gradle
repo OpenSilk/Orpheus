@@ -4,7 +4,7 @@
 
 include ':app3'
 include ':common-core', ':common-ui', ':common-bundleable'
-include ':core-model', ':core-library', ':core-loader', ':core-artwork'
+include ':core-model', ':core-library', ':core-loader', ':core-artwork', ':core-res-drawables'
 include ':core-playback', ':core-translations', ':core-index', ':core-lastfm', ':core-volley'
 include ':library-mediastore', ':library-upnp'
 //include ':plugin-common', ':plugin-upnp', ':plugin-drive'
