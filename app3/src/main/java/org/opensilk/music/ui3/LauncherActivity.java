@@ -34,6 +34,7 @@ import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.settings.SettingsActivity;
+import org.opensilk.music.ui.theme.OrpheusTheme;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
 import org.opensilk.music.ui3.index.GalleryScreenFragment;
 import org.opensilk.music.ui3.library.LibraryScreenFragment;
@@ -81,7 +82,9 @@ public class LauncherActivity extends MusicActivity {
 
     @Override
     protected void themeActivity(AppPreferences preferences) {
-
+        boolean darkTheme = preferences.isDarkTheme();
+        OrpheusTheme theme = preferences.getTheme();
+        setTheme(darkTheme ? theme.dark : theme.light);
     }
 
     @Override
