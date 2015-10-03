@@ -54,8 +54,8 @@ public class GridTileDescription extends LinearLayout {
             @Override
             public void onNext(PaletteResponse paletteResponse) {
                 Palette palette = paletteResponse.palette;
-                Palette.Swatch swatch = lightTheme ? palette.getLightMutedSwatch() : palette.getDarkMutedSwatch();
-                if (swatch == null) swatch = palette.getMutedSwatch();
+                Palette.Swatch swatch = lightTheme ? palette.getLightVibrantSwatch() : palette.getDarkVibrantSwatch();
+                if (swatch == null) swatch = palette.getVibrantSwatch();
                 if (swatch != null) {
                     if (paletteResponse.shouldAnimate) {
                         originalBackground = getBackground();
