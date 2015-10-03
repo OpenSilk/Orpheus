@@ -99,8 +99,8 @@ public class FoldersScreenModule {
         return new ItemClickListener() {
             @Override
             public void onItemClicked(BundleablePresenter presenter, Context context, Bundleable item) {
-                if (item instanceof Folder) {
-                    FoldersScreenFragment f = FoldersScreenFragment.ni(context, screen.libraryConfig, (Folder)item);
+                if (item instanceof Container) {
+                    FoldersScreenFragment f = FoldersScreenFragment.ni(context, screen.libraryConfig, (Container)item);
                     presenter.getFm().replaceMainContent(f, true);
                 } else if (item instanceof Track) {
                     delegate.playAllItems(context, presenter.getItems(), item);

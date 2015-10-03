@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2015 OpenSilk Productions LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<animated-selector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:constantSize="true">
+
+    <item
+        android:drawable="@drawable/ic_repeat_one_black_vector_36dp"
+        android:state_last="true"
+        android:id="@+id/repeat_one_state" />
+    <item
+        android:drawable="@drawable/ic_repeat_on_black_vector_36dp"
+        android:state_middle="true"
+        android:id="@+id/repeat_on_state" />
+    <item
+        android:drawable="@drawable/ic_repeat_off_black_vector_36dp"
+        android:id="@+id/repeat_off_state" />
+
+    <!--
+        Leaving these for reference
+        I could not get them to work on my moto e. The parser would only accept one transition
+        These are now added manually at runtime.
+    -->
+
+    <!--<transition android:fromId="@id/repeat_one_state" android:toId="@id/repeat_off_state" android:reversible="true">-->
+        <!--<animated-vector android:drawable="@drawable/ic_repeat_one_black_vector_36dp">-->
+            <!--<target android:name="d" android:animation="@anim/repeat_one_off" />-->
+        <!--</animated-vector>-->
+    <!--</transition>-->
+    <!--<transition android:fromId="@id/repeat_on_state" android:toId="@id/repeat_one_state" android:reversible="true">-->
+        <!--<animated-vector android:drawable="@drawable/ic_repeat_on_black_vector_36dp">-->
+            <!--<target android:name="d" android:animation="@anim/repeat_on_one" />-->
+        <!--</animated-vector>-->
+    <!--</transition>-->
+    <!--<transition android:fromId="@+id/repeat_off_state" android:toId="@+id/repeat_on_state" android:reversible="true">-->
+        <!--<animated-vector android:drawable="@drawable/ic_repeat_off_black_vector_36dp">-->
+            <!--<target android:name="d" android:animation="@anim/repeat_off_on" />-->
+        <!--</animated-vector>-->
+    <!--</transition>-->
+    <!--<transition android:fromId="@id/repeat_off_state" android:toId="@id/repeat_one_state" android:reversible="true">-->
+        <!--<animated-vector android:drawable="@drawable/ic_repeat_off_black_vector_36dp">-->
+            <!--<target android:name="d" android:animation="@anim/repeat_off_one" />-->
+        <!--</animated-vector>-->
+    <!--</transition>-->
+</animated-selector>

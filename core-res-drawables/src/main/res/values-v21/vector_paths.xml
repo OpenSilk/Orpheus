@@ -17,9 +17,21 @@
   -->
 
 <resources>
-    <string name="close_path">M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z</string>
-    <string name="pause_path">M14,19.14H18V5.14H14M6,19.14H10V5.14H6V19.14Z</string>
-    <string name="play_arrow_path">M8,5.14V19.14L19,12.14L8,5.14Z</string>
-    <string name="skip_next_path">M16,18.14H18V6.14H16M6,18.14L14.5,12.14L6,6.14V18.14Z</string>
-    <string name="skip_previous_path">M6,18.14V6.14H8V18.14H6M9.5,12.14L18,6.14V18.14L9.5,12.14Z</string>
+    <string name="close_vector_path">M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z</string>
+    <!--<string name="pause_path">M14,19.14H18V5.14H14M6,19.14H10V5.14H6V19.14Z</string>-->
+    <!--<string name="play_arrow_path">M8,5.14V19.14L19,12.14L8,5.14Z</string>-->
+    <string name="pause_vector_path">M12,10L20,10L20,38L12,38ZM28,10L36,10L36,38L28,38Z</string>
+    <string name="play_vector_path">M16,24L38,24L27.3,30.8L16,38ZM16,10L27.3,17.2L38,24L16,24Z</string>
+    <string name="skip_next_vector_path">M16,18.14H18V6.14H16M6,18.14L14.5,12.14L6,6.14V18.14Z</string>
+    <string name="skip_previous_vector_path">M6,18.14V6.14H8V18.14H6M9.5,12.14L18,6.14V18.14L9.5,12.14Z</string>
+    <string name="repeat_off_vector_path">M2,5.27L3.28,4L20,20.72L18.73,22L15.73,19H7V22L3,18L7,14V17H13.73L7,10.27V11H5V8.27L2,5.27M17,13H19V17.18L17,15.18V13M17,5V2L21,6L17,10V7H8.82L6.82,5H17Z</string>
+    <string name="repeat_off_vector_path_aligned_on" >M 2.0,5.27 L 3.28,4.0 L 20.0,20.72 L 18.73,22.0 L 15.73,19.0 H 7.0 V 22.0 L 3.0,18.0 L 7.0,14.0 V 17.0 H 13.73 L 7.0,10.27 V 11.0 H 5.0 V 8.27 L 2.0,5.27 M 17.0,13.0 H 19.0 V 17.18 L 17.0,15.18 V 13.0 M 17.0,5.0 V 2.0 L 21.0,6.0 L 17.0,10.0 V 7.0 H 8.82 L 6.82,5.0 V 5.0 H 17.0 V 5.0 L 17.0,5.0</string>
+    <string name="repeat_off_vector_path_aligned_one">M 2.0,5.27 L 3.28,4.0 L 20.0,20.72 L 18.73,22.0 L 15.73,19.0 H 7.0 V 22.0 L 3.0,18.0 L 7.0,14.0 V 17.0 H 13.73 L 7.0,10.27 V 11.0 H 5.0 V 8.27 L 2.0,5.27 M 17.0,13.0 H 19.0 V 17.18 L 19.0,17.18 L 17.0,15.18 V 15.18 H 17.0 V 13.0 H 17.0 M 17.0,5.0 H 17.0 V 2.0 L 21.0,6.0 L 17.0,10.0 V 7.0 H 8.82 V 7.0 L 6.82,5.0 H 17.0 V 5.0 L 17.0,5.0</string>
+    <string name="repeat_on_vector_path">M17,17H7V14L3,18L7,22V19H19V13H17M7,7H17V10L21,6L17,2V5H5V11H7V7Z</string>
+    <string name="repeat_on_vector_path_aligned_off">M 17.0,17.0 L 17.0,17.0 L 17.0,17.0 L 17.0,17.0 L 17.0,17.0 H 7.0 V 14.0 L 3.0,18.0 L 7.0,22.0 V 19.0 H 19.0 L 19.0,19.0 V 13.0 H 17.0 V 13.0 L 17.0,13.0 M 7.0,7.0 H 17.0 V 7.0 L 17.0,7.0 V 7.0 M 17.0,7.0 V 10.0 L 21.0,6.0 L 17.0,2.0 V 5.0 H 5.0 L 5.0,5.0 V 11.0 H 7.0 V 7.0 L 7.0,7.0</string>
+    <string name="repeat_on_vector_path_aligned_one">M 0.0,0.0 V 0.0 H 0.0 L 0.0,0.0 V 0.0 H 0.0 V 0.0 M 17.0,17.0 H 7.0 V 14.0 L 3.0,18.0 L 7.0,22.0 V 19.0 H 19.0 V 13.0 H 17.0 M 7.0,7.0 H 17.0 V 10.0 L 21.0,6.0 L 17.0,2.0 V 5.0 H 5.0 V 11.0 H 7.0 V 7.0 L 7.0,7.0</string>
+    <string name="repeat_one_vector_path">M13,15V9H12L10,10V11H11.5V15M17,17H7V14L3,18L7,22V19H19V13H17M7,7H17V10L21,6L17,2V5H5V11H7V7Z</string>
+    <string name="repeat_one_vector_path_aligned_on">M 13.0,15.0 V 9.0 H 12.0 L 10.0,10.0 V 11.0 H 11.5 V 15.0 M 17.0,17.0 H 7.0 V 14.0 L 3.0,18.0 L 7.0,22.0 V 19.0 H 19.0 V 13.0 H 17.0 M 7.0,7.0 H 17.0 V 10.0 L 21.0,6.0 L 17.0,2.0 V 5.0 H 5.0 V 11.0 H 7.0 V 7.0 L 7.0,7.0</string>
+    <string name="repeat_one_vector_path_aligned_off">M 13.0,15.0 L 13.0,15.0 L 13.0,15.0 L 13.0,15.0 L 13.0,15.0 H 13.0 V 15.0 L 13.0,15.0 L 13.0,15.0 V 9.0 H 12.0 L 10.0,10.0 V 11.0 H 11.5 V 15.0 L 11.5,15.0 M 17.0,17.0 H 7.0 V 14.0 L 3.0,18.0 L 7.0,22.0 V 19.0 H 19.0 V 13.0 H 17.0 M 7.0,7.0 H 17.0 V 10.0 L 21.0,6.0 L 17.0,2.0 V 5.0 H 5.0 V 11.0 L 5.0,11.0 H 7.0 V 7.0 L 7.0,7.0</string>
+    <string name="shuffle_vector_path">M14.83,13.41L13.42,14.82L16.55,17.95L14.5,20H20V14.5L17.96,16.54L14.83,13.41M14.5,4L16.54,6.04L4,18.59L5.41,20L17.96,7.46L20,9.5V4M10.59,9.17L5.41,4L4,5.41L9.17,10.58L10.59,9.17Z</string>
 </resources>

@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Icon;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
@@ -39,14 +38,11 @@ import android.widget.RemoteViews;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.artwork.service.ArtworkProviderHelper;
-import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.playback.service.PlaybackService;
 
 import javax.inject.Inject;
 
-import rx.Scheduler;
 import rx.Subscription;
-import rx.android.schedulers.HandlerScheduler;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import timber.log.Timber;
@@ -427,7 +423,7 @@ public class NotificationHelper2 extends BroadcastReceiver {
 
     private int getPlayPauseIcon(boolean isPlaying) {
         if (VersionUtils.hasApi21()) {
-            return isPlaying ? R.drawable.ic_pause_black_vector_36dp : R.drawable.ic_play_arrow_black_vector_36dp;
+            return isPlaying ? R.drawable.ic_pause_black_vector_36dp : R.drawable.ic_play_black_vector_36dp;
         } else {
             return isPlaying ? R.drawable.ic_pause_white_36dp : R.drawable.ic_play_arrow_white_36dp;
         }

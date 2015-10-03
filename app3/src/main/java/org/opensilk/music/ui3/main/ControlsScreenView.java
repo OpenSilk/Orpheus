@@ -18,29 +18,29 @@
 package org.opensilk.music.ui3.main;
 
 import android.content.Context;
+import android.graphics.drawable.AnimatedStateListDrawable;
+import android.graphics.drawable.AnimatedVectorDrawable;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.jakewharton.rxbinding.view.RxView;
 import com.jakewharton.rxbinding.view.ViewClickEvent;
-import com.triggertrap.seekarc.SeekArc;
 
 import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.common.ui.widget.CompatSeekBar;
+import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.common.ui.widget.ImageButtonCheckable;
+import org.opensilk.common.ui.widget.ImageButtonTriState;
 import org.opensilk.music.R;
-import org.opensilk.music.artwork.PaletteObserver;
+import org.opensilk.music.playback.PlaybackConstants;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import butterknife.Optional;
+import hugo.weaving.DebugLog;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 
@@ -56,11 +56,11 @@ public class ControlsScreenView extends RelativeLayout {
     @InjectView(R.id.now_playing_seekprogress) CircularSeekBar seekBar;
     @InjectView(R.id.now_playing_current_time) TextView currentTime;
     @InjectView(R.id.now_playing_total_time) TextView totalTime;
-    @InjectView(R.id.now_playing_shuffle) ImageButton shuffle;
+    @InjectView(R.id.now_playing_shuffle) ImageButtonCheckable shuffle;
     @InjectView(R.id.now_playing_previous) ImageButton prev;
     @InjectView(R.id.now_playing_play) ImageButtonCheckable play;
     @InjectView(R.id.now_playing_next) ImageButton next;
-    @InjectView(R.id.now_playing_repeat) ImageButton repeat;
+    @InjectView(R.id.now_playing_repeat) ImageButtonTriState repeat;
 
     CompositeSubscription clicks;
 
@@ -121,12 +121,13 @@ public class ControlsScreenView extends RelativeLayout {
         }
     }
 
+    @DebugLog
     public void setRepeatLevel(int mode) {
-        repeat.setImageLevel(mode);
+        repeat.setState(mode);
     }
 
     public void setShuffleLevel(int mode) {
-        shuffle.setImageLevel(mode);
+        shuffle.setChecked(mode == PlaybackConstants.SHUFFLE_NORMAL);
     }
 
     void setup() {
@@ -146,6 +147,18 @@ public class ControlsScreenView extends RelativeLayout {
                 mPresenter.onStartTrackingTouch();
             }
         });
+        if (VersionUtils.hasApi21()) {
+            //add state transitions
+            AnimatedStateListDrawable repeatDrawable = (AnimatedStateListDrawable) repeat.getDrawable();
+            repeatDrawable.addTransition(R.id.repeat_off_state, R.id.repeat_on_state, (AnimatedVectorDrawable)
+                    ContextCompat.getDrawable(getContext(), R.drawable.ic_repeat_off_on_black_animated_36dp), true);
+            repeatDrawable.addTransition(R.id.repeat_on_state, R.id.repeat_one_state, (AnimatedVectorDrawable)
+                    ContextCompat.getDrawable(getContext(), R.drawable.ic_repeat_on_one_black_animated_36dp), true);
+            repeatDrawable.addTransition(R.id.repeat_one_state, R.id.repeat_off_state, (AnimatedVectorDrawable)
+                    ContextCompat.getDrawable(getContext(), R.drawable.ic_repeat_one_off_black_animated_36dp), true);
+            repeatDrawable.addTransition(R.id.repeat_off_state, R.id.repeat_one_state, (AnimatedVectorDrawable)
+                    ContextCompat.getDrawable(getContext(), R.drawable.ic_repeat_off_one_black_animated_36dp), true);
+        }
     }
 
     void subscribeClicks() {

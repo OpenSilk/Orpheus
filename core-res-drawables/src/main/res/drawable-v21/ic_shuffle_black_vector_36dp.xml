@@ -5,5 +5,8 @@
     android:width="36dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
-<path android:fillColor="@color/black" android:pathData="@string/skip_previous_vector_path" />
-</vector>
+    <group android:name="g">
+        <path android:fillColor="@color/black"
+            android:pathData="@string/shuffle_vector_path" />
+    </group>
+    </vector>

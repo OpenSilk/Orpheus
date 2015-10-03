@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/*
-* Copyright (C) 2014 OpenSilk Productions LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
--->
+  ~ Copyright (c) 2015 OpenSilk Productions LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
 <resources>
 
     <style name="Orpheus">
@@ -207,7 +206,7 @@
     </style>
 
     <style name="nowPlayingActionLight.Next">
-        <item name="android:src">@drawable/ic_skip_next_black_36dp</item>
+        <item name="android:src">@drawable/ic_skip_next_black_vector_36dp</item>
         <item name="android:contentDescription">@string/accessibility_next</item>
     </style>
 
@@ -217,7 +216,7 @@
     </style>
 
     <style name="nowPlayingActionLight.Prev">
-        <item name="android:src">@drawable/ic_skip_previous_black_36dp</item>
+        <item name="android:src">@drawable/ic_skip_previous_black_vector_36dp</item>
         <item name="android:contentDescription">@string/accessibility_prev</item>
     </style>
 
@@ -322,4 +321,72 @@
     </style>
 
     <!-- end footer buttons -->
+
+    <!-- drawer controls -->
+
+    <!--also in values-21-->
+    <style name="drawerControlsActionDark">
+        <item name="android:scaleType">centerInside</item>
+        <item name="android:padding">@dimen/now_playing_button_padding</item>
+        <item name="android:background">?android:selectableItemBackground</item>
+    </style>
+
+    <!--also in values-21-->
+    <style name="drawerControlsActionLight">
+        <item name="android:scaleType">centerInside</item>
+        <item name="android:padding">@dimen/now_playing_button_padding</item>
+        <item name="android:background">?android:selectableItemBackground</item>
+    </style>
+
+    <style name="drawerControlsActionLight.Play">
+        <item name="android:src">@drawable/action_playpause_black_36dp</item>
+        <item name="android:contentDescription">@string/accessibility_play</item>
+    </style>
+
+    <style name="drawerControlsActionDark.Play">
+        <item name="android:src">@drawable/action_playpause_white_36dp</item>
+        <item name="android:contentDescription">@string/accessibility_play</item>
+    </style>
+
+    <style name="drawerControlsActionLight.Next">
+        <item name="android:src">@drawable/ic_skip_next_black_vector_36dp</item>
+        <item name="android:contentDescription">@string/accessibility_next</item>
+    </style>
+
+    <style name="drawerControlsActionDark.Next">
+        <item name="android:src">@drawable/ic_skip_next_white_36dp</item>
+        <item name="android:contentDescription">@string/accessibility_next</item>
+    </style>
+
+    <style name="drawerControlsActionLight.Prev">
+        <item name="android:src">@drawable/ic_skip_previous_black_vector_36dp</item>
+        <item name="android:contentDescription">@string/accessibility_prev</item>
+    </style>
+
+    <style name="drawerControlsActionDark.Prev">
+        <item name="android:src">@drawable/ic_skip_previous_white_36dp</item>
+        <item name="android:contentDescription">@string/accessibility_prev</item>
+    </style>
+
+    <style name="drawerControlsActionLight.Shuffle">
+        <item name="android:src">@drawable/action_shuffle_black_36dp</item>
+        <item name="android:contentDescription">@string/accessibility_shuffle</item>
+    </style>
+
+    <style name="drawerControlsActionDark.Shuffle">
+        <item name="android:src">@drawable/action_shuffle_white_36dp</item>
+        <item name="android:contentDescription">@string/accessibility_shuffle</item>
+    </style>
+
+    <style name="drawerControlsActionLight.Repeat">
+        <item name="android:src">@drawable/action_repeat_black_36dp</item>
+        <item name="android:contentDescription">@string/accessibility_repeat</item>
+    </style>
+
+    <style name="drawerControlsActionDark.Repeat">
+        <item name="android:src">@drawable/action_repeat_white_36dp</item>
+        <item name="android:contentDescription">@string/accessibility_repeat</item>
+    </style>
+
+    <!-- end drawer controls-->
 </resources>

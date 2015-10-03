@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--http://blog.neteril.org/blog/2014/11/13/transitioning-to-infinity/-->
+<!--https://materialdesignicons.com/-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:height="36dp"
     android:width="36dp"
@@ -8,6 +8,6 @@
     <group>
         <path android:name="d"
             android:fillColor="@color/black"
-            android:pathData="@string/pause_vector_path" />
+            android:pathData="@string/play_vector_path" />
     </group>
 </vector>

@@ -86,8 +86,8 @@ public class PlaybackQueue {
         int rep = mIndexClient.getLastQueueRepeatMode();
         switch (rep) {
             case PlaybackConstants.REPEAT_NONE:
-            case PlaybackConstants.REPEAT_CURRENT:
             case PlaybackConstants.REPEAT_ALL:
+            case PlaybackConstants.REPEAT_CURRENT:
                 mRepeatMode = rep;
                 break;
             default:

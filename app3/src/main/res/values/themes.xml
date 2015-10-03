@@ -40,6 +40,8 @@
         <item name="carModeNextStyle">@style/carModeActionLight.Next</item>
         <item name="carModePrevStyle">@style/carModeActionLight.Prev</item>
 
+        <item name="footerPlayStyle">@style/footerLight.Play</item>
+
         <item name="seekArcStyle">@style/SeekArcNowPlaying</item>
         <item name="windowActionModeOverlay">true</item>
 
@@ -83,6 +85,8 @@
         <item name="carModePlayStyle">@style/carModeActionDark.Play</item>
         <item name="carModeNextStyle">@style/carModeActionDark.Next</item>
         <item name="carModePrevStyle">@style/carModeActionDark.Prev</item>
+
+        <item name="footerPlayStyle">@style/footerDark.Play</item>
 
         <item name="seekArcStyle">@style/SeekArcNowPlaying</item>
         <item name="windowActionModeOverlay">true</item>

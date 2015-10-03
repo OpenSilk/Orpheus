@@ -32,6 +32,7 @@ import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.common.ui.widget.ForegroundLinearLayout;
 import org.opensilk.common.ui.widget.ForegroundRelativeLayout;
+import org.opensilk.common.ui.widget.ImageButtonCheckable;
 import org.opensilk.music.R;
 
 import javax.inject.Inject;
@@ -52,7 +53,7 @@ public class FooterPageScreenView extends LinearLayout {
     @InjectView(R.id.footer_track_title) TextView trackTitle;
     @InjectView(R.id.footer_artist_name) TextView artistName;
     @InjectView(R.id.footer_thumbnail) AnimatedImageView artworkThumbnail;
-    @InjectView(R.id.footer_playpause_btn) ImageButton mPlayPause;
+    @InjectView(R.id.footer_playpause_btn) ImageButtonCheckable mPlayPause;
 
     CompositeSubscription mSubs = new CompositeSubscription();
 
@@ -81,7 +82,7 @@ public class FooterPageScreenView extends LinearLayout {
     }
 
     void setPlaying(boolean yes) {
-        mPlayPause.setImageLevel(yes ? 1 : 0);
+        mPlayPause.setChecked(yes);
     }
 
     void subscribeClicks() {

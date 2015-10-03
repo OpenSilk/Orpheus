@@ -67,7 +67,7 @@
 
     </LinearLayout>
 
-    <ImageButton
+    <org.opensilk.common.ui.widget.ImageButtonCheckable
         android:id="@+id/footer_playpause_btn"
         android:layout_width="48dp"
         android:layout_height="48dp"
@@ -76,9 +76,7 @@
         android:layout_marginLeft="6dp"
         android:layout_marginRight="6dp"
         android:clickable="true"
-        android:src="@drawable/ic_play_arrow_white_36dp"
-        android:scaleType="centerInside"
-        android:background="?android:selectableItemBackground"
+        style="?footerPlayStyle"
         tools:tint="@color/black"/>
 
 </org.opensilk.music.ui3.main.FooterPageScreenView>

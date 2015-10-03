@@ -36,14 +36,79 @@
         <item name="android:background">?android:selectableItemBackgroundBorderless</item>
     </style>
 
+    <style name="nowPlayingActionLight.Play">
+        <item name="android:src">@drawable/ic_play_pause_black_animated_36dp</item>
+        <item name="android:contentDescription">@string/accessibility_play</item>
+    </style>
+
+    <style name="nowPlayingActionDark.Play">
+        <item name="android:src">@drawable/ic_play_pause_black_animated_36dp</item>
+        <item name="android:tint">@color/white</item>
+        <item name="android:contentDescription">@string/accessibility_play</item>
+    </style>
+
+    <style name="nowPlayingActionLight.Next">
+        <item name="android:src">@drawable/ic_skip_next_black_vector_36dp</item>
+        <item name="android:contentDescription">@string/accessibility_next</item>
+    </style>
+
+    <style name="nowPlayingActionDark.Next">
+        <item name="android:src">@drawable/ic_skip_next_black_vector_36dp</item>
+        <item name="android:tint">@color/white</item>
+        <item name="android:contentDescription">@string/accessibility_next</item>
+    </style>
+
+    <style name="nowPlayingActionLight.Prev">
+        <item name="android:src">@drawable/ic_skip_previous_black_vector_36dp</item>
+        <item name="android:contentDescription">@string/accessibility_prev</item>
+    </style>
+
+    <style name="nowPlayingActionDark.Prev">
+        <item name="android:src">@drawable/ic_skip_previous_white_36dp</item>
+        <item name="android:tint">@color/white</item>
+        <item name="android:contentDescription">@string/accessibility_prev</item>
+    </style>
+
+    <style name="nowPlayingActionLight.Shuffle">
+        <item name="android:src">@drawable/ic_shuffle_black_animated_36dp</item>
+        <item name="android:contentDescription">@string/accessibility_shuffle</item>
+    </style>
+
+    <style name="nowPlayingActionDark.Shuffle">
+        <item name="android:src">@drawable/ic_shuffle_white_animated_36dp</item>
+        <item name="android:contentDescription">@string/accessibility_shuffle</item>
+    </style>
+
+    <style name="nowPlayingActionLight.Repeat">
+        <item name="android:src">@drawable/ic_repeat_black_animated_36dp</item>
+        <item name="android:contentDescription">@string/accessibility_repeat</item>
+    </style>
+
+    <style name="nowPlayingActionDark.Repeat">
+        <item name="android:src">@drawable/ic_repeat_black_animated_36dp</item>
+        <item name="android:tint">@color/white</item>
+        <item name="android:contentDescription">@string/accessibility_repeat</item>
+    </style>
+
     <style name="footerLight">
         <item name="android:scaleType">centerInside</item>
+        <item name="android:src">@drawable/ic_play_pause_black_animated_36dp</item>
         <item name="android:background">?android:selectableItemBackgroundBorderless</item>
     </style>
 
     <style name="footerDark">
         <item name="android:scaleType">centerInside</item>
+        <item name="android:src">@drawable/ic_play_pause_black_animated_36dp</item>
+        <item name="android:tint">@color/white</item>
         <item name="android:background">?android:selectableItemBackgroundBorderless</item>
+    </style>
+
+    <style name="footerLight.Play">
+        <item name="android:contentDescription">@string/accessibility_play</item>
+    </style>
+
+    <style name="footerDark.Play">
+        <item name="android:contentDescription">@string/accessibility_play</item>
     </style>
 
 </resources>

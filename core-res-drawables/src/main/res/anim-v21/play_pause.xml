@@ -3,6 +3,6 @@
 <objectAnimator xmlns:android="http://schemas.android.com/apk/res/android"
     android:duration="250"
     android:propertyName="pathData"
-    android:valueFrom="@string/play_arrow_path"
-    android:valueTo="@string/pause_path"
+    android:valueFrom="@string/play_vector_path"
+    android:valueTo="@string/pause_vector_path"
     android:valueType="pathType" />

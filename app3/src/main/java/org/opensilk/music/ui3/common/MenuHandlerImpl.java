@@ -20,7 +20,9 @@ package org.opensilk.music.ui3.common;
 import android.content.Context;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 
+import org.opensilk.common.ui.mortar.ActionBarMenuHandler;
 import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
@@ -42,7 +44,17 @@ import java.util.Collections;
 /**
  * Created by drew on 9/24/15.
  */
-public class MenuHandlerImpl {
+public class MenuHandlerImpl implements ActionBarMenuHandler {
+
+    @Override
+    public boolean onBuildMenu(MenuInflater menuInflater, Menu menu) {
+        return false;
+    }
+
+    @Override
+    public boolean onMenuItemClicked(Context context, MenuItem menuItem) {
+        return false;
+    }
 
     public static final int[] ALBUMS = new int[]{
             R.menu.popup_play_all,

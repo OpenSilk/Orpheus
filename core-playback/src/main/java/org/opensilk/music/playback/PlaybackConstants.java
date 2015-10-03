@@ -185,15 +185,14 @@ public interface PlaybackConstants {
     int REPEAT_NONE = 0;
 
     /**
-     * Repeats the current track in a list
-     */
-    int REPEAT_CURRENT = 1;
-
-    /**
      * Repeats all the tracks in a list
      */
-    int REPEAT_ALL = 2;
+    int REPEAT_ALL = 1;
 
+    /**
+     * Repeats the current track in a list
+     */
+    int REPEAT_CURRENT = 2;
 
     /**
      * Idle time before stopping the foreground notfication (1 minute)
