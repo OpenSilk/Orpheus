@@ -46,7 +46,6 @@ import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.playback.PlaybackConstants;
 import org.opensilk.music.playback.PlaybackConstants.CMD;
 import org.opensilk.music.playback.PlaybackStateHelper;
-import org.opensilk.music.playback.service.IPlaybackService;
 import org.opensilk.music.playback.service.PlaybackService;
 
 import java.lang.ref.WeakReference;
@@ -81,7 +80,6 @@ public class PlaybackController {
 
     int mForegroundActivities = 0;
     boolean mWaitingForService = false;
-    IPlaybackService mPlaybackService;
     MediaController mMediaController;
     MediaController.TransportControls mTransportControls;
 
@@ -116,44 +114,6 @@ public class PlaybackController {
         } else if (mForegroundActivities == 0) {
             disconnect();
         }
-    }
-
-    public static boolean isActive(PlaybackStateCompat state) {
-        switch (state.getState()) {
-            case STATE_FAST_FORWARDING:
-            case STATE_REWINDING:
-            case STATE_SKIPPING_TO_PREVIOUS:
-            case STATE_SKIPPING_TO_NEXT:
-            case STATE_BUFFERING:
-            case STATE_CONNECTING:
-            case STATE_PLAYING:
-                return true;
-        }
-        return false;
-    }
-
-    public static boolean isActive(PlaybackState state) {
-        return isActive(PlaybackStateCompat.fromPlaybackState(state));
-    }
-
-    public static boolean isPlayingOrSimilar(PlaybackStateCompat state) {
-        switch (state.getState()) {
-            case STATE_FAST_FORWARDING:
-            case STATE_REWINDING:
-            case STATE_SKIPPING_TO_PREVIOUS:
-            case STATE_SKIPPING_TO_NEXT:
-            case STATE_PLAYING:
-                return true;
-        }
-        return false;
-    }
-
-    public static boolean isPlayingOrSimilar(PlaybackState state) {
-        return isPlayingOrSimilar(PlaybackStateCompat.fromPlaybackState(state));
-    }
-
-    public static boolean isPlaying(PlaybackStateCompat state) {
-        return state.getState() == STATE_PLAYING;
     }
 
     /*
@@ -340,12 +300,6 @@ public class PlaybackController {
      */
 
     public int getAudioSessionId() {
-        if (hasController()) {
-            try {
-                return mPlaybackService.getAudioSessionId();
-            } catch (RemoteException e) {
-            }
-        }
         return AudioEffect.ERROR_BAD_VALUE;
     }
 
@@ -453,7 +407,6 @@ public class PlaybackController {
     }
 
     void onDisconnect() {
-        mPlaybackService = null;
         mMediaController = null;
         mTransportControls = null;
         mWaitingForService = false;
