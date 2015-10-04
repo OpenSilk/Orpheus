@@ -31,6 +31,7 @@ import android.support.annotation.NonNull;
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.util.BundleHelper;
+import org.opensilk.music.artwork.UtilsArt;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.index.provider.Methods;
 import org.opensilk.bundleable.BundleableListSlice;
@@ -39,6 +40,7 @@ import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.loader.TypedBundleableLoader;
+import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Track;
 
@@ -74,15 +76,19 @@ public class IndexClientImpl implements IndexClient {
 
     final Context appContext;
     final Uri callUri;
+    final String artworkAuthority;
     ContentProviderClient client;
+
 
     @Inject
     public IndexClientImpl(
             @ForApplication Context appContext,
-            @Named("IndexProviderAuthority") String authority
+            @Named("IndexProviderAuthority") String authority,
+            @Named("artworkauthority") String artworkAuthority
     ) {
         this.appContext = appContext;
         callUri = IndexUris.call(authority);
+        this.artworkAuthority = artworkAuthority;
     }
 
     @Override
@@ -317,7 +323,9 @@ public class IndexClientImpl implements IndexClient {
                             .setTitle(track.getName())
                             .setSubtitle(track.getArtistName())
                             .setMediaId(track.getUri().toString())
-                                    //.setIconUri()TODO
+                            .setIconUri(UtilsArt.makeBestfitArtInfo(track.getAlbumArtistName(),
+                                    track.getArtistName(), track.getAlbumName(),
+                                    track.getArtworkUri()).asUri(artworkAuthority))
                             .build();
                     mediaDescriptions.add(description);
                 }

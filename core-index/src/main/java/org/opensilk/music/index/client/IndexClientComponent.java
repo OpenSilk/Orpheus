@@ -19,6 +19,7 @@ package org.opensilk.music.index.client;
 
 import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.common.core.dagger2.AppContextModule;
+import org.opensilk.music.artwork.shared.ArtworkAuthorityModule;
 
 import javax.inject.Singleton;
 
@@ -32,6 +33,7 @@ import dagger.Component;
         modules = {
                 AppContextModule.class,
                 IndexClientModule.class,
+                ArtworkAuthorityModule.class,
         }
 )
 public interface IndexClientComponent extends AppContextComponent {
