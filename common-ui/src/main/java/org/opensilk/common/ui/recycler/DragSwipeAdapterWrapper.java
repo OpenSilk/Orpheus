@@ -60,18 +60,19 @@ public class DragSwipeAdapterWrapper<VH extends RecyclerView.ViewHolder & DragSw
 
     @Override
     public boolean onItemMove(int fromPosition, int toPosition) {
-        if (listener != null) {
+        boolean success = wrappedAdapter.swap(fromPosition, toPosition);
+        if (success && listener != null) {
             listener.onChange();
         }
-        return wrappedAdapter.swap(fromPosition, toPosition);
+        return success;
     }
 
     @Override
     public void onItemDismiss(int position) {
-        if (listener != null) {
+        Object obj = wrappedAdapter.removeItem(position);
+        if (obj != null && listener != null) {
             listener.onChange();
         }
-        wrappedAdapter.removeItem(position);
     }
 
     @Override
