@@ -591,7 +591,12 @@ public class IndexDatabaseImpl implements IndexDatabase {
         }
         where.append(")");
 
-        return delete(IndexSchema.Containers.TABLE, where.toString(), containers);
+        int num = delete(IndexSchema.Containers.TABLE, where.toString(), containers);
+        if (num > 0) {
+            //notify everyone
+            mAppContext.getContentResolver().notifyChange(IndexUris.call(indexAuthority), null);
+        }
+        return num;
     }
 
     static final String[] findChildrenUnderCols = new String[] {
@@ -696,7 +701,11 @@ public class IndexDatabaseImpl implements IndexDatabase {
             cv.put(IndexSchema.Meta.Track.DURATION, duration);
         }
 
-        return insert(IndexSchema.Meta.Track.TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
+        long id = insert(IndexSchema.Meta.Track.TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
+        if (id > 0) {
+            mAppContext.getContentResolver().notifyChange(IndexUris.tracks(indexAuthority), null);
+        }
+        return id;
     }
 
     long insertTrack(Track track) {
@@ -836,7 +845,11 @@ public class IndexDatabaseImpl implements IndexDatabase {
             cv.put(IndexSchema.Meta.Album.ALBUM_BIO_CONTENT, bioContent);
             cv.put(IndexSchema.Meta.Album.ALBUM_BIO_DATE_MOD, lastMod > 0 ? lastMod : System.currentTimeMillis());
         }
-        return insert(IndexSchema.Meta.Album.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+        long id = insert(IndexSchema.Meta.Album.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+        if (id > 0) {
+            mAppContext.getContentResolver().notifyChange(IndexUris.albums(indexAuthority), null);
+        }
+        return id;
     }
 
     static final String checkArtistSel = IndexSchema.Info.Artist.ARTIST_KEY + "=?";
@@ -908,7 +921,11 @@ public class IndexDatabaseImpl implements IndexDatabase {
             cv.put(IndexSchema.Meta.Artist.ARTIST_BIO_CONTENT, bioContent);
             cv.put(IndexSchema.Meta.Artist.ARTIST_BIO_DATE_MOD, lastMod > 0 ? lastMod : System.currentTimeMillis());
         }
-        return insert(IndexSchema.Meta.Artist.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+        long id = insert(IndexSchema.Meta.Artist.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+        if (id > 0) {
+            mAppContext.getContentResolver().notifyChange(IndexUris.artists(indexAuthority), null);
+        }
+        return id;
     }
 
     static final String checkGenreSel = IndexSchema.Info.Genre.GENRE_KEY + "=?";
@@ -957,7 +974,11 @@ public class IndexDatabaseImpl implements IndexDatabase {
         String name = meta.getString(Metadata.KEY_GENRE_NAME);
         cv.put(IndexSchema.Meta.Genre.GENRE_NAME, name);
         cv.put(IndexSchema.Meta.Genre.GENRE_KEY, keyFor(name));
-        return insert(IndexSchema.Meta.Genre.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+        long id = insert(IndexSchema.Meta.Genre.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+        if (id > 0) {
+            mAppContext.getContentResolver().notifyChange(IndexUris.genres(indexAuthority), null);
+        }
+        return id;
     }
 
     static final String playbackSettingsSel = IndexSchema.PlaybackSettings.KEY + "=?";
