@@ -17,32 +17,26 @@
 
 package org.opensilk.music.ui3.nowplaying;
 
-import android.content.Context;
-
 import org.opensilk.common.core.dagger2.ActivityScope;
-import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.common.ui.mortar.ToolbarOwner;
-import org.opensilk.common.ui.mortar.PauseAndResumeModule;
-import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
+import org.opensilk.common.ui.mortar.DrawerController;
 import org.opensilk.music.AppComponent;
-import org.opensilk.music.AppPreferences;
-import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
-import org.opensilk.music.playback.control.PlaybackController;
+import org.opensilk.music.ui3.MusicActivityComponent;
+import org.opensilk.music.ui3.MusicActivityModule;
 
 import dagger.Component;
 import rx.functions.Func1;
 
 /**
- * Created by drew on 5/9/15.
+ * Created by drew on 10/3/15.
  */
 @ActivityScope
 @Component(
         dependencies = AppComponent.class,
         modules = {
-                PauseAndResumeModule.class,
+                MusicActivityModule.class,
         }
 )
-public interface NowPlayingActivityComponent {
+public interface NowPlayingActivityComponent extends MusicActivityComponent {
     Func1<AppComponent, NowPlayingActivityComponent> FACTORY =
             new Func1<AppComponent, NowPlayingActivityComponent>() {
                 @Override
@@ -52,10 +46,5 @@ public interface NowPlayingActivityComponent {
                             .build();
                 }
             };
-    @ForApplication Context appContext();
-    AppPreferences appPreferences();
-    ArtworkRequestManager artworkRequestor();
-    PlaybackController playbackController();
-    PauseAndResumeRegistrar pauseAndResumeRegistrar();
-    void inject(NowPlayingActivity activty);
+    void inject(NowPlayingActivity activity);
 }

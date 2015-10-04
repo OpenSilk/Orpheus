@@ -18,8 +18,10 @@
 package org.opensilk.music.ui3.nowplaying;
 
 import org.apache.commons.lang3.StringUtils;
+import org.opensilk.common.ui.recycler.DragSwipeViewHolder;
 import org.opensilk.common.ui.recycler.RecyclerListAdapter;
 import org.opensilk.common.ui.widget.AnimatedImageView;
+import org.opensilk.common.ui.widget.LetterTileDrawable;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
@@ -28,44 +30,36 @@ import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui.widget.PlayingIndicator;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Color;
+import android.net.Uri;
+import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.support.v4.media.session.MediaSessionCompat.QueueItem;
 
 import javax.inject.Inject;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 /**
  * Created by drew on 5/10/15.
  */
-public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueScreenItem, QueueScreenViewAdapter.ViewHolder> {
+public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem, QueueScreenViewAdapter.ViewHolder> {
 
     final ArtworkRequestManager requestor;
     final QueueScreenPresenter presenter;
     final PlaybackController playbackController;
 
-    String activeId;
+    long activeId = -1;
     boolean isPlaying;
-
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView title;
-        TextView subtitle;
-        AnimatedImageView artwork;
-        PlayingIndicator playingIndicator;
-
-        final CompositeSubscription subscriptions = new CompositeSubscription();
-        public ViewHolder(View itemView) {
-            super(itemView);
-        }
-        void reset() {
-            subscriptions.clear();
-        }
-    }
 
     @Inject
     public QueueScreenViewAdapter(
@@ -77,82 +71,129 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueScreenItem,
         this.requestor = requestor;
         this.presenter = presenter;
         this.playbackController = playbackController;
+        setHasStableIds(true);
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return null;
+        return new ViewHolder(inflate(parent, R.layout.gallery_list_item_dragsort));
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        QueueScreenItem item = getItem(position);
+        QueueItem item = getItem(position);
         holder.reset();
-        holder.title.setText(item.title);
-        holder.subtitle.setText(item.subtitle);
-        ArtInfo artInfo = item.artInfo;
-        if (artInfo == null || artInfo.equals(ArtInfo.NULLINSTANCE)) {
-//            setLetterTileDrawable(holder, item.title);
-        } else {
-            holder.subscriptions.add(
-                    requestor.newRequest(holder.artwork, null, artInfo, ArtworkType.THUMBNAIL));
+        MediaDescriptionCompat desc = item.getDescription();
+        holder.title.setText(desc.getTitle());
+        holder.subtitle.setText(desc.getSubtitle());
+        Uri uri = desc.getIconUri();
+        if (uri != null) {
+            ArtInfo artInfo = ArtInfo.fromUri(uri);
+            if (artInfo !=ArtInfo.NULLINSTANCE) {
+                holder.subscriptions.add(
+                        requestor.newRequest(holder.artwork, null, artInfo, ArtworkType.THUMBNAIL)
+                );
+            } else {
+                setLetterTileDrawable(holder, desc.getTitle().toString());
+            }
         }
-        if (StringUtils.equals(activeId, item.mediaId)) {
+        if (activeId == item.getQueueId()) {
             if (isPlaying) {
                 holder.playingIndicator.startAnimating();
             } else {
                 holder.playingIndicator.setVisibility(View.VISIBLE);
             }
         }
-//        holder.title.setText(item.getDescription().getTitle());
-//        holder.subtitle.setText(item.getDescription().getSubtitle());
-//        ArtInfo artInfo = BundleHelper.getParcelable(item.getDescription().getExtras());
-//        if (artInfo == null || artInfo.equals(ArtInfo.NULLINSTANCE)) {
-//            setLetterTileDrawable(holder, item.getDescription().getTitle().toString());
-//        } else {
-//            holder.subscriptions.add(
-//                    requestor.newRequest(holder.artwork, null, artInfo, ArtworkType.THUMBNAIL));
-//        }
-//        if (StringUtils.equals(activeId, item.getDescription().getMediaId())) {
-//            if (isPlaying) {
-//                holder.playingIndicator.startAnimating();
-//            } else {
-//                holder.playingIndicator.setVisibility(View.VISIBLE);
-//            }
-//        }
-//        bindClickListeners(holder, position);
+    }
+
+    void setLetterTileDrawable(ViewHolder holder, String text) {
+        Resources resources = holder.itemView.getResources();
+        LetterTileDrawable drawable = LetterTileDrawable.fromText(resources, text);
+        drawable.setIsCircular(true);
+        holder.artwork.setImageDrawable(drawable);
     }
 
     @Override
     public long getItemId(int position) {
-        QueueScreenItem item = getItem(position);
-        return item.hashCode();// item.getDescription().getMediaId().hashCode() + (31 * item.getQueueId());
+        return getItem(position).getQueueId();
     }
 
-//    @Override
-    protected void onItemRemoved(Context context, int position, QueueScreenItem item) {
-        playbackController.removeQueueItemAt(position);
+    public void setActiveItem(long newId) {
+        if (activeId != newId) {
+            int oldidx = -1;
+            int activeidx = -1;
+            for (int ii=0; ii<getItemCount(); ii++) {
+                long id = getItemId(ii);
+                if (activeId == id) {
+                    oldidx = ii;
+                } else if (newId == id) {
+                    activeidx = ii;
+                }
+                if (activeidx != -1 && oldidx != -1) {
+                    break;
+                }
+            }
+            activeId = newId;
+            notifyActive(oldidx);
+            notifyActive(activeidx);
+            Timber.v("Active item updated %d", newId);
+        }
     }
 
-    public void setActiveItem(String id) {
-        if (!StringUtils.equals(activeId, id)) {
-            activeId = id;
-            Timber.v("Active item updated %s", id);
-            notifyItemRangeChanged(0, getItemCount());
+    private void notifyActive(int idx) {
+        if (idx >= 0) {
+            notifyItemChanged(idx);
         }
     }
 
     public void setPlaying(boolean playing) {
         if (isPlaying != playing) {
             isPlaying = playing;
+            int activeidx = -1;
+            for (int ii=0; ii<getItemCount(); ii++) {
+                long id = getItemId(ii);
+                if (activeId == id) {
+                    activeidx = ii;
+                    break;
+                }
+            }
+            notifyActive(activeidx);
             Timber.v("Playing updated playing=%s", playing);
-            notifyItemRangeChanged(0, getItemCount());
         }
     }
 
-//    @Override
-    protected void onItemClicked(Context context, QueueScreenItem item) {
-        playbackController.skipToQueueItem(item.getQueueId());
+    public static class ViewHolder extends RecyclerView.ViewHolder implements DragSwipeViewHolder {
+        @InjectView(R.id.tile_title) TextView title;
+        @InjectView(R.id.tile_subtitle) TextView subtitle;
+        @InjectView(R.id.artwork_thumb) AnimatedImageView artwork;
+        @InjectView(R.id.drag_handle) View dragHandle;
+        @InjectView(R.id.playing_indicator) PlayingIndicator playingIndicator;
+        final CompositeSubscription subscriptions = new CompositeSubscription();
+        public ViewHolder(View itemView) {
+            super(itemView);
+            ButterKnife.inject(this, itemView);
+        }
+        void reset() {
+            subscriptions.clear();
+            artwork.setImageBitmap(null);
+            playingIndicator.stopAnimating();
+            playingIndicator.setVisibility(View.GONE);
+        }
+
+        @Override
+        public View getDragHandle() {
+            return dragHandle;
+        }
+
+        @Override
+        public void onItemSelected() {
+            itemView.setBackgroundColor(Color.BLUE);
+        }
+
+        @Override
+        public void onItemClear() {
+            itemView.setBackground(null);
+        }
     }
 
 }

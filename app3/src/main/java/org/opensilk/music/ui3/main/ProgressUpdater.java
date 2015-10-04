@@ -127,7 +127,7 @@ public class ProgressUpdater {
         });
     }
 
-    void unsubscribeProgress() {
+    public void unsubscribeProgress() {
         if (isSubscribed(progressSubscription)) {
             progressSubscription.unsubscribe();
             progressSubscription = null;

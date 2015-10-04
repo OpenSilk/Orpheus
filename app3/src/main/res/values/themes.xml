@@ -35,12 +35,15 @@
         <item name="nowPlayingPrevStyle">@style/nowPlayingActionLight.Prev</item>
         <item name="nowPlayingShuffleStyle">@style/nowPlayingActionLight.Shuffle</item>
         <item name="nowPlayingRepeatStyle">@style/nowPlayingActionLight.Repeat</item>
-
-        <item name="carModePlayStyle">@style/carModeActionLight.Play</item>
-        <item name="carModeNextStyle">@style/carModeActionLight.Next</item>
-        <item name="carModePrevStyle">@style/carModeActionLight.Prev</item>
+        <item name="nowPlayingCardBackground">@color/white</item>
 
         <item name="footerPlayStyle">@style/footerLight.Play</item>
+
+        <item name="controlsPlayStyle">@style/controlsActionLight.Play</item>
+        <item name="controlsNextStyle">@style/controlsActionLight.Next</item>
+        <item name="controlsPrevStyle">@style/controlsActionLight.Prev</item>
+        <item name="controlsShuffleStyle">@style/controlsActionLight.Shuffle</item>
+        <item name="controlsRepeatStyle">@style/controlsActionLight.Repeat</item>
 
         <item name="seekArcStyle">@style/SeekArcNowPlaying</item>
         <item name="windowActionModeOverlay">true</item>
@@ -81,12 +84,15 @@
         <item name="nowPlayingPrevStyle">@style/nowPlayingActionDark.Prev</item>
         <item name="nowPlayingShuffleStyle">@style/nowPlayingActionDark.Shuffle</item>
         <item name="nowPlayingRepeatStyle">@style/nowPlayingActionDark.Repeat</item>
-
-        <item name="carModePlayStyle">@style/carModeActionDark.Play</item>
-        <item name="carModeNextStyle">@style/carModeActionDark.Next</item>
-        <item name="carModePrevStyle">@style/carModeActionDark.Prev</item>
+        <item name="nowPlayingCardBackground">@color/black</item>
 
         <item name="footerPlayStyle">@style/footerDark.Play</item>
+
+        <item name="controlsPlayStyle">@style/controlsActionDark.Play</item>
+        <item name="controlsNextStyle">@style/controlsActionDark.Next</item>
+        <item name="controlsPrevStyle">@style/controlsActionDark.Prev</item>
+        <item name="controlsShuffleStyle">@style/controlsActionDark.Shuffle</item>
+        <item name="controlsRepeatStyle">@style/controlsActionDark.Repeat</item>
 
         <item name="seekArcStyle">@style/SeekArcNowPlaying</item>
         <item name="windowActionModeOverlay">true</item>
@@ -117,6 +123,14 @@
     </style>
 
     <!-- end settings themes -->
+
+    <style name="Theme.NowPlaying.Light" parent="Theme.LightBase">
+
+    </style>
+
+    <style name="Theme.NowPlaying.Dark" parent="Theme.DarkBase">
+
+    </style>
 
     <!-- Carmode theme also in v21-->
     <style name="Theme.Carmode" parent="Theme.DarkBase">

@@ -14,9 +14,12 @@
         <attr name="nowPlayingPrevStyle" format="reference"/>
         <attr name="nowPlayingShuffleStyle" format="reference"/>
         <attr name="nowPlayingRepeatStyle" format="reference"/>
-        <attr name="carModePlayStyle" format="reference"/>
-        <attr name="carModeNextStyle" format="reference"/>
-        <attr name="carModePrevStyle" format="reference"/>
+        <attr name="nowPlayingCardBackground" format="reference"/>
+        <attr name="controlsPlayStyle" format="reference"/>
+        <attr name="controlsNextStyle" format="reference"/>
+        <attr name="controlsPrevStyle" format="reference"/>
+        <attr name="controlsShuffleStyle" format="reference"/>
+        <attr name="controlsRepeatStyle" format="reference"/>
         <attr name="mainContentTopMargin" format="reference"/>
         <attr name="footerPlayStyle" format="reference"/>
         <attr name="iconTint" format="reference"/>

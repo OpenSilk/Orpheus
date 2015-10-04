@@ -154,7 +154,8 @@ public class ControlsScreenPresenter extends ViewPresenter<ControlsScreenView>
                     @Override
                     public void call(PlaybackStateCompat playbackState) {
                         if (hasView()) {
-                            getView().setPlayChecked(PlaybackController.isPlayingOrSimilar(playbackState));
+                            getView().setPlayChecked(PlaybackStateHelper.
+                                    shouldShowPauseButton(playbackState.getState()));
                             if (VersionUtils.hasApi22()) {
                                 getView().setRepeatLevel(BundleHelper.getInt(playbackState.getExtras()));
                                 getView().setShuffleLevel(BundleHelper.getInt2(playbackState.getExtras()));
@@ -288,6 +289,8 @@ public class ControlsScreenPresenter extends ViewPresenter<ControlsScreenView>
                     toggleCurrentTimeVisiblility();
                 }
             }
+            //TODO find somewhere to put this that doent update as much
+            setTotalTimeText(mProgressUpdater.getLastKnownDuration());
         }
     }
 

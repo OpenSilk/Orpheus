@@ -24,42 +24,38 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.PorterDuffXfermode;
 import android.media.audiofx.AudioEffect;
+import android.support.v4.view.GravityCompat;
 import android.support.v7.graphics.Palette;
+import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.jakewharton.rxbinding.view.RxView;
 import com.jakewharton.rxbinding.view.ViewClickEvent;
+import com.jakewharton.rxbinding.view.ViewLongClickEvent;
 import com.pheelicks.visualizer.VisualizerView;
 import com.pheelicks.visualizer.renderer.CircleBarRenderer;
 import com.pheelicks.visualizer.renderer.CircleRenderer;
 import com.pheelicks.visualizer.renderer.LineRenderer;
-import com.triggertrap.seekarc.SeekArc;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.util.ThemeUtils;
-import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.common.ui.util.ViewUtils;
 import org.opensilk.common.ui.widget.AnimatedImageView;
-import org.opensilk.common.ui.widget.CompatSeekBar;
 import org.opensilk.common.ui.widget.ImageButtonCheckable;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.PaletteObserver;
 import org.opensilk.music.artwork.PaletteResponse;
-import org.opensilk.music.playback.control.PlaybackController;
-import org.opensilk.music.ui.theme.PlaybackDrawableTint;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import butterknife.Optional;
 import hugo.weaving.DebugLog;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
@@ -76,23 +72,17 @@ import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_VIS_LINES;
 /**
  * Created by drew on 11/17/14.
  */
-public class NowPlayingScreenView extends RelativeLayout implements NowPlayingView {
+public class NowPlayingScreenView extends RelativeLayout {
 
-    @Inject NowPlayingViewPresenter presenter;
+    @Inject NowPlayingScreenPresenter presenter;
     @Inject AppPreferences settings;
-    @Inject PlaybackController playbackController;
 
     @InjectView(R.id.now_playing_something) ViewGroup placeholder;
-    @InjectView(R.id.now_playing_actions_container) ViewGroup actionsContainer;
-    @InjectView(R.id.now_playing_seekprogress) @Optional SeekArc seekBar;
-    @InjectView(R.id.now_playing_seekbar) @Optional CompatSeekBar seekBarClassic;
-    @InjectView(R.id.now_playing_current_time) TextView currentTime;
-    @InjectView(R.id.now_playing_total_time) TextView totalTime;
-    @InjectView(R.id.now_playing_shuffle) ImageButton shuffle;
-    @InjectView(R.id.now_playing_previous) ImageButton prev;
-    @InjectView(R.id.now_playing_play) ImageButtonCheckable play;
-    @InjectView(R.id.now_playing_next) ImageButton next;
-    @InjectView(R.id.now_playing_repeat) ImageButton repeat;
+    @InjectView(R.id.now_playing_title) TextView title;
+    @InjectView(R.id.now_playing_subtitle) TextView subTitle;
+    @InjectView(R.id.now_playing_playpause) ImageButtonCheckable playPause;
+    @InjectView(R.id.now_playing_card) CardView card;
+    @InjectView(R.id.now_playing_progress) ProgressBar progress;
 
     final boolean lightTheme;
 
@@ -131,10 +121,6 @@ public class NowPlayingScreenView extends RelativeLayout implements NowPlayingVi
                 initArtwork();
                 break;
         }
-        setupSeeker();
-
-        PlaybackDrawableTint.repeatDrawable36(repeat);
-        PlaybackDrawableTint.shuffleDrawable36(shuffle);
         if (!isInEditMode()) presenter.takeView(this);
     }
 
@@ -153,58 +139,8 @@ public class NowPlayingScreenView extends RelativeLayout implements NowPlayingVi
         destroyVisualizer();
     }
 
-    void setupSeeker() {
-        if (seekBar != null) {
-            if (!VersionUtils.hasLollipop()) {
-                seekBar.getThumb().mutate().setColorFilter(
-                        ThemeUtils.getColorAccent(getContext()), PorterDuff.Mode.SRC_IN
-                );
-            }
-            seekBar.setOnSeekArcChangeListener(new SeekArc.OnSeekArcChangeListener() {
-                @Override
-                public void onProgressChanged(SeekArc seekArc, int i, boolean b) {
-                    presenter.onProgressChanged(i, b);
-                }
-
-                @Override
-                public void onStartTrackingTouch(SeekArc seekArc) {
-                    presenter.onStartTrackingTouch();
-                }
-
-                @Override
-                public void onStopTrackingTouch(SeekArc seekArc) {
-                    presenter.onStopTrackingTouch();
-                }
-            });
-        } else if (seekBarClassic != null) {
-            if (!VersionUtils.hasLollipop()) {
-                ThemeUtils.themeSeekBar(seekBarClassic, R.attr.colorAccent);
-            }
-            seekBarClassic.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    presenter.onProgressChanged(progress, fromUser);
-                }
-
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-                    presenter.onStartTrackingTouch();
-                }
-
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-                    presenter.onStopTrackingTouch();
-                }
-            });
-        }
-    }
-
-    public void setProgress(int progress) {
-        if (seekBar != null) {
-            seekBar.setProgress(progress);
-        } else if (seekBarClassic != null) {
-            seekBarClassic.setProgress(progress);
-        }
+    public void setPlayChecked(boolean yes) {
+        playPause.setChecked(yes);
     }
 
     void initVisualizer(String type) {
@@ -283,68 +219,44 @@ public class NowPlayingScreenView extends RelativeLayout implements NowPlayingVi
     }
 
     public void setTotalTime(CharSequence text) {
-        totalTime.setText(text);
     }
 
     public void setCurrentTime(CharSequence text) {
-        currentTime.setText(text);
     }
 
     public void setCurrentTimeVisibility(int visibility) {
-        currentTime.setVisibility(visibility);
+
     }
 
     public int getCurrentTimeVisibility() {
-        return currentTime.getVisibility();
+        return VISIBLE;
     }
 
     public PaletteObserver getPaletteObserver() {
         return paletteObserver;
     }
 
-    public void setPlayChecked(boolean yes) {
-        play.setChecked(yes);
-    }
-
     public void setCurrentTrack(CharSequence text) {
-
+        title.setText(text);
     }
 
     public void setCurrentArtist(CharSequence text) {
-
+        subTitle.setText(text);
     }
 
     void subscribeClicks() {
         if (isSubscribed(clicks)) return;
         clicks = new CompositeSubscription(
-                RxView.clickEvents(shuffle).subscribe(new Action1<ViewClickEvent>() {
+                RxView.clickEvents(playPause).subscribe(new Action1<ViewClickEvent>() {
                     @Override
-                    public void call(ViewClickEvent onClickEvent) {
-                        playbackController.shuffleQueue();
+                    public void call(ViewClickEvent viewClickEvent) {
+                        presenter.playbackController.playorPause();
                     }
                 }),
-                RxView.clickEvents(prev).subscribe(new Action1<ViewClickEvent>() {
+                RxView.longClickEvents(playPause).subscribe(new Action1<ViewLongClickEvent>() {
                     @Override
-                    public void call(ViewClickEvent onClickEvent) {
-                        playbackController.skipToPrevious();
-                    }
-                }),
-                RxView.clickEvents(play).subscribe(new Action1<ViewClickEvent>() {
-                    @Override
-                    public void call(ViewClickEvent onClickEvent) {
-                        playbackController.playorPause();
-                    }
-                }),
-                RxView.clickEvents(next).subscribe(new Action1<ViewClickEvent>() {
-                    @Override
-                    public void call(ViewClickEvent onClickEvent) {
-                        playbackController.skipToNext();
-                    }
-                }),
-                RxView.clickEvents(repeat).subscribe(new Action1<ViewClickEvent>() {
-                    @Override
-                    public void call(ViewClickEvent onClickEvent) {
-                        playbackController.cycleRepeateMode();
+                    public void call(ViewLongClickEvent viewLongClickEvent) {
+                        presenter.drawerController.openDrawer(GravityCompat.END);
                     }
                 })
         );
@@ -362,10 +274,19 @@ public class NowPlayingScreenView extends RelativeLayout implements NowPlayingVi
         public void onNext(PaletteResponse paletteResponse) {
             if (artwork != null) {
                 Palette p = paletteResponse.palette;
-                int color = p.getDarkVibrantColor(getResources().getColor(R.color.transparent_black));
-                color = ThemeUtils.setColorAlpha(color, 0x66);
-                PorterDuffColorFilter cf = new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP);
-                artwork.setColorFilter(cf);
+                Palette.Swatch s1 = p.getDarkVibrantSwatch();
+                Palette.Swatch s2 = p.getVibrantSwatch();
+                if (s1 != null && s2 != null) {
+                    NowPlayingScreenView.this.setBackgroundColor(s1.getRgb());
+                    progress.getProgressDrawable().setTint(s1.getRgb());
+                    card.setBackgroundColor(s2.getRgb());
+                    title.setTextColor(s2.getTitleTextColor());
+                    subTitle.setTextColor(s2.getBodyTextColor());
+                }
+//                int color = p.getDarkVibrantColor(getResources().getColor(R.color.transparent_black));
+//                color = ThemeUtils.setColorAlpha(color, 0x66);
+//                PorterDuffColorFilter cf = new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+//                artwork.setColorFilter(cf);
             }
         }
     };

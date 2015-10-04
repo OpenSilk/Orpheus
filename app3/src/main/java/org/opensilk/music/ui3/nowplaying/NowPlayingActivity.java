@@ -19,49 +19,24 @@ package org.opensilk.music.ui3.nowplaying;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
-
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+import android.support.v4.widget.DrawerLayout;
 
 import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.common.ui.mortar.ActionBarConfig;
-import org.opensilk.common.ui.mortar.ToolbarOwner;
-import org.opensilk.common.ui.mortar.ToolbarOwnerDelegate;
-import org.opensilk.common.ui.mortarfragment.MortarFragmentActivity;
-import org.opensilk.common.ui.recycler.RecyclerListAdapter;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.playback.control.PlaybackController;
-import org.opensilk.music.ui.theme.OrpheusTheme;
-
-import javax.inject.Inject;
+import org.opensilk.music.ui3.MusicActivity;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import butterknife.Optional;
 import mortar.MortarScope;
 
 /**
- * Created by drew on 5/9/15.
+ * Created by drew on 10/2/15.
  */
-public class NowPlayingActivity extends MortarFragmentActivity {
+public class NowPlayingActivity extends MusicActivity {
 
-    @Inject protected PlaybackController mPlaybackController;
-//    @Inject ToolbarOwner mToolbarOwner;
-
-    @InjectView(R.id.sliding_panel) @Optional SlidingUpPanelLayout mSlidingPanel;
-    @InjectView(R.id.recyclerview) RecyclerView mList;
-
-//    ToolbarOwnerDelegate<NowPlayingActivity> mActionBarDelegate;
+    @InjectView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
 
     public static void startSelf(Context context, boolean startQueue) {
         Intent i = new Intent(context, NowPlayingActivity.class);
@@ -70,18 +45,16 @@ public class NowPlayingActivity extends MortarFragmentActivity {
     }
 
     @Override
-    protected void onCreateScope(MortarScope.Builder builder) {
-        AppComponent appComponent = DaggerService.getDaggerComponent(getApplicationContext());
-        builder.withService(DaggerService.DAGGER_SERVICE,
-                NowPlayingActivityComponent.FACTORY.call(appComponent));
+    protected void setupContentView() {
+        setContentView(R.layout.activity_nowplaying);
+        ButterKnife.inject(this);
+//        mDrawerLayout.setStatusBarBackgroundColor(Color.TRANSPARENT);
     }
 
     @Override
-    protected void onScopeCreated(MortarScope scope) {
-        NowPlayingActivityComponent component = DaggerService.getDaggerComponent(scope);
-        AppPreferences settings = component.appPreferences();
-        OrpheusTheme theme = settings.getTheme();
-        setTheme(settings.isDarkTheme() ? theme.dark : theme.light);
+    protected void themeActivity(AppPreferences preferences) {
+//        OrpheusTheme theme = preferences.getTheme();
+//        setTheme(preferences.isDarkTheme() ? theme.dark : theme.light);
     }
 
     @Override
@@ -92,99 +65,13 @@ public class NowPlayingActivity extends MortarFragmentActivity {
 
     @Override
     public int getContainerViewId() {
-        return 0;//unsupported
-    }
-
-    protected void setupView() {
-        setContentView(R.layout.activity_nowplaying);
-        ButterKnife.inject(this);
-        mList.setLayoutManager(new LinearLayoutManager(this));
-        mList.setAdapter(new TestAdapter());
+        return 0;
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setupView();
-
-        if (mSlidingPanel != null && getIntent().getBooleanExtra("startqueue", false)) {
-            mSlidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
-        }
-
-//        mToolbarOwner.setConfig(ActionBarConfig.builder()
-//                .setTitle("")
-//                .setUpButtonEnabled(true)
-////                .setTransparentBackground(true)
-//                .build());
-//        mActionBarDelegate = new ToolbarOwnerDelegate<>(this, mToolbarOwner, mToolbar);
-//        mActionBarDelegate.onCreate();
-
-        mPlaybackController.connect();
-
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-//        mActionBarDelegate.onDestroy();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mPlaybackController.notifyForegroundStateChanged(true);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mPlaybackController.notifyForegroundStateChanged(false);
-    }
-
-    /*
-     * Action bar owner
-     */
-
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        return mActionBarDelegate.onCreateOptionsMenu(menu) || super.onCreateOptionsMenu(menu);
-//    }
-//
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        return mActionBarDelegate.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
-//    }
-
-    @Override
-    public void onBackPressed() {
-        if (mSlidingPanel != null && mSlidingPanel.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
-            mSlidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    static class TestAdapter extends RecyclerListAdapter<String, TestAdapter.ViewHolder> {
-
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new ViewHolder(inflate(parent, R.layout.mtrl_list_item_oneline_text));
-        }
-
-        @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            ((TextView) holder.itemView).setText("ITem " + position);
-        }
-
-        @Override
-        public int getItemCount() {
-            return 20;
-        }
-
-        static class ViewHolder extends RecyclerView.ViewHolder {
-            public ViewHolder(View itemView) {
-                super(itemView);
-            }
-        }
+    protected void onCreateScope(MortarScope.Builder builder) {
+        AppComponent appComponent = DaggerService.getDaggerComponent(getApplicationContext());
+        builder.withService(DaggerService.DAGGER_SERVICE,
+                NowPlayingActivityComponent.FACTORY.call(appComponent));
     }
 }

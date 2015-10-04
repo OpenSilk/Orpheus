@@ -69,35 +69,35 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:src="@drawable/ic_repeat_on_black_vector_36dp"
-            style="?nowPlayingRepeatStyle"/>
+            style="?controlsRepeatStyle"/>
 
         <ImageButton
             android:id="@+id/now_playing_previous"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:src="@drawable/ic_skip_previous_black_vector_36dp"
-            style="?nowPlayingPrevStyle"/>
+            style="?controlsPrevStyle"/>
 
         <org.opensilk.common.ui.widget.ImageButtonCheckable
             android:id="@+id/now_playing_play"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:src="@drawable/ic_play_black_vector_36dp"
-            style="?nowPlayingPlayStyle"/>
+            style="?controlsPlayStyle"/>
 
         <ImageButton
             android:id="@+id/now_playing_next"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:src="@drawable/ic_skip_next_black_vector_36dp"
-            style="?nowPlayingNextStyle"/>
+            style="?controlsNextStyle"/>
 
         <org.opensilk.common.ui.widget.ImageButtonCheckable
             android:id="@+id/now_playing_shuffle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:src="@drawable/ic_shuffle_black_vector_36dp"
-            style="?nowPlayingShuffleStyle"/>
+            style="?controlsShuffleStyle"/>
 
     </com.ogaclejapan.arclayout.ArcLayout>
 

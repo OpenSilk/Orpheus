@@ -24,7 +24,8 @@
     android:gravity="center_vertical"
     android:layout_width="match_parent"
     android:layout_height="72dp"
-    android:foreground="?selectableItemBackground">
+    android:foreground="?selectableItemBackground"
+    style="@style/GalleryListTile">
 
     <include layout="@layout/gallery_list_item_common"/>
 

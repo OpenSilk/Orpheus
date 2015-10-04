@@ -31,14 +31,18 @@ import com.triggertrap.seekarc.SeekArc;
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.ui.mortar.DrawerController;
+import org.opensilk.common.ui.mortar.DrawerOwner;
 import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.ui.mortar.PausesAndResumes;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
+import org.opensilk.music.playback.PlaybackStateHelper;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.common.UtilsCommon;
+import org.opensilk.music.ui3.main.ProgressUpdater;
 
 import java.util.concurrent.TimeUnit;
 
@@ -64,7 +68,7 @@ import static android.support.v4.media.session.PlaybackStateCompat.*;
  * Created by drew on 4/20/15.
  */
 @ScreenScope
-public class NowPlayingViewPresenter extends Presenter<NowPlayingView> implements PausesAndResumes {
+public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenView> implements PausesAndResumes {
 
     final Context appContext;
     final PauseAndResumeRegistrar pauseAndResumeRegistrar;
@@ -72,30 +76,32 @@ public class NowPlayingViewPresenter extends Presenter<NowPlayingView> implement
     final ArtworkRequestManager requestor;
 //    final ActionBarOwner actionBarOwner;
     final AppPreferences settings;
+    final DrawerOwner drawerController;
 
     CompositeSubscription broadcastSubscription;
 
-    long posOverride = -1;
-    long lastSeekEventTime;
-    boolean fromTouch = false;
     boolean isPlaying;
     int sessionId = AudioEffect.ERROR_BAD_VALUE;
-    long lastPosition = -1;
-    long lastDuration = -1;
-    boolean lastPosSynced;
     ArtInfo lastArtInfo;
-    long lastBlinkTime;
     String lastTrack;
     String lastArtist;
 
+    final ProgressUpdater mProgressUpdater = new ProgressUpdater(new Action1<Integer>() {
+        @Override
+        public void call(Integer integer) {
+            setProgress(integer);
+        }
+    });
+
     @Inject
-    public NowPlayingViewPresenter(
+    public NowPlayingScreenPresenter(
             @ForApplication Context appContext,
             PauseAndResumeRegistrar pauseAndResumeRegistrar,
             PlaybackController playbackController,
             ArtworkRequestManager requestor,
 //             ActionBarOwner actionBarOwner,
-            AppPreferences settings
+            AppPreferences settings,
+            DrawerOwner drawerController
     ) {
         this.appContext = appContext;
         this.pauseAndResumeRegistrar = pauseAndResumeRegistrar;
@@ -103,10 +109,7 @@ public class NowPlayingViewPresenter extends Presenter<NowPlayingView> implement
         this.requestor = requestor;
 //        this.actionBarOwner = actionBarOwner;
         this.settings = settings;
-    }
-
-    @Override protected final BundleService extractBundleService(NowPlayingView view) {
-        return BundleService.getBundleService(view.getContext());
+        this.drawerController = drawerController;
     }
 
     @Override
@@ -153,8 +156,6 @@ public class NowPlayingViewPresenter extends Presenter<NowPlayingView> implement
         if (lastArtInfo != null) {
             loadArtwork(lastArtInfo);
         }
-        setCurrentTimeText(lastPosition);
-        setTotalTimeText(lastDuration);
         setCurrentTrack(lastTrack);
         setCurrentArtist(lastArtist);
         subscribeBroadcasts();
@@ -166,6 +167,7 @@ public class NowPlayingViewPresenter extends Presenter<NowPlayingView> implement
             getView().destroyVisualizer();
         }
         unsubscribeBroadcasts();
+        mProgressUpdater.unsubscribeProgress();
     }
 
     void loadArtwork(ArtInfo artInfo) {
@@ -182,23 +184,15 @@ public class NowPlayingViewPresenter extends Presenter<NowPlayingView> implement
                 new Action1<PlaybackStateCompat>() {
                     @Override
                     public void call(PlaybackStateCompat playbackState) {
-                        boolean playing = playbackState.getState() == STATE_PLAYING;
+                        boolean playing = PlaybackStateHelper.isPlaying(playbackState.getState());
                         if (hasView()) {
-                            getView().setPlayChecked(PlaybackController.isPlayingOrSimilar(playbackState));
+                            getView().setPlayChecked(PlaybackStateHelper.
+                                    shouldShowPauseButton(playbackState.getState()));
                             getView().setVisualizerEnabled(playing);
                             //TODO shuffle/repeat
                         }
+                        mProgressUpdater.subscribeProgress(playbackState);
                         isPlaying = playing;
-                        long position = playbackState.getPosition();
-                        long duration = playbackState.getBufferedPosition();
-                        updateProgress(position, duration);
-                        if (duration != lastDuration) {
-                            setTotalTimeText(duration);
-                        }
-                        Timber.v("Position discrepancy = %d", lastPosition - position);
-                        lastPosition = position;
-                        lastDuration = duration;
-                        lastPosSynced = true;
                     }
                 }
         );
@@ -227,24 +221,7 @@ public class NowPlayingViewPresenter extends Presenter<NowPlayingView> implement
                     }
                 }
         );
-        final long interval = 250;
-        Subscription s3 = Observable.interval(interval, TimeUnit.MILLISECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Long>() {
-                    @Override
-                    public void call(Long aLong) {
-                        long position = lastPosition;
-                        if (lastPosSynced) {
-                            lastPosSynced = false;
-                        } else if (isPlaying) {
-                            position += interval + 10;
-                            lastPosition = position;
-                        }
-                        long duration = lastDuration;
-                        updateProgress(position, duration);
-                    }
-                });
-        broadcastSubscription = new CompositeSubscription(s1, s2, s3);
+        broadcastSubscription = new CompositeSubscription(s1, s2);
     }
 
     void unsubscribeBroadcasts() {
@@ -254,98 +231,9 @@ public class NowPlayingViewPresenter extends Presenter<NowPlayingView> implement
         }
     }
 
-    /*seekbars*/
-    public void onProgressChanged(final int progress, final boolean fromuser) {
-        if (!fromuser) {
-            return;
-        }
-        final long now = SystemClock.elapsedRealtime();
-        if (now > lastSeekEventTime + 30) {
-            lastSeekEventTime = now;
-            posOverride = (lastDuration * progress) / 1000;
-            if (posOverride < 0 || !fromTouch) {
-                posOverride = -1;
-            } else {
-                setCurrentTimeText(posOverride);
-            }
-        }
-    }
-
-    public void onStartTrackingTouch() {
-        lastSeekEventTime = 0;
-        posOverride = -1;
-        fromTouch = true;
-        setCurrentTimeVisibile();
-    }
-
-    public void onStopTrackingTouch() {
-        fromTouch = false;
-        if (posOverride != -1) {
-            playbackController.seekTo(posOverride);
-            updateProgress(posOverride, lastDuration);
-        }
-        posOverride = -1;
-    }
-    /*end seekbars*/
-
-    void updateProgress(long position, long duration) {
-        if (position < 0 || duration <= 0) {
-            setProgress(1000);
-            setCurrentTimeText(-1);
-        } else {
-            if (!fromTouch) {
-                setCurrentTimeText(position);
-                setProgress((int) (1000 * position / duration));
-                if (isPlaying) {
-                    setCurrentTimeVisibile();
-                } else {
-                    //blink the counter
-                    long now = SystemClock.elapsedRealtime();
-                    if (now >= lastBlinkTime + 500) {
-                        lastBlinkTime = now;
-                        toggleCurrentTimeVisiblility();
-                    }
-                }
-            }
-        }
-    }
-
     void setProgress(int progress) {
         if (hasView()) {
-            getView().setProgress(progress);
-        }
-    }
-
-    void setTotalTimeText(long duration) {
-        if (hasView()) {
-            if (duration > 0) {
-                getView().setTotalTime(UtilsCommon.makeTimeString(getView().getContext(), duration / 1000));
-            } else {
-                getView().setTotalTime("--:--");
-            }
-        }
-    }
-
-    void setCurrentTimeText(long pos) {
-        if (hasView()) {
-            if (pos >= 0) {
-                getView().setCurrentTime(UtilsCommon.makeTimeString(getView().getContext(), pos / 1000));
-            } else {
-                getView().setCurrentTime("--:--");
-            }
-        }
-    }
-
-    void setCurrentTimeVisibile() {
-        if (hasView()) {
-            getView().setCurrentTimeVisibility(View.VISIBLE);
-        }
-    }
-
-    void toggleCurrentTimeVisiblility() {
-        if (hasView()) {
-            boolean visible = getView().getCurrentTimeVisibility() == View.VISIBLE;
-            getView().setCurrentTimeVisibility(visible ? View.INVISIBLE : View.VISIBLE);
+            getView().progress.setProgress(progress);
         }
     }
 
@@ -365,8 +253,7 @@ public class NowPlayingViewPresenter extends Presenter<NowPlayingView> implement
         sessionId = playbackController.getAudioSessionId();
         if (sessionId == AudioEffect.ERROR_BAD_VALUE) {
             //TODO stop doing this
-            Observable.timer(500, TimeUnit.MILLISECONDS)
-                    .observeOn(AndroidSchedulers.mainThread())
+            Observable.timer(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
                     .subscribe(new Action1<Long>() {
                         @Override
                         public void call(Long aLong) {
@@ -375,9 +262,7 @@ public class NowPlayingViewPresenter extends Presenter<NowPlayingView> implement
                     });
         } else if (hasView()) {
             getView().attachVisualizer(sessionId);
-            if (isPlaying) {
-                getView().setVisualizerEnabled(true);
-            }
+            getView().setVisualizerEnabled(isPlaying);
         }
     }
 

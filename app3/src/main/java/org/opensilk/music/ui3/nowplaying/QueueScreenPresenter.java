@@ -18,6 +18,7 @@
 package org.opensilk.music.ui3.nowplaying;
 
 import android.content.Context;
+import android.media.session.MediaSession;
 import android.os.Bundle;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat.QueueItem;
@@ -28,6 +29,7 @@ import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.ui.mortar.PausesAndResumes;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
+import org.opensilk.music.playback.PlaybackStateHelper;
 import org.opensilk.music.playback.control.PlaybackController;
 
 import java.util.ArrayList;
@@ -57,6 +59,9 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView>
     final PauseAndResumeRegistrar pauseAndResumeRegistrar;
 
     CompositeSubscription broadcastSubscriptions;
+    boolean isPlaying;
+    long lastPlayingId;
+    ArrayList<QueueItem> queue = new ArrayList<>();
 
     @Inject
     public QueueScreenPresenter(
@@ -76,10 +81,16 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView>
     }
 
     @Override
+    protected void onExitScope() {
+        super.onExitScope();
+        teardown();
+    }
+
+    @Override
     protected void onLoad(Bundle savedInstanceState) {
         super.onLoad(savedInstanceState);
         if (pauseAndResumeRegistrar.isRunning()) {
-            subscribeBroadcasts();
+            setup();
         }
     }
 
@@ -87,47 +98,51 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView>
     protected void onSave(Bundle outState) {
         super.onSave(outState);
         if (pauseAndResumeRegistrar.isRunning()) {
-            unsubscribeBroadcasts();
+            teardown();
         }
     }
 
     @Override
     public void onResume() {
+        setup();
+    }
+
+    @Override
+    public void onPause() {
+        teardown();
+    }
+
+    void setup() {
         if (hasView()) {
             subscribeBroadcasts();
         }
     }
 
-    @Override
-    public void onPause() {
+    void teardown() {
         unsubscribeBroadcasts();
+    }
+
+    void onItemMoved(int from, int to) {
+        playbackController.moveQueueItem(from, to);
+    }
+
+    void onItemRemoved(int pos) {
+        playbackController.removeQueueItemAt(pos);
     }
 
     void subscribeBroadcasts() {
         if (isSubscribed(broadcastSubscriptions)) {
             return;
         }
-        Subscription s = playbackController.subscribeMetaChanges(
-                new Action1<MediaMetadataCompat>() {
-                    @Override
-                    public void call(MediaMetadataCompat mediaMetadata) {
-                        String track = mediaMetadata.getString(METADATA_KEY_TITLE);
-                        String artist = mediaMetadata.getString(METADATA_KEY_ARTIST);
-                        String id = mediaMetadata.getString(METADATA_KEY_MEDIA_ID);
-                        if (hasView()) {
-                            getView().setTitle(track);
-                            getView().setSubTitle(artist);
-                            getView().getAdapter().setActiveItem(id);
-                        }
-                    }
-                }
-        );
         Subscription s1 = playbackController.subscribePlayStateChanges(
                 new Action1<PlaybackStateCompat>() {
                     @Override
                     public void call(PlaybackStateCompat playbackState) {
+                        isPlaying = PlaybackStateHelper.isPlaying(playbackState.getState());
+                        lastPlayingId = playbackState.getActiveQueueItemId();
                         if (hasView()) {
-                            getView().getAdapter().setPlaying(PlaybackController.isPlaying(playbackState));
+                            getView().getAdapter().setPlaying(isPlaying);
+                            getView().getAdapter().setActiveItem(lastPlayingId);
                         }
                     }
                 }
@@ -137,17 +152,17 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView>
                     @Override
                     @DebugLog
                     public void call(List<QueueItem> queueItems) {
+                        queue.clear();
+                        queue.addAll(queueItems);
+                        queue.trimToSize();
                         if (hasView()) {
-                            List<QueueScreenItem> list = new ArrayList<>(queueItems.size());
-                            for (QueueItem item : queueItems) {
-                                list.add(QueueScreenItem.fromQueueItem(item));
-                            }
-                            getView().getAdapter().replaceAll(list);
+                            getView().getAdapter().replaceAll(queue);
+                            getView().getAdapter().setActiveItem(lastPlayingId);
                         }
                     }
                 }
         );
-        broadcastSubscriptions = new CompositeSubscription(s, s1, s2);
+        broadcastSubscriptions = new CompositeSubscription(s1, s2);
     }
 
     void unsubscribeBroadcasts() {

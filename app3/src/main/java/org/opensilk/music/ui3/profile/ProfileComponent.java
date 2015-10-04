@@ -25,8 +25,6 @@ import org.opensilk.music.ui3.common.BundleableComponent;
 public interface ProfileComponent extends BundleableComponent {
     void inject(ProfilePortraitView view);
     void inject(ProfileHeroView view);
-    void inject(ProfileLandscapeView view);
-    void inject(ProfileLandscapeRecyclerView view);
     void inject(ProfileView2Portrait view);
     void inject(ProfileView2DragSwipePortrait view);
 }

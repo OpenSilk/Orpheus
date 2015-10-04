@@ -28,14 +28,6 @@ import org.opensilk.music.AppPreferences;
 public class NowPlayingScreenFragment extends MortarFragment {
     @Override
     protected Screen newScreen() {
-        NowPlayingActivityComponent component = DaggerService.getDaggerComponent(getActivity());
-        AppPreferences settings = component.appPreferences();
-        switch (settings.getString(AppPreferences.NOW_PLAYING_LAYOUT, AppPreferences.NOW_PLAYING_DEFAULT)) {
-            case AppPreferences.NOW_PLAYING_CLASSIC:
-                return new NowPlayingClassicScreen();
-            case AppPreferences.NOW_PLAYING_DEFAULT:
-            default:
-                return new NowPlayingScreen();
-        }
+        return new NowPlayingScreen();
     }
 }

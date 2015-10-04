@@ -33,6 +33,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.model.ArtInfo;
+import org.opensilk.music.playback.PlaybackStateHelper;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.nowplaying.NowPlayingActivity;
 
@@ -124,10 +125,8 @@ public class FooterPageScreenPresenter extends ViewPresenter<FooterPageScreenVie
     boolean handleClick(String action, View view) {
         switch (action) {
             case AppPreferences.ACTION_OPEN_QUEUE:
-//                NowPlayingActivity.startSelf(view.getContext(), true);
-                return true;
             case AppPreferences.ACTION_OPEN_NOW_PLAYING:
-//                NowPlayingActivity.startSelf(view.getContext(), false);
+                NowPlayingActivity.startSelf(view.getContext(), false);
                 return true;
             case AppPreferences.ACTION_NONE:
             default:
@@ -141,7 +140,7 @@ public class FooterPageScreenPresenter extends ViewPresenter<FooterPageScreenVie
 
     void updatePlayBtn() {
         if (hasView() && lastState != null) {
-            getView().setPlaying(PlaybackController.isPlayingOrSimilar(lastState));
+            getView().setPlaying(PlaybackStateHelper.shouldShowPauseButton(lastState.getState()));
         }
     }
 

@@ -26,6 +26,7 @@ import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortar.WithComponentFactory;
 import org.opensilk.music.R;
 import org.opensilk.music.ui3.LauncherActivityComponent;
+import org.opensilk.music.ui3.MusicActivityComponent;
 
 import mortar.MortarScope;
 
@@ -38,7 +39,7 @@ public class ControlsScreen extends Screen {
     public static class Factory extends ComponentFactory<ControlsScreen> {
         @Override
         protected Object createDaggerComponent(Resources resources, MortarScope parentScope, ControlsScreen screen) {
-            LauncherActivityComponent acc = DaggerService.getDaggerComponent(parentScope);
+            MusicActivityComponent acc = DaggerService.getDaggerComponent(parentScope);
             return ControlsScreenComponent.FACTORY.call(acc);
         }
     }

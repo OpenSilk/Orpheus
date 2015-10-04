@@ -27,12 +27,15 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.ui.recycler.DragSwipeAdapterWrapper;
 import org.opensilk.music.R;
+import org.opensilk.music.ui3.common.BundleableRecyclerAdapter;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import hugo.weaving.DebugLog;
 
 /**
  * Created by drew on 5/9/15.
@@ -52,17 +55,30 @@ public class QueueScreenView extends RelativeLayout {
     }
 
     @Override
+    @DebugLog
     protected void onFinishInflate() {
         super.onFinishInflate();
         ButterKnife.inject(this);
         mList.setHasFixedSize(true);
-        mList.setAdapter(mAdapter);
+        mList.setLayoutManager(new LinearLayoutManager(getContext()));
+        DragSwipeAdapterWrapper<QueueScreenViewAdapter.ViewHolder> wrapper =
+                new DragSwipeAdapterWrapper<>(mAdapter, null);
+        mList.setAdapter(wrapper);
         mPresenter.takeView(this);
     }
 
     @Override
+    @DebugLog
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        mAdapter.registerAdapterDataObserver(mObserver);
+    }
+
+    @Override
+    @DebugLog
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        mAdapter.unregisterAdapterDataObserver(mObserver);
         mPresenter.dropView(this);
     }
 
@@ -77,5 +93,17 @@ public class QueueScreenView extends RelativeLayout {
     public void setSubTitle(CharSequence title) {
         mToolbar.setSubtitle(title);
     }
+
+    final RecyclerView.AdapterDataObserver mObserver = new RecyclerView.AdapterDataObserver() {
+        @Override
+        public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+            mPresenter.onItemMoved(fromPosition, toPosition);
+        }
+
+        @Override
+        public void onItemRangeRemoved(int positionStart, int itemCount) {
+            mPresenter.onItemRemoved(positionStart);
+        }
+    };
 
 }

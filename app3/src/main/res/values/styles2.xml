@@ -73,6 +73,13 @@
 
     <!-- Tiles -->
 
+    <style name="GalleryGridTile">
+    </style>
+
+    <style name="GalleryListTile">
+
+    </style>
+
     <style name="TileOverflow" parent="Widget.AppCompat.ActionButton.Overflow">
         <item name="android:src">@drawable/ic_menu_moreoverflow_mtrl_alpha</item>
         <item name="tibTint">?attr/colorControlNormal</item>
@@ -247,54 +254,6 @@
 
     <!-- end now playing buttons -->
 
-    <!-- now playing buttons -->
-
-    <style name="carModeActionDark">
-        <item name="android:scaleType">centerInside</item>
-        <item name="android:padding">@dimen/now_playing_button_padding</item>
-        <item name="android:background">?android:selectableItemBackground</item>
-    </style>
-
-    <style name="carModeActionLight">
-        <item name="android:scaleType">centerInside</item>
-        <item name="android:padding">@dimen/now_playing_button_padding</item>
-        <item name="android:background">?android:selectableItemBackground</item>
-    </style>
-
-    <style name="carModeActionLight.Play">
-        <item name="android:scaleType">fitCenter</item>
-        <item name="android:src">@drawable/action_playpause_circle_black_48dp</item>
-        <item name="android:contentDescription">@string/accessibility_play</item>
-    </style>
-
-    <style name="carModeActionDark.Play">
-        <item name="android:scaleType">fitCenter</item>
-        <item name="android:src">@drawable/action_playpause_circle_white_48dp</item>
-        <item name="android:contentDescription">@string/accessibility_play</item>
-    </style>
-
-    <style name="carModeActionLight.Next">
-        <item name="android:src">@drawable/ic_skip_next_black_48dp</item>
-        <item name="android:contentDescription">@string/accessibility_next</item>
-    </style>
-
-    <style name="carModeActionDark.Next">
-        <item name="android:src">@drawable/ic_skip_next_white_48dp</item>
-        <item name="android:contentDescription">@string/accessibility_next</item>
-    </style>
-
-    <style name="carModeActionLight.Prev">
-        <item name="android:src">@drawable/ic_skip_previous_black_48dp</item>
-        <item name="android:contentDescription">@string/accessibility_prev</item>
-    </style>
-
-    <style name="carModeActionDark.Prev">
-        <item name="android:src">@drawable/ic_skip_previous_white_48dp</item>
-        <item name="android:contentDescription">@string/accessibility_prev</item>
-    </style>
-
-    <!-- end now playing buttons -->
-
     <!-- footer buttons -->
 
     <!--also in values-21-->
@@ -325,65 +284,65 @@
     <!-- drawer controls -->
 
     <!--also in values-21-->
-    <style name="drawerControlsActionDark">
+    <style name="controlsActionDark">
         <item name="android:scaleType">centerInside</item>
         <item name="android:padding">@dimen/now_playing_button_padding</item>
         <item name="android:background">?android:selectableItemBackground</item>
     </style>
 
     <!--also in values-21-->
-    <style name="drawerControlsActionLight">
+    <style name="controlsActionLight">
         <item name="android:scaleType">centerInside</item>
         <item name="android:padding">@dimen/now_playing_button_padding</item>
         <item name="android:background">?android:selectableItemBackground</item>
     </style>
 
-    <style name="drawerControlsActionLight.Play">
+    <style name="controlsActionLight.Play">
         <item name="android:src">@drawable/action_playpause_black_36dp</item>
         <item name="android:contentDescription">@string/accessibility_play</item>
     </style>
 
-    <style name="drawerControlsActionDark.Play">
+    <style name="controlsActionDark.Play">
         <item name="android:src">@drawable/action_playpause_white_36dp</item>
         <item name="android:contentDescription">@string/accessibility_play</item>
     </style>
 
-    <style name="drawerControlsActionLight.Next">
+    <style name="controlsActionLight.Next">
         <item name="android:src">@drawable/ic_skip_next_black_vector_36dp</item>
         <item name="android:contentDescription">@string/accessibility_next</item>
     </style>
 
-    <style name="drawerControlsActionDark.Next">
+    <style name="controlsActionDark.Next">
         <item name="android:src">@drawable/ic_skip_next_white_36dp</item>
         <item name="android:contentDescription">@string/accessibility_next</item>
     </style>
 
-    <style name="drawerControlsActionLight.Prev">
+    <style name="controlsActionLight.Prev">
         <item name="android:src">@drawable/ic_skip_previous_black_vector_36dp</item>
         <item name="android:contentDescription">@string/accessibility_prev</item>
     </style>
 
-    <style name="drawerControlsActionDark.Prev">
+    <style name="controlsActionDark.Prev">
         <item name="android:src">@drawable/ic_skip_previous_white_36dp</item>
         <item name="android:contentDescription">@string/accessibility_prev</item>
     </style>
 
-    <style name="drawerControlsActionLight.Shuffle">
+    <style name="controlsActionLight.Shuffle">
         <item name="android:src">@drawable/action_shuffle_black_36dp</item>
         <item name="android:contentDescription">@string/accessibility_shuffle</item>
     </style>
 
-    <style name="drawerControlsActionDark.Shuffle">
+    <style name="controlsActionDark.Shuffle">
         <item name="android:src">@drawable/action_shuffle_white_36dp</item>
         <item name="android:contentDescription">@string/accessibility_shuffle</item>
     </style>
 
-    <style name="drawerControlsActionLight.Repeat">
+    <style name="controlsActionLight.Repeat">
         <item name="android:src">@drawable/action_repeat_black_36dp</item>
         <item name="android:contentDescription">@string/accessibility_repeat</item>
     </style>
 
-    <style name="drawerControlsActionDark.Repeat">
+    <style name="controlsActionDark.Repeat">
         <item name="android:src">@drawable/action_repeat_white_36dp</item>
         <item name="android:contentDescription">@string/accessibility_repeat</item>
     </style>

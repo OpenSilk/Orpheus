@@ -16,40 +16,37 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<com.sothree.slidinguppanel.SlidingUpPanelLayout
+<android.support.v4.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/sliding_panel"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="bottom"
-    app:umanoPanelHeight="?actionBarSize"
-    app:umanoShadowHeight="4dp"
-    app:umanoParalaxOffset="100dp"
-    app:umanoDragView="@+id/queue_toolbar"
     android:fitsSystemWindows="true">
 
-    <FrameLayout
+    <!--<include layout="@layout/main"/>-->
+    <fragment
+        android:id="@+id/nowplaying_fragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <fragment
-            android:id="@+id/nowplaying_fragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:name="org.opensilk.music.ui3.nowplaying.NowPlayingScreenFragment"
-            tools:layout="@layout/screen_nowplaying"/>
-
-    </FrameLayout>
+        android:layout_height="match_parent"
+        android:name="org.opensilk.music.ui3.nowplaying.NowPlayingScreenFragment"
+        tools:layout="@layout/screen_nowplaying"/>
 
     <fragment
         android:id="@+id/queue_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clickable="true"
-        android:focusable="false"
+        android:layout_gravity="start"
         android:name="org.opensilk.music.ui3.nowplaying.QueueScreenFragment"
         tools:layout="@layout/screen_queue"/>
 
-</com.sothree.slidinguppanel.SlidingUpPanelLayout>
+    <fragment
+        android:id="@+id/controls_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:name="org.opensilk.music.ui3.main.ControlsScreenFragment"
+        tools:layout="@layout/screen_controls"/>
+
+</android.support.v4.widget.DrawerLayout>

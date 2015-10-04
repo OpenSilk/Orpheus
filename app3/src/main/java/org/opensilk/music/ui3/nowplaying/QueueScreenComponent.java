@@ -18,6 +18,7 @@
 package org.opensilk.music.ui3.nowplaying;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.music.ui3.MusicActivityComponent;
 
 import dagger.Component;
 import rx.functions.Func1;
@@ -27,15 +28,15 @@ import rx.functions.Func1;
  */
 @ScreenScope
 @Component(
-        dependencies = NowPlayingActivityComponent.class
+        dependencies = MusicActivityComponent.class
 )
 public interface QueueScreenComponent {
-    Func1<NowPlayingActivityComponent, QueueScreenComponent> FACTORY =
-            new Func1<NowPlayingActivityComponent, QueueScreenComponent>() {
+    Func1<MusicActivityComponent, QueueScreenComponent> FACTORY =
+            new Func1<MusicActivityComponent, QueueScreenComponent>() {
                 @Override
-                public QueueScreenComponent call(NowPlayingActivityComponent component) {
+                public QueueScreenComponent call(MusicActivityComponent component) {
                     return DaggerQueueScreenComponent.builder()
-                            .nowPlayingActivityComponent(component)
+                            .musicActivityComponent(component)
                             .build();
                 }
             };

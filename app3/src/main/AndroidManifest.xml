@@ -132,15 +132,7 @@
 
         <activity
             android:name=".ui3.nowplaying.NowPlayingActivity"
-            android:theme="@style/Theme.Dark"
-            android:process=":ui">
-            <meta-data android:name="android.support.PARENT_ACTIVITY"
-                       android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
-        </activity>
-
-        <activity
-            android:name=".ui3.dragswipe.TracksDragSwipeActivity"
-            android:theme="@style/Theme.Dark"
+            android:theme="@style/Theme.NowPlaying.Dark"
             android:process=":ui">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
