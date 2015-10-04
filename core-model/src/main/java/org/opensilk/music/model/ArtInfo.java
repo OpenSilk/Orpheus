@@ -16,10 +16,16 @@
 
 package org.opensilk.music.model;
 
+import android.content.Context;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Base64;
+
+import org.apache.commons.lang3.StringUtils;
+
+import java.nio.charset.Charset;
 
 /**
  * Contains all the info the ArtworkFetcher needs to locate artwork
@@ -103,6 +109,61 @@ public class ArtInfo implements Parcelable, Comparable<ArtInfo> {
     @Override
     public String toString() {
         return "ArtInfo{ artist="+artistName+" album="+albumName+" uri="+artworkUri+" }";
+    }
+
+    public Uri asUri(String authority) {
+        Uri.Builder ub = new Uri.Builder()
+                .scheme("content")
+                .authority(authority);
+        StringBuilder builder = new StringBuilder();
+        builder.append("?forArtist=").append(forArtist);
+        if (!StringUtils.isEmpty(artistName)) {
+            builder.append("&artistName=").append(encodeString(artistName));
+        }
+        if (!StringUtils.isEmpty(albumName)) {
+            builder.append("&albumName=").append(encodeString(albumName));
+        }
+        if (artworkUri != null && !Uri.EMPTY.equals(artworkUri)) {
+            builder.append("&arworkUri=").append(encodeString(artworkUri.toString()));
+        }
+        return ub.encodedQuery(builder.toString()).build();
+    }
+
+    public static ArtInfo fromUri(Uri uri) {
+        String encUri = uri.getQueryParameter("artworkUri");
+        Uri artworkUri = null;
+        if (!StringUtils.isEmpty(encUri)) {
+            artworkUri = Uri.parse(decodeString(encUri));
+        }
+        if (uri.getBooleanQueryParameter("forArtist", false)) {
+            String encArtist = uri.getQueryParameter("artistName");
+            if (!StringUtils.isEmpty(encArtist)) {
+                return ArtInfo.forArtist(decodeString(encArtist), artworkUri);
+            } else if (artworkUri != null) {
+                return ArtInfo.forArtist(null, artworkUri);
+            } else {
+                return NULLINSTANCE;
+            }
+        } else {
+            String encArtist = uri.getQueryParameter("artistName");
+            String encAlbum = uri.getQueryParameter("albumName");
+            if (!StringUtils.isEmpty(encArtist) && !StringUtils.isEmpty(encAlbum)) {
+                return ArtInfo.forAlbum(decodeString(encArtist), decodeString(encAlbum), artworkUri);
+            } else if (artworkUri != null) {
+                return ArtInfo.forAlbum(null, null, artworkUri);
+            } else {
+                return NULLINSTANCE;
+            }
+        }
+    }
+
+    private static String encodeString(String string) {
+        return Base64.encodeToString(string.getBytes(Charset.defaultCharset()),
+                Base64.URL_SAFE|Base64.NO_WRAP|Base64.NO_PADDING);
+    }
+
+    private static String decodeString(String string) {
+        return new String(Base64.decode(string, Base64.URL_SAFE), Charset.defaultCharset());
     }
 
     @Override
