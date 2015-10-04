@@ -17,6 +17,8 @@
 
 package de.umass.lastfm;
 
+import com.squareup.okhttp.ResponseBody;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
@@ -35,7 +37,7 @@ import retrofit.Converter;
 /**
  * Created by drew on 9/16/15.
  */
-public abstract class MusicEntryConverter<T> implements Converter<T> {
+public abstract class MusicEntryConverter<T> implements Converter<ResponseBody, T> {
 
     public static Result createResultFromInputStream(InputStream inputStream) throws SAXException, IOException {
         Document document = newDocumentBuilder().parse(new InputSource(new InputStreamReader(inputStream, "UTF-8")));
@@ -59,6 +61,14 @@ public abstract class MusicEntryConverter<T> implements Converter<T> {
         } catch (ParserConfigurationException e) {
             // better never happens
             throw new RuntimeException(e);
+        }
+    }
+
+    protected static void closeQuietly(InputStream stream) {
+        if (stream == null) return;
+        try {
+            stream.close();
+        } catch (IOException ignored) {
         }
     }
 

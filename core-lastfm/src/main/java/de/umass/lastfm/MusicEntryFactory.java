@@ -17,6 +17,9 @@
 
 package de.umass.lastfm;
 
+import com.squareup.okhttp.ResponseBody;
+
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
 import retrofit.Converter;
@@ -24,15 +27,19 @@ import retrofit.Converter;
 /**
  * Created by drew on 9/16/15.
  */
-public class MusicEntryFactory implements Converter.Factory {
+public class MusicEntryFactory extends Converter.Factory {
+
+    private final AlbumConverter albumConverter = new AlbumConverter();
+    private final ArtistConverter artistConverter = new ArtistConverter();
+
     @Override
-    public Converter<?> get(Type type) {
-        if (type instanceof Album) {
-            return new AlbumConverter();
-        } else if (type instanceof Artist) {
-            return new ArtistConverter();
+    public Converter<ResponseBody, ?> fromResponseBody(Type type, Annotation[] annotations) {
+        if (type == Album.class) {
+            return albumConverter;
+        } else if (type == Artist.class) {
+            return artistConverter;
         } else {
-            return null;
+            return super.fromResponseBody(type, annotations);
         }
     }
 }

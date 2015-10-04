@@ -15,29 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.umass.lastfm;
+package org.opensilk.music.lastfm;
 
-import com.squareup.okhttp.ResponseBody;
+import android.app.Application;
 
-import org.xml.sax.SAXException;
-
-import java.io.IOException;
-import java.io.InputStream;
+import org.robolectric.shadows.ShadowLog;
 
 /**
- * Created by drew on 9/16/15.
+ * Created by drew on 10/4/15.
  */
-public class ArtistConverter extends MusicEntryConverter<Artist> {
-    @Override
-    public Artist convert(ResponseBody responseBody) throws IOException {
-        InputStream bis = responseBody.byteStream();
-        try {
-            Result res = createResultFromInputStream(bis);
-            return ResponseBuilder.buildItem(res, Artist.class);
-        } catch (SAXException e) {
-            return null;
-        } finally {
-            closeQuietly(bis);
-        }
+public class TestApplication extends Application {
+
+    static {
+        ShadowLog.stream = System.out;
     }
+
 }

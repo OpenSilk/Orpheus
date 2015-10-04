@@ -38,7 +38,7 @@ import de.umass.lastfm.AlbumConverter;
 import de.umass.lastfm.Artist;
 import de.umass.lastfm.ArtistConverter;
 import de.umass.lastfm.LastFM;
-import de.umass.lastfm.LastFMVolley;
+import de.umass.lastfm.MusicEntryConverter;
 import de.umass.lastfm.MusicEntryFactory;
 import retrofit.Retrofit;
 import retrofit.RxJavaCallAdapterFactory;
@@ -78,9 +78,7 @@ public class LastFMModule {
             });
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(endpoint)
-                    .addConverter(Album.class, new AlbumConverter())
-                    .addConverter(Artist.class, new ArtistConverter())
-//                    .addConverterFactory(new MusicEntryFactory())
+                    .addConverterFactory(new MusicEntryFactory())
                     .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                     .client(client)
                     .build();

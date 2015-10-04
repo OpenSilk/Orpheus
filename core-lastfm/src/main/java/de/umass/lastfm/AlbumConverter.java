@@ -17,29 +17,27 @@
 
 package de.umass.lastfm;
 
-import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.ResponseBody;
 
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Created by drew on 9/16/15.
  */
 public class AlbumConverter extends MusicEntryConverter<Album> {
     @Override
-    public Album fromBody(ResponseBody responseBody) throws IOException {
+    public Album convert(ResponseBody responseBody) throws IOException {
+        InputStream bis = responseBody.byteStream();
         try {
-            Result res = createResultFromInputStream(responseBody.byteStream());
+            Result res = createResultFromInputStream(bis);
             return ResponseBuilder.buildItem(res, Album.class);
         } catch (SAXException e) {
             return null;
+        } finally {
+            closeQuietly(bis);
         }
-    }
-
-    @Override
-    public RequestBody toBody(Album album) {
-        return null;
     }
 }
