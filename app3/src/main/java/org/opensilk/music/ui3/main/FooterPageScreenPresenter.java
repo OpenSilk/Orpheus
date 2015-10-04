@@ -18,6 +18,7 @@
 package org.opensilk.music.ui3.main;
 
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.session.MediaSessionCompat.QueueItem;
@@ -85,14 +86,11 @@ public class FooterPageScreenPresenter extends ViewPresenter<FooterPageScreenVie
         getView().trackTitle.setText(desc.getTitle());
         getView().artistName.setText(desc.getSubtitle());
         Bitmap artwork = desc.getIconBitmap();
-        Bundle extras = desc.getExtras();
-        ArtInfo artInfo = null;
-        if (extras != null) {
-            artInfo = BundleHelper.getParcelable(extras);
-        }
+        Uri artworkUri = desc.getIconUri();
         if (artwork != null) {
             getView().artworkThumbnail.setImageBitmap(artwork);
-        } else if (artInfo != null) {
+        } else if (artworkUri != null) {
+            ArtInfo artInfo = ArtInfo.fromUri(artworkUri);
             Subscription s = artworkReqestor.newRequest(getView().artworkThumbnail, null, artInfo, ArtworkType.THUMBNAIL);
             subscriptions.add(s);
         } else {
