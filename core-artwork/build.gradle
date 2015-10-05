@@ -79,4 +79,6 @@ dependencies {
     testCompile (group:"org.assertj", name:"assertj-core", version: rootProject.ext.testAssertJVersion)
     testCompile (group:"org.robolectric", name:"robolectric", version : rootProject.ext.testRobolectricVersion)
     testCompile (group:"org.mockito", name:"mockito-core", version: rootProject.ext.testMockitoVersion)
+    testCompile "commons-io:commons-io:2.4"
+    testCompile 'com.squareup.okhttp:mockwebserver:2.5.0'
 }
