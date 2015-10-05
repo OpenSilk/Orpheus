@@ -20,20 +20,24 @@ package de.umass.lastfm;
 import retrofit.Call;
 import retrofit.http.GET;
 import retrofit.http.Query;
+import rx.Observable;
 
 /**
  * Created by drew on 9/16/15.
  */
 
 public interface LastFM {
-    String DEFAULT_API_ROOT = "http://ws.audioscrobbler.com/2.0/";
-
-    String METHOD_ARTIST_INFO = "artist.getInfo";
-    String METHOD_ALBUM_INFO = "album.getInfo";
+    String API_ROOT = "https://ws.audioscrobbler.com/2.0/";
 
     @GET("?method=artist.getInfo")
     Call<Artist> getArtist(@Query("artist") String artist);
 
+    @GET("?method=artist.getInfo")
+    Observable<Artist> getArtistObservable(@Query("artist") String artist);
+
     @GET("?method=album.getInfo")
     Call<Album> getAlbum(@Query("artist") String artist, @Query("album") String album);
+
+    @GET("?method=album.getInfo")
+    Observable<Album> getAlbumObservable(@Query("artist") String artist, @Query("album") String album);
 }
