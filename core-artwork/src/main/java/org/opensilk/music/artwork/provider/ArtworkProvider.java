@@ -17,17 +17,23 @@
 package org.opensilk.music.artwork.provider;
 
 import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.UriMatcher;
+import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
+import android.graphics.Point;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
+import android.support.annotation.Nullable;
 
 import com.google.gson.Gson;
 import com.jakewharton.disklrucache.DiskLruCache;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.ArtworkUris;
@@ -45,6 +51,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import hugo.weaving.DebugLog;
 import rx.Scheduler;
 import rx.functions.Action0;
 import timber.log.Timber;
@@ -100,9 +107,30 @@ public class ArtworkProvider extends ContentProvider {
         throw new UnsupportedOperationException("Provider is read only");
     }
 
+    @Nullable
     @Override
-    public ParcelFileDescriptor openFile(Uri uri, String mode, CancellationSignal signal) throws FileNotFoundException {
-        return openFile(uri, mode);
+    @DebugLog
+    public AssetFileDescriptor openTypedAssetFile(Uri uri, String mimeTypeFilter, Bundle opts) throws FileNotFoundException {
+        if (opts != null && opts.containsKey(ContentResolver.EXTRA_SIZE)) {
+            final Point p = opts.getParcelable(ContentResolver.EXTRA_SIZE);
+            switch (mUriMatcher.match(uri)) {
+                case ArtworkUris.MATCH.ARTINFO: {
+                    final int size = p.x * p.y;
+                    final int thumbSize = ArtworkType.THUMBNAIL.px * ArtworkType.THUMBNAIL.px;
+                    final ArtInfo artInfo = ArtInfo.fromUri(uri);
+                    final ParcelFileDescriptor pfd;
+                    if (size > thumbSize) {
+                        pfd = getArtwork(uri, artInfo);
+                    } else {
+                        pfd = getArtworkThumbnail(uri, artInfo);
+                    }
+                    if (pfd != null) {
+                        return new AssetFileDescriptor(pfd, 0, -1);
+                    }
+                }
+            }
+        }
+        return super.openTypedAssetFile(uri, mimeTypeFilter, opts);
     }
 
     @Override
@@ -158,6 +186,25 @@ public class ArtworkProvider extends ContentProvider {
                     }
                 }
                 break;
+            }case ArtworkUris.MATCH.ARTINFO: {
+                final ArtInfo artInfo = ArtInfo.fromUri(uri);
+                ArtworkType artworkType = ArtworkType.THUMBNAIL;
+                final String t = uri.getQueryParameter("t");
+                if (!StringUtils.isEmpty(t)) {
+                    artworkType = ArtworkType.valueOf(t);
+                }
+                final ParcelFileDescriptor pfd;
+                switch (artworkType) {
+                    case LARGE:
+                        pfd = getArtwork(uri, artInfo);
+                        break;
+                    default:
+                        pfd = getArtworkThumbnail(uri, artInfo);
+                        break;
+                }
+                if (pfd != null) {
+                    return pfd;
+                }
             }
         }
         throw new FileNotFoundException("Could not obtain image from cache");

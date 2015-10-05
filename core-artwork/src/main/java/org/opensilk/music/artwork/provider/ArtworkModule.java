@@ -20,14 +20,15 @@ import android.content.Context;
 import android.graphics.Bitmap;
 
 import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.music.artwork.shared.ArtworkAuthorityModule;
-import org.opensilk.music.artwork.shared.ArtworkPreferences;
 import org.opensilk.music.artwork.cache.BitmapDiskCache;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.artwork.cache.CacheUtil;
+import org.opensilk.music.artwork.coverartarchive.CoverArtArchive;
+import org.opensilk.music.artwork.coverartarchive.CoverArtArchiveModule;
+import org.opensilk.music.artwork.shared.ArtworkAuthorityModule;
+import org.opensilk.music.artwork.shared.ArtworkPreferences;
 import org.opensilk.music.artwork.shared.GsonModule;
 import org.opensilk.music.lastfm.LastFMModule;
-import org.opensilk.music.volley.VolleyModule;
 
 import javax.inject.Singleton;
 
@@ -44,7 +45,8 @@ import static org.opensilk.music.artwork.Constants.DISK_CACHE_DIRECTORY;
                 ArtworkAuthorityModule.class,
                 GsonModule.class,
                 SystemServicesModule.class,
-                LastFMModule.class
+                LastFMModule.class,
+                CoverArtArchiveModule.class
         }
 )
 public class ArtworkModule {

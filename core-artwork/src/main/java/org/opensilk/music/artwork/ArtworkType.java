@@ -30,7 +30,7 @@ public enum ArtworkType {
     THUMBNAIL,
     LARGE;
 
-    private int px = -1;
+    public int px = -1;
 
     //TODO this in only used an ArtwokrRequst2, move it in there.
     public static int getWidth(Context context, ArtworkType type) {

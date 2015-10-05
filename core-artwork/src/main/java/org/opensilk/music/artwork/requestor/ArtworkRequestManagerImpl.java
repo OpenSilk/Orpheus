@@ -335,7 +335,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
         @Override
         Uri getUri() {
-            return ArtworkUris.createArtistReq(mAuthority, UtilsArt.base64EncodedJsonArtInfo(mGson, artInfo), artworkType);
+            return ArtworkUris.forArtInfo(mAuthority, artInfo, artworkType);
         }
     }
 
@@ -353,7 +353,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
         @Override
         Uri getUri() {
-            return ArtworkUris.createAlbumReq(mAuthority, UtilsArt.base64EncodedJsonArtInfo(mGson, artInfo), artworkType);
+            return ArtworkUris.forArtInfo(mAuthority, artInfo, artworkType);
         }
     }
 

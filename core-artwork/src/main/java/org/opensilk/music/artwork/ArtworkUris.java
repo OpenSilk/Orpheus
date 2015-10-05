@@ -20,16 +20,19 @@ package org.opensilk.music.artwork;
 import android.content.UriMatcher;
 import android.net.Uri;
 
+import org.opensilk.music.model.ArtInfo;
+
 /**
  * Created by drew on 4/30/15.
  */
 public class ArtworkUris {
 
-    static String content = "content";
-    static String artwork = "artwork";
-    static String thumbnail = "thumbnail";
-    static String albumReq = "req/album";
-    static String artistReq = "req/artist";
+    static final String content = "content";
+    static final String artwork = "artwork";
+    static final String thumbnail = "thumbnail";
+    static final String albumReq = "req/album";
+    static final String artistReq = "req/artist";
+    static final String artInfo = "artInfo";
 
     /**
      * @return Uri to retrieve large (fullscreen) artwork for specified albumId
@@ -57,11 +60,16 @@ public class ArtworkUris {
                 .appendQueryParameter("q", base64Artinfo).appendQueryParameter("t", type.toString()).build();
     }
 
+    public static Uri forArtInfo(String authority, ArtInfo artInfo, ArtworkType type) {
+        return artInfo.asUri(authority).buildUpon().appendQueryParameter("t", type.toString()).build();
+    }
+
     public interface MATCH {
         int ARTWORK = 1;
         int THUMBNAIL = 2;
         int ALBUM_REQ = 3;
         int ARTIST_REQ = 4;
+        int ARTINFO = 5;
     }
 
     //XXX when adding new matches be sure to update both the provider and the fetchermanager
@@ -71,6 +79,7 @@ public class ArtworkUris {
         matcher.addURI(authority, thumbnail + "/*/*", MATCH.THUMBNAIL);
         matcher.addURI(authority, albumReq, MATCH.ALBUM_REQ);
         matcher.addURI(authority, artistReq, MATCH.ARTIST_REQ);
+        matcher.addURI(authority, artInfo, MATCH.ARTINFO);
         return matcher;
     }
 }
