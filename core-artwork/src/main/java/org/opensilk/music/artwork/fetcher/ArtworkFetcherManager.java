@@ -17,56 +17,46 @@
 
 package org.opensilk.music.artwork.fetcher;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import com.android.volley.NetworkResponse;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.google.gson.Gson;
+import com.squareup.okhttp.CacheControl;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.music.artwork.shared.ArtworkPreferences;
-import org.opensilk.music.artwork.ArtworkRequest2;
-import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.artwork.ArtworkUris;
-import org.opensilk.music.artwork.Constants;
-import org.opensilk.music.artwork.CoverArtJsonRequest;
-import org.opensilk.music.artwork.CrumbTrail;
-import org.opensilk.music.artwork.RequestKey;
-import org.opensilk.music.artwork.UtilsArt;
 import org.opensilk.music.artwork.cache.BitmapDiskCache;
+import org.opensilk.music.artwork.coverartarchive.CoverArtArchive;
+import org.opensilk.music.artwork.coverartarchive.Metadata;
+import org.opensilk.music.artwork.shared.ArtworkPreferences;
 import org.opensilk.music.model.ArtInfo;
 
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.AbstractMap;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import de.umass.lastfm.Album;
 import de.umass.lastfm.Artist;
+import de.umass.lastfm.LastFM;
 import de.umass.lastfm.LastFMVolley;
+import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscriber;
 import rx.Subscription;
-import rx.functions.Action0;
-import rx.functions.Action1;
+import rx.exceptions.OnErrorThrowable;
 import rx.functions.Func1;
 import timber.log.Timber;
 
@@ -75,398 +65,70 @@ import timber.log.Timber;
  */
 @ArtworkFetcherScope
 public class ArtworkFetcherManager {
-    final static boolean DROP_CRUMBS = true;
 
     final Context mContext;
     final ArtworkPreferences mPreferences;
     final BitmapDiskCache mL2Cache;
-    final RequestQueue mVolleyQueue;
-    final Gson mGson;
     final ConnectivityManager mConnectivityManager;
-    final LastFMVolley mLastFMVolley;
+    final LastFM mLastFM;
+    final CoverArtArchive mCoverArtArchive;
+    final OkHttpClient mOkHttpClient;
 
     final UriMatcher mUriMatcher;
-    /*
-     * Scheduler our requests are observed on.
-     * Normally volley dispatches results on the main thread but we are
-     * using a custom dispatcher to receive them on a worker thread since we write
-     * to disk. This also means our final onComplete will be called on that worker thread
-     * which we dont want, so we use this to push the onComplete call over to the same
-     * thread that created the request so we dont need to worry about synchronization
-     */
-    final Scheduler oScheduler;
-
-    final Scheduler scheduler = Constants.ARTWORK_SCHEDULER;
-    final Map<RequestKey, Uri> mActiveRequests = new LinkedHashMap<>();
+    final Scheduler mObserveOn;
+    final Scheduler mSubscribeOn;
 
     @Inject
     public ArtworkFetcherManager(
             @ForApplication Context mContext,
             ArtworkPreferences mPreferences,
             BitmapDiskCache mL2Cache,
-            RequestQueue mVolleyQueue,
-            Gson mGson,
             ConnectivityManager mConnectivityManager,
             UriMatcher mUriMatcher,
-            @Named("oScheduler") Scheduler oScheduler,
-            LastFMVolley lastFMVolley
+            @Named("ObserveOnScheduler") Scheduler mObserveOn,
+            @Named("SubscribeOnScheduler") Scheduler mSubscribeOn,
+            LastFM mLastFM,
+            CoverArtArchive mCoverArtArchive,
+            OkHttpClient mOkHttpClient
     ) {
         this.mContext = mContext;
         this.mPreferences = mPreferences;
         this.mL2Cache = mL2Cache;
-        this.mVolleyQueue = mVolleyQueue;
-        this.mGson = mGson;
         this.mConnectivityManager = mConnectivityManager;
         this.mUriMatcher = mUriMatcher;
-        this.oScheduler = oScheduler;
-        this.mLastFMVolley = lastFMVolley;
+        this.mObserveOn = mObserveOn;
+        this.mSubscribeOn = mSubscribeOn;
+        this.mLastFM = mLastFM;
+        this.mCoverArtArchive = mCoverArtArchive;
+        this.mOkHttpClient = mOkHttpClient;
     }
 
-    interface CompletionListener {
-        void onComplete();
-    }
-
-    interface IFetcherTask extends Subscription {
-        void start();
-    }
-
-    abstract class BaseArtworkRequest implements IFetcherTask {
-        final RequestKey key;
-        final ArtInfo artInfo;
-        final ArtworkType artworkType;
-        final CompletionListener listener;
-
-        Subscription subscription;
-        boolean unsubscribed = false;
-        boolean complete = false;
-
-        BaseArtworkRequest(RequestKey key, CompletionListener listener) {
-            this.key = key;
-            this.artInfo = key.artInfo;
-            this.artworkType = key.artworkType;
-            this.listener = listener;
-            addBreadcrumb("Fetcher: %s", UtilsArt.getCacheKey(artInfo, artworkType));
-        }
-
-        @Override
-        public void unsubscribe() {
-            addBreadcrumb("unsubscribe");
-            unsubscribed = true;
-            if (subscription != null) {
-                subscription.unsubscribe();
-                subscription = null;
-            }
-            if (artInfo != null) {
-                mVolleyQueue.cancelAll(artInfo);
-            }
-            onComplete();
-        }
-
-        @Override
-        public boolean isUnsubscribed() {
-            return unsubscribed;
-        }
-
-        @Override
-        public void start() {
-            addBreadcrumb("start");
-            if (validateArtInfo()) {
-                onStart();
-            } else {
-                onComplete();
-            }
-        }
-
-        void onComplete() {
-            addBreadcrumb("complete");
-            complete = true;
-            mActiveRequests.remove(key);
-            listener.onComplete();
-            printTrail();
-        }
-
-        void onResponse() {
-            addBreadcrumb("onResponse");
-            if (unsubscribed) return;
-            Uri uri = mActiveRequests.get(key);
-            if (uri != null) {
-                mContext.getContentResolver().notifyChange(uri, null);
-            }
-        }
-
-        abstract boolean validateArtInfo();
-        abstract void onStart();
-
-        CrumbTrail crumbTrail;
-        void addBreadcrumb(String crumb, Object... args) {
-            if (!DROP_CRUMBS) return;
-            if (crumbTrail == null)
-                crumbTrail = new CrumbTrail();
-            crumbTrail.drop(String.format(Locale.US, crumb, args));
-        }
-
-        void printTrail() {
-            if (!DROP_CRUMBS) return;
-            crumbTrail.follow();
-        }
-    }
-
-    class ArtistArtworkRequest extends BaseArtworkRequest {
-
-        ArtistArtworkRequest(RequestKey key, CompletionListener listener) {
-            super(key, listener);
-        }
-
-        @Override
-        boolean validateArtInfo() {
-            return !TextUtils.isEmpty(artInfo.artistName);
-        }
-
-        @Override
-        void onStart() {
-            addBreadcrumb("onStart");
-            boolean isOnline = isOnline(mPreferences.getBoolean(ArtworkPreferences.ONLY_ON_WIFI, true));
-            boolean wantArtistImages = mPreferences.getBoolean(ArtworkPreferences.DOWNLOAD_MISSING_ARTIST_IMAGES, true);
-            if (isOnline && wantArtistImages) {
-                addBreadcrumb("goingForNetwork");
-                tryForNetwork();
-            } else {
-                onComplete();
-            }
-        }
-
-        void tryForNetwork() {
-            subscription = createArtistNetworkRequest(artInfo, artworkType)
-                    .observeOn(oScheduler)
-                    .subscribe(new Action1<Bitmap>() {
-                        @Override
-                        public void call(Bitmap bitmap) {
-                        }
-                    }, new Action1<Throwable>() {
-                        @Override
-                        public void call(Throwable throwable) {
-                            addBreadcrumb("tryForNetwork miss");
-                            onComplete();
-                        }
-                    }, new Action0() {
-                        @Override
-                        public void call() {
-                            addBreadcrumb("tryForNetwork hit");
-                            onResponse();
-                            onComplete();
-                        }
-                    });
-        }
-    }
-
-    class AlbumArtworkRequest extends BaseArtworkRequest {
-
-        AlbumArtworkRequest(RequestKey key, CompletionListener listener) {
-            super(key, listener);
-        }
-
-        @Override
-        boolean validateArtInfo() {
-            return (!TextUtils.isEmpty(artInfo.artistName) && !TextUtils.isEmpty(artInfo.albumName))
-                    || (artInfo.artworkUri != null && !artInfo.artworkUri.equals(Uri.EMPTY));
-        }
-
-        @Override
-        void onStart() {
-            addBreadcrumb("onStart");
-            //check if we have everything we need to download artwork
-            boolean hasAlbumArtist = !TextUtils.isEmpty(artInfo.albumName) && !TextUtils.isEmpty(artInfo.artistName);
-            boolean hasUri = artInfo.artworkUri != null && !artInfo.artworkUri.equals(Uri.EMPTY);
-            boolean isOnline = isOnline(mPreferences.getBoolean(ArtworkPreferences.ONLY_ON_WIFI, true));
-            boolean wantAlbumArt = mPreferences.getBoolean(ArtworkPreferences.DOWNLOAD_MISSING_ARTWORK, true);
-            boolean preferDownload = mPreferences.getBoolean(ArtworkPreferences.PREFER_DOWNLOAD_ARTWORK, false);
-            boolean isLocalArt = isLocalArtwork(artInfo.artworkUri);
-            if (hasAlbumArtist && hasUri) {
-                addBreadcrumb("hasAlbumArtist && hasUri");
-                // We have everything we may need
-                if (isOnline && wantAlbumArt) {
-                    addBreadcrumb("isOnline && wantAlbumArt");
-                    // were online and want artwork
-                    if (isLocalArt && !preferDownload) {
-                        addBreadcrumb("goingForMediaStore(true)");
-                        // try mediastore first if local and user prefers
-                        tryForMediaStore(true);
-                    } else if (!isLocalArt && !preferDownload) {
-                        // remote art and dont want to try for lfm
-                        addBreadcrumb("goingForUrl");
-                        tryForUrl();
-                    } else {
-                        addBreadcrumb("goingForNetwork(true)");
-                        // go to network, falling back on fail
-                        tryForNetwork(true);
-                    }
-                } else if (isOnline && !isLocalArt) {
-                    addBreadcrumb("goingForUrl");
-                    // were online and have an external uri lets get it
-                    // regardless of user preference
-                    tryForUrl();
-                } else if (!isOnline && isLocalArt && !preferDownload) {
-                    addBreadcrumb("goingForMediaStore(false)");
-                    // were offline, this is a local source
-                    // and the user doesnt want to try network first
-                    // go ahead and fetch the mediastore image
-                    tryForMediaStore(false);
-                } else {
-                    //  were offline and cant get artwork or the user wants to defer
-                    addBreadcrumb("defer fetching art");
-                    onComplete();
-                }
-            } else if (hasAlbumArtist) {
-                addBreadcrumb("hasAlbumArtist");
-                if (isOnline) {
-                    addBreadcrumb("tryForNetwork(false)");
-                    // try for network, we dont have a uri so dont fallback on failure
-                    tryForNetwork(false);
-                } else {
-                    onComplete();
-                }
-            } else if (hasUri) {
-                addBreadcrumb("hasUri");
-                if (isLocalArt) {
-                    addBreadcrumb("goingForMediaStore(false)");
-                    //Wait what? this should never happen
-                    tryForMediaStore(false);
-                } else if (isOnline(false)) { //ignore wifi only request for remote urls
-                    addBreadcrumb("goingForUrl");
-                    //all we have is a url so go for it
-                    tryForUrl();
-                } else {
-                    onComplete();
-                }
-            } else { // just ignore the request
-                onComplete();
-            }
-        }
-
-        void tryForNetwork(final boolean tryFallbackOnFail) {
-            subscription = createAlbumNetworkObservable(artInfo, artworkType)
-                    .observeOn(oScheduler)
-                    .subscribe(new Action1<Bitmap>() {
-                        @Override
-                        public void call(Bitmap bitmap) {
-                        }
-                    }, new Action1<Throwable>() {
-                        @Override
-                        public void call(Throwable throwable) {
-                            addBreadcrumb("tryForNetwork miss");
-                            onNetworkMiss(tryFallbackOnFail);
-                        }
-                    }, new Action0() {
-                        @Override
-                        public void call() {
-                            addBreadcrumb("tryForNetwork hit");
-                            onResponse();
-                            onComplete();
-                        }
-                    });
-        }
-
-        void onNetworkMiss(final boolean tryFallback) {
-            addBreadcrumb("onNetworkMiss");
-            boolean isLocalArt = isLocalArtwork(artInfo.artworkUri);
-            if (tryFallback) {
-                if (isLocalArt) {
-                    addBreadcrumb("goingForMediaStore(false)");
-                    tryForMediaStore(false);
-                } else {
-                    addBreadcrumb("goingForUrl");
-                    tryForUrl();
-                }
-            } else {
-                onComplete();
-            }
-        }
-
-        void tryForMediaStore(final boolean tryNetworkOnFailure) {
-            subscription = createMediaStoreRequestObservable(artInfo, artworkType)
-                    .observeOn(oScheduler)
-                    .subscribe(new Action1<Bitmap>() {
-                        @Override
-                        public void call(Bitmap bitmap) {
-                        }
-                    }, new Action1<Throwable>() {
-                        @Override
-                        public void call(Throwable throwable) {
-                            addBreadcrumb("tryForMediaStore miss");
-                            onMediaStoreMiss(tryNetworkOnFailure);
-                        }
-                    }, new Action0() {
-                        @Override
-                        public void call() {
-                            addBreadcrumb("tryForMediaStore hit");
-                            onResponse();
-                            onComplete();
-                        }
-                    });
-        }
-
-        void onMediaStoreMiss(boolean tryNetwork) {
-            addBreadcrumb("onMediaStoreMiss");
-            if (tryNetwork) {
-                addBreadcrumb("goingForNetwork");
-                tryForNetwork(false);
-            } else {
-                onComplete();
-            }
-        }
-
-        void tryForUrl() {
-            subscription = createImageRequestObservable(artInfo.artworkUri.toString(), artInfo, artworkType)
-                    .observeOn(oScheduler)
-                    .subscribe(new Action1<Bitmap>() {
-                        @Override
-                        public void call(Bitmap bitmap) {
-
-                        }
-                    }, new Action1<Throwable>() {
-                        @Override
-                        public void call(Throwable throwable) {
-                            addBreadcrumb("tryForUrl miss");
-//                            Timber.w(throwable, "tryForUrl %s", artInfo);
-                            onComplete();
-                        }
-                    }, new Action0() {
-                        @Override
-                        public void call() {
-                            addBreadcrumb("tryForUrl hit");
-                            onResponse();
-                            onComplete();
-                        }
-                    });
-        }
+    public static abstract class CompletionListener extends Subscriber<Bitmap> {
+        @Override public void onError(Throwable e) { }
+        /** Do not call super when overriding this method */
+        @Override public void onNext(Bitmap o) { o.recycle(); }
     }
 
     /**
      * Entry point
      */
-    public Subscription fetch(Uri uri, ArtInfo artInfo, ArtworkType artworkType, CompletionListener l) {
-        IFetcherTask t = null;
-        final RequestKey k = new RequestKey(artInfo, artworkType);
-        if (!mActiveRequests.containsKey(k)) {
-            t = newTaskForUri(uri, k, l);
-            if (t != null) {
-                mActiveRequests.put(k, uri);
-                t.start();
+    public Subscription fetch(ArtInfo artInfo, CompletionListener l) {
+        if (artInfo.forArtist) {
+            if (StringUtils.isEmpty(artInfo.artistName)) {
+                return Observable.<Bitmap>error(new Exception("Invalid artInfo: " +
+                        "must have artistName set")).subscribe(l);
+            } else {
+                return fetchArtistImage(artInfo).observeOn(mObserveOn).subscribe(l);
             }
-        }
-        return t;
-    }
-
-    IFetcherTask newTaskForUri(Uri uri, RequestKey k, CompletionListener l) {
-        switch (mUriMatcher.match(uri)) {
-            case ArtworkUris.MATCH.ARTWORK:
-            case ArtworkUris.MATCH.THUMBNAIL:
-            case ArtworkUris.MATCH.ALBUM_REQ:
-                return new AlbumArtworkRequest(k, l);
-            case ArtworkUris.MATCH.ARTIST_REQ:
-                return new ArtistArtworkRequest(k, l);
-            default:
-                return null;
+        } else {
+            if ((StringUtils.isEmpty(artInfo.artistName)
+                    && StringUtils.isEmpty(artInfo.albumName))
+                    && (artInfo.artworkUri == null || Uri.EMPTY.equals(artInfo.artworkUri))) {
+                return Observable.<Bitmap>error(new Exception("Invalid artInfo: must have artistName " +
+                        "and albumName set or valid artworkUri")).subscribe(l);
+            } else {
+                return fetchAlbumCover(artInfo).observeOn(mObserveOn).subscribe(l);
+            }
         }
     }
 
@@ -474,289 +136,330 @@ public class ArtworkFetcherManager {
      * Clears the disk caches
      */
     public void clearCaches() {
-//        clearVolleyQueue();
-//        mVolleyQueue.getCache().clear();
         mL2Cache.clearCache();
     }
 
-    void clearVolleyQueue() {
-        mVolleyQueue.cancelAll(new RequestQueue.RequestFilter() {
+    public void onDestroy() {
+    }
+
+    /*
+     * End public methods
+     */
+
+    private Observable<Boolean> baseObservable(final ArtInfo artInfo) {
+        return Observable.create(new Observable.OnSubscribe<Boolean>() {
             @Override
-            public boolean apply(Request<?> request) {
-                return true;
+            public void call(Subscriber<? super Boolean> subscriber) {
+                //in case a request just finished
+                subscriber.onNext(mL2Cache.containsKey(artInfo.cacheKey()));
+                subscriber.onCompleted();
+            }
+        }).subscribeOn(mSubscribeOn);
+    }
+
+    private Observable<Bitmap> fetchArtistImage(final ArtInfo artInfo) {
+        return baseObservable(artInfo).flatMap(new Func1<Boolean, Observable<Bitmap>>() {
+            @Override
+            public Observable<Bitmap> call(Boolean inCache) {
+                if (inCache) {
+                    return Observable.just(mL2Cache.getBitmap(artInfo.cacheKey()));
+                }
+                boolean isOnline = isOnline(mPreferences.getBoolean(ArtworkPreferences.ONLY_ON_WIFI, true));
+                boolean wantArtistImages = mPreferences.getBoolean(ArtworkPreferences.DOWNLOAD_MISSING_ARTIST_IMAGES, true);
+                if (isOnline && wantArtistImages) {
+                    return createArtistNetworkRequest(artInfo);
+                } else {
+                    return Observable.error(new Exception("Must defer #0"));
+                }
             }
         });
     }
 
-    public void cancelAllRequests() {
-        Timber.w("cancelAllRequests(): Not implemented"); //TODO
-    }
-
-    public void onDestroy() {
-//        mVolleyQueue.stop();
-    }
-
-    public Observable<Bitmap> createAlbumNetworkObservable(final ArtInfo artInfo, final ArtworkType artworkType) {
-        return mLastFMVolley.newAlbumRequestObservable(artInfo.artistName, artInfo.albumName)
-                // remap the album info returned by last fm into a url where we can find an image
-                .flatMap(new Func1<Album, Observable<String>>() {
-                    @Override
-                    public Observable<String> call(final Album album) {
-                        // try coverartarchive
-                        if (!mPreferences.getBoolean(ArtworkPreferences.WANT_LOW_RESOLUTION_ART, false)) {
-                            Timber.v("Creating CoverArtRequest %s, from %s", album.getName(), Thread.currentThread().getName());
-                            return createAlbumCoverArtRequestObservable(album.getMbid())
-                                    // if coverartarchive fails fallback to lastfm
-                                    // im using ResumeNext so i can propogate the error
-                                    // not sure Return will do that properly TODO find out
-                                    .onErrorResumeNext(new Func1<Throwable, Observable<String>>() {
-                                        @Override
-                                        public Observable<String> call(Throwable throwable) {
-                                            Timber.v("CoverArtRequest failed %s, from %s", album.getName(), Thread.currentThread().getName());
-                                            String url = LastFMVolley.getBestImage(album, true);
-                                            if (!TextUtils.isEmpty(url)) {
-                                                return Observable.just(url);
-                                            } else {
-                                                return Observable.error(new NullPointerException("No image urls for " + album.getName()));
-                                            }
-                                        }
-                                    });
-                        } else { // user wants low res go straight for lastfm
-                            String url = LastFMVolley.getBestImage(album, false);
-                            if (!TextUtils.isEmpty(url)) {
-                                return Observable.just(url);
+    private Observable<Bitmap> fetchAlbumCover(final ArtInfo artInfo) {
+        return baseObservable(artInfo).flatMap(new Func1<Boolean, Observable<Bitmap>>() {
+            @Override
+            public Observable<Bitmap> call(Boolean inCache) {
+                if (inCache) {
+                    return Observable.just(mL2Cache.getBitmap(artInfo.cacheKey()));
+                }
+                boolean hasAlbumArtist = !TextUtils.isEmpty(artInfo.albumName) && !TextUtils.isEmpty(artInfo.artistName);
+                boolean hasUri = artInfo.artworkUri != null && !artInfo.artworkUri.equals(Uri.EMPTY);
+                boolean isOnline = isOnline(mPreferences.getBoolean(ArtworkPreferences.ONLY_ON_WIFI, true));
+                boolean wantAlbumArt = mPreferences.getBoolean(ArtworkPreferences.DOWNLOAD_MISSING_ARTWORK, true);
+                boolean preferDownload = mPreferences.getBoolean(ArtworkPreferences.PREFER_DOWNLOAD_ARTWORK, false);
+                boolean isLocalArt = isLocalArtwork(artInfo.artworkUri);
+                if (hasAlbumArtist && hasUri) {
+                    // We have everything we may need
+                    if (isOnline && wantAlbumArt) {
+                        // were online and want artwork
+                        if (!preferDownload) {
+                            if (isLocalArt) {
+                                // try mediastore first if parsing fails go to network
+                                return tryForMediaStore(artInfo, true);
                             } else {
-                                return Observable.error(new NullPointerException("No url for " + album.getName()));
+                                // remote art and dont want to try for lfm
+                                return createImageObservable(artInfo.artworkUri.toString(), artInfo);
                             }
+                        } else {
+                            // go to network, falling back on fail
+                            return tryForNetwork(artInfo, true);
                         }
+                    } else if (isOnline && !isLocalArt) {
+                        // were online and have an external uri lets get it
+                        // regardless of user preference
+                        return createImageObservable(artInfo.artworkUri.toString(), artInfo);
+                    } else if (!isOnline && isLocalArt && !preferDownload) {
+                        // were offline, this is a local source
+                        // and the user doesnt want to try network first
+                        // go ahead and fetch the mediastore image
+                        return tryForMediaStore(artInfo, false);
+                    } else {
+                        //  were offline and cant get artwork or the user wants to defer
+                        return Observable.error(new Exception("Must defer #1"));
                     }
-                })
-                // remap the url we found into a bitmap
-                .flatMap(new Func1<String, Observable<Bitmap>>() {
-                    @Override
-                    public Observable<Bitmap> call(String s) {
-                        return createImageRequestObservable(s, artInfo, artworkType);
+                } else if (hasAlbumArtist) {
+                    if (isOnline && wantAlbumArt) {
+                        // try for network, we dont have a uri so dont fallback on failure
+                        return tryForNetwork(artInfo, false);
+                    } else {
+                        return Observable.error(new Exception("Must defer #2"));
                     }
-                });
+                } else if (hasUri) {
+                    if (isLocalArt) {
+                        //we cant fallback without album/artist
+                        return tryForMediaStore(artInfo, false);
+                    } else if (isOnline) {
+                        //all we have is a url so go for it
+                        return createImageObservable(artInfo.artworkUri.toString(), artInfo);
+                    } else {
+                        return Observable.error(new Exception("Must defer #3"));
+                    }
+                } else { // just ignore the request
+                    return Observable.error(new Exception("Must defer #4"));
+                }
+            }
+        });
     }
 
-    public Observable<Bitmap> createArtistNetworkRequest(final ArtInfo artInfo, final ArtworkType artworkType) {
-        return mLastFMVolley.newArtistRequestObservable(artInfo.artistName)
+    private Observable<Bitmap> createArtistNetworkRequest(final ArtInfo artInfo) {
+        return mLastFM.getArtistObservable(artInfo.artistName)
                 .map(new Func1<Artist, String>() {
                     @Override
                     public String call(Artist artist) {
-                        String url = LastFMVolley.getBestImage(artist,
-                                !mPreferences.getBoolean(ArtworkPreferences.WANT_LOW_RESOLUTION_ART, false));
+                        String url = LastFMVolley.getBestImage(artist, true);
                         if (!TextUtils.isEmpty(url)) {
                             return url;
                         }
                         Timber.v("ArtistApiRequest: No image urls for %s", artist.getName());
-                        throw new NullPointerException("No image urls for " + artist.getName());
+                        throw OnErrorThrowable.from(new Exception("No artwork found for " +
+                                artist.getName()));
                     }
-                })
-                .flatMap(new Func1<String, Observable<Bitmap>>() {
+                }).flatMap(new Func1<String, Observable<Bitmap>>() {
                     @Override
                     public Observable<Bitmap> call(String s) {
-                        return createImageRequestObservable(s, artInfo, artworkType);
+                        return createImageObservable(mangleImageUrl(s), artInfo);
                     }
                 });
     }
 
-    public Observable<String> createAlbumCoverArtRequestObservable(final String mbid) {
-        return Observable.create(new Observable.OnSubscribe<String>() {
-            @Override
-            public void call(final Subscriber<? super String> subscriber) {
-                CoverArtJsonRequest.Listener listener = new CoverArtJsonRequest.Listener() {
+    private Observable<Bitmap> createAlbumNetworkRequest(final ArtInfo artInfo) {
+        return mLastFM.getAlbumObservable(artInfo.artistName, artInfo.albumName)
+                .flatMap(new Func1<Album, Observable<String>>() {
                     @Override
-                    public void onErrorResponse(VolleyError volleyError) {
-                        Timber.v("CoverArtRequest:onErrorResponse %s", volleyError);
-                        if (subscriber.isUnsubscribed()) return;
-                        subscriber.onError(volleyError);
+                    public Observable<String> call(final Album album) {
+                        String mbid = album.getMbid();
+                        if (StringUtils.isEmpty(mbid)) {
+                            return Observable.error(new Exception("No mbid for album " + album.getName()));
+                        } else {
+                            return mCoverArtArchive.getReleaseObservable(album.getMbid())
+                                    .map(new Func1<Metadata, String>() {
+                                        @Override
+                                        public String call(Metadata metadata) {
+                                            for (Metadata.Image image : metadata.images) {
+                                                if (image.front && image.approved) {
+                                                    return image.image;
+                                                }
+                                            }
+                                            throw OnErrorThrowable.from(new Exception("No suitable " +
+                                                    "artwork found for release " + metadata.release));
+                                        }
+                                    }).onErrorReturn(new Func1<Throwable, String>() {
+                                        @Override
+                                        public String call(Throwable throwable) {
+                                            String url = LastFMVolley.getBestImage(album, true);
+                                            if (!StringUtils.isEmpty(url)) {
+                                                return url;
+                                            }
+                                            throw OnErrorThrowable.from(new Exception("No " +
+                                                    "artwork found for album " + album.getName()));
+                                        }
+                                    });
+                        }
                     }
+                }).flatMap(new Func1<String, Observable<Bitmap>>() {
                     @Override
-                    public void onResponse(String s) {
-                        if (subscriber.isUnsubscribed()) return;
-                        subscriber.onNext(s);
-                        subscriber.onCompleted();
+                    public Observable<Bitmap> call(final String s) {
+                        return createImageObservable(mangleImageUrl(s), artInfo);
                     }
-                };
-                mVolleyQueue.add(new CoverArtJsonRequest(mbid, listener, mGson));
-            }
-        });
+                });
     }
 
-    public Observable<Bitmap> createImageRequestObservable(final String url, final ArtInfo artInfo, final ArtworkType artworkType) {
-        return Observable.create(new Observable.OnSubscribe<Bitmap>() {
-            @Override
-            public void call(final Subscriber<? super Bitmap> subscriber) {
-                Timber.v("creating ImageRequest %s, from %s", url, Thread.currentThread().getName());
-                ArtworkRequest2.Listener listener = new ArtworkRequest2.Listener() {
-                    @Override
-                    public void onErrorResponse(VolleyError volleyError) {
-                        if (subscriber.isUnsubscribed()) return;
-                        subscriber.onError(volleyError);
-                    }
-                    @Override
-                    public void onResponse(Bitmap bitmap) {
-                        // always add to cache
-                        String cacheKey = UtilsArt.getCacheKey(artInfo, artworkType);
-                        writeToL2(cacheKey, bitmap);
-                        if (subscriber.isUnsubscribed()) return;
-                        //subscriber.onNext(bitmap);
-                        subscriber.onCompleted();
-                    }
-                };
-                mVolleyQueue.add(new ArtworkRequest2(mContext, url, artworkType, listener).setTag(artInfo));
-                // Here we take advantage of volleys coolest feature,
-                // We have 2 types of images, a thumbnail and a larger image suitable for
-                // fullscreen use. these are almost never required at the same time so we create
-                // a second request. The cool part is volley wont actually download the image twice
-                // this second request is attached to the first and processed afterwards
-                // saving bandwidth and ensuring both kinds of images are available next time
-                // we need them.
-                createImageRequestForCache(url, artInfo, ArtworkType.opposite(artworkType));
-            }
-        });
-    }
-
-    public void createImageRequestForCache(final String url, final ArtInfo artInfo, final ArtworkType artworkType) {
-        ArtworkRequest2.Listener listener = new ArtworkRequest2.Listener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                //pass
-            }
-            @Override
-            public void onResponse(Bitmap bitmap) {
-                writeToL2(UtilsArt.getCacheKey(artInfo, artworkType), bitmap);
-            }
-        };
-        mVolleyQueue.add(new ArtworkRequest2(mContext, url, artworkType, listener).setTag(artInfo));
-    }
-
-    public Observable<Bitmap> createMediaStoreRequestObservable(final ArtInfo artInfo, final ArtworkType artworkType) {
-        return Observable.create(new Observable.OnSubscribe<Bitmap>() {
-            @Override
-            public void call(final Subscriber<? super Bitmap> subscriber) {
-                Timber.v("creating MediaStoreRequest %s, from %s", artInfo, Thread.currentThread().getName());
-                InputStream in = null;
-                try {
-                    final Uri uri = artInfo.artworkUri;
-                    in = mContext.getContentResolver().openInputStream(uri);
-                    final NetworkResponse response = new NetworkResponse(IOUtils.toByteArray(in));
-                    // We create a faux ImageRequest so we can cheat and use it
-                    // to processs the bitmap like a real network request
-                    // this is not only easier but safer since all bitmap processing is serial.
-                    ArtworkRequest2 request = new ArtworkRequest2(mContext, "fauxrequest", artworkType, null);
-                    Response<Bitmap> result = request.parseNetworkResponse(response);
-                    // make the opposite as well
-                    ArtworkType artworkType2 = ArtworkType.opposite(artworkType);
-                    ArtworkRequest2 request2 = new ArtworkRequest2(mContext, "fauxrequest2", artworkType2, null);
-                    Response<Bitmap> result2 = request2.parseNetworkResponse(response);
-                    // add to cache first so we dont return before its added
-                    if (result2.isSuccess()) {
-                        String cacheKey = UtilsArt.getCacheKey(artInfo, artworkType2);
-                        writeToL2(cacheKey, result2.result);
-                    }
-                    if (result.isSuccess()) {
-                        //always add to cache
-                        String cacheKey = UtilsArt.getCacheKey(artInfo, artworkType);
-                        writeToL2(cacheKey, result.result);
-                        if (subscriber.isUnsubscribed()) return;
-                        subscriber.onNext(result.result);
-                        subscriber.onCompleted();
-                    } else {
-                        if (subscriber.isUnsubscribed()) return;
-                        subscriber.onError(result.error);
-                    }
-                } catch (Exception e) { //too many to keep track of
-                    if (subscriber.isUnsubscribed()) return;
-                    subscriber.onError(e);
-                } finally {
-                    IOUtils.closeQuietly(in);
-                }
-            }
-        }).subscribeOn(scheduler);
-    }
-
-    final BlockingDeque<Map.Entry<String, Bitmap>> diskCacheQueue = new LinkedBlockingDeque<>();
-    Scheduler.Worker diskCacheWorker;
-
-    //Unused but keeping around
-    public void putInDiskCache(final String key, final Bitmap bitmap) {
-        Timber.v("putInDiskCache(%s)", key);
-        diskCacheQueue.addLast(new AbstractMap.SimpleEntry<>(key, bitmap));
-        if (diskCacheWorker == null || diskCacheWorker.isUnsubscribed()) {
-            diskCacheWorker = scheduler.createWorker();
-            diskCacheWorker.schedule(new Action0() {
+    private Observable<Bitmap> tryForNetwork(final ArtInfo artInfo, final boolean tryFallbackOnFail) {
+        Observable<Bitmap> o = createAlbumNetworkRequest(artInfo);
+        if (tryFallbackOnFail) {
+            o = o.onErrorResumeNext(new Func1<Throwable, Observable<? extends Bitmap>>() {
                 @Override
-                public void call() {
-                    while (true) {
-                        try {
-                            Map.Entry<String, Bitmap> entry = diskCacheQueue.pollFirst(60, TimeUnit.SECONDS);
-                            if (entry != null) {
-                                writeToL2(entry.getKey(), entry.getValue());
-                                continue;
-                            }
-                        } catch (InterruptedException ignored) {
-                            //fall
-                        }
-                        if (diskCacheWorker != null) {
-                            diskCacheWorker.unsubscribe();
-                            diskCacheWorker = null;
-                        }
-                        break;
+                public Observable<? extends Bitmap> call(Throwable throwable) {
+                    boolean isLocalArt = isLocalArtwork(artInfo.artworkUri);
+                    if (isLocalArt) {
+                        return tryForMediaStore(artInfo, false);
+                    } else {
+                        return createImageObservable(artInfo.artworkUri.toString(), artInfo);
                     }
                 }
             });
         }
+        return o;
     }
 
-    void writeToL2(final String key, final Bitmap bitmap) {
+    private Observable<Bitmap> createImageObservable(final String url, final ArtInfo artInfo) {
+        return Observable.create(new Observable.OnSubscribe<Bitmap>() {
+            @Override
+            public void call(Subscriber<? super Bitmap> subscriber) {
+                InputStream is = null;
+                try {
+                    //We don't want okhttp clogging its cache with these images
+                    CacheControl cc = new CacheControl.Builder().noStore().build();
+                    Request req = new Request.Builder()
+                            .url(url).get().cacheControl(cc).build();
+                    Response response = mOkHttpClient.newCall(req).execute();
+                    if (response.isSuccessful()) {
+                        is = response.body().byteStream();
+                        Bitmap bitmap = decodeBitmap(is, artInfo);
+                        if (bitmap != null && !subscriber.isUnsubscribed()) {
+                            subscriber.onNext(bitmap);
+                            subscriber.onCompleted();
+                            return;
+                        } // else fall
+                    } // else fall
+                    if (!subscriber.isUnsubscribed()) {
+                        subscriber.onError(new Exception("unable to decode " +
+                                "bitmap for " + url));
+                    }
+                } catch (IOException | OutOfMemoryError e) {
+                    if (!subscriber.isUnsubscribed()) subscriber.onError(e);
+                } finally {
+                    IOUtils.closeQuietly(is);
+                }
+            }
+        });
+    }
+
+    private Observable<Bitmap> tryForMediaStore(final ArtInfo artInfo, final boolean tryNetworkOnFailure) {
+        Observable<Bitmap> o = createMediaStoreRequestObservable(artInfo);
+        if (tryNetworkOnFailure) {
+            o = o.onErrorResumeNext(new Func1<Throwable, Observable<Bitmap>>() {
+                @Override
+                public Observable<Bitmap> call(Throwable throwable) {
+                    return tryForNetwork(artInfo, false);
+                }
+            });
+        }
+        return o;
+    }
+
+    private Observable<Bitmap> createMediaStoreRequestObservable(final ArtInfo artInfo) {
+        return Observable.create(new Observable.OnSubscribe<Bitmap>() {
+            @Override
+            public void call(Subscriber<? super Bitmap> subscriber) {
+                InputStream in = null;
+                try {
+                    final Uri uri = artInfo.artworkUri;
+                    in = mContext.getContentResolver().openInputStream(uri);
+                    Bitmap bitmap = decodeBitmap(in, artInfo);
+                    if (bitmap != null && !subscriber.isUnsubscribed()) {
+                        subscriber.onNext(bitmap);
+                        subscriber.onCompleted();
+                        return;
+                    } //else fall
+                    if (!subscriber.isUnsubscribed()) {
+                        subscriber.onError(new Exception("Unable to decode bitmap for " + artInfo.toString()));
+                    }
+                } catch (Exception e) { //too many to keep track of
+                    if (!subscriber.isUnsubscribed()) subscriber.onError(e);
+                } finally {
+                    IOUtils.closeQuietly(in);
+                }
+            }
+        }).subscribeOn(mSubscribeOn);
+    }
+
+    private static final Object sDecodeLock = new Object();
+    @DebugLog
+    private Bitmap decodeBitmap(InputStream is, ArtInfo artInfo) {
+        if (is == null) return null;
+        Bitmap bitmap = null;
+        synchronized (sDecodeLock) {
+            Bitmap tempBitmap2 = BitmapFactory.decodeStream(is);
+            if (tempBitmap2 != null) {
+                // Clip to squares so our circles dont become ovals
+                int w = tempBitmap2.getWidth();
+                int h = tempBitmap2.getHeight();
+                StringBuilder sb = new StringBuilder();
+                if (w > h) {
+                    sb.append("Center cropping: ");
+                    //center crop
+                    bitmap = Bitmap.createBitmap(tempBitmap2, w / 2 - h / 2, 0, h, h);
+                    tempBitmap2.recycle();
+                } else if (h > w) {
+                    sb.append("Top cropping: ");
+                    // top crop
+                    bitmap = Bitmap.createBitmap(tempBitmap2, 0, 0, w, w);
+                    tempBitmap2.recycle();
+                } else {
+                    sb.append("Not cropping: ");
+                    bitmap = tempBitmap2;
+                }
+                Timber.v(sb.append(" from %dx%d to %dx%d for %s").toString(),
+                        w, h, bitmap.getWidth(), bitmap.getHeight(), artInfo.toString());
+            }
+        }
+        if (bitmap != null) {
+            writeToL2(artInfo.cacheKey(), bitmap);
+        }
+        return bitmap;
+    }
+
+    private void writeToL2(final String key, final Bitmap bitmap) {
         Timber.v("writeToL2(%s)", key);
         mL2Cache.putBitmap(key, bitmap);
     }
 
-    /**
-     *
-     */
+    //for testing
+    protected String mangleImageUrl(String url) {
+        return url;
+    }
+
     public static boolean isLocalArtwork(Uri u) {
         if (u != null) {
-            if ("content".equals(u.getScheme())) {
+            if (ContentResolver.SCHEME_CONTENT.equals(u.getScheme())
+                    || ContentResolver.SCHEME_FILE.equals(u.getScheme())
+                    || ContentResolver.SCHEME_ANDROID_RESOURCE.equals(u.getScheme())){
                 return true;
             }
         }
         return false;
     }
 
-    boolean isOnline(boolean wifiOnly) {
-
+    private boolean isOnline(boolean wifiOnly) {
         boolean state = false;
-
-        /* Wi-Fi connection */
-        final NetworkInfo wifiNetwork =
-                mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        if (wifiNetwork != null) {
-            state = wifiNetwork.isConnectedOrConnecting();
-        }
-
-        // Don't bother checking the rest if we are connected or we have opted out of mobile
-        if (wifiOnly || state) {
-            return state;
-        }
-
-        /* Mobile data connection */
-        final NetworkInfo mbobileNetwork =
-                mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-        if (mbobileNetwork != null) {
-            state = mbobileNetwork.isConnectedOrConnecting();
-        }
-
-        /* Other networks */
         final NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
         if (activeNetwork != null) {
             state = activeNetwork.isConnectedOrConnecting();
         }
-
+        if (wifiOnly && state) {
+            return activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
+        }
         return state;
     }
 

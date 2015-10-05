@@ -22,6 +22,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 
 import org.opensilk.music.artwork.ArtworkUris;
+import org.opensilk.music.artwork.Constants;
 
 import javax.inject.Named;
 
@@ -52,16 +53,14 @@ public class ArtworkFetcherModule {
         return ArtworkUris.makeMatcher(authority);
     }
 
-    @Provides @ArtworkFetcherScope @Named("oScheduler")
-    public Scheduler provideObserveOnScheduler(@Named("fetcher") HandlerThread ht) {
-        return HandlerScheduler.from(new Handler(ht.getLooper()));
+    @Provides @ArtworkFetcherScope @Named("ObserveOnScheduler")
+    public Scheduler provideObserveOnScheduler() {
+        return HandlerScheduler.from(new Handler(service.getHandlerThread().getLooper()));
     }
 
-    @Provides @ArtworkFetcherScope @Named("fetcher")
-    public HandlerThread provideFetcherHandlerThread() {
-        HandlerThread ht = new HandlerThread("Fetcher");
-        ht.start();
-        return ht;
+    @Provides @ArtworkFetcherScope @Named("SubscribeOnScheduler")
+    public Scheduler provideSubscribeOnScheduler() {
+        return Constants.ARTWORK_SCHEDULER;
     }
 
 }

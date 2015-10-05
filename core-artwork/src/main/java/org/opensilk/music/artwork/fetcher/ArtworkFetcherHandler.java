@@ -35,6 +35,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import rx.Subscription;
+import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 /**
@@ -50,17 +51,19 @@ public class ArtworkFetcherHandler extends Handler {
         int ON_LOW_MEM = 4;
     }
 
-    WeakReference<ArtworkFetcherService> mService;
+    final WeakReference<ArtworkFetcherService> mService;
     final ArtworkFetcherManager mFetcherManager;
     final ArtworkPreferences mArtworkPrefs;
+    CompositeSubscription mSubscriptions;
 
     @Inject
     public ArtworkFetcherHandler(
-            @Named("fetcher")HandlerThread mHandlerThread,
+            ArtworkFetcherService mService,
             ArtworkFetcherManager mFetcherManager,
             ArtworkPreferences mArtworkPrefs
     ) {
-        super(mHandlerThread.getLooper());
+        super(mService.getHandlerThread().getLooper());
+        this.mService = new WeakReference<ArtworkFetcherService>(mService);
         this.mFetcherManager = mFetcherManager;
         this.mArtworkPrefs = mArtworkPrefs;
     }
@@ -71,16 +74,25 @@ public class ArtworkFetcherHandler extends Handler {
         switch (msg.what) {
             case MSG.NEW_INTENT: {
                 Intent i = (Intent) msg.obj;
-                Uri uri = i.getData();
+                final Uri uri = i.getData();
                 ArtInfo artInfo = i.getParcelableExtra(ArtworkFetcherService.EXTRA.ARTINFO);
-                ArtworkType artworkType = ArtworkType.valueOf(i.getStringExtra(ArtworkFetcherService.EXTRA.ARTTYPE));
-                Subscription s = mFetcherManager.fetch(uri, artInfo, artworkType, new CompletionListener() {
-                    @Override
-                    public void onComplete() {
+                Subscription s = mFetcherManager.fetch(artInfo, new CompletionListener() {
+                    @Override public void onError(Throwable e) {
+                        onDone();
+                    }
+                    @Override public void onCompleted() {
+                        ArtworkFetcherService s = mService.get();
+                        if (s != null) {
+                            s.getContentResolver().notifyChange(uri, null);
+                        }
+                        onDone();
+                    }
+                    void onDone() {
+                        mSubscriptions.remove(this);
                         stopService(startId);
                     }
                 });
-                //TODO keep subscriptions around?
+                mSubscriptions.add(s);
                 break;
             } case MSG.CLEAR_CACHES: {
                 mFetcherManager.clearCaches();
@@ -91,7 +103,7 @@ public class ArtworkFetcherHandler extends Handler {
                 stopService(startId);
                 break;
             }case MSG.ON_LOW_MEM: {
-                mFetcherManager.cancelAllRequests();
+                mSubscriptions.unsubscribe();
                 break;
             }
         }
@@ -113,11 +125,6 @@ public class ArtworkFetcherHandler extends Handler {
                 obtainMessage(MSG.RELOAD_PREFS, startId, 0).sendToTarget();
                 break;
         }
-    }
-
-    //Break Dependency cycle
-    void setService(ArtworkFetcherService service) {
-        mService = new WeakReference<ArtworkFetcherService>(service);
     }
 
     void onDestroy() {

@@ -20,6 +20,7 @@ package org.opensilk.music.artwork.fetcher;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 
@@ -81,7 +82,7 @@ public class ArtworkFetcherService extends MortarService {
         context.startService(i);
     }
 
-    @Inject @Named("fetcher") HandlerThread mHandlerThread;
+    private HandlerThread mHandlerThread;
     @Inject ArtworkFetcherHandler mHandler;
 
     private final AtomicInteger mTimesStarted = new AtomicInteger(0);
@@ -98,9 +99,9 @@ public class ArtworkFetcherService extends MortarService {
     @Override
     public void onCreate() {
         super.onCreate();
+        mHandlerThread = new HandlerThread("ArtworkFetcher");
+        mHandlerThread.start();
         DaggerService.<ArtworkFetcherComponent>getDaggerComponent(this).inject(this);
-        //mHandlerThread.start(); //started by inject
-        mHandler.setService(this);
     }
 
     @Override
@@ -135,6 +136,10 @@ public class ArtworkFetcherService extends MortarService {
         } else if (level >= 15 /*TRIM_MEMORY_RUNNING_CRITICAL*/) {
             mHandler.sendEmptyMessage(ArtworkFetcherHandler.MSG.ON_LOW_MEM);
         }
+    }
+
+    public HandlerThread getHandlerThread() {
+        return mHandlerThread;
     }
 
     void maybeStopSelf(int startId) {
