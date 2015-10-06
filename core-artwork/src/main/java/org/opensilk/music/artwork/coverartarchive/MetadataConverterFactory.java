@@ -48,25 +48,29 @@ public class MetadataConverterFactory extends retrofit.Converter.Factory {
 
     static class Converter implements retrofit.Converter<ResponseBody, Metadata> {
         public Metadata convert(ResponseBody value) throws IOException {
-            final List<Metadata.Image> images = new ArrayList<>();
-            String release = null;
-            JsonReader reader = new JsonReader(value.charStream());
-            reader.beginObject();
-            while (reader.hasNext()) {
-                final String nextName = reader.nextName();
-                switch (nextName) {
-                    case "images":
-                        images.addAll(parseImages(reader));
-                        break;
-                    case "release":
-                        release = reader.nextString();
-                        break;
-                    default:
-                        reader.skipValue();
-                        break;
+            try {
+                final List<Metadata.Image> images = new ArrayList<>();
+                String release = null;
+                JsonReader reader = new JsonReader(value.charStream());
+                reader.beginObject();
+                while (reader.hasNext()) {
+                    final String nextName = reader.nextName();
+                    switch (nextName) {
+                        case "images":
+                            images.addAll(parseImages(reader));
+                            break;
+                        case "release":
+                            release = reader.nextString();
+                            break;
+                        default:
+                            reader.skipValue();
+                            break;
+                    }
                 }
+                return new Metadata(release, images);
+            } finally {
+                value.close();
             }
-            return new Metadata(release, images);
         }
     }
 
