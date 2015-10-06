@@ -23,8 +23,6 @@ import org.opensilk.music.artwork.shared.ArtworkComponentCommon;
 import org.opensilk.music.artwork.cache.BitmapDiskCache;
 import org.opensilk.music.artwork.shared.GsonComponent;
 import org.opensilk.music.lastfm.LastFMComponent;
-import org.opensilk.music.lastfm.LastFMModule;
-import org.opensilk.music.volley.VolleyComponent;
 
 import javax.inject.Singleton;
 

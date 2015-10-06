@@ -50,7 +50,6 @@ import javax.inject.Named;
 import de.umass.lastfm.Album;
 import de.umass.lastfm.Artist;
 import de.umass.lastfm.LastFM;
-import de.umass.lastfm.LastFMVolley;
 import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Scheduler;
@@ -246,7 +245,7 @@ public class ArtworkFetcherManager {
                 .map(new Func1<Artist, String>() {
                     @Override
                     public String call(Artist artist) {
-                        String url = LastFMVolley.getBestImage(artist, true);
+                        String url = LastFM.GET_BEST_IMAGE.call(artist);
                         if (!TextUtils.isEmpty(url)) {
                             return url;
                         }
@@ -286,7 +285,7 @@ public class ArtworkFetcherManager {
                                     }).onErrorReturn(new Func1<Throwable, String>() {
                                         @Override
                                         public String call(Throwable throwable) {
-                                            String url = LastFMVolley.getBestImage(album, true);
+                                            String url = LastFM.GET_BEST_IMAGE.call(album);
                                             if (!StringUtils.isEmpty(url)) {
                                                 return url;
                                             }

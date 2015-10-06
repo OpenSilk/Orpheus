@@ -70,7 +70,6 @@ dependencies {
     compile project(':common-ui')
     compile project(':core-model')
     compile project(':core-lastfm')
-    compile project(':core-volley')
     compile 'com.jakewharton:disklrucache:2.0.2'
 
     androidTestCompile('com.squareup:fest-android:1.0.0')
