@@ -111,12 +111,17 @@ public class ArtInfo implements Parcelable, Comparable<ArtInfo> {
         return "ArtInfo{ artist="+artistName+" album="+albumName+" uri="+artworkUri+" }";
     }
 
+    public String cacheKey() {
+        return "forArtist=" + forArtist + "+artist=" + artistName + "+album=" + albumName;
+    }
+
     public Uri asUri(String authority) {
         Uri.Builder ub = new Uri.Builder()
                 .scheme("content")
-                .authority(authority);
+                .authority(authority)
+                .appendPath("artInfo");
         StringBuilder builder = new StringBuilder();
-        builder.append("?forArtist=").append(forArtist);
+        builder.append("forArtist=").append(forArtist);
         if (!StringUtils.isEmpty(artistName)) {
             builder.append("&artistName=").append(encodeString(artistName));
         }
