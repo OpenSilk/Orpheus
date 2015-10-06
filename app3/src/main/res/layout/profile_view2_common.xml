@@ -56,14 +56,14 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         style="@style/mtrl.List"/>
 
-    <fragment
+    <include
         android:id="@+id/footer_fragment"
         android:layout_width="match_parent"
         android:layout_height="@dimen/footer_height"
         android:layout_gravity="bottom"
         android:name="org.opensilk.music.ui3.main.FooterScreenFragment"
         app:layout_behavior="org.opensilk.common.ui.behavior.QuickReturnFooterBehavior"
-        tools:layout="@layout/screen_footer"/>
+        layout="@layout/screen_footer"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/floating_action_button"
