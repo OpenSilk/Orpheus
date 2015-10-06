@@ -17,10 +17,14 @@
 
 package de.umass.lastfm;
 
+import android.text.TextUtils;
+
 import retrofit.Call;
 import retrofit.http.GET;
 import retrofit.http.Query;
 import rx.Observable;
+import rx.functions.Func1;
+import timber.log.Timber;
 
 /**
  * Created by drew on 9/16/15.
@@ -40,4 +44,17 @@ public interface LastFM {
 
     @GET("?method=album.getInfo")
     Observable<Album> getAlbumObservable(@Query("artist") String artist, @Query("album") String album);
+
+    Func1<MusicEntry, String> GET_BEST_IMAGE = new Func1<MusicEntry, String>() {
+        @Override
+        public String call(MusicEntry musicEntry) {
+            for (ImageSize q : ImageSize.values()) {
+                String url = musicEntry.getImageURL(q);
+                if (!TextUtils.isEmpty(url)) {
+                    return url;
+                }
+            }
+            return null;
+        }
+    };
 }

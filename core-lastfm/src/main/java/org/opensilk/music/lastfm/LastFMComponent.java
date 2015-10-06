@@ -17,14 +17,14 @@
 
 package org.opensilk.music.lastfm;
 
+import com.squareup.okhttp.OkHttpClient;
+
 import org.opensilk.common.core.dagger2.AppContextModule;
-import org.opensilk.music.volley.VolleyComponent;
 
 import javax.inject.Singleton;
 
 import dagger.Component;
 import de.umass.lastfm.LastFM;
-import de.umass.lastfm.LastFMVolley;
 
 /**
  * Extend to provide LastFM to child scopes
@@ -38,7 +38,7 @@ import de.umass.lastfm.LastFMVolley;
                 LastFMModule.class,
         }
 )
-public interface LastFMComponent extends VolleyComponent {
-    LastFMVolley lastFMVolley();
+public interface LastFMComponent {
     LastFM lastFM();
+    OkHttpClient okHttpClient();
 }

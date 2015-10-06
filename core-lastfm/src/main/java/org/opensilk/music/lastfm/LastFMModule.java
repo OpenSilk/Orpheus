@@ -27,7 +27,6 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.music.volley.VolleyModule;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,15 +46,13 @@ import timber.log.Timber;
 /**
  * Created by drew on 9/16/15.
  */
-@Module(
-        includes = VolleyModule.class
-)
+@Module
 public class LastFMModule {
 
     static final int _8MB = 8*1024*1024;
 
     @Provides @Singleton
-    LastFM provideLastFM(
+    public LastFM provideLastFM(
             final @Named("LFMEndpoint") String endpoint,
             OkHttpClient client
     ) {
@@ -70,12 +67,12 @@ public class LastFMModule {
     }
 
     @Provides @Named("LFMEndpoint")
-    String provideLfmendpoint() {
+    public String provideLfmendpoint() {
         return LastFM.API_ROOT;
     }
 
     @Provides @Named("LFMApiKey")
-    String provideLfmapiKEy() {
+    public String provideLfmapiKEy() {
         return BuildConfig.LASTFM_KEY;
     }
 
