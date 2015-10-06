@@ -17,24 +17,15 @@
 
 package org.opensilk.music.index;
 
-import com.squareup.okhttp.HttpUrl;
-import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import org.apache.commons.io.IOUtils;
 import org.opensilk.music.index.database.IndexDatabase;
 import org.opensilk.music.index.database.IndexDatabaseImpl;
-import org.opensilk.music.lastfm.LastFMModule;
-import org.opensilk.music.volley.VolleyModule;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.Proxy;
-import java.util.Locale;
 
 import javax.inject.Singleton;
 
@@ -44,15 +35,12 @@ import de.umass.lastfm.Album;
 import de.umass.lastfm.Artist;
 import de.umass.lastfm.LastFM;
 import de.umass.lastfm.MusicEntryConverter;
-import de.umass.lastfm.MusicEntryFactory;
 import de.umass.lastfm.ResponseBuilder;
 import de.umass.lastfm.Result;
 import retrofit.Call;
 import retrofit.Callback;
-import retrofit.Retrofit;
-import retrofit.RxJavaCallAdapterFactory;
 import retrofit.http.Query;
-import timber.log.Timber;
+import rx.Observable;
 
 /**
  * Created by drew on 9/16/15.
@@ -60,13 +48,17 @@ import timber.log.Timber;
 @Module(
         includes = {
                 IndexProviderAuthorityModule.class,
-                VolleyModule.class
         }
 )
 public class IndexTestModule {
     @Provides @Singleton
     IndexDatabase provideIndexDatabase(IndexDatabaseImpl impl) {
         return impl;
+    }
+
+    @Provides @Singleton
+    OkHttpClient provideOkClient() {
+        return new OkHttpClient();
     }
 
     @Provides @Singleton
@@ -138,6 +130,16 @@ public class IndexTestModule {
                         return this;
                     }
                 };
+            }
+
+            @Override
+            public Observable<Artist> getArtistObservable(@Query("artist") String artist) {
+                return null;
+            }
+
+            @Override
+            public Observable<Album> getAlbumObservable(@Query("artist") String artist, @Query("album") String album) {
+                return null;
             }
         };
     }
