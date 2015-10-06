@@ -17,29 +17,27 @@
 
 package org.opensilk.music.artwork.fetcher;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.net.Uri;
-import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.core.mortar.MortarService;
-import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.provider.ArtworkComponent;
 import org.opensilk.music.model.ArtInfo;
 
+import java.io.Closeable;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
@@ -58,15 +56,14 @@ public class ArtworkFetcherService extends MortarService {
 
     public interface EXTRA {
         String ARTINFO = "artinfo";
-        String ARTTYPE = "arttype";
     }
 
-    public static void newTask(Context context, Uri uri, ArtInfo artInfo, ArtworkType type) {
+    public static void newTask(Context context, Uri uri, ArtInfo artInfo) {
         Intent i = new Intent(context, ArtworkFetcherService.class)
                 .setAction(ArtworkFetcherService.ACTION.NEWTASK)
                 .setData(uri)
                 .putExtra(ArtworkFetcherService.EXTRA.ARTINFO, artInfo)
-                .putExtra(ArtworkFetcherService.EXTRA.ARTTYPE, type.toString());
+                ;
         context.startService(i);
     }
 
@@ -87,6 +84,7 @@ public class ArtworkFetcherService extends MortarService {
 
     private final AtomicInteger mTimesStarted = new AtomicInteger(0);
     private final Runnable mStopSelfTask = new StopSelfTask(this);
+    private final Binder mBinder = new Binder();
 
     @Override
     protected void onBuildScope(MortarScope.Builder builder) {
@@ -114,7 +112,7 @@ public class ArtworkFetcherService extends MortarService {
 
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return mBinder;
     }
 
     @Override
@@ -163,6 +161,68 @@ public class ArtworkFetcherService extends MortarService {
             if (s != null) {
                 s.stopSelf();
             }
+        }
+    }
+
+    public class Binder extends android.os.Binder {
+        public void newRequest(ArtInfo artInfo, ArtworkFetcherManager.CompletionListener listener) {
+            mHandler.newTask(artInfo, listener);
+        }
+    }
+
+    public final static class Connection implements Closeable {
+        private final Context context;
+        private final ServiceConnection serviceConnection;
+        private final ArtworkFetcherService.Binder service;
+        private Connection(
+                Context context,
+                ServiceConnection serviceConnection,
+                ArtworkFetcherService.Binder service
+        ) {
+            this.context = context;
+            this.serviceConnection = serviceConnection;
+            this.service = service;
+        }
+        @Override public void close() {
+            context.unbindService(serviceConnection);
+        }
+        public ArtworkFetcherService.Binder getService() {
+            return service;
+        }
+    }
+
+    public static Connection bindService(Context context) throws InterruptedException {
+        if (context == null) throw new IllegalArgumentException("Null context");
+        ensureNotOnMainThread(context);
+        final BlockingQueue<ArtworkFetcherService.Binder> q = new LinkedBlockingQueue<>(1);
+        ServiceConnection keyChainServiceConnection = new ServiceConnection() {
+            volatile boolean mConnectedAtLeastOnce = false;
+            @Override public void onServiceConnected(ComponentName name, IBinder service) {
+                if (!mConnectedAtLeastOnce) {
+                    mConnectedAtLeastOnce = true;
+                    try {
+                        q.put((ArtworkFetcherService.Binder) service);
+                    } catch (InterruptedException e) {
+                        // will never happen, since the queue starts with one available slot
+                    }
+                }
+            }
+            @Override public void onServiceDisconnected(ComponentName name) {}
+        };
+        boolean isBound = context.bindService(new Intent(context, ArtworkFetcherService.class),
+                keyChainServiceConnection,
+                Context.BIND_AUTO_CREATE);
+        if (!isBound) {
+            throw new AssertionError("could not bind to KeyChainService");
+        }
+        return new Connection(context, keyChainServiceConnection, q.take());
+    }
+
+    private static void ensureNotOnMainThread(Context context) {
+        Looper looper = Looper.myLooper();
+        if (looper != null && looper == context.getMainLooper()) {
+            throw new IllegalStateException(
+                    "calling this from your main thread can lead to deadlock");
         }
     }
 }

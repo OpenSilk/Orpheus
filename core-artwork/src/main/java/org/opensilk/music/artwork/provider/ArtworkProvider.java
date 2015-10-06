@@ -17,41 +17,33 @@
 package org.opensilk.music.artwork.provider;
 
 import android.content.ContentProvider;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.UriMatcher;
-import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
-import android.graphics.Point;
+import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Bundle;
-import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
-import android.support.annotation.Nullable;
-
-import com.google.gson.Gson;
-import com.jakewharton.disklrucache.DiskLruCache;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.ArtworkUris;
 import org.opensilk.music.artwork.Constants;
-import org.opensilk.music.artwork.UtilsArt;
 import org.opensilk.music.artwork.cache.BitmapDiskCache;
+import org.opensilk.music.artwork.fetcher.ArtworkFetcherManager;
 import org.opensilk.music.artwork.fetcher.ArtworkFetcherService;
 import org.opensilk.music.model.ArtInfo;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import hugo.weaving.DebugLog;
 import rx.Scheduler;
 import rx.functions.Action0;
 import timber.log.Timber;
@@ -66,7 +58,6 @@ public class ArtworkProvider extends ContentProvider {
 
     @Inject @Named("artworkauthority") String mAuthority;
     @Inject BitmapDiskCache mL2Cache;
-    @Inject Gson mGson;
 
     private UriMatcher mUriMatcher;
 
@@ -107,32 +98,6 @@ public class ArtworkProvider extends ContentProvider {
         throw new UnsupportedOperationException("Provider is read only");
     }
 
-    @Nullable
-    @Override
-    @DebugLog
-    public AssetFileDescriptor openTypedAssetFile(Uri uri, String mimeTypeFilter, Bundle opts) throws FileNotFoundException {
-        if (opts != null && opts.containsKey(ContentResolver.EXTRA_SIZE)) {
-            final Point p = opts.getParcelable(ContentResolver.EXTRA_SIZE);
-            switch (mUriMatcher.match(uri)) {
-                case ArtworkUris.MATCH.ARTINFO: {
-                    final int size = p.x * p.y;
-                    final int thumbSize = ArtworkType.THUMBNAIL.px * ArtworkType.THUMBNAIL.px;
-                    final ArtInfo artInfo = ArtInfo.fromUri(uri);
-                    final ParcelFileDescriptor pfd;
-                    if (size > thumbSize) {
-                        pfd = getArtwork(uri, artInfo);
-                    } else {
-                        pfd = getArtworkThumbnail(uri, artInfo);
-                    }
-                    if (pfd != null) {
-                        return new AssetFileDescriptor(pfd, 0, -1);
-                    }
-                }
-            }
-        }
-        return super.openTypedAssetFile(uri, mimeTypeFilter, opts);
-    }
-
     @Override
     //@DebugLog
     public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
@@ -140,126 +105,105 @@ public class ArtworkProvider extends ContentProvider {
             throw new FileNotFoundException("Provider is read only");
         }
         switch (mUriMatcher.match(uri)) {
-            case ArtworkUris.MATCH.ARTWORK: { //Fullscreen
-                final List<String> seg = uri.getPathSegments();
-                if (seg == null || seg.size() < 2) {
-                    break;
-                }
-                final ArtInfo artInfo = new ArtInfo(seg.get(seg.size() - 2), seg.get(seg.size() - 1), null);
+            case ArtworkUris.MATCH.ARTINFO: {
+                final ArtInfo artInfo = ArtInfo.fromUri(uri);
                 final ParcelFileDescriptor pfd = getArtwork(uri, artInfo);
                 if (pfd != null) {
                     return pfd;
                 }
                 break;
-            } case ArtworkUris.MATCH.THUMBNAIL: { //Thumbnail
-                final List<String> seg = uri.getPathSegments();
-                if (seg == null || seg.size() < 2) {
-                    break;
-                }
-                final ArtInfo artInfo = new ArtInfo(seg.get(seg.size() - 2), seg.get(seg.size() - 1), null);
-                final ParcelFileDescriptor pfd = getArtworkThumbnail(uri, artInfo);
-                if (pfd != null) {
-                    return pfd;
-                }
-                break;
-            } case ArtworkUris.MATCH.ALBUM_REQ:
-              case ArtworkUris.MATCH.ARTIST_REQ: {
-                  final String q = uri.getQueryParameter("q");
-                  final String t = uri.getQueryParameter("t");
-                  if (q != null) {
-                    final ArtInfo artInfo = UtilsArt.artInfoFromBase64EncodedJson(mGson, q);
-                    ArtworkType artworkType = ArtworkType.THUMBNAIL;
-                    if (t != null) {
-                        artworkType = ArtworkType.valueOf(t);
-                    }
-                    final ParcelFileDescriptor pfd;
-                    switch (artworkType) {
-                        case LARGE:
-                            pfd = getArtwork(uri, artInfo);
-                            break;
-                        default:
-                            pfd = getArtworkThumbnail(uri, artInfo);
-                            break;
-                    }
-                    if (pfd != null) {
-                        return pfd;
-                    }
-                }
-                break;
-            }case ArtworkUris.MATCH.ARTINFO: {
-                final ArtInfo artInfo = ArtInfo.fromUri(uri);
-                ArtworkType artworkType = ArtworkType.THUMBNAIL;
-                final String t = uri.getQueryParameter("t");
-                if (!StringUtils.isEmpty(t)) {
-                    artworkType = ArtworkType.valueOf(t);
-                }
-                final ParcelFileDescriptor pfd;
-                switch (artworkType) {
-                    case LARGE:
-                        pfd = getArtwork(uri, artInfo);
-                        break;
-                    default:
-                        pfd = getArtworkThumbnail(uri, artInfo);
-                        break;
-                }
-                if (pfd != null) {
-                    return pfd;
-                }
             }
         }
         throw new FileNotFoundException("Could not obtain image from cache");
     }
 
     public ParcelFileDescriptor getArtwork(Uri uri, ArtInfo artInfo) {
-        final String cacheKey = UtilsArt.getCacheKey(artInfo, ArtworkType.LARGE);
-        ParcelFileDescriptor pfd = pullSnapshot(cacheKey);
-        // Create request so it will be there next time
-        if (pfd == null) ArtworkFetcherService.newTask(getContext(), uri, artInfo, ArtworkType.LARGE);
-        return pfd;
-    }
-
-    public ParcelFileDescriptor getArtworkThumbnail(Uri uri, ArtInfo artInfo) {
-        final String cacheKey = UtilsArt.getCacheKey(artInfo, ArtworkType.THUMBNAIL);
-        ParcelFileDescriptor pfd = pullSnapshot(cacheKey);
-        // Create request so it will be there next time
-        if (pfd == null) ArtworkFetcherService.newTask(getContext(), uri, artInfo, ArtworkType.THUMBNAIL);
-        return pfd;
+        ParcelFileDescriptor pfd = pullSnapshot(artInfo.cacheKey());
+        if (pfd != null) {
+            return pfd;
+        }
+        OptionalBitmap bitmap = null;
+        try {
+            //not in cache, make a new request and wait for it to come in.
+            final ArtworkFetcherService.Connection serviceConnection =
+                    ArtworkFetcherService.bindService(getContext());
+            final ArtworkFetcherService.Binder binder = serviceConnection.getService();
+            final BlockingQueue<OptionalBitmap> queue = new LinkedBlockingQueue<>(1);
+            final ArtworkFetcherManager.CompletionListener listener =
+                    new ArtworkFetcherManager.CompletionListener() {
+                        @Override public void onError(Throwable e) {
+                            queue.offer(new OptionalBitmap(null));
+                        }
+                        @Override public void onNext(Bitmap o) {
+                            queue.offer(new OptionalBitmap(o));
+                        }
+                        @Override public void onCompleted() { }
+            };
+            binder.newRequest(artInfo, listener);
+            bitmap = queue.take();
+            if (bitmap.hasBitmap()) {
+                return createPipe(mL2Cache.bitmapToBytes(bitmap.getBitmap()));
+            } else {
+                return null;
+            }
+        } catch (InterruptedException e) {
+            Timber.w(e, "getArtwork(%s)", uri);
+            return null;
+        } finally {
+            if (bitmap != null) bitmap.recycle();
+        }
     }
 
     private ParcelFileDescriptor pullSnapshot(String cacheKey) {
-        Timber.v("Checking DiskCache for " + cacheKey);
+        final byte[] snapshot = mL2Cache.getBytes(cacheKey);
+        if (snapshot != null) {
+            return createPipe(snapshot);
+        } else {
+            return null;
+        }
+    }
+
+    private ParcelFileDescriptor createPipe(final byte[] bytes) {
         try {
-            if (mL2Cache == null) {
-                throw new IOException("Unable to obtain cache instance");
-            }
             final ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
             final OutputStream out = new ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]);
-            final DiskLruCache.Snapshot snapshot = mL2Cache.getSnapshot(cacheKey);
-            if (snapshot != null && snapshot.getInputStream(0) != null) {
-                final Scheduler.Worker worker = mScheduler.createWorker();
-                worker.schedule(new Action0() {
-                    @Override
-                    public void call() {
-                        try {
-                            IOUtils.copy(snapshot.getInputStream(0), out);
-                        } catch (IOException e) {
-                            Timber.e(e, "ParcelFileDescriptorPipe");
-                        } finally {
-                            snapshot.close();
-                            IOUtils.closeQuietly(out);
-                            worker.unsubscribe();
-                        }
+            final ParcelFileDescriptor in = pipe[0];
+            final Scheduler.Worker worker = mScheduler.createWorker();
+            worker.schedule(new Action0() {
+                @Override
+                public void call() {
+                    try {
+                        IOUtils.write(bytes, out);
+                    } catch (IOException e) {
+                        Timber.e(e, "ParcelFileDescriptorPipe");
+                    } finally {
+                        IOUtils.closeQuietly(out);
+                        worker.unsubscribe();
                     }
-                });
-                return pipe[0];
-            } else {
-                pipe[0].close();
-                out.close();
-            }
+                }
+            });
+            return in;
         } catch (IOException e) {
-            Timber.w("pullSnapshot failed: %s", e.getMessage());
+            Timber.w(e, "createPipe");
         }
         return null;
+    }
+
+    /** Wrapper so we can notify error */
+    private static final class OptionalBitmap {
+        final Bitmap bitmap;
+        public OptionalBitmap(Bitmap bitmap) {
+            this.bitmap = bitmap;
+        }
+        boolean hasBitmap() {
+            return bitmap != null;
+        }
+        Bitmap getBitmap() {
+            return bitmap;
+        }
+        void recycle() {
+            if (hasBitmap()) bitmap.recycle();
+        }
     }
 
 }

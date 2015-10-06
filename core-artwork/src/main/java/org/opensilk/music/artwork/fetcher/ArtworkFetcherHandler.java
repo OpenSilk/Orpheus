@@ -34,6 +34,7 @@ import java.lang.ref.WeakReference;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import hugo.weaving.DebugLog;
 import rx.Subscription;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
@@ -45,7 +46,7 @@ import timber.log.Timber;
 public class ArtworkFetcherHandler extends Handler {
 
     public interface MSG {
-        int NEW_INTENT = 1;
+        int NEW_TASK = 1;
         int CLEAR_CACHES = 2;
         int RELOAD_PREFS = 3;
         int ON_LOW_MEM = 4;
@@ -54,7 +55,7 @@ public class ArtworkFetcherHandler extends Handler {
     final WeakReference<ArtworkFetcherService> mService;
     final ArtworkFetcherManager mFetcherManager;
     final ArtworkPreferences mArtworkPrefs;
-    CompositeSubscription mSubscriptions;
+    final CompositeSubscription mSubscriptions = new CompositeSubscription();
 
     @Inject
     public ArtworkFetcherHandler(
@@ -72,27 +73,9 @@ public class ArtworkFetcherHandler extends Handler {
     public void handleMessage(Message msg) {
         final int startId = msg.arg1;
         switch (msg.what) {
-            case MSG.NEW_INTENT: {
-                Intent i = (Intent) msg.obj;
-                final Uri uri = i.getData();
-                ArtInfo artInfo = i.getParcelableExtra(ArtworkFetcherService.EXTRA.ARTINFO);
-                Subscription s = mFetcherManager.fetch(artInfo, new CompletionListener() {
-                    @Override public void onError(Throwable e) {
-                        onDone();
-                    }
-                    @Override public void onCompleted() {
-                        ArtworkFetcherService s = mService.get();
-                        if (s != null) {
-                            s.getContentResolver().notifyChange(uri, null);
-                        }
-                        onDone();
-                    }
-                    void onDone() {
-                        mSubscriptions.remove(this);
-                        stopService(startId);
-                    }
-                });
-                mSubscriptions.add(s);
+            case MSG.NEW_TASK: {
+                Task task = (Task) msg.obj;
+                mSubscriptions.add(mFetcherManager.fetch(task.artInfo, task.listener));
                 break;
             } case MSG.CLEAR_CACHES: {
                 mFetcherManager.clearCaches();
@@ -103,21 +86,36 @@ public class ArtworkFetcherHandler extends Handler {
                 stopService(startId);
                 break;
             }case MSG.ON_LOW_MEM: {
-                mSubscriptions.unsubscribe();
+                mSubscriptions.clear();
                 break;
             }
         }
     }
 
-    void processIntent(Intent intent, int startId) {
+    void processIntent(Intent intent, final int startId) {
         Timber.d("processIntent id=%d, i=%s", startId,intent);
         if (intent == null) return;
         String action = intent.getAction();
         if (action == null) return;
         switch (action) {
-            case ArtworkFetcherService.ACTION.NEWTASK:
-                obtainMessage(MSG.NEW_INTENT, startId, 0, intent).sendToTarget();
+            case ArtworkFetcherService.ACTION.NEWTASK: {
+                if (!intent.hasExtra(ArtworkFetcherService.EXTRA.ARTINFO)) return;
+                final ArtInfo artInfo = intent.getParcelableExtra(ArtworkFetcherService.EXTRA.ARTINFO);
+                CompletionListener listener = new CompletionListener() {
+                    @Override public void onError(Throwable e) {
+                        onDone();
+                    }
+                    @Override public void onCompleted() {
+                        onDone();
+                    }
+                    void onDone() {
+                        mSubscriptions.remove(this);
+                        stopService(startId);
+                    }
+                };
+                newTask(artInfo, listener);
                 break;
+            }
             case ArtworkFetcherService.ACTION.CLEARCACHE:
                 obtainMessage(MSG.CLEAR_CACHES, startId, 0).sendToTarget();
                 break;
@@ -125,6 +123,11 @@ public class ArtworkFetcherHandler extends Handler {
                 obtainMessage(MSG.RELOAD_PREFS, startId, 0).sendToTarget();
                 break;
         }
+    }
+
+    @DebugLog
+    void newTask(ArtInfo artInfo, CompletionListener listener) {
+        obtainMessage(MSG.NEW_TASK, 0, 0, new Task(artInfo, listener)).sendToTarget();
     }
 
     void onDestroy() {
@@ -135,5 +138,14 @@ public class ArtworkFetcherHandler extends Handler {
     private void stopService(int startId) {
         ArtworkFetcherService s = mService != null ? mService.get() : null;
         if (s != null) s.maybeStopSelf(startId);
+    }
+
+    private static final class Task {
+        final ArtInfo artInfo;
+        final CompletionListener listener;
+        public Task(ArtInfo artInfo, CompletionListener listener) {
+            this.artInfo = artInfo;
+            this.listener = listener;
+        }
     }
 }
