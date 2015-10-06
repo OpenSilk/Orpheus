@@ -54,10 +54,7 @@ public class ArtworkModule {
     @Provides @Singleton //TODO when/how to close this?
     public BitmapDiskCache provideBitmapDiskLruCache(@ForApplication Context context, ArtworkPreferences preferences) {
         final int size = Integer.decode(preferences.getString(ArtworkPreferences.IMAGE_DISK_CACHE_SIZE, "60")) * 1024 * 1024;
-        return BitmapDiskLruCache.open(
-                CacheUtil.getCacheDir(context, DISK_CACHE_DIRECTORY),
-                size, Bitmap.CompressFormat.PNG, 100
-        );
+        return BitmapDiskLruCache.open(CacheUtil.getCacheDir(context, DISK_CACHE_DIRECTORY), size);
     }
 
 }

@@ -17,11 +17,13 @@
 
 package org.opensilk.music.artwork.cache;
 
-import com.jakewharton.disklrucache.DiskLruCache;
+import android.graphics.Bitmap;
 
 /**
  * Created by drew on 12/23/14.
  */
 public interface BitmapDiskCache extends BitmapCache {
-    DiskLruCache.Snapshot getSnapshot(String key);
+    byte[] getBytes(String key);
+    //ugly hack TODO find another way
+    byte[] bitmapToBytes(Bitmap bitmap);
 }
