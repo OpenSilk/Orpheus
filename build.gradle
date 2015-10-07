@@ -15,6 +15,7 @@ allprojects {
         jcenter()
         maven { url  "http://dl.bintray.com/google/exoplayer" }
         maven { url "http://4thline.org/m2" }
+        maven { url 'http://oss.sonatype.org/content/repositories/snapshots' }
     }
 }
 
