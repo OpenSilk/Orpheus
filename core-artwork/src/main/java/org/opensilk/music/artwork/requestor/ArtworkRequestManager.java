@@ -23,6 +23,7 @@ import android.support.annotation.Nullable;
 import android.widget.ImageView;
 
 import org.opensilk.common.glide.Paletteable;
+import org.opensilk.common.glide.PalettizedBitmapTarget;
 import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.artwork.ArtworkType;
@@ -35,10 +36,9 @@ import rx.Subscription;
  */
 public interface ArtworkRequestManager {
 
-    @Deprecated
-    Subscription newRequest(AnimatedImageView imageView, PaletteObserver paletteObserver,
-                            ArtInfo artInfo, ArtworkType artworkType);
     void newRequest(Uri uri, ImageView imageView, @Nullable Paletteable paletteable, @Nullable Bundle extras);
     void newRequest(ArtInfo artInfo, ImageView imageView, @Nullable Paletteable paletteable, @Nullable Bundle extras);
 
+    void newRequest(ArtInfo artInfo, PalettizedBitmapTarget target, @Nullable Bundle extras);
+    void newRequest(Uri uri, PalettizedBitmapTarget target, @Nullable Bundle extras);
 }

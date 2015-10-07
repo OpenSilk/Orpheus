@@ -67,37 +67,6 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         this.mAuthority = authority;
     }
 
-    @Override
-    public Subscription newRequest(AnimatedImageView imageView, final PaletteObserver paletteObserver,
-                                   ArtInfo artInfo, ArtworkType artworkType) {
-        final Palette.PaletteAsyncListener listener = paletteObserver != null ? new Palette.PaletteAsyncListener() {
-            @Override
-            public void onGenerated(Palette palette) {
-                paletteObserver.onNext(new PaletteResponse(palette, true));
-            }
-        } : null;
-        final PalettizedBitmapTarget target = newRequest(imageView, listener, artInfo.asUri(mAuthority));
-        return Subscriptions.empty();
-    }
-
-    public PalettizedBitmapTarget newRequest(final ImageView imageView, Palette.PaletteAsyncListener listener, Uri uri) {
-        PalettizedBitmapTarget.Builder bob = PalettizedBitmapTarget.builder().from(imageView);
-        if (listener != null) {
-            bob.intoCallBack(listener);
-        }
-        RequestOptions options = new RequestOptions()
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .centerCrop(imageView.getContext())
-                .placeholder(R.drawable.default_artwork)
-                ;
-        return Glide.with(imageView.getContext())
-                .as(PalettizedBitmap.class)
-                .apply(options)
-                .transition(PalettizedBitmapTransitionOptions.withCrossFade())
-                .load(uri)
-                .into(bob.build());
-    }
-
     public void newRequest(ArtInfo artInfo, ImageView imageView, @Nullable Paletteable paletteable, @Nullable Bundle extras) {
         newRequest(artInfo.asUri(mAuthority), imageView, paletteable, extras);
     }
@@ -113,8 +82,10 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .placeholder(R.drawable.default_artwork)
                 ;
-        if (BundleHelper.getInt(extras) == 1) {
+        if (extras != null && BundleHelper.getInt(extras) == 1) {
             options.circleCrop(imageView.getContext());
+        } else if (extras != null && BundleHelper.getInt(extras) == 2) {
+            options.fitCenter(imageView.getContext());
         } else {
             options.centerCrop(imageView.getContext());
         }
@@ -124,6 +95,30 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                 .transition(PalettizedBitmapTransitionOptions.withCrossFade())
                 .load(uri)
                 .into(bob.build());
+    }
+
+    public void newRequest(ArtInfo artInfo, PalettizedBitmapTarget target, @Nullable Bundle extras) {
+        newRequest(artInfo.asUri(mAuthority), target, extras);
+    }
+
+    public void newRequest(Uri uri, PalettizedBitmapTarget target, @Nullable Bundle extras) {
+        RequestOptions options = new RequestOptions()
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .placeholder(R.drawable.default_artwork)
+                ;
+        if (extras != null && BundleHelper.getInt(extras) == 1) {
+            options.circleCrop(target.getView().getContext());
+        } else if (extras != null && BundleHelper.getInt(extras) == 2) {
+            options.fitCenter(target.getView().getContext());
+        } else {
+            options.centerCrop(target.getView().getContext());
+        }
+        Glide.with(target.getView().getContext())
+                .as(PalettizedBitmap.class)
+                .apply(options)
+                .transition(PalettizedBitmapTransitionOptions.withCrossFade())
+                .load(uri)
+                .into(target);
     }
 
 }
