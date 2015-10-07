@@ -29,6 +29,7 @@ import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import org.opensilk.common.ui.widget.AnimatedImageView;
@@ -88,49 +89,46 @@ public class UtilsCommon {
     public static void loadMultiArtwork(
             ArtworkRequestManager requestor,
             CompositeSubscription cs,
-            AnimatedImageView artwork,
-            AnimatedImageView artwork2,
-            AnimatedImageView artwork3,
-            AnimatedImageView artwork4,
+            ImageView artwork,
+            ImageView artwork2,
+            ImageView artwork3,
+            ImageView artwork4,
             List<ArtInfo> artInfos,
             ArtworkType artworkType
     ) {
         final int num = artInfos.size();
         if (artwork != null) {
             if (num >= 1) {
-                cs.add(requestor.newRequest(artwork, null, artInfos.get(0), artworkType));
+                requestor.newRequest(artInfos.get(0), artwork, null, null);
             } else {
-                artwork.setDefaultImage(R.drawable.default_artwork);
+                artwork.setImageResource(R.drawable.default_artwork);
             }
         }
         if (artwork2 != null) {
             if (num >= 2) {
-                cs.add(requestor.newRequest(artwork2, null, artInfos.get(1), artworkType));
+                requestor.newRequest(artInfos.get(1), artwork2, null, null);
             } else {
-                // never get here
-                artwork2.setDefaultImage(R.drawable.default_artwork);
+                artwork2.setImageResource(R.drawable.default_artwork);
             }
         }
         if (artwork3 != null) {
             if (num >= 3) {
-                cs.add(requestor.newRequest(artwork3, null, artInfos.get(2), artworkType));
+                requestor.newRequest(artInfos.get(2), artwork3, null, null);
             } else if (num >= 2) {
                 //put the second image here, first image will be put in 4th spot to crisscross
-                cs.add(requestor.newRequest(artwork3, null, artInfos.get(1), artworkType));
+                requestor.newRequest(artInfos.get(1), artwork3, null, null);
             } else {
-                // never get here
-                artwork3.setDefaultImage(R.drawable.default_artwork);
+                artwork3.setImageResource(R.drawable.default_artwork);
             }
         }
         if (artwork4 != null) {
             if (num >= 4) {
-                cs.add(requestor.newRequest(artwork4, null, artInfos.get(3), artworkType));
+                requestor.newRequest(artInfos.get(3), artwork4, null, null);
             } else if (num >= 2) {
                 //3 -> loopback, 2 -> put the first image here for crisscross
-                cs.add(requestor.newRequest(artwork4, null, artInfos.get(0), artworkType));
+                requestor.newRequest(artInfos.get(0), artwork4, null, null);
             } else {
-                //never get here
-                artwork4.setDefaultImage(R.drawable.default_artwork);
+                artwork4.setImageResource(R.drawable.default_artwork);
             }
         }
     }

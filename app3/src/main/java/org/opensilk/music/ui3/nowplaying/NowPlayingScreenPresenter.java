@@ -22,20 +22,27 @@ import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.support.v7.graphics.Palette;
 import android.view.View;
 
+import com.bumptech.glide.Glide;
 import com.triggertrap.seekarc.SeekArc;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.glide.PaletteSwatchType;
+import org.opensilk.common.glide.PalettizedBitmapTarget;
 import org.opensilk.common.ui.mortar.DrawerController;
 import org.opensilk.common.ui.mortar.DrawerOwner;
 import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.ui.mortar.PausesAndResumes;
+import org.opensilk.common.ui.util.ThemeUtils;
 import org.opensilk.music.AppPreferences;
+import org.opensilk.music.R;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
@@ -125,7 +132,6 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
             Timber.v("missed onResume()");
             setup();
         }
-        setupActionBar();
     }
 
     @Override
@@ -172,7 +178,38 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
 
     void loadArtwork(ArtInfo artInfo) {
         if (hasView() && getView().getArtwork() != null) {
-            requestor.newRequest(getView().getArtwork(), getView().getPaletteObserver(), artInfo, ArtworkType.LARGE);
+            PalettizedBitmapTarget.Builder bob = PalettizedBitmapTarget.builder()
+                    .from(getView().getArtwork())
+                    .using(PaletteSwatchType.VIBRANT_DARK)
+                    .intoBackground(getView(),
+                            ThemeUtils.getThemeAttrColor(getView().getContext(),
+                                    android.R.attr.colorBackground))
+                    .using(PaletteSwatchType.VIBRANT)
+                    .intoBackground(getView().card, ContextCompat.getColor(getView().getContext(),
+                            ThemeUtils.isLightTheme(getView().getContext()) ? R.color.white : R.color.black))
+                    .intoTitleText(getView().title,
+                            ThemeUtils.getThemeAttrColor(getView().getContext(),
+                                    android.R.attr.textColorPrimary))
+                    .intoBodyText(getView().subTitle,
+                            ThemeUtils.getThemeAttrColor(getView().getContext(),
+                                    android.R.attr.textColorSecondary))
+                    .intoCallBack(new Palette.PaletteAsyncListener() {
+                        @Override
+                        public void onGenerated(Palette palette) {
+                            Palette.Swatch s1 = palette.getDarkVibrantSwatch();
+                            if (hasView()) {
+                                if (s1 != null) {
+                                    getView().progress.getProgressDrawable().setTint(s1.getRgb());
+                                } else {
+                                    int color = ThemeUtils.getThemeAttrColor(getView().getContext(),
+                                            R.attr.colorAccent);
+                                    getView().progress.getProgressDrawable().setTint(color);
+                                }
+                            }
+                        }
+                    })
+                    ;
+            requestor.newRequest(artInfo, bob.build(), null);
         }
     }
 
@@ -264,151 +301,6 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
             getView().attachVisualizer(sessionId);
             getView().setVisualizerEnabled(isPlaying);
         }
-    }
-
-    void setupActionBar() {
-        /*
-        final Func1<Integer, Boolean> handler = new Func1<Integer, Boolean>() {
-            @Override
-            public Boolean call(Integer integer) {
-                switch (integer) {
-                    case R.id.popup_menu_share:
-                        Observable.zip(
-                                musicService.getTrackName(),
-                                musicService.getArtistName(),
-                                musicService.getAlbumArtistName(),
-                                musicService.getAlbumName(),
-                                new Func4<String, String, String, String, String[]>() {
-                                    @Override
-                                    public String[] call(String s, String s2, String s3, String s4) {
-                                        return new String[]{s, s2, s3, s4};
-                                    }
-                                })
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(new SimpleObserver<String[]>() {
-                                    @Override
-                                    public void onNext(String[] strings) {
-                                        if (strings.length != 4
-                                                || strings[0] == null
-                                                || strings[1] == null
-                                                || getView() == null) {
-                                            notifyError();
-                                        } else {
-                                            Intent si = new Intent();
-                                            String msg = getView().getContext().getString(
-                                                    R.string.now_listening_to, strings[0], strings[1]);
-                                            si.setAction(Intent.ACTION_SEND);
-                                            si.setType("text/plain");
-                                            si.putExtra(Intent.EXTRA_TEXT, msg);
-                                            String albumArtist = strings[1];
-                                            if (strings[2] != null) {
-                                                albumArtist = strings[2];
-                                            }
-                                            String album = strings[3];
-                                            if (albumArtist != null && album != null) {
-                                                si.putExtra(Intent.EXTRA_STREAM,
-                                                        ArtworkProvider.createArtworkUri(albumArtist, album));
-                                            }
-                                            getView().getContext().startActivity(
-                                                    Intent.createChooser(si,
-                                                            getView().getContext().getString(R.string.share_track_using))
-                                            );
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onError(Throwable e) {
-                                        super.onError(e);
-                                        notifyError();
-                                    }
-
-                                    void notifyError() {
-                                        eventBus.post(new MakeToast(R.string.err_generic));
-                                    }
-                                });
-                        return true;
-                    case R.id.popup_set_ringtone:
-                        musicService.getTrackId()
-                                .map(new Func1<Long, Long>() {
-                                    @Override
-                                    public Long call(Long id) {
-                                        long realId = MusicProviderUtil.getRealId(appContext, id);
-                                        if (realId < 0) {
-                                            throw new IllegalArgumentException("Song not in MediaStore");
-                                        }
-                                        return realId;
-                                    }
-                                })
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(new SimpleObserver<Long>() {
-                                    @Override
-                                    public void onNext(Long id) {
-                                        MakeToast mt = MusicUtils.setRingtone(appContext, id);
-                                        if (mt != null) {
-                                            eventBus.post(mt);
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onError(Throwable e) {
-                                        super.onError(e);
-                                        int msg = (e instanceof IllegalArgumentException)
-                                                ? R.string.err_unsupported_for_library : R.string.err_generic;
-                                        eventBus.post(new MakeToast(msg));
-                                    }
-                                });
-                        return true;
-                    case R.id.popup_delete:
-                        Observable.zip(
-                                musicService.getTrackName(),
-                                musicService.getTrackId().map(new Func1<Long, Long>() {
-                                    @Override
-                                    public Long call(Long id) {
-                                        long realId = MusicProviderUtil.getRealId(appContext, id);
-                                        if (realId < 0) {
-                                            throw new IllegalArgumentException("Song not in MediaStore");
-                                        }
-                                        return realId;
-                                    }
-                                }), new Func2<String, Long, OpenDialog>() {
-                                    @Override
-                                    public OpenDialog call(String s, Long id) {
-                                        return new OpenDialog(DeleteDialog.newInstance(s, new long[]{id}));
-                                    }
-                                })
-                                .subscribe(new SimpleObserver<OpenDialog>() {
-                                    @Override
-                                    public void onNext(OpenDialog openDialog) {
-                                        eventBus.post(openDialog);
-                                    }
-
-                                    @Override
-                                    public void onError(Throwable e) {
-                                        super.onError(e);
-                                        int msg = (e instanceof IllegalArgumentException)
-                                                ? R.string.err_unsupported_for_library : R.string.err_generic;
-                                        eventBus.post(new MakeToast(msg));
-                                    }
-                                });
-                        return true;
-                    default:
-                        return false;
-                }
-            }
-        };
-        actionBarOwner.setConfig(new ActionBarOwner.Config.Builder()
-                        .setTitle(R.string.now_playing)
-                        .setUpButtonEnabled(true)
-                        .setMenuConfig(new ActionBarOwner.MenuConfig.Builder()
-                                        .withMenus(
-                                                R.menu.popup_share,
-                                                R.menu.popup_set_ringtone,
-                                                R.menu.popup_delete
-                                        )
-                                        .setActionHandler(handler).build()
-                        ).build()
-        );
-        */
     }
 
 }

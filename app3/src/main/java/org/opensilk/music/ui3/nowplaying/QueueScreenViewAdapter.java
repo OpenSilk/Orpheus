@@ -17,19 +17,15 @@
 
 package org.opensilk.music.ui3.nowplaying;
 
-import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.ui.recycler.DragSwipeViewHolder;
 import org.opensilk.common.ui.recycler.RecyclerListAdapter;
-import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.common.ui.widget.LetterTileDrawable;
 import org.opensilk.music.R;
-import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui.widget.PlayingIndicator;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.net.Uri;
@@ -37,16 +33,14 @@ import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.PopupMenu;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.support.v4.media.session.MediaSessionCompat.QueueItem;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 /**
@@ -90,9 +84,7 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem, Queue
         if (uri != null) {
             ArtInfo artInfo = ArtInfo.fromUri(uri);
             if (artInfo !=ArtInfo.NULLINSTANCE) {
-                holder.subscriptions.add(
-                        requestor.newRequest(holder.artwork, null, artInfo, ArtworkType.THUMBNAIL)
-                );
+                requestor.newRequest(artInfo, holder.artwork, null, null);
             } else {
                 setLetterTileDrawable(holder, desc.getTitle().toString());
             }
@@ -165,16 +157,14 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem, Queue
     public static class ViewHolder extends RecyclerView.ViewHolder implements DragSwipeViewHolder {
         @InjectView(R.id.tile_title) TextView title;
         @InjectView(R.id.tile_subtitle) TextView subtitle;
-        @InjectView(R.id.artwork_thumb) AnimatedImageView artwork;
+        @InjectView(R.id.artwork_thumb) ImageView artwork;
         @InjectView(R.id.drag_handle) View dragHandle;
         @InjectView(R.id.playing_indicator) PlayingIndicator playingIndicator;
-        final CompositeSubscription subscriptions = new CompositeSubscription();
         public ViewHolder(View itemView) {
             super(itemView);
             ButterKnife.inject(this, itemView);
         }
         void reset() {
-            subscriptions.clear();
             artwork.setImageBitmap(null);
             playingIndicator.stopAnimating();
             playingIndicator.setVisibility(View.GONE);

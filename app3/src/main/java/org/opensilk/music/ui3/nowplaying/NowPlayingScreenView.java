@@ -86,7 +86,7 @@ public class NowPlayingScreenView extends RelativeLayout {
 
     final boolean lightTheme;
 
-    AnimatedImageView artwork;
+    ImageView artwork;
     VisualizerView visualizerView;
 
     CompositeSubscription clicks;
@@ -206,34 +206,16 @@ public class NowPlayingScreenView extends RelativeLayout {
     }
 
     void initArtwork() {
-        String scaleType = settings.getString(NOW_PLAYING_ARTWORK_SCALE, NOW_PLAYING_ARTWORK_FILL);
-        if (NOW_PLAYING_ARTWORK_FILL.equals(scaleType)) {
+//        String scaleType = settings.getString(NOW_PLAYING_ARTWORK_SCALE, NOW_PLAYING_ARTWORK_FILL);
+//        if (NOW_PLAYING_ARTWORK_FILL.equals(scaleType)) {
             artwork.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        } else {
-            artwork.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        }
+//        } else {
+//            artwork.setScaleType(ImageView.ScaleType.FIT_CENTER);
+//        }
     }
 
-    public AnimatedImageView getArtwork() {
+    public ImageView getArtwork() {
         return artwork;
-    }
-
-    public void setTotalTime(CharSequence text) {
-    }
-
-    public void setCurrentTime(CharSequence text) {
-    }
-
-    public void setCurrentTimeVisibility(int visibility) {
-
-    }
-
-    public int getCurrentTimeVisibility() {
-        return VISIBLE;
-    }
-
-    public PaletteObserver getPaletteObserver() {
-        return paletteObserver;
     }
 
     public void setCurrentTrack(CharSequence text) {
@@ -268,27 +250,5 @@ public class NowPlayingScreenView extends RelativeLayout {
             clicks = null;
         }
     }
-
-    final PaletteObserver paletteObserver = new PaletteObserver() {
-        @Override
-        public void onNext(PaletteResponse paletteResponse) {
-            if (artwork != null) {
-                Palette p = paletteResponse.palette;
-                Palette.Swatch s1 = p.getDarkVibrantSwatch();
-                Palette.Swatch s2 = p.getVibrantSwatch();
-                if (s1 != null && s2 != null) {
-                    NowPlayingScreenView.this.setBackgroundColor(s1.getRgb());
-                    progress.getProgressDrawable().setTint(s1.getRgb());
-                    card.setBackgroundColor(s2.getRgb());
-                    title.setTextColor(s2.getTitleTextColor());
-                    subTitle.setTextColor(s2.getBodyTextColor());
-                }
-//                int color = p.getDarkVibrantColor(getResources().getColor(R.color.transparent_black));
-//                color = ThemeUtils.setColorAlpha(color, 0x66);
-//                PorterDuffColorFilter cf = new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP);
-//                artwork.setColorFilter(cf);
-            }
-        }
-    };
 
 }

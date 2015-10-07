@@ -27,6 +27,7 @@ import android.text.TextUtils;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.opensilk.bundleable.Bundleable;
@@ -310,10 +311,10 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
     void loadMultiArtwork(ViewHolder holder, List<ArtInfo> artInfos) {
         ArtworkRequestManager requestor = presenter.getRequestor();
         CompositeSubscription cs = holder.subscriptions;
-        AnimatedImageView artwork = holder.artwork;
-        AnimatedImageView artwork2 = holder.artwork2;
-        AnimatedImageView artwork3 = holder.artwork3;
-        AnimatedImageView artwork4 = holder.artwork4;
+        ImageView artwork = holder.artwork;
+        ImageView artwork2 = holder.artwork2;
+        ImageView artwork3 = holder.artwork3;
+        ImageView artwork4 = holder.artwork4;
         ArtworkType artworkType = ArtworkType.THUMBNAIL;
         UtilsCommon.loadMultiArtwork(requestor, cs, artwork, artwork2, artwork3, artwork4, artInfos, artworkType);
     }
@@ -361,10 +362,10 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements DragSwipeViewHolder {
-        @InjectView(R.id.artwork_thumb) public AnimatedImageView artwork;
-        @InjectView(R.id.artwork_thumb2) @Optional public AnimatedImageView artwork2;
-        @InjectView(R.id.artwork_thumb3) @Optional public AnimatedImageView artwork3;
-        @InjectView(R.id.artwork_thumb4) @Optional public AnimatedImageView artwork4;
+        @InjectView(R.id.artwork_thumb) public ImageView artwork;
+        @InjectView(R.id.artwork_thumb2) @Optional public ImageView artwork2;
+        @InjectView(R.id.artwork_thumb3) @Optional public ImageView artwork3;
+        @InjectView(R.id.artwork_thumb4) @Optional public ImageView artwork4;
         @InjectView(R.id.grid_description) @Optional GridTileDescription descriptionContainer;
         @InjectView(R.id.tile_title) TextView title;
         @InjectView(R.id.tile_subtitle) TextView subtitle;

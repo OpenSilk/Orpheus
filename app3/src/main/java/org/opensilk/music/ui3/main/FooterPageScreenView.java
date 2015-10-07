@@ -21,6 +21,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -52,7 +53,7 @@ public class FooterPageScreenView extends LinearLayout {
 
     @InjectView(R.id.footer_track_title) TextView trackTitle;
     @InjectView(R.id.footer_artist_name) TextView artistName;
-    @InjectView(R.id.footer_thumbnail) AnimatedImageView artworkThumbnail;
+    @InjectView(R.id.footer_thumbnail) ImageView artworkThumbnail;
     @InjectView(R.id.footer_playpause_btn) ImageButtonCheckable mPlayPause;
 
     CompositeSubscription mSubs = new CompositeSubscription();
