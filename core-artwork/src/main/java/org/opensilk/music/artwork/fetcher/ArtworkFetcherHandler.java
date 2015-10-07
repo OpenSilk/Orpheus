@@ -18,24 +18,17 @@
 package org.opensilk.music.artwork.fetcher;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Message;
 
-import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.shared.ArtworkPreferences;
 import org.opensilk.music.model.ArtInfo;
-
-import org.opensilk.music.artwork.fetcher.ArtworkFetcherManager.CompletionListener;
 
 import java.lang.ref.WeakReference;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import hugo.weaving.DebugLog;
-import rx.Subscription;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 

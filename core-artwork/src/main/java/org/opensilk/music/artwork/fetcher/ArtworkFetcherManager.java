@@ -102,12 +102,6 @@ public class ArtworkFetcherManager {
         this.mOkHttpClient = mOkHttpClient;
     }
 
-    public static abstract class CompletionListener extends Subscriber<Bitmap> {
-        @Override public void onError(Throwable e) { }
-        /** Do not call super when overriding this method */
-        @Override public void onNext(Bitmap o) { o.recycle(); }
-    }
-
     /**
      * Entry point
      */

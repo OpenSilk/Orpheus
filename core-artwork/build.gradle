@@ -72,8 +72,6 @@ dependencies {
     compile project(':common-glide')
     compile 'com.jakewharton:disklrucache:2.0.2'
 
-    androidTestCompile('com.squareup:fest-android:1.0.0')
-
     testCompile (group:"junit", name:"junit", version: rootProject.ext.testJunitVersion)
     testCompile (group:"org.assertj", name:"assertj-core", version: rootProject.ext.testAssertJVersion)
     testCompile (group:"org.robolectric", name:"robolectric", version : rootProject.ext.testRobolectricVersion)

@@ -15,31 +15,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.artwork;
+package org.opensilk.music.artwork.fetcher;
 
-import org.opensilk.common.core.app.BaseApp;
-import org.opensilk.music.artwork.provider.ArtworkComponent;
-import org.robolectric.shadows.ShadowLog;
+import android.graphics.Bitmap;
 
-import timber.log.Timber;
+import rx.Subscriber;
 
 /**
- * Created by drew on 10/5/15.
+ * Created by drew on 10/7/15.
  */
-public class TestApplication extends BaseApp {
-
-    static {
-        ShadowLog.stream = System.out;
+public abstract class CompletionListener extends Subscriber<Bitmap> {
+    @Override
+    public void onError(Throwable e) {
     }
 
+    /**
+     * Do not call super when overriding this method
+     */
     @Override
-    public void onCreate() {
-        super.onCreate();
-        Timber.plant(new Timber.DebugTree());
-    }
-
-    @Override
-    protected Object getRootComponent() {
-        return ArtworkComponent.FACTORY.call(this);
+    public void onNext(Bitmap o) {
+        o.recycle();
     }
 }

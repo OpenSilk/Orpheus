@@ -83,7 +83,7 @@ public class ArtworkFetcherManagerTest {
 
     TestFetcher mFetcher;
 
-    private static class TestListener extends ArtworkFetcherManager.CompletionListener {
+    private static class TestListener extends CompletionListener {
         //set true to debug unexpected errors
         boolean printStack = false;
         @Override public void onError(Throwable e) {

@@ -164,8 +164,8 @@ public class ArtworkFetcherService extends MortarService {
         }
     }
 
-    public class Binder extends android.os.Binder {
-        public void newRequest(ArtInfo artInfo, ArtworkFetcherManager.CompletionListener listener) {
+    class Binder extends android.os.Binder implements ArtworkFetcher {
+        public void newRequest(ArtInfo artInfo, CompletionListener listener) {
             mHandler.newTask(artInfo, listener);
         }
     }
@@ -186,7 +186,7 @@ public class ArtworkFetcherService extends MortarService {
         @Override public void close() {
             context.unbindService(serviceConnection);
         }
-        public ArtworkFetcherService.Binder getService() {
+        public ArtworkFetcher getService() {
             return service;
         }
     }
@@ -200,11 +200,7 @@ public class ArtworkFetcherService extends MortarService {
             @Override public void onServiceConnected(ComponentName name, IBinder service) {
                 if (!mConnectedAtLeastOnce) {
                     mConnectedAtLeastOnce = true;
-                    try {
-                        q.put((ArtworkFetcherService.Binder) service);
-                    } catch (InterruptedException e) {
-                        // will never happen, since the queue starts with one available slot
-                    }
+                    q.offer((ArtworkFetcherService.Binder) service);
                 }
             }
             @Override public void onServiceDisconnected(ComponentName name) {}

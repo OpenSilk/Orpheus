@@ -29,21 +29,21 @@ import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.artwork.ArtworkUris;
 import org.opensilk.music.artwork.Constants;
 import org.opensilk.music.artwork.cache.BitmapDiskCache;
-import org.opensilk.music.artwork.fetcher.ArtworkFetcherManager;
+import org.opensilk.music.artwork.fetcher.ArtworkFetcher;
 import org.opensilk.music.artwork.fetcher.ArtworkFetcherService;
+import org.opensilk.music.artwork.fetcher.CompletionListener;
 import org.opensilk.music.model.ArtInfo;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import hugo.weaving.DebugLog;
 import rx.Scheduler;
 import rx.functions.Action0;
 import timber.log.Timber;
@@ -99,7 +99,7 @@ public class ArtworkProvider extends ContentProvider {
     }
 
     @Override
-    //@DebugLog
+    @DebugLog
     public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
         if (!"r".equals(mode)) {
             throw new FileNotFoundException("Provider is read only");
@@ -125,12 +125,10 @@ public class ArtworkProvider extends ContentProvider {
         OptionalBitmap bitmap = null;
         try {
             //not in cache, make a new request and wait for it to come in.
-            final ArtworkFetcherService.Connection serviceConnection =
-                    ArtworkFetcherService.bindService(getContext());
-            final ArtworkFetcherService.Binder binder = serviceConnection.getService();
+            final ArtworkFetcher binder = getArtworkFetcher();
             final BlockingQueue<OptionalBitmap> queue = new LinkedBlockingQueue<>(1);
-            final ArtworkFetcherManager.CompletionListener listener =
-                    new ArtworkFetcherManager.CompletionListener() {
+            final CompletionListener listener =
+                    new CompletionListener() {
                         @Override public void onError(Throwable e) {
                             queue.offer(new OptionalBitmap(null));
                         }
@@ -187,6 +185,13 @@ public class ArtworkProvider extends ContentProvider {
             Timber.w(e, "createPipe");
         }
         return null;
+    }
+
+    //allow tests to override
+    protected ArtworkFetcher getArtworkFetcher() throws InterruptedException {
+        final ArtworkFetcherService.Connection serviceConnection =
+                ArtworkFetcherService.bindService(getContext());
+        return serviceConnection.getService();
     }
 
     /** Wrapper so we can notify error */
