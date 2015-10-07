@@ -24,13 +24,13 @@ public class BitmapDiskLruCache implements BitmapDiskCache {
 
     private final File mDiskCacheDir;
     private final int mDiskCacheSize;
-    private final ByteArrayPool mBytePool = new ByteArrayPool(1024*256);
+    private final ByteArrayPool mBytePool = new ByteArrayPool(1024*512);
     private static final Bitmap.CompressFormat COMPRESS_FORMAT = Bitmap.CompressFormat.PNG;
     private static final int COMPRESS_QUALITY = 100;
     private static final int APP_VERSION = 2;
     private static final int VALUE_COUNT = 1;
     private static final int DEFAULT_BUFFER_SIZE = 1024 * 8;
-    private static final int OUTPUT_BUFFER_SIZE = 1024 * 24;
+    private static final int OUTPUT_BUFFER_SIZE = 1024 * 64;
 
     public static final Object sDecodeLock = new Object();
 

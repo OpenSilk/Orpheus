@@ -22,6 +22,8 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
+import timber.log.Timber;
+
 /**
  * ByteArrayPool is a source and repository of <code>byte[]</code> objects. Its purpose is to
  * supply those buffers to consumers who need to use them for a short period of time and then
@@ -95,9 +97,11 @@ public class ByteArrayPool {
                 mCurrentSize -= buf.length;
                 mBuffersBySize.remove(i);
                 mBuffersByLastUse.remove(buf);
+                Timber.d("getBuf cached buf size=%.03fKib requested %.03fKib", ((float)buf.length/1024), ((float)len)/1024);
                 return buf;
             }
         }
+        Timber.d("getBuf new buffer size=%.06fKib", ((float)len)/1024);
         return new byte[len];
     }
 
@@ -109,6 +113,7 @@ public class ByteArrayPool {
      */
     public synchronized void returnBuf(byte[] buf) {
         if (buf == null || buf.length > mSizeLimit) {
+            Timber.d("returnBuf discarding buffer size=%.03fKib", buf != null ? (((float)buf.length)/1024) : 0);
             return;
         }
         mBuffersByLastUse.add(buf);
@@ -119,6 +124,7 @@ public class ByteArrayPool {
         mBuffersBySize.add(pos, buf);
         mCurrentSize += buf.length;
         trim();
+        Timber.d("returnBuf after trim %.03fKib", ((float) mCurrentSize) / 1024);
     }
 
     /**
