@@ -3,17 +3,13 @@ package org.opensilk.music.artwork.cache;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 
 import com.jakewharton.disklrucache.DiskLruCache;
 
 import org.apache.commons.io.IOUtils;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 import timber.log.Timber;
@@ -172,6 +168,8 @@ public class BitmapDiskLruCache implements BitmapDiskCache {
             return true;
         } catch (IOException e) {
             return false;
+        } finally {
+            close();
         }
     }
 
