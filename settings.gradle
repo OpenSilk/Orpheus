@@ -3,7 +3,7 @@
 //include ':iabcore', ':iabgplay'
 
 include ':app3'
-include ':common-core', ':common-ui', ':common-bundleable'
+include ':common-core', ':common-ui', ':common-bundleable', 'common-glide'
 include ':core-model', ':core-library', ':core-loader', ':core-artwork', ':core-res-drawables'
 include ':core-playback', ':core-translations', ':core-index', ':core-lastfm'
 include ':library-mediastore', ':library-upnp'
