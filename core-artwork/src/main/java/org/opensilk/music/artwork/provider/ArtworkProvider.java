@@ -23,11 +23,11 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.support.annotation.Nullable;
 
 import org.apache.commons.io.IOUtils;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.artwork.ArtworkUris;
-import org.opensilk.music.artwork.Constants;
 import org.opensilk.music.artwork.cache.BitmapDiskCache;
 import org.opensilk.music.artwork.fetcher.ArtworkFetcher;
 import org.opensilk.music.artwork.fetcher.ArtworkFetcherService;
@@ -54,9 +54,8 @@ import timber.log.Timber;
 public class ArtworkProvider extends ContentProvider {
     private static final String TAG = ArtworkProvider.class.getSimpleName();
 
-    final Scheduler mScheduler = Constants.ARTWORK_SCHEDULER;
-
     @Inject @Named("artworkauthority") String mAuthority;
+    @Inject @Named("artworkscheduler") Scheduler mScheduler;
     @Inject BitmapDiskCache mL2Cache;
 
     private UriMatcher mUriMatcher;
@@ -107,61 +106,32 @@ public class ArtworkProvider extends ContentProvider {
         switch (mUriMatcher.match(uri)) {
             case ArtworkUris.MATCH.ARTINFO: {
                 final ArtInfo artInfo = ArtInfo.fromUri(uri);
-                final ParcelFileDescriptor pfd = getArtwork(uri, artInfo);
+                final ParcelFileDescriptor pfd = getArtwork(artInfo);
                 if (pfd != null) {
                     return pfd;
                 }
                 break;
             }
         }
-        throw new FileNotFoundException("Could not obtain image from cache");
+        throw new FileNotFoundException("Could not obtain image from cache or network");
     }
 
-    public ParcelFileDescriptor getArtwork(Uri uri, ArtInfo artInfo) {
-        ParcelFileDescriptor pfd = pullSnapshot(artInfo.cacheKey());
-        if (pfd != null) {
-            return pfd;
+    public @Nullable ParcelFileDescriptor getArtwork(ArtInfo artInfo) {
+        ParcelFileDescriptor pfd = createPipe(artInfo);
+        if (pfd == null) {
+            pfd = createPipe2(artInfo);
         }
-        OptionalBitmap bitmap = null;
-        try {
-            //not in cache, make a new request and wait for it to come in.
-            final ArtworkFetcher binder = getArtworkFetcher();
-            final BlockingQueue<OptionalBitmap> queue = new LinkedBlockingQueue<>(1);
-            final CompletionListener listener =
-                    new CompletionListener() {
-                        @Override public void onError(Throwable e) {
-                            queue.offer(new OptionalBitmap(null));
-                        }
-                        @Override public void onNext(Bitmap o) {
-                            queue.offer(new OptionalBitmap(o));
-                        }
-                        @Override public void onCompleted() { }
-            };
-            binder.newRequest(artInfo, listener);
-            bitmap = queue.take();
-            if (bitmap.hasBitmap()) {
-                return createPipe(mL2Cache.bitmapToBytes(bitmap.getBitmap()));
-            } else {
-                return null;
-            }
-        } catch (InterruptedException e) {
-            Timber.w(e, "getArtwork(%s)", uri);
-            return null;
-        } finally {
-            if (bitmap != null) bitmap.recycle();
-        }
+        return pfd;
     }
 
-    private ParcelFileDescriptor pullSnapshot(String cacheKey) {
-        final byte[] snapshot = mL2Cache.getBytes(cacheKey);
-        if (snapshot != null) {
-            return createPipe(snapshot);
-        } else {
+    /**
+     * Pulls bitmap from diskcache
+     */
+    private @Nullable ParcelFileDescriptor createPipe(ArtInfo artInfo) {
+        final byte[] bytes = mL2Cache.getBytes(artInfo.cacheKey());
+        if (bytes == null) {
             return null;
         }
-    }
-
-    private ParcelFileDescriptor createPipe(final byte[] bytes) {
         try {
             final ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
             final OutputStream out = new ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]);
@@ -182,9 +152,59 @@ public class ArtworkProvider extends ContentProvider {
             });
             return in;
         } catch (IOException e) {
-            Timber.w(e, "createPipe");
+            Timber.w(e, "createPipe(%s)", artInfo);
+            return null;
         }
-        return null;
+    }
+
+    /**
+     * Eagerly creates a pipe, then blocks on a background thread while we
+     * wait for the fetcher to return the bitmap, simply closing the pipe
+     * if no art was found
+     */
+    private @Nullable ParcelFileDescriptor createPipe2(final ArtInfo artInfo) {
+        try {
+            final ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
+            final OutputStream out = new ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]);
+            final ParcelFileDescriptor in = pipe[0];
+            final Scheduler.Worker worker = mScheduler.createWorker();
+            worker.schedule(new Action0() {
+                @Override
+                public void call() {
+                    OptionalBitmap bitmap = null;
+                    try {
+                        //make a new request and wait for it to come in.
+                        final ArtworkFetcher binder = getArtworkFetcher();
+                        final BlockingQueue<OptionalBitmap> queue = new LinkedBlockingQueue<>(1);
+                        final CompletionListener listener =
+                                new CompletionListener() {
+                                    @Override public void onError(Throwable e) {
+                                        queue.offer(new OptionalBitmap(null));
+                                    }
+                                    @Override public void onNext(Bitmap o) {
+                                        queue.offer(new OptionalBitmap(o));
+                                    }
+                                    @Override public void onCompleted() { }
+                                };
+                        binder.newRequest(artInfo, listener);
+                        bitmap = queue.take();
+                        if (bitmap.hasBitmap()) {
+                            IOUtils.write(mL2Cache.bitmapToBytes(bitmap.getBitmap()), out);
+                        }
+                    } catch (InterruptedException|IOException e) {
+                        Timber.w(e, "createPipe2(%s)", artInfo);
+                    } finally {
+                        if (bitmap != null) bitmap.recycle();
+                        IOUtils.closeQuietly(out);
+                        worker.unsubscribe();
+                    }
+                }
+            });
+            return in;
+        } catch (IOException e) {
+            Timber.w(e, "createPipe2(%s)", artInfo);
+            return null;
+        }
     }
 
     //allow tests to override
