@@ -46,9 +46,6 @@ import timber.log.Timber;
 public class App extends BaseApp {
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
-    //Only for UiProcess
-    @Inject ArtworkRequestManager mArtworkRequestor;
-
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
@@ -140,12 +137,7 @@ public class App extends BaseApp {
         @Override
         @DebugLog
         public void onTrimMemory(int level) {
-            if (level >= TRIM_MEMORY_COMPLETE) {
-                //mArtworkRequestor.onDeathImminent();
-            } else if (level >= 15 /*TRIM_MEMORY_RUNNING_CRITICAL*/) {
-                mArtworkRequestor.evictL1();
-                Runtime.getRuntime().gc();
-            }
+            //pass
         }
     };
 

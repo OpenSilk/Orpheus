@@ -56,4 +56,5 @@ public interface MusicActivityComponent extends MortarFragmentActivityComponent 
     //TODO figure out why i cant use DrawerController/DrawerListenerRegistrar here
     DrawerOwner drawerOwner();
     ActionModePresenter actionModePresenter();
+    @Named("artworkauthority") String artworkAuthority();
 }

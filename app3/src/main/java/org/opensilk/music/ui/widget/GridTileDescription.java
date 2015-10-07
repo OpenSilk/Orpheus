@@ -23,6 +23,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.support.v7.graphics.Palette;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -31,6 +32,10 @@ import org.opensilk.common.ui.widget.SquareImageView;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.PaletteObserver;
 import org.opensilk.music.artwork.PaletteResponse;
+import org.opensilk.common.glide.Paletteable;
+
+import java.util.Collections;
+import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -38,7 +43,7 @@ import butterknife.InjectView;
 /**
  * Created by drew on 10/31/14.
  */
-public class GridTileDescription extends LinearLayout {
+public class GridTileDescription extends LinearLayout implements Paletteable {
 
     @InjectView(R.id.tile_title) TextView mTitle;
     @InjectView(R.id.tile_subtitle) TextView mSubTitle;
@@ -92,4 +97,26 @@ public class GridTileDescription extends LinearLayout {
         }
     }
 
+    public TextView getTitle() {
+        return mTitle;
+    }
+
+    public TextView getSubTitle() {
+        return mSubTitle;
+    }
+
+    @Override
+    public List<? extends View> getBackgroundViews() {
+        return Collections.singletonList(this);
+    }
+
+    @Override
+    public List<TextView> getTitleViews() {
+        return Collections.singletonList(mTitle);
+    }
+
+    @Override
+    public List<TextView> getBodyViews() {
+        return Collections.singletonList(mSubTitle);
+    }
 }

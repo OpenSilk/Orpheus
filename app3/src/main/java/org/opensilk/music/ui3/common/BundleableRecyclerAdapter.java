@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.SparseBooleanArray;
@@ -28,14 +29,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import org.opensilk.bundleable.Bundleable;
+import org.opensilk.common.core.util.BundleHelper;
+import org.opensilk.common.glide.PaletteSwatchType;
 import org.opensilk.common.ui.recycler.DragSwipeViewHolder;
 import org.opensilk.common.ui.recycler.ItemClickSupport;
 import org.opensilk.common.ui.recycler.RecyclerListAdapter;
+import org.opensilk.common.ui.util.ThemeUtils;
 import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.common.ui.widget.LetterTileDrawable;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.artwork.PaletteObserver;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.ArtInfo;
@@ -45,7 +49,6 @@ import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.TrackList;
-import org.opensilk.bundleable.Bundleable;
 import org.opensilk.music.ui.widget.GridTileDescription;
 
 import java.util.ArrayList;
@@ -89,6 +92,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
 
     boolean gridStyle;
     boolean dragableList;
+    boolean lightTheme;
 
     @Inject
     public BundleableRecyclerAdapter(
@@ -103,6 +107,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         ItemClickSupport.addTo(recyclerView)
                 .setOnItemClickListener(this)
                 .setOnItemLongClickListener(this);
+        lightTheme = ThemeUtils.isLightTheme(recyclerView.getContext());
     }
 
     @Override
@@ -148,10 +153,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         if (artInfo == ArtInfo.NULLINSTANCE) {
             setLetterTileDrawable(holder, album.getName());
         } else {
-            PaletteObserver paletteObserver = holder.descriptionContainer != null
-                    ? holder.descriptionContainer.getPaletteObserver() : null;
-            holder.subscriptions.add(presenter.getRequestor().newRequest(holder.artwork,
-                    paletteObserver, artInfo, ArtworkType.THUMBNAIL));
+            loadArtwork(artInfo, holder);
         }
     }
 
@@ -171,10 +173,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         if (artInfo == ArtInfo.NULLINSTANCE) {
             setLetterTileDrawable(holder, artist.getName());
         } else {
-            PaletteObserver paletteObserver = holder.descriptionContainer != null
-                    ? holder.descriptionContainer.getPaletteObserver() : null;
-            holder.subscriptions.add(presenter.getRequestor().newRequest(holder.artwork,
-                    paletteObserver, artInfo, ArtworkType.THUMBNAIL));
+            loadArtwork(artInfo, holder);
         }
     }
 
@@ -222,15 +221,15 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
                 track.getAlbumName(), track.getArtworkUri());
         holder.title.setText(track.getName());
         holder.subtitle.setText(track.getArtistName());
-        if (holder.extraInfo != null && track.getDurationS() > 0) {
-            holder.extraInfo.setText(UtilsCommon.makeTimeString(holder.itemView.getContext(), track.getDurationS()));
+        if (holder.extraInfo != null && track.getResources().get(0).getDurationS() > 0) {
+            holder.extraInfo.setText(UtilsCommon.makeTimeString(holder.itemView.getContext(),
+                    track.getResources().get(0).getDurationS()));
             holder.extraInfo.setVisibility(View.VISIBLE);
         }
         if (artInfo == ArtInfo.NULLINSTANCE) {
             setLetterTileDrawable(holder, track.getName());
         } else {
-            holder.subscriptions.add(presenter.getRequestor().newRequest(holder.artwork,
-                    null, artInfo, ArtworkType.THUMBNAIL));
+            loadArtwork(artInfo, holder);
         }
     }
 
@@ -245,13 +244,6 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         } else {
             setLetterTileDrawable(holder, collection.getName());
         }
-    }
-
-    void setLetterTileDrawable(ViewHolder holder, String text) {
-        Resources resources = holder.itemView.getResources();
-        LetterTileDrawable drawable = LetterTileDrawable.fromText(resources, text);
-        drawable.setIsCircular(!gridStyle);
-        holder.artwork.setImageDrawable(drawable);
     }
 
     @Override
@@ -296,6 +288,23 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         } else {
             return false;
         }
+    }
+
+    void setLetterTileDrawable(ViewHolder holder, String text) {
+        Resources resources = holder.itemView.getResources();
+        LetterTileDrawable drawable = LetterTileDrawable.fromText(resources, text);
+        drawable.setIsCircular(!gridStyle);
+        holder.artwork.setImageDrawable(drawable);
+    }
+
+    void loadArtwork(ArtInfo artInfo, ViewHolder holder) {
+        Bundle extras = BundleHelper.b()
+                .putString(String.valueOf(lightTheme ?
+                        PaletteSwatchType.VIBRANT_LIGHT : PaletteSwatchType.VIBRANT_DARK))
+                .putString2(PaletteSwatchType.VIBRANT.toString())
+                .putInt(holder.descriptionContainer == null ? 1 : 0) //crop circles for lists
+                .get();
+        presenter.getRequestor().newRequest(artInfo, holder.artwork, holder.descriptionContainer, extras);
     }
 
     void loadMultiArtwork(ViewHolder holder, List<ArtInfo> artInfos) {
