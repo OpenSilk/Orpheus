@@ -60,6 +60,7 @@ public class ArtworkModule {
 
     @Provides @Singleton @Named("artworkscheduler")
     public Scheduler provideArtworkScheduler() {
-        return Schedulers.computation();//TODO implement Schedulers.io() with bounded pool
+        return Schedulers.io();//TODO using computation for both provider and fetcher will
+                               //create deadlock maybe use io for provider and computation for fetcher
     }
 }
