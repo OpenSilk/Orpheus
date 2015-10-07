@@ -32,7 +32,7 @@ import javax.inject.Singleton;
 @Singleton
 public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
-    public static final int DB_VERSION = 29;
+    public static final int DB_VERSION = 30;
     public static final String DB_NAME = "music.db";
 
     @Inject
@@ -412,6 +412,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
     public void onConfigure(SQLiteDatabase db) {
         super.onConfigure(db);
         db.execSQL("PRAGMA foreign_keys = ON;");
+        db.execSQL("PRAGMA encoding = 'UTF-8';");
     }
 
 }
