@@ -20,6 +20,7 @@ package org.opensilk.music.playback.service;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.drm.DrmStore;
+import android.graphics.Bitmap;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.audiofx.AudioEffect;
@@ -70,6 +71,8 @@ import rx.Scheduler;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.HandlerScheduler;
+import rx.functions.Action0;
+import rx.functions.Action1;
 import timber.log.Timber;
 
 import static org.opensilk.music.playback.PlaybackConstants.CMDNAME;
@@ -107,6 +110,7 @@ public class PlaybackService extends MediaBrowserService {
     @Inject MediaSessionHolder mSessionHolder;
     @Inject IndexClient mIndexClient;
     @Inject Playback mPlayback;
+    @Inject ArtworkProviderHelper mArtworkHelper;
 
     int mAudioSessionId;
     private Handler mHandler;
@@ -127,6 +131,7 @@ public class PlaybackService extends MediaBrowserService {
     Subscription mCurrentTrackSub;
     Subscription mNextTrackSub;
     Subscription mQueueListSub;
+    Subscription mArtworkSubscription;
 
     @Override
     public void onCreate() {
@@ -161,6 +166,19 @@ public class PlaybackService extends MediaBrowserService {
     public void onDestroy() {
         saveState(true); //fire early as possible
         super.onDestroy();
+
+        if (mCurrentTrackSub != null) {
+            mCurrentTrackSub.unsubscribe();
+        }
+        if (mNextTrackSub != null) {
+            mNextTrackSub.unsubscribe();
+        }
+        if (mQueueListSub != null) {
+            mQueueListSub.unsubscribe();
+        }
+        if (mArtworkSubscription != null) {
+            mArtworkSubscription.unsubscribe();
+        }
 
         mNotificationHelper.killNotification();
         mDelayedShutdownHandler.cancelDelayedShutdown();
@@ -347,8 +365,34 @@ public class PlaybackService extends MediaBrowserService {
     }
 
     void updateMeta() {
-        MediaMetadata meta = mIndexClient.convertToMediaMetadata(mCurrentTrack);
-        getMediaSession().setMetadata(meta);
+        if (mArtworkSubscription != null) {
+            mArtworkSubscription.unsubscribe();
+            mArtworkSubscription = null;
+        }
+        final MediaMetadata meta = mIndexClient.convertToMediaMetadata(mCurrentTrack);
+        final Uri artUri = MediaMetadataHelper.getIconUri(meta);
+        ArtworkProviderHelper.CacheBitmap bitmap = mArtworkHelper.getCachedOrDefault(artUri);
+        //Always build with default first to ensure it shows promptly
+        getMediaSession().setMetadata(new MediaMetadata.Builder(meta).putBitmap(
+                MediaMetadata.METADATA_KEY_ART, bitmap.getBitmap()).build());
+        if (!bitmap.fromCache()) {
+            //Then go for artwork, since it could take a while
+            mArtworkSubscription = mArtworkHelper.getArtwork(artUri)
+                    .observeOn(getScheduler())
+                    .subscribe(new Subscriber<Bitmap>() {
+                        @Override public void onCompleted() {
+                            mArtworkSubscription = null;
+                        }
+                        @Override public void onError(Throwable e) {
+                            Timber.w(e, "getArtwork");
+                            mArtworkSubscription = null;
+                        }
+                        @Override public void onNext(Bitmap bitmap) {
+                            getMediaSession().setMetadata(new MediaMetadata.Builder(meta)
+                                    .putBitmap(MediaMetadata.METADATA_KEY_ART, bitmap).build());
+                        }
+                    });
+        }
     }
 
     void saveState(final boolean full) {

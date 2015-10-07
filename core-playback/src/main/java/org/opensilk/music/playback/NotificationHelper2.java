@@ -64,7 +64,6 @@ public class NotificationHelper2 extends BroadcastReceiver {
 
     private final Context mContext;
     private final NotificationManager mNotificationManager;
-    private final ArtworkProviderHelper mArtworkHelper;
 
     private final PlaybackService mService;
     private MediaSession.Token mSessionToken;
@@ -81,7 +80,6 @@ public class NotificationHelper2 extends BroadcastReceiver {
     private PendingIntent mStopIntent;
 
     private int mNotificationColor;
-    private Subscription mArtworkSubscription;
     private boolean mAnyActivityInForeground;
 
     private boolean mStarted = false;
@@ -90,12 +88,10 @@ public class NotificationHelper2 extends BroadcastReceiver {
     public NotificationHelper2(
             @ForApplication Context context,
             NotificationManager notificationManager,
-            ArtworkProviderHelper artworkHelper,
             PlaybackService service
     ) {
         mContext = context;
         mNotificationManager = notificationManager;
-        mArtworkHelper = artworkHelper;
         mService = service;
 
         String pkg = mService.getPackageName();
@@ -153,9 +149,6 @@ public class NotificationHelper2 extends BroadcastReceiver {
                 // ignore if the receiver is not registered.
             }
             mService.stopForeground(true);
-        }
-        if (mArtworkSubscription != null) {
-            mArtworkSubscription.unsubscribe();
         }
     }
 
@@ -275,29 +268,10 @@ public class NotificationHelper2 extends BroadcastReceiver {
             return;
         }
 
-        final Uri artUri = MediaMetadataHelper.getIconUri(mMetadata);
-        if (mArtworkSubscription != null) {
-            mArtworkSubscription.unsubscribe();
-        }
-        mArtworkSubscription = mArtworkHelper.getArtwork(artUri)
-                .observeOn(mService.getScheduler())
-                .subscribe(new Action1<Bitmap>() {
-                    @Override
-                    public void call(Bitmap bitmap) {
-                        buildNotificationInternal(bitmap);
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Timber.w(throwable, "getArtwork");
-                        mArtworkSubscription = null;
-                    }
-                }, new Action0() {
-                    @Override
-                    public void call() {
-                        mArtworkSubscription = null;
-                    }
-                });
+        int size = mContext.getResources().getDimensionPixelSize(R.dimen.notification_bitmap_resize);
+        Timber.d("Bitmap size = %d", size);
+        Bitmap bitmap = scaleBitmap(MediaMetadataHelper.getIcon(mMetadata), size);
+        buildNotificationInternal(bitmap);
     }
 
     private void buildNotificationInternal(Bitmap icon) {
@@ -427,6 +401,16 @@ public class NotificationHelper2 extends BroadcastReceiver {
         } else {
             return isPlaying ? R.drawable.ic_pause_white_36dp : R.drawable.ic_play_arrow_white_36dp;
         }
+    }
+
+    private Bitmap scaleBitmap(Bitmap bmp, int maxSize) {
+        float maxSizeF = maxSize;
+        float widthScale = maxSizeF / bmp.getWidth();
+        float heightScale = maxSizeF / bmp.getHeight();
+        float scale = Math.min(widthScale, heightScale);
+        int height = (int) (bmp.getHeight() * scale);
+        int width = (int) (bmp.getWidth() * scale);
+        return Bitmap.createScaledBitmap(bmp, width, height, true);
     }
 
 }

@@ -21,4 +21,6 @@
     <dimen name="notification_action_height">48.0dip</dimen>
     <dimen name="notification_action_width">48.0dip</dimen>
 
+    <dimen name="notification_bitmap_resize">128dp</dimen>
+
 </resources>
