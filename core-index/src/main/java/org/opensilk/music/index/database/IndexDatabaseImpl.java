@@ -595,6 +595,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
         if (num > 0) {
             //notify everyone
             mAppContext.getContentResolver().notifyChange(IndexUris.call(indexAuthority), null);
+            clearCaches();
         }
         return num;
     }
@@ -979,6 +980,21 @@ public class IndexDatabaseImpl implements IndexDatabase {
             mAppContext.getContentResolver().notifyChange(IndexUris.genres(indexAuthority), null);
         }
         return id;
+    }
+
+    void clearCaches() {
+        synchronized (sConainerIdsCache) {
+            sConainerIdsCache.clear();
+        }
+        synchronized (sAlbumIdsCache) {
+            sArtistIdsCache.clear();
+        }
+        synchronized (sArtistIdsCache) {
+            sArtistIdsCache.clear();
+        }
+        synchronized (sGenreIdsCache) {
+            sGenreIdsCache.clear();
+        }
     }
 
     static final String playbackSettingsSel = IndexSchema.PlaybackSettings.KEY + "=?";
