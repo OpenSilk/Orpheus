@@ -29,6 +29,7 @@ import java.lang.ref.WeakReference;
 import javax.inject.Inject;
 
 import hugo.weaving.DebugLog;
+import rx.Subscription;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
@@ -68,7 +69,10 @@ public class ArtworkFetcherHandler extends Handler {
         switch (msg.what) {
             case MSG.NEW_TASK: {
                 Task task = (Task) msg.obj;
-                mSubscriptions.add(mFetcherManager.fetch(task.artInfo, task.listener));
+                Subscription s = mFetcherManager.fetch(task.artInfo, task.listener);
+                if (msg.arg1 == 1) {
+                    mSubscriptions.add(s);
+                }
                 break;
             } case MSG.CLEAR_CACHES: {
                 mFetcherManager.clearCaches();
@@ -103,10 +107,11 @@ public class ArtworkFetcherHandler extends Handler {
                     }
                     void onDone() {
                         mSubscriptions.remove(this);
+                        Timber.d("Has subscriptions=%d", mSubscriptions.hasSubscriptions());
                         stopService(startId);
                     }
                 };
-                newTask(artInfo, listener);
+                newTaskInternal(artInfo, listener, true);
                 break;
             }
             case ArtworkFetcherService.ACTION.CLEARCACHE:
@@ -120,7 +125,12 @@ public class ArtworkFetcherHandler extends Handler {
 
     @DebugLog
     void newTask(ArtInfo artInfo, CompletionListener listener) {
-        obtainMessage(MSG.NEW_TASK, 0, 0, new Task(artInfo, listener)).sendToTarget();
+        newTaskInternal(artInfo, listener, false);
+    }
+
+    @DebugLog
+    private void newTaskInternal(ArtInfo artInfo, CompletionListener listener, boolean track) {
+        obtainMessage(MSG.NEW_TASK, track ? 1 : 0, 0, new Task(artInfo, listener)).sendToTarget();
     }
 
     void onDestroy() {
