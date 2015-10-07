@@ -77,8 +77,8 @@ public class ArtworkProvider extends ContentProvider {
     @Override
     public String getType(Uri uri) {
         switch (mUriMatcher.match(uri)) {
-            case 1:
-                return "image/*";
+            case ArtworkUris.MATCH.ARTINFO:
+                return "image/png";
         }
         return null;
     }
