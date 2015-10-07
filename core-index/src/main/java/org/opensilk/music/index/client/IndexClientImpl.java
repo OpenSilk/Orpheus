@@ -62,10 +62,12 @@ import timber.log.Timber;
 
 import static android.media.MediaMetadata.METADATA_KEY_ALBUM;
 import static android.media.MediaMetadata.METADATA_KEY_ALBUM_ARTIST;
+import static android.media.MediaMetadata.METADATA_KEY_ALBUM_ART_URI;
 import static android.media.MediaMetadata.METADATA_KEY_ARTIST;
 import static android.media.MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE;
 import static android.media.MediaMetadata.METADATA_KEY_DISPLAY_TITLE;
 import static android.media.MediaMetadata.METADATA_KEY_DURATION;
+import static android.media.MediaMetadata.METADATA_KEY_MEDIA_ID;
 import static android.media.MediaMetadata.METADATA_KEY_TITLE;
 
 /**
@@ -338,25 +340,21 @@ public class IndexClientImpl implements IndexClient {
         Track t = track;
         Track.Res r = track.getResources().get(0);
         MediaMetadata m = new MediaMetadata.Builder()
+                .putString(METADATA_KEY_MEDIA_ID, track.getUri().toString())
                 .putString(METADATA_KEY_TITLE, t.getName())
                 .putString(METADATA_KEY_DISPLAY_TITLE, t.getName())
                 .putString(METADATA_KEY_ARTIST, t.getArtistName())
                 .putString(METADATA_KEY_DISPLAY_SUBTITLE, t.getArtistName())
                         //.putString(METADATA_KEY_DISPLAY_DESCRIPTION, TODO)
                 .putString(METADATA_KEY_ALBUM_ARTIST,
-                        StringUtils.isEmpty(t.getAlbumArtistName()) ? t.getArtistName() : t.getAlbumArtistName())
+                        StringUtils.isEmpty(t.getAlbumArtistName())
+                                ? t.getArtistName() : t.getAlbumArtistName())
                 .putString(METADATA_KEY_ALBUM, t.getAlbumName())
                 .putLong(METADATA_KEY_DURATION, r.getDuration())
-//                .putBitmap(METADATA_KEY_ALBUM_ART, b)
-                        //.putString(METADATA_KEY_ALBUM_ART_URI, TODO)
-//                .putString(METADATA_KEY_MEDIA_ID, trackUri.toString())
-                        //Dispaly uri is prefered over arturi, we only set arturi for internal
-                        //purposes and cant use a custom key cause of the conversion compat does
-                        //strips away custom keys, so we set a display uri to avoid anyone
-                        //using the art uri. even though we also set a bitmap
-//                .putString(METADATA_KEY_DISPLAY_ICON_URI, artUri.toString())
-//                .putString(METADATA_KEY_ART_URI, //used by now playing
-//                        t.getArtworkUri() != null ? t.getArtworkUri().toString() : null)
+                .putString(METADATA_KEY_ALBUM_ART_URI, UtilsArt
+                        .makeBestfitArtInfo(track.getAlbumArtistName(),
+                                track.getArtistName(), track.getAlbumName(),
+                                track.getArtworkUri()).asUri(artworkAuthority).toString())
                 .build();
         return m;
     }
