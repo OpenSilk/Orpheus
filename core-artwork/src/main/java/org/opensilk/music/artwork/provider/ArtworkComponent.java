@@ -18,15 +18,17 @@
 package org.opensilk.music.artwork.provider;
 
 import org.opensilk.common.core.dagger2.AppContextModule;
+import org.opensilk.music.artwork.cache.BitmapDiskCache;
 import org.opensilk.music.artwork.coverartarchive.CoverArtArchiveComponent;
 import org.opensilk.music.artwork.shared.ArtworkComponentCommon;
-import org.opensilk.music.artwork.cache.BitmapDiskCache;
 import org.opensilk.music.artwork.shared.GsonComponent;
 import org.opensilk.music.lastfm.LastFMComponent;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Component;
+import rx.Scheduler;
 
 /**
  * Root component for provider process, This isnt used directly but extended to allow
@@ -43,14 +45,7 @@ import dagger.Component;
 )
 public interface ArtworkComponent extends ArtworkComponentCommon, GsonComponent,
         SystemServicesComponent, LastFMComponent, CoverArtArchiveComponent {
-//    Func1<Context, ArtworkComponent> FACTORY = new Func1<Context, ArtworkComponent>() {
-//        @Override
-//        public ArtworkComponent call(Context context) {
-//            return DaggerArtworkComponent.builder()
-//                    .appContextModule(new AppContextModule(context))
-//                    .build();
-//        }
-//    };
     void inject(ArtworkProvider provider);
     BitmapDiskCache bitmapDiskCache();
+    @Named("artworkscheduler") Scheduler artworkScheduler();
 }

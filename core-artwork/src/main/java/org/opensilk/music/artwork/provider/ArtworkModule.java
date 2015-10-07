@@ -17,23 +17,24 @@
 package org.opensilk.music.artwork.provider;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.artwork.cache.BitmapDiskCache;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.artwork.cache.CacheUtil;
-import org.opensilk.music.artwork.coverartarchive.CoverArtArchive;
 import org.opensilk.music.artwork.coverartarchive.CoverArtArchiveModule;
 import org.opensilk.music.artwork.shared.ArtworkAuthorityModule;
 import org.opensilk.music.artwork.shared.ArtworkPreferences;
 import org.opensilk.music.artwork.shared.GsonModule;
 import org.opensilk.music.lastfm.LastFMModule;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import rx.Scheduler;
+import rx.schedulers.Schedulers;
 
 import static org.opensilk.music.artwork.Constants.DISK_CACHE_DIRECTORY;
 
@@ -57,4 +58,8 @@ public class ArtworkModule {
         return BitmapDiskLruCache.open(CacheUtil.getCacheDir(context, DISK_CACHE_DIRECTORY), size);
     }
 
+    @Provides @Singleton @Named("artworkscheduler")
+    public Scheduler provideArtworkScheduler() {
+        return Schedulers.computation();//TODO implement Schedulers.io() with bounded pool
+    }
 }

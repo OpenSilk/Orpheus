@@ -19,10 +19,8 @@ package org.opensilk.music.artwork.fetcher;
 
 import android.content.UriMatcher;
 import android.os.Handler;
-import android.os.HandlerThread;
 
 import org.opensilk.music.artwork.ArtworkUris;
-import org.opensilk.music.artwork.Constants;
 
 import javax.inject.Named;
 
@@ -59,8 +57,8 @@ public class ArtworkFetcherModule {
     }
 
     @Provides @ArtworkFetcherScope @Named("SubscribeOnScheduler")
-    public Scheduler provideSubscribeOnScheduler() {
-        return Constants.ARTWORK_SCHEDULER;
+    public Scheduler provideSubscribeOnScheduler(@Named("artworkscheduler") Scheduler artworkScheduler) {
+        return artworkScheduler;
     }
 
 }

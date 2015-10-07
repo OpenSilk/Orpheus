@@ -31,6 +31,4 @@ public interface Constants {
 
     float THUMB_MEM_CACHE_DIVIDER = 0.15f;
     String DISK_CACHE_DIRECTORY = "artworkcache";
-
-    Scheduler ARTWORK_SCHEDULER = Schedulers.computation();
 }
