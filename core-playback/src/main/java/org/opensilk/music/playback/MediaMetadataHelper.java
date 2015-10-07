@@ -17,14 +17,20 @@
 
 package org.opensilk.music.playback;
 
+import android.graphics.Bitmap;
 import android.media.MediaMetadata;
 import android.net.Uri;
 
+import org.opensilk.music.artwork.coverartarchive.Metadata;
+
 import static android.media.MediaMetadata.METADATA_KEY_ALBUM;
+import static android.media.MediaMetadata.METADATA_KEY_ALBUM_ART;
 import static android.media.MediaMetadata.METADATA_KEY_ALBUM_ARTIST;
 import static android.media.MediaMetadata.METADATA_KEY_ALBUM_ART_URI;
+import static android.media.MediaMetadata.METADATA_KEY_ART;
 import static android.media.MediaMetadata.METADATA_KEY_ARTIST;
 import static android.media.MediaMetadata.METADATA_KEY_ART_URI;
+import static android.media.MediaMetadata.METADATA_KEY_DISPLAY_ICON;
 import static android.media.MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI;
 import static android.media.MediaMetadata.METADATA_KEY_DISPLAY_TITLE;
 import static android.media.MediaMetadata.METADATA_KEY_DURATION;
@@ -70,5 +76,16 @@ public class MediaMetadataHelper {
             uri = meta.getString(METADATA_KEY_ALBUM_ART_URI);
         }
         return uri != null ? Uri.parse(uri) : null;
+    }
+
+    public static Bitmap getIcon(MediaMetadata meta) {
+        Bitmap bitmap = meta.getBitmap(METADATA_KEY_DISPLAY_ICON);
+        if (bitmap == null) {
+            bitmap = meta.getBitmap(METADATA_KEY_ART);
+        }
+        if (bitmap == null) {
+            bitmap = meta.getBitmap(METADATA_KEY_ALBUM_ART);
+        }
+        return bitmap;
     }
 }
