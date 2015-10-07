@@ -41,8 +41,11 @@ import dagger.Provides;
         }
 )
 public class ArtworkProviderHelperModule {
+    //keep cache small
+    private static final int _4MB = 4 * 1024 * 1024;
+
     @Provides @Singleton @Named("helpercache")
-    public BitmapLruCache provideBitmapLruCache(@ForApplication Context context) {
-        return new BitmapLruCache(UtilsArt.calculateL1CacheSize(context, false));
+    public BitmapLruCache provideBitmapLruCache() {
+        return new BitmapLruCache(_4MB);
     }
 }

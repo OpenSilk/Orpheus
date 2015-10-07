@@ -65,70 +65,33 @@ public class ArtworkProviderHelper {
     private final Context mContext;
     private final String mAuthority;
     private final BitmapLruCache mL1Cache;
-    private final Gson mGson;
 
     @Inject
     public ArtworkProviderHelper(
             @ForApplication Context context,
             @Named("artworkauthority") String authority,
-            @Named("helpercache") BitmapLruCache l1cache,
-            Gson gson
+            @Named("helpercache") BitmapLruCache l1cache
     ) {
         mContext = context;
         mAuthority = authority;
         mL1Cache = l1cache;
-        mGson = gson;
     }
 
-    public Observable<Bitmap> getArtwork(Uri uri) {
+    public Observable<Bitmap> getArtwork(final Uri uri) {
         return Observable.create(new Observable.OnSubscribe<Bitmap>() {
             @Override
             public void call(Subscriber<? super Bitmap> subscriber) {
-                subscriber.onNext(getDefaultArt());
-                subscriber.onCompleted();
-            }
-        });
-    }
-
-    public Observable<Bitmap> getArtwork(final ArtInfo artInfo, final ArtworkType artworkType) {
-        return Observable.create(new Observable.OnSubscribe<Bitmap>() {
-            @Override
-            public void call(Subscriber<? super Bitmap> subscriber) {
-                if (artInfo == ArtInfo.NULLINSTANCE) {
-                    subscriber.onNext(getDefaultArt());
-                    subscriber.onCompleted();
-                    return;
-                }
-                final String cacheKey = UtilsArt.getCacheKey(artInfo, artworkType);
-                final Uri artworkUri = makeUri(artInfo, artworkType);
-                Bitmap bitmap = queryArtworkProvider(artworkUri, cacheKey);
-                if (bitmap == null && artworkType == ArtworkType.LARGE) {
-                    // Fullscreen not available try the thumbnail for a temp fix
-                    final Uri artworkUri2 = ArtworkUris.createAlbumReq(mAuthority,
-                            UtilsArt.base64EncodedJsonArtInfo(mGson, artInfo), ArtworkType.THUMBNAIL);
-                    final String cacheKey2 = UtilsArt.getCacheKey(artInfo, ArtworkType.THUMBNAIL);
-                    bitmap = queryArtworkProvider(artworkUri2, cacheKey2);
-                }
+                Bitmap bitmap = queryArtworkProvider(uri, uri.toString());
                 if (!subscriber.isUnsubscribed()) {
                     if (bitmap != null) {
                         subscriber.onNext(bitmap);
-                        subscriber.onCompleted();
                     } else {
-                        //send them default
                         subscriber.onNext(getDefaultArt());
-                        //register content observer so if new art comes in we can update
-                        //adding it to the subscriper so when upstream unsubscribes we wont
-                        //leak the content observer
-                        subscriber.add(new Notifyer(subscriber, artworkUri, cacheKey));
                     }
+                    subscriber.onCompleted();
                 }
             }
         });
-    }
-
-    public Uri makeUri(ArtInfo artInfo, ArtworkType artworkType) {
-        return ArtworkUris.createAlbumReq(mAuthority,
-                UtilsArt.base64EncodedJsonArtInfo(mGson, artInfo), artworkType);
     }
 
     /**
@@ -144,7 +107,9 @@ public class ArtworkProviderHelper {
                 if (pfd != null) {
                     synchronized (sDecodeLock) {
                         try {
-                            bitmap = BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor());
+                            BitmapFactory.Options options = new BitmapFactory.Options();
+                            options.inPreferredConfig = Bitmap.Config.RGB_565;
+                            bitmap = BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor(), null, options);
                         } catch (OutOfMemoryError e) {
                             bitmap = null;
                         }
@@ -159,11 +124,9 @@ public class ArtworkProviderHelper {
                 Timber.w(e, "queryArtworkProvider(%s) error", cacheKey);
                 bitmap = null;
             } finally {
-                if (pfd != null) {
-                    try {
-                        pfd.close();
-                    } catch (IOException ignored) {
-                    }
+                try {
+                    if (pfd != null) pfd.close();
+                } catch (IOException ignored) {
                 }
             }
         }
@@ -180,43 +143,31 @@ public class ArtworkProviderHelper {
         return ((BitmapDrawable) ContextCompat.getDrawable(mContext, R.drawable.default_artwork)).getBitmap();
     }
 
-    class Notifyer extends ContentObserver implements Subscription {
-        final Subscriber<? super Bitmap> subscriber;
-        final Uri uri;
-        final String cacheKey;
+    public CacheBitmap getCachedOrDefault(Uri uri) {
+        boolean fromCache = true;
+        Bitmap bitmap = mL1Cache.getBitmap(uri.toString());
+        if (bitmap == null) {
+            fromCache = false;
+            bitmap = getDefaultArt();
+        }
+        return new CacheBitmap(fromCache, bitmap);
+    }
 
-        public Notifyer(Subscriber<? super Bitmap> subscriber, Uri uri, String cacheKey) {
-            super(null);
-            this.subscriber = subscriber;
-            this.uri = uri;
-            this.cacheKey = cacheKey;
-            init();
+    public static final class CacheBitmap {
+        final boolean fromCache;
+        final Bitmap bitmap;
+
+        public CacheBitmap(boolean fromCache, Bitmap bitmap) {
+            this.fromCache = fromCache;
+            this.bitmap = bitmap;
         }
 
-        void init() {
-            mContext.getContentResolver().registerContentObserver(uri, false, this);
+        public boolean fromCache() {
+            return fromCache;
         }
 
-        @Override
-        public void onChange(boolean selfChange) {
-            Bitmap bitmap = queryArtworkProvider(uri, cacheKey);
-            if (!isUnsubscribed()) {
-                if (bitmap != null) {
-                    subscriber.onNext(bitmap);
-                }
-                subscriber.onCompleted();
-                unsubscribe();
-            }
-        }
-
-        @Override
-        public void unsubscribe() {
-            mContext.getContentResolver().unregisterContentObserver(this);
-        }
-
-        @Override
-        public boolean isUnsubscribed() {
-            return subscriber.isUnsubscribed();
+        public Bitmap getBitmap() {
+            return bitmap;
         }
     }
 
