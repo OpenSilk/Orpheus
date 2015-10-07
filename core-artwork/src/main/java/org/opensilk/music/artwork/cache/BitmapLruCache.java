@@ -33,7 +33,7 @@ public class BitmapLruCache extends LruCache<String, Bitmap> implements BitmapCa
 
     public BitmapLruCache(int maxSize) {
         super(maxSize);
-        Log.i("BitmapLruCache", String.format(Locale.US, "BitmapLruCache size=%.02fM", ((float) maxSize / 1024 / 1024)));
+        Timber.i("BitmapLruCache", String.format(Locale.US, "BitmapLruCache size=%.02fM", ((float) maxSize / 1024 / 1024)));
     }
 
     @Override
