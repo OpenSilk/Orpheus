@@ -17,6 +17,12 @@
 
 package org.opensilk.music.artwork.requestor;
 
+import android.net.Uri;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.widget.ImageView;
+
+import org.opensilk.common.glide.Paletteable;
 import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.artwork.ArtworkType;
@@ -29,9 +35,10 @@ import rx.Subscription;
  */
 public interface ArtworkRequestManager {
 
+    @Deprecated
     Subscription newRequest(AnimatedImageView imageView, PaletteObserver paletteObserver,
                             ArtInfo artInfo, ArtworkType artworkType);
-
-    void evictL1();
+    void newRequest(Uri uri, ImageView imageView, @Nullable Paletteable paletteable, @Nullable Bundle extras);
+    void newRequest(ArtInfo artInfo, ImageView imageView, @Nullable Paletteable paletteable, @Nullable Bundle extras);
 
 }
