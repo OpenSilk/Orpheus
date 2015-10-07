@@ -63,13 +63,13 @@ android {
 
 dependencies {
     provided(group: 'com.google.dagger', name:'dagger-compiler', version: rootProject.ext.dagger2Version)
-    compile (group: 'com.android.support', name: 'palette-v7', version: rootProject.ext.supportLibVersion)
     compile (group: 'com.google.code.gson', name: 'gson', version: rootProject.ext.gsonVersion)
     compile (group: 'commons-io', name: 'commons-io', version: rootProject.ext.commonsIoVersion)
     compile project(':common-core')
     compile project(':common-ui')
     compile project(':core-model')
     compile project(':core-lastfm')
+    compile project(':common-glide')
     compile 'com.jakewharton:disklrucache:2.0.2'
 
     androidTestCompile('com.squareup:fest-android:1.0.0')
