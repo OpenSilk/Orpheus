@@ -26,7 +26,7 @@ import rx.Observable;
  * Created by drew on 10/4/15.
  */
 public interface CoverArtArchive {
-    String API_ROOT = "https://coverartarchive.org/release/";
+    String API_ROOT = "https://coverartarchive.org/";
 
     @GET("/release/{mbid}")
     Call<Metadata> getRelease(@Path("mbid") String mbid);
