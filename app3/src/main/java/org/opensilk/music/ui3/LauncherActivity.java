@@ -90,10 +90,23 @@ public class LauncherActivity extends MusicActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         if (mDrawerLayout != null) {
             mNavigation.setNavigationItemSelectedListener(mNavigaitonClickListener);
-            mNavigaitonClickListener.onNavigationItemSelected(mNavigation.getMenu().getItem(0));
+            if (savedInstanceState == null) {
+                mNavigaitonClickListener.onNavigationItemSelected(
+                        mNavigation.getMenu().getItem(mSettings.getInt(AppPreferences.LAST_NAVIGATION_ITEM, 0)));
+            }
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        for (int ii=0; ii<mNavigation.getMenu().size(); ii++) {
+            if (mNavigation.getMenu().getItem(ii).isChecked()) {
+                mSettings.putInt(AppPreferences.LAST_NAVIGATION_ITEM, ii);
+                break;
+            }
         }
     }
 

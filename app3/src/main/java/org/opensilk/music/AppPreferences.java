@@ -138,6 +138,9 @@ public class AppPreferences extends PreferencesWrapper {
 
     public static final String LAST_PLUGIN_AUTHORITY = "last_used_plugin";
 
+    //launcher activit
+    public static final String LAST_NAVIGATION_ITEM = "last_navigation_item";
+
     private final Context appContext;
     private final SharedPreferences prefs;
     private final Gson gson;
