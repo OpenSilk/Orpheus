@@ -17,22 +17,12 @@
 
 package org.opensilk.music.ui3.common;
 
-import android.content.Context;
 import android.net.Uri;
 import android.view.Menu;
 import android.view.MenuInflater;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.music.AppPreferences;
-import org.opensilk.music.R;
-import org.opensilk.music.model.Album;
-import org.opensilk.music.model.Artist;
-import org.opensilk.music.model.Folder;
-import org.opensilk.music.model.Genre;
-import org.opensilk.music.model.Model;
-import org.opensilk.music.model.Playlist;
-import org.opensilk.music.model.Track;
-import org.opensilk.music.model.TrackList;
 
 import java.util.List;
 
