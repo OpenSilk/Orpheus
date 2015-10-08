@@ -111,7 +111,7 @@ public class TrackListScreenModule {
             public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,
                         R.menu.song_sort_by,
-                        R.menu.popup_add_to_queue
+                        R.menu.add_to_queue
                 );
                 return false;
             }
@@ -146,7 +146,7 @@ public class TrackListScreenModule {
                         Toast.makeText(context, R.string.err_unimplemented, Toast.LENGTH_LONG).show();
                         //TODO
                         return true;
-                    case R.id.popup_add_to_queue:
+                    case R.id.add_to_queue:
                         addItemsToQueue(presenter);
                         return true;
                     default:
@@ -157,8 +157,8 @@ public class TrackListScreenModule {
             @Override
             public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,
-                        R.menu.popup_add_to_queue,
-                        R.menu.popup_play_next
+                        R.menu.add_to_queue,
+                        R.menu.play_next
                 );
                 return true;
             }
@@ -166,10 +166,10 @@ public class TrackListScreenModule {
             @Override
             public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
-                    case R.id.popup_add_to_queue:
+                    case R.id.add_to_queue:
                         addSelectedItemsToQueue(presenter);
                         return true;
-                    case R.id.popup_play_next:
+                    case R.id.play_next:
                         playSelectedItemsNext(presenter);
                         return true;
                     default:

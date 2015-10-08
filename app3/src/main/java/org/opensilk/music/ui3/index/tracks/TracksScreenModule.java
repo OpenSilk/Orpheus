@@ -34,10 +34,6 @@ import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
 import org.opensilk.music.ui3.common.PlayAllItemClickListener;
-import org.opensilk.music.ui3.common.UtilsCommon;
-
-import java.util.Collections;
-import java.util.List;
 
 import javax.inject.Named;
 
@@ -124,8 +120,8 @@ public class TracksScreenModule {
             @Override
             public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,
-                        R.menu.popup_add_to_queue,
-                        R.menu.popup_play_next
+                        R.menu.add_to_queue,
+                        R.menu.play_next
                 );
                 return true;
             }
@@ -133,10 +129,10 @@ public class TracksScreenModule {
             @Override
             public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
-                    case R.id.popup_add_to_queue:
+                    case R.id.add_to_queue:
                         addSelectedItemsToQueue(presenter);
                         return true;
-                    case R.id.popup_play_next:
+                    case R.id.play_next:
                         playSelectedItemsNext(presenter);
                         return true;
                     default:

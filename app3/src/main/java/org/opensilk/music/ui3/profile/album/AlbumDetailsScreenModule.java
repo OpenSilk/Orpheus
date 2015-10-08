@@ -106,8 +106,8 @@ public class AlbumDetailsScreenModule {
             @Override
             public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenu(R.menu.album_song_sort_by, menuInflater, menu);
-                inflateMenu(R.menu.popup_add_to_queue, menuInflater, menu);
-                inflateMenu(R.menu.popup_play_next, menuInflater, menu);
+                inflateMenu(R.menu.add_to_queue, menuInflater, menu);
+                inflateMenu(R.menu.play_next, menuInflater, menu);
                 return true;
             }
 
@@ -129,10 +129,10 @@ public class AlbumDetailsScreenModule {
                     case R.id.menu_sort_by_artist:
                         setNewSortOrder(presenter, TrackSortOrder.ARTIST);
                         return true;
-                    case R.id.popup_add_to_queue:
+                    case R.id.add_to_queue:
                         addItemsToQueue(presenter);
                         return true;
-                    case R.id.popup_play_next:
+                    case R.id.play_next:
                         playItemsNext(presenter);
                         return true;
                     default:
@@ -143,8 +143,8 @@ public class AlbumDetailsScreenModule {
             @Override
             public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,
-                        R.menu.popup_add_to_queue,
-                        R.menu.popup_play_next
+                        R.menu.add_to_queue,
+                        R.menu.play_next
                 );
                 return true;
             }
@@ -152,10 +152,10 @@ public class AlbumDetailsScreenModule {
             @Override
             public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
-                    case R.id.popup_add_to_queue:
+                    case R.id.add_to_queue:
                         addSelectedItemsToQueue(presenter);
                         return true;
-                    case R.id.popup_play_next:
+                    case R.id.play_next:
                         playSelectedItemsNext(presenter);
                         return true;
                     default:

@@ -174,10 +174,10 @@ public class ArtistDetailsScreenModule {
                     case R.id.menu_view_as_grid:
                         updateLayout(presenter, AppPreferences.GRID);
                         return true;
-                    case R.id.popup_play_next:
+                    case R.id.play_next:
                         playItemsNext(presenter);
                         return true;
-                    case R.id.popup_add_to_queue:
+                    case R.id.add_to_queue:
                         addItemsToQueue(presenter);
                         return true;
                     default:
