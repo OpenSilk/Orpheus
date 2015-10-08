@@ -31,13 +31,13 @@ import java.util.List;
 public class BundleablePresenterConfig {
     public final boolean wantsGrid;
     public final ItemClickListener itemClickListener;
-    public final ActionBarMenuHandler menuConfig;
+    public final MenuHandler menuConfig;
     public final List<Bundleable> loaderSeed;
 
     public BundleablePresenterConfig(
             boolean wantsGrid,
             ItemClickListener itemClickListener,
-            ActionBarMenuHandler menuConfig,
+            MenuHandler menuConfig,
             List<Bundleable> loaderSeed
     ) {
         this.wantsGrid = wantsGrid;
@@ -53,7 +53,7 @@ public class BundleablePresenterConfig {
     public static class Builder {
         boolean wantsGrid;
         ItemClickListener itemClickListener;
-        ActionBarMenuConfig menuConfig;
+        MenuHandler menuConfig;
         List<Bundleable> loaderSeed = new ArrayList<>();
 
         public Builder setWantsGrid(boolean wantsGrid) {
@@ -66,7 +66,7 @@ public class BundleablePresenterConfig {
             return this;
         }
 
-        public Builder setMenuConfig(ActionBarMenuConfig menuConfig) {
+        public Builder setMenuConfig(MenuHandler menuConfig) {
             this.menuConfig = menuConfig;
             return this;
         }

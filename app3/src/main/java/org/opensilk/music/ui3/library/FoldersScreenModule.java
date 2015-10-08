@@ -19,31 +19,28 @@ package org.opensilk.music.ui3.library;
 
 import android.content.Context;
 import android.net.Uri;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
+import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.dagger2.ScreenScope;
-import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
-import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.model.sort.FolderTrackSortOrder;
 import org.opensilk.music.model.Container;
-import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Track;
-import org.opensilk.bundleable.Bundleable;
-import org.opensilk.music.ui3.common.ActionBarMenuBaseHandler;
-import org.opensilk.music.ui3.common.BundleableComponent;
+import org.opensilk.music.model.sort.FolderTrackSortOrder;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
-import org.opensilk.music.ui3.common.ItemClickDelegate;
 import org.opensilk.music.ui3.common.ItemClickListener;
+import org.opensilk.music.ui3.common.MenuHandler;
+import org.opensilk.music.ui3.common.MenuHandlerImpl;
+import org.opensilk.music.ui3.common.PlayAllItemClickListener;
 
 import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
-import mortar.MortarScope;
-import rx.functions.Func2;
 
 /**
  * Created by drew on 5/2/15.
@@ -66,12 +63,6 @@ public class FoldersScreenModule {
         return screen.container.getUri();
     }
 
-    @Provides @Named("loader_sortorder")
-    public String provideLoaderSortOrder(AppPreferences preferences) {
-        return preferences.getString(preferences.makePluginPrefKey(screen.libraryConfig,
-                AppPreferences.FOLDER_SORT_ORDER), FolderTrackSortOrder.A_Z);
-    }
-
     @Provides @Named("folders_title")
     public String provideTitle() {
         return screen.container.getName();
@@ -85,7 +76,7 @@ public class FoldersScreenModule {
     @Provides @ScreenScope
     public BundleablePresenterConfig providePresenterConfig(
             ItemClickListener itemClickListener,
-            ActionBarMenuConfig menuConfig
+            MenuHandler menuConfig
     ) {
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(false)
@@ -95,41 +86,32 @@ public class FoldersScreenModule {
     }
 
     @Provides @ScreenScope
-    public ItemClickListener provideItemClickListener(final ItemClickDelegate delegate) {
-        return new ItemClickListener() {
+    public ItemClickListener provideItemClickListener() {
+        return new PlayAllItemClickListener() {
             @Override
             public void onItemClicked(BundleablePresenter presenter, Context context, Bundleable item) {
                 if (item instanceof Container) {
                     FoldersScreenFragment f = FoldersScreenFragment.ni(context, screen.libraryConfig, (Container)item);
                     presenter.getFm().replaceMainContent(f, true);
                 } else if (item instanceof Track) {
-                    delegate.playAllItems(context, presenter.getItems(), item);
+                    super.onItemClicked(presenter, context, item);
                 }
             }
         };
     }
 
     @Provides @ScreenScope
-    public ActionBarMenuConfig provideMenuConfig(
-            final AppPreferences appPreferences
-    ) {
-
-        ActionBarMenuConfig.Builder builder = ActionBarMenuConfig.builder();
-
-        builder.withMenu(R.menu.folder_sort_by);
-
-        Func2<Context, Integer, Boolean> handler = new ActionBarMenuBaseHandler(
-                screen.libraryConfig,
-                AppPreferences.FOLDER_SORT_ORDER,
-                null,
-                appPreferences
-        ) {
+    public MenuHandler provideMenuHandler(@Named("loader_uri") final Uri loaderUri) {
+        return new MenuHandlerImpl(loaderUri) {
             @Override
-            public Boolean call(Context context, Integer integer) {
-                MortarScope scope = MortarScope.findChild(context, screen.getName());
-                BundleableComponent component = DaggerService.getDaggerComponent(scope);
-                BundleablePresenter presenter = component.presenter();
-                switch (integer) {
+            public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
+                inflateMenu(R.menu.folder_sort_by, menuInflater, menu);
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
                     case R.id.menu_sort_by_az:
                         setNewSortOrder(presenter, FolderTrackSortOrder.A_Z);
                         return true;
@@ -140,8 +122,16 @@ public class FoldersScreenModule {
                         return false;
                 }
             }
-        };
 
-        return builder.setActionHandler(handler).build();
+            @Override
+            public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
+                return false;
+            }
+        };
     }
 }

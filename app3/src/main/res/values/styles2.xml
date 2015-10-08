@@ -86,11 +86,11 @@
     </style>
 
     <style name="GridTileDescriptionLight">
-        <item name="android:background">@color/primary_material_light</item>
+        <item name="android:background">@color/grey_100</item>
     </style>
 
     <style name="GridTileDescriptionDark">
-        <item name="android:background">@color/primary_dark_material_dark</item>
+        <item name="android:background">@color/black</item>
     </style>
 
     <style name="GridTileDescriptionTitle" parent="SingleLineTextView">

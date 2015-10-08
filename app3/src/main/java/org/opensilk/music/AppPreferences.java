@@ -18,7 +18,9 @@ package org.opensilk.music;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.util.Base64;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -28,10 +30,12 @@ import org.opensilk.common.core.app.PreferencesWrapper;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;
+import org.opensilk.music.model.sort.BaseSortOrder;
 import org.opensilk.music.ui.theme.OrpheusTheme;
 import org.opensilk.music.ui3.index.GalleryPage;
 
 import java.lang.reflect.Type;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -352,6 +356,31 @@ public class AppPreferences extends PreferencesWrapper {
 
     public boolean isDarkTheme() {
         return getBoolean(WANT_DARK_THEME, false);
+    }
+
+    public String sortOrderKey(Uri uri) {
+        return makePrefKey(encodeString(uri.toString()), ".sortorder");
+    }
+
+    public String layoutKey(Uri uri) {
+        return makePrefKey(encodeString(uri.toString()), ".layout");
+    }
+
+    public String getSortOrder(Uri uri) {
+        return getString(makePrefKey(encodeString(uri.toString()), ".sortorder"), BaseSortOrder.A_Z);
+    }
+
+    public String getLayout(Uri uri, boolean defaultGrid) {
+        return getString(makePrefKey(encodeString(uri.toString()), ".layout"), defaultGrid ? GRID : SIMPLE);
+    }
+
+    private static String encodeString(String string) {
+        return Base64.encodeToString(string.getBytes(Charset.defaultCharset()),
+                Base64.URL_SAFE | Base64.NO_WRAP | Base64.NO_PADDING);
+    }
+
+    private static String decodeString(String string) {
+        return new String(Base64.decode(string, Base64.URL_SAFE), Charset.defaultCharset());
     }
 
 }

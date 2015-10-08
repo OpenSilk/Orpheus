@@ -22,9 +22,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.view.ActionMode;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.rx.RxLoader;
 import org.opensilk.common.core.rx.SimpleObserver;
@@ -37,9 +39,11 @@ import org.opensilk.music.R;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.loader.BundleableLoader;
 import org.opensilk.bundleable.Bundleable;
+import org.opensilk.music.playback.control.PlaybackController;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -59,16 +63,17 @@ import static org.opensilk.common.core.rx.RxUtils.notSubscribed;
  */
 @ScreenScope
 public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
-        implements RxLoader.ContentChangedListener, HasOptionsMenu {
+        implements RxLoader.ContentChangedListener, HasOptionsMenu, ActionBarMenuHandler {
 
     protected final AppPreferences preferences;
     protected final ArtworkRequestManager requestor;
     protected final BundleableLoader loader;
     protected final FragmentManagerOwner fm;
     protected final ItemClickListener itemClickListener;
-    protected final ActionBarMenuHandler menuConfig;
+    protected final MenuHandler menuConfig;
     protected final List<Bundleable> loaderSeed;
     protected final ActionModePresenter actionModePresenter;
+    protected final PlaybackController playbackController;
 
     protected Boolean wantGrid;
 
@@ -83,18 +88,19 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
             FragmentManagerOwner fm,
             BundleablePresenterConfig config,
             @Named("loader_uri") Uri uri,
-            @Named("loader_sortorder") String sortOrder,
-            ActionModePresenter actionModePresenter
+            ActionModePresenter actionModePresenter,
+            PlaybackController playbackController
     ) {
         this.preferences = preferences;
         this.requestor = requestor;
-        this.loader = loader.setUri(uri).setSortOrder(sortOrder);
+        this.loader = loader.setUri(uri).setSortOrder(preferences.getSortOrder(uri));
         this.fm = fm;
-        this.wantGrid = config.wantsGrid;
+        this.wantGrid = StringUtils.equals(preferences.getLayout(uri, config.wantsGrid), AppPreferences.GRID);
         this.itemClickListener = config.itemClickListener;
         this.menuConfig = config.menuConfig;
         this.loaderSeed = config.loaderSeed;
         this.actionModePresenter = actionModePresenter;
+        this.playbackController = playbackController;
     }
 
     @Override
@@ -244,7 +250,14 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
         if (hasView()) {
             return getView().getAdapter().getItems();
         }
-        return null;
+        return Collections.emptyList();
+    }
+
+    public List<Bundleable> getSelectedItems() {
+        if (hasView()) {
+            return getView().getAdapter().getSelectedItems();
+        }
+        return Collections.emptyList();
     }
 
     public void setWantsGrid(boolean yes) {
@@ -264,8 +277,18 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
     }
 
     @Override
+    public boolean onBuildMenu(MenuInflater menuInflater, Menu menu) {
+        return menuConfig.onBuildMenu(this, menuInflater, menu);
+    }
+
+    @Override
+    public boolean onMenuItemClicked(Context context, MenuItem menuItem) {
+        return menuConfig.onMenuItemClicked(this, context, menuItem);
+    }
+
+    @Override
     public ActionBarMenuHandler getMenuConfig() {
-        return menuConfig;
+        return this;
     }
 
     public ArtworkRequestManager getRequestor() {
@@ -276,18 +299,26 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
         return fm;
     }
 
-    public void onFabClicked(View view) {
+    public AppPreferences getSettings() {
+        return preferences;
+    }
 
+    public PlaybackController getPlaybackController() {
+        return playbackController;
+    }
+
+    public void onFabClicked(View view) {
+        List<Uri> toPlay = UtilsCommon.filterTracks(getItems());
+        if (toPlay.isEmpty()) {
+            return; //TODO toast?
+        }
+        getPlaybackController().playAll(toPlay, 0);
     }
 
     private ActionMode actionMode;
 
     public void onItemClicked(BundleableRecyclerAdapter.ViewHolder viewHolder, Bundleable item) {
         if (itemClickListener != null) itemClickListener.onItemClicked(this, viewHolder.itemView.getContext(), item);
-    }
-
-    public boolean onItemLongClicked(BundleableRecyclerAdapter.ViewHolder viewHolder, Bundleable item) {
-        return false;
     }
 
     public void onItemSelected() {
@@ -318,19 +349,29 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
         @Override
         @DebugLog
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            return true;
+            mode.setTitleOptionalHint(true);
+            boolean started = menuConfig.onBuildActionMenu(BundleablePresenter.this,
+                    mode.getMenuInflater(), menu);
+            if (!started) {
+                mode.finish();
+            }
+            return started;
         }
 
         @Override
         @DebugLog
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            List<Bundleable> items = getView().getAdapter().getSelectedItems();
-            return true;
+            return false;
         }
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            return false;
+            boolean handled = menuConfig.onActionMenuItemClicked(BundleablePresenter.this,
+                    getView().getContext(), item);
+            if (handled) {
+                mode.finish();
+            }
+            return handled;
         }
 
         @Override

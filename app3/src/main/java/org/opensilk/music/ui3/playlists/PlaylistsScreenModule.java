@@ -19,6 +19,9 @@ package org.opensilk.music.ui3.playlists;
 
 import android.content.Context;
 import android.net.Uri;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
@@ -34,6 +37,8 @@ import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
+import org.opensilk.music.ui3.common.MenuHandler;
+import org.opensilk.music.ui3.common.MenuHandlerImpl;
 
 import javax.inject.Named;
 
@@ -63,22 +68,13 @@ public class PlaylistsScreenModule {
         return Uri.EMPTY;
     }
 
-    @Provides @Named("loader_sortorder")
-    public String provideLoaderSortOrder(AppPreferences preferences) {
-        return preferences.getString(preferences.makePluginPrefKey(screen.libraryConfig,
-                AppPreferences.PLAYLIST_SORT_ORDER), PlaylistSortOrder.A_Z);
-    }
-
     @Provides @ScreenScope
     public BundleablePresenterConfig providePresenterConfig(
-            AppPreferences preferences,
             ItemClickListener itemClickListener,
-            ActionBarMenuConfig menuConfig
+            MenuHandler menuConfig
     ) {
-        boolean grid = preferences.isGrid(preferences.makePluginPrefKey(screen.libraryConfig,
-                AppPreferences.PLAYLIST_LAYOUT), AppPreferences.GRID);
         return BundleablePresenterConfig.builder()
-                .setWantsGrid(grid)
+                .setWantsGrid(true)
                 .setItemClickListener(itemClickListener)
                 .setMenuConfig(menuConfig)
                 .build();
@@ -95,22 +91,20 @@ public class PlaylistsScreenModule {
     }
 
     @Provides @ScreenScope
-    public ActionBarMenuConfig provideMenuConfig(
-            AppPreferences appPreferences
-    ) {
-
-        Func2<Context, Integer, Boolean> handler = new ActionBarMenuBaseHandler(
-                screen.libraryConfig,
-                AppPreferences.PLAYLIST_SORT_ORDER,
-                AppPreferences.PLAYLIST_LAYOUT,
-                appPreferences
-        ) {
+    public MenuHandler provideMenuHandler(@Named("loader_uri") final Uri loaderUri) {
+        return new MenuHandlerImpl(loaderUri) {
             @Override
-            public Boolean call(Context context, Integer integer) {
-                MortarScope scope = MortarScope.findChild(context, screen.getName());
-                BundleableComponent component = DaggerService.getDaggerComponent(scope);
-                BundleablePresenter presenter = component.presenter();
-                switch (integer) {
+            public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
+                inflateMenus(menuInflater, menu,
+                        R.menu.playlist_sort_by,
+                        R.menu.view_as
+                );
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
                     case R.id.menu_sort_by_az:
                         setNewSortOrder(presenter, PlaylistSortOrder.A_Z);
                         return true;
@@ -131,12 +125,17 @@ public class PlaylistsScreenModule {
                         return false;
                 }
             }
-        };
 
-        return ActionBarMenuConfig.builder()
-                .withMenu(R.menu.playlist_sort_by)
-                .withMenu(R.menu.view_as)
-                .setActionHandler(handler)
-                .build();
+            @Override
+            public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
+                return false;
+            }
+        };
     }
+
 }

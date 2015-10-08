@@ -32,13 +32,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.UtilsArt;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.model.ArtInfo;
+import org.opensilk.music.model.Track;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import rx.subscriptions.CompositeSubscription;
@@ -86,6 +90,7 @@ public class UtilsCommon {
         return UtilsArt.makeBestfitArtInfo(artist, altArtist, album, uri);
     }
 
+    @Deprecated
     public static void loadMultiArtwork(
             ArtworkRequestManager requestor,
             CompositeSubscription cs,
@@ -95,6 +100,17 @@ public class UtilsCommon {
             ImageView artwork4,
             List<ArtInfo> artInfos,
             ArtworkType artworkType
+    ) {
+        loadMultiArtwork(requestor, artwork, artwork2, artwork3, artwork4, artInfos);
+    }
+
+    public static void loadMultiArtwork(
+            ArtworkRequestManager requestor,
+            ImageView artwork,
+            ImageView artwork2,
+            ImageView artwork3,
+            ImageView artwork4,
+            List<ArtInfo> artInfos
     ) {
         final int num = artInfos.size();
         if (artwork != null) {
@@ -185,4 +201,17 @@ public class UtilsCommon {
         return false;
     }
 
+    public static List<Uri> filterTracks(List<Bundleable> adapterItems) {
+        if (adapterItems == null || adapterItems.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Uri> toPlay = new ArrayList<>(adapterItems.size());
+        for (Bundleable b : adapterItems) {
+            if (b instanceof Track) {
+                toPlay.add(((Track) b).getUri());
+            }
+        }
+        return toPlay;
+    }
 }

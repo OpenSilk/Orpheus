@@ -20,12 +20,14 @@ package org.opensilk.music.ui3.index.artistdetails;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Toast;
 
+import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
-import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.index.provider.IndexUris;
@@ -33,14 +35,12 @@ import org.opensilk.music.model.Album;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.TrackList;
 import org.opensilk.music.model.sort.AlbumSortOrder;
-import org.opensilk.bundleable.Bundleable;
-import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
+import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
 import org.opensilk.music.ui3.common.UtilsCommon;
-import org.opensilk.music.ui3.index.IndexBaseMenuHandler;
 import org.opensilk.music.ui3.index.albumdetails.AlbumDetailsScreen;
 import org.opensilk.music.ui3.index.trackcollection.TrackCollectionScreen;
 import org.opensilk.music.ui3.profile.ProfileActivity;
@@ -52,8 +52,6 @@ import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
-import mortar.MortarScope;
-import rx.functions.Func2;
 
 /**
  * Created by drew on 5/5/15.
@@ -69,12 +67,6 @@ public class ArtistDetailsScreenModule {
     @Provides @Named("loader_uri")
     public Uri provideLoaderUri(@Named("IndexProviderAuthority") String authority) {
         return IndexUris.artistDetails(screen.artist);
-    }
-
-    @Provides @Named("loader_sortorder")
-    public String provideLoaderSortOrder(AppPreferences preferences) {
-        return preferences.getString(preferences.makePrefKey(AppPreferences.KEY_INDEX,
-                AppPreferences.ARTIST_ALBUM_SORT_ORDER), AlbumSortOrder.A_Z);
     }
 
     @Provides @Named("trackcollection_sortorderpref")
@@ -112,13 +104,9 @@ public class ArtistDetailsScreenModule {
 
     @Provides @ScreenScope
     public BundleablePresenterConfig providePresenterConfig(
-            @ForApplication Context context,
-            AppPreferences preferences,
             ItemClickListener itemClickListener,
-            ActionBarMenuConfig menuConfig
+            MenuHandler menuConfig
     ) {
-        boolean grid = preferences.isGrid(preferences.makePrefKey(AppPreferences.KEY_INDEX,
-                AppPreferences.ALBUM_LAYOUT), AppPreferences.GRID);
 //        TrackCollection allTracks = TrackCollection.builder()
 //                .setName(context.getString(R.string.title_all_songs))
 //                .setTracksUri(LibraryUris.artistTracks(screen.libraryConfig.authority,
@@ -128,7 +116,7 @@ public class ArtistDetailsScreenModule {
 //                .addArtInfo(ArtInfo.forArtist(screen.artist.name, null))
 //                .build();
         return BundleablePresenterConfig.builder()
-                .setWantsGrid(grid)
+                .setWantsGrid(true)
                 .setItemClickListener(itemClickListener)
                 .setMenuConfig(menuConfig)
 //                .addLoaderSeed(allTracks)
@@ -151,21 +139,22 @@ public class ArtistDetailsScreenModule {
     }
 
     @Provides @ScreenScope
-    public ActionBarMenuConfig provideMenuConfig(
-            final AppPreferences appPreferences
-    ) {
-
-        Func2<Context, Integer, Boolean> handler = new IndexBaseMenuHandler(
-                AppPreferences.ARTIST_ALBUM_SORT_ORDER,
-                AppPreferences.ARTIST_ALBUM_LAYOUT,
-                appPreferences
-        ) {
+    public MenuHandler provideMenuHandler(@Named("loader_uri") final Uri loaderUri) {
+        return new MenuHandlerImpl(loaderUri) {
             @Override
-            public Boolean call(Context context, Integer integer) {
-                MortarScope scope = MortarScope.findChild(context, screen.getName());
-                BundleableComponent component = DaggerService.getDaggerComponent(scope);
-                BundleablePresenter presenter = component.presenter();
-                switch (integer) {
+            public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
+                inflateMenus(menuInflater, menu,
+                        R.menu.artist_album_sort_by,
+                        R.menu.view_as
+//                        ,R.menu.popup_play_next,
+//                        R.menu.popup_add_to_queue
+                );
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
                     case R.id.menu_sort_by_az:
                         setNewSortOrder(presenter, AlbumSortOrder.A_Z);
                         return true;
@@ -185,17 +174,27 @@ public class ArtistDetailsScreenModule {
                     case R.id.menu_view_as_grid:
                         updateLayout(presenter, AppPreferences.GRID);
                         return true;
+                    case R.id.popup_play_next:
+                        playItemsNext(presenter);
+                        return true;
+                    case R.id.popup_add_to_queue:
+                        addItemsToQueue(presenter);
+                        return true;
                     default:
-                            return false;
+                        return false;
                 }
             }
-        };
 
-        return ActionBarMenuConfig.builder()
-                .withMenu(R.menu.artist_album_sort_by)
-                .withMenu(R.menu.view_as)
-                .withMenus(ActionBarMenuConfig.toObject(MenuHandlerImpl.ARTISTS))
-                .setActionHandler(handler)
-                .build();
+            @Override
+            public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
+                return false;
+            }
+        };
     }
+
 }

@@ -20,6 +20,7 @@ package org.opensilk.music.ui3.common;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
@@ -80,6 +81,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
     private final OnSelectionModeEnded selectionEndedListener = new OnSelectionModeEnded() {
         @Override
         public void onEndSelectionMode() {
+            inSelectionMode = false;
             for (int ii=0; ii<getItemCount(); ii++) {
                 if (selectedItems.get(ii)) {
                     selectedItems.put(ii, false);
@@ -87,7 +89,6 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
                 }
             }
             selectedItems.clear();
-            inSelectionMode = false;
         }
     };
 
@@ -310,13 +311,11 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
 
     void loadMultiArtwork(ViewHolder holder, List<ArtInfo> artInfos) {
         ArtworkRequestManager requestor = presenter.getRequestor();
-        CompositeSubscription cs = holder.subscriptions;
         ImageView artwork = holder.artwork;
         ImageView artwork2 = holder.artwork2;
         ImageView artwork3 = holder.artwork3;
         ImageView artwork4 = holder.artwork4;
-        ArtworkType artworkType = ArtworkType.THUMBNAIL;
-        UtilsCommon.loadMultiArtwork(requestor, cs, artwork, artwork2, artwork3, artwork4, artInfos, artworkType);
+        UtilsCommon.loadMultiArtwork(requestor, artwork, artwork2, artwork3, artwork4, artInfos);
     }
 
     @Override
@@ -325,12 +324,12 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
             boolean selected = selectedItems.get(position);
             if (selected) {
                 selectedItems.put(position, false);
-                presenter.onItemUnselected();
                 notifyItemChanged(position);
+                presenter.onItemUnselected();
             } else {
                 selectedItems.put(position, true);
-                presenter.onItemSelected();
                 notifyItemChanged(position);
+                presenter.onItemSelected();
             }
         } else {
             ViewHolder holder = (ViewHolder) recyclerView.getChildViewHolder(v);
@@ -345,8 +344,8 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         } else {
             selectedItems.put(position, true);
             inSelectionMode = true;
-            presenter.onStartSelectionMode(selectionEndedListener);
             notifyItemChanged(position);
+            presenter.onStartSelectionMode(selectionEndedListener);
             return true;
         }
     }
@@ -371,53 +370,56 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         @InjectView(R.id.tile_subtitle) TextView subtitle;
         @InjectView(R.id.tile_info) @Optional TextView extraInfo;
         @InjectView(R.id.drag_handle) @Optional View dragHandle;
-
-        final CompositeSubscription subscriptions;
+        private int descColor;
 
         public ViewHolder(View itemView) {
             super(itemView);
             ButterKnife.inject(this, itemView);
-            subscriptions = new CompositeSubscription();
+            if (descriptionContainer != null) {
+                Drawable descBackground = descriptionContainer.getBackground();
+                if (descBackground instanceof ColorDrawable) {
+                    descColor = ((ColorDrawable) descBackground).getColor();
+                } else {
+                    descColor = ThemeUtils.getThemeAttrColor(itemView.getContext(),
+                            android.R.attr.colorBackground);
+                }
+            }
         }
 
         public void reset() {
-//            Timber.v("Reset title=%s", title.getText());
-            subscriptions.clear();
+            Timber.v("Resetting %s", title.getText());
             if (artwork != null) artwork.setImageBitmap(null);
             if (artwork2 != null) artwork2.setImageBitmap(null);
             if (artwork3 != null) artwork3.setImageBitmap(null);
             if (artwork4 != null) artwork4.setImageBitmap(null);
-            if (descriptionContainer != null) descriptionContainer.resetBackground();
+            if (descriptionContainer != null) descriptionContainer.setBackgroundColor(descColor);
             if (extraInfo != null && extraInfo.getVisibility() != View.GONE) extraInfo.setVisibility(View.GONE);
-            unselectedBackground = null;
             itemView.setBackground(null);
+            itemView.setSelected(false);
         }
 
-        Drawable unselectedBackground;
 
         @Override
         public void onItemSelected() {
             itemView.setElevation(23);
-            itemView.setSelected(true);
+//            itemView.setSelected(true);
+            int selectedColor = ThemeUtils.getColorAccent(itemView.getContext());
             if (descriptionContainer != null) {
-                unselectedBackground = descriptionContainer.getBackground();
-                descriptionContainer.setBackgroundColor(Color.BLUE);
+                descriptionContainer.setBackgroundColor(selectedColor);
             } else {
-                unselectedBackground = itemView.getBackground();
-                itemView.setBackgroundColor(Color.BLUE);
+                itemView.setBackgroundColor(selectedColor);
             }
         }
 
         @Override
         public void onItemClear() {
             itemView.setElevation(0);
-            itemView.setSelected(false);
+//            itemView.setSelected(false);
             if (descriptionContainer != null) {
-                descriptionContainer.setBackground(unselectedBackground);
+                descriptionContainer.setBackgroundColor(descColor);
             } else {
-                itemView.setBackground(unselectedBackground);
+                itemView.setBackground(null);
             }
-            unselectedBackground = null;
         }
 
         @Override

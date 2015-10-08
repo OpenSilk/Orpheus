@@ -19,21 +19,22 @@ package org.opensilk.music.ui3.index.genres;
 
 import android.content.Context;
 import android.net.Uri;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
+import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.dagger2.ScreenScope;
-import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.sort.GenreSortOrder;
-import org.opensilk.bundleable.Bundleable;
-import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
-import org.opensilk.music.ui3.index.IndexBaseMenuHandler;
+import org.opensilk.music.ui3.common.MenuHandler;
+import org.opensilk.music.ui3.common.MenuHandlerImpl;
 import org.opensilk.music.ui3.index.genredetails.GenreDetailsScreen;
 import org.opensilk.music.ui3.profile.ProfileActivity;
 
@@ -41,8 +42,6 @@ import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
-import mortar.MortarScope;
-import rx.functions.Func2;
 
 /**
  * Created by drew on 5/5/15.
@@ -60,22 +59,13 @@ public class GenresScreenModule {
         return IndexUris.genres(authority);
     }
 
-    @Provides @Named("loader_sortorder")
-    public String provideLoaderSortOrder(AppPreferences preferences) {
-        return preferences.getString(preferences.makePrefKey(AppPreferences.KEY_INDEX,
-                AppPreferences.GENRE_SORT_ORDER), GenreSortOrder.A_Z);
-    }
-
     @Provides @ScreenScope
     public BundleablePresenterConfig providePresenterConfig(
-            AppPreferences preferences,
             ItemClickListener itemClickListener,
-            ActionBarMenuConfig menuConfig
+            MenuHandler menuConfig
     ) {
-        boolean grid = preferences.isGrid(preferences.makePrefKey(AppPreferences.KEY_INDEX,
-                AppPreferences.GENRE_LAYOUT), AppPreferences.GRID);
         return BundleablePresenterConfig.builder()
-                .setWantsGrid(grid)
+                .setWantsGrid(true)
                 .setItemClickListener(itemClickListener)
                 .setMenuConfig(menuConfig)
                 .build();
@@ -92,21 +82,18 @@ public class GenresScreenModule {
     }
 
     @Provides @ScreenScope
-    public ActionBarMenuConfig provideMenuConfig(
-            AppPreferences appPreferences
-    ) {
-
-        Func2<Context, Integer, Boolean> handler = new IndexBaseMenuHandler(
-                AppPreferences.GENRE_SORT_ORDER,
-                AppPreferences.GENRE_LAYOUT,
-                appPreferences
-        ) {
+    public MenuHandler provideMenuHandler(@Named("loader_uri") final Uri loaderUri) {
+        return new MenuHandlerImpl(loaderUri) {
             @Override
-            public Boolean call(Context context, Integer integer) {
-                MortarScope scope = MortarScope.findChild(context, screen.getName());
-                BundleableComponent component = DaggerService.getDaggerComponent(scope);
-                BundleablePresenter presenter = component.presenter();
-                switch (integer) {
+            public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
+                inflateMenu(R.menu.genre_sort_by, menuInflater, menu);
+                inflateMenu(R.menu.view_as, menuInflater, menu);
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
                     case R.id.menu_sort_by_az:
                         setNewSortOrder(presenter, GenreSortOrder.A_Z);
                         return true;
@@ -123,12 +110,17 @@ public class GenresScreenModule {
                         return false;
                 }
             }
-        };
 
-        return ActionBarMenuConfig.builder()
-                .withMenu(R.menu.genre_sort_by)
-                .withMenu(R.menu.view_as)
-                .setActionHandler(handler)
-                .build();
+            @Override
+            public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
+                return false;
+            }
+        };
     }
+
 }
