@@ -232,7 +232,7 @@ public class PlaybackController {
         enqueueAll(list, PlaybackConstants.ENQUEUE_NEXT);
     }
 
-    public void addAllToQueue(List<Uri> list) {
+    public void enqueueAllEnd(List<Uri> list) {
         enqueueAll(list, PlaybackConstants.ENQUEUE_LAST);
     }
 
