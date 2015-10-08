@@ -53,12 +53,12 @@
                 android:text="Login"
                 style="?android:buttonStyleSmall"/>
 
-            <Button
+            <ImageButton
                 android:id="@+id/btn_retry"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="retry"
-                style="?android:buttonStyleSmall"/>
+                android:src="@drawable/ic_refresh_black_vector_36dp"
+                style="?android:actionButtonStyle"/>
 
             <org.opensilk.common.ui.widget.TintImageButton
                 android:id="@+id/tile_overflow"

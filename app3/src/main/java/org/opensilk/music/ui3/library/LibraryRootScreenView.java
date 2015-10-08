@@ -23,6 +23,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -55,7 +56,7 @@ public class LibraryRootScreenView extends CardView {
     @InjectView(R.id.avatar) ImageView avatar;
     @InjectView(R.id.loading_progress) ProgressBar progress;
     @InjectView(R.id.btn_login) Button loginBtn;
-    @InjectView(R.id.btn_retry) Button retryBtn;
+    @InjectView(R.id.btn_retry) ImageButton retryBtn;
     @InjectView(R.id.tile_overflow) View overflow;
     @InjectView(R.id.roots_container) ViewGroup rootsContainer;
 
