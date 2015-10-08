@@ -69,13 +69,13 @@
         app:layout_behavior="org.opensilk.common.ui.behavior.QuickReturnFooterBehavior"
         layout="@layout/screen_footer"/>
 
-    <android.support.design.widget.FloatingActionButton
+    <org.opensilk.common.ui.widget.FloatingActionButtonCheckable
         android:id="@+id/floating_action_button"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         app:layout_anchor="@id/appbar"
         app:layout_anchorGravity="bottom|right|end"
-        android:src="@drawable/ic_add_to_library_inv"
+        android:src="@drawable/ic_plus_minus_box_white_animated_24dp"
         android:layout_margin="16dp"
         android:clickable="true"
         android:elevation="8dp"/>

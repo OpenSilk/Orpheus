@@ -39,6 +39,7 @@ import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.ToolbarOwner;
 import org.opensilk.common.ui.mortarfragment.MortarFragment;
+import org.opensilk.common.ui.widget.FloatingActionButtonCheckable;
 import org.opensilk.music.R;
 import org.opensilk.music.index.client.IndexClient;
 import org.opensilk.music.library.provider.LibraryUris;
@@ -70,7 +71,7 @@ public class FoldersScreenView extends CoordinatorLayout implements BundleableRe
     @InjectView(R.id.toolbar) Toolbar mToolbar;
     @InjectView(R.id.recyclerview) RecyclerView mList;
     @InjectView(R.id.go_up) View mUpView;
-    @InjectView(R.id.floating_action_button) ImageView mFab;
+    @InjectView(R.id.floating_action_button) FloatingActionButtonCheckable mFab;
 
     CompositeSubscription mSubscriptions = new CompositeSubscription();
 
@@ -166,25 +167,22 @@ public class FoldersScreenView extends CoordinatorLayout implements BundleableRe
     }
 
     void updateFab() {
-        mFab.setImageLevel(mIndexClient.isIndexed(mThisContainer) ? 1 : 0);
+        mFab.setChecked(mIndexClient.isIndexed(mThisContainer));
     }
 
     void subscribeClicks() {
         mSubscriptions.add(RxView.clickEvents(mFab).subscribe(
                 new Action1<ViewClickEvent>() {
-                    int level = 0;
-
                     @Override
                     public void call(ViewClickEvent onClickEvent) {
                         if (!mIndexClient.isIndexed(mThisContainer)) {
                             mIndexClient.add(mThisContainer);
-                            level = 1;
+                            mFab.setChecked(true);
                         } else {
                             mIndexClient.remove(mThisContainer);
                             //TODO show toast
-                            level = 0;
+                            mFab.setChecked(false);
                         }
-                        mFab.setImageLevel(level);
                     }
                 }
         ));
