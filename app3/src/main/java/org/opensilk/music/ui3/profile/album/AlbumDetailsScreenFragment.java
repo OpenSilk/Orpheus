@@ -15,21 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.index.artistdetails;
+package org.opensilk.music.ui3.profile.album;
 
 import android.content.Context;
 import android.os.Bundle;
 
 import org.opensilk.common.ui.mortar.Screen;
-import org.opensilk.music.ui3.common.BundleableFragment;
+import org.opensilk.common.ui.mortarfragment.MortarFragment;
 
 /**
  * Created by drew on 5/5/15.
  */
-public class ArtistDetailsScreenFragment extends BundleableFragment {
-    public static final String NAME = ArtistDetailsScreenFragment.class.getName();
+public class AlbumDetailsScreenFragment extends MortarFragment {
+    public static final String NAME = AlbumDetailsScreenFragment.class.getName();
 
-    public static ArtistDetailsScreenFragment ni(Context context, ArtistDetailsScreen screen) {
+    public static AlbumDetailsScreenFragment ni(Context context, AlbumDetailsScreen screen) {
         Bundle args = new Bundle();
         args.putParcelable("screen", screen);
         return factory(context, NAME, args);
@@ -38,6 +38,6 @@ public class ArtistDetailsScreenFragment extends BundleableFragment {
     @Override
     protected Screen newScreen() {
         getArguments().setClassLoader(getClass().getClassLoader());
-        return getArguments().<ArtistDetailsScreen>getParcelable("screen");
+        return getArguments().<AlbumDetailsScreen>getParcelable("screen");
     }
 }

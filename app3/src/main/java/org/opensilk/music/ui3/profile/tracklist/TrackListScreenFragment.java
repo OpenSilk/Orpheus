@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.index.trackcollection;
+package org.opensilk.music.ui3.profile.tracklist;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -26,10 +26,10 @@ import org.opensilk.common.ui.mortarfragment.MortarFragment;
 /**
  * Created by drew on 5/12/15.
  */
-public class TrackCollectionScreenFragment extends MortarFragment {
-    public static final String NAME = TrackCollectionScreenFragment.class.getName();
+public class TrackListScreenFragment extends MortarFragment {
+    public static final String NAME = TrackListScreenFragment.class.getName();
 
-    public static TrackCollectionScreenFragment ni(Context context, TrackCollectionScreen screen) {
+    public static TrackListScreenFragment ni(Context context, TrackListScreen screen) {
         Bundle args = new Bundle();
         args.putParcelable("screen", screen);
         return factory(context, NAME, args);
@@ -38,6 +38,6 @@ public class TrackCollectionScreenFragment extends MortarFragment {
     @Override
     protected Screen newScreen() {
         getArguments().setClassLoader(getClass().getClassLoader());
-        return getArguments().<TrackCollectionScreen>getParcelable("screen");
+        return getArguments().<TrackListScreen>getParcelable("screen");
     }
 }

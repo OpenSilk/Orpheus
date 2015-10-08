@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.index.albumdetails;
+package org.opensilk.music.ui3.profile.album;
 
 import android.content.Context;
 import android.content.res.Resources;

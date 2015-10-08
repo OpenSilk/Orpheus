@@ -35,7 +35,7 @@ import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
-import org.opensilk.music.ui3.index.artistdetails.ArtistDetailsScreen;
+import org.opensilk.music.ui3.profile.artist.ArtistDetailsScreen;
 import org.opensilk.music.ui3.profile.ProfileActivity;
 
 import javax.inject.Named;

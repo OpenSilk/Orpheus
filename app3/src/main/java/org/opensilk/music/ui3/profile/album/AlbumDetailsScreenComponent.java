@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.index.artistdetails;
+package org.opensilk.music.ui3.profile.album;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.ui3.MusicActivityComponent;
@@ -30,16 +30,16 @@ import rx.functions.Func2;
 @ScreenScope
 @Component(
         dependencies = MusicActivityComponent.class,
-        modules = ArtistDetailsScreenModule.class
+        modules = AlbumDetailsScreenModule.class
 )
-public interface ArtistDetailsScreenComponent extends ProfileComponent {
-    Func2<MusicActivityComponent, ArtistDetailsScreen, ArtistDetailsScreenComponent> FACTORY =
-            new Func2<MusicActivityComponent, ArtistDetailsScreen, ArtistDetailsScreenComponent>() {
+public interface AlbumDetailsScreenComponent extends ProfileComponent {
+    Func2<MusicActivityComponent, AlbumDetailsScreen, AlbumDetailsScreenComponent> FACTORY =
+            new Func2<MusicActivityComponent, AlbumDetailsScreen, AlbumDetailsScreenComponent>() {
                 @Override
-                public ArtistDetailsScreenComponent call(MusicActivityComponent musicActivityComponent, ArtistDetailsScreen artistsScreen) {
-                    return DaggerArtistDetailsScreenComponent.builder()
+                public AlbumDetailsScreenComponent call(MusicActivityComponent musicActivityComponent, AlbumDetailsScreen albumsScreen) {
+                    return DaggerAlbumDetailsScreenComponent.builder()
                             .musicActivityComponent(musicActivityComponent)
-                            .artistDetailsScreenModule(new ArtistDetailsScreenModule(artistsScreen))
+                            .albumDetailsScreenModule(new AlbumDetailsScreenModule(albumsScreen))
                             .build();
                 }
             };

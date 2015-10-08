@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.index.trackcollection;
+package org.opensilk.music.ui3.profile.tracklist;
 
 import android.content.Context;
 import android.net.Uri;
@@ -48,10 +48,10 @@ import dagger.Provides;
  * Created by drew on 5/12/15.
  */
 @Module
-public class TrackCollectionScreenModule {
-    final TrackCollectionScreen screen;
+public class TrackListScreenModule {
+    final TrackListScreen screen;
 
-    public TrackCollectionScreenModule(TrackCollectionScreen screen) {
+    public TrackListScreenModule(TrackListScreen screen) {
         this.screen = screen;
     }
 

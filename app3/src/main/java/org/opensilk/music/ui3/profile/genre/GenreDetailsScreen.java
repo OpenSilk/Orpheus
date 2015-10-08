@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.index.artistdetails;
+package org.opensilk.music.ui3.profile.genre;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -28,7 +28,7 @@ import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortar.WithComponentFactory;
 import org.opensilk.common.ui.mortarfragment.MortarFragment;
 import org.opensilk.music.R;
-import org.opensilk.music.model.Artist;
+import org.opensilk.music.model.Genre;
 import org.opensilk.music.ui3.MusicActivityComponent;
 import org.opensilk.music.ui3.profile.ProfileScreen;
 
@@ -38,23 +38,23 @@ import mortar.MortarScope;
  * Created by drew on 5/5/15.
  */
 @Layout(R.layout.profile_view2)
-@WithComponentFactory(ArtistDetailsScreen.Factory.class)
-public class ArtistDetailsScreen extends Screen implements ProfileScreen {
+@WithComponentFactory(GenreDetailsScreen.Factory.class)
+public class GenreDetailsScreen extends Screen implements ProfileScreen {
 
-    final Artist artist;
+    final Genre genre;
 
-    public ArtistDetailsScreen(Artist artist) {
-        this.artist = artist;
+    public GenreDetailsScreen(Genre genre) {
+        this.genre = genre;
     }
 
     @Override
     public String getName() {
-        return super.getName() + "-" + artist.getUri();
+        return super.getName() + "-" + genre.getUri();
     }
 
     @Override
     public MortarFragment getFragment(Context context) {
-        return ArtistDetailsScreenFragment.ni(context, this);
+        return GenreDetailsScreenFragment.ni(context, this);
     }
 
     @Override
@@ -64,28 +64,28 @@ public class ArtistDetailsScreen extends Screen implements ProfileScreen {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeBundle(artist.toBundle());
+        dest.writeBundle(genre.toBundle());
     }
 
-    public static final Creator<ArtistDetailsScreen> CREATOR = new Creator<ArtistDetailsScreen>() {
+    public static final Creator<GenreDetailsScreen> CREATOR = new Creator<GenreDetailsScreen>() {
         @Override
-        public ArtistDetailsScreen createFromParcel(Parcel source) {
-            return new ArtistDetailsScreen(
-                    Artist.BUNDLE_CREATOR.fromBundle(source.readBundle(Artist.class.getClassLoader()))
+        public GenreDetailsScreen createFromParcel(Parcel source) {
+            return new GenreDetailsScreen(
+                    Genre.BUNDLE_CREATOR.fromBundle(source.readBundle(Genre.class.getClassLoader()))
             );
         }
 
         @Override
-        public ArtistDetailsScreen[] newArray(int size) {
-            return new ArtistDetailsScreen[size];
+        public GenreDetailsScreen[] newArray(int size) {
+            return new GenreDetailsScreen[size];
         }
     };
 
-    public static class Factory extends ComponentFactory<ArtistDetailsScreen> {
+    public static class Factory extends ComponentFactory<GenreDetailsScreen> {
         @Override
-        protected Object createDaggerComponent(Resources resources, MortarScope parentScope, ArtistDetailsScreen screen) {
+        protected Object createDaggerComponent(Resources resources, MortarScope parentScope, GenreDetailsScreen screen) {
             MusicActivityComponent activityComponent = DaggerService.getDaggerComponent(parentScope);
-            return ArtistDetailsScreenComponent.FACTORY.call(activityComponent, screen);
+            return GenreDetailsScreenComponent.FACTORY.call(activityComponent, screen);
         }
     }
 }

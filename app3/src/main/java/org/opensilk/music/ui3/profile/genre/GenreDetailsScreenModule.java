@@ -15,15 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.index.artistdetails;
+package org.opensilk.music.ui3.profile.genre;
 
 import android.content.Context;
 import android.net.Uri;
-import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.dagger2.ForApplication;
@@ -41,11 +39,10 @@ import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
 import org.opensilk.music.ui3.common.UtilsCommon;
-import org.opensilk.music.ui3.index.albumdetails.AlbumDetailsScreen;
-import org.opensilk.music.ui3.index.trackcollection.TrackCollectionScreen;
+import org.opensilk.music.ui3.profile.album.AlbumDetailsScreen;
+import org.opensilk.music.ui3.profile.tracklist.TrackListScreen;
 import org.opensilk.music.ui3.profile.ProfileActivity;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Named;
@@ -57,49 +54,42 @@ import dagger.Provides;
  * Created by drew on 5/5/15.
  */
 @Module
-public class ArtistDetailsScreenModule {
-    final ArtistDetailsScreen screen;
+public class GenreDetailsScreenModule {
+    final GenreDetailsScreen screen;
 
-    public ArtistDetailsScreenModule(ArtistDetailsScreen screen) {
+    public GenreDetailsScreenModule(GenreDetailsScreen screen) {
         this.screen = screen;
     }
 
     @Provides @Named("loader_uri")
     public Uri provideLoaderUri(@Named("IndexProviderAuthority") String authority) {
-        return IndexUris.artistDetails(screen.artist);
+        return IndexUris.genreDetails(screen.genre);
     }
 
     @Provides @Named("trackcollection_sortorderpref")
     public String provideTrackCollectionSortOrderPref() {
-        return AppPreferences.ARTIST_TRACK_SORT_ORDER;
+        return AppPreferences.GENRE_TRACK_SORT_ORDER;
     }
 
     @Provides @Named("profile_heros")
     public Boolean provideWantMultiHeros() {
-        return false;
+        return screen.genre.getArtInfos().size() > 1;
     }
 
     @Provides @Named("profile_heros")
     public List<ArtInfo> provideHeroArtinfos() {
-        return Collections.singletonList(ArtInfo.forArtist(screen.artist.getName(), null));
+        return screen.genre.getArtInfos();
     }
 
     @Provides @Named("profile_title")
     public String provideProfileTitle() {
-        return screen.artist.getName();
+        return screen.genre.getName();
     }
 
     @Provides @Named("profile_subtitle")
     public String provideProfileSubTitle(@ForApplication Context context) {
-        String subtitle = "";
-        if (screen.artist.getAlbumCount() > 0) {
-            subtitle += UtilsCommon.makeLabel(context, R.plurals.Nalbums, screen.artist.getAlbumCount());
-        }
-        if (screen.artist.getTrackCount() > 0) {
-            if (!TextUtils.isEmpty(subtitle)) subtitle += ", ";
-            subtitle += UtilsCommon.makeLabel(context, R.plurals.Nsongs, screen.artist.getTrackCount());
-        }
-        return subtitle;
+        return UtilsCommon.makeLabel(context, R.plurals.Nalbums, screen.genre.getAlbumsCount())
+                + ", " + UtilsCommon.makeLabel(context, R.plurals.Nsongs, screen.genre.getTracksCount());
     }
 
     @Provides @ScreenScope
@@ -109,11 +99,11 @@ public class ArtistDetailsScreenModule {
     ) {
 //        TrackCollection allTracks = TrackCollection.builder()
 //                .setName(context.getString(R.string.title_all_songs))
-//                .setTracksUri(LibraryUris.artistTracks(screen.libraryConfig.authority,
-//                        screen.libraryInfo.libraryId, screen.artist.identity))
-//                .setTrackCount(screen.artist.trackCount)
-//                .setAlbumCount(screen.artist.albumCount)
-//                .addArtInfo(ArtInfo.forArtist(screen.artist.name, null))
+//                .setTracksUri(LibraryUris.genreTracks(screen.libraryConfig.authority,
+//                        screen.libraryInfo.libraryId, screen.genre.identity))
+//                .setTrackCount(screen.genre.trackUris.size())
+//                .setAlbumCount(screen.genre.albumUris.size())
+//                .addArtInfos(screen.genre.artInfos)
 //                .build();
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(true)
@@ -129,10 +119,10 @@ public class ArtistDetailsScreenModule {
             @Override
             public void onItemClicked(BundleablePresenter presenter, Context context, Bundleable item) {
                 if (item instanceof Album) {
-                    ProfileActivity.startSelf(context, new AlbumDetailsScreen((Album)item));
+                    ProfileActivity.startSelf(context, new AlbumDetailsScreen((Album) item));
                 } else if (item instanceof TrackList) {
-                    ProfileActivity.startSelf(context, new TrackCollectionScreen((TrackList)item,
-                            provideTrackCollectionSortOrderPref()));
+                    ProfileActivity.startSelf(context, new TrackListScreen((TrackList) item,
+                            AppPreferences.GENRE_TRACK_SORT_ORDER));
                 }
             }
         };
@@ -144,11 +134,9 @@ public class ArtistDetailsScreenModule {
             @Override
             public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,
-                        R.menu.artist_album_sort_by,
+                        R.menu.genre_album_sort_by,
                         R.menu.view_as
-//                        ,R.menu.popup_play_next,
-//                        R.menu.popup_add_to_queue
-                );
+                        );
                 return true;
             }
 
@@ -165,20 +153,13 @@ public class ArtistDetailsScreenModule {
                         setNewSortOrder(presenter, AlbumSortOrder.NEWEST);
                         return true;
                     case R.id.menu_sort_by_number_of_songs:
-                        Toast.makeText(context, R.string.err_unimplemented, Toast.LENGTH_LONG).show();
-                        //TODO
+                        setNewSortOrder(presenter, AlbumSortOrder.MOST_TRACKS);
                         return true;
                     case R.id.menu_view_as_simple:
                         updateLayout(presenter, AppPreferences.SIMPLE);
                         return true;
                     case R.id.menu_view_as_grid:
                         updateLayout(presenter, AppPreferences.GRID);
-                        return true;
-                    case R.id.popup_play_next:
-                        playItemsNext(presenter);
-                        return true;
-                    case R.id.popup_add_to_queue:
-                        addItemsToQueue(presenter);
                         return true;
                     default:
                         return false;

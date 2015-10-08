@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.index.trackcollection;
+package org.opensilk.music.ui3.profile.tracklist;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.ui3.MusicActivityComponent;
@@ -30,16 +30,16 @@ import rx.functions.Func2;
 @ScreenScope
 @Component(
         dependencies = MusicActivityComponent.class,
-        modules = TrackCollectionScreenModule.class
+        modules = TrackListScreenModule.class
 )
-public interface TrackCollectionScreenComponent extends ProfileComponent {
-    Func2<MusicActivityComponent, TrackCollectionScreen, TrackCollectionScreenComponent> FACTORY =
-            new Func2<MusicActivityComponent, TrackCollectionScreen, TrackCollectionScreenComponent>() {
+public interface TrackListScreenComponent extends ProfileComponent {
+    Func2<MusicActivityComponent, TrackListScreen, TrackListScreenComponent> FACTORY =
+            new Func2<MusicActivityComponent, TrackListScreen, TrackListScreenComponent>() {
                 @Override
-                public TrackCollectionScreenComponent call(MusicActivityComponent musicActivityComponent, TrackCollectionScreen trackCollectionScreen) {
-                    return DaggerTrackCollectionScreenComponent.builder()
+                public TrackListScreenComponent call(MusicActivityComponent musicActivityComponent, TrackListScreen trackCollectionScreen) {
+                    return DaggerTrackListScreenComponent.builder()
                             .musicActivityComponent(musicActivityComponent)
-                            .trackCollectionScreenModule(new TrackCollectionScreenModule(trackCollectionScreen))
+                            .trackListScreenModule(new TrackListScreenModule(trackCollectionScreen))
                             .build();
                 }
             };

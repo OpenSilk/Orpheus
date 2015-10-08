@@ -19,11 +19,16 @@ package org.opensilk.music.ui3.playlistsprofile;
 
 import android.content.Context;
 import android.net.Uri;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.model.sort.TrackSortOrder;
+import org.opensilk.music.ui3.common.BundleablePresenter;
+import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
 
 import javax.inject.Named;
@@ -59,20 +64,28 @@ public class PlaylistsProfileScreenModule {
     }
 
     @Provides @ScreenScope
-    public ActionBarMenuConfig provideMenuConfig(
-    ) {
-
-        Func2<Context, Integer, Boolean> handler = new Func2<Context, Integer, Boolean>() {
+    public MenuHandler provideMenuHandler(@Named("loader_uri") Uri loaderUri) {
+        return new MenuHandlerImpl(loaderUri) {
             @Override
-            public Boolean call(Context context, Integer integer) {
+            public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
+                return false;
+            }
+
+            @Override
+            public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
                 return false;
             }
         };
-
-        return ActionBarMenuConfig.builder()
-                .withMenus(ActionBarMenuConfig.toObject(MenuHandlerImpl.PLAYLISTS))
-                .setActionHandler(handler)
-                .build();
     }
 
 }

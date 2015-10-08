@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.index.trackcollection;
+package org.opensilk.music.ui3.profile.tracklist;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -38,13 +38,13 @@ import mortar.MortarScope;
  * Created by drew on 5/12/15.
  */
 @Layout(R.layout.profile_recycler)
-@WithComponentFactory(TrackCollectionScreen.Factory.class)
-public class TrackCollectionScreen extends Screen implements ProfileScreen {
+@WithComponentFactory(TrackListScreen.Factory.class)
+public class TrackListScreen extends Screen implements ProfileScreen {
 
     final TrackList trackList;
     final String sortOrderPref;
 
-    public TrackCollectionScreen(TrackList trackList, String sortOrderPref) {
+    public TrackListScreen(TrackList trackList, String sortOrderPref) {
         this.trackList = trackList;
         this.sortOrderPref = sortOrderPref;
     }
@@ -56,7 +56,7 @@ public class TrackCollectionScreen extends Screen implements ProfileScreen {
 
     @Override
     public MortarFragment getFragment(Context context) {
-        return TrackCollectionScreenFragment.ni(context, this);
+        return TrackListScreenFragment.ni(context, this);
     }
 
     @Override
@@ -70,26 +70,26 @@ public class TrackCollectionScreen extends Screen implements ProfileScreen {
         dest.writeString(sortOrderPref);
     }
 
-    public static final Creator<TrackCollectionScreen> CREATOR = new Creator<TrackCollectionScreen>() {
+    public static final Creator<TrackListScreen> CREATOR = new Creator<TrackListScreen>() {
         @Override
-        public TrackCollectionScreen createFromParcel(Parcel source) {
-            return new TrackCollectionScreen(
+        public TrackListScreen createFromParcel(Parcel source) {
+            return new TrackListScreen(
                     TrackList.BUNDLE_CREATOR.fromBundle(source.readBundle(TrackList.class.getClassLoader())),
                     source.readString()
             );
         }
 
         @Override
-        public TrackCollectionScreen[] newArray(int size) {
-            return new TrackCollectionScreen[size];
+        public TrackListScreen[] newArray(int size) {
+            return new TrackListScreen[size];
         }
     };
 
-    public static class Factory extends ComponentFactory<TrackCollectionScreen> {
+    public static class Factory extends ComponentFactory<TrackListScreen> {
         @Override
-        protected Object createDaggerComponent(Resources resources, MortarScope parentScope, TrackCollectionScreen screen) {
+        protected Object createDaggerComponent(Resources resources, MortarScope parentScope, TrackListScreen screen) {
             MusicActivityComponent activityComponent = DaggerService.getDaggerComponent(parentScope);
-            return TrackCollectionScreenComponent.FACTORY.call(activityComponent, screen);
+            return TrackListScreenComponent.FACTORY.call(activityComponent, screen);
         }
     }
 }
