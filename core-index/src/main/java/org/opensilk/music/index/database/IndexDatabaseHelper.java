@@ -32,7 +32,7 @@ import javax.inject.Singleton;
 @Singleton
 public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
-    public static final int DB_VERSION = 30;
+    public static final int DB_VERSION = 31;
     public static final String DB_NAME = "music.db";
 
     @Inject
@@ -164,6 +164,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "compilation INTEGER, " +
                     "genre TEXT, " +
                     "genre_key TEXT, " +
+                    "artwork_uri TEXT, " +
                     "res_uri TEXT NOT NULL, " +
                     "res_headers TEXT, " +
                     "res_size INTEGER, " +
@@ -277,6 +278,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "coalesce(t1.compilation, t2.compilation) as compilation, " +
                     "coalesce(g1.genre_name, t2.genre) as genre, " +
                     "t1.genre_id, " +
+                    "t2.artwork_uri, " +
                     "t2.res_uri, " +
                     "t2.res_headers, " +
                     "t2.res_size, " +
@@ -292,6 +294,15 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "LEFT OUTER JOIN genre_meta g1 ON t1.genre_id = g1._id " +
                     ";");
 
+            db.execSQL("CREATE VIEW IF NOT EXISTS genre_album_map AS SELECT " +
+                    "g1._id as genre_id, " +
+                    "t1.album_id, " +
+                    "t1.album as album_name, " +
+                    "t1.album_artist " +
+                    "FROM genre_meta g1 " +
+                    "JOIN track_info t1 ON g1._id = t1.genre_id " +
+                    "GROUP BY t1.album_id" +
+                    ";");
 
             // For a given artist_id, provides the album_id for albums on
             // which the artist appears.

@@ -33,6 +33,7 @@ import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.index.provider.LastFMHelper;
 import org.opensilk.music.model.Album;
+import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.Metadata;
@@ -238,31 +239,40 @@ public class IndexDatabaseImpl implements IndexDatabase {
             IndexSchema.Info.Genre.NUMBER_OF_TRACKS,
     };
 
+    static final String[] genre_album_map_cols = new String[] {
+            IndexSchema.Misc.GenreAlbumMap.GENRE_ID,
+            IndexSchema.Misc.GenreAlbumMap.ALBUM_NAME,
+            IndexSchema.Misc.GenreAlbumMap.ALBUM_ARTIST,
+    };
+
     @Override
     public List<Genre> getGenres(String sortOrder) {
         List<Genre> lst = new ArrayList<>();
         Cursor c = null;
+        Cursor c2 = null;
         try {
             c = query(IndexSchema.Info.Genre.TABLE, genres_cols, null, null, null, null, sortOrder);
+            c2 = query(IndexSchema.Misc.GenreAlbumMap.TABLE, genre_album_map_cols, null, null, null, null, null);
             if (c != null && c.moveToFirst()) {
                 final Uri parentUri = IndexUris.genres(indexAuthority);
                 do {
-                    lst.add(buildGenre(c, parentUri));
+                    lst.add(buildGenre(c, parentUri, c2));
                 } while (c.moveToNext());
             }
         } finally {
             closeCursor(c);
+            closeCursor(c2);
         }
         return lst;
     }
 
-    Genre buildGenre(Cursor c, Uri parentUri) {
+    Genre buildGenre(Cursor c, Uri parentUri, Cursor c2) {
         final String id = c.getString(0);
         final String name = c.getString(1);
         //2
         final int albumNum = c.getInt(3);
         final int trackNum = c.getInt(4);
-        return Genre.builder()
+        Genre.Builder bob = Genre.builder()
                 .setUri(IndexUris.genre(indexAuthority, id))
                 .setParentUri(parentUri)
                 .setName(name)
@@ -270,7 +280,20 @@ public class IndexDatabaseImpl implements IndexDatabase {
                 .setAlbumsUri(IndexUris.genreAlbums(indexAuthority, id))
                 .setTrackCount(trackNum)
                 .setTracksUri(IndexUris.genreTracks(indexAuthority, id))
-                .build();
+                ;
+        long gid = Long.valueOf(id);
+        if (c2 != null && c2.moveToFirst()) {
+            do {
+                if (c2.getLong(0) == gid) {
+                    final String album = getStringOrNull(c2, 1);
+                    final String albumArtist = getStringOrNull(c2, 2);
+                    if (album != null && albumArtist != null) {
+                        bob.addArtInfo(ArtInfo.forAlbum(albumArtist, album, null));
+                    }
+                }
+            } while (c2.moveToNext());
+        }
+        return bob.build();
     }
 
     static final String[] tracks_cols = new String[] {
@@ -295,6 +318,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
             IndexSchema.Info.Track.RES_MIME_TYPE,
             IndexSchema.Info.Track.RES_BITRATE,
             IndexSchema.Info.Track.RES_DURATION, //20
+            IndexSchema.Info.Track.ARTWORK_URI
     };
 
     @Override
@@ -450,6 +474,10 @@ public class IndexDatabaseImpl implements IndexDatabase {
             rob.setDuration(dur);
         }
         bob.addRes(rob.build());
+        String artUri = getStringOrNull(c, 21);
+        if (artUri != null) {
+            bob.setArtworkUri(Uri.parse(artUri));
+        }
         return bob.build();
     }
 
@@ -749,6 +777,10 @@ public class IndexDatabaseImpl implements IndexDatabase {
         if (!StringUtils.isEmpty(genre)) {
             cv.put(IndexSchema.Tracks.GENRE, genre);
             cv.put(IndexSchema.Tracks.GENRE_KEY, keyFor(genre));
+        }
+        Uri artworkUri = track.getArtworkUri();
+        if (artworkUri != null && !Uri.EMPTY.equals(artworkUri)) {
+            cv.put(IndexSchema.Tracks.ARTWORK_URI, artworkUri.toString());
         }
         org.opensilk.music.model.Track.Res res = track.getResources().get(0);
         cv.put(IndexSchema.Tracks.RES_URI, res.getUri().toString());

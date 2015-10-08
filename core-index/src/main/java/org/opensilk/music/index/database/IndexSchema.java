@@ -85,6 +85,7 @@ public class IndexSchema {
             String COMPILATION = "compilation";
             String GENRE = "genre";
             String GENRE_ID = "genre_id";
+            String ARTWORK_URI = "artwork_uri";
             String RES_URI = "res_uri";
             String RES_HEADERS = "res_headers";
             String RES_SIZE = "res_size";
@@ -143,6 +144,16 @@ public class IndexSchema {
 
     }
 
+    public interface Misc {
+        interface GenreAlbumMap {
+            String TABLE = "genre_album_map";
+            String GENRE_ID = "genre_id";
+            String ALBUM_ID = "album_id";
+            String ALBUM_NAME = "album_name";
+            String ALBUM_ARTIST = "album_artist";
+        }
+    }
+
     public interface Containers extends BaseColumns {
         String TABLE = "containers";
         String URI = "uri";
@@ -169,6 +180,7 @@ public class IndexSchema {
         String COMPILATION = "compilation";
         String GENRE = "genre";
         String GENRE_KEY = "genre_key";
+        String ARTWORK_URI = "artwork_uri";
         String RES_URI = "res_uri";
         String RES_HEADERS = "res_headers";
         String RES_SIZE = "res_size";
