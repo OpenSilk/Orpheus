@@ -70,7 +70,6 @@ public class FoldersScreenView extends CoordinatorLayout implements BundleableRe
 
     @InjectView(R.id.toolbar) Toolbar mToolbar;
     @InjectView(R.id.recyclerview) RecyclerView mList;
-    @InjectView(R.id.go_up) View mUpView;
     @InjectView(R.id.floating_action_button) FloatingActionButtonCheckable mFab;
 
     CompositeSubscription mSubscriptions = new CompositeSubscription();
