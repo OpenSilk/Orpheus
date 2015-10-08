@@ -112,7 +112,26 @@ public class ArtInfo implements Parcelable, Comparable<ArtInfo> {
     }
 
     public String cacheKey() {
-        return "forArtist=" + forArtist + "+artist=" + artistName + "+album=" + albumName;
+        StringBuilder sb = new StringBuilder("forArtist=").append(forArtist);
+        if (forArtist) {
+            if (!StringUtils.isEmpty(artistName)) {
+                sb.append("+artist=").append(artistName);
+            } else {
+                throw new IllegalArgumentException("Invalid artInfo cannot make cache key from:\n " + toString());
+            }
+        } else {
+            if (!StringUtils.isEmpty(artistName) && !StringUtils.isEmpty(albumName)) {
+                //prefer using artist/album to reduce duplication
+                sb.append("+artist=").append(artistName);
+                sb.append("+album=").append(albumName);
+            } else if (artworkUri != null) {
+                //must use uri to prevent improper mapping
+                sb.append("+uri=").append(artworkUri);
+            } else {
+                throw new IllegalArgumentException("Invalid artInfo cannot make cache key from:\n " + toString());
+            }
+        }
+        return sb.toString();
     }
 
     public Uri asUri(String authority) {
