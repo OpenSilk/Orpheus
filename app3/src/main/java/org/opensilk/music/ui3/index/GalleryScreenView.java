@@ -21,13 +21,16 @@ import android.content.Context;
 import android.os.Parcelable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ToolbarOwner;
+import org.opensilk.common.ui.util.ThemeUtils;
 import org.opensilk.music.R;
+import org.opensilk.music.ui3.common.UtilsCommon;
 
 import java.util.List;
 
@@ -88,9 +91,13 @@ public class GalleryScreenView extends CoordinatorLayout {
     }
 
     public void setup(List<GalleryPage> pages, int startPage) {
-        GalleryScreenViewAdapter adapter = new GalleryScreenViewAdapter(getContext(), mPresenter, pages);
+        GalleryScreenViewAdapter adapter = new GalleryScreenViewAdapter(
+                //pages expect to descend from the activity context
+                UtilsCommon.findActivity(getContext()), mPresenter, pages);
         mViewPager.setAdapter(adapter);
         mTabBar.setTabMode(TabLayout.MODE_SCROLLABLE);
+        mTabBar.setTabTextColors(ContextCompat.getColor(getContext(), R.color.white),
+                ThemeUtils.getThemeAttrColor(getContext(), R.attr.colorAccent));
         mTabBar.setupWithViewPager(mViewPager);
         mViewPager.setCurrentItem(startPage);
         mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
