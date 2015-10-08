@@ -138,7 +138,7 @@ public class Genre extends Container {
         }
 
         public Builder setAlbumCount(int count) {
-            bob.putInt(Metadata.KEY_CHILD_TRACKS_COUNT, count);
+            bob.putInt(Metadata.KEY_CHILD_ALBUMS_COUNT, count);
             return this;
         }
 
