@@ -28,6 +28,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
 import android.widget.ProgressBar;
@@ -106,7 +107,7 @@ public class ThemeUtils {
                         && sTypedValue.type <= TypedValue.TYPE_LAST_INT) {
                     return sTypedValue.data;
                 } else if (sTypedValue.type == TypedValue.TYPE_STRING) {
-                    return context.getResources().getColor(sTypedValue.resourceId);
+                    return ContextCompat.getColor(context, sTypedValue.resourceId);
                 }
             }
         }
