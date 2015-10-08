@@ -80,7 +80,7 @@ public class ArtInfo implements Parcelable, Comparable<ArtInfo> {
     private ArtInfo(String artistName, String albumName, Uri artworkUri, boolean forArtist) {
         this.artistName = artistName;
         this.albumName = albumName;
-        this.artworkUri = artworkUri;
+        this.artworkUri = artworkUri != null ? artworkUri : Uri.EMPTY;
         this.forArtist = forArtist;
     }
 
@@ -124,7 +124,7 @@ public class ArtInfo implements Parcelable, Comparable<ArtInfo> {
                 //prefer using artist/album to reduce duplication
                 sb.append("+artist=").append(artistName);
                 sb.append("+album=").append(albumName);
-            } else if (artworkUri != null && !Uri.EMPTY.equals(artworkUri)) {
+            } else if (!Uri.EMPTY.equals(artworkUri)) {
                 //must use uri to prevent improper mapping
                 sb.append("+uri=").append(artworkUri);
             } else {
@@ -147,7 +147,7 @@ public class ArtInfo implements Parcelable, Comparable<ArtInfo> {
         if (!StringUtils.isEmpty(albumName)) {
             builder.append("&albumName=").append(encodeString(albumName));
         }
-        if (artworkUri != null && !Uri.EMPTY.equals(artworkUri)) {
+        if (!Uri.EMPTY.equals(artworkUri)) {
             builder.append("&artworkUri=").append(encodeString(artworkUri.toString()));
         }
         return ub.encodedQuery(builder.toString()).build();

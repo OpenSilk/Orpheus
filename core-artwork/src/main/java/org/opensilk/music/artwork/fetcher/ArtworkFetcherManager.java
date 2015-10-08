@@ -116,7 +116,7 @@ public class ArtworkFetcherManager {
         } else {
             if ((StringUtils.isEmpty(artInfo.artistName)
                     && StringUtils.isEmpty(artInfo.albumName))
-                    && (artInfo.artworkUri == null || Uri.EMPTY.equals(artInfo.artworkUri))) {
+                    && (Uri.EMPTY.equals(artInfo.artworkUri))) {
                 return Observable.<Bitmap>error(new Exception("Invalid artInfo: must have artistName " +
                         "and albumName set or valid artworkUri")).subscribe(l);
             } else {
@@ -176,7 +176,7 @@ public class ArtworkFetcherManager {
                     return Observable.just(mL2Cache.getBitmap(artInfo.cacheKey()));
                 }
                 boolean hasAlbumArtist = !TextUtils.isEmpty(artInfo.albumName) && !TextUtils.isEmpty(artInfo.artistName);
-                boolean hasUri = artInfo.artworkUri != null && !artInfo.artworkUri.equals(Uri.EMPTY);
+                boolean hasUri = !Uri.EMPTY.equals(artInfo.artworkUri);
                 boolean isOnline = isOnline(mPreferences.getBoolean(ArtworkPreferences.ONLY_ON_WIFI, true));
                 boolean wantAlbumArt = mPreferences.getBoolean(ArtworkPreferences.DOWNLOAD_MISSING_ARTWORK, true);
                 boolean preferDownload = mPreferences.getBoolean(ArtworkPreferences.PREFER_DOWNLOAD_ARTWORK, false);
