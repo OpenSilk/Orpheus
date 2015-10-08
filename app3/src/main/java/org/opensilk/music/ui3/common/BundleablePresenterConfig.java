@@ -17,9 +17,8 @@
 
 package org.opensilk.music.ui3.common;
 
-import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
-import org.opensilk.common.ui.mortar.ActionBarMenuHandler;
 import org.opensilk.bundleable.Bundleable;
+import org.opensilk.music.model.sort.BaseSortOrder;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,17 +32,20 @@ public class BundleablePresenterConfig {
     public final ItemClickListener itemClickListener;
     public final MenuHandler menuConfig;
     public final List<Bundleable> loaderSeed;
+    public final String defaultSortOrder;
 
     public BundleablePresenterConfig(
             boolean wantsGrid,
             ItemClickListener itemClickListener,
             MenuHandler menuConfig,
-            List<Bundleable> loaderSeed
+            List<Bundleable> loaderSeed,
+            String defaultSortOrder
     ) {
         this.wantsGrid = wantsGrid;
         this.itemClickListener = itemClickListener;
         this.menuConfig = menuConfig;
         this.loaderSeed = loaderSeed;
+        this.defaultSortOrder = defaultSortOrder;
     }
 
     public static Builder builder() {
@@ -55,6 +57,7 @@ public class BundleablePresenterConfig {
         ItemClickListener itemClickListener;
         MenuHandler menuConfig;
         List<Bundleable> loaderSeed = new ArrayList<>();
+        String preferedSortOrder = BaseSortOrder.A_Z;
 
         public Builder setWantsGrid(boolean wantsGrid) {
             this.wantsGrid = wantsGrid;
@@ -81,9 +84,14 @@ public class BundleablePresenterConfig {
             return this;
         }
 
+        public Builder setDefaultSortOrder(String sortOrder) {
+            this.preferedSortOrder = sortOrder;
+            return this;
+        }
 
         public BundleablePresenterConfig build() {
-            return new BundleablePresenterConfig(wantsGrid, itemClickListener, menuConfig, loaderSeed);
+            return new BundleablePresenterConfig(wantsGrid, itemClickListener, menuConfig,
+                    loaderSeed, preferedSortOrder);
         }
     }
 }

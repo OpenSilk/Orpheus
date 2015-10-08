@@ -95,6 +95,7 @@ public class TrackListScreenModule {
                 .setWantsGrid(false)
                 .setItemClickListener(itemClickListener)
                 .setMenuConfig(menuConfig)
+                .setDefaultSortOrder(TrackSortOrder.ALBUM)
                 .build();
     }
 

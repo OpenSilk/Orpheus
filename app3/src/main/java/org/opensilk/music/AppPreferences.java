@@ -366,8 +366,8 @@ public class AppPreferences extends PreferencesWrapper {
         return makePrefKey(encodeString(uri.toString()), ".layout");
     }
 
-    public String getSortOrder(Uri uri) {
-        return getString(makePrefKey(encodeString(uri.toString()), ".sortorder"), BaseSortOrder.A_Z);
+    public String getSortOrder(Uri uri, String defaultSort) {
+        return getString(makePrefKey(encodeString(uri.toString()), ".sortorder"), defaultSort);
     }
 
     public String getLayout(Uri uri, boolean defaultGrid) {

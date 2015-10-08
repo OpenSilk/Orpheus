@@ -91,6 +91,7 @@ public class AlbumDetailsScreenModule {
                 .setWantsGrid(false)
                 .setItemClickListener(itemClickListener)
                 .setMenuConfig(menuConfig)
+                .setDefaultSortOrder(TrackSortOrder.PLAYORDER)
                 .build();
     }
 

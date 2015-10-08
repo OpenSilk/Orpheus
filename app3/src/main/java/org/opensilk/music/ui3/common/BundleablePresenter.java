@@ -93,7 +93,7 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
     ) {
         this.preferences = preferences;
         this.requestor = requestor;
-        this.loader = loader.setUri(uri).setSortOrder(preferences.getSortOrder(uri));
+        this.loader = loader.setUri(uri).setSortOrder(preferences.getSortOrder(uri, config.defaultSortOrder));
         this.fm = fm;
         this.wantGrid = StringUtils.equals(preferences.getLayout(uri, config.wantsGrid), AppPreferences.GRID);
         this.itemClickListener = config.itemClickListener;
