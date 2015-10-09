@@ -119,7 +119,11 @@ public class PalettizedBitmapTarget extends ImageViewTarget<PalettizedBitmap> {
     }
 
     public List<ChildTarget> getPaletteTargets() {
-        return childTargets;
+        return Collections.unmodifiableList(childTargets);
+    }
+
+    public List<Palette.PaletteAsyncListener> getCallbacks() {
+        return Collections.unmodifiableList(callbacks);
     }
 
     public static Builder builder() {

@@ -73,12 +73,22 @@ public class PalettizedBitmapTransition implements Transition<PalettizedBitmap> 
             transitionDrawable.startTransition(duration);
             adapter.setDrawable(transitionDrawable);
             transitionColors(current, adapter);
+            notifyCallbacks(current, adapter);
             return true;
         } else {
             defaultAnimation.transition(current, adapter);
             //TODO this will jank when the target gets its setResource method called
 //            transitionColors(current, adapter);
             return false;
+        }
+    }
+
+    private void notifyCallbacks(PalettizedBitmap current, ViewAdapter adapter) {
+        if (current.getPalette() != null && adapter instanceof PalettizedBitmapTarget) {
+            PalettizedBitmapTarget target = (PalettizedBitmapTarget) adapter;
+            for (Palette.PaletteAsyncListener c :  target.getCallbacks()) {
+                c.onGenerated(current.getPalette());
+            }
         }
     }
 
