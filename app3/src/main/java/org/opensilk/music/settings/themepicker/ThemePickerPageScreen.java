@@ -26,6 +26,7 @@ import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortar.WithComponentFactory;
 import org.opensilk.music.R;
 import org.opensilk.music.ui.theme.OrpheusTheme;
+import org.opensilk.music.ui3.MusicActivityComponent;
 
 import mortar.MortarScope;
 
@@ -49,7 +50,8 @@ public class ThemePickerPageScreen extends Screen {
     public static class Factory extends ComponentFactory<ThemePickerPageScreen> {
         @Override
         protected Object createDaggerComponent(Resources resources, MortarScope parentScope, ThemePickerPageScreen screen) {
-            return DaggerService.getDaggerComponent(parentScope);
+            MusicActivityComponent parent = DaggerService.getDaggerComponent(parentScope);
+            return ThemePickerPageScreenComponent.FACTORY.call(parent);
         }
     }
 

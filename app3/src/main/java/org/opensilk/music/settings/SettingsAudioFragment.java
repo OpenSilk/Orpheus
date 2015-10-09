@@ -73,7 +73,7 @@ public class SettingsAudioFragment extends SettingsFragment implements
     @Override
     public boolean onPreferenceClick(Preference preference) {
         if (preference == mEqualizer) {
-            int sessionId = mMusicService.getAudioSessionId();
+            int sessionId = ERROR_BAD_VALUE;
             if (sessionId == ERROR_BAD_VALUE) {
                 new AlertDialog.Builder(getActivity())
                         .setTitle(R.string.error)

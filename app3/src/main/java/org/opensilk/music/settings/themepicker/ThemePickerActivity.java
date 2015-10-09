@@ -93,9 +93,7 @@ public class ThemePickerActivity extends MusicActivity {
         }
         mAdapter = new ThemePickerPagerAdapter(this, screens, !mSettings.isDarkTheme());
         mPager.setAdapter(mAdapter);
-        mPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override public void onPageScrolled(int i, float v, int i2) { }
-            @Override public void onPageScrollStateChanged(int i) { }
+        mPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override public void onPageSelected(int i) {
                 updateTheme(i);
             }

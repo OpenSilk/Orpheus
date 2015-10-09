@@ -18,15 +18,19 @@
 package org.opensilk.music.settings;
 
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.settings.main.SettingsMainFragment;
 import org.opensilk.music.ui3.MusicActivity;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import mortar.MortarScope;
 
 /**
@@ -34,9 +38,12 @@ import mortar.MortarScope;
  */
 public class SettingsActivity extends MusicActivity {
 
+    @InjectView(R.id.main_toolbar) Toolbar mToolbar;
+
     @Override
     protected void setupContentView() {
         setContentView(R.layout.blank_framelayout_toolbar);
+        ButterKnife.inject(this);
     }
 
     @Override
@@ -66,7 +73,7 @@ public class SettingsActivity extends MusicActivity {
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//        mActionBarDelegate.setUpButtonEnabled(true);
+        mToolbarOwner.attachToolbar(mToolbar);
 
         if (savedInstanceState == null) {
             //Load the main fragment
@@ -75,6 +82,12 @@ public class SettingsActivity extends MusicActivity {
                     .commit();
         }
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        mToolbarOwner.detachToolbar(mToolbar);
+        super.onDestroy();
     }
 
     @Override
@@ -91,4 +104,8 @@ public class SettingsActivity extends MusicActivity {
         super.onBackPressed();
     }
 
+    @Override
+    public void onToolbarAttached(Toolbar toolbar) {
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
 }
