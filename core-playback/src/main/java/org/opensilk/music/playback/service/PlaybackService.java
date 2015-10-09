@@ -125,6 +125,7 @@ public class PlaybackService extends MediaBrowserService {
     boolean mPlayWhenReady;
     //
     boolean mQueueReloaded;
+    boolean mQueueReady;
     //
     boolean mServiceStarted = false;
     volatile int mConnectedClients = 0;
@@ -635,19 +636,24 @@ public class PlaybackService extends MediaBrowserService {
                 startService(new Intent(PlaybackService.this, PlaybackService.class));
                 mServiceStarted = true;
             }
-            if (!getMediaSession().isActive()) {
+            if (mQueueReady) {
                 getMediaSession().setActive(true);
-            }
-            if (mQueue.notEmpty()) {
-                if (PlaybackStateHelper.isConnecting(mPlayback.getState())) {
-                    //we are still fetching the current track, tell it to
-                    //play when it arrives
-                    mPlayWhenReady = true;
-                } else if (!mPlayback.isPlaying()) {
-                    mPlayback.play();
+                if (mQueue.notEmpty()) {
+                    if (PlaybackStateHelper.isConnecting(mPlayback.getState())) {
+                        //we are still fetching the current track, tell it to
+                        //play when it arrives
+                        mPlayWhenReady = true;
+                    } else if (!mPlayback.isPlaying()) {
+                        mPlayback.play();
+                    }
+                } else {
+                    //TODO make random queue
                 }
             } else {
-                //TODO make random queue
+                //If we were started from a mediabutton
+                //we will be called before the queue has a chance to
+                //load, so tell it to go ahead and start
+                mPlayWhenReady = true;
             }
         }
 
@@ -917,6 +923,7 @@ public class PlaybackService extends MediaBrowserService {
             if (mQueue.notEmpty()) {
                 getMediaSession().setQueue(mQueue.getQueueItems());
                 if (mQueueReloaded) {
+                    mQueueReady = true;
                     updatePlaybackState(null);
                 }
                 if (mQueue.getCurrentPos() < 0) {
