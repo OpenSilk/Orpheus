@@ -47,12 +47,12 @@
     </style>
 
     <style name="nowPlayingActionLight.Play">
-        <item name="android:src">@drawable/ic_play_pause_white_animated_48dp</item>
+        <item name="android:src">@drawable/ic_play_pause_toggle_white_animated_48dp</item>
         <item name="android:contentDescription">@string/accessibility_play</item>
     </style>
 
     <style name="nowPlayingActionDark.Play">
-        <item name="android:src">@drawable/ic_play_pause_white_animated_48dp</item>
+        <item name="android:src">@drawable/ic_play_pause_toggle_white_animated_48dp</item>
         <item name="android:contentDescription">@string/accessibility_play</item>
     </style>
 
@@ -102,13 +102,13 @@
 
     <style name="footerLight">
         <item name="android:scaleType">centerInside</item>
-        <item name="android:src">@drawable/ic_play_pause_black_animated_36dp</item>
+        <item name="android:src">@drawable/ic_play_pause_toggle_black_animated_36dp</item>
         <item name="android:background">?android:selectableItemBackgroundBorderless</item>
     </style>
 
     <style name="footerDark">
         <item name="android:scaleType">centerInside</item>
-        <item name="android:src">@drawable/ic_play_pause_black_animated_36dp</item>
+        <item name="android:src">@drawable/ic_play_pause_toggle_black_animated_36dp</item>
         <item name="android:tint">@color/white</item>
         <item name="android:background">?android:selectableItemBackgroundBorderless</item>
     </style>
@@ -134,13 +134,13 @@
     </style>
 
     <style name="controlsActionLight.Play">
-        <item name="android:src">@drawable/ic_play_pause_black_animated_36dp</item>
+        <item name="android:src">@drawable/ic_play_pause_toggle_black_animated_36dp</item>
         <item name="android:tint">@color/white</item>
         <item name="android:contentDescription">@string/accessibility_play</item>
     </style>
 
     <style name="controlsActionDark.Play">
-        <item name="android:src">@drawable/ic_play_pause_black_animated_36dp</item>
+        <item name="android:src">@drawable/ic_play_pause_toggle_black_animated_36dp</item>
         <item name="android:tint">@color/white</item>
         <item name="android:contentDescription">@string/accessibility_play</item>
     </style>
