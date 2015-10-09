@@ -71,21 +71,21 @@
 
     <!-- Base themes for dialog activities -->
 
-    <style name="Theme.Dialog.LightBase" parent="Theme.AppCompat.Light.DialogWhenLarge">
+    <style name="Theme.Dialog.LightBase" parent="Theme.AppCompat.Light.NoActionBar">
         <!--NoActionBar-->
         <!--<item name="windowActionBar">false</item>-->
-        <item name="android:windowNoTitle">true</item>
+        <!--<item name="android:windowNoTitle">true</item>-->
         <!--DarkActionBar-->
         <item name="toolbarStyle">@style/Toolbar.Dark.WhiteOverflow</item>
         <!--Light dark actionbar-->
-        <item name="colorPrimary">@color/primary_material_dark</item>
-        <item name="colorPrimaryDark">@color/primary_dark_material_dark</item>
+        <item name="colorPrimary">@color/grey_900</item>
+        <item name="colorPrimaryDark">@color/black</item>
     </style>
 
-    <style name="Theme.Dialog.DarkBase" parent="Theme.AppCompat.DialogWhenLarge">
+    <style name="Theme.Dialog.DarkBase" parent="Theme.AppCompat.Light.NoActionBar">
         <!--NoActionBar-->
         <!--<item name="windowActionBar">false</item>-->
-        <item name="android:windowNoTitle">true</item>
+        <!--<item name="android:windowNoTitle">true</item>-->
         <!--DarkActionBar-->
         <item name="toolbarStyle">@style/Toolbar.Dark</item>
     </style>

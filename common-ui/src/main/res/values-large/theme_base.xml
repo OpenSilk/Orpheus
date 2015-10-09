@@ -26,8 +26,8 @@
         <!--DarkActionBar-->
         <item name="toolbarStyle">@style/Toolbar.Dark.WhiteOverflow</item>
         <!--Light dark actionbar-->
-        <item name="colorPrimary">@color/primary_material_dark</item>
-        <item name="colorPrimaryDark">@color/primary_dark_material_dark</item>
+        <item name="colorPrimary">@color/grey_900</item>
+        <item name="colorPrimaryDark">@color/black</item>
 
         <item name="windowFixedWidthMajor">@dimen/dialog_fixed_width_major2</item>
         <item name="windowFixedWidthMinor">@dimen/dialog_fixed_width_minor2</item>
