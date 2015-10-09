@@ -22,7 +22,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.drawable.AnimatedStateListDrawable;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.media.audiofx.AudioEffect;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPropertyAnimatorListener;
@@ -43,6 +46,7 @@ import com.pheelicks.visualizer.renderer.CircleBarRenderer;
 import com.pheelicks.visualizer.renderer.CircleRenderer;
 
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.common.ui.util.ThemeUtils;
 import org.opensilk.common.ui.util.ViewUtils;
 import org.opensilk.common.ui.widget.ImageButtonCheckable;
@@ -87,7 +91,7 @@ public class NowPlayingScreenView extends RelativeLayout {
     VisualizerView visualizerView;
     String visualizerType = "none";
     int rendererColor = Color.argb(255, 222, 92, 143);
-    int sessionId = AudioEffect.ERROR_BAD_VALUE;
+    int sessionId = 0;
 
     CompositeSubscription clicks;
 
@@ -107,6 +111,13 @@ public class NowPlayingScreenView extends RelativeLayout {
         if (!isInEditMode()) {
             visualizerType = settings.getString(NOW_PLAYING_VIEW, "none");
             rendererColor = ThemeUtils.getColorAccent(getContext());
+            if (VersionUtils.hasLollipop()) {
+                AnimatedStateListDrawable drawable = (AnimatedStateListDrawable) playPause.getDrawable();
+                drawable.addTransition(R.id.pause_state, R.id.play_state, (AnimatedVectorDrawable)
+                        ContextCompat.getDrawable(getContext(), R.drawable.ic_pause_play_white_animated_48dp), false);
+                drawable.addTransition(R.id.play_state, R.id.pause_state, (AnimatedVectorDrawable)
+                        ContextCompat.getDrawable(getContext(), R.drawable.ic_play_pause_white_animated_48dp), false);
+            }
             presenter.takeView(this);
         }
     }
@@ -205,7 +216,7 @@ public class NowPlayingScreenView extends RelativeLayout {
     @DebugLog
     private void linkVisualizer() {
         destroyVisualizer();
-        if (sessionId != AudioEffect.ERROR_BAD_VALUE) {
+        if (sessionId > 0) {
             if (visualizerView != null) {
                 visualizerView.link(sessionId);
             }

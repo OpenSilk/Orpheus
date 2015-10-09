@@ -18,6 +18,9 @@
 package org.opensilk.music.ui3.main;
 
 import android.content.Context;
+import android.graphics.drawable.AnimatedStateListDrawable;
+import android.graphics.drawable.AnimatedVectorDrawable;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageButton;
@@ -30,6 +33,7 @@ import com.jakewharton.rxbinding.view.ViewClickEvent;
 import com.jakewharton.rxbinding.view.ViewLongClickEvent;
 
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.common.ui.widget.ForegroundLinearLayout;
 import org.opensilk.common.ui.widget.ForegroundRelativeLayout;
@@ -67,12 +71,27 @@ public class FooterPageScreenView extends LinearLayout {
     }
 
     @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        if (!isInEditMode()) {
+            ButterKnife.inject(this);
+            if (VersionUtils.hasLollipop()) {
+                AnimatedStateListDrawable drawable = (AnimatedStateListDrawable) mPlayPause.getDrawable();
+                drawable.addTransition(R.id.pause_state, R.id.play_state, (AnimatedVectorDrawable)
+                        ContextCompat.getDrawable(getContext(), R.drawable.ic_pause_play_black_animated_36dp), false);
+                drawable.addTransition(R.id.play_state, R.id.pause_state, (AnimatedVectorDrawable)
+                        ContextCompat.getDrawable(getContext(), R.drawable.ic_play_pause_black_animated_36dp), false);
+            }
+            mPresenter.takeView(this);
+            subscribeClicks();
+        }
+    }
+
+    @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         if (!isInEditMode()) {
-            ButterKnife.inject(this);
             mPresenter.takeView(this);
-            subscribeClicks();
         }
     }
 

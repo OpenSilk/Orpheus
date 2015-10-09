@@ -147,8 +147,14 @@ public class ControlsScreenView extends RelativeLayout {
                 mPresenter.onStartTrackingTouch();
             }
         });
-        if (VersionUtils.hasApi21()) {
+        if (VersionUtils.hasLollipop()) {
             //add state transitions
+            AnimatedStateListDrawable drawable = (AnimatedStateListDrawable) play.getDrawable();
+            drawable.addTransition(R.id.pause_state, R.id.play_state, (AnimatedVectorDrawable)
+                    ContextCompat.getDrawable(getContext(), R.drawable.ic_pause_play_black_animated_36dp), false);
+            drawable.addTransition(R.id.play_state, R.id.pause_state, (AnimatedVectorDrawable)
+                    ContextCompat.getDrawable(getContext(), R.drawable.ic_play_pause_black_animated_36dp), false);
+
             AnimatedStateListDrawable repeatDrawable = (AnimatedStateListDrawable) repeat.getDrawable();
             repeatDrawable.addTransition(R.id.repeat_off_state, R.id.repeat_on_state, (AnimatedVectorDrawable)
                     ContextCompat.getDrawable(getContext(), R.drawable.ic_repeat_off_on_black_animated_36dp), true);
