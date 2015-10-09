@@ -17,6 +17,8 @@
 
 package org.opensilk.music.ui3;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -36,6 +38,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.settings.SettingsActivity;
 import org.opensilk.music.ui.theme.OrpheusTheme;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
+import org.opensilk.music.ui3.common.ActivityResultCodes;
 import org.opensilk.music.ui3.index.GalleryScreenFragment;
 import org.opensilk.music.ui3.library.LibraryScreenFragment;
 
@@ -44,6 +47,7 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import mortar.MortarScope;
+import timber.log.Timber;
 
 /**
  * Created by drew on 4/30/15.
@@ -107,6 +111,29 @@ public class LauncherActivity extends MusicActivity {
                 mSettings.putInt(AppPreferences.LAST_NAVIGATION_ITEM, ii);
                 break;
             }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Timber.v("onActivityResult");
+        switch (requestCode) {
+            case ActivityRequestCodes.APP_SETTINGS:
+                switch (resultCode) {
+                    case ActivityResultCodes.RESULT_RESTART_APP:
+                        // Hack to force a refresh for our activity for eg theme change
+                        AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+                        PendingIntent pi = PendingIntent.getActivity(this, 0,
+                                getBaseContext().getPackageManager()
+                                        .getLaunchIntentForPackage(getBaseContext().getPackageName()),
+                                PendingIntent.FLAG_CANCEL_CURRENT);
+                        am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+700, pi);
+                        finish();
+                        break;
+                }
+                break;
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
