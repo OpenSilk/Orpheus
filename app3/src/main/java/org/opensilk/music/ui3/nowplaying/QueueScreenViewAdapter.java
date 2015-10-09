@@ -17,8 +17,10 @@
 
 package org.opensilk.music.ui3.nowplaying;
 
+import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.common.ui.recycler.DragSwipeViewHolder;
 import org.opensilk.common.ui.recycler.RecyclerListAdapter;
+import org.opensilk.common.ui.util.ThemeUtils;
 import org.opensilk.common.ui.widget.LetterTileDrawable;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
@@ -70,7 +72,7 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem, Queue
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new ViewHolder(inflate(parent, R.layout.gallery_list_item_dragsort));
+        return new ViewHolder(inflate(parent, R.layout.gallery_list_item_artwork));
     }
 
     @Override
@@ -84,7 +86,7 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem, Queue
         if (uri != null) {
             ArtInfo artInfo = ArtInfo.fromUri(uri);
             if (artInfo !=ArtInfo.NULLINSTANCE) {
-                requestor.newRequest(artInfo, holder.artwork, null, null);
+                requestor.newRequest(artInfo, holder.artwork, null, BundleHelper.b().putInt(1).get());
             } else {
                 setLetterTileDrawable(holder, desc.getTitle().toString());
             }
@@ -158,7 +160,6 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem, Queue
         @InjectView(R.id.tile_title) TextView title;
         @InjectView(R.id.tile_subtitle) TextView subtitle;
         @InjectView(R.id.artwork_thumb) ImageView artwork;
-        @InjectView(R.id.drag_handle) View dragHandle;
         @InjectView(R.id.playing_indicator) PlayingIndicator playingIndicator;
         public ViewHolder(View itemView) {
             super(itemView);
@@ -172,12 +173,12 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem, Queue
 
         @Override
         public View getDragHandle() {
-            return dragHandle;
+            return artwork;
         }
 
         @Override
         public void onItemSelected() {
-            itemView.setBackgroundColor(Color.BLUE);
+            itemView.setBackgroundColor(ThemeUtils.getColorAccent(itemView.getContext()));
         }
 
         @Override

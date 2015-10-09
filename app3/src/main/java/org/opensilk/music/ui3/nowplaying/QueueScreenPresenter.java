@@ -33,6 +33,8 @@ import org.opensilk.music.playback.PlaybackStateHelper;
 import org.opensilk.music.playback.control.PlaybackController;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -61,6 +63,7 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView>
     CompositeSubscription broadcastSubscriptions;
     boolean isPlaying;
     long lastPlayingId;
+    boolean selfChange;
     ArrayList<QueueItem> queue = new ArrayList<>();
 
     @Inject
@@ -123,10 +126,12 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView>
     }
 
     void onItemMoved(int from, int to) {
+        selfChange = true;
         playbackController.moveQueueItem(from, to);
     }
 
     void onItemRemoved(int pos) {
+        selfChange = true;
         playbackController.removeQueueItemAt(pos);
     }
 
@@ -152,10 +157,25 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView>
                     @Override
                     @DebugLog
                     public void call(List<QueueItem> queueItems) {
+                        boolean needupdate = true;
+                        if (selfChange) {
+                            selfChange = false;
+                            if (hasView() && getView().getAdapter().getItemCount() == queueItems.size()) {
+                                needupdate = false;
+                                Iterator<QueueItem> i1 = getView().getAdapter().getItems().iterator();
+                                Iterator<QueueItem> i2 = queueItems.iterator();
+                                while (i1.hasNext() && i2.hasNext()) {
+                                    if (i1.next().getQueueId() != i2.next().getQueueId()) {
+                                        needupdate = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                         queue.clear();
                         queue.addAll(queueItems);
                         queue.trimToSize();
-                        if (hasView()) {
+                        if (needupdate && hasView()) {
                             getView().getAdapter().replaceAll(queue);
                             getView().getAdapter().setActiveItem(lastPlayingId);
                         }
