@@ -21,6 +21,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.audiofx.AudioEffect;
@@ -33,6 +34,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.media.MediaMetadataCompat;
@@ -45,6 +47,7 @@ import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.playback.PlaybackConstants;
 import org.opensilk.music.playback.PlaybackConstants.CMD;
+import org.opensilk.music.playback.PlaybackConstants.EVENT;
 import org.opensilk.music.playback.PlaybackStateHelper;
 import org.opensilk.music.playback.service.PlaybackService;
 
@@ -299,9 +302,36 @@ public class PlaybackController {
      * Misc
      */
 
-    public int getAudioSessionId() {
-        return AudioEffect.ERROR_BAD_VALUE;
+    private void fetchRepeatMode() {
+        mMediaController.sendCommand(CMD.REQUEST_REPEATMODE_UPDATE, null, new ResultReceiver(mCallbackHandler) {
+            @Override
+            protected void onReceiveResult(int resultCode, Bundle resultData) {
+                mRepeatModeSubject.onNext(BundleHelper.getInt(resultData));
+            }
+        });
     }
+
+    private void fetchShuffleMode() {
+        mMediaController.sendCommand(CMD.REQUEST_SHUFFLEMODE_UPDATE, null, new ResultReceiver(mCallbackHandler) {
+            @Override
+            protected void onReceiveResult(int resultCode, Bundle resultData) {
+                mShuffleModeSubject.onNext(BundleHelper.getInt(resultData));
+            }
+        });
+    }
+
+    private void fetchAudioSessionId() {
+        mMediaController.sendCommand(CMD.REQUEST_AUDIOSESSION_ID, null, new ResultReceiver(mCallbackHandler) {
+            @Override
+            protected void onReceiveResult(int resultCode, Bundle resultData) {
+                mAudioSessionIdSubject.onNext(BundleHelper.getInt(resultData));
+            }
+        });
+    }
+
+    /*
+     * End misc
+     */
 
     /*
      * Subscriptions
@@ -325,6 +355,24 @@ public class PlaybackController {
         return mQueueSubject.asObservable().subscribe(onNext);
     }
 
+    final BehaviorSubject<Integer> mAudioSessionIdSubject = BehaviorSubject.create();
+
+    public Subscription subscribeAudioSessionIdChanges(Action1<Integer> onNext) {
+        return mAudioSessionIdSubject.asObservable().subscribe(onNext);
+    }
+
+    final BehaviorSubject<Integer> mRepeatModeSubject = BehaviorSubject.create();
+
+    public Subscription subscribeRepeatModeChanges(Action1<Integer> onNext) {
+        return mRepeatModeSubject.asObservable().subscribe(onNext);
+    }
+
+    final BehaviorSubject<Integer> mShuffleModeSubject = BehaviorSubject.create();
+
+    public Subscription subscribeShuffleModeChanges(Action1<Integer> onNext) {
+        return mShuffleModeSubject.asObservable().subscribe(onNext);
+    }
+
     /*
      * end subscriptions
      */
@@ -337,8 +385,36 @@ public class PlaybackController {
 
         @Override
         @DebugLog
-        public void onSessionEvent(String event, Bundle extras) {
-            super.onSessionEvent(event, extras);
+        public void onSessionEvent(@NonNull String event, Bundle extras) {
+            switch (event) {
+                case EVENT.NEW_AUDIO_SESSION_ID:{
+                    if (VersionUtils.hasMarshmallow()) {
+                        mAudioSessionIdSubject.onNext(BundleHelper.getInt(extras));
+                    } else{
+                        //work around platform bug (extras not delivered)
+                        fetchAudioSessionId();
+                    }
+                    break;
+                }
+                case EVENT.REPEAT_CHANGED: {
+                    if (VersionUtils.hasMarshmallow()) {
+                        mRepeatModeSubject.onNext(BundleHelper.getInt(extras));
+                    } else {
+                        //work around platform bug (extras not delivered)
+                        fetchRepeatMode();
+                    }
+                    break;
+                }
+                case EVENT.QUEUE_SHUFFLED: {
+                    if (VersionUtils.hasMarshmallow()) {
+                        mShuffleModeSubject.onNext(BundleHelper.getInt(extras));
+                    } else {
+                        //work around platform bug (extras not delivered)
+                        fetchShuffleMode();
+                    }
+                    break;
+                }
+            }
         }
 
         @Override
@@ -421,31 +497,19 @@ public class PlaybackController {
             mWaitingForService = false;
             final PlaybackState state = mMediaController.getPlaybackState();
             if (state != null) {
-                mCallbackHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mCallback.onPlaybackStateChanged(state);
-                    }
-                });
+                mCallback.onPlaybackStateChanged(state);
             }
             final MediaMetadata meta = mMediaController.getMetadata();
             if (meta != null) {
-                mCallbackHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mCallback.onMetadataChanged(meta);
-                    }
-                });
+                mCallback.onMetadataChanged(meta);
             }
             final List<MediaSession.QueueItem> queue = mMediaController.getQueue();
             if (queue != null) {
-                mCallbackHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mCallback.onQueueChanged(queue);
-                    }
-                });
+                mCallback.onQueueChanged(queue);
             }
+            fetchRepeatMode();
+            fetchShuffleMode();
+            fetchAudioSessionId();
         }
 
         @Override

@@ -229,15 +229,28 @@ public interface PlaybackConstants {
         String PLAY_ALL = "cmd.playall";
         String PLAY_TRACKS_FROM = "cmd.playtracksfrom";
         String TOGGLE_PLAYBACK = "cmd.toggleplayback";
+        //reply has int extra
+        String REQUEST_REPEATMODE_UPDATE = "cmd.request.repeatmodeupdate";
+        //reply has int extra
+        String REQUEST_SHUFFLEMODE_UPDATE = "cmd.request.shufflemodeupdate";
+        //reply has int extra
+        String REQUEST_AUDIOSESSION_ID = "cmd.request.audiosessionid";
     }
 
     interface EVENT {
+        //reply has int extra
         String QUEUE_SHUFFLED = "event.queueshuffled";
+        //reply has int extra
         String REPEAT_CHANGED = "event.repeatchanged";
+        //reply has int extra
+        String NEW_AUDIO_SESSION_ID = "event.newaudiosessionid";
     }
 
     interface EXTRA {
         String DURATION = "duration";
+        String AUDIO_SESSION_ID = "audio_session_id";
+        String REPEAT_MODE = "repeat_mode";
+        String SHUFFLE_MODE = "shuffle_mode";
     }
 
     interface META {

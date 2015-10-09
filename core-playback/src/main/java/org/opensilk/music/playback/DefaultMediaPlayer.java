@@ -52,6 +52,9 @@ public class DefaultMediaPlayer implements IMediaPlayer, MediaPlayer.OnCompletio
         mMediaPlayer.setOnCompletionListener(this);
         mMediaPlayer.setOnErrorListener(this);
         mMediaPlayer.setOnSeekCompleteListener(this);
+        if (mCallback != null) {
+            mCallback.onAudioSessionId(this, mMediaPlayer.getAudioSessionId());
+        }
     }
 
     @Override

@@ -58,6 +58,7 @@ import org.opensilk.music.playback.PlaybackComponent;
 import org.opensilk.music.playback.PlaybackConstants;
 import org.opensilk.music.playback.PlaybackConstants.CMD;
 import org.opensilk.music.playback.PlaybackConstants.EVENT;
+import org.opensilk.music.playback.PlaybackConstants.EXTRA;
 import org.opensilk.music.playback.PlaybackQueue;
 import org.opensilk.music.playback.PlaybackStateHelper;
 
@@ -189,13 +190,7 @@ public class PlaybackService extends MediaBrowserService {
         mHandler.removeCallbacksAndMessages(null);
         mHandlerThread.getLooper().quitSafely();
 
-        // Remove any sound effects
-        final Intent audioEffectsIntent = new Intent(
-                AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
-        audioEffectsIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, getAudioSessionId());
-        audioEffectsIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, getPackageName());
-        sendBroadcast(audioEffectsIntent);
-
+        removeSoundEffects();
         releaseWakeLock();
     }
 
@@ -314,9 +309,7 @@ public class PlaybackService extends MediaBrowserService {
                 PlaybackStateHelper.PLAYBACK_SPEED, SystemClock.elapsedRealtime());
         if (VersionUtils.hasApi22()) {
             stateBuilder.setExtras(BundleHelper.b()
-                    .putLong(duration)
-                    .putInt(mQueue.getRepeatMode())
-                    .putInt2(mQueue.getShuffleMode()).get());
+                    .putLong(duration).get());
         } else {
             stateBuilder.setBufferedPosition(duration);
         }
@@ -438,6 +431,15 @@ public class PlaybackService extends MediaBrowserService {
         }
     }
 
+    void removeSoundEffects() {
+        // Remove any sound effects
+        final Intent audioEffectsIntent = new Intent(
+                AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
+        audioEffectsIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, mAudioSessionId);
+        audioEffectsIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, getPackageName());
+        sendBroadcast(audioEffectsIntent);
+    }
+
     public Scheduler getScheduler() {
         return mHandlerScheduler;
     }
@@ -450,8 +452,12 @@ public class PlaybackService extends MediaBrowserService {
         return mSessionHolder.getSession();
     }
 
-    public int getAudioSessionId() {
-        return mAudioSessionId;
+    private Bundle getSessionExtras() {
+        Bundle extras = getMediaSession().getController().getExtras();
+        if (extras == null) {
+            extras = new Bundle();
+        }
+        return extras;
     }
 
     @Nullable @Override
@@ -585,7 +591,34 @@ public class PlaybackService extends MediaBrowserService {
     class MediaSessionCallback extends MediaSession.Callback {
         @Override
         public void onCommand(String command, Bundle args, ResultReceiver cb) {
-            super.onCommand(command, args, cb);
+            switch (command) {
+                case CMD.REQUEST_REPEATMODE_UPDATE: {
+                    Bundle reply = BundleHelper.b().putInt(mQueue.getRepeatMode()).get();
+                    if (cb != null) {
+                        cb.send(0, reply);
+                    } else {
+                        getMediaSession().sendSessionEvent(EVENT.REPEAT_CHANGED, reply);
+                    }
+                    break;
+                }
+                case CMD.REQUEST_SHUFFLEMODE_UPDATE: {
+                    Bundle reply = BundleHelper.b().putInt(mQueue.getShuffleMode()).get();
+                    if (cb != null) {
+                        cb.send(0, reply);
+                    } else {
+                        getMediaSession().sendSessionEvent(EVENT.QUEUE_SHUFFLED, reply);
+                    }
+                    break;
+                }
+                case CMD.REQUEST_AUDIOSESSION_ID: {
+                    Bundle reply = BundleHelper.b().putInt(mAudioSessionId).get();
+                    if (cb != null) {
+                        cb.send(0, reply);
+                    } else if (mAudioSessionId != AudioEffect.ERROR_BAD_VALUE) {
+                        getMediaSession().sendSessionEvent(EVENT.NEW_AUDIO_SESSION_ID, reply);
+                    }
+                }
+            }
         }
 
         @Override
@@ -712,14 +745,14 @@ public class PlaybackService extends MediaBrowserService {
                 case CMD.CYCLE_REPEAT: {
                     mQueue.toggleRepeat();
                     getMediaSession().sendSessionEvent(EVENT.REPEAT_CHANGED,
-                            BundleHelper.builder().putInt(mQueue.getRepeatMode()).get());
+                            BundleHelper.b().putInt(mQueue.getRepeatMode()).get());
                     updatePlaybackState(null);
                     break;
                 }
                 case CMD.TOGGLE_SHUFFLE_MODE: {
                     mQueue.toggleShuffle();
                     getMediaSession().sendSessionEvent(EVENT.QUEUE_SHUFFLED,
-                            BundleHelper.builder().putInt(mQueue.getShuffleMode()).get());
+                            BundleHelper.b().putInt(mQueue.getShuffleMode()).get());
                     updatePlaybackState(null);
                     break;
                 }
@@ -966,6 +999,13 @@ public class PlaybackService extends MediaBrowserService {
         @DebugLog
         public void onError(String error) {
             updatePlaybackState(error);
+        }
+
+        @Override
+        public void onAudioSessionId(int audioSessionId) {
+            mAudioSessionId = audioSessionId;
+            getMediaSession().sendSessionEvent(EVENT.NEW_AUDIO_SESSION_ID,
+                    BundleHelper.b().putInt(audioSessionId).get());
         }
     }
 

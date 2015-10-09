@@ -52,14 +52,14 @@ public interface IMediaPlayer {
          *
          * @see android.media.MediaPlayer.OnCompletionListener
          */
-        void onCompletion(IMediaPlayer player);
+        void onCompletion(IMediaPlayer mp);
 
         /**
          * Called when media player is done preparing.
          *
          * @see android.media.MediaPlayer.OnPreparedListener
          */
-        void onPrepared(IMediaPlayer player);
+        void onPrepared(IMediaPlayer mp);
 
         /**
          * Called when there's an error playing media. When this happens, the media
@@ -69,6 +69,11 @@ public interface IMediaPlayer {
          * @see android.media.MediaPlayer.OnErrorListener
          */
         boolean onError(IMediaPlayer mp, int what, int extra);
+
+        /**
+         * Invoked when the audio session id becomes known
+         */
+        void onAudioSessionId(IMediaPlayer mp, int audioSessionId);
     }
     interface Factory {
         IMediaPlayer create(Context context);

@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
+import android.media.audiofx.AudioEffect;
 import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
@@ -70,6 +71,7 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
     private IMediaPlayer mNextMediaPlayer;
     private boolean mPlayerPrepared;
     private boolean mNextPlayerPrepared;
+    private int mNextAudioSessionId;
 
     private final IntentFilter mAudioNoisyIntentFilter =
             new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
@@ -250,7 +252,10 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
             mState = PlaybackState.STATE_BUFFERING;
             //and wait for prepared
         }
+        final int sessionId = mNextAudioSessionId;
+        mNextAudioSessionId = AudioEffect.ERROR_BAD_VALUE;
         if (mCallback != null) {
+            mCallback.onAudioSessionId(sessionId);
             mCallback.onWentToNext();
         }
     }
@@ -484,6 +489,18 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
         return true; // true indicates we handled the error
     }
 
+    @Override
+    @DebugLog
+    public void onAudioSessionId(IMediaPlayer mp, int audioSessionId) {
+        if (mp == mMediaPlayer) {
+            if (mCallback != null) {
+                mCallback.onAudioSessionId(audioSessionId);
+            }
+        } else {
+            mNextAudioSessionId = audioSessionId;
+        }
+    }
+
     /**
      * Releases resources used by the service for playback.
      */
@@ -506,6 +523,7 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
             mNextMediaPlayer.release();
             mNextMediaPlayer = null;
             mNextPlayerPrepared = false;
+            mNextAudioSessionId = AudioEffect.ERROR_BAD_VALUE;
         }
     }
 
@@ -558,6 +576,11 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
          * @param error to be added to the PlaybackState
          */
         void onError(String error);
+
+        /**
+         * Invoked when the audio session id becomes known
+         */
+        void onAudioSessionId(int audioSessionId);
 
     }
 
