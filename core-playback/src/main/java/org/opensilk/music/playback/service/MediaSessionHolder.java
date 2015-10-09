@@ -54,7 +54,7 @@ public class MediaSessionHolder {
         final Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON)
                 .setComponent(mediaButtonReceiverComponent);
         final PendingIntent mediaButtonReceiverIntent = PendingIntent.getBroadcast(
-                context, 0, mediaButtonIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                context, 0, mediaButtonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         mSession.setMediaButtonReceiver(mediaButtonReceiverIntent);
     }
 
