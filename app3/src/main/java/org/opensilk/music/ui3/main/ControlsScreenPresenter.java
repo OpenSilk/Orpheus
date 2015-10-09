@@ -156,10 +156,6 @@ public class ControlsScreenPresenter extends ViewPresenter<ControlsScreenView>
                         if (hasView()) {
                             getView().setPlayChecked(PlaybackStateHelper.
                                     shouldShowPauseButton(playbackState.getState()));
-                            if (VersionUtils.hasApi22()) {
-                                getView().setRepeatLevel(BundleHelper.getInt(playbackState.getExtras()));
-                                getView().setShuffleLevel(BundleHelper.getInt2(playbackState.getExtras()));
-                            } //TODO api21 maybe track events?
                         }
                         mProgressUpdater.subscribeProgress(playbackState);
                         isPlaying = PlaybackStateHelper.isPlaying(playbackState.getState());
@@ -167,7 +163,23 @@ public class ControlsScreenPresenter extends ViewPresenter<ControlsScreenView>
                     }
                 }
         );
-        broadcastSubscription = new CompositeSubscription(s1);
+        Subscription s2 = playbackController.subscribeRepeatModeChanges(new Action1<Integer>() {
+            @Override
+            public void call(Integer integer) {
+                if (hasView()) {
+                    getView().setRepeatLevel(integer);
+                }
+            }
+        });
+        Subscription s3 = playbackController.subscribeShuffleModeChanges(new Action1<Integer>() {
+            @Override
+            public void call(Integer integer) {
+                if (hasView()) {
+                    getView().setShuffleLevel(integer);
+                }
+            }
+        });
+        broadcastSubscription = new CompositeSubscription(s1, s2, s3);
     }
 
     void unsubscribeBroadcasts() {
