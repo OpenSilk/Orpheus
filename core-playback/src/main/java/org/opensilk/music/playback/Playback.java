@@ -253,7 +253,7 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
             //and wait for prepared
         }
         final int sessionId = mNextAudioSessionId;
-        mNextAudioSessionId = AudioEffect.ERROR_BAD_VALUE;
+        mNextAudioSessionId = 0;
         if (mCallback != null) {
             mCallback.onAudioSessionId(sessionId);
             mCallback.onWentToNext();
@@ -523,7 +523,7 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
             mNextMediaPlayer.release();
             mNextMediaPlayer = null;
             mNextPlayerPrepared = false;
-            mNextAudioSessionId = AudioEffect.ERROR_BAD_VALUE;
+            mNextAudioSessionId = 0;
         }
     }
 

@@ -37,8 +37,6 @@ import org.opensilk.music.ui3.common.ActivityResultCodes;
 
 import javax.inject.Inject;
 
-import static android.media.audiofx.AudioEffect.ERROR_BAD_VALUE;
-
 /**
  * Created by andrew on 3/1/14.
  */
@@ -73,22 +71,13 @@ public class SettingsAudioFragment extends SettingsFragment implements
     @Override
     public boolean onPreferenceClick(Preference preference) {
         if (preference == mEqualizer) {
-            int sessionId = ERROR_BAD_VALUE;
-            if (sessionId == ERROR_BAD_VALUE) {
-                new AlertDialog.Builder(getActivity())
-                        .setTitle(R.string.error)
-                        .setMessage(R.string.settings_err_no_audio_id)
-                        .setNeutralButton(android.R.string.ok, null)
-                        .show();
-            } else {
-                try {
-                    final Intent effects = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
-                    effects.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, sessionId);
-                    effects.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC);
-                    mActivytResultsController.startActivityForResult(effects, 0, null);
-                } catch (final ActivityNotFoundException notFound) {
-                    Toast.makeText(getActivity(), getString(R.string.no_effects_for_you), Toast.LENGTH_LONG).show();
-                }
+            try {
+                final Intent effects = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
+                effects.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, getContext().getPackageName());
+                effects.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC);
+                mActivytResultsController.startActivityForResult(effects, 0, null);
+            } catch (final ActivityNotFoundException notFound) {
+                Toast.makeText(getActivity(), getString(R.string.no_effects_for_you), Toast.LENGTH_LONG).show();
             }
             return true;
         }

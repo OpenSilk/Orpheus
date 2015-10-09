@@ -17,9 +17,7 @@
 
 package org.opensilk.music.playback.service;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.drm.DrmStore;
 import android.graphics.Bitmap;
 import android.media.MediaMetadata;
 import android.media.Rating;
@@ -58,11 +56,9 @@ import org.opensilk.music.playback.PlaybackComponent;
 import org.opensilk.music.playback.PlaybackConstants;
 import org.opensilk.music.playback.PlaybackConstants.CMD;
 import org.opensilk.music.playback.PlaybackConstants.EVENT;
-import org.opensilk.music.playback.PlaybackConstants.EXTRA;
 import org.opensilk.music.playback.PlaybackQueue;
 import org.opensilk.music.playback.PlaybackStateHelper;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -72,8 +68,6 @@ import rx.Scheduler;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.HandlerScheduler;
-import rx.functions.Action0;
-import rx.functions.Action1;
 import timber.log.Timber;
 
 import static org.opensilk.music.playback.PlaybackConstants.CMDNAME;
@@ -191,7 +185,7 @@ public class PlaybackService extends MediaBrowserService {
         mHandler.removeCallbacksAndMessages(null);
         mHandlerThread.getLooper().quitSafely();
 
-        removeSoundEffects();
+        removeAudioEffects();
         releaseWakeLock();
     }
 
@@ -432,7 +426,17 @@ public class PlaybackService extends MediaBrowserService {
         }
     }
 
-    void removeSoundEffects() {
+    void applyAudioEffects() {
+        //apply audio effects to our new sessionId
+        final Intent audioEffectsIntent = new Intent(
+                AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION);
+        audioEffectsIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, mAudioSessionId);
+        audioEffectsIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, getPackageName());
+        audioEffectsIntent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC);
+        sendBroadcast(audioEffectsIntent);
+    }
+
+    void removeAudioEffects() {
         // Remove any sound effects
         final Intent audioEffectsIntent = new Intent(
                 AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
@@ -615,7 +619,7 @@ public class PlaybackService extends MediaBrowserService {
                     Bundle reply = BundleHelper.b().putInt(mAudioSessionId).get();
                     if (cb != null) {
                         cb.send(0, reply);
-                    } else if (mAudioSessionId != AudioEffect.ERROR_BAD_VALUE) {
+                    } else if (mAudioSessionId != 0) {
                         getMediaSession().sendSessionEvent(EVENT.NEW_AUDIO_SESSION_ID, reply);
                     }
                 }
@@ -1011,6 +1015,7 @@ public class PlaybackService extends MediaBrowserService {
         @Override
         public void onAudioSessionId(int audioSessionId) {
             mAudioSessionId = audioSessionId;
+            applyAudioEffects();
             getMediaSession().sendSessionEvent(EVENT.NEW_AUDIO_SESSION_ID,
                     BundleHelper.b().putInt(audioSessionId).get());
         }
