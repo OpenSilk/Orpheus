@@ -24,17 +24,16 @@
     android:gravity="center_vertical"
     android:layout_width="match_parent"
     android:layout_height="72dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
     android:foreground="?selectableItemBackground"
     style="@style/GalleryGridTile">
 
-    <org.opensilk.common.ui.widget.CircleImageView
+    <ImageView
         android:id="@+id/artwork_thumb"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"/>
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        tools:src="@drawable/default_artwork"/>
 
     <include layout="@layout/gallery_list_item_common"/>
 

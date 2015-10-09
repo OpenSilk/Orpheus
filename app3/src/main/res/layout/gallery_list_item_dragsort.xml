@@ -16,45 +16,38 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<LinearLayout
+<org.opensilk.common.ui.widget.ForegroundLinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/tile_content"
+    android:gravity="center_vertical"
     android:layout_width="match_parent"
     android:layout_height="72dp"
-    style="@style/GalleryListTile">
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:foreground="?selectableItemBackground"
+    style="@style/GalleryGridTile">
 
-    <org.opensilk.common.ui.widget.ForegroundLinearLayout
-        android:id="@+id/tile_content"
-        android:layout_width="match_parent"
+    <org.opensilk.common.ui.widget.CircleImageView
+        android:id="@+id/artwork_thumb"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:gravity="center_vertical"
-        android:foreground="?selectableItemBackground">
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        tools:src="@drawable/default_artwork"/>
 
-        <org.opensilk.common.ui.widget.CircleImageView
-            android:id="@+id/artwork_thumb"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginStart="16dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"/>
+    <include layout="@layout/gallery_list_item_common"/>
 
-        <include layout="@layout/gallery_list_item_common"/>
+    <ImageView
+        android:id="@+id/drag_handle"
+        android:layout_gravity="center_vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_drag_black_vector_36dp"
+        android:tint="@color/grey_600"/>
 
-        <ImageView
-            android:id="@+id/drag_handle"
-            android:layout_gravity="center_vertical"
-            android:paddingStart="16dp"
-            android:paddingLeft="16dp"
-            android:paddingEnd="16dp"
-            android:paddingRight="16dp"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:scaleType="center"
-            android:src="@drawable/ic_drag_black_vector_36dp"
-            android:tint="@color/grey_600"/>
-
-    </org.opensilk.common.ui.widget.ForegroundLinearLayout>
-
-</LinearLayout>
+</org.opensilk.common.ui.widget.ForegroundLinearLayout>
