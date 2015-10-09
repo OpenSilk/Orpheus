@@ -33,26 +33,12 @@ public class MediaButtonIntentReceiver extends WakefulBroadcastReceiver {
     public void onReceive(final Context context, final Intent intent) {
         Timber.v("Received intent: " + intent);
         final String intentAction = intent.getAction();
-        if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intentAction)) {
-            startService(context, makeCommandIntent(context, PlaybackConstants.CMDPAUSE));
-        } else if (Intent.ACTION_MEDIA_BUTTON.equals(intentAction)) {
-            if (context.getPackageName().equals(intent.getPackage())) {
-                startService(context, copyIntent(context, intent));
-                if (isOrderedBroadcast()) {
-                    abortBroadcast();
-                }
-            } else {
-                Timber.w("Ignoring media button broadcast not directed at us");
+        if (Intent.ACTION_MEDIA_BUTTON.equals(intentAction)) {
+            startService(context, copyIntent(context, intent));
+            if (isOrderedBroadcast()) {
+                abortBroadcast();
             }
         }
-    }
-
-    private static Intent makeCommandIntent(Context context, String command) {
-        final Intent i = new Intent(context, PlaybackService.class);
-        i.setAction(PlaybackConstants.SERVICECMD);
-        i.putExtra(PlaybackConstants.CMDNAME, command);
-        i.putExtra(PlaybackConstants.FROM_MEDIA_BUTTON, true);
-        return i;
     }
 
     private static Intent copyIntent(Context context, Intent o) {
