@@ -21,12 +21,14 @@ package org.opensilk.common.ui.mortar;
  * Created by drew on 5/5/15.
  */
 public class ActionBarConfig {
+    @Deprecated
     public final boolean upButtonEnabled;
     public final int titleRes;
     public final CharSequence title;
     public final int subtitleRes;
     public final CharSequence subtitle;
     public final ActionBarMenuHandler menuConfig;
+    @Deprecated
     public final boolean transparentBackground;
 
     private ActionBarConfig(
@@ -77,6 +79,7 @@ public class ActionBarConfig {
             trasparentBackground = config.transparentBackground;
         }
 
+        @Deprecated
         public Builder setUpButtonEnabled(boolean enabled) {
             setUpButtonEnabled = enabled;
             return this;
@@ -115,6 +118,7 @@ public class ActionBarConfig {
             return this;
         }
 
+        @Deprecated
         public Builder setTransparentBackground(boolean yes) {
             this.trasparentBackground = yes;
             return this;
