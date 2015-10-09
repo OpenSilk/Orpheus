@@ -23,64 +23,48 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:background="@null"
+        style="?toolbarStyle"/>
+
     <android.support.v7.widget.CardView
         android:id="@+id/now_playing_card"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar"
         app:cardPreventCornerOverlap="true"
         app:cardBackgroundColor="?nowPlayingCardBackground"
         android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp">
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="?actionBarSize">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="match_parent">
 
             <org.opensilk.common.ui.widget.SquareFrameLayout
                 android:id="@+id/now_playing_something"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:layout_alignParentTop="true">
+
+                <org.opensilk.common.ui.widget.SquareImageView
+                    android:id="@+id/now_playing_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    tools:src="@drawable/default_artwork"/>
 
             </org.opensilk.common.ui.widget.SquareFrameLayout>
-
-            <TextView
-                android:id="@+id/now_playing_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:textAppearanceLarge"
-                android:textSize="34sp"
-                android:ellipsize="marquee"
-                android:singleLine="true"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                tools:text="Title"/>
-
-            <TextView
-                android:id="@+id/now_playing_subtitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:textAppearanceMedium"
-                android:textSize="20sp"
-                android:ellipsize="marquee"
-                android:singleLine="true"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                tools:text="Subtitle"/>
-
-            <ProgressBar
-                android:id="@+id/now_playing_progress"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="-6dp"
-                android:max="1000"
-                style="?android:progressBarStyleHorizontal"/>
 
             <LinearLayout
                 android:id="@+id/now_playing_controls"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
                 android:gravity="center">
 
                 <ImageButton
@@ -106,7 +90,42 @@
 
             </LinearLayout>
 
-        </LinearLayout>
+            <ProgressBar
+                android:id="@+id/now_playing_progress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/now_playing_controls"
+                android:layout_marginBottom="-4dp"
+                android:max="1000"
+                style="?android:progressBarStyleHorizontal"/>
+
+            <TextView
+                android:id="@+id/now_playing_subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/now_playing_progress"
+                android:textAppearance="?android:textAppearanceMedium"
+                android:textSize="20sp"
+                android:ellipsize="marquee"
+                android:singleLine="true"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                tools:text="Subtitle"/>
+
+            <TextView
+                android:id="@+id/now_playing_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/now_playing_subtitle"
+                android:textAppearance="?android:textAppearanceLarge"
+                android:textSize="34sp"
+                android:ellipsize="marquee"
+                android:singleLine="true"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                tools:text="Title"/>
+
+        </RelativeLayout>
 
     </android.support.v7.widget.CardView>
 

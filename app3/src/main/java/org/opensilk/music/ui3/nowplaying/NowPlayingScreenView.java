@@ -21,36 +21,33 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.PorterDuffXfermode;
 import android.media.audiofx.AudioEffect;
 import android.support.v4.view.GravityCompat;
-import android.support.v7.graphics.Palette;
+import android.support.v4.view.ViewCompat;
+import android.support.v4.view.ViewPropertyAnimatorListener;
 import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.jakewharton.rxbinding.view.RxView;
-import com.jakewharton.rxbinding.view.ViewClickEvent;
 import com.jakewharton.rxbinding.view.ViewLongClickEvent;
 import com.pheelicks.visualizer.VisualizerView;
 import com.pheelicks.visualizer.renderer.CircleBarRenderer;
 import com.pheelicks.visualizer.renderer.CircleRenderer;
-import com.pheelicks.visualizer.renderer.LineRenderer;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.util.ThemeUtils;
 import org.opensilk.common.ui.util.ViewUtils;
-import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.common.ui.widget.ImageButtonCheckable;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.artwork.PaletteObserver;
-import org.opensilk.music.artwork.PaletteResponse;
 
 import javax.inject.Inject;
 
@@ -59,12 +56,10 @@ import butterknife.InjectView;
 import hugo.weaving.DebugLog;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
+import timber.log.Timber;
 
 import static org.opensilk.common.core.rx.RxUtils.isSubscribed;
-import static org.opensilk.music.AppPreferences.NOW_PLAYING_ARTWORK_FILL;
-import static org.opensilk.music.AppPreferences.NOW_PLAYING_ARTWORK_SCALE;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW;
-import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_ARTWORK;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_VIS_CIRCLE;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_VIS_CIRCLE_BAR;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_VIS_LINES;
@@ -83,11 +78,16 @@ public class NowPlayingScreenView extends RelativeLayout {
     @InjectView(R.id.now_playing_playpause) ImageButtonCheckable playPause;
     @InjectView(R.id.now_playing_card) CardView card;
     @InjectView(R.id.now_playing_progress) ProgressBar progress;
+    @InjectView(R.id.now_playing_previous) ImageButton previousBtn;
+    @InjectView(R.id.now_playing_next) ImageButton nextButton;
+    @InjectView(R.id.now_playing_image) ImageView artwork;
 
     final boolean lightTheme;
 
-    ImageView artwork;
     VisualizerView visualizerView;
+    String visualizerType = "none";
+    int rendererColor = Color.argb(255, 222, 92, 143);
+    int sessionId = AudioEffect.ERROR_BAD_VALUE;
 
     CompositeSubscription clicks;
 
@@ -104,31 +104,20 @@ public class NowPlayingScreenView extends RelativeLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         ButterKnife.inject(this);
-        placeholder.removeAllViews();
-        String pickedview = settings.getString(NOW_PLAYING_VIEW, NOW_PLAYING_VIEW_ARTWORK);
-        switch (pickedview) {
-            case NOW_PLAYING_VIEW_VIS_CIRCLE:
-            case NOW_PLAYING_VIEW_VIS_CIRCLE_BAR:
-            case NOW_PLAYING_VIEW_VIS_LINES:
-                visualizerView = ViewUtils.inflate(getContext(), R.layout.now_playing_visualization, placeholder, false);
-                placeholder.addView(visualizerView);
-                initVisualizer(pickedview);
-                break;
-            case NOW_PLAYING_VIEW_ARTWORK:
-            default:
-                artwork = ViewUtils.inflate(getContext(), R.layout.now_playing_artwork, placeholder, false);
-                placeholder.addView(artwork);
-                initArtwork();
-                break;
+        if (!isInEditMode()) {
+            visualizerType = settings.getString(NOW_PLAYING_VIEW, "none");
+            rendererColor = ThemeUtils.getColorAccent(getContext());
+            presenter.takeView(this);
         }
-        if (!isInEditMode()) presenter.takeView(this);
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if (!isInEditMode()) presenter.takeView(this);
-        subscribeClicks();
+        if (!isInEditMode()) {
+            presenter.takeView(this);
+            subscribeClicks();
+        }
     }
 
     @Override
@@ -143,16 +132,33 @@ public class NowPlayingScreenView extends RelativeLayout {
         playPause.setChecked(yes);
     }
 
-    void initVisualizer(String type) {
-        int accentColor = ThemeUtils.getColorAccent(getContext());
-        int paintColor = Color.argb(255, 222, 92, 143);
-        switch (type) {
+    @DebugLog
+    private void initVisualizer() {
+        View vis = placeholder.findViewById(R.id.now_playing_visualizer);
+        if (vis != null) placeholder.removeView(vis);
+        visualizerView = null;
+        switch (visualizerType) {
+            case NOW_PLAYING_VIEW_VIS_CIRCLE:
+            case NOW_PLAYING_VIEW_VIS_CIRCLE_BAR:
+            case NOW_PLAYING_VIEW_VIS_LINES: {
+                visualizerView = ViewUtils.inflate(getContext(), R.layout.now_playing_visualization, placeholder, false);
+                placeholder.addView(visualizerView);
+                placeholder.bringChildToFront(visualizerView);
+                initRenderer();
+                break;
+            }
+        }
+    }
+
+    private void initRenderer() {
+        visualizerView.clearRenderers();
+        switch (visualizerType) {
             case NOW_PLAYING_VIEW_VIS_CIRCLE: {
                 Paint paint = new Paint();
                 paint.setStrokeWidth(3f);
                 paint.setAntiAlias(true);
-                paint.setColor(paintColor);
-                CircleRenderer circleRenderer = new CircleRenderer(paint, true);
+                paint.setColor(rendererColor);
+                CircleRenderer circleRenderer = new CircleRenderer(paint, false);
                 visualizerView.addRenderer(circleRenderer);
                 break;
             } case NOW_PLAYING_VIEW_VIS_CIRCLE_BAR: {
@@ -160,15 +166,17 @@ public class NowPlayingScreenView extends RelativeLayout {
                 paint.setStrokeWidth(8f);
                 paint.setAntiAlias(true);
                 paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.LIGHTEN));
-                paint.setColor(paintColor);
-                CircleBarRenderer circleBarRenderer = new CircleBarRenderer(paint, 32, true);
+                paint.setColor(rendererColor);
+                CircleBarRenderer circleBarRenderer = new CircleBarRenderer(paint, 32, false);
                 visualizerView.addRenderer(circleBarRenderer);
                 break;
             } case NOW_PLAYING_VIEW_VIS_LINES: {
+                /*
+                int accentColor = ThemeUtils.getColorAccent(getContext());
                 Paint linePaint = new Paint();
                 linePaint.setStrokeWidth(1f);
                 linePaint.setAntiAlias(true);
-                linePaint.setColor(paintColor);
+                linePaint.setColor(rendererColor);
 
                 Paint lineFlashPaint = new Paint();
                 lineFlashPaint.setStrokeWidth(5f);
@@ -176,42 +184,88 @@ public class NowPlayingScreenView extends RelativeLayout {
                 lineFlashPaint.setColor(accentColor);
                 LineRenderer lineRenderer = new LineRenderer(linePaint, lineFlashPaint, true);
                 visualizerView.addRenderer(lineRenderer);
+                */
                 break;
             }
         }
-//        attachVisualizer(presenter.sessionId);
+    }
+
+    public void reInitRenderer(int paintColor) {
+        rendererColor = paintColor;
+        if (visualizerView != null) {
+            initRenderer();
+        }
+    }
+
+    public void relinkVisualizer(int sessionId) {
+        this.sessionId = sessionId;
+        linkVisualizer();
     }
 
     @DebugLog
-    public void attachVisualizer(int id) {
+    private void linkVisualizer() {
         destroyVisualizer();
-        if (id == AudioEffect.ERROR_BAD_VALUE) return;
-        if (visualizerView == null) return;
-        visualizerView.link(id);
-//        setVisualizerEnabled(presenter.isPlaying);
+        if (sessionId != AudioEffect.ERROR_BAD_VALUE) {
+            if (visualizerView != null) {
+                visualizerView.link(sessionId);
+            }
+        }
     }
 
     @DebugLog
     public void destroyVisualizer() {
-        if (visualizerView == null) return;
-        visualizerView.release();
-    }
-
-    @DebugLog
-    public void setVisualizerEnabled(boolean enabled) {
-        if (visualizerView == null) return;
-        if (visualizerView.isLinked()) {
-            visualizerView.setEnabled(enabled);
+        if (visualizerView != null) {
+            visualizerView.release();
         }
     }
 
-    void initArtwork() {
-//        String scaleType = settings.getString(NOW_PLAYING_ARTWORK_SCALE, NOW_PLAYING_ARTWORK_FILL);
-//        if (NOW_PLAYING_ARTWORK_FILL.equals(scaleType)) {
-            artwork.setScaleType(ImageView.ScaleType.CENTER_CROP);
-//        } else {
-//            artwork.setScaleType(ImageView.ScaleType.FIT_CENTER);
-//        }
+    public void setPlaying(boolean playing) {
+        if (playing) {
+            if (visualizerView == null) {
+                initVisualizer();
+            }
+            if (visualizerView != null) {
+                if (!visualizerView.isLinked()) {
+                    Timber.d("Relinking visualizer");
+                    linkVisualizer();
+                }
+                if (visualizerView.isLinked()) {
+                    Timber.d("Visualizer linked");
+                    //success! show the visualizer
+                    visualizerView.setEnabled(true);
+                    if (visualizerView.getVisibility() != VISIBLE) {
+                        animateIn(visualizerView);
+                    }
+                    if (artwork.getVisibility() == VISIBLE) {
+                        animateOut(artwork);
+                    }
+                } else {
+                    Timber.w("Failed linking visualizer");
+                    //link failed go back to artwork
+                    if (visualizerView.getVisibility() == VISIBLE) {
+                        animateOut(visualizerView);
+                    }
+                    if (artwork.getVisibility() != VISIBLE) {
+                        animateIn(artwork);
+                    }
+                }
+            } else if (artwork.getVisibility() != VISIBLE) {
+                //no visualizer always want art
+                animateIn(artwork);
+            }
+        } else {
+            if (visualizerView != null) {
+                //eagerly release in case paused for a while
+                destroyVisualizer();
+                if (visualizerView.getVisibility() == VISIBLE) {
+                    animateOut(visualizerView);
+                }
+            }
+            //always want artwork when paused
+            if (artwork.getVisibility() != VISIBLE) {
+                animateIn(artwork);
+            }
+        }
     }
 
     public ImageView getArtwork() {
@@ -229,9 +283,9 @@ public class NowPlayingScreenView extends RelativeLayout {
     void subscribeClicks() {
         if (isSubscribed(clicks)) return;
         clicks = new CompositeSubscription(
-                RxView.clickEvents(playPause).subscribe(new Action1<ViewClickEvent>() {
+                RxView.clicks(playPause).subscribe(new Action1<Object>() {
                     @Override
-                    public void call(ViewClickEvent viewClickEvent) {
+                    public void call(Object o) {
                         presenter.playbackController.playorPause();
                     }
                 }),
@@ -239,6 +293,18 @@ public class NowPlayingScreenView extends RelativeLayout {
                     @Override
                     public void call(ViewLongClickEvent viewLongClickEvent) {
                         presenter.drawerController.openDrawer(GravityCompat.END);
+                    }
+                }),
+                RxView.clicks(previousBtn).subscribe(new Action1<Object>() {
+                    @Override
+                    public void call(Object o) {
+                        presenter.playbackController.skipToPrevious();
+                    }
+                }),
+                RxView.clicks(nextButton).subscribe(new Action1<Object>() {
+                    @Override
+                    public void call(Object o) {
+                        presenter.playbackController.skipToNext();
                     }
                 })
         );
@@ -249,6 +315,47 @@ public class NowPlayingScreenView extends RelativeLayout {
             clicks.unsubscribe();
             clicks = null;
         }
+    }
+
+    @DebugLog
+    private void animateOut(View view) {
+        view.setAlpha(1f);
+        view.setVisibility(VISIBLE);
+        ViewCompat.animate(view)
+                .alpha(0f)
+                .setDuration(300)
+                .setListener(new ViewPropertyAnimatorListener() {
+                    @Override
+                    public void onAnimationStart(View view) {
+                    }
+
+                    @Override
+                    @DebugLog
+                    public void onAnimationEnd(View view) {
+                        if (view == artwork) {
+                            view.setVisibility(INVISIBLE); //not gone or palette wont update
+                        } else {
+                            view.setVisibility(GONE);
+                        }
+                        view.setAlpha(1f);
+                    }
+
+                    @Override
+                    public void onAnimationCancel(View view) {
+                    }
+                })
+                .start();
+    }
+
+    @DebugLog
+    private void animateIn(View view) {
+        view.setAlpha(0f);
+        view.setVisibility(VISIBLE);
+        ViewCompat.animate(view)
+                .alpha(1f)
+                .setDuration(300)
+                .setListener(null)
+                .start();
     }
 
 }

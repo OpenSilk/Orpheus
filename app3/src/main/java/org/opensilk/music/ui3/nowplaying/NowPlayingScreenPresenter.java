@@ -21,22 +21,15 @@ import android.content.Context;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.graphics.Palette;
-import android.view.View;
 
-import com.bumptech.glide.Glide;
-import com.triggertrap.seekarc.SeekArc;
-
-import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.glide.PaletteSwatchType;
 import org.opensilk.common.glide.PalettizedBitmapTarget;
-import org.opensilk.common.ui.mortar.DrawerController;
 import org.opensilk.common.ui.mortar.DrawerOwner;
 import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.ui.mortar.PausesAndResumes;
@@ -45,31 +38,23 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
-import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.playback.PlaybackStateHelper;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.common.UtilsCommon;
 import org.opensilk.music.ui3.main.ProgressUpdater;
 
-import java.util.concurrent.TimeUnit;
-
 import javax.inject.Inject;
 
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
-import mortar.Presenter;
 import mortar.ViewPresenter;
-import mortar.bundler.BundleService;
-import rx.Observable;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 import static android.support.v4.media.MediaMetadataCompat.*;
 import static org.opensilk.common.core.rx.RxUtils.isSubscribed;
-import static android.support.v4.media.session.PlaybackStateCompat.*;
 
 /**
  * Created by drew on 4/20/15.
@@ -158,12 +143,12 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
 
     @DebugLog
     void setup() {
-        getSessionId();
         if (lastArtInfo != null) {
             loadArtwork(lastArtInfo);
         }
         setCurrentTrack(lastTrack);
         setCurrentArtist(lastArtist);
+        updateVisualizer();
         subscribeBroadcasts();
     }
 
@@ -195,15 +180,20 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
                                     android.R.attr.textColorSecondary))
                     .intoCallBack(new Palette.PaletteAsyncListener() {
                         @Override
+                        @DebugLog
                         public void onGenerated(Palette palette) {
                             Palette.Swatch s1 = palette.getDarkVibrantSwatch();
                             if (hasView()) {
                                 if (s1 != null) {
                                     getView().progress.getProgressDrawable().setTint(s1.getRgb());
+                                    getView().reInitRenderer(s1.getRgb());
+                                    getView().setPlaying(isPlaying);
                                 } else {
                                     int color = ThemeUtils.getThemeAttrColor(getView().getContext(),
                                             R.attr.colorAccent);
                                     getView().progress.getProgressDrawable().setTint(color);
+                                    getView().reInitRenderer(color);
+                                    getView().setPlaying(isPlaying);
                                 }
                             }
                         }
@@ -225,8 +215,7 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
                         if (hasView()) {
                             getView().setPlayChecked(PlaybackStateHelper.
                                     shouldShowPauseButton(playbackState.getState()));
-                            getView().setVisualizerEnabled(playing);
-                            //TODO shuffle/repeat
+                            getView().setPlaying(playing);
                         }
                         mProgressUpdater.subscribeProgress(playbackState);
                         isPlaying = playing;
@@ -258,7 +247,16 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
                     }
                 }
         );
-        broadcastSubscription = new CompositeSubscription(s1, s2);
+        Subscription s3 = playbackController.subscribeAudioSessionIdChanges(
+                new Action1<Integer>() {
+                    @Override
+                    public void call(Integer integer) {
+                        sessionId = integer;
+                        updateVisualizer();
+                    }
+                }
+        );
+        broadcastSubscription = new CompositeSubscription(s1, s2, s3);
     }
 
     void unsubscribeBroadcasts() {
@@ -286,20 +284,10 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
         }
     }
 
-    void getSessionId() {
-        sessionId = playbackController.getAudioSessionId();
-        if (sessionId == AudioEffect.ERROR_BAD_VALUE) {
-            //TODO stop doing this
-            Observable.timer(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-                    .subscribe(new Action1<Long>() {
-                        @Override
-                        public void call(Long aLong) {
-                            getSessionId();
-                        }
-                    });
-        } else if (hasView()) {
-            getView().attachVisualizer(sessionId);
-            getView().setVisualizerEnabled(isPlaying);
+    void updateVisualizer() {
+        if (hasView()) {
+            getView().relinkVisualizer(sessionId);
+            getView().setPlaying(isPlaying);
         }
     }
 
