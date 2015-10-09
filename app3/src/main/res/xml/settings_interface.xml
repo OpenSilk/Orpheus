@@ -2,12 +2,6 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!--<CheckBoxPreference-->
-        <!--android:key="keep_screen_on"-->
-        <!--android:title="@string/settings_keep_screen_on"-->
-        <!--android:summary="@string/settings_keep_screen_on_summary"-->
-        <!--android:defaultValue="false"/>-->
-
     <PreferenceCategory
         android:title="@string/settings_theme_category">
 
@@ -25,12 +19,11 @@
     <PreferenceCategory
         android:title="@string/now_playing">
 
-        <ListPreference
-            android:key="now_playing_layout"
-            android:title="@string/settings_now_playing_layout"
-            android:entries="@array/now_playing_layout"
-            android:entryValues="@array/now_playing_layout_values"
-            android:defaultValue="default"/>
+        <CheckBoxPreference
+            android:key="keep_screen_on"
+            android:title="@string/settings_keep_screen_on"
+            android:summary="@string/settings_keep_screen_on_summary"
+            android:defaultValue="false"/>
 
         <ListPreference
             android:key="now_playing_view"
@@ -38,65 +31,6 @@
             android:entries="@array/now_playing_view"
             android:entryValues="@array/now_playing_view_values"
             android:defaultValue="artwork"/>
-
-        <ListPreference
-            android:key="now_playing_artwork_scale"
-            android:title="@string/settings_now_playing_artwork_scale"
-            android:entries="@array/now_playing_artwork_scale"
-            android:entryValues="@array/now_playing_artwork_scale_values"
-            android:defaultValue="fill"/>
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:title="@string/settings_fab">
-
-        <ListPreference
-            android:key="fab_click"
-            android:title="@string/settings_fab_click"
-            android:entries="@array/fab_actions"
-            android:entryValues="@array/fab_actions_values"
-            android:defaultValue="play_pause"/>
-
-        <ListPreference
-            android:key="fab_double_click"
-            android:title="@string/settings_fab_double_click"
-            android:entries="@array/fab_actions"
-            android:entryValues="@array/fab_actions_values"
-            android:defaultValue="quick_controls"/>
-
-        <ListPreference
-            android:key="fab_long_click"
-            android:title="@string/settings_fab_long_click_action"
-            android:entries="@array/fab_actions"
-            android:entryValues="@array/fab_actions_values"
-            android:defaultValue="quick_controls"/>
-
-        <ListPreference
-            android:key="fab_fling"
-            android:title="@string/settings_fab_fling_action"
-            android:entries="@array/fab_actions"
-            android:entryValues="@array/fab_actions_values"
-            android:defaultValue="open_now_playing"/>
-
-     </PreferenceCategory>
-
-    <PreferenceCategory
-        android:title="@string/settings_footer">
-
-        <ListPreference
-            android:key="footer_click"
-            android:title="@string/settings_footer_click"
-            android:entries="@array/footer_actions"
-            android:entryValues="@array/footer_actions_values"
-            android:defaultValue="open_now_playing"/>
-
-        <ListPreference
-            android:key="footer_long_click"
-            android:title="@string/settings_footer_long_click"
-            android:entries="@array/footer_actions"
-            android:entryValues="@array/footer_actions_values"
-            android:defaultValue="none"/>
 
     </PreferenceCategory>
 

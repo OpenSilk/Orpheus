@@ -32,20 +32,18 @@
         app:title="@string/settings_theme_preview"
         style="?toolbarStyle"/>
 
-    <!--<fragment-->
-        <!--android:id="@+id/footer_fragment"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="@dimen/footer_height"-->
-        <!--android:layout_alignParentBottom="true"-->
-        <!--android:name="org.opensilk.music.ui3.main.FooterScreenFragment"-->
-        <!--tools:layout="@layout/screen_footer"/>-->
+    <include
+        android:id="@+id/footer_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/footer_height"
+        android:layout_alignParentBottom="true"
+        layout="@layout/screen_footer"/>
 
     <FrameLayout
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        >
-        <!--android:layout_above="@id/footer_fragment">-->
+        android:layout_above="@id/footer_fragment">
 
         <TextView
             android:layout_width="wrap_content"
@@ -55,7 +53,5 @@
             android:text="@string/settings_theme_picker_help"/>
 
     </FrameLayout>
-
-    <include layout="@layout/floating_action_buttons"/>
 
 </RelativeLayout>
