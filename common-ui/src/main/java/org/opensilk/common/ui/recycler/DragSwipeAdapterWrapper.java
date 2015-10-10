@@ -27,7 +27,7 @@ import android.view.ViewGroup;
 /**
  * Created by drew on 9/5/15.
  */
-public class DragSwipeAdapterWrapper<VH extends RecyclerView.ViewHolder & DragSwipeViewHolder>
+public class DragSwipeAdapterWrapper<VH extends RecyclerView.ViewHolder>
         extends RecyclerView.Adapter<VH> implements SimpleItemTouchHelperCallback.Listener {
 
     public interface Listener {
@@ -84,15 +84,18 @@ public class DragSwipeAdapterWrapper<VH extends RecyclerView.ViewHolder & DragSw
     public void onBindViewHolder(final VH viewHolder, int i) {
         wrappedAdapter.onBindViewHolder(viewHolder, i);
         // Start a drag whenever the handle view it touched
-        viewHolder.getDragHandle().setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN) {
-                    itemTouchHelper.startDrag(viewHolder);
+        if (viewHolder instanceof DragSwipeViewHolder) {
+            DragSwipeViewHolder vh = (DragSwipeViewHolder) viewHolder;
+            vh.getDragHandle().setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN) {
+                        itemTouchHelper.startDrag(viewHolder);
+                    }
+                    return false;
                 }
-                return false;
-            }
-        });
+            });
+        }
     }
 
     @Override
