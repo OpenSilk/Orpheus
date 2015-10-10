@@ -60,11 +60,6 @@ public class TrackListScreenModule {
         return screen.trackList.getUri();
     }
 
-    @Provides @Named("trackcollection_sortorderpref")
-    public String provideTrackCollectionSortOrderPref() {
-        return screen.sortOrderPref;
-    }
-
     @Provides @Named("profile_heros")
     public Boolean provideWantMultiHeros() {
         return screen.trackList.getArtInfos().size() > 1;

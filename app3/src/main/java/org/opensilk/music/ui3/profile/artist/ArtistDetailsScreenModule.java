@@ -33,6 +33,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.ArtInfo;
+import org.opensilk.music.model.Model;
 import org.opensilk.music.model.TrackList;
 import org.opensilk.music.model.sort.AlbumSortOrder;
 import org.opensilk.music.ui3.common.BundleablePresenter;
@@ -69,11 +70,6 @@ public class ArtistDetailsScreenModule {
         return IndexUris.artistDetails(screen.artist);
     }
 
-    @Provides @Named("trackcollection_sortorderpref")
-    public String provideTrackCollectionSortOrderPref() {
-        return AppPreferences.ARTIST_TRACK_SORT_ORDER;
-    }
-
     @Provides @Named("profile_heros")
     public Boolean provideWantMultiHeros() {
         return false;
@@ -107,19 +103,10 @@ public class ArtistDetailsScreenModule {
             ItemClickListener itemClickListener,
             MenuHandler menuConfig
     ) {
-//        TrackCollection allTracks = TrackCollection.builder()
-//                .setName(context.getString(R.string.title_all_songs))
-//                .setTracksUri(LibraryUris.artistTracks(screen.libraryConfig.authority,
-//                        screen.libraryInfo.libraryId, screen.artist.identity))
-//                .setTrackCount(screen.artist.trackCount)
-//                .setAlbumCount(screen.artist.albumCount)
-//                .addArtInfo(ArtInfo.forArtist(screen.artist.name, null))
-//                .build();
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(true)
                 .setItemClickListener(itemClickListener)
                 .setMenuConfig(menuConfig)
-//                .addLoaderSeed(allTracks)
                 .build();
     }
 
@@ -127,12 +114,11 @@ public class ArtistDetailsScreenModule {
     public ItemClickListener provideItemClickListener() {
         return new ItemClickListener() {
             @Override
-            public void onItemClicked(BundleablePresenter presenter, Context context, Bundleable item) {
+            public void onItemClicked(BundleablePresenter presenter, Context context, Model item) {
                 if (item instanceof Album) {
                     ProfileActivity.startSelf(context, new AlbumDetailsScreen((Album)item));
                 } else if (item instanceof TrackList) {
-                    ProfileActivity.startSelf(context, new TrackListScreen((TrackList)item,
-                            provideTrackCollectionSortOrderPref()));
+                    ProfileActivity.startSelf(context, new TrackListScreen((TrackList)item));
                 }
             }
         };

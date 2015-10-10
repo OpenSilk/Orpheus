@@ -28,6 +28,7 @@ import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.model.Container;
+import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.sort.FolderTrackSortOrder;
 import org.opensilk.music.ui3.common.BundleablePresenter;
@@ -89,7 +90,7 @@ public class FoldersScreenModule {
     public ItemClickListener provideItemClickListener() {
         return new PlayAllItemClickListener() {
             @Override
-            public void onItemClicked(BundleablePresenter presenter, Context context, Bundleable item) {
+            public void onItemClicked(BundleablePresenter presenter, Context context, Model item) {
                 if (item instanceof Container) {
                     FoldersScreenFragment f = FoldersScreenFragment.ni(context, screen.libraryConfig, (Container)item);
                     presenter.getFm().replaceMainContent(f, true);

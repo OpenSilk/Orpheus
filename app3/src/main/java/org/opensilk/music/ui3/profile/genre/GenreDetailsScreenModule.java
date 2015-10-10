@@ -31,6 +31,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.ArtInfo;
+import org.opensilk.music.model.Model;
 import org.opensilk.music.model.TrackList;
 import org.opensilk.music.model.sort.AlbumSortOrder;
 import org.opensilk.music.ui3.common.BundleablePresenter;
@@ -97,19 +98,10 @@ public class GenreDetailsScreenModule {
             ItemClickListener itemClickListener,
             MenuHandler menuConfig
     ) {
-//        TrackCollection allTracks = TrackCollection.builder()
-//                .setName(context.getString(R.string.title_all_songs))
-//                .setTracksUri(LibraryUris.genreTracks(screen.libraryConfig.authority,
-//                        screen.libraryInfo.libraryId, screen.genre.identity))
-//                .setTrackCount(screen.genre.trackUris.size())
-//                .setAlbumCount(screen.genre.albumUris.size())
-//                .addArtInfos(screen.genre.artInfos)
-//                .build();
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(true)
                 .setItemClickListener(itemClickListener)
                 .setMenuConfig(menuConfig)
-//                .addLoaderSeed(allTracks)
                 .build();
     }
 
@@ -117,12 +109,11 @@ public class GenreDetailsScreenModule {
     public ItemClickListener provideItemClickListener() {
         return new ItemClickListener() {
             @Override
-            public void onItemClicked(BundleablePresenter presenter, Context context, Bundleable item) {
+            public void onItemClicked(BundleablePresenter presenter, Context context, Model item) {
                 if (item instanceof Album) {
                     ProfileActivity.startSelf(context, new AlbumDetailsScreen((Album) item));
                 } else if (item instanceof TrackList) {
-                    ProfileActivity.startSelf(context, new TrackListScreen((TrackList) item,
-                            AppPreferences.GENRE_TRACK_SORT_ORDER));
+                    ProfileActivity.startSelf(context, new TrackListScreen((TrackList) item));
                 }
             }
         };

@@ -19,6 +19,7 @@ package org.opensilk.music.ui3.profile.tracklist;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Bundle;
 import android.os.Parcel;
 
 import org.opensilk.common.core.mortar.DaggerService;
@@ -37,16 +38,14 @@ import mortar.MortarScope;
 /**
  * Created by drew on 5/12/15.
  */
-@Layout(R.layout.profile_recycler)
+@Layout(R.layout.profile_view2)
 @WithComponentFactory(TrackListScreen.Factory.class)
 public class TrackListScreen extends Screen implements ProfileScreen {
 
     final TrackList trackList;
-    final String sortOrderPref;
 
-    public TrackListScreen(TrackList trackList, String sortOrderPref) {
+    public TrackListScreen(TrackList trackList) {
         this.trackList = trackList;
-        this.sortOrderPref = sortOrderPref;
     }
 
     @Override
@@ -67,16 +66,13 @@ public class TrackListScreen extends Screen implements ProfileScreen {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeBundle(trackList.toBundle());
-        dest.writeString(sortOrderPref);
     }
 
     public static final Creator<TrackListScreen> CREATOR = new Creator<TrackListScreen>() {
         @Override
         public TrackListScreen createFromParcel(Parcel source) {
-            return new TrackListScreen(
-                    TrackList.BUNDLE_CREATOR.fromBundle(source.readBundle(TrackList.class.getClassLoader())),
-                    source.readString()
-            );
+            Bundle b = source.readBundle(TrackList.class.getClassLoader());
+            return new TrackListScreen(TrackList.BUNDLE_CREATOR.fromBundle(b));
         }
 
         @Override

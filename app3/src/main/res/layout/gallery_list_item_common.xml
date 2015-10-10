@@ -62,8 +62,9 @@
 
     <org.opensilk.music.ui.widget.PlayingIndicator
         android:id="@+id/playing_indicator"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:scaleType="centerInside"
         tools:visibility="visible"
         android:visibility="gone" />
 

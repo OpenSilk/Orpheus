@@ -19,11 +19,11 @@ package org.opensilk.music.ui3.common;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.SparseBooleanArray;
 import android.view.View;
@@ -31,18 +31,19 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.common.glide.PaletteSwatchType;
 import org.opensilk.common.ui.recycler.DragSwipeViewHolder;
 import org.opensilk.common.ui.recycler.ItemClickSupport;
 import org.opensilk.common.ui.recycler.RecyclerListAdapter;
+import org.opensilk.common.ui.recycler.SelectableItemViewHolder;
 import org.opensilk.common.ui.util.ThemeUtils;
-import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.common.ui.widget.LetterTileDrawable;
 import org.opensilk.music.R;
-import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
+import org.opensilk.music.index.model.BioSummary;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.Artist;
@@ -61,7 +62,6 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.Optional;
-import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 /**
@@ -119,7 +119,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new ViewHolder(inflate(parent, viewType));
+        return getViewHolder(inflate(parent, viewType), viewType);
     }
 
     @Override
@@ -140,18 +140,23 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
             bindTrack(viewHolder, (Track) b);
         } else if (b instanceof TrackList) {
             bindTrackCollection(viewHolder, (TrackList) b);
+        } else if (b instanceof BioSummary) {
+            bindBio(viewHolder, (BioSummary)b);
         } else {
             Timber.e("Somehow an invalid Bundleable slipped through.");
         }
-        if (inSelectionMode && selectedItems.get(position)) {
-            viewHolder.onItemSelected();
+        if (viewHolder instanceof SelectableItemViewHolder) {
+            if (inSelectionMode && selectedItems.get(position)) {
+                ((SelectableItemViewHolder) viewHolder).onItemSelected();
+            }
         }
     }
 
     void bindAlbum(ViewHolder holder, Album album) {
-        ArtInfo artInfo = UtilsCommon.makeBestfitArtInfo(album.getArtistName(), null, album.getName(), album.getArtworkUri());
-        holder.title.setText(album.getName());
-        holder.subtitle.setText(album.getArtistName());
+        ArtInfo artInfo = UtilsCommon.makeBestfitArtInfo(album.getArtistName(),
+                null, album.getName(), album.getArtworkUri());
+        holder.setTitle(album.getName());
+        holder.setSubTitle(album.getArtistName());
         if (artInfo == ArtInfo.NULLINSTANCE) {
             setLetterTileDrawable(holder, album.getName());
         } else {
@@ -161,7 +166,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
 
     void bindArtist(ViewHolder holder, Artist artist) {
         ArtInfo artInfo = ArtInfo.forArtist(artist.getName(), null);
-        holder.title.setText(artist.getName());
+        holder.setTitle(artist.getName());
         Context context = holder.itemView.getContext();
         String subtitle = "";
         if (artist.getAlbumCount() > 0) {
@@ -171,7 +176,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
             if (!TextUtils.isEmpty(subtitle)) subtitle += ", ";
             subtitle += UtilsCommon.makeLabel(context, R.plurals.Nsongs, artist.getTrackCount());
         }
-        holder.subtitle.setText(subtitle);
+        holder.setSubTitle(subtitle);
         if (artInfo == ArtInfo.NULLINSTANCE) {
             setLetterTileDrawable(holder, artist.getName());
         } else {
@@ -180,39 +185,38 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
     }
 
     void bindFolder(ViewHolder holder, Folder folder) {
-        holder.title.setText(folder.getName());
+        holder.setTitle(folder.getName());
         Context context = holder.itemView.getContext();
         if (folder.getChildCount() > 0) {
-            holder.subtitle.setText(UtilsCommon.makeLabel(context, R.plurals.Nitems, folder.getChildCount()));
+            holder.setSubTitle(UtilsCommon.makeLabel(context, R.plurals.Nitems, folder.getChildCount()));
         } else {
-            holder.subtitle.setText(" ");
+            holder.setSubTitle(" ");
         }
-        if (holder.extraInfo != null) {
-            holder.extraInfo.setText(folder.getDateModified());
-            holder.extraInfo.setVisibility(View.VISIBLE);
+        if (holder instanceof HasExtraInfo) {
+            ((HasExtraInfo) holder).setExtraInfo(folder.getDateModified());
         }
         setLetterTileDrawable(holder, folder.getName());
     }
 
     void bindGenre(ViewHolder holder, Genre genre) {
-        holder.title.setText(genre.getName());
+        holder.setTitle(genre.getName());
         Context context = holder.itemView.getContext();
         String l2 = UtilsCommon.makeLabel(context, R.plurals.Nalbums, genre.getAlbumsCount())
                 + ", " + UtilsCommon.makeLabel(context, R.plurals.Nsongs, genre.getTracksCount());
-        holder.subtitle.setText(l2);
+        holder.setSubTitle(l2);
         if (gridStyle && genre.getArtInfos().size() > 0) {
-            loadMultiArtwork(holder, genre.getArtInfos());
+            loadMultiArtwork((GridArtworkVH) holder, genre.getArtInfos());
         } else {
             setLetterTileDrawable(holder, genre.getName());
         }
     }
 
     void bindPlaylist(ViewHolder holder, Playlist playlist) {
-        holder.title.setText(playlist.getName());
+        holder.setTitle(playlist.getName());
         Context context = holder.itemView.getContext();
-        holder.subtitle.setText(UtilsCommon.makeLabel(context, R.plurals.Nsongs, playlist.getTracksCount()));
+        holder.setSubTitle(UtilsCommon.makeLabel(context, R.plurals.Nsongs, playlist.getTracksCount()));
         if (gridStyle && (playlist.getArtInfos().size() > 0)) {
-            loadMultiArtwork(holder, playlist.getArtInfos());
+            loadMultiArtwork((GridArtworkVH) holder, playlist.getArtInfos());
         } else {
             setLetterTileDrawable(holder, playlist.getName());
         }
@@ -221,12 +225,11 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
     void bindTrack(ViewHolder holder, Track track) {
         ArtInfo artInfo = UtilsCommon.makeBestfitArtInfo(track.getAlbumArtistName(), track.getArtistName(),
                 track.getAlbumName(), track.getArtworkUri());
-        holder.title.setText(track.getName());
-        holder.subtitle.setText(track.getArtistName());
-        if (holder.extraInfo != null && track.getResources().get(0).getDurationS() > 0) {
-            holder.extraInfo.setText(UtilsCommon.makeTimeString(holder.itemView.getContext(),
+        holder.setTitle(track.getName());
+        holder.setSubTitle(track.getArtistName());
+        if ((holder instanceof HasExtraInfo) && track.getResources().get(0).getDurationS() > 0) {
+            ((HasExtraInfo) holder).setExtraInfo(UtilsCommon.makeTimeString(holder.itemView.getContext(),
                     track.getResources().get(0).getDurationS()));
-            holder.extraInfo.setVisibility(View.VISIBLE);
         }
         if (artInfo == ArtInfo.NULLINSTANCE) {
             setLetterTileDrawable(holder, track.getName());
@@ -236,16 +239,26 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
     }
 
     void bindTrackCollection(ViewHolder holder, TrackList collection) {
-        holder.title.setText(collection.getName());
+        holder.setTitle(collection.getName());
         Context context = holder.itemView.getContext();
-        String l2 = UtilsCommon.makeLabel(context, R.plurals.Nalbums, collection.getAlbumsCount())
-                + ", " + UtilsCommon.makeLabel(context, R.plurals.Nsongs, collection.getTracksCount());
-        holder.subtitle.setText(l2);
+        String subtitle = "";
+        if (collection.getAlbumsCount() > 0) {
+            subtitle += UtilsCommon.makeLabel(context, R.plurals.Nalbums,  collection.getAlbumsCount());
+        }
+        if (collection.getTracksCount() > 0) {
+            if (!TextUtils.isEmpty(subtitle)) subtitle += ", ";
+            subtitle += UtilsCommon.makeLabel(context, R.plurals.Nsongs, collection.getTracksCount());
+        }
+        holder.setSubTitle(subtitle);
         if (gridStyle && collection.getArtInfos().size() > 0) {
-            loadMultiArtwork(holder, collection.getArtInfos());
+            loadMultiArtwork((GridArtworkVH) holder, collection.getArtInfos());
         } else {
             setLetterTileDrawable(holder, collection.getName());
         }
+    }
+
+    void bindBio(ViewHolder holder, BioSummary bio) {
+        ((BioVH)holder).bind(bio);
     }
 
     @Override
@@ -258,19 +271,6 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         return getItem(position).hashCode();
     }
 
-    @Override
-    public int getItemViewType(int position) {
-        if (dragableList) {
-            return R.layout.gallery_list_item_dragsort;
-        } else if (!gridStyle) {
-            return R.layout.gallery_list_item_artwork;
-        } else if (wantsMultiArtwork(position)) {
-            return R.layout.gallery_grid_item_artwork4;
-        } else {
-            return R.layout.gallery_grid_item_artwork;
-        }
-    }
-
     public void setGridStyle(boolean gridStyle) {
         this.gridStyle = gridStyle;
     }
@@ -279,8 +279,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         this.dragableList = dragable;
     }
 
-    protected boolean wantsMultiArtwork(int position) {
-        Bundleable item = getItem(position);
+    protected boolean wantsMultiArtwork(Bundleable item) {
         if (item instanceof Genre) {
             return ((Genre) item).getArtInfos().size() > 1;
         } else if (item instanceof Playlist) {
@@ -293,23 +292,35 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
     }
 
     void setLetterTileDrawable(ViewHolder holder, String text) {
-        Resources resources = holder.itemView.getResources();
-        LetterTileDrawable drawable = LetterTileDrawable.fromText(resources, text);
-        drawable.setIsCircular(!gridStyle);
-        holder.artwork.setImageDrawable(drawable);
+        if (holder instanceof HasArtwork) {
+            ImageView artwork = ((HasArtwork) holder).getArtwork();
+            Resources resources = artwork.getResources();
+            LetterTileDrawable drawable = LetterTileDrawable.fromText(resources, text);
+            drawable.setIsCircular(!gridStyle);
+            artwork.setImageDrawable(drawable);
+        }
     }
 
     void loadArtwork(ArtInfo artInfo, ViewHolder holder) {
-        Bundle extras = BundleHelper.b()
-                .putString(String.valueOf(lightTheme ?
-                        PaletteSwatchType.VIBRANT_LIGHT : PaletteSwatchType.VIBRANT_DARK))
-                .putString2(PaletteSwatchType.VIBRANT.toString())
-                .putInt(holder.descriptionContainer == null ? 1 : 0) //crop circles for lists
-                .get();
-        presenter.getRequestor().newRequest(artInfo, holder.artwork, holder.descriptionContainer, extras);
+        if (holder instanceof HasArtwork) {
+            boolean isgridartwork = holder instanceof GridArtworkVH;
+            Bundle extras = BundleHelper.b()
+                    .putString(String.valueOf(lightTheme ?
+                            PaletteSwatchType.VIBRANT_LIGHT : PaletteSwatchType.VIBRANT_DARK))
+                    .putString2(PaletteSwatchType.VIBRANT.toString())
+                    .putInt(isgridartwork ? 0 : 1) //crop circles for lists
+                    .get();
+            ImageView artwork = ((HasArtwork) holder).getArtwork();
+            if (isgridartwork) {
+                presenter.getRequestor().newRequest(artInfo, artwork,
+                        ((GridArtworkVH)holder).descriptionContainer, extras);
+            } else {
+                presenter.getRequestor().newRequest(artInfo, artwork, extras);
+            }
+        }
     }
 
-    void loadMultiArtwork(ViewHolder holder, List<ArtInfo> artInfos) {
+    void loadMultiArtwork(GridArtworkVH holder, List<ArtInfo> artInfos) {
         ArtworkRequestManager requestor = presenter.getRequestor();
         ImageView artwork = holder.artwork;
         ImageView artwork2 = holder.artwork2;
@@ -320,34 +331,37 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
 
     @Override
     public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-        if (inSelectionMode) {
-            boolean selected = selectedItems.get(position);
-            if (selected) {
-                selectedItems.put(position, false);
-                notifyItemChanged(position);
-                presenter.onItemUnselected();
+        ViewHolder holder = (ViewHolder) recyclerView.getChildViewHolder(v);
+        if (holder instanceof SelectableItemViewHolder) {
+            if (inSelectionMode) {
+                boolean selected = selectedItems.get(position);
+                if (selected) {
+                    selectedItems.put(position, false);
+                    notifyItemChanged(position);
+                    presenter.onItemUnselected();
+                } else {
+                    selectedItems.put(position, true);
+                    notifyItemChanged(position);
+                    presenter.onItemSelected();
+                }
             } else {
-                selectedItems.put(position, true);
-                notifyItemChanged(position);
-                presenter.onItemSelected();
+                presenter.onItemClicked(holder, getItem(position));
             }
-        } else {
-            ViewHolder holder = (ViewHolder) recyclerView.getChildViewHolder(v);
-            presenter.onItemClicked(holder, getItem(position));
         }
     }
 
     @Override
     public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
-        if (inSelectionMode) {
-            return false;
-        } else {
-            selectedItems.put(position, true);
-            inSelectionMode = true;
-            notifyItemChanged(position);
-            presenter.onStartSelectionMode(selectionEndedListener);
-            return true;
+        ViewHolder holder = (ViewHolder) recyclerView.getChildViewHolder(v);
+        if (holder instanceof SelectableItemViewHolder) {
+            if (!inSelectionMode) {
+                selectedItems.put(position, true);
+                inSelectionMode = true;
+                notifyItemChanged(position);
+                presenter.onStartSelectionMode(selectionEndedListener);
+            }
         }
+        return true;
     }
 
     public List<Bundleable> getSelectedItems() {
@@ -360,72 +374,212 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         return lst;
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder implements DragSwipeViewHolder {
-        @InjectView(R.id.artwork_thumb) public ImageView artwork;
+    @Override
+    public int getItemViewType(int position) {
+        Bundleable item = getItem(position);
+        if (gridStyle) {
+            if (item instanceof BioSummary) {
+                return R.layout.gallery_list_item_bio_summary;
+            } else if (wantsMultiArtwork(item)) {
+                return R.layout.gallery_grid_item_artwork4;
+            } else {
+                return R.layout.gallery_grid_item_artwork;
+            }
+        } else {
+            if (item instanceof BioSummary) {
+                return R.layout.gallery_list_item_bio_summary;
+            } else if (dragableList) {
+                return R.layout.gallery_list_item_dragsort;
+            } else {
+                return R.layout.gallery_list_item_artwork;
+            }
+        }
+    }
+
+    private ViewHolder getViewHolder(View itemView, int id) {
+        switch (id) {
+            case R.layout.gallery_grid_item_artwork:
+            case R.layout.gallery_grid_item_artwork4:
+                return new GridArtworkVH(itemView);
+            case R.layout.gallery_list_item_artwork:
+                return new ListArtworkVH(itemView);
+            case R.layout.gallery_list_item_dragsort:
+                return new ListArtworkDragVH(itemView);
+            case R.layout.gallery_list_item_bio_summary:
+                return new BioVH(itemView);
+            default:
+                throw new IllegalArgumentException("Unknown layout id");
+        }
+    }
+
+    public static class BioVH extends ViewHolder {
+        @InjectView(R.id.summary_text) TextView summary;
+        @InjectView(R.id.btn_show_more) View showmore;
+        public BioVH(View itemView) {
+            super(itemView);
+            ButterKnife.inject(this, itemView);
+        }
+
+        public void bind(BioSummary bio) {
+            summary.setText(Html.fromHtml(bio.getSummary()));
+            showmore.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //TODO
+                }
+            });
+        }
+
+        @Override
+        public void reset() {
+            super.reset();
+            showmore.setOnClickListener(null);
+        }
+    }
+
+    public static class GridArtworkVH extends ViewHolder implements HasArtwork, SelectableItemViewHolder {
+        @InjectView(R.id.artwork_thumb) ImageView artwork;
         @InjectView(R.id.artwork_thumb2) @Optional public ImageView artwork2;
         @InjectView(R.id.artwork_thumb3) @Optional public ImageView artwork3;
         @InjectView(R.id.artwork_thumb4) @Optional public ImageView artwork4;
-        @InjectView(R.id.grid_description) @Optional GridTileDescription descriptionContainer;
+        @InjectView(R.id.grid_description) GridTileDescription descriptionContainer;
         @InjectView(R.id.tile_title) TextView title;
         @InjectView(R.id.tile_subtitle) TextView subtitle;
-        @InjectView(R.id.tile_info) @Optional TextView extraInfo;
-        @InjectView(R.id.drag_handle) @Optional View dragHandle;
         private int descColor;
 
-        public ViewHolder(View itemView) {
+        public GridArtworkVH(View itemView) {
             super(itemView);
             ButterKnife.inject(this, itemView);
-            if (descriptionContainer != null) {
-                Drawable descBackground = descriptionContainer.getBackground();
-                if (descBackground instanceof ColorDrawable) {
-                    descColor = ((ColorDrawable) descBackground).getColor();
-                } else {
-                    descColor = ThemeUtils.getThemeAttrColor(itemView.getContext(),
-                            android.R.attr.colorBackground);
-                }
+            Drawable descBackground = descriptionContainer.getBackground();
+            if (descBackground instanceof ColorDrawable) {
+                descColor = ((ColorDrawable) descBackground).getColor();
+            } else {
+                descColor = ThemeUtils.getThemeAttrColor(itemView.getContext(),
+                        android.R.attr.colorBackground);
             }
         }
 
         public void reset() {
-            Timber.v("Resetting %s", title.getText());
+            super.reset();
             if (artwork != null) artwork.setImageBitmap(null);
             if (artwork2 != null) artwork2.setImageBitmap(null);
             if (artwork3 != null) artwork3.setImageBitmap(null);
             if (artwork4 != null) artwork4.setImageBitmap(null);
             if (descriptionContainer != null) descriptionContainer.setBackgroundColor(descColor);
-            if (extraInfo != null && extraInfo.getVisibility() != View.GONE) extraInfo.setVisibility(View.GONE);
-            itemView.setBackground(null);
-            itemView.setSelected(false);
         }
-
 
         @Override
         public void onItemSelected() {
-            itemView.setElevation(23);
-//            itemView.setSelected(true);
             int selectedColor = ThemeUtils.getColorAccent(itemView.getContext());
-            if (descriptionContainer != null) {
-                descriptionContainer.setBackgroundColor(selectedColor);
-            } else {
-                itemView.setBackgroundColor(selectedColor);
-            }
+            descriptionContainer.setBackgroundColor(selectedColor);
         }
 
         @Override
         public void onItemClear() {
-            itemView.setElevation(0);
-//            itemView.setSelected(false);
-            if (descriptionContainer != null) {
-                descriptionContainer.setBackgroundColor(descColor);
-            } else {
-                itemView.setBackground(null);
+            descriptionContainer.setBackgroundColor(descColor);
+        }
+
+        @Override
+        public ImageView getArtwork() {
+            return artwork;
+        }
+
+        @Override
+        public void setTitle(CharSequence text) {
+            title.setText(text);
+        }
+
+        @Override
+        public void setSubTitle(CharSequence tetx) {
+            subtitle.setText(tetx);
+        }
+    }
+
+    public static class ListArtworkVH extends ViewHolder implements HasArtwork, HasExtraInfo, SelectableItemViewHolder {
+        @InjectView(R.id.artwork_thumb) ImageView artwork;
+        @InjectView(R.id.tile_title) TextView title;
+        @InjectView(R.id.tile_subtitle) TextView subtitle;
+        @InjectView(R.id.tile_info) @Optional TextView extraInfo;
+
+        public ListArtworkVH(View itemView) {
+            super(itemView);
+            ButterKnife.inject(this, itemView);
+        }
+
+        @Override
+        public void reset() {
+            super.reset();
+            if (extraInfo != null && extraInfo.getVisibility() != View.GONE) extraInfo.setVisibility(View.GONE);
+            itemView.setBackground(null);
+        }
+
+        @Override
+        public void onItemSelected() {
+            int selectedColor = ThemeUtils.getColorAccent(itemView.getContext());
+            itemView.setBackgroundColor(selectedColor);
+        }
+
+        @Override
+        public void onItemClear() {
+            itemView.setBackground(null);
+        }
+
+        @Override
+        public ImageView getArtwork() {
+            return artwork;
+        }
+
+        @Override
+        public void setTitle(CharSequence text) {
+            title.setText(text);
+        }
+
+        @Override
+        public void setSubTitle(CharSequence tetx) {
+            subtitle.setText(tetx);
+        }
+
+        @Override
+        public void setExtraInfo(CharSequence text) {
+            if (extraInfo != null && !StringUtils.isEmpty(text)) {
+                extraInfo.setText(text);
+                extraInfo.setVisibility(View.VISIBLE);
             }
+        }
+    }
+
+    public static class ListArtworkDragVH extends ListArtworkVH implements DragSwipeViewHolder {
+        @InjectView(R.id.drag_handle) View dragHandle;
+
+        public ListArtworkDragVH(View itemView) {
+            super(itemView);
+            ButterKnife.inject(this, itemView);
         }
 
         @Override
         public View getDragHandle() {
             return dragHandle;
         }
+
+    }
+
+    public static abstract class ViewHolder extends RecyclerView.ViewHolder  {
+        public ViewHolder(View itemView) {
+            super(itemView);
+        }
+        public void reset() {
+            itemView.setSelected(false);
+        }
+        public void setTitle(CharSequence text) { }
+        public void setSubTitle(CharSequence tetx) { }
+    }
+
+    interface HasArtwork {
+        ImageView getArtwork();
+    }
+
+    interface HasExtraInfo {
+        void setExtraInfo(CharSequence text);
     }
 
 }

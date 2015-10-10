@@ -30,6 +30,7 @@ import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.model.Model;
 import org.opensilk.music.model.sort.PlaylistSortOrder;
 import org.opensilk.bundleable.Bundleable;
 import org.opensilk.music.ui3.common.BundleableComponent;
@@ -83,7 +84,7 @@ public class PlaylistsScreenModule {
     public ItemClickListener provideItemClickListener() {
         return new ItemClickListener() {
             @Override
-            public void onItemClicked(BundleablePresenter presenter, Context context, Bundleable item) {
+            public void onItemClicked(BundleablePresenter presenter, Context context, Model item) {
 //                TracksDragSwipeActivity.startSelf(context, new PlaylistsProfileScreen(screen.libraryConfig, (Playlist) item));
             }
         };

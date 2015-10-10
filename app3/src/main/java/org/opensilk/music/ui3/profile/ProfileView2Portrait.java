@@ -30,11 +30,13 @@ import android.view.View;
 import com.jakewharton.rxbinding.view.RxView;
 import com.jakewharton.rxbinding.view.ViewClickEvent;
 
+import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.ToolbarOwner;
 import org.opensilk.common.ui.util.ViewUtils;
 import org.opensilk.music.R;
+import org.opensilk.music.index.model.BioSummary;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleableRecyclerAdapter;
 import org.opensilk.music.ui3.common.BundleableRecyclerView2;
@@ -134,8 +136,16 @@ public class ProfileView2Portrait extends CoordinatorLayout implements Bundleabl
     }
 
     protected RecyclerView.LayoutManager makeGridLayoutManager() {
-        int numCols = getContext().getResources().getInteger(R.integer.grid_columns);
-        return new GridLayoutManager(getContext(), numCols, GridLayoutManager.VERTICAL, false);
+        final int numCols = getContext().getResources().getInteger(R.integer.grid_columns);
+        GridLayoutManager m = new GridLayoutManager(getContext(), numCols, GridLayoutManager.VERTICAL, false);
+        m.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                Bundleable item = mAdapter.getItem(position);
+                return (item instanceof BioSummary) ? numCols : 1;
+            }
+        });
+        return m;
     }
 
     protected RecyclerView.LayoutManager makeListLayoutManager() {
