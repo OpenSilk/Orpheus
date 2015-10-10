@@ -30,6 +30,7 @@ import android.util.Pair;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
+import org.opensilk.music.index.model.BioSummary;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.index.provider.LastFMHelper;
 import org.opensilk.music.model.Album;
@@ -37,7 +38,9 @@ import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.Metadata;
+import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Track;
+import org.opensilk.music.model.TrackList;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -137,6 +140,20 @@ public class IndexDatabaseImpl implements IndexDatabase {
             IndexSchema.Info.Artist.NUMBER_OF_TRACKS,
     };
 
+    Artist buildArtist(Cursor c, Uri parentUri) {
+        final String id = c.getString(0);
+        final String name = c.getString(1);
+        final int num_albums = c.getInt(2);
+        final int num_tracks = c.getInt(3);
+        return Artist.builder()
+                .setUri(IndexUris.artist(indexAuthority, id))
+                .setParentUri(parentUri)
+                .setName(name)
+                .setAlbumCount(num_albums)
+                .setTrackCount(num_tracks)
+                .build();
+    }
+
     @Override
     public List<Artist> getArtists(String sortOrder) {
         List<Artist> lst = new ArrayList<>();
@@ -155,18 +172,108 @@ public class IndexDatabaseImpl implements IndexDatabase {
         return lst;
     }
 
-    Artist buildArtist(Cursor c, Uri parentUri) {
-        final String id = c.getString(0);
-        final String name = c.getString(1);
-        final int num_albums = c.getInt(2);
-        final int num_tracks = c.getInt(3);
-        return Artist.builder()
-                .setUri(IndexUris.artist(indexAuthority, id))
-                .setParentUri(parentUri)
-                .setName(name)
-                .setAlbumCount(num_albums)
-                .setTrackCount(num_tracks)
-                .build();
+    static final String artist_albums_sel = IndexSchema.Info.Album.ARTIST_ID + "=?";
+
+    @Override
+    public List<Album> getArtistAlbums(String id, String sortOrder) {
+        List<Album> lst = new ArrayList<>();
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.Info.Album.TABLE, albums_cols,
+                    artist_albums_sel, new String[]{id}, null, null, sortOrder);
+            if (c != null && c.moveToFirst()) {
+                final Uri parentUri = IndexUris.artistAlbums(indexAuthority, id);
+                do {
+                    lst.add(buildAlbum(c, parentUri));
+                } while (c.moveToNext());
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return lst;
+    }
+
+    static final String[] artist_details_cols = new String[] {
+            IndexSchema.Info.Artist._ID,
+            IndexSchema.Info.Artist.TITLE,
+            IndexSchema.Info.Artist.MBID,
+            IndexSchema.Info.Artist.SUMMARY,
+            IndexSchema.Info.Artist.NUMBER_OF_TRACKS,
+    };
+    static final String artist_details_sel = IndexSchema.Info.Artist._ID + "=?";
+    static final String album_map_id_sel = IndexSchema.Misc.AlbumMap._ID + "=?";
+
+    public List<Model> getArtistDetails(String id, String sortOrder) {
+        List<Model> lst = new ArrayList<>();
+        Cursor c = null;
+        Cursor c2 = null;
+        try {
+            c = query(IndexSchema.Info.Artist.TABLE, artist_details_cols,
+                    artist_details_sel, new String[]{id}, null, null, null);
+            c2 = query(IndexSchema.Misc.ArtistAlbumMap.TABLE, album_map_cols,
+                    album_map_id_sel, new String[]{id}, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                final String title = getStringOrNull(c, 1);
+                final String mbid = getStringOrNull(c, 2);
+                final String summary = getStringOrNull(c, 3);
+                if (!StringUtils.isEmpty(mbid) && !StringUtils.isEmpty(summary)) {
+                    BioSummary bioSummary = BioSummary.builder()
+                            .setKind(BioSummary.Kind.ARTIST)
+                            .setUri(IndexUris.bioSummary(indexAuthority, id))
+                            .setParentUri(IndexUris.artistDetails(indexAuthority, id))
+                            .setMbid(mbid)
+                            .setName(title)
+                            .setSummary(summary)
+                            .build();
+                    lst.add(bioSummary);
+                }
+                final int songCount = getIntOrNeg(c, 4);
+                if (songCount > 0) {
+                    TrackList.Builder tlb = TrackList.builder()
+                            .setUri(IndexUris.artistTracks(indexAuthority, id))
+                            .setParentUri(IndexUris.artistDetails(indexAuthority, id))
+                            .setName(title)
+                            .setTrackCount(songCount)
+                            .setTracksUri(IndexUris.artistTracks(indexAuthority, id));
+                    if (c2 != null && c2.moveToFirst()) {
+                        do {
+                            final String album = getStringOrNull(c2, 1);
+                            final String albumArtist = getStringOrNull(c2, 2);
+                            if (album != null && albumArtist != null) {
+                                tlb.addArtInfo(ArtInfo.forAlbum(albumArtist, album, null));
+                            }
+                        } while (c2.moveToNext());
+                    }
+                    lst.add(tlb.build());
+                }
+            }
+        } finally {
+            closeCursor(c);
+            closeCursor(c2);
+        }
+        //add the albums after
+        lst.addAll(getArtistAlbums(id, sortOrder));
+        return lst;
+    }
+
+    static final String artist_tracks_sel = IndexSchema.Info.Track.ARTIST_ID + "=?";
+
+    @Override
+    public List<Track> getArtistTracks(String id, String sortOrder) {
+        List<Track> lst = new ArrayList<>();
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.Info.Track.TABLE, tracks_cols,
+                    artist_tracks_sel, new String[]{id}, null, null, sortOrder);
+            if (c != null && c.moveToFirst()) {
+                do {
+                    lst.add(buildTrack(c));
+                } while (c.moveToNext());
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return lst;
     }
 
     static final String[] albums_cols = new String[] {
@@ -176,6 +283,22 @@ public class IndexDatabaseImpl implements IndexDatabase {
             IndexSchema.Info.Album.ARTIST_ID,
             IndexSchema.Info.Album.TRACK_COUNT
     };
+
+    Album buildAlbum(Cursor c, Uri parentUri) {
+        final String id = c.getString(0);
+        final String name = c.getString(1);
+        final String artistName = c.getString(2);
+        final String artistId = c.getString(3);
+        final int trackNum = c.getInt(4);
+        return Album.builder()
+                .setUri(IndexUris.album(indexAuthority, id))
+                .setParentUri(parentUri)
+                .setName(name)
+                .setArtistName(artistName)
+                .setArtistUri(IndexUris.artist(indexAuthority, artistId))
+                .setTrackCount(trackNum)
+                .build();
+    }
 
     @Override
     public List<Album> getAlbums(String sortOrder) {
@@ -215,20 +338,43 @@ public class IndexDatabaseImpl implements IndexDatabase {
         return lst;
     }
 
-    Album buildAlbum(Cursor c, Uri parentUri) {
-        final String id = c.getString(0);
-        final String name = c.getString(1);
-        final String artistName = c.getString(2);
-        final String artistId = c.getString(3);
-        final int trackNum = c.getInt(4);
-        return Album.builder()
-                .setUri(IndexUris.album(indexAuthority, id))
-                .setParentUri(parentUri)
-                .setName(name)
-                .setArtistName(artistName)
-                .setArtistUri(IndexUris.artist(indexAuthority, artistId))
-                .setTrackCount(trackNum)
-                .build();
+    static final String[] album_details_cols = new String[] {
+            IndexSchema.Info.Album._ID,
+            IndexSchema.Info.Album.TITLE,
+            IndexSchema.Info.Album.MBID,
+            IndexSchema.Info.Album.SUMMARY,
+    };
+    static final String album_detals_sel = IndexSchema.Info.Album._ID + "=?";
+
+    @Override
+    public List<Model> getAlbumDetails(String id, String sortOrder) {
+        List<Model> lst = new ArrayList<>();
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.Info.Album.TABLE, album_details_cols,
+                    album_detals_sel, new String[]{id}, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                final String title = getStringOrNull(c, 1);
+                final String mbid = getStringOrNull(c, 2);
+                final String summary = getStringOrNull(c, 3);
+                if (!StringUtils.isEmpty(mbid) && !StringUtils.isEmpty(summary)) {
+                    BioSummary bioSummary = BioSummary.builder()
+                            .setKind(BioSummary.Kind.ALBUM)
+                            .setUri(IndexUris.bioSummary(indexAuthority, id))
+                            .setParentUri(IndexUris.albumDetails(indexAuthority, id))
+                            .setMbid(mbid)
+                            .setName(title)
+                            .setSummary(summary)
+                            .build();
+                    lst.add(bioSummary);
+                }
+            }
+        } finally {
+            closeCursor(c);
+        }
+        //add the tracks after
+        lst.addAll(getAlbumTracks(id, sortOrder));
+        return lst;
     }
 
     static final String[] genres_cols = new String[] {
@@ -238,33 +384,6 @@ public class IndexDatabaseImpl implements IndexDatabase {
             IndexSchema.Info.Genre.NUMBER_OF_ALBUMS,
             IndexSchema.Info.Genre.NUMBER_OF_TRACKS,
     };
-
-    static final String[] genre_album_map_cols = new String[] {
-            IndexSchema.Misc.GenreAlbumMap.GENRE_ID,
-            IndexSchema.Misc.GenreAlbumMap.ALBUM_NAME,
-            IndexSchema.Misc.GenreAlbumMap.ALBUM_ARTIST,
-    };
-
-    @Override
-    public List<Genre> getGenres(String sortOrder) {
-        List<Genre> lst = new ArrayList<>();
-        Cursor c = null;
-        Cursor c2 = null;
-        try {
-            c = query(IndexSchema.Info.Genre.TABLE, genres_cols, null, null, null, null, sortOrder);
-            c2 = query(IndexSchema.Misc.GenreAlbumMap.TABLE, genre_album_map_cols, null, null, null, null, null);
-            if (c != null && c.moveToFirst()) {
-                final Uri parentUri = IndexUris.genres(indexAuthority);
-                do {
-                    lst.add(buildGenre(c, parentUri, c2));
-                } while (c.moveToNext());
-            }
-        } finally {
-            closeCursor(c);
-            closeCursor(c2);
-        }
-        return lst;
-    }
 
     Genre buildGenre(Cursor c, Uri parentUri, Cursor c2) {
         final String id = c.getString(0);
@@ -296,6 +415,148 @@ public class IndexDatabaseImpl implements IndexDatabase {
         return bob.build();
     }
 
+    static final String[] album_map_cols = new String[] {
+            IndexSchema.Misc.AlbumMap._ID,
+            IndexSchema.Misc.AlbumMap.ALBUM_NAME,
+            IndexSchema.Misc.AlbumMap.ALBUM_ARTIST,
+    };
+
+    @Override
+    public List<Genre> getGenres(String sortOrder) {
+        List<Genre> lst = new ArrayList<>();
+        Cursor c = null;
+        Cursor c2 = null;
+        try {
+            c = query(IndexSchema.Info.Genre.TABLE, genres_cols, null, null, null, null, sortOrder);
+            c2 = query(IndexSchema.Misc.GenreAlbumMap.TABLE, album_map_cols, null, null, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                final Uri parentUri = IndexUris.genres(indexAuthority);
+                do {
+                    lst.add(buildGenre(c, parentUri, c2));
+                } while (c.moveToNext());
+            }
+        } finally {
+            closeCursor(c);
+            closeCursor(c2);
+        }
+        return lst;
+    }
+
+    static final String[] genre_details_cols = new String[] {
+            IndexSchema.Info.Genre._ID,
+            IndexSchema.Info.Genre.TITLE,
+            IndexSchema.Info.Genre.NUMBER_OF_TRACKS,
+    };
+    static final String genre_details_sel = IndexSchema.Info.Genre._ID + "=?";
+
+    @Override
+    public List<Model> getGenreDetails(String id, String sortOrder) {
+        List<Model> lst = new ArrayList<>();
+        Cursor c = null;
+        Cursor c2 = null;
+        try {
+            c = query(IndexSchema.Info.Genre.TABLE, genre_details_cols,
+                    genre_details_sel, new String[]{id}, null, null, null);
+            c2 = query(IndexSchema.Misc.GenreAlbumMap.TABLE, album_map_cols,
+                    album_map_id_sel, new String[]{id}, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                final String title = getStringOrNull(c, 1);
+                final int songCount = getIntOrNeg(c, 2);
+                if (songCount > 0) {
+                    TrackList.Builder tlb = TrackList.builder()
+                            .setUri(IndexUris.genreTracks(indexAuthority, id))
+                            .setParentUri(IndexUris.genreDetails(indexAuthority, id))
+                            .setName(title)
+                            .setTrackCount(songCount)
+                            .setTracksUri(IndexUris.genreTracks(indexAuthority, id));
+                    if (c2 != null && c2.moveToFirst()) {
+                        do {
+                            final String album = getStringOrNull(c2, 1);
+                            final String albumArtist = getStringOrNull(c2, 2);
+                            if (album != null && albumArtist != null) {
+                                tlb.addArtInfo(ArtInfo.forAlbum(albumArtist, album, null));
+                            }
+                        } while (c2.moveToNext());
+                    }
+                    lst.add(tlb.build());
+                }
+            }
+        } finally {
+            closeCursor(c);
+            closeCursor(c2);
+        }
+        //add the albums after
+        lst.addAll(getGenreAlbums(id, sortOrder));
+        return lst;
+    }
+
+    static final String[] genre_albums_map_cols = new String[] {
+            IndexSchema.Misc.AlbumMap.ALBUM_ID,
+    };
+
+    @Override
+    public List<Album> getGenreAlbums(String id, String sortOrder) {
+        List<Album> lst = new ArrayList<>();
+        List<String> albums = new ArrayList<>();
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.Misc.GenreAlbumMap.TABLE, genre_albums_map_cols,
+                    album_map_id_sel, new String[]{id}, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                do {
+                    final String aid = getStringOrNull(c, 0);
+                    if (aid != null) {
+                        albums.add(aid);
+                    }
+                } while (c.moveToNext());
+            }
+        } finally {
+            closeCursor(c);
+        }
+        if (!albums.isEmpty()) {
+            StringBuilder sel = new StringBuilder(IndexSchema.Info.Album._ID)
+                    .append(" IN (?");
+            for (int ii=1; ii<albums.size(); ii++) {
+                sel.append(",?");
+            }
+            sel.append(")");
+            Cursor c2 = null;
+            try {
+                c2 = query(IndexSchema.Info.Album.TABLE, albums_cols, sel.toString(),
+                        albums.toArray(new String[albums.size()]), null, null, sortOrder);
+                if (c2 != null && c2.moveToFirst()) {
+                    Uri parentUri = IndexUris.genreAlbums(indexAuthority, id);
+                    do {
+                        lst.add(buildAlbum(c2,parentUri));
+                    } while (c2.moveToNext());
+                }
+            } finally {
+                closeCursor(c2);
+            }
+        }
+        return lst;
+    }
+
+    static final String genre_tracks_sel = IndexSchema.Info.Track.GENRE_ID + "=?";
+
+    @Override
+    public List<Track> getGenreTracks(String id, String sortOrder) {
+        List<Track> lst = new ArrayList<>();
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.Info.Track.TABLE, tracks_cols,
+                    genre_tracks_sel, new String[]{id}, null, null, sortOrder);
+            if (c != null && c.moveToFirst()) {
+                do {
+                    lst.add(buildTrack(c));
+                } while (c.moveToNext());
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return lst;
+    }
+
     static final String[] tracks_cols = new String[] {
             IndexSchema.Info.Track._ID,
             IndexSchema.Info.Track.URI,
@@ -320,84 +581,6 @@ public class IndexDatabaseImpl implements IndexDatabase {
             IndexSchema.Info.Track.RES_DURATION, //20
             IndexSchema.Info.Track.ARTWORK_URI
     };
-
-    @Override
-    public List<Track> getTracks(String sortOrder) {
-        return getTracks(sortOrder, false);
-    }
-
-    @Override
-    public List<Track> getTracks(String sortOrder, boolean excludeOrphaned) {
-        List<Track> lst = new ArrayList<>();
-        Cursor c = null;
-        try {
-            c = query(IndexSchema.Info.Track.TABLE, tracks_cols, null, null, null, null, sortOrder);
-            if (c != null && c.moveToFirst()) {
-                do {
-                    lst.add(buildTrack(c));
-                } while (c.moveToNext());
-            }
-        } finally {
-            closeCursor(c);
-        }
-        return lst;
-    }
-
-    static final String trackUriSel = IndexSchema.Info.Track.URI + "=?";
-
-    @Override
-    public Track getTrack(Uri uri) {
-        Cursor c = null;
-        try {
-            c = query(IndexSchema.Info.Track.TABLE, tracks_cols, trackUriSel,
-                    new String[]{uri.toString()}, null, null, null);
-            if (c != null && c.moveToFirst()) {
-                return buildTrack(c);
-            }
-        } finally {
-            closeCursor(c);
-        }
-        return null;
-    }
-
-    @Override
-    public List<Track> getTracksInList(final List<Uri> uris) {
-        List<Track> lst = new ArrayList<>(uris.size());
-        Cursor c = null;
-        try {
-            StringBuilder sel = new StringBuilder(IndexSchema.Info.Track.URI)
-                    .append(" IN (");
-            String[] selArgs = new String[uris.size()];
-            int ii=0;
-            for (Uri u : uris) {
-                selArgs[ii] = u.toString();
-                if (ii++ > 0) {
-                    sel.append(",");
-                }
-                sel.append("?");
-            }
-            sel.append(")");
-            c = query(IndexSchema.Info.Track.TABLE, tracks_cols,
-                    sel.toString(), selArgs, null, null, null);
-            if (c != null && c.moveToFirst()) {
-                do {
-                    lst.add(buildTrack(c));
-                } while (c.moveToNext());
-            }
-            //get them in the same order as the passed list
-            Collections.sort(lst, new Comparator<Track>() {
-                @Override
-                public int compare(Track lhs, Track rhs) {
-                    int idx1 = uris.indexOf(lhs.getUri());
-                    int idx2 = uris.indexOf(rhs.getUri());
-                    return idx1 - idx2;
-                }
-            });
-        } finally {
-            closeCursor(c);
-        }
-        return lst;
-    }
 
     Track buildTrack(Cursor c) {
         Track.Builder bob = Track.builder();
@@ -479,6 +662,84 @@ public class IndexDatabaseImpl implements IndexDatabase {
             bob.setArtworkUri(Uri.parse(artUri));
         }
         return bob.build();
+    }
+
+    @Override
+    public List<Track> getTracks(String sortOrder) {
+        return getTracks(sortOrder, false);
+    }
+
+    @Override
+    public List<Track> getTracks(String sortOrder, boolean excludeOrphaned) {
+        List<Track> lst = new ArrayList<>();
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.Info.Track.TABLE, tracks_cols, null, null, null, null, sortOrder);
+            if (c != null && c.moveToFirst()) {
+                do {
+                    lst.add(buildTrack(c));
+                } while (c.moveToNext());
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return lst;
+    }
+
+    static final String trackUriSel = IndexSchema.Info.Track.URI + "=?";
+
+    @Override
+    public Track getTrack(Uri uri) {
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.Info.Track.TABLE, tracks_cols, trackUriSel,
+                    new String[]{uri.toString()}, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                return buildTrack(c);
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return null;
+    }
+
+    @Override
+    public List<Track> getTracksInList(final List<Uri> uris) {
+        List<Track> lst = new ArrayList<>(uris.size());
+        Cursor c = null;
+        try {
+            StringBuilder sel = new StringBuilder(IndexSchema.Info.Track.URI)
+                    .append(" IN (");
+            String[] selArgs = new String[uris.size()];
+            int ii=0;
+            for (Uri u : uris) {
+                selArgs[ii] = u.toString();
+                if (ii++ > 0) {
+                    sel.append(",");
+                }
+                sel.append("?");
+            }
+            sel.append(")");
+            c = query(IndexSchema.Info.Track.TABLE, tracks_cols,
+                    sel.toString(), selArgs, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                do {
+                    lst.add(buildTrack(c));
+                } while (c.moveToNext());
+            }
+            //get them in the same order as the passed list
+            Collections.sort(lst, new Comparator<Track>() {
+                @Override
+                public int compare(Track lhs, Track rhs) {
+                    int idx1 = uris.indexOf(lhs.getUri());
+                    int idx2 = uris.indexOf(rhs.getUri());
+                    return idx1 - idx2;
+                }
+            });
+        } finally {
+            closeCursor(c);
+        }
+        return lst;
     }
 
     static final String containerUriSel = IndexSchema.Containers.URI + "=?";
@@ -873,9 +1134,8 @@ public class IndexDatabaseImpl implements IndexDatabase {
         String bioSummary = meta.getString(Metadata.KEY_ALBUM_SUMMARY);
         String bioContent = meta.getString(Metadata.KEY_ALBUM_BIO);
         long lastMod = meta.getLong(Metadata.KEY_LAST_MODIFIED);
-        if (!StringUtils.isEmpty(bioSummary) && !StringUtils.isEmpty(bioContent)) {
+        if (!StringUtils.isEmpty(bioSummary)) {
             cv.put(IndexSchema.Meta.Album.ALBUM_BIO_SUMMARY, bioSummary);
-            cv.put(IndexSchema.Meta.Album.ALBUM_BIO_CONTENT, bioContent);
             cv.put(IndexSchema.Meta.Album.ALBUM_BIO_DATE_MOD, lastMod > 0 ? lastMod : System.currentTimeMillis());
         }
         long id = insert(IndexSchema.Meta.Album.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
@@ -949,9 +1209,8 @@ public class IndexDatabaseImpl implements IndexDatabase {
         String bioSummary = meta.getString(Metadata.KEY_ARTIST_SUMMARY);
         String bioContent = meta.getString(Metadata.KEY_ARTIST_BIO);
         long lastMod = meta.getLong(Metadata.KEY_LAST_MODIFIED);
-        if (!StringUtils.isEmpty(bioSummary) && !StringUtils.isEmpty(bioContent)) {
+        if (!StringUtils.isEmpty(bioSummary)) {
             cv.put(IndexSchema.Meta.Artist.ARTIST_BIO_SUMMARY, bioSummary);
-            cv.put(IndexSchema.Meta.Artist.ARTIST_BIO_CONTENT, bioContent);
             cv.put(IndexSchema.Meta.Artist.ARTIST_BIO_DATE_MOD, lastMod > 0 ? lastMod : System.currentTimeMillis());
         }
         long id = insert(IndexSchema.Meta.Artist.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);

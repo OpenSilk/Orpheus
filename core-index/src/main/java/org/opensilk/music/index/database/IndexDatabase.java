@@ -22,18 +22,16 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.media.MediaDescriptionCompat;
 import android.util.Pair;
 
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.Metadata;
+import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Track;
 
 import java.util.List;
-
-import rx.Observable;
 
 /**
  * Created by drew on 9/13/15.
@@ -46,13 +44,20 @@ public interface IndexDatabase {
     long insert(String table, String nullColumnHack, ContentValues values,int conflictAlgorithm);
     int update(String table, ContentValues values, String whereClause, String[] whereArgs);
     List<Artist> getArtists(String sortOrder);
+    List<Album> getArtistAlbums(String id, String sortOrder);
+    List<Model> getArtistDetails(String id, String sortOrder);
+    List<Track> getArtistTracks(String id, String sortOrder);
     List<Album> getAlbums(String sortOrder);
     List<Track> getAlbumTracks(String id, String sortOrder);
+    List<Model> getAlbumDetails(String id, String sortOrder);
     List<Track> getTracks(String sortOrder);
     List<Track> getTracks(String sortOrder, boolean excludeOrphaned);
     List<Track> getTracksInList(List<Uri> uris);
     Track getTrack(Uri uri);
     List<Genre> getGenres(String sortOrder);
+    List<Album> getGenreAlbums(String id, String sortOrder);
+    List<Model> getGenreDetails(String id, String sortOrder);
+    List<Track> getGenreTracks(String id, String sortOrder);
 
     long hasContainer(Uri uri);
     @NonNull List<Pair<Uri, Uri>> findTopLevelContainers(@Nullable String authority);

@@ -41,7 +41,6 @@ public class IndexSchema {
             String ARTIST_KEY = "artist_key";
             String NUMBER_OF_ALBUMS = "number_of_albums";
             String NUMBER_OF_TRACKS = "number_of_tracks";
-            String BIO = "bio";
             String SUMMARY = "summary";
             String MBID = "mbid";
         }
@@ -54,7 +53,6 @@ public class IndexSchema {
             String ARTIST_KEY = "artist_key";
             String ARTIST_ID = "artist_id";
             String TRACK_COUNT = "track_count";
-            String BIO = "bio";
             String SUMMARY = "summary";
             String MBID = "mbid";
         }
@@ -104,7 +102,6 @@ public class IndexSchema {
             String ARTIST_NAME = "artist_name";
             String ARTIST_KEY = "artist_key";
             String ARTIST_BIO_SUMMARY = "artist_bio_summary";
-            String ARTIST_BIO_CONTENT = "artist_bio_content";
             String ARTIST_BIO_DATE_MOD = "artist_bio_date_modified";
             String ARTIST_MBID = "artist_mbid";
         }
@@ -114,7 +111,6 @@ public class IndexSchema {
             String ALBUM_NAME = "album_name";
             String ALBUM_KEY = "album_key";
             String ALBUM_BIO_SUMMARY = "album_bio_summary";
-            String ALBUM_BIO_CONTENT = "album_bio_content";
             String ALBUM_BIO_DATE_MOD = "album_bio_date_modified";
             String ALBUM_MBID = "album_mbid";
             String ALBUM_ARTIST_ID = "album_artist_id";
@@ -145,12 +141,19 @@ public class IndexSchema {
     }
 
     public interface Misc {
-        interface GenreAlbumMap {
-            String TABLE = "genre_album_map";
-            String GENRE_ID = "genre_id";
+
+        interface AlbumMap extends BaseColumns {
             String ALBUM_ID = "album_id";
             String ALBUM_NAME = "album_name";
             String ALBUM_ARTIST = "album_artist";
+        }
+
+        interface GenreAlbumMap extends AlbumMap {
+            String TABLE = "genre_album_map";
+        }
+
+        interface ArtistAlbumMap extends AlbumMap {
+            String TABLE = "artist_album_map";
         }
     }
 

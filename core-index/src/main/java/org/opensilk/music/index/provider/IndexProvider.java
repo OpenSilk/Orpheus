@@ -37,6 +37,7 @@ import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Genre;
+import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Track;
 import org.opensilk.bundleable.Bundleable;
 
@@ -53,7 +54,14 @@ import rx.schedulers.Schedulers;
 import static org.opensilk.music.index.provider.IndexUris.M_ALBUMS;
 import static org.opensilk.music.index.provider.IndexUris.M_ALBUM_TRACKS;
 import static org.opensilk.music.index.provider.IndexUris.M_ARTISTS;
+import static org.opensilk.music.index.provider.IndexUris.M_ALBUM_DETAILS;
+import static org.opensilk.music.index.provider.IndexUris.M_ARTIST_ALBUMS;
+import static org.opensilk.music.index.provider.IndexUris.M_ARTIST_DETAILS;
+import static org.opensilk.music.index.provider.IndexUris.M_ARTIST_TRACKS;
 import static org.opensilk.music.index.provider.IndexUris.M_GENRES;
+import static org.opensilk.music.index.provider.IndexUris.M_GENRE_ALBUMS;
+import static org.opensilk.music.index.provider.IndexUris.M_GENRE_DETAILS;
+import static org.opensilk.music.index.provider.IndexUris.M_GENRE_TRACKS;
 import static org.opensilk.music.index.provider.IndexUris.M_TRACKS;
 import static org.opensilk.music.index.provider.IndexUris.makeMatcher;
 
@@ -224,9 +232,53 @@ public class IndexProvider extends LibraryProvider {
                 }
                 break;
             }
+            case M_ALBUM_DETAILS: {
+                final BundleableSubscriber<Model> subscriber = new BundleableSubscriber<>(binder);
+                List<String> segments = uri.getPathSegments();
+                String id = segments.get(segments.size() - 2);
+                final List<Model> lst = mDataBase.getAlbumDetails(id, LibraryExtras.getSortOrder(args));
+                if (!subscriber.isUnsubscribed()) {
+                    subscriber.onNext(lst);
+                    subscriber.onCompleted();
+                }
+                break;
+            }
             case M_ARTISTS: {
                 final BundleableSubscriber<Artist> subscriber = new BundleableSubscriber<>(binder);
                 final List<Artist> lst = mDataBase.getArtists(LibraryExtras.getSortOrder(args));
+                if (!subscriber.isUnsubscribed()) {
+                    subscriber.onNext(lst);
+                    subscriber.onCompleted();
+                }
+                break;
+            }
+            case M_ARTIST_ALBUMS: {
+                final BundleableSubscriber<Album> subscriber = new BundleableSubscriber<>(binder);
+                List<String> segments = uri.getPathSegments();
+                String id = segments.get(segments.size() - 2);
+                final List<Album> lst = mDataBase.getArtistAlbums(id, LibraryExtras.getSortOrder(args));
+                if (!subscriber.isUnsubscribed()) {
+                    subscriber.onNext(lst);
+                    subscriber.onCompleted();
+                }
+                break;
+            }
+            case M_ARTIST_DETAILS: {
+                final BundleableSubscriber<Model> subscriber = new BundleableSubscriber<>(binder);
+                List<String> segments = uri.getPathSegments();
+                String id = segments.get(segments.size() - 2);
+                final List<Model> lst = mDataBase.getArtistDetails(id, LibraryExtras.getSortOrder(args));
+                if (!subscriber.isUnsubscribed()) {
+                    subscriber.onNext(lst);
+                    subscriber.onCompleted();
+                }
+                break;
+            }
+            case M_ARTIST_TRACKS: {
+                final BundleableSubscriber<Track> subscriber = new BundleableSubscriber<>(binder);
+                List<String> segments = uri.getPathSegments();
+                String id = segments.get(segments.size() - 2);
+                final List<Track> lst = mDataBase.getArtistTracks(id, LibraryExtras.getSortOrder(args));
                 if (!subscriber.isUnsubscribed()) {
                     subscriber.onNext(lst);
                     subscriber.onCompleted();
@@ -245,6 +297,39 @@ public class IndexProvider extends LibraryProvider {
             case M_GENRES: {
                 final BundleableSubscriber<Genre> subscriber = new BundleableSubscriber<>(binder);
                 final List<Genre> lst = mDataBase.getGenres(LibraryExtras.getSortOrder(args));
+                if (!subscriber.isUnsubscribed()) {
+                    subscriber.onNext(lst);
+                    subscriber.onCompleted();
+                }
+                break;
+            }
+            case M_GENRE_DETAILS: {
+                final BundleableSubscriber<Model> subscriber = new BundleableSubscriber<>(binder);
+                List<String> segments = uri.getPathSegments();
+                String id = segments.get(segments.size() - 2);
+                final List<Model> lst = mDataBase.getGenreDetails(id, LibraryExtras.getSortOrder(args));
+                if (!subscriber.isUnsubscribed()) {
+                    subscriber.onNext(lst);
+                    subscriber.onCompleted();
+                }
+                break;
+            }
+            case M_GENRE_ALBUMS: {
+                final BundleableSubscriber<Album> subscriber = new BundleableSubscriber<>(binder);
+                List<String> segments = uri.getPathSegments();
+                String id = segments.get(segments.size() - 2);
+                final List<Album> lst = mDataBase.getGenreAlbums(id, LibraryExtras.getSortOrder(args));
+                if (!subscriber.isUnsubscribed()) {
+                    subscriber.onNext(lst);
+                    subscriber.onCompleted();
+                }
+                break;
+            }
+            case M_GENRE_TRACKS: {
+                final BundleableSubscriber<Track> subscriber = new BundleableSubscriber<>(binder);
+                List<String> segments = uri.getPathSegments();
+                String id = segments.get(segments.size() - 2);
+                final List<Track> lst = mDataBase.getGenreTracks(id, LibraryExtras.getSortOrder(args));
                 if (!subscriber.isUnsubscribed()) {
                     subscriber.onNext(lst);
                     subscriber.onCompleted();

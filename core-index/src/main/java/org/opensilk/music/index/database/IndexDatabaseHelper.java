@@ -32,7 +32,7 @@ import javax.inject.Singleton;
 @Singleton
 public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
-    public static final int DB_VERSION = 31;
+    public static final int DB_VERSION = 32;
     public static final String DB_NAME = "music.db";
 
     @Inject
@@ -69,6 +69,8 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP VIEW IF EXISTS artists_albums_map");
             db.execSQL("DROP VIEW IF EXISTS genre_info");
             db.execSQL("DROP VIEW IF EXISTS track_parent_map;");
+            db.execSQL("DROP VIEW IF EXISTS genre_album_map;");
+            db.execSQL("DROP VIEW IF EXISTS artist_album_map;");
 
             db.execSQL("DROP INDEX IF EXISTS artist_key_idx;");
             db.execSQL("DROP INDEX IF EXISTS album_key_idx;");
@@ -114,7 +116,6 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "artist_name TEXT NOT NULL, " +
                     "artist_key TEXT NOT NULL, " +
                     "artist_bio_summary TEXT, " +
-                    "artist_bio_content TEXT, " +
                     "artist_bio_date_modified INTEGER, " +
                     "artist_mbid TEXT COLLATE NOCASE, " +
                     "UNIQUE(artist_key,artist_mbid)" +
@@ -125,7 +126,6 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "album_name TEXT NOT NULL, " +
                     "album_key TEXT NOT NULL, " +
                     "album_bio_summary TEXT, " +
-                    "album_bio_content TEXT, " +
                     "album_bio_date_modified INTEGER, " +
                     "album_mbid TEXT COLLATE NOCASE, " +
                     "album_artist_id INTEGER REFERENCES artist_meta(_id) ON DELETE CASCADE ON UPDATE CASCADE, " +
@@ -216,7 +216,6 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "a1.artist_key, " +
                     "COUNT(DISTINCT a2._id) AS number_of_albums, " +
                     "COUNT(DISTINCT t1._id) AS number_of_tracks, "+
-                    "artist_bio_content as bio, " +
                     "artist_bio_summary as summary, " +
                     "artist_mbid as mbid " +
                     "FROM artist_meta a1 " +
@@ -233,7 +232,6 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "album_artist_id as artist_id, " +
                     "a2.artist_key, " +
                     "COUNT(DISTINCT t1._id) as track_count, " +
-                    "album_bio_content as bio, " +
                     "album_bio_summary as summary, " +
                     "album_mbid as mbid " +
                     "FROM album_meta a1 " +
@@ -295,12 +293,22 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     ";");
 
             db.execSQL("CREATE VIEW IF NOT EXISTS genre_album_map AS SELECT " +
-                    "g1._id as genre_id, " +
+                    "g1._id, " +
                     "t1.album_id, " +
                     "t1.album as album_name, " +
                     "t1.album_artist " +
                     "FROM genre_meta g1 " +
                     "JOIN track_info t1 ON g1._id = t1.genre_id " +
+                    "GROUP BY t1.album_id" +
+                    ";");
+
+            db.execSQL("CREATE VIEW IF NOT EXISTS artist_album_map AS SELECT " +
+                    "a1._id, " +
+                    "t1.album_id, " +
+                    "t1.album as album_name, " +
+                    "t1.album_artist " +
+                    "FROM artist_meta a1 " +
+                    "JOIN track_info t1 ON a1._id = t1.artist_id " +
                     "GROUP BY t1.album_id" +
                     ";");
 
