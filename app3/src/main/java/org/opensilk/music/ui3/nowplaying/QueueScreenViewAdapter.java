@@ -86,7 +86,7 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem, Queue
         if (uri != null) {
             ArtInfo artInfo = ArtInfo.fromUri(uri);
             if (artInfo !=ArtInfo.NULLINSTANCE) {
-                requestor.newRequest(artInfo, holder.artwork, null, BundleHelper.b().putInt(1).get());
+                requestor.newRequest(artInfo, holder.artwork, BundleHelper.b().putInt(1).get());
             } else {
                 setLetterTileDrawable(holder, desc.getTitle().toString());
             }

@@ -115,34 +115,34 @@ public class UtilsCommon {
         final int num = artInfos.size();
         if (artwork != null) {
             if (num >= 1) {
-                requestor.newRequest(artInfos.get(0), artwork, null, null);
+                requestor.newRequest(artInfos.get(0), artwork, null);
             } else {
                 artwork.setImageResource(R.drawable.default_artwork);
             }
         }
         if (artwork2 != null) {
             if (num >= 2) {
-                requestor.newRequest(artInfos.get(1), artwork2, null, null);
+                requestor.newRequest(artInfos.get(1), artwork2, null);
             } else {
                 artwork2.setImageResource(R.drawable.default_artwork);
             }
         }
         if (artwork3 != null) {
             if (num >= 3) {
-                requestor.newRequest(artInfos.get(2), artwork3, null, null);
+                requestor.newRequest(artInfos.get(2), artwork3, null);
             } else if (num >= 2) {
                 //put the second image here, first image will be put in 4th spot to crisscross
-                requestor.newRequest(artInfos.get(1), artwork3, null, null);
+                requestor.newRequest(artInfos.get(1), artwork3, null);
             } else {
                 artwork3.setImageResource(R.drawable.default_artwork);
             }
         }
         if (artwork4 != null) {
             if (num >= 4) {
-                requestor.newRequest(artInfos.get(3), artwork4, null, null);
+                requestor.newRequest(artInfos.get(3), artwork4, null);
             } else if (num >= 2) {
                 //3 -> loopback, 2 -> put the first image here for crisscross
-                requestor.newRequest(artInfos.get(0), artwork4, null, null);
+                requestor.newRequest(artInfos.get(0), artwork4, null);
             } else {
                 artwork4.setImageResource(R.drawable.default_artwork);
             }

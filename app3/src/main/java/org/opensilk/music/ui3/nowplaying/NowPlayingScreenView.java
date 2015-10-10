@@ -24,11 +24,16 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.AnimatedStateListDrawable;
 import android.graphics.drawable.AnimatedVectorDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.audiofx.AudioEffect;
+import android.support.annotation.ColorInt;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPropertyAnimatorListener;
+import android.support.v7.graphics.Palette;
 import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 import android.view.View;
@@ -39,6 +44,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.request.transition.Transition;
 import com.jakewharton.rxbinding.view.RxView;
 import com.jakewharton.rxbinding.view.ViewLongClickEvent;
 import com.pheelicks.visualizer.VisualizerView;
@@ -47,6 +53,10 @@ import com.pheelicks.visualizer.renderer.CircleRenderer;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.core.util.VersionUtils;
+import org.opensilk.common.glide.PalettableUtils;
+import org.opensilk.common.glide.PaletteSwatchType;
+import org.opensilk.common.glide.PaletteableDrawableCrossFadeTransition;
+import org.opensilk.common.glide.ViewBackgroundDrawableTarget;
 import org.opensilk.common.ui.util.ThemeUtils;
 import org.opensilk.common.ui.util.ViewUtils;
 import org.opensilk.common.ui.widget.ImageButtonCheckable;
@@ -368,5 +378,51 @@ public class NowPlayingScreenView extends RelativeLayout {
                 .setListener(null)
                 .start();
     }
+
+    private NowPlayingScreenView getView() {
+        return this;
+    }
+
+    final PaletteableDrawableCrossFadeTransition backgroundTransition =
+            new PaletteableDrawableCrossFadeTransition(PalettableUtils.DEFAULT_DURATION_MS);
+
+    final Palette.PaletteAsyncListener mListener = new Palette.PaletteAsyncListener() {
+        @Override
+        public void onGenerated(Palette palette) {
+            Palette.Swatch s1 = palette.getDarkVibrantSwatch();
+            Palette.Swatch s2 = palette.getVibrantSwatch();
+            if (s1 != null && s2 != null) {
+                ViewBackgroundDrawableTarget.builder()
+                        .into(getView())
+                        .using(PaletteSwatchType.VIBRANT_DARK)
+                        .build().onResourceReady(palette, backgroundTransition);
+                ViewBackgroundDrawableTarget.builder()
+                        .into(card)
+                        .using(PaletteSwatchType.VIBRANT)
+                        .build().onResourceReady(palette, backgroundTransition);
+                getView().title.setTextColor(s2.getTitleTextColor());
+                getView().subTitle.setTextColor(s2.getBodyTextColor());
+                getView().progress.getProgressDrawable().setTint(s1.getRgb());
+                getView().reInitRenderer(s1.getRgb());
+            } else {
+                int background = ThemeUtils.getThemeAttrColor(getView().getContext(),
+                        android.R.attr.colorBackground);
+                getView().setBackgroundColor(background);
+                int cardBackground = ThemeUtils.getThemeAttrColor(getView().getContext(),
+                        R.attr.nowPlayingCardBackground);
+                getView().card.setBackgroundColor(cardBackground);
+                int titleText = ThemeUtils.getThemeAttrColor(getView().getContext(),
+                        android.R.attr.textColorPrimary);
+                getView().title.setTextColor(titleText);
+                int subTitleText = ThemeUtils.getThemeAttrColor(getView().getContext(),
+                        android.R.attr.textColorSecondary);
+                getView().subTitle.setTextColor(subTitleText);
+                int accent = ThemeUtils.getThemeAttrColor(getView().getContext(),
+                        R.attr.colorAccent);
+                getView().progress.getProgressDrawable().setTint(accent);
+                getView().reInitRenderer(accent);
+            }
+        }
+    };
 
 }

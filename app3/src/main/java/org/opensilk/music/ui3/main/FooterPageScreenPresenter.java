@@ -90,7 +90,7 @@ public class FooterPageScreenPresenter extends ViewPresenter<FooterPageScreenVie
         if (artwork != null) {
             getView().artworkThumbnail.setImageBitmap(artwork);
         } else if (artworkUri != null) {
-            artworkReqestor.newRequest(artworkUri, getView().artworkThumbnail, null, null);
+            artworkReqestor.newRequest(artworkUri, getView().artworkThumbnail, null);
         } else {
             getView().artworkThumbnail.setImageResource(R.drawable.default_artwork);
         }

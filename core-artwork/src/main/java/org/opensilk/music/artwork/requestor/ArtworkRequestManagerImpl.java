@@ -26,28 +26,21 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
 
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.util.BundleHelper;
+import org.opensilk.common.glide.PalettableImageViewTarget;
 import org.opensilk.common.glide.PaletteSwatchType;
 import org.opensilk.common.glide.Paletteable;
-import org.opensilk.common.glide.PalettizedBitmap;
-import org.opensilk.common.glide.PalettizedBitmapTarget;
-import org.opensilk.common.glide.PalettizedBitmapTransitionOptions;
-import org.opensilk.common.ui.widget.AnimatedImageView;
-import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.artwork.PaletteObserver;
-import org.opensilk.music.artwork.PaletteResponse;
+import org.opensilk.common.glide.PalettizedBitmapDrawable;
 import org.opensilk.music.artwork.R;
 import org.opensilk.music.model.ArtInfo;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-
-import rx.Subscription;
-import rx.subscriptions.Subscriptions;
 
 /**
  * Created by drew on 10/21/14.
@@ -67,16 +60,24 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         this.mAuthority = authority;
     }
 
+    public void newRequest(ArtInfo artInfo, ImageView imageView, @Nullable Bundle extras) {
+        newRequest(artInfo.asUri(mAuthority), imageView, extras);
+    }
+
+    public void newRequest(Uri uri, ImageView imageView, @Nullable Bundle extras) {
+        newRequest(uri, imageView, (Paletteable) null, extras);
+    }
+
     public void newRequest(ArtInfo artInfo, ImageView imageView, @Nullable Paletteable paletteable, @Nullable Bundle extras) {
         newRequest(artInfo.asUri(mAuthority), imageView, paletteable, extras);
     }
 
     public void newRequest(Uri uri, ImageView imageView, @Nullable Paletteable paletteable, @Nullable Bundle extras) {
-        PalettizedBitmapTarget.Builder bob = PalettizedBitmapTarget.builder().from(imageView);
+        PalettableImageViewTarget.Builder bob = PalettableImageViewTarget.builder().into(imageView);
         if (paletteable != null && extras != null) {
             PaletteSwatchType type = PaletteSwatchType.valueOf(BundleHelper.getString(extras));
             PaletteSwatchType fallbackType = PaletteSwatchType.valueOf(BundleHelper.getString2(extras));
-            bob.using(type, fallbackType).intoPalettable(paletteable);
+            bob.intoPalettable(type, fallbackType, paletteable);
         }
         RequestOptions options = new RequestOptions()
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -90,35 +91,39 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             options.centerCrop(imageView.getContext());
         }
         Glide.with(imageView.getContext())
-                .as(PalettizedBitmap.class)
+                .as(PalettizedBitmapDrawable.class)
                 .apply(options)
-                .transition(PalettizedBitmapTransitionOptions.withCrossFade())
+                .transition(DrawableTransitionOptions.withCrossFade())
                 .load(uri)
                 .into(bob.build());
     }
 
-    public void newRequest(ArtInfo artInfo, PalettizedBitmapTarget target, @Nullable Bundle extras) {
-        newRequest(artInfo.asUri(mAuthority), target, extras);
+    public void newRequest(ArtInfo artInfo, ImageView imageView, Palette.PaletteAsyncListener listener, @Nullable Bundle extras) {
+        newRequest(artInfo.asUri(mAuthority), imageView, listener, extras);
     }
 
-    public void newRequest(Uri uri, PalettizedBitmapTarget target, @Nullable Bundle extras) {
+    public void newRequest(Uri uri, ImageView imageView, Palette.PaletteAsyncListener listener, @Nullable Bundle extras) {
+        PalettableImageViewTarget.Builder bob = PalettableImageViewTarget.builder()
+                .into(imageView)
+                .withCallback(listener)
+                ;
         RequestOptions options = new RequestOptions()
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .placeholder(R.drawable.default_artwork)
                 ;
         if (extras != null && BundleHelper.getInt(extras) == 1) {
-            options.circleCrop(target.getView().getContext());
+            options.circleCrop(imageView.getContext());
         } else if (extras != null && BundleHelper.getInt(extras) == 2) {
-            options.fitCenter(target.getView().getContext());
+            options.fitCenter(imageView.getContext());
         } else {
-            options.centerCrop(target.getView().getContext());
+            options.centerCrop(imageView.getContext());
         }
-        Glide.with(target.getView().getContext())
-                .as(PalettizedBitmap.class)
+        Glide.with(imageView.getContext())
+                .as(PalettizedBitmapDrawable.class)
                 .apply(options)
-                .transition(PalettizedBitmapTransitionOptions.withCrossFade())
+                .transition(DrawableTransitionOptions.withCrossFade())
                 .load(uri)
-                .into(target);
+                .into(bob.build());
     }
 
 }

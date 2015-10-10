@@ -20,25 +20,23 @@ package org.opensilk.music.artwork.requestor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.graphics.Palette;
 import android.widget.ImageView;
 
 import org.opensilk.common.glide.Paletteable;
-import org.opensilk.common.glide.PalettizedBitmapTarget;
-import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.music.model.ArtInfo;
-import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.artwork.PaletteObserver;
-
-import rx.Subscription;
 
 /**
  * Created by drew on 10/22/14.
  */
 public interface ArtworkRequestManager {
 
+    void newRequest(ArtInfo artInfo, ImageView imageView, @Nullable Bundle extras);
+    void newRequest(Uri uri, ImageView imageView, @Nullable Bundle extras);
+
     void newRequest(Uri uri, ImageView imageView, @Nullable Paletteable paletteable, @Nullable Bundle extras);
     void newRequest(ArtInfo artInfo, ImageView imageView, @Nullable Paletteable paletteable, @Nullable Bundle extras);
 
-    void newRequest(ArtInfo artInfo, PalettizedBitmapTarget target, @Nullable Bundle extras);
-    void newRequest(Uri uri, PalettizedBitmapTarget target, @Nullable Bundle extras);
+    void newRequest(ArtInfo artInfo, ImageView imageView, Palette.PaletteAsyncListener listener, @Nullable Bundle extras);
+    void newRequest(Uri uri, ImageView imageView, Palette.PaletteAsyncListener listener, @Nullable Bundle extras);
 }
