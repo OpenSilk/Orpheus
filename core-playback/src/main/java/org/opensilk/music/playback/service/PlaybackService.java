@@ -622,6 +622,7 @@ public class PlaybackService extends MediaBrowserService {
                     } else if (mAudioSessionId != 0) {
                         getMediaSession().sendSessionEvent(EVENT.NEW_AUDIO_SESSION_ID, reply);
                     }
+                    break;
                 }
             }
         }
