@@ -52,8 +52,10 @@ public class ToolbarOwner extends Presenter<ToolbarOwnerActivity> {
                 detachToolbar(this.toolbar);
             }
             this.toolbar = toolbar;
-            getView().setSupportActionBar(toolbar);
-            getView().onToolbarAttached(toolbar);
+            if (hasView()) {
+                getView().setSupportActionBar(toolbar);
+                getView().onToolbarAttached(toolbar);
+            }
         }
     }
 
@@ -63,8 +65,12 @@ public class ToolbarOwner extends Presenter<ToolbarOwnerActivity> {
         }
         if (this.toolbar == toolbar) {
             this.toolbar = null;
-//            getView().setSupportActionBar(null);
-            getView().onToolbarDetached(toolbar);
+            if (hasView()) {
+//                getView().setSupportActionBar(null);
+                getView().onToolbarDetached(toolbar);
+            } else {
+                Timber.e("detachToolbar called after dropView");
+            }
         }
     }
 
