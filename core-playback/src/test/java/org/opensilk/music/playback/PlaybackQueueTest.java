@@ -532,6 +532,21 @@ public class PlaybackQueueTest {
     }
 
     @Test
+    public void testRemoveIndexWithPos0() {
+        //populate with some stuff
+        testAddEndOnEmptyQueue();
+        verify(mListener, times(2)).onCurrentPosChanged();
+        //make sure we dont try to get any descriptions
+        verifyNoMoreInteractions(mClient);
+        mPlaybackQueue.remove(3);
+        assertThat(mPlaybackQueue.get().size()).isEqualTo(9);
+        checkListsMatch(mPlaybackQueue.get(), mPlaybackQueue.getQueueItems());
+        assertThat(mPlaybackQueue.getCurrentPos()).isEqualTo(0);
+        verify(mListener, times(2)).onCurrentPosChanged();
+        verify(mListener).onQueueChanged();
+    }
+
+    @Test
     public void testMoveItemAroundCurrent() {
         //populate with some stuff
         testAddEndOnEmptyQueue();
