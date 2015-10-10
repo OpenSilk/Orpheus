@@ -599,6 +599,23 @@ public class PlaybackQueueTest {
         verify(mListener).onQueueChanged();
     }
 
+
+    @Test
+    public void testMoveItemWithPosAt0() {
+        //populate with some stuff
+        testAddEndOnEmptyQueue();
+        verify(mListener, times(2)).onCurrentPosChanged();
+        //make sure we dont try to get any descriptions
+        verifyNoMoreInteractions(mClient);
+        mPlaybackQueue.moveItem(2, 5);
+        assertThat(mPlaybackQueue.get().size()).isEqualTo(10);
+        assertThat(mPlaybackQueue.get().get(5)).isEqualTo(Uri.parse("content://test/track/2"));
+        checkListsMatch(mPlaybackQueue.get(), mPlaybackQueue.getQueueItems());
+        assertThat(mPlaybackQueue.getCurrentPos()).isEqualTo(0);
+        verify(mListener, times(2)).onCurrentPosChanged();
+        verify(mListener).onQueueChanged();
+    }
+
     @Test
     public void testgetPosOfId() {
         //populate with some stuff

@@ -224,10 +224,9 @@ public class PlaybackQueue {
             return;
         }
         Uri current = null;
-        if (mCurrentPos > 0 && mCurrentPos < mQueue.size()) {
+        if (mCurrentPos >= 0 && mCurrentPos < mQueue.size()) {
             current = mQueue.get(mCurrentPos);
         }
-        mQueue.get(mCurrentPos);
         mQueue.remove(uri);
         if (to > mQueue.size()) {
             to = mQueue.size();
