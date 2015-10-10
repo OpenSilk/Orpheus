@@ -20,10 +20,11 @@ package org.opensilk.music.ui3.common;
 import android.content.Context;
 
 import org.opensilk.bundleable.Bundleable;
+import org.opensilk.music.model.Model;
 
 /**
  * Created by drew on 5/2/15.
  */
 public interface ItemClickListener {
-    void onItemClicked(BundleablePresenter presenter, Context context, Bundleable item);
+    void onItemClicked(BundleablePresenter presenter, Context context, Model item);
 }

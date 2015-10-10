@@ -39,6 +39,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.loader.BundleableLoader;
 import org.opensilk.bundleable.Bundleable;
+import org.opensilk.music.model.Model;
 import org.opensilk.music.playback.control.PlaybackController;
 
 import java.util.ArrayList;
@@ -273,7 +274,7 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
     }
 
     public void onItemClicked(Context context, Bundleable item) {
-        if (itemClickListener != null) itemClickListener.onItemClicked(this, context, item);
+        if (itemClickListener != null) itemClickListener.onItemClicked(this, context, (Model) item);
     }
 
     @Override
@@ -318,7 +319,7 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
     private ActionMode actionMode;
 
     public void onItemClicked(BundleableRecyclerAdapter.ViewHolder viewHolder, Bundleable item) {
-        if (itemClickListener != null) itemClickListener.onItemClicked(this, viewHolder.itemView.getContext(), item);
+        if (itemClickListener != null) itemClickListener.onItemClicked(this, viewHolder.itemView.getContext(), (Model)item);
     }
 
     public void onItemSelected() {

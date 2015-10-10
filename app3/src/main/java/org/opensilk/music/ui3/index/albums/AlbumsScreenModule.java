@@ -29,6 +29,7 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.model.Album;
+import org.opensilk.music.model.Model;
 import org.opensilk.music.model.sort.AlbumSortOrder;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
@@ -75,7 +76,7 @@ public class AlbumsScreenModule {
     public ItemClickListener provideItemClickListener() {
         return new ItemClickListener() {
             @Override
-            public void onItemClicked(BundleablePresenter presenter, Context context, Bundleable item) {
+            public void onItemClicked(BundleablePresenter presenter, Context context, Model item) {
                 ProfileActivity.startSelf(context, new AlbumDetailsScreen((Album)item));
             }
         };

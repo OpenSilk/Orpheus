@@ -31,13 +31,13 @@ import java.util.List;
 public class PlayAllItemClickListener implements ItemClickListener {
 
     @Override
-    public void onItemClicked(BundleablePresenter presenter, Context context, Bundleable item) {
+    public void onItemClicked(BundleablePresenter presenter, Context context, Model item) {
         List<Uri> toPlay = UtilsCommon.filterTracks(presenter.getItems());
         if (toPlay.isEmpty()) {
             return; //TODO toast?
         }
         //find its new pos in case there were folders before it in the adapteritems
-        int pos = toPlay.indexOf(((Model) item).getUri());
+        int pos = toPlay.indexOf(item.getUri());
         presenter.getPlaybackController().playAll(toPlay, pos);
     }
 
