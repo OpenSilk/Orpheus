@@ -17,16 +17,18 @@
 
 package org.opensilk.common.glide;
 
+import android.support.v7.graphics.Palette;
+
 import com.bumptech.glide.TransitionOptions;
 
 /**
- * Created by drew on 10/6/15.
+ * Created by drew on 10/9/15.
  */
-public class PalettizedBitmapTransitionOptions extends TransitionOptions<PalettizedBitmapTransitionOptions, PalettizedBitmap> {
-    public static PalettizedBitmapTransitionOptions withCrossFade() {
-        return new PalettizedBitmapTransitionOptions().crossFade();
+public class ViewBackgroundTransitionOptions extends TransitionOptions<ViewBackgroundTransitionOptions, Palette> {
+    public static ViewBackgroundTransitionOptions withCrossFade() {
+        return new ViewBackgroundTransitionOptions().crossFade();
     }
-    public PalettizedBitmapTransitionOptions crossFade() {
-        return transition(new PalettizedBitmapTransitionFactory());
+    public ViewBackgroundTransitionOptions crossFade() {
+        return transition(PaletteableDrawableCrossFadeFactory.create());
     }
 }

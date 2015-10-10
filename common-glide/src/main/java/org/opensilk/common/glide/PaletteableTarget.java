@@ -17,26 +17,13 @@
 
 package org.opensilk.common.glide;
 
-import android.graphics.drawable.BitmapDrawable;
-import android.support.v7.graphics.Palette;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 /**
- * Created by drew on 10/6/15.
+ * Created by drew on 10/9/15.
  */
-public class PalettizedBitmap {
-    private final BitmapDrawable drawable;
-    private final Palette palette;
-
-    public PalettizedBitmap(BitmapDrawable drawable, Palette palette) {
-        this.drawable = drawable;
-        this.palette = palette;
-    }
-
-    public BitmapDrawable getDrawable() {
-        return drawable;
-    }
-
-    public Palette getPalette() {
-        return palette;
-    }
+public interface PaletteableTarget {
+    @NonNull PaletteSwatchType getSwatchType();
+    @Nullable PaletteSwatchType getFallbackSwatch();
 }

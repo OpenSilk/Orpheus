@@ -17,17 +17,28 @@
 
 package org.opensilk.common.glide;
 
-import android.graphics.drawable.BitmapDrawable;
+import android.graphics.Bitmap;
+import android.support.v7.graphics.Palette;
 
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 
 /**
- * Created by drew on 10/6/15.
+ * Created by drew on 10/9/15.
  */
-public class PalettizedBitmapTranscoder implements ResourceTranscoder<BitmapDrawable, PalettizedBitmap> {
+public class PaletteBitmapTranscoder implements ResourceTranscoder<Bitmap, Palette> {
+
+    private PaletteBitmapTranscoder() { }
+
+    public static PaletteBitmapTranscoder create() {
+        return new PaletteBitmapTranscoder();
+    }
+
     @Override
-    public Resource<PalettizedBitmap> transcode(Resource<BitmapDrawable> toTranscode) {
-        return PalettizedBitmapResource.create(toTranscode);
+    public Resource<Palette> transcode(Resource<Bitmap> toTranscode) {
+        Bitmap bitmap = toTranscode.get();
+        PaletteResource resource = PaletteResource.obtain(bitmap);
+        toTranscode.recycle();
+        return resource;
     }
 }

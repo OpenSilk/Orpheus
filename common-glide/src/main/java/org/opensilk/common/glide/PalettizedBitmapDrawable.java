@@ -17,28 +17,25 @@
 
 package org.opensilk.common.glide;
 
-import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.support.v7.graphics.Palette;
 
-import com.bumptech.glide.GlideBuilder;
-import com.bumptech.glide.Registry;
-import com.bumptech.glide.module.GlideModule;
-
 /**
- * Created by drew on 10/6/15.
+ * Created by drew on 10/9/15.
  */
-public class PalettizedBitmapGlideModule implements GlideModule {
-    @Override
-    public void applyOptions(Context context, GlideBuilder builder) {
-        //none
+public class PalettizedBitmapDrawable extends BitmapDrawable {
+
+    private final Palette palette;
+
+    public PalettizedBitmapDrawable(Resources res, Bitmap bitmap, Palette palette) {
+        super(res, bitmap);
+        this.palette = palette;
     }
 
-    @Override
-    public void registerComponents(Context context, Registry registry) {
-        registry.register(Bitmap.class, PalettizedBitmapDrawable.class,
-                PalettizedBitmapDrawableTranscoder.create(context));
-        registry.register(Bitmap.class, Palette.class,
-                PaletteBitmapTranscoder.create());
+    public Palette getPalette(){
+        return palette;
     }
+
 }

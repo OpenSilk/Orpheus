@@ -17,50 +17,46 @@
 
 package org.opensilk.common.glide;
 
-import android.graphics.drawable.BitmapDrawable;
+import android.graphics.Bitmap;
 import android.support.v7.graphics.Palette;
 
 import com.bumptech.glide.load.engine.Resource;
 
 /**
- * Created by drew on 10/6/15.
+ * Created by drew on 10/9/15.
  */
-public class PalettizedBitmapResource implements Resource<PalettizedBitmap> {
-    private final Resource<BitmapDrawable> wrapped;
-    private final BitmapDrawable drawable;
+public class PaletteResource implements Resource<Palette> {
+
     private final Palette palette;
 
-    private PalettizedBitmapResource(Resource<BitmapDrawable> wrapped, BitmapDrawable drawable, Palette palette) {
-        this.wrapped = wrapped;
-        this.drawable = drawable;
+    private PaletteResource(Palette palette) {
         this.palette = palette;
     }
 
-    public static PalettizedBitmapResource create(Resource<BitmapDrawable> wrapped) {
-        final BitmapDrawable drawable = wrapped.get();
-        final Palette palette = Palette.from(drawable.getBitmap())
-                .maximumColorCount(24)
-                .generate();
-        return new PalettizedBitmapResource(wrapped, drawable, palette);
+    public static PaletteResource obtain(Bitmap bitmap) {
+        final Palette palette = Palette.from(bitmap)
+                .maximumColorCount(24) //TODO allow configure
+                .generate(); //Compute heavy, must be on background thread
+        return new PaletteResource(palette);
     }
 
     @Override
-    public Class<PalettizedBitmap> getResourceClass() {
-        return PalettizedBitmap.class;
+    public Class<Palette> getResourceClass() {
+        return Palette.class;
     }
 
     @Override
-    public PalettizedBitmap get() {
-        return new PalettizedBitmap(drawable, palette);
+    public Palette get() {
+        return palette;
     }
 
     @Override
     public int getSize() {
-        return wrapped.getSize();
+        return 1;
     }
 
     @Override
     public void recycle() {
-        wrapped.recycle();
+        //noop
     }
 }
