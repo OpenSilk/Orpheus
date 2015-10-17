@@ -43,7 +43,7 @@
 
     <fragment
         android:id="@+id/controls_fragment"
-        android:layout_width="match_parent"
+        android:layout_width="@dimen/drawer_width"
         android:layout_height="match_parent"
         android:layout_gravity="end"
         android:name="org.opensilk.music.ui3.main.ControlsScreenFragment"

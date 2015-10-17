@@ -24,6 +24,7 @@ import android.graphics.PorterDuffXfermode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.pheelicks.visualizer.renderer.CircleBarRenderer;
 import com.pheelicks.visualizer.renderer.CircleRenderer;
@@ -77,18 +78,25 @@ public class NowPlayingScreenMenuHander implements ActionBarMenuHandler {
         switch (menuItem.getItemId()) {
             case R.id.menu_visualizer_circle_lines:
                 preferences.putString(NOW_PLAYING_VIEW, NOW_PLAYING_VIEW_VIS_CIRCLE);
+                showToast(context);
 //                presenter.pokeVisRenderer();//TODO
                 return true;
             case R.id.menu_visualizer_circle_bars:
                 preferences.putString(NOW_PLAYING_VIEW, NOW_PLAYING_VIEW_VIS_CIRCLE_BAR);
+                showToast(context);
 //                presenter.pokeVisRenderer();
                 return true;
             case R.id.menu_visualizer_off:
                 preferences.putString(NOW_PLAYING_VIEW, NOW_PLAYING_VIEW_ARTWORK);
+                showToast(context);
 //                presenter.disableVisualizer();
                 return true;
             default:
                 return false;
         }
+    }
+
+    void showToast(Context context) {
+        Toast.makeText(context, "Please close and reopen Now Playing", Toast.LENGTH_LONG).show();
     }
 }

@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActionBarConfig;
@@ -65,16 +66,17 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
     final ArtworkRequestManager requestor;
     final AppPreferences settings;
     final DrawerOwner drawerController;
-    final ToolbarOwner toolbarOwner;
 
     Observable<Lifecycle> lifecycle;
     CompositeSubscription broadcastSubscription;
+    Subscription lifcycleSubscripton;
 
     boolean isPlaying;
     int sessionId = 0;
-    ArtInfo lastArtInfo;
+    Uri lastArtUri;
     String lastTrack;
     String lastArtist;
+    PlaybackStateCompat lastState;
 
     final ProgressUpdater mProgressUpdater = new ProgressUpdater(new Action1<Integer>() {
         @Override
@@ -89,15 +91,13 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
             PlaybackController playbackController,
             ArtworkRequestManager requestor,
             AppPreferences settings,
-            DrawerOwner drawerController,
-            ToolbarOwner toolbarOwner
+            DrawerOwner drawerController
     ) {
         this.appContext = appContext;
         this.playbackController = playbackController;
         this.requestor = requestor;
         this.settings = settings;
         this.drawerController = drawerController;
-        this.toolbarOwner = toolbarOwner;
     }
 
     @Override
@@ -109,16 +109,19 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
     @Override
     protected void onLoad(Bundle savedInstanceState) {
         super.onLoad(savedInstanceState);
-        if (lastArtInfo != null) {
-            loadArtwork(lastArtInfo);
+        if (lastArtUri != null) {
+            loadArtwork(lastArtUri);
         }
         setCurrentTrack(lastTrack);
         setCurrentArtist(lastArtist);
-        toolbarOwner.setConfig(ActionBarConfig.builder()
-                        .setTitle("")
-                        .setMenuConfig(new NowPlayingScreenMenuHander(this))
-                        .build());
-        lifecycle.subscribe(new Action1<Lifecycle>() {
+        if (lastState != null) {
+            onNewPlaybackState(lastState);
+        }
+        getView().setPlaying(false);
+        if (lifcycleSubscripton != null) {
+            lifcycleSubscripton.unsubscribe();
+        }
+        lifcycleSubscripton = lifecycle.subscribe(new Action1<Lifecycle>() {
             @Override
             @DebugLog
             public void call(Lifecycle lifecycle) {
@@ -139,6 +142,14 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
         });
     }
 
+    @Override
+    protected void onExitScope() {
+        super.onExitScope();
+        if (lifcycleSubscripton != null) {
+            lifcycleSubscripton.unsubscribe();
+        }
+    }
+
     void subscribeBroadcasts() {
         if (isSubscribed(broadcastSubscription)){
             return;
@@ -147,14 +158,8 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
                 new Action1<PlaybackStateCompat>() {
                     @Override
                     public void call(PlaybackStateCompat playbackState) {
-                        Timber.d("New playbackState %s", playbackState);
-                        isPlaying = PlaybackStateHelper.isPlaying(playbackState.getState());
-                        if (hasView()) {
-                            getView().setPlayChecked(PlaybackStateHelper.
-                                    shouldShowPauseButton(playbackState.getState()));
-                            getView().setPlaying(isPlaying);
-                        }
-                        mProgressUpdater.subscribeProgress(playbackState);
+                        lastState = playbackState;
+                        onNewPlaybackState(playbackState);
                     }
                 }
         );
@@ -162,20 +167,13 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
                 new Action1<MediaMetadataCompat>() {
                     @Override
                     public void call(MediaMetadataCompat mediaMetadata) {
-                        //TODO maybe should just set the large art uri in the metadata
+                        String uriString = mediaMetadata.getString(METADATA_KEY_ALBUM_ART_URI);
+                        if (!StringUtils.isEmpty(uriString)) {
+                            lastArtUri = Uri.parse(uriString);
+                            loadArtwork(lastArtUri);
+                        }
                         String track = mediaMetadata.getString(METADATA_KEY_TITLE);
                         String artist = mediaMetadata.getString(METADATA_KEY_ARTIST);
-                        String albumArtist = mediaMetadata.getString(METADATA_KEY_ALBUM_ARTIST);
-                        String album = mediaMetadata.getString(METADATA_KEY_ALBUM);
-                        String uriString = mediaMetadata.getString(METADATA_KEY_ART_URI);
-                        Uri artworkUri = uriString != null ? Uri.parse(uriString) : null;
-                        Timber.d("%s, %s, %s, %s", artist, albumArtist, album, uriString);
-                        final ArtInfo artInfo = UtilsCommon.makeBestfitArtInfo(albumArtist, artist, album, artworkUri);
-                        Timber.d(artInfo.toString());
-                        if (!artInfo.equals(lastArtInfo)) {
-                            lastArtInfo = artInfo;
-                            loadArtwork(artInfo);
-                        }
                         lastTrack = track;
                         setCurrentTrack(track);
                         lastArtist = artist;
@@ -203,10 +201,21 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
         }
     }
 
-    void loadArtwork(ArtInfo artInfo) {
+    void loadArtwork(Uri artUri) {
         if (hasView() && getView().getArtwork() != null) {
-            requestor.newRequest(artInfo, getView().getArtwork(), getView().mListener, null);
+            requestor.newRequest(artUri, getView().getArtwork(), getView().mListener, null);
         }
+    }
+
+    void onNewPlaybackState(PlaybackStateCompat playbackState) {
+        Timber.d("New playbackState %s", playbackState);
+        isPlaying = PlaybackStateHelper.isPlaying(playbackState.getState());
+        if (hasView()) {
+            getView().setPlayChecked(PlaybackStateHelper.
+                    shouldShowPauseButton(playbackState.getState()));
+            getView().setPlaying(isPlaying);
+        }
+        mProgressUpdater.subscribeProgress(playbackState);
     }
 
     void setProgress(int progress) {
@@ -250,6 +259,13 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
         if (hasView()) {
             getView().disableVisualizer();;
         }
+    }
+
+    ActionBarConfig getActionBarConfig() {
+        return ActionBarConfig.builder()
+                .setTitle("")
+                .setMenuConfig(new NowPlayingScreenMenuHander(this))
+                .build();
     }
 
 }

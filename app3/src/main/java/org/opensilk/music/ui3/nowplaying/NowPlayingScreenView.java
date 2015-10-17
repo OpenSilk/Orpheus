@@ -87,6 +87,7 @@ public class NowPlayingScreenView extends RelativeLayout {
 
     @Inject NowPlayingScreenPresenter presenter;
     @Inject AppPreferences settings;
+    @Inject ToolbarOwner toolbarOwner;
 
     @InjectView(R.id.now_playing_something) ViewGroup placeholder;
     @InjectView(R.id.now_playing_title) TextView title;
@@ -133,6 +134,7 @@ public class NowPlayingScreenView extends RelativeLayout {
                         ContextCompat.getDrawable(getContext(), R.drawable.ic_play_pause_white_animated_48dp), false);
             }
         }
+        presenter.takeView(this);
     }
 
     @Override
@@ -140,7 +142,8 @@ public class NowPlayingScreenView extends RelativeLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         if (!isInEditMode()) {
-            presenter.toolbarOwner.attachToolbar(toolbar);
+            toolbarOwner.attachToolbar(toolbar);
+            toolbarOwner.setConfig(presenter.getActionBarConfig());
             presenter.takeView(this);
             subscribeClicks();
         }
@@ -150,7 +153,7 @@ public class NowPlayingScreenView extends RelativeLayout {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         unsubscribeClicks();
-        presenter.toolbarOwner.detachToolbar(toolbar);
+        toolbarOwner.detachToolbar(toolbar);
         presenter.dropView(this);
         destroyVisualizer();
     }
