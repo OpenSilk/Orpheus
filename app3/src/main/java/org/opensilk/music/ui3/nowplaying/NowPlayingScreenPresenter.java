@@ -25,9 +25,13 @@ import android.support.v4.media.session.PlaybackStateCompat;
 
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.DrawerOwner;
+import org.opensilk.common.ui.mortar.Lifecycle;
+import org.opensilk.common.ui.mortar.LifecycleService;
 import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.ui.mortar.PausesAndResumes;
+import org.opensilk.common.ui.mortar.ToolbarOwner;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
@@ -41,6 +45,7 @@ import javax.inject.Inject;
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
+import rx.Observable;
 import rx.Subscription;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
@@ -53,16 +58,16 @@ import static org.opensilk.common.core.rx.RxUtils.isSubscribed;
  * Created by drew on 4/20/15.
  */
 @ScreenScope
-public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenView> implements PausesAndResumes {
+public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenView> {
 
     final Context appContext;
-    final PauseAndResumeRegistrar pauseAndResumeRegistrar;
     final PlaybackController playbackController;
     final ArtworkRequestManager requestor;
-//    final ActionBarOwner actionBarOwner;
     final AppPreferences settings;
     final DrawerOwner drawerController;
+    final ToolbarOwner toolbarOwner;
 
+    Observable<Lifecycle> lifecycle;
     CompositeSubscription broadcastSubscription;
 
     boolean isPlaying;
@@ -81,83 +86,57 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
     @Inject
     public NowPlayingScreenPresenter(
             @ForApplication Context appContext,
-            PauseAndResumeRegistrar pauseAndResumeRegistrar,
             PlaybackController playbackController,
             ArtworkRequestManager requestor,
-//             ActionBarOwner actionBarOwner,
             AppPreferences settings,
-            DrawerOwner drawerController
+            DrawerOwner drawerController,
+            ToolbarOwner toolbarOwner
     ) {
         this.appContext = appContext;
-        this.pauseAndResumeRegistrar = pauseAndResumeRegistrar;
         this.playbackController = playbackController;
         this.requestor = requestor;
-//        this.actionBarOwner = actionBarOwner;
         this.settings = settings;
         this.drawerController = drawerController;
+        this.toolbarOwner = toolbarOwner;
     }
 
     @Override
     protected void onEnterScope(MortarScope scope) {
         super.onEnterScope(scope);
-        pauseAndResumeRegistrar.register(scope, this);
+        lifecycle = LifecycleService.getLifecycle(scope);
     }
 
     @Override
     protected void onLoad(Bundle savedInstanceState) {
         super.onLoad(savedInstanceState);
-        if (pauseAndResumeRegistrar.isRunning()) {
-            Timber.v("missed onResume()");
-            setup();
-        }
-    }
-
-    @Override
-    protected void onSave(Bundle outState) {
-        super.onSave(outState);
-        if (pauseAndResumeRegistrar.isRunning()) {
-            Timber.v("missed onPause()");
-            teardown();
-        }
-    }
-
-    @Override
-    public void onResume() {
-        if (hasView()) {
-            Timber.v("missed onLoad()");
-            setup();
-        }
-    }
-
-    @Override
-    public void onPause() {
-        teardown();
-    }
-
-    @DebugLog
-    void setup() {
         if (lastArtInfo != null) {
             loadArtwork(lastArtInfo);
         }
         setCurrentTrack(lastTrack);
         setCurrentArtist(lastArtist);
-        updateVisualizer();
-        subscribeBroadcasts();
-    }
-
-    @DebugLog
-    void teardown() {
-        if (hasView()) {
-            getView().destroyVisualizer();
-        }
-        unsubscribeBroadcasts();
-        mProgressUpdater.unsubscribeProgress();
-    }
-
-    void loadArtwork(ArtInfo artInfo) {
-        if (hasView() && getView().getArtwork() != null) {
-            requestor.newRequest(artInfo, getView().getArtwork(), getView().mListener , null);
-        }
+        toolbarOwner.setConfig(ActionBarConfig.builder()
+                        .setTitle("")
+                        .setMenuConfig(new NowPlayingScreenMenuHander(this))
+                        .build());
+        lifecycle.subscribe(new Action1<Lifecycle>() {
+            @Override
+            @DebugLog
+            public void call(Lifecycle lifecycle) {
+                switch (lifecycle) {
+                    case RESUME: {
+                        subscribeBroadcasts();
+                        //progressupdater is kicked off by subscriptions
+                        break;
+                    }
+                    case PAUSE: {
+                        unsubscribeBroadcasts();
+                        mProgressUpdater.unsubscribeProgress();
+                        destroyVisualizer();
+                        break;
+                    }
+                }
+            }
+        });
     }
 
     void subscribeBroadcasts() {
@@ -168,14 +147,14 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
                 new Action1<PlaybackStateCompat>() {
                     @Override
                     public void call(PlaybackStateCompat playbackState) {
-                        boolean playing = PlaybackStateHelper.isPlaying(playbackState.getState());
+                        Timber.d("New playbackState %s", playbackState);
+                        isPlaying = PlaybackStateHelper.isPlaying(playbackState.getState());
                         if (hasView()) {
                             getView().setPlayChecked(PlaybackStateHelper.
                                     shouldShowPauseButton(playbackState.getState()));
-                            getView().setPlaying(playing);
+                            getView().setPlaying(isPlaying);
                         }
                         mProgressUpdater.subscribeProgress(playbackState);
-                        isPlaying = playing;
                     }
                 }
         );
@@ -208,6 +187,7 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
                 new Action1<Integer>() {
                     @Override
                     public void call(Integer integer) {
+                        Timber.d("New Session id %d", integer);
                         sessionId = integer;
                         updateVisualizer();
                     }
@@ -220,6 +200,12 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
         if (isSubscribed(broadcastSubscription)) {
             broadcastSubscription.unsubscribe();
             broadcastSubscription = null;
+        }
+    }
+
+    void loadArtwork(ArtInfo artInfo) {
+        if (hasView() && getView().getArtwork() != null) {
+            requestor.newRequest(artInfo, getView().getArtwork(), getView().mListener, null);
         }
     }
 
@@ -241,10 +227,28 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
         }
     }
 
+    public void pokeVisRenderer() {
+        if (hasView()) {
+            getView().reInitRenderer();
+        }
+    }
+
     void updateVisualizer() {
         if (hasView()) {
             getView().relinkVisualizer(sessionId);
             getView().setPlaying(isPlaying);
+        }
+    }
+
+    void destroyVisualizer() {
+        if (hasView()) {
+            getView().destroyVisualizer();
+        }
+    }
+
+    void disableVisualizer() {
+        if (hasView()) {
+            getView().disableVisualizer();;
         }
     }
 

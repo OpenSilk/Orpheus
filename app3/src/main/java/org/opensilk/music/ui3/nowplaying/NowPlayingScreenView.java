@@ -35,6 +35,7 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPropertyAnimatorListener;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,6 +58,7 @@ import org.opensilk.common.glide.PalettableUtils;
 import org.opensilk.common.glide.PaletteSwatchType;
 import org.opensilk.common.glide.PaletteableDrawableCrossFadeTransition;
 import org.opensilk.common.glide.ViewBackgroundDrawableTarget;
+import org.opensilk.common.ui.mortar.ToolbarOwner;
 import org.opensilk.common.ui.util.ThemeUtils;
 import org.opensilk.common.ui.util.ViewUtils;
 import org.opensilk.common.ui.widget.ImageButtonCheckable;
@@ -95,6 +97,7 @@ public class NowPlayingScreenView extends RelativeLayout {
     @InjectView(R.id.now_playing_previous) ImageButton previousBtn;
     @InjectView(R.id.now_playing_next) ImageButton nextButton;
     @InjectView(R.id.now_playing_image) ImageView artwork;
+    @InjectView(R.id.toolbar) Toolbar toolbar;
 
     final boolean lightTheme;
 
@@ -115,6 +118,7 @@ public class NowPlayingScreenView extends RelativeLayout {
     }
 
     @Override
+    @DebugLog
     protected void onFinishInflate() {
         super.onFinishInflate();
         ButterKnife.inject(this);
@@ -128,14 +132,15 @@ public class NowPlayingScreenView extends RelativeLayout {
                 drawable.addTransition(R.id.play_state, R.id.pause_state, (AnimatedVectorDrawable)
                         ContextCompat.getDrawable(getContext(), R.drawable.ic_play_pause_white_animated_48dp), false);
             }
-            presenter.takeView(this);
         }
     }
 
     @Override
+    @DebugLog
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         if (!isInEditMode()) {
+            presenter.toolbarOwner.attachToolbar(toolbar);
             presenter.takeView(this);
             subscribeClicks();
         }
@@ -145,6 +150,7 @@ public class NowPlayingScreenView extends RelativeLayout {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         unsubscribeClicks();
+        presenter.toolbarOwner.detachToolbar(toolbar);
         presenter.dropView(this);
         destroyVisualizer();
     }
@@ -171,7 +177,13 @@ public class NowPlayingScreenView extends RelativeLayout {
         }
     }
 
+    @DebugLog
     private void initRenderer() {
+        boolean waslinked = false;
+        if (visualizerView.isLinked() && visualizerView.isEnabled()) {
+            waslinked = true;
+            visualizerView.setEnabled(false);
+        }
         visualizerView.clearRenderers();
         switch (visualizerType) {
             case NOW_PLAYING_VIEW_VIS_CIRCLE: {
@@ -209,13 +221,20 @@ public class NowPlayingScreenView extends RelativeLayout {
                 break;
             }
         }
+        if (waslinked) {
+            visualizerView.setEnabled(true);
+        }
+    }
+
+    public void reInitRenderer() {
+        if (visualizerView != null) {
+            initRenderer();
+        }
     }
 
     public void reInitRenderer(int paintColor) {
         rendererColor = paintColor;
-        if (visualizerView != null) {
-            initRenderer();
-        }
+        reInitRenderer();
     }
 
     public void relinkVisualizer(int sessionId) {
@@ -238,6 +257,11 @@ public class NowPlayingScreenView extends RelativeLayout {
         if (visualizerView != null) {
             visualizerView.release();
         }
+    }
+
+    public void disableVisualizer(){
+        setPlaying(false);
+        initVisualizer();
     }
 
     public void setPlaying(boolean playing) {
@@ -299,6 +323,10 @@ public class NowPlayingScreenView extends RelativeLayout {
 
     public void setCurrentArtist(CharSequence text) {
         subTitle.setText(text);
+    }
+
+    public Toolbar getToolbar() {
+        return toolbar;
     }
 
     void subscribeClicks() {
