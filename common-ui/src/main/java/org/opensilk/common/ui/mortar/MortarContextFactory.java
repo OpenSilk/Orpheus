@@ -17,7 +17,7 @@ public final class MortarContextFactory {
 
   public Context setUpContext(Screen path, Context parentContext) {
     MortarScope screenScope =
-        screenScoper.getScreenScope(parentContext, path.getName(), path);
+        screenScoper.getScreenScope(parentContext, path);
     return new TearDownContext(parentContext, screenScope);
   }
 

@@ -30,12 +30,15 @@ import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.core.mortar.HasScope;
 import org.opensilk.common.ui.mortar.HasName;
 import org.opensilk.common.ui.mortar.LayoutCreator;
+import org.opensilk.common.ui.mortar.Lifecycle;
+import org.opensilk.common.ui.mortar.LifecycleService;
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortar.ScreenScoper;
 
 import javax.inject.Inject;
 
 import mortar.MortarScope;
+import rx.subjects.BehaviorSubject;
 import timber.log.Timber;
 
 /**
@@ -46,6 +49,7 @@ public abstract class MortarFragment extends Fragment implements HasScope {
 
     private MortarScope mScope;
     private Screen mScreen;
+    private final BehaviorSubject<Lifecycle> lifecycleSubject = BehaviorSubject.create();
 
     protected abstract Screen newScreen();
 
@@ -88,6 +92,30 @@ public abstract class MortarFragment extends Fragment implements HasScope {
         if (DEBUG_LIFECYCLE) Timber.v("<-onDestroy %s", getScopeName());
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        lifecycleSubject.onNext(Lifecycle.START);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        lifecycleSubject.onNext(Lifecycle.RESUME);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        lifecycleSubject.onNext(Lifecycle.PAUSE);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        lifecycleSubject.onNext(Lifecycle.STOP);
+    }
+
     private MortarScope findOrMakeScope() {
         MortarScope scope = MortarScope.findChild(getActivity(), getScopeName());
         if (scope != null) {
@@ -95,7 +123,8 @@ public abstract class MortarFragment extends Fragment implements HasScope {
         }
         if (scope == null) {
             ScreenScoper scoper = ScreenScoper.getService(getActivity());
-            scope = scoper.getScreenScope(getActivity(), getScopeName(), getScreen());
+            scope = scoper.getScreenScope(getActivity(), getScreen(),
+                    LifecycleService.LIFECYCLE_SERVICE, lifecycleSubject.asObservable());
             Timber.d("Created new fragment scope %s", getScopeName());
         }
         return scope;

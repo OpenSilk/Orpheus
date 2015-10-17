@@ -52,9 +52,9 @@ public class ScreenScoper {
         throw new IllegalArgumentException(String.format("No ScreenScoper service in scope %s", scope.getName()));
     }
 
-    public MortarScope getScreenScope(Context context, String name, Object screen) {
+    public MortarScope getScreenScope(Context context, Screen screen, Object... services) {
         MortarScope parentScope = MortarScope.getScope(context);
-        return getScreenScope(context.getResources(), parentScope, name, screen);
+        return getScreenScope(context.getResources(), parentScope, screen, services);
     }
 
     /**
@@ -62,8 +62,8 @@ public class ScreenScoper {
      * WithComponentFactory} or {@link WithComponent} annotation. Note that scopes are also created
      * for unannotated screens.
      */
-    public MortarScope getScreenScope(Resources resources, MortarScope parentScope, final String name, final Object screen) {
-        MortarScope childScope = parentScope.findChild(name);
+    public MortarScope getScreenScope(Resources resources, MortarScope parentScope, Screen screen, Object... services) {
+        MortarScope childScope = parentScope.findChild(screen.getName());
         if (childScope == null) {
             ComponentFactory componentFactory = getModuleFactory(screen);
 
@@ -74,9 +74,18 @@ public class ScreenScoper {
                 throw new IllegalArgumentException("Screen must have a component");
             }
 
-            childScope = parentScope.buildChild()
-                    .withService(DAGGER_SERVICE, childComponent)
-                    .build(name);
+            MortarScope.Builder bob = parentScope.buildChild()
+                    .withService(DAGGER_SERVICE, childComponent);
+
+            if (services != null && services.length > 0) {
+                if (services.length % 2 != 0) {
+                    throw new IllegalArgumentException("Services must be name, service pairs");
+                }
+                for (int ii=0; ii<services.length; ii+=2) {
+                    bob.withService((String) services[ii], services[ii+1]);
+                }
+            }
+            childScope = bob.build(screen.getName());
         }
         return childScope;
     }

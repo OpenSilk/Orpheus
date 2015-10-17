@@ -97,7 +97,7 @@ public abstract class MortarDialogFragment extends DialogFragment {
         }
         if (scope == null) {
             ScreenScoper scoper = ScreenScoper.getService(getActivity());
-            scope = scoper.getScreenScope(getActivity(), getScopeName(), getScreen());
+            scope = scoper.getScreenScope(getActivity(), getScreen());
             Timber.d("Created new fragment scope %s", getScopeName());
         }
         return scope;
