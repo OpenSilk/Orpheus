@@ -27,11 +27,6 @@
             android:title="@string/settings_download_artist_images_title"
             android:defaultValue="true" />
 
-        <CheckBoxPreference
-            android:key="want_low_resolution"
-            android:title="@string/settings_low_resolution"
-            android:defaultValue="false"/>
-
     </PreferenceCategory>
 
     <PreferenceCategory
