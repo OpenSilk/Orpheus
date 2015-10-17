@@ -30,6 +30,7 @@ import org.opensilk.common.core.app.SimpleComponentCallbacks;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.artwork.fetcher.ArtworkFetcherService;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
+import org.opensilk.music.index.client.IndexClient;
 import org.opensilk.music.playback.PlaybackComponent;
 import org.opensilk.music.playback.service.PlaybackServiceComponent;
 
@@ -45,6 +46,8 @@ import timber.log.Timber;
 
 public class App extends BaseApp {
     private static final boolean DEBUG = BuildConfig.DEBUG;
+
+    @Inject IndexClient mIndexClient;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -63,6 +66,7 @@ public class App extends BaseApp {
                 //TODO
             }
         });
+
 
         if (isUiProcess()) {
             DaggerService.<AppComponent>getDaggerComponent(this).inject(this);
@@ -137,7 +141,13 @@ public class App extends BaseApp {
         @Override
         @DebugLog
         public void onTrimMemory(int level) {
-            //pass
+            Timber.d("Trim memory for process %s", getProcName());
+            if (level >= TRIM_MEMORY_UI_HIDDEN) {
+                if (isUiProcess()) {
+                    //todo find a better place for this
+                    mIndexClient.release();
+                }
+            }
         }
     };
 
