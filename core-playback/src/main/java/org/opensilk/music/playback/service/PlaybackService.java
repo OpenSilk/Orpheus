@@ -123,6 +123,7 @@ public class PlaybackService extends MediaBrowserService {
     //
     boolean mServiceStarted = false;
     volatile int mConnectedClients = 0;
+    volatile boolean shouldReleaseClient;
 
     Subscription mCurrentTrackSub;
     Subscription mNextTrackSub;
@@ -160,6 +161,7 @@ public class PlaybackService extends MediaBrowserService {
 
     @Override
     public void onDestroy() {
+        shouldReleaseClient = true;
         saveState(true); //fire early as possible
         super.onDestroy();
 
@@ -265,6 +267,10 @@ public class PlaybackService extends MediaBrowserService {
 
     @DebugLog
     void updatePlaybackState(String error) {
+        updatePlaybackState(error, false);
+    }
+
+    void updatePlaybackState(String error, boolean fromChecker) {
         int state = mPlayback.getState();
         Timber.d("updatePlaybackState(%s) err=%s",
                 PlaybackStateHelper.stringifyState(state), error);
@@ -323,7 +329,8 @@ public class PlaybackService extends MediaBrowserService {
 
         mHandler.removeCallbacks(mProgressCheckRunnable);
         if (PlaybackStateHelper.isPlaying(state)) {
-            mHandler.postDelayed(mProgressCheckRunnable, 10000);
+            //if not a schedule update recheck in 2 sec in case duration wasnt ready
+            mHandler.postDelayed(mProgressCheckRunnable, fromChecker ? 30000 : 2000);
         }
     }
 
@@ -404,6 +411,9 @@ public class PlaybackService extends MediaBrowserService {
                 mIndexClient.saveQueueRepeatMode(qSnapshot.repeat);
                 mIndexClient.saveQueueShuffleMode(qSnapshot.shuffle);
                 mIndexClient.saveLastSeekPosition(seekPos);
+                if (shouldReleaseClient) {
+                    mIndexClient.release();
+                }
                 return null;
             }
         }.execute();
@@ -1034,7 +1044,7 @@ public class PlaybackService extends MediaBrowserService {
     final Runnable mProgressCheckRunnable = new Runnable() {
         @Override
         public void run() {
-            updatePlaybackState(null);
+            updatePlaybackState(null, true);
         }
     };
 
