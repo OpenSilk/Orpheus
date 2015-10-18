@@ -359,6 +359,16 @@ public class IndexClientImpl implements IndexClient {
         return m;
     }
 
+    @Override
+    public void release() {
+        synchronized (this) {
+            if (client != null) {
+                client.release();
+                client = null;
+            }
+        }
+    }
+
     private boolean makeCheckedCall(String method, Bundle args) {
         return checkCall(appContext.getContentResolver().call(callUri, method, null, args));
     }
@@ -367,8 +377,6 @@ public class IndexClientImpl implements IndexClient {
         if (client == null) {
             synchronized (this) {
                 if (client == null) {
-                    //XXX we are using an unstable provider since we never actually release it
-                    // but we *need* this cached as it greatly improves performance
                     client = appContext.getContentResolver().acquireUnstableContentProviderClient(callUri);
                 }
             }
@@ -376,10 +384,7 @@ public class IndexClientImpl implements IndexClient {
         try {
             return client.call(method, null, args);
         } catch (RemoteException e) {
-            synchronized (this) {
-                client.release();
-                client = null;
-            }
+            release();
             return makeCall(method, args);
         }
     }
