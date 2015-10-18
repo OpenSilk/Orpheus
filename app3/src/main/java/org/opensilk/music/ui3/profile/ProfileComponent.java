@@ -28,4 +28,5 @@ public interface ProfileComponent extends BundleableComponent, FooterScreenCompo
     void inject(ProfileHeroView view);
     void inject(ProfileView2Portrait view);
     void inject(ProfileView2DragSwipePortrait view);
+    void inject(ProfileView2Land view);
 }

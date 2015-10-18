@@ -26,4 +26,13 @@
 
     <dimen name="carmode_bottom_margin">16dp</dimen>
     <dimen name="carmode_seekbar_padding">8dp</dimen>
+
+    <!--profile-->
+    <dimen name="profile_appbar_height">180dp</dimen>
+    <dimen name="profile_appbar_title_padding_left">96dp</dimen>
+    <dimen name="profile_appbar_title_padding_bottom">64dp</dimen>
+    <dimen name="profile_list_margin">88dp</dimen>
+    <dimen name="profile_list_overlap">56dp</dimen>
+    <dimen name="profile_fab_margin">16dp</dimen>
+    <dimen name="profile_artwork_size">120dp</dimen>
 </resources>

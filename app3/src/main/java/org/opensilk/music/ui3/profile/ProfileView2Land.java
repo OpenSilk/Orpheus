@@ -34,6 +34,9 @@ import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.ToolbarOwner;
+import org.opensilk.common.ui.recycler.HeaderRecyclerAdapter;
+import org.opensilk.common.ui.recycler.ItemClickSupport;
+import org.opensilk.common.ui.recycler.RecyclerListAdapter;
 import org.opensilk.common.ui.util.ViewUtils;
 import org.opensilk.music.R;
 import org.opensilk.music.index.model.BioSummary;
@@ -50,9 +53,9 @@ import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 
 /**
- * Created by drew on 9/3/15.
+ * Created by drew on 10/17/15.
  */
-public class ProfileView2Portrait extends CoordinatorLayout implements BundleableRecyclerView2 {
+public class ProfileView2Land extends CoordinatorLayout implements BundleableRecyclerView2 {
 
     @Inject @Named("profile_heros") Boolean wantMultiHeros;
     @Inject @Named("profile_title") String mTitleText;
@@ -68,7 +71,7 @@ public class ProfileView2Portrait extends CoordinatorLayout implements Bundleabl
 
     CompositeSubscription mClicks = new CompositeSubscription();
 
-    public ProfileView2Portrait(Context context, AttributeSet attrs) {
+    public ProfileView2Land(Context context, AttributeSet attrs) {
         super(context, attrs);
         if (!isInEditMode()) {
             ProfileComponent component = DaggerService.getDaggerComponent(getContext());
@@ -80,17 +83,11 @@ public class ProfileView2Portrait extends CoordinatorLayout implements Bundleabl
     protected void onFinishInflate() {
         super.onFinishInflate();
         ButterKnife.inject(this);
-        int headerlayout = wantMultiHeros ? R.layout.profile_view2_hero_multi : R.layout.profile_view2_hero;
-        ViewUtils.inflate(getContext(), headerlayout, mCollapsingToolbar);
-        mCollapsingToolbar.bringChildToFront(mToolbar);
-//        View hero = ViewUtils.inflate(getContext(), headerlayout, null);
-//        mCollapsingToolbar.addView(hero, 0);
         mCollapsingToolbar.setTitle(mTitleText);
         initRecyclerView();
         subscribeClicks();
         if (!isInEditMode()) {
-            mToolbarOwner.attachToolbar(mToolbar);
-            mToolbarOwner.setConfig(ActionBarConfig.builder().setMenuConfig(mPresenter.getMenuConfig()).build());
+
             mPresenter.takeView(this);
         }
     }
@@ -99,8 +96,7 @@ public class ProfileView2Portrait extends CoordinatorLayout implements Bundleabl
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
         mToolbarOwner.attachToolbar(mToolbar);
-        mToolbarOwner.setConfig(ActionBarConfig.builder()
-                .setTitle(mTitleText).setMenuConfig(mPresenter.getMenuConfig()).build());
+        mToolbarOwner.setConfig(ActionBarConfig.builder().setMenuConfig(mPresenter.getMenuConfig()).build());
     }
 
     @Override
@@ -122,7 +118,10 @@ public class ProfileView2Portrait extends CoordinatorLayout implements Bundleabl
 
     protected void initRecyclerView() {
         getListView().setHasFixedSize(true);
-        getListView().setAdapter(mAdapter);
+        WrappedHeaderRecyclerAdapter wrapper = new WrappedHeaderRecyclerAdapter(mAdapter);
+        int headerlayout = wantMultiHeros ? R.layout.profile_view2_hero_multi : R.layout.profile_view2_hero;
+        wrapper.addHeader(ViewUtils.inflate(getContext(), headerlayout, null, false));
+        getListView().setAdapter(wrapper);
     }
 
     public void setupRecyclerView() {
@@ -149,7 +148,10 @@ public class ProfileView2Portrait extends CoordinatorLayout implements Bundleabl
         m.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
-                Bundleable item = mAdapter.getItem(position);
+                if (position == 0) {
+                    return numCols;
+                }
+                Bundleable item = mAdapter.getItem(position-1);
                 return (item instanceof BioSummary) ? numCols : 1;
             }
         });
@@ -190,5 +192,38 @@ public class ProfileView2Portrait extends CoordinatorLayout implements Bundleabl
     @Override
     public void setEmptyText(int resId) {
 
+    }
+
+    static class WrappedHeaderRecyclerAdapter extends HeaderRecyclerAdapter<BundleableRecyclerAdapter.ViewHolder>
+            implements ItemClickSupport.OnItemLongClickListener, ItemClickSupport.OnItemClickListener {
+        public WrappedHeaderRecyclerAdapter(BundleableRecyclerAdapter wrappedAdapter) {
+            super(wrappedAdapter);
+        }
+
+        @Override
+        public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+            ItemClickSupport.addTo(recyclerView)
+                    .setOnItemClickListener(this)
+                    .setOnItemLongClickListener(this);
+        }
+
+        @Override
+        public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
+            ItemClickSupport.removeFrom(recyclerView);
+        }
+
+        @Override
+        public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
+            return position != 0 && ((ItemClickSupport.OnItemLongClickListener) wrappedAdapter)
+                    .onItemLongClicked(recyclerView, position - 1, v);
+        }
+
+        @Override
+        public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+            if (position != 0) {
+                ((ItemClickSupport.OnItemClickListener)wrappedAdapter)
+                        .onItemClicked(recyclerView, position - 1, v);
+            }
+        }
     }
 }

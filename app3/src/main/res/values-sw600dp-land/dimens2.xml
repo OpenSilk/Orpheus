@@ -23,4 +23,13 @@
 
     <!--now playing-->
     <dimen name="now_playing_button_padding">12dp</dimen>
+
+    <!--profile-->
+    <dimen name="profile_appbar_height">300dp</dimen>
+    <dimen name="profile_appbar_title_padding_left">116dp</dimen>
+    <dimen name="profile_appbar_title_padding_bottom">116dp</dimen>
+    <dimen name="profile_list_margin">100dp</dimen>
+    <dimen name="profile_list_overlap">100dp</dimen>
+    <dimen name="profile_fab_margin">22dp</dimen>
+    <dimen name="profile_artwork_size">220dp</dimen>
 </resources>
