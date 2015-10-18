@@ -26,7 +26,7 @@ import android.view.ViewGroup;
  */
 public class HeaderRecyclerAdapter<VH extends RecyclerView.ViewHolder> extends RecyclerListAdapter<View, RecyclerView.ViewHolder> {
 
-    final RecyclerListAdapter<?, VH> wrappedAdapter;
+    protected final RecyclerListAdapter<?, VH> wrappedAdapter;
 
     public HeaderRecyclerAdapter(RecyclerListAdapter<?, VH> wrappedAdapter) {
         super();
@@ -40,6 +40,16 @@ public class HeaderRecyclerAdapter<VH extends RecyclerView.ViewHolder> extends R
 
     public int getNumHeaders() {
         return getItems().size();
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        wrappedAdapter.onAttachedToRecyclerView(recyclerView);
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
+        wrappedAdapter.onDetachedFromRecyclerView(recyclerView);
     }
 
     @Override
