@@ -84,12 +84,16 @@ public abstract class MusicActivity extends MortarFragmentActivity
         setupContentView();
         mActivityResultsOwner.takeView(this);
         DrawerLayout drawerLayout = ButterKnife.findById(this, R.id.drawer_layout);
+        boolean hasdrawer = false;
         if (drawerLayout != null) {
             mDrawerOwnerDelegate = new DrawerOwnerDelegate<>(this, mDrawerOwner, drawerLayout,
                     R.string.app_name, R.string.app_name);
             mDrawerOwnerDelegate.onCreate();
+            hasdrawer = true;
+        }
+        if (hasdrawer && hasLeftDrawer()) {
             mToolbarOwnerDelegate = new ToolbarOwnerDelegate<>(this, mToolbarOwner, mDrawerOwnerDelegate);
-        } else {
+        }else {
             mToolbarOwnerDelegate = new ToolbarOwnerDelegate<>(this, mToolbarOwner, this);
         }
         mToolbarOwnerDelegate.onCreate();
@@ -213,5 +217,9 @@ public abstract class MusicActivity extends MortarFragmentActivity
     @Override
     public void onToolbarDetached(Toolbar toolbar) {
 
+    }
+
+    protected boolean hasLeftDrawer() {
+        return true;
     }
 }

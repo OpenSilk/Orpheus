@@ -25,6 +25,7 @@ import org.opensilk.common.ui.mortar.Layout;
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortar.WithComponentFactory;
 import org.opensilk.music.R;
+import org.opensilk.music.ui3.NowPlayingActivityComponent;
 
 import mortar.MortarScope;
 

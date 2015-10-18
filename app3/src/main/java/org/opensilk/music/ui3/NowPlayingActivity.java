@@ -15,28 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.nowplaying;
+package org.opensilk.music.ui3;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.widget.DrawerLayout;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.ui3.MusicActivity;
+import org.opensilk.music.ui.theme.OrpheusTheme;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import mortar.MortarScope;
 
 /**
  * Created by drew on 10/2/15.
  */
 public class NowPlayingActivity extends MusicActivity {
-
-    @InjectView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
 
     public static void startSelf(Context context, boolean startQueue) {
         Intent i = new Intent(context, NowPlayingActivity.class);
@@ -48,13 +44,13 @@ public class NowPlayingActivity extends MusicActivity {
     protected void setupContentView() {
         setContentView(R.layout.activity_nowplaying);
         ButterKnife.inject(this);
-//        mDrawerLayout.setStatusBarBackgroundColor(Color.TRANSPARENT);
     }
 
     @Override
     protected void themeActivity(AppPreferences preferences) {
-//        OrpheusTheme theme = preferences.getTheme();
-//        setTheme(preferences.isDarkTheme() ? theme.dark : theme.light);
+        boolean darkTheme = preferences.isDarkTheme();
+        OrpheusTheme theme = preferences.getTheme();
+        setTheme(darkTheme ? theme.dark : theme.light);
     }
 
     @Override

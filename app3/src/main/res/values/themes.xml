@@ -126,14 +126,6 @@
 
     <!-- end settings themes -->
 
-    <style name="Theme.NowPlaying.Light" parent="Theme.LightBase">
-
-    </style>
-
-    <style name="Theme.NowPlaying.Dark" parent="Theme.DarkBase">
-
-    </style>
-
     <!-- Carmode theme also in v21-->
     <style name="Theme.Carmode" parent="Theme.DarkBase">
         <item name="colorAccent">@color/white</item>

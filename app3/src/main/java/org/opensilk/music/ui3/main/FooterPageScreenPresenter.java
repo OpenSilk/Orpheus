@@ -27,16 +27,13 @@ import android.support.v4.view.GravityCompat;
 import android.view.View;
 
 import org.opensilk.common.core.dagger2.SubScreenScope;
-import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.common.ui.mortar.DrawerOwner;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
-import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.playback.PlaybackStateHelper;
 import org.opensilk.music.playback.control.PlaybackController;
-import org.opensilk.music.ui3.nowplaying.NowPlayingActivity;
+import org.opensilk.music.ui3.NowPlayingActivity;
 
 import javax.inject.Inject;
 

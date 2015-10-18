@@ -23,7 +23,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.AppPreferences;
@@ -42,7 +41,7 @@ import org.opensilk.music.ui3.common.MenuHandlerImpl;
 import org.opensilk.music.ui3.common.UtilsCommon;
 import org.opensilk.music.ui3.profile.album.AlbumDetailsScreen;
 import org.opensilk.music.ui3.profile.tracklist.TrackListScreen;
-import org.opensilk.music.ui3.profile.ProfileActivity;
+import org.opensilk.music.ui3.ProfileActivity;
 
 import java.util.List;
 

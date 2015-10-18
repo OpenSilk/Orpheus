@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.profile;
+package org.opensilk.music.ui3;
 
 import android.content.Context;
 import android.content.Intent;
@@ -23,11 +23,11 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 
 import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.ui3.MusicActivity;
+import org.opensilk.music.ui.theme.OrpheusTheme;
+import org.opensilk.music.ui3.profile.ProfileScreen;
 
 import mortar.MortarScope;
 
@@ -66,7 +66,9 @@ public class ProfileActivity extends MusicActivity {
 
     @Override
     protected void themeActivity(AppPreferences preferences) {
-
+        boolean darkTheme = preferences.isDarkTheme();
+        OrpheusTheme theme = preferences.getTheme();
+        setTheme(darkTheme ? theme.dark : theme.light);
     }
 
     @Override
@@ -84,5 +86,10 @@ public class ProfileActivity extends MusicActivity {
     @Override
     public void onToolbarAttached(Toolbar toolbar) {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    @Override
+    protected boolean hasLeftDrawer() {
+        return false;
     }
 }

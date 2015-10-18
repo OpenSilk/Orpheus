@@ -57,9 +57,7 @@ public class LauncherActivity extends MusicActivity {
     @Inject AppPreferences mSettings;
     @Inject FragmentManagerOwner mFm;
 
-    @InjectView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
     @InjectView(R.id.navigation) NavigationView mNavigation;
-
 
     @Override
     protected void onCreateScope(MortarScope.Builder builder) {
@@ -94,12 +92,10 @@ public class LauncherActivity extends MusicActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (mDrawerLayout != null) {
-            mNavigation.setNavigationItemSelectedListener(mNavigaitonClickListener);
-            if (savedInstanceState == null) {
-                mNavigaitonClickListener.onNavigationItemSelected(
-                        mNavigation.getMenu().getItem(mSettings.getInt(AppPreferences.LAST_NAVIGATION_ITEM, 0)));
-            }
+        mNavigation.setNavigationItemSelectedListener(mNavigaitonClickListener);
+        if (savedInstanceState == null) {
+            mNavigaitonClickListener.onNavigationItemSelected(
+                    mNavigation.getMenu().getItem(mSettings.getInt(AppPreferences.LAST_NAVIGATION_ITEM, 0)));
         }
     }
 
