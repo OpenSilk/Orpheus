@@ -57,6 +57,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import hugo.weaving.DebugLog;
+import timber.log.Timber;
 
 import static android.provider.MediaStore.Audio.keyFor;
 
@@ -849,6 +850,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
         cv.put(IndexSchema.Containers.URI, uri.toString());
         cv.put(IndexSchema.Containers.PARENT_URI, parentUri.toString());
         cv.put(IndexSchema.Containers.AUTHORITY, uri.getAuthority());
+        Timber.v("Inserting container %s", cv);
         return insert(IndexSchema.Containers.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
     }
 
@@ -991,6 +993,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
             cv.put(IndexSchema.Meta.Track.DURATION, duration);
         }
 
+        Timber.v("Insering track metadata %s", cv.toString());
         long id = insert(IndexSchema.Meta.Track.TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
         if (id > 0) {
             mAppContext.getContentResolver().notifyChange(IndexUris.tracks(indexAuthority), null);
@@ -1071,6 +1074,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
             cv.put(IndexSchema.Tracks.RES_DURATION, duration);
         }
         cv.put(IndexSchema.Tracks.DATE_ADDED, System.currentTimeMillis());
+        Timber.v("Inserting track %s", cv.toString());
         return insert(IndexSchema.Tracks.TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
     }
 
