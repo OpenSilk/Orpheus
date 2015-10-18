@@ -85,7 +85,7 @@ public class DrawerOwnerDelegate<A extends Activity & HasScope>
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
-        return mDrawerToggle.onOptionsItemSelected(item);
+        return mToolbar != null && mDrawerToggle.onOptionsItemSelected(item);
     }
 
     public boolean onBackPressed() {
@@ -149,7 +149,7 @@ public class DrawerOwnerDelegate<A extends Activity & HasScope>
     public void enableDrawer(int gravity, boolean enable) {
         int lockmode = enable ? DrawerLayout.LOCK_MODE_UNLOCKED : DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
         if (mDrawerLayout != null) mDrawerLayout.setDrawerLockMode(lockmode, gravity);
-        if (gravity == GravityCompat.START && mDrawerToggle != null)
+        if (gravity == GravityCompat.START && mDrawerToggle != null && mToolbar != null)
             mDrawerToggle.setDrawerIndicatorEnabled(enable);
     }
 
