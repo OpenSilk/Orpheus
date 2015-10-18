@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.concurrent.Semaphore;
 
 import timber.log.Timber;
 
@@ -34,6 +35,7 @@ public class BitmapDiskLruCache implements BitmapDiskCache {
     private static final int DEFAULT_BUFFER_SIZE = 1024 * 8;
     private static final int OUTPUT_BUFFER_SIZE = 1024 * 64;
     private final Pools.Pool<ByteArrayOutputStream> mOutputPool = new Pools.SynchronizedPool<>(5);
+    private final Semaphore mOutputSemaphore = new Semaphore(5, true);
 
     public static final Object sDecodeLock = new Object();
 
@@ -65,6 +67,7 @@ public class BitmapDiskLruCache implements BitmapDiskCache {
     }
 
     private ByteArrayOutputStream getOutput() {
+        mOutputSemaphore.acquireUninterruptibly();
         ByteArrayOutputStream out = mOutputPool.acquire();
         if (out == null) {
             out = new PoolingByteArrayOutputStream(mBytePool, OUTPUT_BUFFER_SIZE);
@@ -79,6 +82,7 @@ public class BitmapDiskLruCache implements BitmapDiskCache {
                 IOUtils.closeQuietly(out);
             }
         }
+        mOutputSemaphore.release();
     }
 
     @Override
