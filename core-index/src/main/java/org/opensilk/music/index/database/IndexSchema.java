@@ -37,6 +37,7 @@ public class IndexSchema {
 
         interface Artist extends BaseColumns {
             String TABLE = "artist_info";
+            String ALBUM_ARSTIST_TABLE = "album_artist_info";
             String TITLE = "name";
             String ARTIST_KEY = "artist_key";
             String NUMBER_OF_ALBUMS = "number_of_albums";

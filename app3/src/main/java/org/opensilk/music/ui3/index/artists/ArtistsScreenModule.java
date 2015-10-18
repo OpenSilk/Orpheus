@@ -57,7 +57,7 @@ public class ArtistsScreenModule {
 
     @Provides @Named("loader_uri")
     public Uri provideLoaderUri(@Named("IndexProviderAuthority") String authority) {
-        return IndexUris.artists(authority);
+        return IndexUris.albumArtists(authority);
     }
 
     @Provides @ScreenScope

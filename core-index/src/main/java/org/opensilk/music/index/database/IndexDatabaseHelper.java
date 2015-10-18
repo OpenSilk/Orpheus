@@ -32,7 +32,7 @@ import javax.inject.Singleton;
 @Singleton
 public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
-    public static final int DB_VERSION = 32;
+    public static final int DB_VERSION = 33;
     public static final String DB_NAME = "music.db";
 
     @Inject
@@ -54,9 +54,10 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP TABLE IF EXISTS recent;");
         }
 
-        if (oldVersion < DB_VERSION) {
-            // STOPSHIP: 9/19/15 remove before release
-            //cleanup mistakes prior to 3.0 release
+        // STOPSHIP: 9/19/15 remove before release
+        //cleanup mistakes prior to 3.0 release
+        if (oldVersion < 32) {
+
             db.execSQL("DROP TRIGGER IF EXISTS tracks_cleanup;");
             db.execSQL("DROP TRIGGER IF EXISTS albums_cleanup;");
             db.execSQL("DROP TRIGGER IF EXISTS artists_cleanup;");
@@ -83,7 +84,6 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP INDEX IF EXISTS containers_uri_idx;");
             db.execSQL("DROP INDEX IF EXISTS playback_settings_key_idx;");
 
-
             db.execSQL("DROP TABLE IF EXISTS extracted_meta;");
             db.execSQL("DROP TABLE IF EXISTS track_resources;");
             db.execSQL("DROP TABLE IF EXISTS track_meta;");
@@ -98,7 +98,13 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP TABLE IF EXISTS scanner_settings;");
             db.execSQL("DROP TABLE IF EXISTS playback_settings;");
 
-            //end mistakes cleanup
+        }
+        if (oldVersion < 33) {
+            db.execSQL("DROP VIEW IF EXISTS album_artist_info;");
+        }
+        //end mistakes cleanup
+
+        if (oldVersion < DB_VERSION) {
 
             //Scanner meta
             db.execSQL("CREATE TABLE IF NOT EXISTS scanner_settings (" +
@@ -221,6 +227,19 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "FROM artist_meta a1 " +
                     "LEFT OUTER JOIN album_meta a2 ON a2.album_artist_id = a1._id " +
                     "LEFT OUTER JOIN track_meta t1 ON t1.artist_id = a1._id " +
+                    "GROUP BY a1._id" +
+                    ";");
+
+            db.execSQL("CREATE VIEW IF NOT EXISTS album_artist_info AS SELECT " +
+                    "a1._id, " +
+                    "a1.name, " +
+                    "a1.artist_key, " +
+                    "a1.number_of_albums, " +
+                    "a1.number_of_tracks, "+
+                    "a1.summary, " +
+                    "a1.mbid " +
+                    "FROM artist_info a1 " +
+                    "JOIN album_meta a2 ON a2.album_artist_id = a1._id " +
                     "GROUP BY a1._id" +
                     ";");
 

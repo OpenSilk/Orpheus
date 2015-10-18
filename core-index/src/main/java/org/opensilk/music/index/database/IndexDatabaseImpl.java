@@ -173,6 +173,24 @@ public class IndexDatabaseImpl implements IndexDatabase {
         return lst;
     }
 
+    @Override
+    public List<Artist> getAlbumArtists(String sortOrder) {
+        List<Artist> lst = new ArrayList<>();
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.Info.Artist.ALBUM_ARSTIST_TABLE, artists_cols, null, null, null, null, sortOrder);
+            if (c != null && c.moveToFirst()) {
+                final Uri parentUri = IndexUris.albumArtists(indexAuthority);
+                do {
+                    lst.add(buildArtist(c, parentUri));
+                } while (c.moveToNext());
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return lst;
+    }
+
     static final String artist_albums_sel = IndexSchema.Info.Album.ARTIST_ID + "=?";
 
     @Override
@@ -1220,6 +1238,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
         long id = insert(IndexSchema.Meta.Artist.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
         if (id > 0) {
             mAppContext.getContentResolver().notifyChange(IndexUris.artists(indexAuthority), null);
+            mAppContext.getContentResolver().notifyChange(IndexUris.albumArtists(indexAuthority), null);
         }
         return id;
     }

@@ -47,6 +47,7 @@ public class IndexUris {
     static final String details = "details";
     static final String locations = "locations";
     static final String bioSummary = "bioSummary";
+    static final String albumArtists = "albumArtists";
 
     private static Uri.Builder baseUriBuilder(String authority) {
         return new Uri.Builder().scheme(scheme).authority(authority);
@@ -87,6 +88,10 @@ public class IndexUris {
 
     public static Uri artists(String authority) {
         return modelBase(authority).appendPath(artists).build();
+    }
+
+    public static Uri albumArtists(String authority) {
+        return modelBase(authority).appendPath(albumArtists).build();
     }
 
     public static Uri artist(String authority, String id) {
@@ -203,6 +208,7 @@ public class IndexUris {
     public static final int M_ARTIST_DETAILS = 20;
     public static final int M_GENRE_DETAILS = 21;
     public static final int M_LOCATIONS = 22;
+    public static final int M_ALBUM_ARTISTS = 23;
 
     private static final String slash_wild = "/*";
     private static final String slash_wild_slash = "/*/";
@@ -219,6 +225,7 @@ public class IndexUris {
         uriMatcher.addURI(authority, model_base_match + album + slash_wild_slash + details, M_ALBUM_DETAILS);
 
         uriMatcher.addURI(authority, model_base_match + artists, M_ARTISTS);
+        uriMatcher.addURI(authority, model_base_match + albumArtists, M_ALBUM_ARTISTS);
         uriMatcher.addURI(authority, model_base_match + artist + slash_wild, M_ARTIST);
         uriMatcher.addURI(authority, model_base_match + artist + slash_wild_slash + albums, M_ARTIST_ALBUMS);
         uriMatcher.addURI(authority, model_base_match + artist + slash_wild_slash + tracks, M_ARTIST_TRACKS);

@@ -43,6 +43,7 @@ public interface IndexDatabase {
     int delete(String table, String whereClause, String[] whereArgs);
     long insert(String table, String nullColumnHack, ContentValues values,int conflictAlgorithm);
     int update(String table, ContentValues values, String whereClause, String[] whereArgs);
+    List<Artist> getAlbumArtists(String sortOrder);
     List<Artist> getArtists(String sortOrder);
     List<Album> getArtistAlbums(String id, String sortOrder);
     List<Model> getArtistDetails(String id, String sortOrder);

@@ -52,6 +52,7 @@ import rx.Subscriber;
 import rx.schedulers.Schedulers;
 
 import static org.opensilk.music.index.provider.IndexUris.M_ALBUMS;
+import static org.opensilk.music.index.provider.IndexUris.M_ALBUM_ARTISTS;
 import static org.opensilk.music.index.provider.IndexUris.M_ALBUM_TRACKS;
 import static org.opensilk.music.index.provider.IndexUris.M_ARTISTS;
 import static org.opensilk.music.index.provider.IndexUris.M_ALBUM_DETAILS;
@@ -246,6 +247,15 @@ public class IndexProvider extends LibraryProvider {
             case M_ARTISTS: {
                 final BundleableSubscriber<Artist> subscriber = new BundleableSubscriber<>(binder);
                 final List<Artist> lst = mDataBase.getArtists(LibraryExtras.getSortOrder(args));
+                if (!subscriber.isUnsubscribed()) {
+                    subscriber.onNext(lst);
+                    subscriber.onCompleted();
+                }
+                break;
+            }
+            case M_ALBUM_ARTISTS: {
+                final BundleableSubscriber<Artist> subscriber = new BundleableSubscriber<>(binder);
+                final List<Artist> lst = mDataBase.getAlbumArtists(LibraryExtras.getSortOrder(args));
                 if (!subscriber.isUnsubscribed()) {
                     subscriber.onNext(lst);
                     subscriber.onCompleted();
