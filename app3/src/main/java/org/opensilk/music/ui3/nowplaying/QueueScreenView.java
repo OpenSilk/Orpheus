@@ -23,6 +23,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
+import android.view.MenuItem;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -65,6 +66,16 @@ public class QueueScreenView extends RelativeLayout {
                 new DragSwipeAdapterWrapper<>(mAdapter, null);
         mList.setAdapter(wrapper);
         mPresenter.takeView(this);
+        mToolbar.setTitle(R.string.title_queue);
+        mToolbar.getMenu().clear();
+        mToolbar.inflateMenu(R.menu.popup_save_queue);
+        mToolbar.inflateMenu(R.menu.popup_clear_queue);
+        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                return mPresenter.onMenuItemClicked(item);
+            }
+        });
     }
 
     @Override

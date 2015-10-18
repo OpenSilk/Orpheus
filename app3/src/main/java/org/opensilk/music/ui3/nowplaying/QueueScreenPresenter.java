@@ -17,23 +17,20 @@
 
 package org.opensilk.music.ui3.nowplaying;
 
-import android.content.Context;
-import android.media.session.MediaSession;
 import android.os.Bundle;
-import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat.QueueItem;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.widget.PopupMenu;
+import android.view.MenuItem;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
-import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
-import org.opensilk.common.ui.mortar.PausesAndResumes;
+import org.opensilk.common.ui.mortar.Lifecycle;
+import org.opensilk.common.ui.mortar.LifecycleService;
+import org.opensilk.music.R;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.playback.PlaybackStateHelper;
 import org.opensilk.music.playback.control.PlaybackController;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -42,25 +39,27 @@ import javax.inject.Inject;
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
+import rx.Observable;
 import rx.Subscription;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
+import timber.log.Timber;
 
-import static android.support.v4.media.MediaMetadataCompat.*;
 import static org.opensilk.common.core.rx.RxUtils.isSubscribed;
 
 /**
  * Created by drew on 5/9/15.
  */
 @ScreenScope
-public class QueueScreenPresenter extends ViewPresenter<QueueScreenView>
-        implements PausesAndResumes {
+public class QueueScreenPresenter extends ViewPresenter<QueueScreenView> {
 
     final PlaybackController playbackController;
     final ArtworkRequestManager requestor;
-    final PauseAndResumeRegistrar pauseAndResumeRegistrar;
 
+    Observable<Lifecycle> lifecycle;
     CompositeSubscription broadcastSubscriptions;
+    Subscription lifcycleSubscripton;
+
     boolean isPlaying;
     long lastPlayingId;
     boolean selfChange;
@@ -69,60 +68,53 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView>
     @Inject
     public QueueScreenPresenter(
             PlaybackController playbackController,
-            ArtworkRequestManager requestor,
-            PauseAndResumeRegistrar pauseAndResumeRegistrar
+            ArtworkRequestManager requestor
     ) {
         this.playbackController = playbackController;
         this.requestor = requestor;
-        this.pauseAndResumeRegistrar = pauseAndResumeRegistrar;
     }
 
     @Override
     protected void onEnterScope(MortarScope scope) {
         super.onEnterScope(scope);
-        pauseAndResumeRegistrar.register(scope, this);
+        lifecycle = LifecycleService.getLifecycle(scope);
     }
 
     @Override
     protected void onExitScope() {
         super.onExitScope();
-        teardown();
+        if (lifcycleSubscripton != null) {
+            lifcycleSubscripton.unsubscribe();
+        }
     }
 
     @Override
     protected void onLoad(Bundle savedInstanceState) {
         super.onLoad(savedInstanceState);
-        if (pauseAndResumeRegistrar.isRunning()) {
-            setup();
+        if (!queue.isEmpty()) {
+            getView().getAdapter().addAll(queue);
+            getView().getAdapter().setActiveItem(lastPlayingId);
+            getView().getAdapter().setPlaying(isPlaying);
         }
-    }
-
-    @Override
-    protected void onSave(Bundle outState) {
-        super.onSave(outState);
-        if (pauseAndResumeRegistrar.isRunning()) {
-            teardown();
+        if (lifcycleSubscripton != null) {
+            lifcycleSubscripton.unsubscribe();
         }
-    }
-
-    @Override
-    public void onResume() {
-        setup();
-    }
-
-    @Override
-    public void onPause() {
-        teardown();
-    }
-
-    void setup() {
-        if (hasView()) {
-            subscribeBroadcasts();
-        }
-    }
-
-    void teardown() {
-        unsubscribeBroadcasts();
+        lifcycleSubscripton = lifecycle.subscribe(new Action1<Lifecycle>() {
+            @Override
+            @DebugLog
+            public void call(Lifecycle lifecycle) {
+                switch (lifecycle) {
+                    case RESUME: {
+                        subscribeBroadcasts();
+                        break;
+                    }
+                    case PAUSE: {
+                        unsubscribeBroadcasts();
+                        break;
+                    }
+                }
+            }
+        });
     }
 
     void onItemMoved(int from, int to) {
@@ -133,6 +125,22 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView>
     void onItemRemoved(int pos) {
         selfChange = true;
         playbackController.removeQueueItemAt(pos);
+    }
+
+    void onItemClicked(QueueItem item) {
+        playbackController.skipToQueueItem(item.getQueueId());
+    }
+
+    public boolean onMenuItemClicked(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.popup_menu_save_queue:
+                return true;
+            case R.id.popup_menu_clear_queue:
+                playbackController.clearQueue();
+                return true;
+            default:
+                return false;
+        }
     }
 
     void subscribeBroadcasts() {
@@ -175,8 +183,11 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView>
                         queue.clear();
                         queue.addAll(queueItems);
                         queue.trimToSize();
-                        if (needupdate && hasView()) {
-                            getView().getAdapter().replaceAll(queue);
+                        if (hasView()) {
+                            if (needupdate) {
+                                Timber.d("Replacing queue");
+                                getView().getAdapter().replaceAll(queue);
+                            }
                             getView().getAdapter().setActiveItem(lastPlayingId);
                         }
                     }

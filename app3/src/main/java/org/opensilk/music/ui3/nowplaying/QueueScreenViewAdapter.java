@@ -19,6 +19,7 @@ package org.opensilk.music.ui3.nowplaying;
 
 import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.common.ui.recycler.DragSwipeViewHolder;
+import org.opensilk.common.ui.recycler.ItemClickSupport;
 import org.opensilk.common.ui.recycler.RecyclerListAdapter;
 import org.opensilk.common.ui.util.ThemeUtils;
 import org.opensilk.common.ui.widget.LetterTileDrawable;
@@ -43,12 +44,15 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
 /**
  * Created by drew on 5/10/15.
  */
-public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem, QueueScreenViewAdapter.ViewHolder> {
+public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem,
+        QueueScreenViewAdapter.ViewHolder> implements ItemClickSupport.OnItemClickListener,
+        ItemClickSupport.OnItemLongClickListener {
 
     final ArtworkRequestManager requestor;
     final QueueScreenPresenter presenter;
@@ -71,11 +75,24 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem, Queue
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new ViewHolder(inflate(parent, R.layout.gallery_list_item_artwork));
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        ItemClickSupport.addTo(recyclerView)
+                .setOnItemClickListener(this)
+                .setOnItemLongClickListener(this);
     }
 
     @Override
+    public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
+        ItemClickSupport.removeFrom(recyclerView);
+    }
+
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        return new ViewHolder(inflate(parent, viewType));
+    }
+
+    @Override
+    @DebugLog
     public void onBindViewHolder(ViewHolder holder, int position) {
         QueueItem item = getItem(position);
         holder.reset();
@@ -97,6 +114,9 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem, Queue
             } else {
                 holder.playingIndicator.setVisibility(View.VISIBLE);
             }
+        } else {
+            holder.playingIndicator.stopAnimating();
+            holder.playingIndicator.setVisibility(View.GONE);
         }
     }
 
@@ -105,6 +125,11 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem, Queue
         LetterTileDrawable drawable = LetterTileDrawable.fromText(resources, text);
         drawable.setIsCircular(true);
         holder.artwork.setImageDrawable(drawable);
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return R.layout.gallery_list_item_artwork;
     }
 
     @Override
@@ -154,6 +179,16 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem, Queue
             notifyActive(activeidx);
             Timber.v("Playing updated playing=%s", playing);
         }
+    }
+
+    @Override
+    public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+        presenter.onItemClicked(getItem(position));
+    }
+
+    @Override
+    public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
+        return false;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements DragSwipeViewHolder {
