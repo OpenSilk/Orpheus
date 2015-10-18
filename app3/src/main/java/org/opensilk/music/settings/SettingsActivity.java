@@ -105,6 +105,12 @@ public class SettingsActivity extends MusicActivity {
     }
 
     @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+    @Override
     public void onToolbarAttached(Toolbar toolbar) {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
