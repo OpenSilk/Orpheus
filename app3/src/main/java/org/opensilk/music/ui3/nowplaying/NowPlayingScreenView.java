@@ -69,6 +69,7 @@ import org.opensilk.common.ui.util.ViewUtils;
 import org.opensilk.common.ui.widget.ImageButtonCheckable;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
+import org.opensilk.music.ui3.common.UtilsCommon;
 
 import javax.inject.Inject;
 
@@ -438,6 +439,10 @@ public class NowPlayingScreenView extends RelativeLayout {
                 getView().subTitle.setTextColor(s2.getBodyTextColor());
                 getView().progress.getProgressDrawable().setTint(s1.getRgb());
                 getView().reInitRenderer(s1.getRgb());
+                if (VersionUtils.hasLollipop()) {
+                    UtilsCommon.findActivity(getContext())
+                            .getWindow().setStatusBarColor(s1.getRgb());
+                }
             } else {
                 int background = ThemeUtils.getThemeAttrColor(getView().getContext(),
                         android.R.attr.colorBackground);
@@ -455,6 +460,12 @@ public class NowPlayingScreenView extends RelativeLayout {
                         R.attr.colorAccent);
                 getView().progress.getProgressDrawable().setTint(accent);
                 getView().reInitRenderer(accent);
+                int primaryDark = ThemeUtils.getThemeAttrColor(getContext(),
+                        R.attr.colorPrimaryDark);
+                if (VersionUtils.hasLollipop()) {
+                    UtilsCommon.findActivity(getContext())
+                            .getWindow().setStatusBarColor(primaryDark);
+                }
             }
         }
     };
