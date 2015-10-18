@@ -60,7 +60,7 @@ public class NowPlayingActivity extends MusicActivity {
     protected void themeActivity(AppPreferences preferences) {
         boolean darkTheme = preferences.isDarkTheme();
         OrpheusTheme theme = preferences.getTheme();
-        setTheme(darkTheme ? theme.dark : theme.light);
+        setTheme(theme.dark);//TODO light themes
     }
 
     @Override
