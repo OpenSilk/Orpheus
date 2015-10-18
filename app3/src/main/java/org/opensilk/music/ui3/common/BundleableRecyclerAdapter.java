@@ -53,6 +53,8 @@ import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.TrackList;
 import org.opensilk.music.ui.widget.GridTileDescription;
+import org.opensilk.music.ui3.ProfileActivity;
+import org.opensilk.music.ui3.profile.bio.BioScreen;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -332,8 +334,8 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
     @Override
     public void onItemClicked(RecyclerView recyclerView, int position, View v) {
         ViewHolder holder = (ViewHolder) recyclerView.getChildViewHolder(v);
-        if (holder instanceof SelectableItemViewHolder) {
-            if (inSelectionMode) {
+        if (inSelectionMode) {
+            if (holder instanceof SelectableItemViewHolder) {
                 boolean selected = selectedItems.get(position);
                 if (selected) {
                     selectedItems.put(position, false);
@@ -344,17 +346,17 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
                     notifyItemChanged(position);
                     presenter.onItemSelected();
                 }
-            } else {
-                presenter.onItemClicked(holder, getItem(position));
             }
+        } else {
+            presenter.onItemClicked(holder, getItem(position));
         }
     }
 
     @Override
     public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
         ViewHolder holder = (ViewHolder) recyclerView.getChildViewHolder(v);
-        if (holder instanceof SelectableItemViewHolder) {
-            if (!inSelectionMode) {
+        if (!inSelectionMode ) {
+            if (holder instanceof SelectableItemViewHolder) {
                 selectedItems.put(position, true);
                 inSelectionMode = true;
                 notifyItemChanged(position);
@@ -420,14 +422,8 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
             ButterKnife.inject(this, itemView);
         }
 
-        public void bind(BioSummary bio) {
+        public void bind(final BioSummary bio) {
             summary.setText(Html.fromHtml(bio.getSummary()));
-            showmore.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    //TODO
-                }
-            });
         }
 
         @Override

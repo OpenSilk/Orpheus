@@ -48,9 +48,13 @@ public interface IndexDatabase {
     List<Album> getArtistAlbums(String id, String sortOrder);
     List<Model> getArtistDetails(String id, String sortOrder);
     List<Track> getArtistTracks(String id, String sortOrder);
+    @Nullable Artist getArtist(String id);
+    @Nullable String getArtistMbid(String id);
     List<Album> getAlbums(String sortOrder);
     List<Track> getAlbumTracks(String id, String sortOrder);
     List<Model> getAlbumDetails(String id, String sortOrder);
+    @Nullable Album getAlbum(String id);
+    @Nullable String getAlbumMbid(String id);
     List<Track> getTracks(String sortOrder);
     List<Track> getTracks(String sortOrder, boolean excludeOrphaned);
     List<Track> getTracksInList(List<Uri> uris);

@@ -20,10 +20,14 @@ package org.opensilk.music.index.provider;
 import android.net.Uri;
 
 import org.apache.commons.lang3.StringUtils;
+import org.opensilk.music.index.model.BioContent;
 import org.opensilk.music.model.Metadata;
+import org.opensilk.music.model.Model;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -34,6 +38,8 @@ import de.umass.lastfm.LastFM;
 import hugo.weaving.DebugLog;
 import retrofit.Call;
 import retrofit.Response;
+import rx.Observable;
+import rx.Subscriber;
 import timber.log.Timber;
 
 import static android.provider.MediaStore.Audio.keyFor;
@@ -105,6 +111,47 @@ public class LastFMHelper {
         bob.putUri(KEY_ARTIST_URL_URI, Uri.parse(artist.getUrl()));
         bob.putString(KEY_ARTIST_MBID, artist.getMbid());
         return bob.build();
+    }
+
+    public Observable<Album> getAlbum(final String mbid) {
+        return Observable.create(new Observable.OnSubscribe<Album>() {
+            @Override
+            public void call(Subscriber<? super Album> subscriber) {
+                Call<Album> call = mLastFM.getAlbumbyMbid(mbid);
+                Album album;
+                try {
+                    album = call.execute().body();
+                    if (!subscriber.isUnsubscribed()) {
+                        subscriber.onNext(album);
+                        subscriber.onCompleted();
+                    }
+                } catch (IOException e) {
+                    if (!subscriber.isUnsubscribed()) {
+                        subscriber.onError(e);
+                    }
+                }
+            }
+        });
+    }
+
+    public Observable<Artist> getArtist(final String mbid) {
+        return Observable.create(new Observable.OnSubscribe<Artist>() {
+            @Override
+            public void call(Subscriber<? super Artist> subscriber) {
+                Call<Artist> call = mLastFM.getArtistbyMbid(mbid);
+                try {
+                    Artist artist = call.execute().body();
+                    if(!subscriber.isUnsubscribed()) {
+                        subscriber.onNext(artist);
+                        subscriber.onCompleted();
+                    }
+                } catch (IOException e) {
+                    if (!subscriber.isUnsubscribed()) {
+                        subscriber.onError(e);
+                    }
+                }
+            }
+        });
     }
 
     public static boolean hasFeaturedArtist(String artist) {

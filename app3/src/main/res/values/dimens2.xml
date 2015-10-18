@@ -47,4 +47,7 @@
 
     <dimen name="carmode_bottom_margin">32dp</dimen>
     <dimen name="carmode_seekbar_padding">16dp</dimen>
+
+    <!--bio screen-->
+    <dimen name="bio_card_margin">16dp</dimen>
 </resources>

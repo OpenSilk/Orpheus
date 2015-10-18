@@ -15,17 +15,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.profile;
+package org.opensilk.music.ui3.profile.bio;
 
-import org.opensilk.music.ui3.common.BundleableComponent;
-import org.opensilk.music.ui3.main.FooterScreenComponent;
+import android.support.design.widget.TabLayout;
+
+import org.opensilk.music.index.model.BioSummary;
+import org.opensilk.music.model.ArtInfo;
+
+import java.util.List;
+
+import javax.inject.Named;
+
+import dagger.Module;
+import dagger.Provides;
 
 /**
- * Created by drew on 5/5/15.
+ * Created by drew on 10/18/15.
  */
-public interface ProfileComponent extends BundleableComponent, FooterScreenComponent, ProfileHeroComponent {
-    void inject(ProfilePortraitView view);
-    void inject(ProfileView2Portrait view);
-    void inject(ProfileView2DragSwipePortrait view);
-    void inject(ProfileView2Land view);
+@Module
+public class BioScreenModule {
+    final BioScreen screen;
+
+    public BioScreenModule(BioScreen screen) {
+        this.screen = screen;
+    }
+
+    @Provides
+    public BioSummary provideSummary() {
+        return screen.bioSummary;
+    }
+
+    @Provides @Named("profile_heros")
+    public List<ArtInfo> provideArtinfos() {
+        return screen.artInfos;
+    }
 }

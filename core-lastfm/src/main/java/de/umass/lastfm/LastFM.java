@@ -37,10 +37,16 @@ public interface LastFM {
     Call<Artist> getArtist(@Query("artist") String artist);
 
     @GET("?method=artist.getInfo")
+    Call<Artist> getArtistbyMbid(@Query("mbid") String mbid);
+
+    @GET("?method=artist.getInfo")
     Observable<Artist> getArtistObservable(@Query("artist") String artist);
 
     @GET("?method=album.getInfo")
     Call<Album> getAlbum(@Query("artist") String artist, @Query("album") String album);
+
+    @GET("?method=album.getInfo")
+    Call<Album> getAlbumbyMbid(@Query("mbid") String mbid);
 
     @GET("?method=album.getInfo")
     Observable<Album> getAlbumObservable(@Query("artist") String artist, @Query("album") String album);

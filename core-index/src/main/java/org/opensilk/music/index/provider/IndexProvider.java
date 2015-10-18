@@ -23,10 +23,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.music.index.IndexComponent;
 import org.opensilk.music.index.database.IndexDatabase;
+import org.opensilk.music.index.model.BioContent;
+import org.opensilk.music.index.model.SimilarArtist;
 import org.opensilk.music.index.scanner.ScannerService;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.internal.BundleableSubscriber;
@@ -41,22 +44,28 @@ import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Track;
 import org.opensilk.bundleable.Bundleable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import de.umass.lastfm.ImageSize;
+import de.umass.lastfm.LastFM;
 import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Subscriber;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 import static org.opensilk.music.index.provider.IndexUris.M_ALBUMS;
 import static org.opensilk.music.index.provider.IndexUris.M_ALBUM_ARTISTS;
+import static org.opensilk.music.index.provider.IndexUris.M_ALBUM_BIO;
 import static org.opensilk.music.index.provider.IndexUris.M_ALBUM_TRACKS;
 import static org.opensilk.music.index.provider.IndexUris.M_ARTISTS;
 import static org.opensilk.music.index.provider.IndexUris.M_ALBUM_DETAILS;
 import static org.opensilk.music.index.provider.IndexUris.M_ARTIST_ALBUMS;
+import static org.opensilk.music.index.provider.IndexUris.M_ARTIST_BIO;
 import static org.opensilk.music.index.provider.IndexUris.M_ARTIST_DETAILS;
 import static org.opensilk.music.index.provider.IndexUris.M_ARTIST_TRACKS;
 import static org.opensilk.music.index.provider.IndexUris.M_GENRES;
@@ -64,6 +73,8 @@ import static org.opensilk.music.index.provider.IndexUris.M_GENRE_ALBUMS;
 import static org.opensilk.music.index.provider.IndexUris.M_GENRE_DETAILS;
 import static org.opensilk.music.index.provider.IndexUris.M_GENRE_TRACKS;
 import static org.opensilk.music.index.provider.IndexUris.M_TRACKS;
+import static org.opensilk.music.index.provider.IndexUris.album;
+import static org.opensilk.music.index.provider.IndexUris.artist;
 import static org.opensilk.music.index.provider.IndexUris.makeMatcher;
 
 /**
@@ -73,6 +84,7 @@ public class IndexProvider extends LibraryProvider {
 
     @Inject @Named("IndexProviderAuthority") String mAuthority;
     @Inject IndexDatabase mDataBase;
+    @Inject LastFMHelper mLastFmH;
 
     private UriMatcher mUriMatcher;
 
@@ -344,6 +356,80 @@ public class IndexProvider extends LibraryProvider {
                     subscriber.onNext(lst);
                     subscriber.onCompleted();
                 }
+                break;
+            }
+            case M_ALBUM_BIO: {
+                final BundleableSubscriber<Model> subscriber = new BundleableSubscriber<>(binder);
+                final String id = uri.getLastPathSegment();
+                final String mbid = mDataBase.getAlbumMbid(id);
+                if (StringUtils.isEmpty(mbid) && !subscriber.isUnsubscribed()) {
+                    subscriber.onError(new NullPointerException("Unknown album id " + id));
+                    return;
+                }
+                mLastFmH.getAlbum(mbid)
+                        .subscribeOn(Schedulers.io())
+                        .map(new Func1<de.umass.lastfm.Album, List<Model>>() {
+                            @Override
+                            public List<Model> call(de.umass.lastfm.Album album) {
+                                List<Model> lst = new ArrayList<Model>();
+                                String wikiText = album.getWikiText();
+                                if (!StringUtils.isEmpty(wikiText)) {
+                                    lst.add(BioContent.builder()
+                                            .setUri(IndexUris.albumBio(mAuthority, id))
+                                            .setParentUri(IndexUris.album(mAuthority, id))
+                                            .setContent(wikiText)
+                                            .setMbid(mbid)
+                                            .setUrl(album.getUrl())
+                                            .setName(album.getName())
+                                            .build()
+                                    );
+                                }
+                                return lst;
+                            }
+                        })
+                        .subscribe(subscriber);
+                break;
+            }
+            case M_ARTIST_BIO: {
+                final BundleableSubscriber<Model> subscriber = new BundleableSubscriber<>(binder);
+                final String id = uri.getLastPathSegment();
+                final String mbid = mDataBase.getArtistMbid(id);
+                if (StringUtils.isEmpty(mbid) && !subscriber.isUnsubscribed()) {
+                    subscriber.onError(new NullPointerException("Unknown artist id " + id));
+                    return;
+                }
+                mLastFmH.getArtist(mbid)
+                        .subscribeOn(Schedulers.io())
+                        .map(new Func1<de.umass.lastfm.Artist, List<Model>>() {
+                            @Override
+                            public List<Model> call(de.umass.lastfm.Artist artist) {
+                                List<Model> lst = new ArrayList<Model>();
+                                String wikiText = artist.getWikiText();
+                                if (!StringUtils.isEmpty(wikiText)) {
+                                    lst.add(BioContent.builder()
+                                                    .setUri(IndexUris.artistBio(mAuthority, id))
+                                                    .setParentUri(IndexUris.artist(mAuthority, id))
+                                                    .setName(artist.getName())
+                                                    .setMbid(mbid)
+                                                    .setUrl(artist.getUrl())
+                                                    .setContent(wikiText)
+                                                    .build()
+                                    );
+                                }
+                                for (de.umass.lastfm.Artist a : artist.getSimilar()) {
+                                    lst.add(SimilarArtist.builder()
+                                            .setUri(Uri.EMPTY)
+                                            .setParentUri(Uri.EMPTY)
+                                            .setName(a.getName())
+                                            .setUrl(a.getUrl())
+                                            .setImageUrl(a.getImageURL(ImageSize.MEDIUM))
+                                            .build()
+                                    );
+                                }
+                                return lst;
+                            }
+                        })
+                        .subscribe(subscriber);
                 break;
             }
             default: {

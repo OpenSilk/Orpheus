@@ -89,8 +89,6 @@ public class ProfileView2Portrait extends CoordinatorLayout implements Bundleabl
         initRecyclerView();
         subscribeClicks();
         if (!isInEditMode()) {
-            mToolbarOwner.attachToolbar(mToolbar);
-            mToolbarOwner.setConfig(ActionBarConfig.builder().setMenuConfig(mPresenter.getMenuConfig()).build());
             mPresenter.takeView(this);
         }
     }

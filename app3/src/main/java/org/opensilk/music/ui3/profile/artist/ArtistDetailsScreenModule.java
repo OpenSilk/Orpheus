@@ -29,6 +29,7 @@ import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
+import org.opensilk.music.index.model.BioSummary;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.ArtInfo;
@@ -42,6 +43,7 @@ import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
 import org.opensilk.music.ui3.common.UtilsCommon;
 import org.opensilk.music.ui3.profile.album.AlbumDetailsScreen;
+import org.opensilk.music.ui3.profile.bio.BioScreen;
 import org.opensilk.music.ui3.profile.tracklist.TrackListScreen;
 import org.opensilk.music.ui3.ProfileActivity;
 
@@ -118,6 +120,8 @@ public class ArtistDetailsScreenModule {
                     ProfileActivity.startSelf(context, new AlbumDetailsScreen((Album)item));
                 } else if (item instanceof TrackList) {
                     ProfileActivity.startSelf(context, new TrackListScreen((TrackList)item));
+                } else if (item instanceof BioSummary) {
+                    ProfileActivity.startSelf(context, new BioScreen(provideHeroArtinfos(), (BioSummary)item));
                 }
             }
         };

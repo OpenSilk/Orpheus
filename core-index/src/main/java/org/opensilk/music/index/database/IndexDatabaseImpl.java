@@ -89,6 +89,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
     static final String[] idCols = new String[] {
             BaseColumns._ID,
     };
+    static final String idSelection = BaseColumns._ID + "=?";
 
     @Override
     public Cursor query(String table, String[] columns, String selection, String[] selectionArgs,
@@ -238,7 +239,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
                 if (!StringUtils.isEmpty(mbid) && !StringUtils.isEmpty(summary)) {
                     BioSummary bioSummary = BioSummary.builder()
                             .setKind(BioSummary.Kind.ARTIST)
-                            .setUri(IndexUris.bioSummary(indexAuthority, id))
+                            .setUri(IndexUris.artistBio(indexAuthority, id))
                             .setParentUri(IndexUris.artistDetails(indexAuthority, id))
                             .setMbid(mbid)
                             .setName(title)
@@ -293,6 +294,40 @@ public class IndexDatabaseImpl implements IndexDatabase {
             closeCursor(c);
         }
         return lst;
+    }
+
+    @Override
+    public @Nullable Artist getArtist(String id) {
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.Info.Artist.TABLE, artists_cols,
+                    idSelection, new String[]{id}, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                return buildArtist(c, IndexUris.artists(indexAuthority));
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return null;
+    }
+
+    static final String[] artistMbidCols = new String[] {
+            IndexSchema.Info.Artist.MBID,
+    };
+
+    @Override
+    public @Nullable String getArtistMbid(String id) {
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.Info.Artist.TABLE, artistMbidCols,
+                    idSelection, new String[]{id}, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                return c.getString(0);
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return null;
     }
 
     static final String[] albums_cols = new String[] {
@@ -379,7 +414,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
                 if (!StringUtils.isEmpty(mbid) && !StringUtils.isEmpty(summary)) {
                     BioSummary bioSummary = BioSummary.builder()
                             .setKind(BioSummary.Kind.ALBUM)
-                            .setUri(IndexUris.bioSummary(indexAuthority, id))
+                            .setUri(IndexUris.albumBio(indexAuthority, id))
                             .setParentUri(IndexUris.albumDetails(indexAuthority, id))
                             .setMbid(mbid)
                             .setName(title)
@@ -394,6 +429,40 @@ public class IndexDatabaseImpl implements IndexDatabase {
         //add the tracks after
         lst.addAll(getAlbumTracks(id, sortOrder));
         return lst;
+    }
+
+    @Override
+    public @Nullable Album getAlbum(String id) {
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.Info.Album.TABLE, albums_cols,
+                    idSelection, new String[]{id}, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                return buildAlbum(c, IndexUris.albums(indexAuthority));
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return null;
+    }
+
+    static final String[] albumMbidCols = new String[] {
+            IndexSchema.Info.Album.MBID,
+    };
+
+    @Override
+    public @Nullable String getAlbumMbid(String id) {
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.Info.Album.TABLE, albumMbidCols,
+                    idSelection, new String[]{id}, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                return c.getString(0);
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return null;
     }
 
     static final String[] genres_cols = new String[] {

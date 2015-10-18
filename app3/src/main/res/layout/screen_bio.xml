@@ -16,30 +16,34 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<org.opensilk.music.ui3.profile.bio.BioScreenView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
-
+    xmlns:tools="http://schemas.android.com/tools" android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="true"
-        android:theme="?appBarTheme">
+        android:theme="?appBarTheme"
+        android:fitsSystemWindows="true">
 
         <android.support.design.widget.CollapsingToolbarLayout
             android:id="@+id/collapsing_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/profile_appbar_height"
-            app:contentScrim="?colorPrimary"
+            android:layout_height="wrap_content"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            android:fitsSystemWindows="true"
+            android:textColor="@color/white"
             app:collapsedTitleTextAppearance="@style/TextAppearanceCollapsingToolbar"
             app:expandedTitleTextAppearance="@style/TextAppearanceCollapsingToolbar.Expanded"
-            app:expandedTitleMarginStart="@dimen/profile_appbar_title_padding_left"
-            app:expandedTitleMarginBottom="@dimen/profile_appbar_title_padding_bottom"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            app:toolbarId="@+id/toolbar"
-            style="?toolbarStyle">
+            app:contentScrim="?colorPrimary"
+            app:expandedTitleMarginStart="48dp"
+            app:expandedTitleMarginEnd="64dp">
+
+            <include layout="@layout/profile_view2_hero"/>
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
@@ -47,8 +51,7 @@
                 android:layout_height="?actionBarSize"
                 app:layout_collapseMode="pin"
                 android:background="@null"
-                style="?toolbarStyle"
-                />
+                style="?toolbarStyle"/>
 
         </android.support.design.widget.CollapsingToolbarLayout>
 
@@ -58,31 +61,14 @@
         android:id="@+id/recyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="@dimen/profile_list_margin"
-        android:layout_marginRight="@dimen/profile_list_margin"
-        app:behavior_overlapTop="@dimen/profile_list_overlap"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:background="?android:colorBackground"
         style="@style/mtrl.List"/>
 
-    <include
-        android:id="@+id/footer_fragment"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/footer_height"
-        android:layout_gravity="bottom"
-        android:name="org.opensilk.music.ui3.main.FooterScreenFragment"
-        app:layout_behavior="org.opensilk.common.ui.behavior.QuickReturnFooterBehavior"
-        layout="@layout/screen_footer"/>
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/floating_action_button"
-        android:layout_height="wrap_content"
+    <ProgressBar
+        android:id="@+id/loading_progress"
         android:layout_width="wrap_content"
-        app:layout_anchor="@id/appbar"
-        app:layout_anchorGravity="bottom|right|end"
-        android:src="@drawable/ic_play_arrow_white_36dp"
-        android:layout_margin="@dimen/profile_fab_margin"
-        android:clickable="true"
-        android:elevation="8dp"/>
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        style="?android:progressBarStyle"/>
 
-</merge>
+</org.opensilk.music.ui3.profile.bio.BioScreenView>

@@ -17,15 +17,9 @@
 
 package org.opensilk.music.ui3.profile;
 
-import org.opensilk.music.ui3.common.BundleableComponent;
-import org.opensilk.music.ui3.main.FooterScreenComponent;
-
 /**
- * Created by drew on 5/5/15.
+ * Created by drew on 10/18/15.
  */
-public interface ProfileComponent extends BundleableComponent, FooterScreenComponent, ProfileHeroComponent {
-    void inject(ProfilePortraitView view);
-    void inject(ProfileView2Portrait view);
-    void inject(ProfileView2DragSwipePortrait view);
-    void inject(ProfileView2Land view);
+public interface ProfileHeroComponent {
+    void inject(ProfileHeroView view);
 }

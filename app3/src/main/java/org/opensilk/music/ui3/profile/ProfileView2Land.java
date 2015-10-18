@@ -87,7 +87,6 @@ public class ProfileView2Land extends CoordinatorLayout implements BundleableRec
         initRecyclerView();
         subscribeClicks();
         if (!isInEditMode()) {
-
             mPresenter.takeView(this);
         }
     }

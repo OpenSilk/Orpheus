@@ -45,7 +45,7 @@ public class ProfileHeroView extends FrameLayout {
 
     public ProfileHeroView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        ProfileComponent component = DaggerService.getDaggerComponent(getContext());
+        ProfileHeroComponent component = DaggerService.getDaggerComponent(getContext());
         component.inject(this);
     }
 

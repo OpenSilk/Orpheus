@@ -67,7 +67,6 @@ public class App extends BaseApp {
             }
         });
 
-
         if (isUiProcess()) {
             DaggerService.<AppComponent>getDaggerComponent(this).inject(this);
             registerComponentCallbacks(mUiComponentCallbacks);

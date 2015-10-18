@@ -348,4 +348,12 @@
     </style>
 
     <!-- end drawer controls-->
+
+    <style name="TextAppearanceCollapsingToolbar" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="TextAppearanceCollapsingToolbar.Expanded" parent="TextAppearance.Design.CollapsingToolbar.Expanded">
+        <item name="android:textColor">@color/white</item>
+    </style>
 </resources>

@@ -25,16 +25,20 @@ import android.view.MenuItem;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.R;
+import org.opensilk.music.index.model.BioSummary;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.ArtInfo;
+import org.opensilk.music.model.Model;
 import org.opensilk.music.model.sort.TrackSortOrder;
+import org.opensilk.music.ui3.ProfileActivity;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.PlayAllItemClickListener;
 import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
+import org.opensilk.music.ui3.profile.bio.BioScreen;
 
 import java.util.Collections;
 import java.util.List;
@@ -97,7 +101,16 @@ public class AlbumDetailsScreenModule {
 
     @Provides @ScreenScope
     public ItemClickListener provideItemClickListener() {
-        return new PlayAllItemClickListener();
+        return new ItemClickListener() {
+            @Override
+            public void onItemClicked(BundleablePresenter presenter, Context context, Model item) {
+                if (item instanceof BioSummary) {
+                    ProfileActivity.startSelf(context, new BioScreen(provideHeroArtinfos(), (BioSummary)item));
+                } else {
+                    new PlayAllItemClickListener().onItemClicked(presenter, context, item);
+                }
+            }
+        };
     }
 
     @Provides @ScreenScope
