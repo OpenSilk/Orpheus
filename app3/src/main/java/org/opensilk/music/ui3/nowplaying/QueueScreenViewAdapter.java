@@ -40,6 +40,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.support.v4.media.session.MediaSessionCompat.QueueItem;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
@@ -60,6 +62,7 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem,
 
     long activeId = -1;
     boolean isPlaying;
+    private final Object INDICATOR_UPDATE = new Object();
 
     @Inject
     public QueueScreenViewAdapter(
@@ -105,9 +108,23 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem,
             if (artInfo !=ArtInfo.NULLINSTANCE) {
                 requestor.newRequest(artInfo, holder.artwork, BundleHelper.b().putInt(1).get());
             } else {
-                setLetterTileDrawable(holder, desc.getTitle().toString());
+                CharSequence titlee = desc.getTitle();
+                setLetterTileDrawable(holder, titlee != null ? titlee.toString() : "");
             }
         }
+        setItemActive(holder, item);
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position, List<Object> payloads) {
+        if (isIndacotorUpdate(payloads)) {
+            setItemActive(holder, getItem(position));
+        } else {
+            onBindViewHolder(holder, position);
+        }
+    }
+
+    void setItemActive(ViewHolder holder, QueueItem item) {
         if (activeId == item.getQueueId()) {
             if (isPlaying) {
                 holder.playingIndicator.startAnimating();
@@ -127,6 +144,18 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem,
         holder.artwork.setImageDrawable(drawable);
     }
 
+    boolean isIndacotorUpdate(List<Object> payloads) {
+        if(payloads == null || payloads.isEmpty()) {
+            return false;
+        }
+        for (Object pl: payloads) {
+            if (pl != INDICATOR_UPDATE) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Override
     public int getItemViewType(int position) {
         return R.layout.gallery_list_item_artwork;
@@ -139,44 +168,16 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem,
 
     public void setActiveItem(long newId) {
         if (activeId != newId) {
-            int oldidx = -1;
-            int activeidx = -1;
-            for (int ii=0; ii<getItemCount(); ii++) {
-                long id = getItemId(ii);
-                if (activeId == id) {
-                    oldidx = ii;
-                } else if (newId == id) {
-                    activeidx = ii;
-                }
-                if (activeidx != -1 && oldidx != -1) {
-                    break;
-                }
-            }
             activeId = newId;
-            notifyActive(oldidx);
-            notifyActive(activeidx);
+            notifyItemRangeChanged(0, getItemCount(), INDICATOR_UPDATE);
             Timber.v("Active item updated %d", newId);
-        }
-    }
-
-    private void notifyActive(int idx) {
-        if (idx >= 0) {
-            notifyItemChanged(idx);
         }
     }
 
     public void setPlaying(boolean playing) {
         if (isPlaying != playing) {
             isPlaying = playing;
-            int activeidx = -1;
-            for (int ii=0; ii<getItemCount(); ii++) {
-                long id = getItemId(ii);
-                if (activeId == id) {
-                    activeidx = ii;
-                    break;
-                }
-            }
-            notifyActive(activeidx);
+            notifyItemRangeChanged(0, getItemCount(), INDICATOR_UPDATE);
             Timber.v("Playing updated playing=%s", playing);
         }
     }
@@ -202,6 +203,10 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem,
         }
         void reset() {
             artwork.setImageBitmap(null);
+            stopAnimating();
+        }
+
+        void stopAnimating() {
             playingIndicator.stopAnimating();
             playingIndicator.setVisibility(View.GONE);
         }
@@ -220,6 +225,7 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem,
         public void onItemClear() {
             itemView.setBackground(null);
         }
+
     }
 
 }
