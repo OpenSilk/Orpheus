@@ -56,9 +56,17 @@ public class LibraryScreenView extends CoordinatorLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         ButterKnife.inject(this);
-        mToolbarOwner.attachToolbar(mToolbar);
-        mToolbarOwner.setConfig(ActionBarConfig.builder().setTitle("Libraries").build());
         mPresenter.takeView(this);
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (!isInEditMode()) {
+            mToolbarOwner.attachToolbar(mToolbar);
+            mToolbarOwner.setConfig(ActionBarConfig.builder().setTitle(R.string.libraries_title).build());
+            mPresenter.takeView(this);
+        }
     }
 
     @Override

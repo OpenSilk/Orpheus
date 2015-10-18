@@ -46,7 +46,6 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
 
     final AppPreferences preferences;
     final GalleryScreen screen;
-    final ToolbarOwner toolbarOwner;
     final ActionModePresenter actionModePresenter;
 
     DelegateActionHandler delegateActionHandler;
@@ -55,20 +54,16 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
     public GalleryScreenPresenter(
             AppPreferences preferences,
             GalleryScreen screen,
-            ToolbarOwner toolbarOwner,
             ActionModePresenter actionModePresenter
     ) {
         this.preferences = preferences;
         this.screen = screen;
-        this.toolbarOwner = toolbarOwner;
         this.actionModePresenter = actionModePresenter;
     }
 
     @Override
     protected void onLoad(Bundle savedInstanceState) {
         super.onLoad(savedInstanceState);
-        // init acitonbar
-        updateActionBarWithChildMenuConfig(null);
         // init pager
 //        List<GalleryPage> galleryPages = preferences.getGalleryPages();
         List<GalleryPage> galleryPages = Arrays.asList(GalleryPage.values());
@@ -94,10 +89,19 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
 
         delegateActionHandler.setWrapped(menuConfig);
 
-        toolbarOwner.setConfig(ActionBarConfig.builder()
+        if (hasView()) {
+            getView().updateToolbar();
+        }
+    }
+
+    ActionBarConfig getActionBarConfig() {
+        if (delegateActionHandler == null) {
+            delegateActionHandler = new DelegateActionHandler();
+        }
+        return ActionBarConfig.builder()
                 .setTitle(R.string.my_library)
                 .setMenuConfig(delegateActionHandler)
-                .build());
+                .build();
     }
 
     class DelegateActionHandler implements ActionBarMenuHandler {

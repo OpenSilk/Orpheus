@@ -34,4 +34,7 @@
     <!--Bio Screen-->
     <string name="bio_biography_title">Biography</string>
     <string name="bio_similar_artists_title">Similar Artists</string>
+
+    <!--Libraries-->
+    <string name="libraries_title">Libraries</string>
 </resources>

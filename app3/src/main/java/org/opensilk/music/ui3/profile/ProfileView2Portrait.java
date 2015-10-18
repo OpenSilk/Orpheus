@@ -96,9 +96,12 @@ public class ProfileView2Portrait extends CoordinatorLayout implements Bundleabl
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mToolbarOwner.attachToolbar(mToolbar);
-        mToolbarOwner.setConfig(ActionBarConfig.builder()
-                .setTitle(mTitleText).setMenuConfig(mPresenter.getMenuConfig()).build());
+        if (!isInEditMode()) {
+            mToolbarOwner.attachToolbar(mToolbar);
+            mToolbarOwner.setConfig(ActionBarConfig.builder()
+                    .setTitle(mTitleText).setMenuConfig(mPresenter.getMenuConfig()).build());
+            mPresenter.takeView(this);
+        }
     }
 
     @Override

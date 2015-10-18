@@ -145,7 +145,7 @@ public class LauncherActivity extends MusicActivity {
                     menuItem.setChecked(true);
                     break;
                 }
-                case R.id.folders:
+                case R.id.libraries:
                     mFm.killBackStack();
                     mFm.replaceMainContent(LibraryScreenFragment.ni(), false);
                     menuItem.setChecked(true);

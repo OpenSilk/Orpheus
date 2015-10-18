@@ -22,9 +22,9 @@
         <item android:id="@+id/my_library"
             android:icon="@drawable/ic_my_library_music_grey600_24dp"
             android:title="@string/my_library"/>
-        <item android:id="@+id/folders"
+        <item android:id="@+id/libraries"
             android:icon="@drawable/ic_folder_grey600_24dp"
-            android:title="@string/folders"/>
+            android:title="@string/libraries_title"/>
     </group>
 
     <item

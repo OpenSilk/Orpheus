@@ -63,7 +63,16 @@ public class GalleryScreenView extends CoordinatorLayout {
         super.onFinishInflate();
         if (!isInEditMode()) {
             ButterKnife.inject(this);
+            mPresenter.takeView(this);
+        }
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (!isInEditMode()) {
             mToolbarOwner.attachToolbar(mToolbar);
+            mToolbarOwner.setConfig(mPresenter.getActionBarConfig());
             mPresenter.takeView(this);
         }
     }
@@ -106,6 +115,12 @@ public class GalleryScreenView extends CoordinatorLayout {
                 mPresenter.actionModePresenter.cancelActionMode();
             }
         });
+    }
+
+    public void updateToolbar() {
+        if (isAttachedToWindow()) {
+            mToolbarOwner.setConfig(mPresenter.getActionBarConfig());
+        }
     }
 
 }

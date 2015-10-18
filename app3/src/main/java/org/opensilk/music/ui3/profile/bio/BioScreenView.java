@@ -73,9 +73,11 @@ public class BioScreenView extends CoordinatorLayout {
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
-        toolbarOwner.attachToolbar(toolbar);
-        toolbarOwner.setConfig(presenter.getActionBarConfig());
-        presenter.takeView(this);
+        if (!isInEditMode()) {
+            toolbarOwner.attachToolbar(toolbar);
+            toolbarOwner.setConfig(presenter.getActionBarConfig());
+            presenter.takeView(this);
+        }
     }
 
     @Override

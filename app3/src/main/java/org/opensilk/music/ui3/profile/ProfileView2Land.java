@@ -94,8 +94,11 @@ public class ProfileView2Land extends CoordinatorLayout implements BundleableRec
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mToolbarOwner.attachToolbar(mToolbar);
-        mToolbarOwner.setConfig(ActionBarConfig.builder().setMenuConfig(mPresenter.getMenuConfig()).build());
+        if(!isInEditMode()) {
+            mToolbarOwner.attachToolbar(mToolbar);
+            mToolbarOwner.setConfig(ActionBarConfig.builder().setMenuConfig(mPresenter.getMenuConfig()).build());
+            mPresenter.takeView(this);
+        }
     }
 
     @Override

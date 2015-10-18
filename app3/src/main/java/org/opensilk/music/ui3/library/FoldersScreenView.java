@@ -85,12 +85,20 @@ public class FoldersScreenView extends CoordinatorLayout implements BundleableRe
         super.onFinishInflate();
         ButterKnife.inject(this);
         initRecyclerView();
-        mToolbarOwner.attachToolbar(mToolbar);
-        mToolbarOwner.setConfig(ActionBarConfig.builder().setTitle(mTitle)
-                .setMenuConfig(mPresenter.getMenuConfig()).build());
         mPresenter.takeView(this);
         updateFab();
         subscribeClicks();
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (!isInEditMode()) {
+            mToolbarOwner.attachToolbar(mToolbar);
+            mToolbarOwner.setConfig(ActionBarConfig.builder().setTitle(mTitle)
+                    .setMenuConfig(mPresenter.getMenuConfig()).build());
+            mPresenter.takeView(this);
+        }
     }
 
     @Override
