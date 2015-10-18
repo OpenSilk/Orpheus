@@ -16,22 +16,4 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="@string/now_playing">
-
-        <CheckBoxPreference
-            android:key="keep_screen_on"
-            android:title="@string/settings_keep_screen_on"
-            android:summary="@string/settings_keep_screen_on_summary"
-            android:defaultValue="false"/>
-
-        <ListPreference
-            android:key="now_playing_view"
-            android:title="@string/settings_now_playing_view"
-            android:entries="@array/now_playing_view"
-            android:entryValues="@array/now_playing_view_values"
-            android:defaultValue="artwork"/>
-
-    </PreferenceCategory>
-
 </PreferenceScreen>

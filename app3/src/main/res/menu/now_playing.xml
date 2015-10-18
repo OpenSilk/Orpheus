@@ -20,19 +20,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/menu_keep_screen_on"
+        app:showAsAction="never"
+        android:title="@string/settings_keep_screen_on"/>
+
+    <item
         android:id="@+id/menu_visualizer"
         app:showAsAction="never"
-        android:title="Visualizer">
+        android:title="@string/now_playing_visualizer">
         <menu>
             <item
                 android:id="@+id/menu_visualizer_off"
-                android:title="Off"/>
+                android:title="@string/now_playing_visualizer_off"/>
             <item
                 android:id="@+id/menu_visualizer_circle_bars"
-                android:title="Circle bars"/>
+                android:title="@string/now_playing_visualizer_circle_bars"/>
             <item
                 android:id="@+id/menu_visualizer_circle_lines"
-                android:title="Circle lines"/>
+                android:title="@string/now_playing_visualizer_circles_lines"/>
         </menu>
     </item>
 

@@ -33,6 +33,7 @@ import org.opensilk.common.ui.mortar.ActionBarMenuHandler;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 
+import static org.opensilk.music.AppPreferences.KEEP_SCREEN_ON;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_ARTWORK;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_VIS_CIRCLE;
@@ -55,18 +56,30 @@ public class NowPlayingScreenMenuHander implements ActionBarMenuHandler {
     @Override
     public boolean onBuildMenu(MenuInflater menuInflater, Menu menu) {
         menuInflater.inflate(R.menu.now_playing, menu);
+        boolean keepScreenOn = preferences.getBoolean(AppPreferences.KEEP_SCREEN_ON, false);
+        if (keepScreenOn) {
+            menu.findItem(R.id.menu_keep_screen_on).setChecked(true);
+            menu.findItem(R.id.menu_keep_screen_on).setTitle(R.string.now_playing_keep_screen_on_checked);
+        }
         String visualizerType = preferences.getString(NOW_PLAYING_VIEW, "none");
         switch (visualizerType) {
             case NOW_PLAYING_VIEW_VIS_CIRCLE: {
                 menu.findItem(R.id.menu_visualizer_circle_lines).setChecked(true);
+                menu.findItem(R.id.menu_visualizer_circle_lines)
+                        .setTitle(R.string.now_playing_visualizer_circles_lines_checked);
                 break;
             }
             case NOW_PLAYING_VIEW_VIS_CIRCLE_BAR: {
                 menu.findItem(R.id.menu_visualizer_circle_bars).setChecked(true);
+                menu.findItem(R.id.menu_visualizer_circle_bars)
+                        .setTitle(R.string.now_playing_visualizer_circle_bars_checked);
                 break;
             }
-            case NOW_PLAYING_VIEW_ARTWORK: {
+            case NOW_PLAYING_VIEW_ARTWORK:
+            default: {
                 menu.findItem(R.id.menu_visualizer_off).setChecked(true);
+                menu.findItem(R.id.menu_visualizer_off)
+                        .setTitle(R.string.now_playing_visualizer_off_checked);
                 break;
             }
         }
@@ -79,7 +92,7 @@ public class NowPlayingScreenMenuHander implements ActionBarMenuHandler {
             case R.id.menu_visualizer_circle_lines:
                 preferences.putString(NOW_PLAYING_VIEW, NOW_PLAYING_VIEW_VIS_CIRCLE);
                 showToast(context);
-//                presenter.pokeVisRenderer();//TODO
+//                presenter.pokeVisRenderer();
                 return true;
             case R.id.menu_visualizer_circle_bars:
                 preferences.putString(NOW_PLAYING_VIEW, NOW_PLAYING_VIEW_VIS_CIRCLE_BAR);
@@ -91,12 +104,17 @@ public class NowPlayingScreenMenuHander implements ActionBarMenuHandler {
                 showToast(context);
 //                presenter.disableVisualizer();
                 return true;
+            case R.id.menu_keep_screen_on:
+                preferences.putBoolean(KEEP_SCREEN_ON, true);
+                showToast(context);
+                return true;
             default:
                 return false;
         }
     }
 
+    //TODO apply without forcing restart
     void showToast(Context context) {
-        Toast.makeText(context, "Please close and reopen Now Playing", Toast.LENGTH_LONG).show();
+        Toast.makeText(context, R.string.now_playing_close_reopen, Toast.LENGTH_LONG).show();
     }
 }

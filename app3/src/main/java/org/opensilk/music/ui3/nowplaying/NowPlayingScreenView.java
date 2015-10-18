@@ -17,7 +17,9 @@
 
 package org.opensilk.music.ui3.nowplaying;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
@@ -26,9 +28,11 @@ import android.graphics.drawable.AnimatedStateListDrawable;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
 import android.media.audiofx.AudioEffect;
 import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewCompat;
@@ -44,6 +48,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.request.transition.Transition;
 import com.jakewharton.rxbinding.view.RxView;
@@ -171,10 +176,16 @@ public class NowPlayingScreenView extends RelativeLayout {
             case NOW_PLAYING_VIEW_VIS_CIRCLE:
             case NOW_PLAYING_VIEW_VIS_CIRCLE_BAR:
             case NOW_PLAYING_VIEW_VIS_LINES: {
-                visualizerView = ViewUtils.inflate(getContext(), R.layout.now_playing_visualization, placeholder, false);
-                placeholder.addView(visualizerView);
-                placeholder.bringChildToFront(visualizerView);
-                initRenderer();
+                if (PackageManager.PERMISSION_GRANTED
+                        == ContextCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO)) {
+                    visualizerView = ViewUtils.inflate(getContext(),
+                            R.layout.now_playing_visualization, placeholder, false);
+                    placeholder.addView(visualizerView);
+                    placeholder.bringChildToFront(visualizerView);
+                    initRenderer();
+                } else {
+                    //TODO
+                }
                 break;
             }
         }
