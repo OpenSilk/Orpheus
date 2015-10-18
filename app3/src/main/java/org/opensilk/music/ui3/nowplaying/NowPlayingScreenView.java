@@ -182,11 +182,6 @@ public class NowPlayingScreenView extends RelativeLayout {
 
     @DebugLog
     private void initRenderer() {
-        boolean waslinked = false;
-        if (visualizerView.isLinked() && visualizerView.isEnabled()) {
-            waslinked = true;
-            visualizerView.setEnabled(false);
-        }
         visualizerView.clearRenderers();
         switch (visualizerType) {
             case NOW_PLAYING_VIEW_VIS_CIRCLE: {
@@ -223,9 +218,6 @@ public class NowPlayingScreenView extends RelativeLayout {
                 */
                 break;
             }
-        }
-        if (waslinked) {
-            visualizerView.setEnabled(true);
         }
     }
 
