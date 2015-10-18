@@ -21,6 +21,7 @@ import android.content.Context;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.artwork.cache.BitmapDiskCache;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
+import org.opensilk.music.artwork.cache.ByteArrayPool;
 import org.opensilk.music.artwork.cache.CacheUtil;
 import org.opensilk.music.artwork.coverartarchive.CoverArtArchiveModule;
 import org.opensilk.music.artwork.shared.ArtworkAuthorityModule;
@@ -53,14 +54,20 @@ import static org.opensilk.music.artwork.Constants.DISK_CACHE_DIRECTORY;
 public class ArtworkModule {
 
     @Provides @Singleton //TODO when/how to close this?
-    public BitmapDiskCache provideBitmapDiskLruCache(@ForApplication Context context, ArtworkPreferences preferences) {
+    public BitmapDiskCache provideBitmapDiskLruCache(
+            @ForApplication Context context, ArtworkPreferences preferences, ByteArrayPool byteArrayPool) {
         final int size = Integer.decode(preferences.getString(ArtworkPreferences.IMAGE_DISK_CACHE_SIZE, "60")) * 1024 * 1024;
-        return BitmapDiskLruCache.open(CacheUtil.getCacheDir(context, DISK_CACHE_DIRECTORY), size);
+        return BitmapDiskLruCache.open(CacheUtil.getCacheDir(context, DISK_CACHE_DIRECTORY), size, byteArrayPool);
     }
 
     @Provides @Singleton @Named("artworkscheduler")
     public Scheduler provideArtworkScheduler() {
         return Schedulers.io();//TODO using computation for both provider and fetcher will
                                //create deadlock maybe use io for provider and computation for fetcher
+    }
+
+    @Provides @Singleton
+    public ByteArrayPool provideByteArrayPool() {
+        return new ByteArrayPool(1024*1024);
     }
 }

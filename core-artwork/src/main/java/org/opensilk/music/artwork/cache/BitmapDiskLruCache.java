@@ -3,11 +3,13 @@ package org.opensilk.music.artwork.cache;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.support.v4.util.Pools;
 
 import com.jakewharton.disklrucache.DiskLruCache;
 
 import org.apache.commons.io.IOUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -24,23 +26,25 @@ public class BitmapDiskLruCache implements BitmapDiskCache {
 
     private final File mDiskCacheDir;
     private final int mDiskCacheSize;
-    private final ByteArrayPool mBytePool = new ByteArrayPool(1024*512);
+    private final ByteArrayPool mBytePool;
     private static final Bitmap.CompressFormat COMPRESS_FORMAT = Bitmap.CompressFormat.PNG;
     private static final int COMPRESS_QUALITY = 100;
     private static final int APP_VERSION = 2;
     private static final int VALUE_COUNT = 1;
     private static final int DEFAULT_BUFFER_SIZE = 1024 * 8;
     private static final int OUTPUT_BUFFER_SIZE = 1024 * 64;
+    private final Pools.Pool<ByteArrayOutputStream> mOutputPool = new Pools.SynchronizedPool<>(5);
 
     public static final Object sDecodeLock = new Object();
 
-    private BitmapDiskLruCache(File diskCacheDir, int diskCacheSize) {
+    private BitmapDiskLruCache(File diskCacheDir, int diskCacheSize, ByteArrayPool bytePool) {
         mDiskCacheDir = diskCacheDir;
         mDiskCacheSize = diskCacheSize;
+        mBytePool = bytePool;
     }
 
-    public static BitmapDiskLruCache open(File diskCacheDir, int diskCacheSize) {
-        return new BitmapDiskLruCache(diskCacheDir, diskCacheSize);
+    public static BitmapDiskLruCache open(File diskCacheDir, int diskCacheSize, ByteArrayPool bytePool) {
+        return new BitmapDiskLruCache(diskCacheDir, diskCacheSize, bytePool);
     }
 
     //lazily created to avoid blocking on main thread during app startup
@@ -60,10 +64,34 @@ public class BitmapDiskLruCache implements BitmapDiskCache {
         mDiskCache = null;
     }
 
+    private ByteArrayOutputStream getOutput() {
+        ByteArrayOutputStream out = mOutputPool.acquire();
+        if (out == null) {
+            out = new PoolingByteArrayOutputStream(mBytePool, OUTPUT_BUFFER_SIZE);
+        }
+        return out;
+    }
+
+    private void returnOutput(ByteArrayOutputStream out) {
+        if (out != null) {
+            out.reset();
+            if (!mOutputPool.release(out)){
+                IOUtils.closeQuietly(out);
+            }
+        }
+    }
+
+    @Override
+    public synchronized void onTrimMemory() {
+        ByteArrayOutputStream out = null;
+        while ((out = mOutputPool.acquire()) != null) {
+            IOUtils.closeQuietly(out);
+        }
+    }
+
     public byte[] getBytes(String url) {
         DiskLruCache.Snapshot snapshot = null;
-        final PoolingByteArrayOutputStream out =
-                new PoolingByteArrayOutputStream(mBytePool, OUTPUT_BUFFER_SIZE);
+        final ByteArrayOutputStream out = getOutput();
         final byte[] buff = mBytePool.getBuf(DEFAULT_BUFFER_SIZE);
         try {
             snapshot = getDiskCache().get(CacheUtil.md5(url));
@@ -77,7 +105,7 @@ public class BitmapDiskLruCache implements BitmapDiskCache {
             Timber.e(e, "getBytes(%s)", url);
         } finally {
             IOUtils.closeQuietly(snapshot);
-            IOUtils.closeQuietly(out);
+            returnOutput(out);
             mBytePool.returnBuf(buff);
         }
         return null;
@@ -85,8 +113,7 @@ public class BitmapDiskLruCache implements BitmapDiskCache {
 
     @Override
     public byte[] bitmapToBytes(Bitmap bitmap) {
-        final PoolingByteArrayOutputStream out =
-                new PoolingByteArrayOutputStream(mBytePool, OUTPUT_BUFFER_SIZE);
+        final ByteArrayOutputStream out = getOutput();
         try {
             if (bitmap.compress(COMPRESS_FORMAT, COMPRESS_QUALITY, out)) {
                 return out.toByteArray();
@@ -94,7 +121,7 @@ public class BitmapDiskLruCache implements BitmapDiskCache {
                 return null;
             }
         } finally {
-            IOUtils.closeQuietly(out);
+            returnOutput(out);
         }
     }
 
@@ -109,6 +136,7 @@ public class BitmapDiskLruCache implements BitmapDiskCache {
                 } catch (OutOfMemoryError e) {
                     Timber.w(e, "getBitmap(%s)", url);
                 } finally {
+                    //dont return huge buffers to the pool
                     if (bytes.length <= OUTPUT_BUFFER_SIZE) {
                         mBytePool.returnBuf(bytes);
                     }
@@ -131,6 +159,10 @@ public class BitmapDiskLruCache implements BitmapDiskCache {
                         out = editor.newOutputStream(0);
                         IOUtils.write(bytes, out);
                     } finally {
+                        //dont return huge buffers to the pool
+                        if (bytes.length <= OUTPUT_BUFFER_SIZE) {
+                            mBytePool.returnBuf(bytes);
+                        }
                         IOUtils.closeQuietly(out);
                     }
                     editor.commit();

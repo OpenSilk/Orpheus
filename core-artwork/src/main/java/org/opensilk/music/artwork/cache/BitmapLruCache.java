@@ -65,4 +65,9 @@ public class BitmapLruCache extends LruCache<String, Bitmap> implements BitmapCa
         evictAll();
         return true;
     }
+
+    @Override
+    public void onTrimMemory() {
+        evictAll();
+    }
 }

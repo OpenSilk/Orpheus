@@ -30,4 +30,6 @@ public interface BitmapCache {
     public boolean containsKey(String url);
 
     public boolean clearCache();
+
+    void onTrimMemory();
 }

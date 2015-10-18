@@ -29,6 +29,7 @@ import org.apache.commons.io.IOUtils;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.artwork.ArtworkUris;
 import org.opensilk.music.artwork.cache.BitmapDiskCache;
+import org.opensilk.music.artwork.cache.ByteArrayPool;
 import org.opensilk.music.artwork.fetcher.ArtworkFetcher;
 import org.opensilk.music.artwork.fetcher.ArtworkFetcherService;
 import org.opensilk.music.artwork.fetcher.CompletionListener;
@@ -46,6 +47,7 @@ import javax.inject.Named;
 import hugo.weaving.DebugLog;
 import rx.Scheduler;
 import rx.functions.Action0;
+import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 /**
@@ -69,11 +71,6 @@ public class ArtworkProvider extends ContentProvider {
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        throw new UnsupportedOperationException("query not implemented");
-    }
-
-    @Override
     public String getType(Uri uri) {
         switch (mUriMatcher.match(uri)) {
             case ArtworkUris.MATCH.ARTINFO:
@@ -83,18 +80,11 @@ public class ArtworkProvider extends ContentProvider {
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues values) {
-        throw new UnsupportedOperationException("Provider is read only");
-    }
-
-    @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
-        throw new UnsupportedOperationException("Provider is read only");
-    }
-
-    @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        throw new UnsupportedOperationException("Provider is read only");
+    @DebugLog
+    public void onTrimMemory(int level) {
+        if (level >= TRIM_MEMORY_BACKGROUND) {
+            mL2Cache.onTrimMemory();
+        }
     }
 
     @Override
@@ -189,7 +179,8 @@ public class ArtworkProvider extends ContentProvider {
                         binder.newRequest(artInfo, listener);
                         bitmap = queue.take();
                         if (bitmap.hasBitmap()) {
-                            IOUtils.write(mL2Cache.bitmapToBytes(bitmap.getBitmap()), out);
+                            byte[] bytes = mL2Cache.bitmapToBytes(bitmap.getBitmap());
+                            IOUtils.write(bytes, out);
                         }
                     } catch (InterruptedException|IOException e) {
                         Timber.w(e, "createPipe2(%s)", artInfo);
@@ -229,6 +220,26 @@ public class ArtworkProvider extends ContentProvider {
         void recycle() {
             if (hasBitmap()) bitmap.recycle();
         }
+    }
+
+    @Override
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        throw new UnsupportedOperationException("query not implemented");
+    }
+
+    @Override
+    public Uri insert(Uri uri, ContentValues values) {
+        throw new UnsupportedOperationException("Provider is read only");
+    }
+
+    @Override
+    public int delete(Uri uri, String selection, String[] selectionArgs) {
+        throw new UnsupportedOperationException("Provider is read only");
+    }
+
+    @Override
+    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        throw new UnsupportedOperationException("Provider is read only");
     }
 
 }
