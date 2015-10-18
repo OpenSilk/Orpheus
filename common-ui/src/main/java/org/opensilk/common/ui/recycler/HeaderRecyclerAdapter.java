@@ -106,5 +106,10 @@ public class HeaderRecyclerAdapter<VH extends RecyclerView.ViewHolder> extends R
         public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
             notifyItemMoved(fromPosition + getNumHeaders(), toPosition + getNumHeaders());
         }
+
+        @Override
+        public void onItemRangeChanged(int positionStart, int itemCount, Object payload) {
+            notifyItemRangeChanged(positionStart, itemCount, payload);
+        }
     };
 }

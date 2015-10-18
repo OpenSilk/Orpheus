@@ -135,5 +135,11 @@ public class DragSwipeAdapterWrapper<VH extends RecyclerView.ViewHolder>
         public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
             notifyItemMoved(fromPosition, toPosition);
         }
+
+        @Override
+        public void onItemRangeChanged(int positionStart, int itemCount, Object payload) {
+            notifyItemRangeChanged(positionStart, itemCount, payload);
+        }
+
     };
 }
