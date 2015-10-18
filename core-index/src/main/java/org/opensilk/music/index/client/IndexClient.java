@@ -80,4 +80,6 @@ public interface IndexClient {
     Observable<List<Track>> getTracks(Uri uri, String sortOrder);
     Observable<List<Uri>> getTrackUris(Uri uri, String sordOrder);
     MediaMetadata convertToMediaMetadata(Track track);
+
+    void release();
 }
