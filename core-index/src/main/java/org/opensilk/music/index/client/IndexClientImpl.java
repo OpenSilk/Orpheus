@@ -36,6 +36,7 @@ import android.support.v4.media.MediaMetadataCompat;
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.util.BundleHelper;
+import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.artwork.UtilsArt;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.index.provider.Methods;
@@ -383,22 +384,27 @@ public class IndexClientImpl implements IndexClient {
     }
 
     private boolean makeCheckedCall(String method, Bundle args) {
-        return checkCall(appContext.getContentResolver().call(callUri, method, null, args));
+        return checkCall(makeCall(method, args));
     }
 
+    @TargetApi(17)
     private Bundle makeCall(String method, Bundle args) {
-        if (client == null) {
-            synchronized (this) {
-                if (client == null) {
-                    client = appContext.getContentResolver().acquireUnstableContentProviderClient(callUri);
+        if (VersionUtils.hasJellyBeanMR1()) {
+            if (client == null) {
+                synchronized (this) {
+                    if (client == null) {
+                        client = appContext.getContentResolver().acquireUnstableContentProviderClient(callUri);
+                    }
                 }
             }
-        }
-        try {
-            return client.call(method, null, args);
-        } catch (RemoteException e) {
-            release();
-            return makeCall(method, args);
+            try {
+                return client.call(method, null, args);
+            } catch (RemoteException e) {
+                release();
+                return makeCall(method, args);
+            }
+        } else {
+            return appContext.getContentResolver().call(callUri, method, null, args);
         }
     }
 
@@ -409,4 +415,5 @@ public class IndexClientImpl implements IndexClient {
         }
         return LibraryExtras.getOk(result);
     }
+
 }
