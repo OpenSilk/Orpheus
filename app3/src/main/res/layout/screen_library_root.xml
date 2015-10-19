@@ -34,7 +34,7 @@
         <LinearLayout
             style="@style/mtrl.SingleLineListItemLinear">
 
-            <org.opensilk.common.ui.widget.CircleImageView
+            <ImageView
                 android:id="@+id/avatar"
                 style="@style/mtrl.TwoLineListItemInner.Avatar"/>
 
@@ -50,15 +50,14 @@
                 android:id="@+id/btn_login"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Login"
+                android:text="@string/libraries_login"
                 style="?android:buttonStyleSmall"/>
 
             <ImageButton
                 android:id="@+id/btn_retry"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_refresh_black_vector_36dp"
-                style="?android:actionButtonStyle"/>
+                style="?libraryRootRefresh"/>
 
             <org.opensilk.common.ui.widget.TintImageButton
                 android:id="@+id/tile_overflow"

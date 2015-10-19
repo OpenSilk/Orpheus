@@ -421,7 +421,7 @@ public class NotificationHelper2 extends BroadcastReceiver {
         if (VersionUtils.hasApi21()) {
             return isPlaying ? R.drawable.ic_pause_black_vector_36dp : R.drawable.ic_play_black_vector_36dp;
         } else {
-            return isPlaying ? R.drawable.ic_pause_white_36dp : R.drawable.ic_play_arrow_white_36dp;
+            return isPlaying ? R.drawable.ic_pause_white_36dp : R.drawable.ic_play_white_36dp;
         }
     }
 

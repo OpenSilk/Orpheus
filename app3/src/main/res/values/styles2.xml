@@ -273,7 +273,6 @@
     </style>
 
     <style name="footerDark.Play">
-        <item name="fabColor">accent</item>
         <item name="android:src">@drawable/action_playpause_white_36dp</item>
         <item name="android:contentDescription">@string/accessibility_play</item>
     </style>
@@ -297,7 +296,7 @@
     </style>
 
     <style name="controlsActionLight.Play">
-        <item name="android:src">@drawable/action_playpause_black_36dp</item>
+        <item name="android:src">@drawable/action_playpause_white_36dp</item>
         <item name="android:contentDescription">@string/accessibility_play</item>
     </style>
 
@@ -307,7 +306,7 @@
     </style>
 
     <style name="controlsActionLight.Next">
-        <item name="android:src">@drawable/ic_skip_next_black_vector_36dp</item>
+        <item name="android:src">@drawable/ic_skip_next_white_36dp</item>
         <item name="android:contentDescription">@string/accessibility_next</item>
     </style>
 
@@ -317,7 +316,7 @@
     </style>
 
     <style name="controlsActionLight.Prev">
-        <item name="android:src">@drawable/ic_skip_previous_black_vector_36dp</item>
+        <item name="android:src">@drawable/ic_skip_previous_white_36dp</item>
         <item name="android:contentDescription">@string/accessibility_prev</item>
     </style>
 
@@ -327,7 +326,7 @@
     </style>
 
     <style name="controlsActionLight.Shuffle">
-        <item name="android:src">@drawable/action_shuffle_black_36dp</item>
+        <item name="android:src">@drawable/action_shuffle_white_36dp</item>
         <item name="android:contentDescription">@string/accessibility_shuffle</item>
     </style>
 
@@ -337,7 +336,7 @@
     </style>
 
     <style name="controlsActionLight.Repeat">
-        <item name="android:src">@drawable/action_repeat_black_36dp</item>
+        <item name="android:src">@drawable/action_repeat_white_36dp</item>
         <item name="android:contentDescription">@string/accessibility_repeat</item>
     </style>
 
@@ -354,6 +353,28 @@
 
     <style name="TextAppearanceCollapsingToolbar.Expanded" parent="TextAppearance.Design.CollapsingToolbar.Expanded">
         <item name="android:textColor">@color/white</item>
+    </style>
+
+    <!--libraries-->
+    <style name="FoldersFab" parent="Widget.Design.FloatingActionButton">
+        <item name="android:src">@drawable/action_plusminus_box_white_24dp</item>
+    </style>
+
+    <style name="LibraryRootRefresh" parent="Widget.AppCompat.ActionButton">
+
+    </style>
+
+    <style name="LibraryRootRefresh.Light">
+        <item name="android:src">@drawable/ic_refresh_black_24dp</item>
+    </style>
+
+    <style name="LibraryRootRefresh.Dark">
+        <item name="android:src">@drawable/ic_refresh_white_24dp</item>
+    </style>
+
+    <!--profile-->
+    <style name="ProfileFab" parent="Widget.Design.FloatingActionButton">
+        <item name="android:src">@drawable/ic_play_white_24dp</item>
     </style>
 
 </resources>

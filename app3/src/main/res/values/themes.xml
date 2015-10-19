@@ -45,12 +45,11 @@
         <item name="controlsShuffleStyle">@style/controlsActionLight.Shuffle</item>
         <item name="controlsRepeatStyle">@style/controlsActionLight.Repeat</item>
 
+        <item name="libraryRootRefresh">@style/LibraryRootRefresh.Light</item>
+
         <item name="seekArcStyle">@style/SeekArcNowPlaying</item>
         <item name="windowActionModeOverlay">true</item>
 
-        <item name="iconTint">@color/black</item>
-        <item name="iconTintInverted">@color/white</item>
-        <item name="iconTintAlt">@color/orange_500</item>
     </style>
 
     <style name="Theme.LightConfig" parent="Theme.LightOverlay">
@@ -94,12 +93,11 @@
         <item name="controlsShuffleStyle">@style/controlsActionDark.Shuffle</item>
         <item name="controlsRepeatStyle">@style/controlsActionDark.Repeat</item>
 
+        <item name="libraryRootRefresh">@style/LibraryRootRefresh.Light</item>
+
         <item name="seekArcStyle">@style/SeekArcNowPlaying</item>
         <item name="windowActionModeOverlay">true</item>
 
-        <item name="iconTint">@color/white</item>
-        <item name="iconTintInverted">@color/white</item>
-        <item name="iconTintAlt">@color/orange_500</item>
     </style>
 
     <style name="Theme.DarkConfig" parent="Theme.DarkOverlay">

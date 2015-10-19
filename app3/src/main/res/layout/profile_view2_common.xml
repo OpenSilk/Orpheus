@@ -73,9 +73,9 @@
         android:layout_width="wrap_content"
         app:layout_anchor="@id/appbar"
         app:layout_anchorGravity="bottom|right|end"
-        android:src="@drawable/ic_play_arrow_white_36dp"
+        tools:src="@drawable/ic_play_white_36dp"
         android:layout_margin="16dp"
         android:clickable="true"
-        android:elevation="8dp"/>
+        style="@style/ProfileFab"/>
 
 </merge>

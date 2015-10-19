@@ -37,4 +37,5 @@
 
     <!--Libraries-->
     <string name="libraries_title">Libraries</string>
+    <string name="libraries_login">Login</string>
 </resources>

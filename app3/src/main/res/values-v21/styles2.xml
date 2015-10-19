@@ -102,22 +102,22 @@
 
     <style name="footerLight">
         <item name="android:scaleType">centerInside</item>
-        <item name="android:src">@drawable/ic_play_pause_toggle_black_animated_36dp</item>
         <item name="android:background">?android:selectableItemBackgroundBorderless</item>
     </style>
 
     <style name="footerDark">
         <item name="android:scaleType">centerInside</item>
-        <item name="android:src">@drawable/ic_play_pause_toggle_black_animated_36dp</item>
-        <item name="android:tint">@color/white</item>
         <item name="android:background">?android:selectableItemBackgroundBorderless</item>
     </style>
 
     <style name="footerLight.Play">
+        <item name="android:src">@drawable/ic_play_pause_toggle_black_animated_36dp</item>
         <item name="android:contentDescription">@string/accessibility_play</item>
     </style>
 
     <style name="footerDark.Play">
+        <item name="android:src">@drawable/ic_play_pause_toggle_black_animated_36dp</item>
+        <item name="android:tint">@color/white</item>
         <item name="android:contentDescription">@string/accessibility_play</item>
     </style>
 
@@ -190,6 +190,26 @@
         <item name="android:src">@drawable/ic_repeat_black_animated_36dp</item>
         <item name="android:tint">@color/white</item>
         <item name="android:contentDescription">@string/accessibility_repeat</item>
+    </style>
+
+    <!--libraries-->
+    <style name="FoldersFab" parent="Widget.Design.FloatingActionButton">
+        <item name="android:src">@drawable/ic_plus_minus_box_white_animated_24dp</item>
+        <item name="android:elevation">8dp</item>
+    </style>
+
+    <style name="LibraryRootRefresh.Light">
+        <item name="android:src">@drawable/ic_refresh_black_vector_24dp</item>
+    </style>
+
+    <style name="LibraryRootRefresh.Dark">
+        <item name="android:src">@drawable/ic_refresh_white_vector_24dp</item>
+    </style>
+
+    <!--profile-->
+    <style name="ProfileFab" parent="Widget.Design.FloatingActionButton">
+        <item name="android:src">@drawable/ic_play_white_vector_24dp</item>
+        <item name="android:elevation">8dp</item>
     </style>
 
 </resources>

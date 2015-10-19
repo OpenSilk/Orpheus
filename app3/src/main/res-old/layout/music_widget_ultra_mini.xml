@@ -34,6 +34,6 @@
         android:contentDescription="@string/accessibility_play"
         android:scaleType="centerInside"
         android:background="?android:selectableItemBackground"
-        tools:src="@drawable/ic_play_arrow_white_36dp" />
+        tools:src="@drawable/ic_play_white_36dp" />
 
 </FrameLayout>

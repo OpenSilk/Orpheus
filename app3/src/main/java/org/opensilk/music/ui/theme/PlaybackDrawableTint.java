@@ -66,7 +66,7 @@ public class PlaybackDrawableTint {
     }
 
     public static LevelListDrawable getRepeatDrawable36(Context context, int color) {
-        final int one = R.drawable.ic_repeat_one_white_36dp;
+        final int one = R.drawable.ic_repeat_once_white_36dp;
         final int all = R.drawable.ic_repeat_white_36dp;
         final LevelListDrawable d = new LevelListDrawable();
         d.addLevel(0, 0, context.getResources().getDrawable(all));
@@ -82,7 +82,7 @@ public class PlaybackDrawableTint {
     }
 
     static void doRepeatDrawable(ImageButton v, boolean is24, int color) {
-        int one = is24 ? R.drawable.ic_repeat_one_white_24dp : R.drawable.ic_repeat_one_white_36dp;
+        int one = is24 ? R.drawable.ic_repeat_once_white_24dp : R.drawable.ic_repeat_once_white_36dp;
         int all = is24 ? R.drawable.ic_repeat_white_24dp : R.drawable.ic_repeat_white_36dp;
         LevelListDrawable d = (LevelListDrawable) v.getDrawable();
         d.addLevel(1, 1, tintDrawable(v.getContext(), one, color));

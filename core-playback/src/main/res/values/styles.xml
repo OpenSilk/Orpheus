@@ -61,7 +61,7 @@
     </style>
 
     <style name="NotificationAction.Play" parent="@style/NotificationAction">
-        <item name="android:src">@drawable/ic_play_arrow_white_36dp</item>
+        <item name="android:src">@drawable/ic_play_white_36dp</item>
         <item name="android:contentDescription">@string/accessibility_play</item>
     </style>
 
