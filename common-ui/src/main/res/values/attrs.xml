@@ -22,9 +22,6 @@
         <attr name="android:foregroundInsidePadding" />
         <attr name="android:foregroundGravity" />
     </declare-styleable>
-    <declare-styleable name="SlidingTabLayout">
-        <attr name="invertedTabBar" format="boolean"/>
-    </declare-styleable>
     <declare-styleable name="TintImageButton">
         <attr name="tibTint" format="color"/>
     </declare-styleable>

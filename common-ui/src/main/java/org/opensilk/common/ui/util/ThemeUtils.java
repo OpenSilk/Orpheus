@@ -208,6 +208,7 @@ public class ThemeUtils {
         themeProgressBar2(progressBar, getThemeAttrColor(progressBar.getContext(), colorAttr));
     }
 
+    @TargetApi(21)
     public static void themeProgressBar2(ProgressBar progressBar, int color) {
         if (VersionUtils.hasLollipop()) {
             progressBar.getProgressDrawable().setTint(color);

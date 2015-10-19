@@ -52,6 +52,7 @@ public class FragmentManagerOwner extends Presenter<FragmentManagerOwnerActivity
         return BundleService.getBundleService(view.getScope());
     }
 
+    @SuppressLint("CommitTransaction")
     public FragmentTransaction newTrasaction() {
         if (hasView()) {
             return getView().getSupportFragmentManager().beginTransaction();

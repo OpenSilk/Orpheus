@@ -17,6 +17,7 @@
 
 package org.opensilk.common.ui.mortar;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.View;
 
@@ -45,7 +46,7 @@ public class LifecycleService {
      * @throws IllegalArgumentException if there is no LifecycleService attached to this scope
      * @return The Lifecycle Observable associated with this context
      */
-    @SuppressWarnings("unchecked") //
+    @SuppressWarnings("unchecked") @SuppressLint("WrongConstant")
     public static Observable<Lifecycle> getLifecycle(Context context) {
         //noinspection ResourceType
         return (Observable<Lifecycle>) context.getSystemService(LIFECYCLE_SERVICE);

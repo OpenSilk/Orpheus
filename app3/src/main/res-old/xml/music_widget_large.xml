@@ -23,5 +23,4 @@
     android:minWidth="@dimen/music_widget_large_min_width"
     android:updatePeriodMillis="0"
     android:widgetCategory="keyguard|home_screen"
-    android:resizeMode="horizontal|vertical"
-    android:configure="org.opensilk.music.appwidgets.MusicWidgetSettings" />
+    android:resizeMode="horizontal|vertical"/>

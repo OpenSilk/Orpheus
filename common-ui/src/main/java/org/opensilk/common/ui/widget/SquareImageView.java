@@ -65,9 +65,9 @@ public class SquareImageView extends AnimatedImageView  {
      * requestLayout() to its parent, taking advantage of knowing that image size
      * won't change once set.
      */
-    @Override
-    public void requestLayout() {
-        forceLayout();
-    }
+//    @Override
+//    public void requestLayout() {
+//        forceLayout();
+//    }
 
 }

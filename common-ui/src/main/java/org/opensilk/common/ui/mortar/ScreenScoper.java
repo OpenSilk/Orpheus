@@ -1,5 +1,6 @@
 package org.opensilk.common.ui.mortar;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 
@@ -41,7 +42,9 @@ public class ScreenScoper {
 
     private final Map<Class, ComponentFactory> moduleFactoryCache = new LinkedHashMap<>();
 
+    @SuppressLint("WrongConstant")
     public static ScreenScoper getService(Context context) {
+        //noinspection ResourceType
         return (ScreenScoper) context.getSystemService(SERVICE_NAME);
     }
 

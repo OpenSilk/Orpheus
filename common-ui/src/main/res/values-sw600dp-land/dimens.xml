@@ -16,5 +16,5 @@
   -->
 
 <resources>
-
+  <dimen name="action_bar_double_height">128dp</dimen>
 </resources>

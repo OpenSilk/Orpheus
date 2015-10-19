@@ -1,5 +1,6 @@
 package org.opensilk.common.core.mortar;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import java.lang.reflect.Method;
 
@@ -13,8 +14,9 @@ public class DaggerService {
     /**
      * Caller is required to know the type of the component for this context.
      */
-    @SuppressWarnings("unchecked") //
+    @SuppressWarnings("unchecked") @SuppressLint("WrongConstant")
     public static <T> T getDaggerComponent(Context context) {
+        //noinspection ResourceType
         return (T) context.getSystemService(DAGGER_SERVICE);
     }
 

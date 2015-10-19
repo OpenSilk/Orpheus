@@ -1,5 +1,6 @@
 package org.opensilk.common.ui.mortar;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 
 import org.opensilk.common.core.util.ObjectUtils;
@@ -18,7 +19,9 @@ public class LayoutCreator {
 
     private final Map<Class, Integer> layoutCache = new LinkedHashMap<>();
 
+    @SuppressLint("WrongConstant")
     public static LayoutCreator getService(Context context) {
+        //noinspection ResourceType
         return (LayoutCreator) context.getSystemService(SERVICE_NAME);
     }
 
