@@ -17,8 +17,6 @@
 
 package org.opensilk.music.playback;
 
-import android.media.MediaDescription;
-import android.media.session.MediaSession;
 import android.net.Uri;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -62,17 +60,18 @@ public class PlaybackQueueTest {
         mService = Mockito.mock(PlaybackServiceProxy.class);
         when(mService.getScheduler()).thenReturn(Schedulers.immediate());
         mPlaybackQueue = new PlaybackQueue(mClient, mService) {
-            @Override MediaSessionCompat.QueueItem makeNewQueueItem(Uri uri, List<MediaDescriptionCompat> descriptions) {
-                for (MediaDescriptionCompat desc : descriptions) {
-                    if (uri.toString().equals(desc.getMediaId())) {
-                        MediaSessionCompat.QueueItem item = mock(MediaSessionCompat.QueueItem.class);
-                        when(item.getDescription()).thenReturn(desc);
-                        when(item.getQueueId()).thenReturn(mIdGenerator.incrementAndGet());
-                        return item;
-                    }
-                }
-                return null;
-            }
+//            @Override MediaSessionCompat.QueueItem makeNewQueueItem(Uri uri, List<MediaDescriptionCompat> descriptions) {
+//                for (MediaDescriptionCompat desc : descriptions) {
+//                    if (uri.toString().equals(desc.getMediaId())) {
+//                        return new MediaSessionCompat.QueueItem(desc, mIdGenerator.incrementAndGet());
+////                        MediaSessionCompat.QueueItem item = mock(MediaSessionCompat.QueueItem.class);
+////                        when(item.getDescription()).thenReturn(desc);
+////                        when(item.getQueueId()).thenReturn(mIdGenerator.incrementAndGet());
+////                        return item;
+//                    }
+//                }
+//                return null;
+//            }
         };
         mListener = mock(PlaybackQueue.QueueChangeListener.class);
         mPlaybackQueue.setListener(mListener);
