@@ -223,7 +223,8 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem,
 
         @Override
         public void onItemClear() {
-            itemView.setBackground(null);
+            //noinspection deprecation
+            itemView.setBackgroundDrawable(null);
         }
 
     }

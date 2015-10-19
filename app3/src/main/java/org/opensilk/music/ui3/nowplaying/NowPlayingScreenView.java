@@ -18,6 +18,7 @@
 package org.opensilk.music.ui3.nowplaying;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -133,14 +134,19 @@ public class NowPlayingScreenView extends RelativeLayout {
             visualizerType = settings.getString(NOW_PLAYING_VIEW, "none");
             rendererColor = ThemeUtils.getColorAccent(getContext());
             if (VersionUtils.hasLollipop()) {
-                AnimatedStateListDrawable drawable = (AnimatedStateListDrawable) playPause.getDrawable();
-                drawable.addTransition(R.id.pause_state, R.id.play_state, (AnimatedVectorDrawable)
-                        ContextCompat.getDrawable(getContext(), R.drawable.ic_pause_play_white_animated_48dp), false);
-                drawable.addTransition(R.id.play_state, R.id.pause_state, (AnimatedVectorDrawable)
-                        ContextCompat.getDrawable(getContext(), R.drawable.ic_play_pause_white_animated_48dp), false);
+                setupDrawables21();
             }
         }
         presenter.takeView(this);
+    }
+
+    @TargetApi(21)
+    void setupDrawables21() {
+        AnimatedStateListDrawable drawable = (AnimatedStateListDrawable) playPause.getDrawable();
+        drawable.addTransition(R.id.pause_state, R.id.play_state, (AnimatedVectorDrawable)
+                ContextCompat.getDrawable(getContext(), R.drawable.ic_pause_play_white_animated_48dp), false);
+        drawable.addTransition(R.id.play_state, R.id.pause_state, (AnimatedVectorDrawable)
+                ContextCompat.getDrawable(getContext(), R.drawable.ic_play_pause_white_animated_48dp), false);
     }
 
     @Override
@@ -437,11 +443,10 @@ public class NowPlayingScreenView extends RelativeLayout {
                         .build().onResourceReady(palette, backgroundTransition);
                 getView().title.setTextColor(s2.getTitleTextColor());
                 getView().subTitle.setTextColor(s2.getBodyTextColor());
-                getView().progress.getProgressDrawable().setTint(s1.getRgb());
+                ThemeUtils.themeProgressBar2(getView().progress, s1.getRgb());
                 getView().reInitRenderer(s1.getRgb());
                 if (VersionUtils.hasLollipop()) {
-                    UtilsCommon.findActivity(getContext())
-                            .getWindow().setStatusBarColor(s1.getRgb());
+                    themeStatusbar21(s1.getRgb());
                 }
             } else {
                 int background = ThemeUtils.getThemeAttrColor(getView().getContext(),
@@ -458,16 +463,21 @@ public class NowPlayingScreenView extends RelativeLayout {
                 getView().subTitle.setTextColor(subTitleText);
                 int accent = ThemeUtils.getThemeAttrColor(getView().getContext(),
                         R.attr.colorAccent);
-                getView().progress.getProgressDrawable().setTint(accent);
+                ThemeUtils.themeProgressBar2(getView().progress, accent);
                 getView().reInitRenderer(accent);
                 int primaryDark = ThemeUtils.getThemeAttrColor(getContext(),
                         R.attr.colorPrimaryDark);
                 if (VersionUtils.hasLollipop()) {
-                    UtilsCommon.findActivity(getContext())
-                            .getWindow().setStatusBarColor(primaryDark);
+                    themeStatusbar21(primaryDark);
                 }
             }
         }
     };
+
+    @TargetApi(21)
+    void themeStatusbar21(int color) {
+        UtilsCommon.findActivity(getContext())
+                .getWindow().setStatusBarColor(color);
+    }
 
 }

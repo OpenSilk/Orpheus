@@ -38,8 +38,8 @@
         android:layout_centerInParent="true"
         app:cardPreventCornerOverlap="true"
         app:cardBackgroundColor="?nowPlayingCardBackground"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginRight="24dp"
         android:layout_marginBottom="?actionBarSize">
 
         <LinearLayout
@@ -73,8 +73,8 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:textAppearanceLarge"
                     android:textSize="34sp"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
                     tools:text="Title"/>
 
                 <TextView
@@ -83,8 +83,8 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:textAppearanceMedium"
                     android:textSize="20sp"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
                     tools:text="Subtitle"/>
 
                 <ProgressBar

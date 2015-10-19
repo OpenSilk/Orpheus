@@ -52,6 +52,8 @@ public class GalleryScreenView extends CoordinatorLayout {
     @InjectView(R.id.tab_bar) TabLayout mTabBar;
     @InjectView(R.id.pager) ViewPager mViewPager;
 
+    boolean attacheed;
+
     public GalleryScreenView(Context context, AttributeSet attrs) {
         super(context, attrs);
         GalleryScreenComponent component = DaggerService.getDaggerComponent(context);
@@ -70,6 +72,7 @@ public class GalleryScreenView extends CoordinatorLayout {
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
+        attacheed = true;
         if (!isInEditMode()) {
             mToolbarOwner.attachToolbar(mToolbar);
             mToolbarOwner.setConfig(mPresenter.getActionBarConfig());
@@ -81,6 +84,7 @@ public class GalleryScreenView extends CoordinatorLayout {
     public void onDetachedFromWindow() {
         Timber.v("onDetachedFromWindow()");
         super.onDetachedFromWindow();
+        attacheed = false;
         if (!isInEditMode()) {
             mToolbarOwner.detachToolbar(mToolbar);
             mPresenter.dropView(this);
@@ -118,7 +122,7 @@ public class GalleryScreenView extends CoordinatorLayout {
     }
 
     public void updateToolbar() {
-        if (isAttachedToWindow()) {
+        if (attacheed) {
             mToolbarOwner.setConfig(mPresenter.getActionBarConfig());
         }
     }

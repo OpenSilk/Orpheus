@@ -17,6 +17,7 @@
 
 package org.opensilk.music.ui3.main;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.drawable.AnimatedStateListDrawable;
 import android.graphics.drawable.AnimatedVectorDrawable;
@@ -76,15 +77,20 @@ public class FooterPageScreenView extends LinearLayout {
         if (!isInEditMode()) {
             ButterKnife.inject(this);
             if (VersionUtils.hasLollipop()) {
-                AnimatedStateListDrawable drawable = (AnimatedStateListDrawable) mPlayPause.getDrawable();
-                drawable.addTransition(R.id.pause_state, R.id.play_state, (AnimatedVectorDrawable)
-                        ContextCompat.getDrawable(getContext(), R.drawable.ic_pause_play_black_animated_36dp), false);
-                drawable.addTransition(R.id.play_state, R.id.pause_state, (AnimatedVectorDrawable)
-                        ContextCompat.getDrawable(getContext(), R.drawable.ic_play_pause_black_animated_36dp), false);
+                setupDrawables21();
             }
             mPresenter.takeView(this);
             subscribeClicks();
         }
+    }
+
+    @TargetApi(21)
+    void setupDrawables21() {
+        AnimatedStateListDrawable drawable = (AnimatedStateListDrawable) mPlayPause.getDrawable();
+        drawable.addTransition(R.id.pause_state, R.id.play_state, (AnimatedVectorDrawable)
+                ContextCompat.getDrawable(getContext(), R.drawable.ic_pause_play_black_animated_36dp), false);
+        drawable.addTransition(R.id.play_state, R.id.pause_state, (AnimatedVectorDrawable)
+                ContextCompat.getDrawable(getContext(), R.drawable.ic_play_pause_black_animated_36dp), false);
     }
 
     @Override

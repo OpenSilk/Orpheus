@@ -16,22 +16,4 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<org.opensilk.common.ui.widget.ForegroundLinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/tile_content"
-    android:gravity="center_vertical"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    android:foreground="?selectableItemBackground"
-    style="@style/GalleryGridTile">
-
-    <TextView
-        android:id="@+id/bio_content"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-</org.opensilk.common.ui.widget.ForegroundLinearLayout>
+<resources></resources>

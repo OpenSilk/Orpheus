@@ -205,9 +205,15 @@ public class ThemeUtils {
     }
 
     public static void themeProgressBar(ProgressBar progressBar, int colorAttr) {
-        if (VersionUtils.hasLollipop()) return;
-        int color = getThemeAttrColor(progressBar.getContext(), colorAttr);
-        progressBar.getProgressDrawable().mutate().setColorFilter(color, PorterDuff.Mode.SRC_IN);
+        themeProgressBar2(progressBar, getThemeAttrColor(progressBar.getContext(), colorAttr));
+    }
+
+    public static void themeProgressBar2(ProgressBar progressBar, int color) {
+        if (VersionUtils.hasLollipop()) {
+            progressBar.getProgressDrawable().setTint(color);
+        } else {
+            progressBar.getProgressDrawable().mutate().setColorFilter(color, PorterDuff.Mode.SRC_IN);
+        }
     }
 
     public static Drawable colorizeBitmapDrawableCopy(Context context, int resId, int newColor) {

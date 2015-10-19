@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import org.opensilk.common.core.dagger2.ActivityScope;
+import org.opensilk.common.core.util.VersionUtils;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -63,7 +64,11 @@ public class ActivityResultsOwner extends Presenter<ActivityResultsActivity> imp
     @Override
     public void startActivityForResult(Intent intent, int requestCode, Bundle options) {
         if (hasView()) {
-            getView().startActivityForResult(intent, requestCode);
+            if (VersionUtils.hasApi16()) {
+                getView().startActivityForResult(intent, requestCode, options);
+            } else {
+                getView().startActivityForResult(intent, requestCode);
+            }
         }
     }
 

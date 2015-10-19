@@ -30,7 +30,7 @@
         android:layout_height="match_parent"
         android:gravity="start|center_vertical"
         android:maxLines="3"
-        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
         android:ellipsize="end"
         tools:text="Glorious is the debut studio album by English singer and songwriter Foxes and was due to be released 28 February 2014 but was pushed back to 12 May 2014, in favour of releasing"/>
 

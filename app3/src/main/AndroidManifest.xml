@@ -45,9 +45,9 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <!-- permissions for librarys -->
-    <permission android:name="${applicationId}.api.permission.BIND_LIBRARY_SERVICE"
+    <permission android:name="${applicationId}.permission.LIBRARY_FULL_ACCESS"
                 android:protectionLevel="signature"/>
-    <uses-permission android:name="${applicationId}.api.permission.BIND_LIBRARY_SERVICE"/>
+    <uses-permission android:name="${applicationId}.permission.LIBRARY_FULL_ACCESS"/>
 
     <!-- Casting is currently only supported over wifi -->
     <uses-feature android:name="android.hardware.wifi"/>
@@ -163,8 +163,9 @@
         <!--Folders plugin provider-->
         <provider
             android:authorities="${applicationId}.provider.foldersLibrary"
+            android:permission="${applicationId}.permission.LIBRARY_FULL_ACCESS"
             android:name="org.opensilk.music.library.mediastore.provider.FoldersLibraryProvider"
-            tools:replace="authorities"/>
+            tools:replace="authorities,permission"/>
 
         <!--Index provider-->
         <provider
@@ -175,8 +176,9 @@
         <!--Upnp provider-->
         <provider
             android:authorities="${applicationId}.provider.upnp"
+            android:permission="${applicationId}.permission.LIBRARY_FULL_ACCESSS"
             android:name="org.opensilk.music.library.upnp.provider.UpnpCDProvider"
-            tools:replace="authorities"/>
+            tools:replace="authorities,permission"/>
 
         <!--Android auto-->
         <meta-data android:name="com.google.android.gms.car.application"

@@ -152,7 +152,7 @@ public class LauncherActivity extends MusicActivity {
                     break;
                 case R.id.settings: {
                     Intent i = new Intent(LauncherActivity.this, SettingsActivity.class);
-                    startActivityForResult(i, ActivityRequestCodes.APP_SETTINGS, null);
+                    mActivityResultsOwner.startActivityForResult(i, ActivityRequestCodes.APP_SETTINGS, null);
                     break;
                 }
                 default:

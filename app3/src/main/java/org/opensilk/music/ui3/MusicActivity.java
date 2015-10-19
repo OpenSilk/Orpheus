@@ -179,17 +179,14 @@ public abstract class MusicActivity extends MortarFragmentActivity
 
     @Override
     public void startActivityForResult(Intent intent, int requestCode) {
-        startActivityForResult(intent, requestCode, null);
+        intent.putExtra(LibraryConstants.EXTRA_WANT_LIGHT_THEME, ThemeUtils.isLightTheme(this));
+        super.startActivityForResult(intent, requestCode, null);
     }
 
     @Override
     public void startActivityForResult(Intent intent, int requestCode, Bundle options) {
         intent.putExtra(LibraryConstants.EXTRA_WANT_LIGHT_THEME, ThemeUtils.isLightTheme(this));
-        if (VersionUtils.hasApi16()) {
-            super.startActivityForResult(intent, requestCode, options);
-        } else {
-            super.startActivityForResult(intent, requestCode);
-        }
+        super.startActivityForResult(intent, requestCode, options);
     }
 
     @Override

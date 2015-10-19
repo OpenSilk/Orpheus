@@ -17,6 +17,7 @@
 
 package org.opensilk.music.ui3.main;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.drawable.AnimatedStateListDrawable;
 import android.graphics.drawable.AnimatedVectorDrawable;
@@ -147,24 +148,29 @@ public class ControlsScreenView extends RelativeLayout {
                 mPresenter.onStartTrackingTouch();
             }
         });
-        if (VersionUtils.hasLollipop()) {
-            //add state transitions
-            AnimatedStateListDrawable drawable = (AnimatedStateListDrawable) play.getDrawable();
-            drawable.addTransition(R.id.pause_state, R.id.play_state, (AnimatedVectorDrawable)
-                    ContextCompat.getDrawable(getContext(), R.drawable.ic_pause_play_black_animated_36dp), false);
-            drawable.addTransition(R.id.play_state, R.id.pause_state, (AnimatedVectorDrawable)
-                    ContextCompat.getDrawable(getContext(), R.drawable.ic_play_pause_black_animated_36dp), false);
-
-            AnimatedStateListDrawable repeatDrawable = (AnimatedStateListDrawable) repeat.getDrawable();
-            repeatDrawable.addTransition(R.id.repeat_off_state, R.id.repeat_on_state, (AnimatedVectorDrawable)
-                    ContextCompat.getDrawable(getContext(), R.drawable.ic_repeat_off_on_black_animated_36dp), true);
-            repeatDrawable.addTransition(R.id.repeat_on_state, R.id.repeat_one_state, (AnimatedVectorDrawable)
-                    ContextCompat.getDrawable(getContext(), R.drawable.ic_repeat_on_one_black_animated_36dp), true);
-            repeatDrawable.addTransition(R.id.repeat_one_state, R.id.repeat_off_state, (AnimatedVectorDrawable)
-                    ContextCompat.getDrawable(getContext(), R.drawable.ic_repeat_one_off_black_animated_36dp), true);
-            repeatDrawable.addTransition(R.id.repeat_off_state, R.id.repeat_one_state, (AnimatedVectorDrawable)
-                    ContextCompat.getDrawable(getContext(), R.drawable.ic_repeat_off_one_black_animated_36dp), true);
+        if (VersionUtils.hasApi21()) {
+            setupDrawables21();
         }
+    }
+
+    @TargetApi(21)
+    void setupDrawables21() {
+        //add state transitions
+        AnimatedStateListDrawable drawable = (AnimatedStateListDrawable) play.getDrawable();
+        drawable.addTransition(R.id.pause_state, R.id.play_state, (AnimatedVectorDrawable)
+                ContextCompat.getDrawable(getContext(), R.drawable.ic_pause_play_black_animated_36dp), false);
+        drawable.addTransition(R.id.play_state, R.id.pause_state, (AnimatedVectorDrawable)
+                ContextCompat.getDrawable(getContext(), R.drawable.ic_play_pause_black_animated_36dp), false);
+
+        AnimatedStateListDrawable repeatDrawable = (AnimatedStateListDrawable) repeat.getDrawable();
+        repeatDrawable.addTransition(R.id.repeat_off_state, R.id.repeat_on_state, (AnimatedVectorDrawable)
+                ContextCompat.getDrawable(getContext(), R.drawable.ic_repeat_off_on_black_animated_36dp), true);
+        repeatDrawable.addTransition(R.id.repeat_on_state, R.id.repeat_one_state, (AnimatedVectorDrawable)
+                ContextCompat.getDrawable(getContext(), R.drawable.ic_repeat_on_one_black_animated_36dp), true);
+        repeatDrawable.addTransition(R.id.repeat_one_state, R.id.repeat_off_state, (AnimatedVectorDrawable)
+                ContextCompat.getDrawable(getContext(), R.drawable.ic_repeat_one_off_black_animated_36dp), true);
+        repeatDrawable.addTransition(R.id.repeat_off_state, R.id.repeat_one_state, (AnimatedVectorDrawable)
+                ContextCompat.getDrawable(getContext(), R.drawable.ic_repeat_off_one_black_animated_36dp), true);
     }
 
     void subscribeClicks() {

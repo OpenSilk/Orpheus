@@ -17,6 +17,7 @@
 
 package org.opensilk.music.loader;
 
+import android.annotation.TargetApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -29,6 +30,7 @@ import android.os.Bundle;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
+import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.library.LibraryCapability;
 import org.opensilk.music.library.LibraryConfig;
@@ -68,7 +70,7 @@ public class LibraryProviderInfoLoader {
     }
 
     public Observable<List<LibraryProviderInfo>> getActivePlugins() {
-        return makeObservableApi19()
+        return makeObservable()
                 .filter(new Func1<LibraryProviderInfo, Boolean>() {
                     @Override
                     public Boolean call(LibraryProviderInfo libraryProviderInfo) {
@@ -84,7 +86,7 @@ public class LibraryProviderInfoLoader {
     }
 
     public Observable<List<LibraryProviderInfo>> getPlugins() {
-        return makeObservableApi19()
+        return makeObservable()
                 .toSortedList(new Func2<LibraryProviderInfo, LibraryProviderInfo, Integer>() {
                     @Override
                     public Integer call(LibraryProviderInfo libraryProviderInfo, LibraryProviderInfo libraryProviderInfo2) {
@@ -94,6 +96,14 @@ public class LibraryProviderInfoLoader {
     }
 
     public Observable<LibraryProviderInfo> makeObservable() {
+        if (VersionUtils.hasKitkat()) {
+            return makeObservableApi19();
+        } else {
+            return _makeObservable();
+        }
+    }
+
+    private Observable<LibraryProviderInfo> _makeObservable() {
         final List<String> disabledPlugins = settings.readDisabledPlugins();
         return Observable.create(new Observable.OnSubscribe<List<ProviderInfo>>() {
             @Override
@@ -111,7 +121,8 @@ public class LibraryProviderInfoLoader {
         }).filter(new Func1<ProviderInfo, Boolean>() {
             @Override
             public Boolean call(ProviderInfo providerInfo) {
-                return StringUtils.startsWith(providerInfo.authority, LibraryProviderOld.AUTHORITY_PFX)
+                //for api < 19 we use the permission as the tag
+                return StringUtils.equals(providerInfo.readPermission, context.getPackageName() + ".permission.LIBRARY_FULL_ACCESS")
                         //Ignore non exported providers unless they're ours
                         && (StringUtils.equals(providerInfo.packageName, context.getPackageName()) || providerInfo.exported);
             }
@@ -144,7 +155,8 @@ public class LibraryProviderInfoLoader {
         });
     }
 
-    public Observable<LibraryProviderInfo> makeObservableApi19() {
+    @TargetApi(19)
+    private Observable<LibraryProviderInfo> makeObservableApi19() {
         final List<String> disabledPlugins = settings.readDisabledPlugins();
         return Observable.create(new Observable.OnSubscribe<List<ResolveInfo>>() {
             @Override

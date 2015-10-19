@@ -17,10 +17,12 @@
 
 package org.opensilk.music.ui3.common;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
@@ -34,6 +36,7 @@ import android.widget.TextView;
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.util.BundleHelper;
+import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.common.glide.PaletteSwatchType;
 import org.opensilk.common.ui.recycler.DragSwipeViewHolder;
 import org.opensilk.common.ui.recycler.ItemClickSupport;
@@ -506,7 +509,12 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         public void reset() {
             super.reset();
             if (extraInfo != null && extraInfo.getVisibility() != View.GONE) extraInfo.setVisibility(View.GONE);
-            itemView.setBackground(null);
+            if (VersionUtils.hasJellyBean()) {
+                clearItemBackground16();
+            } else {
+                //noinspection deprecation
+                itemView.setBackgroundDrawable(null);
+            }
         }
 
         @Override
@@ -517,7 +525,12 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
 
         @Override
         public void onItemClear() {
-            itemView.setBackground(null);
+            if (VersionUtils.hasJellyBean()) {
+                clearItemBackground16();
+            } else {
+                //noinspection deprecation
+                itemView.setBackgroundDrawable(null);
+            }
         }
 
         @Override
@@ -541,6 +554,11 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
                 extraInfo.setText(text);
                 extraInfo.setVisibility(View.VISIBLE);
             }
+        }
+
+        @TargetApi(16)
+        private void clearItemBackground16() {
+            itemView.setBackground(null);
         }
     }
 

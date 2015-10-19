@@ -73,7 +73,7 @@ public class SettingsAudioFragment extends SettingsFragment implements
         if (preference == mEqualizer) {
             try {
                 final Intent effects = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
-                effects.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, getContext().getPackageName());
+                effects.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, getActivity().getPackageName());
                 effects.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC);
                 mActivytResultsController.startActivityForResult(effects, 0, null);
             } catch (final ActivityNotFoundException notFound) {
