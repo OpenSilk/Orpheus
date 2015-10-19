@@ -59,15 +59,24 @@ public abstract class RecyclerListAdapter<T, VH extends RecyclerView.ViewHolder>
     public boolean addAll(Collection<? extends T> collection) {
         int start = items.size();
         if (items.addAll(collection)) {
-            notifyItemRangeInserted(start, collection.size());
+            if (start > 0) {
+                notifyItemRangeInserted(start, collection.size());
+            } else {
+                notifyDataSetChanged();
+            }
             return true;
         }
         return false;
     }
 
     public boolean addAll(int pos, Collection<? extends T> collection) {
+        int size = items.size();
         if (items.addAll(pos, collection)) {
-            notifyItemRangeInserted(pos, collection.size());
+            if (size > 0) {
+                notifyItemRangeInserted(pos, collection.size());
+            } else {
+                notifyDataSetChanged();
+            }
             return true;
         }
         return false;
