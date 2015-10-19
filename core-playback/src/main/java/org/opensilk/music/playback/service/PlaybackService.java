@@ -709,14 +709,14 @@ public class PlaybackService {
             mHandler.removeCallbacks(mProgressCheckRunnable);
             if (mPlayback.hasNext()) {
                 mPlayback.goToNext();
-            } else {
+            } else if (mQueue.notEmpty()) {
                 int next = mQueue.getNextPos();
                 if (next >= 0) {
                     mPlayback.prepareForTrack();
                     mPlayWhenReady = true;
                     mQueue.goToItem(next);
                 }//else ignore
-            }
+            } //else ignore
         }
 
         @Override
@@ -725,7 +725,7 @@ public class PlaybackService {
             mHandler.removeCallbacks(mProgressCheckRunnable);
             if (mPlayback.getCurrentStreamPosition() > REWIND_INSTEAD_PREVIOUS_THRESHOLD) {
                 onSeekTo(0);
-            } else {
+            } else if (mQueue.notEmpty()) {
                 int prev = mQueue.getPrevious();
                 if (prev >= 0) {
                     mPlayback.prepareForTrack();
@@ -733,7 +733,7 @@ public class PlaybackService {
                     //will callback to onCurrentPosChanged
                     mQueue.goToItem(prev);
                 }//else ignore
-            }
+            } //else ignore
         }
 
         @Override
