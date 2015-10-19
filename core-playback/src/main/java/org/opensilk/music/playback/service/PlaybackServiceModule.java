@@ -45,11 +45,6 @@ public class PlaybackServiceModule {
     }
 
     @Provides @PlaybackServiceScope
-    public HandlerThread provideServiceHandlerTHread() {
-        return new HandlerThread(PlaybackService.NAME, Process.THREAD_PRIORITY_BACKGROUND);
-    }
-
-    @Provides @PlaybackServiceScope
     public PowerManager.WakeLock provideWakeLock(PowerManager powerManager) {
         PowerManager.WakeLock w = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, PlaybackService.NAME);
         w.setReferenceCounted(false);

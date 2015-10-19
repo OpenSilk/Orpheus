@@ -24,13 +24,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.PowerManager;
-import android.os.ResultReceiver;
-import android.os.SystemClock;
+import android.os.*;
+import android.os.Process;
 import android.support.annotation.NonNull;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.RatingCompat;
@@ -100,7 +95,6 @@ public class PlaybackService {
     private final DelayedShutdownHandler mDelayedShutdownHandler;
     private final AudioManagerHelper mAudioManagerHelper;
     private final PlaybackQueue mQueue;
-    private final HandlerThread mHandlerThread;
     private final PowerManager.WakeLock mWakeLock;
     private final ArtworkProviderHelper mArtworkProviderHelper;
     private final MediaSessionHolder mSessionHolder;
@@ -108,6 +102,7 @@ public class PlaybackService {
     private final Playback mPlayback;
     private final ArtworkProviderHelper mArtworkHelper;
 
+    private HandlerThread mHandlerThread;
     private PlaybackServiceProxy mProxy;
 
     int mAudioSessionId;
@@ -140,7 +135,6 @@ public class PlaybackService {
             DelayedShutdownHandler mDelayedShutdownHandler,
             AudioManagerHelper mAudioManagerHelper,
             PlaybackQueue mQueue,
-            HandlerThread mHandlerThread,
             PowerManager.WakeLock mWakeLock,
             ArtworkProviderHelper mArtworkProviderHelper,
             MediaSessionHolder mSessionHolder,
@@ -153,7 +147,6 @@ public class PlaybackService {
         this.mDelayedShutdownHandler = mDelayedShutdownHandler;
         this.mAudioManagerHelper = mAudioManagerHelper;
         this.mQueue = mQueue;
-        this.mHandlerThread = mHandlerThread;
         this.mWakeLock = mWakeLock;
         this.mArtworkProviderHelper = mArtworkProviderHelper;
         this.mSessionHolder = mSessionHolder;
@@ -162,12 +155,14 @@ public class PlaybackService {
         this.mArtworkHelper = mArtworkHelper;
     }
 
+    //main thread
     public void onCreate(PlaybackServiceProxy proxy) {
         mProxy = proxy;
 
         acquireWakeLock();
 
         //fire up thread and init handler
+        mHandlerThread = new HandlerThread(PlaybackService.NAME, Process.THREAD_PRIORITY_MORE_FAVORABLE);
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
         mHandlerScheduler = HandlerScheduler.from(mHandler);
@@ -188,6 +183,7 @@ public class PlaybackService {
         mHandler.post(mLoadQueueRunnable);
     }
 
+    //main thread
     public void onDestroy() {
         shouldReleaseClient = true;
         saveState(true); //fire early as possible
@@ -218,16 +214,19 @@ public class PlaybackService {
         releaseWakeLock();
     }
 
+    //binder thread?
     public void onBind() {
         mDelayedShutdownHandler.cancelDelayedShutdown();
         mConnectedClients++;
     }
 
+    //binder thread?
     public void onUnbind() {
         saveState(true);
         mConnectedClients--;
     }
 
+    //main thread
     public void onTrimMemory(int level) {
         if (level >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE) {
             mArtworkProviderHelper.evictL1();
@@ -235,6 +234,7 @@ public class PlaybackService {
         }
     }
 
+    //main thread
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             acquireWakeLock();
@@ -260,6 +260,7 @@ public class PlaybackService {
         return Service.START_STICKY;
     }
 
+    //main thread
     void handleIntentCommand(@NonNull Intent intent) {
         final String action = intent.getAction();
         final String command = SERVICECMD.equals(action) ? intent.getStringExtra(CMDNAME) : null;
@@ -284,11 +285,12 @@ public class PlaybackService {
         }
     }
 
-    @DebugLog
+    @DebugLog //handler thread
     void updatePlaybackState(String error) {
         updatePlaybackState(error, false);
     }
 
+    //handler thread
     void updatePlaybackState(String error, boolean fromChecker) {
         int state = mPlayback.getState();
         Timber.d("updatePlaybackState(%s) err=%s",
@@ -353,6 +355,7 @@ public class PlaybackService {
         }
     }
 
+    //handler thread
     private long getAvailableActions() {
         long actions = PlaybackStateCompat.ACTION_PLAY
                 | PlaybackStateCompat.ACTION_PLAY_PAUSE
@@ -378,6 +381,7 @@ public class PlaybackService {
         return actions;
     }
 
+    //handler thread
     void updateMeta() {
         if (mArtworkSubscription != null) {
             mArtworkSubscription.unsubscribe();
@@ -409,6 +413,7 @@ public class PlaybackService {
         }
     }
 
+    //handler thread / main thread
     void saveState(final boolean full) {
         final PlaybackQueue.Snapshot qSnapshot = mQueue.snapshot();
         PlaybackStateCompat state = mSessionHolder.getPlaybackState();
@@ -474,11 +479,11 @@ public class PlaybackService {
         mContext.sendBroadcast(audioEffectsIntent);
     }
 
-    public Scheduler getScheduler() {
+    Scheduler getScheduler() {
         return mHandlerScheduler;
     }
 
-    public Handler getHandler() {
+    Handler getHandler() {
         return mHandler;
     }
 

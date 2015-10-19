@@ -20,16 +20,16 @@
 
     <application>
       <service android:name=".service.PlaybackServiceL"
-          android:exported="true"
           android:process=":service"
+          android:exported="@bool/hasL"
           android:enabled="@bool/hasL">
           <intent-filter>
               <action android:name="android.media.browse.MediaBrowserService" />
           </intent-filter>
       </service>
         <service android:name=".service.PlaybackServiceK"
-            android:exported="true"
             android:process=":service"
+            android:exported="@bool/notL"
             android:enabled="@bool/notL">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserServiceCompat"/>
