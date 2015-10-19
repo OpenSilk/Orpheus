@@ -176,7 +176,7 @@
         <!--Upnp provider-->
         <provider
             android:authorities="${applicationId}.provider.upnp"
-            android:permission="${applicationId}.permission.LIBRARY_FULL_ACCESSS"
+            android:permission="${applicationId}.permission.LIBRARY_FULL_ACCESS"
             android:name="org.opensilk.music.library.upnp.provider.UpnpCDProvider"
             tools:replace="authorities,permission"/>
 
