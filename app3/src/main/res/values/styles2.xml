@@ -56,7 +56,6 @@
     </style>
 
     <style name="GalleryTabs">
-        <item name="invertedTabBar">false</item>
     </style>
 
     <!-- Settings -->

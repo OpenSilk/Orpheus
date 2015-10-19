@@ -23,7 +23,7 @@ import android.util.AttributeSet;
 /**
  * Created by drew on 10/22/14.
  */
-public class SquareImageView extends AnimatedImageView  {
+public class SquareImageView extends AnimatedImageView {
 
     public SquareImageView(Context context, AttributeSet attrs) {
         super(context, attrs);

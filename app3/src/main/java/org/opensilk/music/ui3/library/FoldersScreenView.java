@@ -18,31 +18,22 @@
 package org.opensilk.music.ui3.library;
 
 import android.content.Context;
-import android.net.Uri;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.internal.widget.TintImageView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
-import android.view.View;
-import android.widget.ImageView;
 
 import com.jakewharton.rxbinding.view.RxView;
 import com.jakewharton.rxbinding.view.ViewClickEvent;
 
-import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.ToolbarOwner;
-import org.opensilk.common.ui.mortarfragment.MortarFragment;
 import org.opensilk.common.ui.widget.FloatingActionButtonCheckable;
 import org.opensilk.music.R;
 import org.opensilk.music.index.client.IndexClient;
-import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleableRecyclerAdapter;
@@ -170,7 +161,6 @@ public class FoldersScreenView extends CoordinatorLayout implements BundleableRe
 
     @Override
     public void setEmptyText(int resId) {
-
     }
 
     void updateFab() {

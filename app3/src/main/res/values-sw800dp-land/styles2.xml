@@ -18,6 +18,5 @@
 
 <resources>
     <style name="GalleryTabs">
-        <item name="invertedTabBar">true</item>
     </style>
 </resources>

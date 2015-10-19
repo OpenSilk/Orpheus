@@ -18,6 +18,7 @@
 package org.opensilk.common.ui.widget;
 
 import android.content.Context;
+import android.support.v7.widget.AppCompatImageButton;
 import android.util.AttributeSet;
 import android.widget.ImageButton;
 
@@ -26,7 +27,7 @@ import timber.log.Timber;
 /**
  * Created by drew on 10/2/15.
  */
-public class ImageButtonTriState extends ImageButton {
+public class ImageButtonTriState extends AppCompatImageButton {
 
     private static final int[] STATE_NONE = new int[]{};
     private static final int[] STATE_MIDDLE = new int[]{android.R.attr.state_middle};

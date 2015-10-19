@@ -18,6 +18,7 @@
 package org.opensilk.common.ui.widget;
 
 import android.content.Context;
+import android.support.v7.widget.AppCompatImageButton;
 import android.util.AttributeSet;
 import android.widget.Checkable;
 import android.widget.ImageButton;
@@ -25,7 +26,7 @@ import android.widget.ImageButton;
 /**
  * Created by drew on 11/26/14.
  */
-public class ImageButtonCheckable extends ImageButton implements Checkable {
+public class ImageButtonCheckable extends AppCompatImageButton implements Checkable {
 
     private static final int[] STATE_CHECKED = new int[]{android.R.attr.state_checked};
     private static final int[] STATE_UNCHECKED = new int[]{};
