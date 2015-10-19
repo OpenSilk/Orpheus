@@ -62,7 +62,6 @@ public class QuickReturnFooterBehavior extends CoordinatorLayout.Behavior<View> 
         ViewCompat.animate(view)
                 .translationY(view.getHeight())
                 .setInterpolator(INTERPOLATOR)
-                .withLayer()
                 .setDuration(200)
                 .setListener(new ViewPropertyAnimatorListener() {
                     @Override
@@ -96,7 +95,6 @@ public class QuickReturnFooterBehavior extends CoordinatorLayout.Behavior<View> 
                 .translationY(0)
                 .setInterpolator(INTERPOLATOR)
                 .setDuration(200)
-                .withLayer()
                 .setListener(new ViewPropertyAnimatorListener() {
                     @Override
                     public void onAnimationStart(View view) {
