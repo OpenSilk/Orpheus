@@ -40,19 +40,11 @@ public class CircleImageView extends SquareImageView {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        radius = Math.max(w, h) * 2; // *2 what? id think it would be /2;
         Drawable d = getDrawable();
         if (d != null) {
             if (d instanceof RoundedBitmapDrawable) {
-                ((RoundedBitmapDrawable)d).setCornerRadius(radius);
+                ((RoundedBitmapDrawable)d).setCircular(true);
                 d.invalidateSelf();
-            } else if (d instanceof TransitionDrawable) {
-                //Todo anyway to check size of transitiondrawable?
-                Drawable d1 = ((TransitionDrawable) d).getDrawable(1);
-                if (d1 instanceof RoundedBitmapDrawable) {
-                    ((RoundedBitmapDrawable) d1).setCornerRadius(radius);
-                    d.invalidateSelf();
-                }
             }
         }
     }
@@ -74,7 +66,7 @@ public class CircleImageView extends SquareImageView {
 
     protected RoundedBitmapDrawable createRoundDrawable(Bitmap bm) {
         RoundedBitmapDrawable d = RoundedBitmapDrawableFactory.create(getResources(), bm);
-        d.setCornerRadius(radius);
+        d.setCircular(true);
         return d;
     }
 }
