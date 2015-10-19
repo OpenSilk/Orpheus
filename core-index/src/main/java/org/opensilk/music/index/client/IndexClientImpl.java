@@ -17,6 +17,7 @@
 
 package org.opensilk.music.index.client;
 
+import android.annotation.TargetApi;
 import android.content.ContentProviderClient;
 import android.content.Context;
 import android.media.MediaDescription;
@@ -27,6 +28,10 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.service.media.MediaBrowserService;
 import android.support.annotation.NonNull;
+import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.MediaBrowserServiceCompat;
+import android.support.v4.media.MediaDescriptionCompat;
+import android.support.v4.media.MediaMetadataCompat;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
@@ -111,16 +116,24 @@ public class IndexClientImpl implements IndexClient {
         return makeCheckedCall(Methods.REMOVE, args);
     }
 
-    @Override
-    public MediaBrowserService.BrowserRoot browserGetRoot(@NonNull String clientPackageName,
-                                                          int clientUid, Bundle rootHints) {
+    @Override @TargetApi(21)
+    public MediaBrowserService.BrowserRoot browserGetRootL(@NonNull String clientPackageName, int clientUid, Bundle rootHints) {
         return new MediaBrowserService.BrowserRoot("__ROOT__", null);
     }
 
-    @Override
-    public void browserLoadChildren(@NonNull String parentId,
-                                    @NonNull MediaBrowserService.Result<List<MediaBrowser.MediaItem>> result) {
+    @Override @TargetApi(21)
+    public void browserLoadChildrenL(@NonNull String parentId, @NonNull MediaBrowserService.Result<List<MediaBrowser.MediaItem>> result) {
+        result.sendResult(null);
+    }
 
+    @Override
+    public MediaBrowserServiceCompat.BrowserRoot browserGetRootK(@NonNull String clientPackageName, int clientUid, Bundle rootHints) {
+        return new MediaBrowserServiceCompat.BrowserRoot("__ROOT__", null);
+    }
+
+    @Override
+    public void browserLoadChildrenK(@NonNull String parentId, @NonNull MediaBrowserServiceCompat.Result<List<MediaBrowserCompat.MediaItem>> result) {
+        result.sendResult(null);
     }
 
     @Override
@@ -227,7 +240,7 @@ public class IndexClientImpl implements IndexClient {
      */
     @Override
     @DebugLog
-    public Observable<List<MediaDescription>> getDescriptions(final List<Uri> queue) {
+    public Observable<List<MediaDescriptionCompat>> getDescriptions(final List<Uri> queue) {
         //first we ask the index what it knows
         return Observable.create(new Observable.OnSubscribe<List<Track>>() {
             @Override
@@ -307,21 +320,21 @@ public class IndexClientImpl implements IndexClient {
 
             }
             //we use collect here instead of map because the merge will
-        }).collect(new Func0<List<MediaDescription>>() {
+        }).collect(new Func0<List<MediaDescriptionCompat>>() {
             //we use collect here instead of map because the merge above
             //will emmit several lists and we only want one onNext call to
             //the subscriber
             @Override
-            public List<MediaDescription> call() {
-                return new ArrayList<MediaDescription>();
+            public List<MediaDescriptionCompat> call() {
+                return new ArrayList<MediaDescriptionCompat>();
             }
-        }, new Action2<List<MediaDescription>, List<Track>>() {
+        }, new Action2<List<MediaDescriptionCompat>, List<Track>>() {
             @Override
-            public void call(List<MediaDescription> mediaDescriptions, List<Track> tracks) {
+            public void call(List<MediaDescriptionCompat> mediaDescriptions, List<Track> tracks) {
                 //convert tracks to descriptions on the fly then add them all to the final list
                 for (Track track : tracks) {
                     Timber.d("track=%s", track.toString());
-                    MediaDescription description = new MediaDescription.Builder()
+                    MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
                             .setTitle(track.getName())
                             .setSubtitle(track.getArtistName())
                             .setMediaId(track.getUri().toString())
@@ -336,10 +349,10 @@ public class IndexClientImpl implements IndexClient {
     }
 
     @Override
-    public MediaMetadata convertToMediaMetadata(Track track) {
+    public MediaMetadataCompat convertToMediaMetadata(Track track) {
         Track t = track;
         Track.Res r = track.getResources().get(0);
-        MediaMetadata m = new MediaMetadata.Builder()
+        MediaMetadataCompat m = new MediaMetadataCompat.Builder()
                 .putString(METADATA_KEY_MEDIA_ID, track.getUri().toString())
                 .putString(METADATA_KEY_TITLE, t.getName())
                 .putString(METADATA_KEY_DISPLAY_TITLE, t.getName())
