@@ -25,26 +25,24 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.media.MediaMetadata;
-import android.media.session.MediaController;
 import android.media.session.MediaSession;
-import android.media.session.PlaybackState;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.widget.RemoteViews;
 
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.util.VersionUtils;
-import org.opensilk.music.artwork.service.ArtworkProviderHelper;
-import org.opensilk.music.playback.service.PlaybackService;
+import org.opensilk.music.playback.service.PlaybackServiceProxy;
+import org.opensilk.music.playback.session.IMediaControllerProxy;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
-import rx.Subscription;
-import rx.functions.Action0;
-import rx.functions.Action1;
 import timber.log.Timber;
 
 /**
@@ -65,13 +63,13 @@ public class NotificationHelper2 extends BroadcastReceiver {
     private final Context mContext;
     private final NotificationManager mNotificationManager;
 
-    private final PlaybackService mService;
-    private MediaSession.Token mSessionToken;
-    private MediaController mController;
-    private MediaController.TransportControls mTransportControls;
+    private final PlaybackServiceProxy mService;
+    private Object mSessionToken;
+    private IMediaControllerProxy mController;
+    private IMediaControllerProxy.TransportControlsProxy mTransportControls;
 
-    private PlaybackState mPlaybackState;
-    private MediaMetadata mMetadata;
+    private PlaybackStateCompat mPlaybackState;
+    private MediaMetadataCompat mMetadata;
 
     private PendingIntent mPauseIntent;
     private PendingIntent mPlayIntent;
@@ -88,13 +86,13 @@ public class NotificationHelper2 extends BroadcastReceiver {
     public NotificationHelper2(
             @ForApplication Context context,
             NotificationManager notificationManager,
-            PlaybackService service
+            PlaybackServiceProxy service
     ) {
         mContext = context;
         mNotificationManager = notificationManager;
         mService = service;
 
-        String pkg = mService.getPackageName();
+        String pkg = mContext.getPackageName();
         mPauseIntent = PendingIntent.getBroadcast(mContext, REQUEST_CODE,
                 new Intent(ACTION_PAUSE).setPackage(pkg), PendingIntent.FLAG_CANCEL_CURRENT);
         mPlayIntent = PendingIntent.getBroadcast(mContext, REQUEST_CODE,
@@ -114,7 +112,7 @@ public class NotificationHelper2 extends BroadcastReceiver {
     /**
      * Posts the notification and starts tracking the session to keep it
      * updated. The notification will automatically be removed if the session is
-     * destroyed before {@link #stopNotification} is called.
+     * destroyed before killNotification is called.
      */
     public void startNotification() {
         if (!mStarted) {
@@ -122,7 +120,7 @@ public class NotificationHelper2 extends BroadcastReceiver {
             mMetadata = mController.getMetadata();
             mPlaybackState = mController.getPlaybackState();
             // The notification must be updated after setting started to true
-            mController.registerCallback(mCb);
+            mController.registerCallback(mCb, mService.getHandler());
             IntentFilter filter = new IntentFilter();
             filter.addAction(ACTION_NEXT);
             filter.addAction(ACTION_PAUSE);
@@ -192,14 +190,14 @@ public class NotificationHelper2 extends BroadcastReceiver {
      * (see {@link android.media.session.MediaController.Callback#onSessionDestroyed()})
      */
     private void updateSessionToken() {
-        MediaSession.Token freshToken = mService.getSessionToken();
+        Object freshToken = mService.getSessionHolder().getSessionToken();
         if (mSessionToken == null || !mSessionToken.equals(freshToken)) {
             if (mController != null) {
                 mController.unregisterCallback(mCb);
             }
             mSessionToken = freshToken;
-            mController = new MediaController(mContext, mSessionToken);
-            mTransportControls = mController.getTransportControls();
+            mController = mService.getSessionHolder().getController();
+            mTransportControls = mService.getSessionHolder().getTransportControls();
             if (mStarted) {
                 mController.registerCallback(mCb, mService.getHandler());
             }
@@ -212,10 +210,10 @@ public class NotificationHelper2 extends BroadcastReceiver {
                 PendingIntent.FLAG_CANCEL_CURRENT);
     }
 
-    private final MediaController.Callback mCb = new MediaController.Callback() {
+    private final IMediaControllerProxy.Callback mCb = new IMediaControllerProxy.Callback() {
         @Override
-        public void onPlaybackStateChanged(@NonNull PlaybackState state) {
-            PlaybackState oldstate = mPlaybackState;
+        public void onPlaybackStateChanged(@NonNull PlaybackStateCompat state) {
+            PlaybackStateCompat oldstate = mPlaybackState;
             mPlaybackState = state;
             if (oldstate != null && oldstate.getState() == state.getState()) {
                 Timber.d("Ignoring playback state update: no change");
@@ -230,7 +228,7 @@ public class NotificationHelper2 extends BroadcastReceiver {
         }
 
         @Override
-        public void onMetadataChanged(MediaMetadata metadata) {
+        public void onMetadataChanged(MediaMetadataCompat metadata) {
             mMetadata = metadata;
             Timber.d("Received new metadata %s", metadata);
             buildNotification();
@@ -238,9 +236,33 @@ public class NotificationHelper2 extends BroadcastReceiver {
 
         @Override
         public void onSessionDestroyed() {
-            super.onSessionDestroyed();
             Timber.d("Session was destroyed, resetting to the new session token");
             updateSessionToken();
+        }
+
+        @Override
+        public void onSessionEvent(@NonNull String event, Bundle extras) {
+
+        }
+
+        @Override
+        public void onQueueChanged(List<MediaSessionCompat.QueueItem> queue) {
+
+        }
+
+        @Override
+        public void onQueueTitleChanged(CharSequence title) {
+
+        }
+
+        @Override
+        public void onExtrasChanged(Bundle extras) {
+
+        }
+
+        @Override
+        public void onAudioInfoChanged(Object info) {
+
         }
     };
 
@@ -293,7 +315,7 @@ public class NotificationHelper2 extends BroadcastReceiver {
         Bundle extras = new Bundle();
         if (VersionUtils.hasApi21()) {
             //tells system we have a mediasession since we dont use mediastyle notification
-            extras.putParcelable(NotificationCompat.EXTRA_MEDIA_SESSION, mSessionToken);
+            extras.putParcelable(NotificationCompat.EXTRA_MEDIA_SESSION, (MediaSession.Token) mSessionToken);
         }
         // Notification Builder
         Notification notification = new NotificationCompat.Builder(mContext)

@@ -15,20 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.playback.service;
+package org.opensilk.music.playback.control;
 
-import dagger.Subcomponent;
+import org.opensilk.music.playback.session.IMediaControllerProxy;
 
 /**
- * Created by drew on 5/6/15.
+ * Created by drew on 10/18/15.
  */
-@PlaybackServiceScope
-@Subcomponent(
-        modules = {
-                PlaybackServiceModule.class,
-        }
-)
-public interface PlaybackServiceComponent {
-    void inject(PlaybackServiceK service);
-    void inject(PlaybackServiceL service);
+interface IPlaybackController {
+    void connect();
+    void disconnect();
+    boolean isConnected();
+    IMediaControllerProxy.TransportControlsProxy getTransportControls();
+    IMediaControllerProxy getMediaController();
 }

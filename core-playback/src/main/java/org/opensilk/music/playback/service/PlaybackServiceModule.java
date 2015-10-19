@@ -29,18 +29,18 @@ import dagger.Provides;
  */
 @Module
 public class PlaybackServiceModule {
-    final PlaybackService mService;
+    final PlaybackServiceProxy mService;
 
-    private PlaybackServiceModule(PlaybackService mService) {
+    private PlaybackServiceModule(PlaybackServiceProxy mService) {
         this.mService = mService;
     }
 
-    public static PlaybackServiceModule create(PlaybackService service) {
+    public static PlaybackServiceModule create(PlaybackServiceProxy service) {
         return new PlaybackServiceModule(service);
     }
 
     @Provides @PlaybackServiceScope
-    public PlaybackService providePlaybackService() {
+    public PlaybackServiceProxy providePlaybackService() {
         return mService;
     }
 

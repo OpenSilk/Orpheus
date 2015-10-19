@@ -17,18 +17,21 @@
 
 package org.opensilk.music.playback.service;
 
-import dagger.Subcomponent;
+import android.app.Notification;
+import android.os.Handler;
+
+import rx.Scheduler;
 
 /**
- * Created by drew on 5/6/15.
+ * Created by drew on 10/18/15.
  */
-@PlaybackServiceScope
-@Subcomponent(
-        modules = {
-                PlaybackServiceModule.class,
-        }
-)
-public interface PlaybackServiceComponent {
-    void inject(PlaybackServiceK service);
-    void inject(PlaybackServiceL service);
+public interface PlaybackServiceProxy {
+    void setSessionToken(Object token);
+    void startSelf();
+    void stopSelf();
+    void stopForeground(boolean removeNotif);
+    void startForeground(int id, Notification notification);
+    MediaSessionHolder getSessionHolder();
+    Handler getHandler();
+    Scheduler getScheduler();
 }

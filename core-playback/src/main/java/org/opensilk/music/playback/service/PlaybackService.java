@@ -17,30 +17,28 @@
 
 package org.opensilk.music.playback.service;
 
+import android.app.Service;
+import android.content.ComponentCallbacks2;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.media.MediaMetadata;
-import android.media.Rating;
 import android.media.audiofx.AudioEffect;
-import android.media.browse.MediaBrowser;
-import android.media.session.MediaController;
-import android.media.session.MediaSession;
-import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
-import android.service.media.MediaBrowserService;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.RatingCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.KeyEvent;
 
-import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.artwork.service.ArtworkProviderHelper;
@@ -52,12 +50,13 @@ import org.opensilk.music.playback.IMediaPlayer;
 import org.opensilk.music.playback.MediaMetadataHelper;
 import org.opensilk.music.playback.NotificationHelper2;
 import org.opensilk.music.playback.Playback;
-import org.opensilk.music.playback.PlaybackComponent;
 import org.opensilk.music.playback.PlaybackConstants;
 import org.opensilk.music.playback.PlaybackConstants.CMD;
 import org.opensilk.music.playback.PlaybackConstants.EVENT;
 import org.opensilk.music.playback.PlaybackQueue;
 import org.opensilk.music.playback.PlaybackStateHelper;
+import org.opensilk.music.playback.session.IMediaControllerProxy;
+import org.opensilk.music.playback.session.IMediaSessionProxy;
 
 import java.util.List;
 
@@ -92,20 +91,24 @@ import static org.opensilk.music.playback.PlaybackConstants.TOGGLEPAUSE_ACTION;
 /**
  * Created by drew on 5/6/15.
  */
-public class PlaybackService extends MediaBrowserService {
+@PlaybackServiceScope
+public class PlaybackService {
     public static final String NAME = PlaybackService.class.getName();
 
-    @Inject NotificationHelper2 mNotificationHelper;
-    @Inject DelayedShutdownHandler mDelayedShutdownHandler;
-    @Inject AudioManagerHelper mAudioManagerHelper;
-    @Inject PlaybackQueue mQueue;
-    @Inject HandlerThread mHandlerThread;
-    @Inject PowerManager.WakeLock mWakeLock;
-    @Inject ArtworkProviderHelper mArtworkProviderHelper;
-    @Inject MediaSessionHolder mSessionHolder;
-    @Inject IndexClient mIndexClient;
-    @Inject Playback mPlayback;
-    @Inject ArtworkProviderHelper mArtworkHelper;
+    private final Context mContext;
+    private final NotificationHelper2 mNotificationHelper;
+    private final DelayedShutdownHandler mDelayedShutdownHandler;
+    private final AudioManagerHelper mAudioManagerHelper;
+    private final PlaybackQueue mQueue;
+    private final HandlerThread mHandlerThread;
+    private final PowerManager.WakeLock mWakeLock;
+    private final ArtworkProviderHelper mArtworkProviderHelper;
+    private final MediaSessionHolder mSessionHolder;
+    private final IndexClient mIndexClient;
+    private final Playback mPlayback;
+    private final ArtworkProviderHelper mArtworkHelper;
+
+    private PlaybackServiceProxy mProxy;
 
     int mAudioSessionId;
     private Handler mHandler;
@@ -130,11 +133,37 @@ public class PlaybackService extends MediaBrowserService {
     Subscription mQueueListSub;
     Subscription mArtworkSubscription;
 
-    @Override
-    public void onCreate() {
-        PlaybackComponent parent = DaggerService.getDaggerComponent(getApplicationContext());
-        parent.playbackServiceComponent(PlaybackServiceModule.create(this)).inject(this);
-        super.onCreate();
+    @Inject
+    public PlaybackService(
+            @ForApplication Context mContext,
+            NotificationHelper2 mNotificationHelper,
+            DelayedShutdownHandler mDelayedShutdownHandler,
+            AudioManagerHelper mAudioManagerHelper,
+            PlaybackQueue mQueue,
+            HandlerThread mHandlerThread,
+            PowerManager.WakeLock mWakeLock,
+            ArtworkProviderHelper mArtworkProviderHelper,
+            MediaSessionHolder mSessionHolder,
+            IndexClient mIndexClient,
+            Playback mPlayback,
+            ArtworkProviderHelper mArtworkHelper
+    ) {
+        this.mContext = mContext;
+        this.mNotificationHelper = mNotificationHelper;
+        this.mDelayedShutdownHandler = mDelayedShutdownHandler;
+        this.mAudioManagerHelper = mAudioManagerHelper;
+        this.mQueue = mQueue;
+        this.mHandlerThread = mHandlerThread;
+        this.mWakeLock = mWakeLock;
+        this.mArtworkProviderHelper = mArtworkProviderHelper;
+        this.mSessionHolder = mSessionHolder;
+        this.mIndexClient = mIndexClient;
+        this.mPlayback = mPlayback;
+        this.mArtworkHelper = mArtworkHelper;
+    }
+
+    public void onCreate(PlaybackServiceProxy proxy) {
+        mProxy = proxy;
 
         acquireWakeLock();
 
@@ -146,10 +175,10 @@ public class PlaybackService extends MediaBrowserService {
         //tell everyone about ourselves
         mQueue.setListener(new PlaybackQueueQueueChangeListener());
 
-        getMediaSession().setCallback(new MediaSessionCallback(), mHandler);
-        setSessionToken(mSessionHolder.getSessionToken());
+        mSessionHolder.setCallback(new MediaSessionCallback(), mHandler);
+        proxy.setSessionToken(mSessionHolder.getSessionToken());
 
-        mPlayback.setState(PlaybackState.STATE_NONE);
+        mPlayback.setState(PlaybackStateCompat.STATE_NONE);
         mPlayback.setCallback(new PlaybackCallback());
         mPlayback.start();
 
@@ -159,11 +188,9 @@ public class PlaybackService extends MediaBrowserService {
         mHandler.post(mLoadQueueRunnable);
     }
 
-    @Override
     public void onDestroy() {
         shouldReleaseClient = true;
         saveState(true); //fire early as possible
-        super.onDestroy();
 
         if (mCurrentTrackSub != null) {
             mCurrentTrackSub.unsubscribe();
@@ -185,36 +212,29 @@ public class PlaybackService extends MediaBrowserService {
         mSessionHolder.release();
 
         mHandler.removeCallbacksAndMessages(null);
-        mHandlerThread.getLooper().quitSafely();
+        mHandlerThread.getLooper().quit();
 
         removeAudioEffects();
         releaseWakeLock();
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
+    public void onBind() {
         mDelayedShutdownHandler.cancelDelayedShutdown();
         mConnectedClients++;
-        return super.onBind(intent);
     }
 
-    @Override
-    public boolean onUnbind(Intent intent) {
+    public void onUnbind() {
         saveState(true);
         mConnectedClients--;
-        return super.onUnbind(intent);
     }
 
-    @Override
     public void onTrimMemory(int level) {
-        super.onTrimMemory(level);
-        if (level >= TRIM_MEMORY_COMPLETE) {
+        if (level >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE) {
             mArtworkProviderHelper.evictL1();
             saveState(true);
         }
     }
 
-    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             acquireWakeLock();
@@ -226,7 +246,7 @@ public class PlaybackService extends MediaBrowserService {
             }
 
             if (Intent.ACTION_MEDIA_BUTTON.equals(action)) {
-                mSessionHolder.getController().dispatchMediaButtonEvent(
+                mSessionHolder.dispatchMediaButtonEvent(
                         intent.<KeyEvent>getParcelableExtra(Intent.EXTRA_KEY_EVENT));
             } else {
                 handleIntentCommand(intent);
@@ -237,15 +257,14 @@ public class PlaybackService extends MediaBrowserService {
             }
         }
         mServiceStarted = true;
-        return START_STICKY;
+        return Service.START_STICKY;
     }
 
     void handleIntentCommand(@NonNull Intent intent) {
         final String action = intent.getAction();
         final String command = SERVICECMD.equals(action) ? intent.getStringExtra(CMDNAME) : null;
         Timber.v("handleIntentCommand: action = %s, command = %s", action, command);
-        MediaController controller = mSessionHolder.getController();
-        MediaController.TransportControls controls = controller.getTransportControls();
+        IMediaControllerProxy.TransportControlsProxy controls = mSessionHolder.getTransportControls();
         if (CMDNEXT.equals(command) || NEXT_ACTION.equals(action)) {
             controls.skipToNext();
         } else if (CMDPREVIOUS.equals(command) || PREVIOUS_ACTION.equals(action)) {
@@ -275,7 +294,7 @@ public class PlaybackService extends MediaBrowserService {
         Timber.d("updatePlaybackState(%s) err=%s",
                 PlaybackStateHelper.stringifyState(state), error);
 
-        PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
+        PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
                 .setActions(getAvailableActions());
 
 
@@ -284,7 +303,7 @@ public class PlaybackService extends MediaBrowserService {
             // Error states are really only supposed to be used for errors that cause playback to
             // stop unexpectedly and persist until the user takes action to fix it.
             stateBuilder.setErrorMessage(error);
-            state = PlaybackState.STATE_ERROR;
+            state = PlaybackStateCompat.STATE_ERROR;
         }
 
         long position = mPlayback.getCurrentStreamPosition();
@@ -292,16 +311,16 @@ public class PlaybackService extends MediaBrowserService {
 
         if (duration > 0) {
             //make sure meta has the right duration
-            MediaMetadata current = getMediaSession().getController().getMetadata();
+            MediaMetadataCompat current = mSessionHolder.getMetadata();
             if (current != null) {
                 long metaDuration = MediaMetadataHelper.getDuration(current);
                 if (metaDuration != duration) {
                     Timber.d("Updating meta with proper duration old=%d, new=%d",
                             metaDuration, duration);
-                    current = new MediaMetadata.Builder(current)
-                            .putLong(MediaMetadata.METADATA_KEY_DURATION, duration)
+                    current = new MediaMetadataCompat.Builder(current)
+                            .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration)
                             .build();
-                    getMediaSession().setMetadata(current);
+                    mSessionHolder.setMetadata(current);
                 }
             }
         }
@@ -316,12 +335,12 @@ public class PlaybackService extends MediaBrowserService {
         }
 
         // Set the activeQueueItemId if the current index is valid.
-        MediaSession.QueueItem item = mQueue.getCurrentQueueItem();
+        MediaSessionCompat.QueueItem item = mQueue.getCurrentQueueItem();
         if (item != null) {
             stateBuilder.setActiveQueueItemId(item.getQueueId());
         }
 
-        getMediaSession().setPlaybackState(stateBuilder.build());
+        mSessionHolder.setPlaybackState(stateBuilder.build());
 
         if (PlaybackStateHelper.isPlayingOrPaused(state)) {
             mNotificationHelper.startNotification();
@@ -335,25 +354,25 @@ public class PlaybackService extends MediaBrowserService {
     }
 
     private long getAvailableActions() {
-        long actions = PlaybackState.ACTION_PLAY
-                | PlaybackState.ACTION_PLAY_PAUSE
+        long actions = PlaybackStateCompat.ACTION_PLAY
+                | PlaybackStateCompat.ACTION_PLAY_PAUSE
                 //| PlaybackState.ACTION_PLAY_FROM_MEDIA_ID
                 //| PlaybackState.ACTION_PLAY_FROM_SEARCH
                 ;
         if (mQueue.notEmpty()) {
-            actions |= (PlaybackState.ACTION_SEEK_TO | PlaybackState.ACTION_SKIP_TO_QUEUE_ITEM);
+            actions |= (PlaybackStateCompat.ACTION_SEEK_TO | PlaybackStateCompat.ACTION_SKIP_TO_QUEUE_ITEM);
             if (mPlayback.isPlaying()) {
-                actions |= PlaybackState.ACTION_PAUSE;
-                actions &= ~PlaybackState.ACTION_PLAY;
+                actions |= PlaybackStateCompat.ACTION_PAUSE;
+                actions &= ~PlaybackStateCompat.ACTION_PLAY;
             }
             if (PlaybackStateHelper.isPlayingOrPaused(mPlayback.getState())) {
-                actions |= PlaybackState.ACTION_STOP;
+                actions |= PlaybackStateCompat.ACTION_STOP;
             }
             if (mQueue.getPrevious() >= 0) {
-                actions |= PlaybackState.ACTION_SKIP_TO_PREVIOUS;
+                actions |= PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS;
             }
             if (mQueue.getNextPos() >= 0) {
-                actions |= PlaybackState.ACTION_SKIP_TO_NEXT;
+                actions |= PlaybackStateCompat.ACTION_SKIP_TO_NEXT;
             }
         }
         return actions;
@@ -364,12 +383,12 @@ public class PlaybackService extends MediaBrowserService {
             mArtworkSubscription.unsubscribe();
             mArtworkSubscription = null;
         }
-        final MediaMetadata meta = mIndexClient.convertToMediaMetadata(mCurrentTrack);
+        final MediaMetadataCompat meta = mIndexClient.convertToMediaMetadata(mCurrentTrack);
         final Uri artUri = MediaMetadataHelper.getIconUri(meta);
         ArtworkProviderHelper.CacheBitmap bitmap = mArtworkHelper.getCachedOrDefault(artUri);
         //Always build with default first to ensure it shows promptly
-        getMediaSession().setMetadata(new MediaMetadata.Builder(meta).putBitmap(
-                MediaMetadata.METADATA_KEY_ART, bitmap.getBitmap()).build());
+        mSessionHolder.setMetadata(new MediaMetadataCompat.Builder(meta).putBitmap(
+                MediaMetadataCompat.METADATA_KEY_ART, bitmap.getBitmap()).build());
         if (!bitmap.fromCache()) {
             //Then go for artwork, since it could take a while
             mArtworkSubscription = mArtworkHelper.getArtwork(artUri)
@@ -383,8 +402,8 @@ public class PlaybackService extends MediaBrowserService {
                             mArtworkSubscription = null;
                         }
                         @Override public void onNext(Bitmap bitmap) {
-                            getMediaSession().setMetadata(new MediaMetadata.Builder(meta)
-                                    .putBitmap(MediaMetadata.METADATA_KEY_ART, bitmap).build());
+                            mSessionHolder.setMetadata(new MediaMetadataCompat.Builder(meta)
+                                    .putBitmap(MediaMetadataCompat.METADATA_KEY_ART, bitmap).build());
                         }
                     });
         }
@@ -392,7 +411,7 @@ public class PlaybackService extends MediaBrowserService {
 
     void saveState(final boolean full) {
         final PlaybackQueue.Snapshot qSnapshot = mQueue.snapshot();
-        PlaybackState state = getMediaSession().getController().getPlaybackState();
+        PlaybackStateCompat state = mSessionHolder.getPlaybackState();
         final long seekPos;
         if (state != null) {
             seekPos = state.getPosition();
@@ -441,9 +460,9 @@ public class PlaybackService extends MediaBrowserService {
         final Intent audioEffectsIntent = new Intent(
                 AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION);
         audioEffectsIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, mAudioSessionId);
-        audioEffectsIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, getPackageName());
+        audioEffectsIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, mContext.getPackageName());
         audioEffectsIntent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC);
-        sendBroadcast(audioEffectsIntent);
+        mContext.sendBroadcast(audioEffectsIntent);
     }
 
     void removeAudioEffects() {
@@ -451,8 +470,8 @@ public class PlaybackService extends MediaBrowserService {
         final Intent audioEffectsIntent = new Intent(
                 AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
         audioEffectsIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, mAudioSessionId);
-        audioEffectsIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, getPackageName());
-        sendBroadcast(audioEffectsIntent);
+        audioEffectsIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, mContext.getPackageName());
+        mContext.sendBroadcast(audioEffectsIntent);
     }
 
     public Scheduler getScheduler() {
@@ -463,30 +482,15 @@ public class PlaybackService extends MediaBrowserService {
         return mHandler;
     }
 
-    public MediaSession getMediaSession() {
-        return mSessionHolder.getSession();
+    MediaSessionHolder getSessionHolder() {
+        return mSessionHolder;
     }
 
-    private Bundle getSessionExtras() {
-        Bundle extras = getMediaSession().getController().getExtras();
-        if (extras == null) {
-            extras = new Bundle();
-        }
-        return extras;
+    IndexClient getIndexClient() {
+        return mIndexClient;
     }
 
-    @Nullable @Override
-    public BrowserRoot onGetRoot(@NonNull String clientPackageName, int clientUid, Bundle rootHints) {
-        return mIndexClient.browserGetRoot(clientPackageName, clientUid, rootHints);
-    }
-
-    @Override
-    public void onLoadChildren(@NonNull String parentId, @NonNull Result<List<MediaBrowser.MediaItem>> result) {
-        result.detach();
-        mIndexClient.browserLoadChildren(parentId, result);
-    }
-
-    private void handleStop() {
+    void handleStop() {
         mPlayback.stop(false);
         mHandler.removeCallbacks(mProgressCheckRunnable);
         mDelayedShutdownHandler.cancelDelayedShutdown();
@@ -497,12 +501,12 @@ public class PlaybackService extends MediaBrowserService {
                 mPlayWhenReady = false;
                 setTrack();
             } else {
-                mPlayback.setState(PlaybackState.STATE_NONE);
+                mPlayback.setState(PlaybackStateCompat.STATE_NONE);
                 updatePlaybackState(null);
             }
         } else {
             //we aren't bound by anyone so we can stop
-            stopSelf();
+            mProxy.stopSelf();
         }
     }
 
@@ -603,7 +607,7 @@ public class PlaybackService extends MediaBrowserService {
                 });
     }
 
-    class MediaSessionCallback extends MediaSession.Callback {
+    class MediaSessionCallback implements IMediaSessionProxy.Callback {
         @Override
         public void onCommand(String command, Bundle args, ResultReceiver cb) {
             switch (command) {
@@ -612,7 +616,7 @@ public class PlaybackService extends MediaBrowserService {
                     if (cb != null) {
                         cb.send(0, reply);
                     } else {
-                        getMediaSession().sendSessionEvent(EVENT.REPEAT_CHANGED, reply);
+                        mSessionHolder.sendSessionEvent(EVENT.REPEAT_CHANGED, reply);
                     }
                     break;
                 }
@@ -621,7 +625,7 @@ public class PlaybackService extends MediaBrowserService {
                     if (cb != null) {
                         cb.send(0, reply);
                     } else {
-                        getMediaSession().sendSessionEvent(EVENT.QUEUE_SHUFFLED, reply);
+                        mSessionHolder.sendSessionEvent(EVENT.QUEUE_SHUFFLED, reply);
                     }
                     break;
                 }
@@ -630,16 +634,11 @@ public class PlaybackService extends MediaBrowserService {
                     if (cb != null) {
                         cb.send(0, reply);
                     } else if (mAudioSessionId != 0) {
-                        getMediaSession().sendSessionEvent(EVENT.NEW_AUDIO_SESSION_ID, reply);
+                        mSessionHolder.sendSessionEvent(EVENT.NEW_AUDIO_SESSION_ID, reply);
                     }
                     break;
                 }
             }
-        }
-
-        @Override
-        public boolean onMediaButtonEvent(Intent mediaButtonIntent) {
-            return super.onMediaButtonEvent(mediaButtonIntent);
         }
 
         @Override
@@ -648,11 +647,11 @@ public class PlaybackService extends MediaBrowserService {
             mHandler.removeCallbacks(mProgressCheckRunnable);
             mDelayedShutdownHandler.cancelDelayedShutdown();
             if (!mServiceStarted) {
-                startService(new Intent(PlaybackService.this, PlaybackService.class));
+                mProxy.startSelf();
                 mServiceStarted = true;
             }
             if (mQueueReady) {
-                getMediaSession().setActive(true);
+                mSessionHolder.setActive(true);
                 if (mQueue.notEmpty()) {
                     if (PlaybackStateHelper.isConnecting(mPlayback.getState())) {
                         //we are still fetching the current track, tell it to
@@ -670,16 +669,6 @@ public class PlaybackService extends MediaBrowserService {
                 //load, so tell it to go ahead and start
                 mPlayWhenReady = true;
             }
-        }
-
-        @Override
-        public void onPlayFromMediaId(String mediaId, Bundle extras) {
-            super.onPlayFromMediaId(mediaId, extras);
-        }
-
-        @Override
-        public void onPlayFromSearch(String query, Bundle extras) {
-            super.onPlayFromSearch(query, extras);
         }
 
         @Override
@@ -755,8 +744,8 @@ public class PlaybackService extends MediaBrowserService {
         }
 
         @Override
-        public void onSetRating(@NonNull Rating rating) {
-            super.onSetRating(rating);
+        public void onSetRating(@NonNull RatingCompat rating) {
+            //TODO
         }
 
         @Override
@@ -765,14 +754,14 @@ public class PlaybackService extends MediaBrowserService {
             switch (action) {
                 case CMD.CYCLE_REPEAT: {
                     mQueue.toggleRepeat();
-                    getMediaSession().sendSessionEvent(EVENT.REPEAT_CHANGED,
+                    mSessionHolder.sendSessionEvent(EVENT.REPEAT_CHANGED,
                             BundleHelper.b().putInt(mQueue.getRepeatMode()).get());
                     updatePlaybackState(null);
                     break;
                 }
                 case CMD.TOGGLE_SHUFFLE_MODE: {
                     mQueue.toggleShuffle();
-                    getMediaSession().sendSessionEvent(EVENT.QUEUE_SHUFFLED,
+                    mSessionHolder.sendSessionEvent(EVENT.QUEUE_SHUFFLED,
                             BundleHelper.b().putInt(mQueue.getShuffleMode()).get());
                     updatePlaybackState(null);
                     break;
@@ -936,7 +925,7 @@ public class PlaybackService extends MediaBrowserService {
         @DebugLog
         void onCurrentPosChangedReal() {
             if (mQueue.notEmpty()) {
-                getMediaSession().setQueue(mQueue.getQueueItems());
+                mSessionHolder.setQueue(mQueue.getQueueItems());
                 if (mQueueReloaded) {
                     mQueueReady = true;
                     updatePlaybackState(null);
@@ -956,7 +945,7 @@ public class PlaybackService extends MediaBrowserService {
         @DebugLog
         void onQueueChangedReal() {
             if (mQueue.notEmpty()) {
-                getMediaSession().setQueue(mQueue.getQueueItems());
+                mSessionHolder.setQueue(mQueue.getQueueItems());
                 setNextTrack();
             } else {
                 Timber.e(new IllegalStateException("Got onQueueChanged with empty queue but " +
@@ -1027,7 +1016,7 @@ public class PlaybackService extends MediaBrowserService {
         public void onAudioSessionId(int audioSessionId) {
             mAudioSessionId = audioSessionId;
             applyAudioEffects();
-            getMediaSession().sendSessionEvent(EVENT.NEW_AUDIO_SESSION_ID,
+            mSessionHolder.sendSessionEvent(EVENT.NEW_AUDIO_SESSION_ID,
                     BundleHelper.b().putInt(audioSessionId).get());
         }
     }

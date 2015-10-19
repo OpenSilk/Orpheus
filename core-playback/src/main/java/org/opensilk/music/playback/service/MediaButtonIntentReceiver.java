@@ -20,9 +20,9 @@ package org.opensilk.music.playback.service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
+import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.playback.PlaybackConstants;
 
 import timber.log.Timber;
@@ -44,7 +44,11 @@ public class MediaButtonIntentReceiver extends WakefulBroadcastReceiver {
     private static Intent copyIntent(Context context, Intent o) {
         Intent i = new Intent();
         i.fillIn(o, 0);
-        i.setComponent(new ComponentName(context, PlaybackService.class));
+        if(VersionUtils.hasLollipop()) {
+            i.setComponent(new ComponentName(context, PlaybackServiceL.class));
+        } else {
+            i.setComponent(new ComponentName(context, PlaybackServiceK.class));
+        }
         i.putExtra(PlaybackConstants.FROM_MEDIA_BUTTON, true);
         return i;
     }

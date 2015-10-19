@@ -17,12 +17,10 @@
 
 package org.opensilk.music.playback.service;
 
-import android.content.Context;
-import android.media.session.PlaybackState;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.media.session.PlaybackStateCompat;
 
-import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.playback.PlaybackStateHelper;
 
 import java.lang.ref.WeakReference;
@@ -46,10 +44,10 @@ public class DelayedShutdownHandler extends Handler {
         switch (msg.what) {
             case MSG_STOP: {
                 mShutdownScheduled = false;
-                PlaybackService s = mService.get();
+                PlaybackServiceProxy s = mService.get();
                 if (s != null) {
-                    PlaybackState state =
-                            s.getMediaSession().getController().getPlaybackState();
+                    PlaybackStateCompat state =
+                            s.getSessionHolder().getPlaybackState();
                     if (state == null
                             || PlaybackStateHelper.isStoppedOrInactive(state)
                             || PlaybackStateHelper.isPaused(state)) {
@@ -60,14 +58,14 @@ public class DelayedShutdownHandler extends Handler {
         }
     }
 
-    WeakReference<PlaybackService> mService;
+    WeakReference<PlaybackServiceProxy> mService;
     boolean mShutdownScheduled;
 
     @Inject
     public DelayedShutdownHandler(
-            PlaybackService service
+            PlaybackServiceProxy service
     ) {
-        mService = new WeakReference<PlaybackService>(service);
+        mService = new WeakReference<PlaybackServiceProxy>(service);
     }
 
     public void scheduleDelayedShutdown() {

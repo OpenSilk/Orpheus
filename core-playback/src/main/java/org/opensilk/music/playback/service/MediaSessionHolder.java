@@ -17,15 +17,20 @@
 
 package org.opensilk.music.playback.service;
 
-import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.media.session.MediaController;
-import android.media.session.MediaSession;
+import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
+import android.view.KeyEvent;
 
 import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.music.playback.NavUtils;
+import org.opensilk.common.core.util.VersionUtils;
+import org.opensilk.music.playback.session.IMediaControllerProxy;
+import org.opensilk.music.playback.session.IMediaSessionProxy;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -35,43 +40,67 @@ import javax.inject.Inject;
 @PlaybackServiceScope
 public class MediaSessionHolder {
 
-    final MediaSession mSession;
+    private final IMediaSessionProxy mProxy;
 
     @Inject
     public MediaSessionHolder(@ForApplication Context context) {
-        mSession = new MediaSession(context, PlaybackService.NAME);
-        configureSession(context);
+        if (VersionUtils.hasLollipop()) {
+            mProxy = new MediaSessionHolderL(context);
+        } else {
+            mProxy = new MediaSessionHolderK(context);
+        }
     }
 
-    void configureSession(Context context) {
-        mSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS
-                | MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
-        mSession.setSessionActivity(PendingIntent.getActivity(
-                context, 2, NavUtils.makeLauncherIntent(context),
-                PendingIntent.FLAG_UPDATE_CURRENT));
-        final ComponentName mediaButtonReceiverComponent
-                = new ComponentName(context, MediaButtonIntentReceiver.class);
-        final Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON)
-                .setComponent(mediaButtonReceiverComponent);
-        final PendingIntent mediaButtonReceiverIntent = PendingIntent.getBroadcast(
-                context, 0, mediaButtonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        mSession.setMediaButtonReceiver(mediaButtonReceiverIntent);
+    public void setCallback(IMediaSessionProxy.Callback cb, Handler handler) {
+        mProxy.setCallback(cb, handler);
     }
 
-    public MediaSession getSession() {
-        return mSession;
+    public void sendSessionEvent(String event, Bundle args) {
+        mProxy.sendSessionEvent(event, args);
     }
 
-    public MediaSession.Token getSessionToken() {
-        return mSession.getSessionToken();
+    public void setQueue(List<MediaSessionCompat.QueueItem> list) {
+        mProxy.setQueue(list);
     }
 
-    public MediaController getController() {
-        return mSession.getController();
+    public void setActive(boolean active) {
+        mProxy.setActive(active);
+    }
+
+    public void dispatchMediaButtonEvent(KeyEvent event) {
+        getController().dispatchMediaButtonEvent(event);
+    }
+
+    public MediaMetadataCompat getMetadata() {
+        return getController().getMetadata();
+    }
+
+    public void setMetadata(MediaMetadataCompat metadata) {
+        mProxy.setMetadata(metadata);
+    }
+
+    public PlaybackStateCompat getPlaybackState() {
+        return getController().getPlaybackState();
+    }
+
+    public void setPlaybackState(PlaybackStateCompat state) {
+        mProxy.setPlaybackState(state);
+    }
+
+    public Object getSessionToken() {
+        return mProxy.getSessionToken();
+    }
+
+    public IMediaControllerProxy getController() {
+        return mProxy.getController();
+    }
+
+    public IMediaControllerProxy.TransportControlsProxy getTransportControls() {
+        return mProxy.getTransportControls();
     }
 
     public void release() {
-        mSession.release();
+        mProxy.release();
     }
 
 }

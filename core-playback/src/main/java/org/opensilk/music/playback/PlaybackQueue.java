@@ -17,16 +17,14 @@
 
 package org.opensilk.music.playback;
 
-import android.media.MediaDescription;
-import android.media.session.MediaSession.QueueItem;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v4.media.MediaDescriptionCompat;
+import android.support.v4.media.session.MediaSessionCompat.QueueItem;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.music.index.client.IndexClient;
-import org.opensilk.music.playback.service.PlaybackService;
+import org.opensilk.music.playback.service.PlaybackServiceProxy;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,11 +35,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.inject.Inject;
 
 import hugo.weaving.DebugLog;
-import rx.Scheduler;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.functions.Action0;
-import rx.functions.Action1;
 import timber.log.Timber;
 
 /**
@@ -50,7 +46,7 @@ import timber.log.Timber;
 public class PlaybackQueue {
 
     private final IndexClient mIndexClient;
-    private final PlaybackService mService;
+    private final PlaybackServiceProxy mService;
     private final ArrayList<Uri> mQueue = new ArrayList<>();
     private final ArrayList<QueueItem> mQueueMeta = new ArrayList<>();
 
@@ -64,7 +60,7 @@ public class PlaybackQueue {
     @Inject
     public PlaybackQueue(
             IndexClient mIndexClient,
-            PlaybackService mService
+            PlaybackServiceProxy mService
     ) {
         this.mIndexClient = mIndexClient;
         this.mService = mService;
@@ -457,7 +453,7 @@ public class PlaybackQueue {
     }
 
     @DebugLog
-    private void updateQueueMeta(List<MediaDescription> descriptions) {
+    private void updateQueueMeta(List<MediaDescriptionCompat> descriptions) {
         final int oldQueueSize = mQueue.size();
         final int oldMeteSize = mQueueMeta.size();
         ArrayList<QueueItem> newMeta = new ArrayList<>(mQueue.size());
@@ -510,8 +506,8 @@ public class PlaybackQueue {
     }
 
     //Exposed for testing
-    /*package*/ QueueItem makeNewQueueItem(Uri uri, List<MediaDescription> descriptions) {
-        for (MediaDescription desc : descriptions) {
+    /*package*/ QueueItem makeNewQueueItem(Uri uri, List<MediaDescriptionCompat> descriptions) {
+        for (MediaDescriptionCompat desc : descriptions) {
             if (uri.toString().equals(desc.getMediaId())) {
                 return new QueueItem(desc, mIdGenerator.incrementAndGet());
             }
@@ -546,13 +542,13 @@ public class PlaybackQueue {
             urisToFetch.addAll(mQueue);
         }
         if (urisToFetch.isEmpty()) {
-            updateQueueMeta(Collections.<MediaDescription>emptyList());
+            updateQueueMeta(Collections.<MediaDescriptionCompat>emptyList());
             callbackaction.call();
         } else {
             mLookupSub = mIndexClient.getDescriptions(urisToFetch)
                     .first()
                     .observeOn(mService.getScheduler())
-                    .subscribe(new Subscriber<List<MediaDescription>>() {
+                    .subscribe(new Subscriber<List<MediaDescriptionCompat>>() {
                         @Override public void onCompleted() {
                             mLookupSub = null;
                         }
@@ -560,7 +556,7 @@ public class PlaybackQueue {
                             Timber.e(e, "What to do?");
                             mLookupSub = null;
                         }
-                        @Override public void onNext(List<MediaDescription> mediaDescriptions) {
+                        @Override public void onNext(List<MediaDescriptionCompat> mediaDescriptions) {
                             updateQueueMeta(mediaDescriptions);
                             callbackaction.call();
                             mLookupSub = null;

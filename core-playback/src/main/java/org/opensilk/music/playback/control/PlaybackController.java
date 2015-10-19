@@ -17,42 +17,29 @@
 
 package org.opensilk.music.playback.control;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
-import android.media.AudioManager;
-import android.media.MediaMetadata;
-import android.media.Rating;
-import android.media.audiofx.AudioEffect;
-import android.media.browse.MediaBrowser;
-import android.media.session.MediaController;
-import android.media.session.MediaSession;
-import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.RatingCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
-import org.apache.commons.lang3.tuple.Triple;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.playback.PlaybackConstants;
 import org.opensilk.music.playback.PlaybackConstants.CMD;
-import org.opensilk.music.playback.PlaybackConstants.EVENT;
-import org.opensilk.music.playback.PlaybackStateHelper;
-import org.opensilk.music.playback.service.PlaybackService;
+import org.opensilk.music.playback.service.PlaybackServiceK;
+import org.opensilk.music.playback.service.PlaybackServiceL;
+import org.opensilk.music.playback.session.IMediaControllerProxy;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -62,15 +49,6 @@ import hugo.weaving.DebugLog;
 import rx.Subscription;
 import rx.functions.Action1;
 import rx.subjects.BehaviorSubject;
-import timber.log.Timber;
-
-import static android.support.v4.media.session.PlaybackStateCompat.STATE_BUFFERING;
-import static android.support.v4.media.session.PlaybackStateCompat.STATE_CONNECTING;
-import static android.support.v4.media.session.PlaybackStateCompat.STATE_FAST_FORWARDING;
-import static android.support.v4.media.session.PlaybackStateCompat.STATE_PLAYING;
-import static android.support.v4.media.session.PlaybackStateCompat.STATE_REWINDING;
-import static android.support.v4.media.session.PlaybackStateCompat.STATE_SKIPPING_TO_NEXT;
-import static android.support.v4.media.session.PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS;
 
 /**
  * Created by drew on 5/6/15.
@@ -78,23 +56,20 @@ import static android.support.v4.media.session.PlaybackStateCompat.STATE_SKIPPIN
 @Singleton
 public class PlaybackController {
 
-    final Context mAppContext;
-    final Handler mCallbackHandler = new Handler(Looper.getMainLooper());
+    private final Context mAppContext;
+    private final Handler mCallbackHandler = new Handler(Looper.getMainLooper());
+    private final IPlaybackController mImpl;
 
     int mForegroundActivities = 0;
-    boolean mWaitingForService = false;
-    MediaController mMediaController;
-    MediaController.TransportControls mTransportControls;
-
-    MediaBrowser mMediaBrowser;
 
     @Inject
     public PlaybackController(@ForApplication Context mAppContext) {
         this.mAppContext = new ContextWrapper(mAppContext);
-        this.mMediaBrowser = new MediaBrowser(
-                this.mAppContext, new ComponentName(this.mAppContext, PlaybackService.class),
-                mConnectionCallback, null
-        );
+        if (VersionUtils.hasLollipop()) {
+            mImpl = new PlaybackControllerL(mAppContext, this);
+        } else {
+            mImpl = new PlaybackControllerK(mAppContext, this);
+        }
     }
 
     public void notifyForegroundStateChanged(boolean inForeground) {
@@ -106,7 +81,12 @@ public class PlaybackController {
         }
 
         if (old == 0 || mForegroundActivities == 0) {
-            final Intent intent = new Intent(mAppContext, PlaybackService.class);
+            final Intent intent;
+            if (VersionUtils.hasLollipop()) {
+                intent = new Intent(mAppContext, PlaybackServiceL.class);
+            } else {
+                intent = new Intent(mAppContext, PlaybackServiceK.class);
+            }
             intent.setAction(PlaybackConstants.FOREGROUND_STATE_CHANGED);
             intent.putExtra(PlaybackConstants.NOW_IN_FOREGROUND, mForegroundActivities != 0);
             mAppContext.startService(intent);
@@ -189,15 +169,9 @@ public class PlaybackController {
         }
     }
 
-    public void setRating(Rating rating) {
+    public void setRating(RatingCompat rating) {
         if (hasController()) {
             getTransportControls().setRating(rating);
-        }
-    }
-
-    public void sendCustomAction(PlaybackState.CustomAction customAction, Bundle args) {
-        if (hasController()) {
-            getTransportControls().sendCustomAction(customAction, args);
         }
     }
 
@@ -303,30 +277,36 @@ public class PlaybackController {
      */
 
     private void fetchRepeatMode() {
-        mMediaController.sendCommand(CMD.REQUEST_REPEATMODE_UPDATE, null, new ResultReceiver(mCallbackHandler) {
-            @Override
-            protected void onReceiveResult(int resultCode, Bundle resultData) {
-                mRepeatModeSubject.onNext(BundleHelper.getInt(resultData));
-            }
-        });
+        if (hasController()) {
+            mImpl.getMediaController().sendCommand(CMD.REQUEST_REPEATMODE_UPDATE, null, new ResultReceiver(mCallbackHandler) {
+                @Override
+                protected void onReceiveResult(int resultCode, Bundle resultData) {
+                    mRepeatModeSubject.onNext(BundleHelper.getInt(resultData));
+                }
+            });
+        }
     }
 
     private void fetchShuffleMode() {
-        mMediaController.sendCommand(CMD.REQUEST_SHUFFLEMODE_UPDATE, null, new ResultReceiver(mCallbackHandler) {
-            @Override
-            protected void onReceiveResult(int resultCode, Bundle resultData) {
-                mShuffleModeSubject.onNext(BundleHelper.getInt(resultData));
-            }
-        });
+        if (hasController()) {
+            mImpl.getMediaController().sendCommand(CMD.REQUEST_SHUFFLEMODE_UPDATE, null, new ResultReceiver(mCallbackHandler) {
+                @Override
+                protected void onReceiveResult(int resultCode, Bundle resultData) {
+                    mShuffleModeSubject.onNext(BundleHelper.getInt(resultData));
+                }
+            });
+        }
     }
 
     private void fetchAudioSessionId() {
-        mMediaController.sendCommand(CMD.REQUEST_AUDIOSESSION_ID, null, new ResultReceiver(mCallbackHandler) {
-            @Override
-            protected void onReceiveResult(int resultCode, Bundle resultData) {
-                mAudioSessionIdSubject.onNext(BundleHelper.getInt(resultData));
-            }
-        });
+        if (hasController()) {
+            mImpl.getMediaController().sendCommand(CMD.REQUEST_AUDIOSESSION_ID, null, new ResultReceiver(mCallbackHandler) {
+                @Override
+                protected void onReceiveResult(int resultCode, Bundle resultData) {
+                    mAudioSessionIdSubject.onNext(BundleHelper.getInt(resultData));
+                }
+            });
+        }
     }
 
     /*
@@ -337,57 +317,100 @@ public class PlaybackController {
      * Subscriptions
      */
 
-    final BehaviorSubject<PlaybackStateCompat> mPlayStateSubject = BehaviorSubject.create();
+    private final BehaviorSubject<PlaybackStateCompat> mPlayStateSubject = BehaviorSubject.create();
 
     public Subscription subscribePlayStateChanges(Action1<PlaybackStateCompat> onNext) {
-        return mPlayStateSubject.asObservable().subscribe(onNext);
+        return mPlayStateSubject.subscribe(onNext);
     }
 
-    final BehaviorSubject<MediaMetadataCompat> mMetaSubject = BehaviorSubject.create();
+    private final BehaviorSubject<MediaMetadataCompat> mMetaSubject = BehaviorSubject.create();
 
     public Subscription subscribeMetaChanges(Action1<MediaMetadataCompat> onNext) {
-        return mMetaSubject.asObservable().subscribe(onNext);
+        return mMetaSubject.subscribe(onNext);
     }
 
-    final BehaviorSubject<List<MediaSessionCompat.QueueItem>> mQueueSubject = BehaviorSubject.create();
+    private final BehaviorSubject<List<MediaSessionCompat.QueueItem>> mQueueSubject = BehaviorSubject.create();
 
     public Subscription subscribeQueueChanges(Action1<List<MediaSessionCompat.QueueItem>> onNext) {
-        return mQueueSubject.asObservable().subscribe(onNext);
+        return mQueueSubject.subscribe(onNext);
     }
 
-    final BehaviorSubject<Integer> mAudioSessionIdSubject = BehaviorSubject.create();
+    private final BehaviorSubject<Integer> mAudioSessionIdSubject = BehaviorSubject.create();
 
     public Subscription subscribeAudioSessionIdChanges(Action1<Integer> onNext) {
-        return mAudioSessionIdSubject.asObservable().subscribe(onNext);
+        return mAudioSessionIdSubject.subscribe(onNext);
     }
 
-    final BehaviorSubject<Integer> mRepeatModeSubject = BehaviorSubject.create();
+    private final BehaviorSubject<Integer> mRepeatModeSubject = BehaviorSubject.create();
 
     public Subscription subscribeRepeatModeChanges(Action1<Integer> onNext) {
-        return mRepeatModeSubject.asObservable().subscribe(onNext);
+        return mRepeatModeSubject.subscribe(onNext);
     }
 
-    final BehaviorSubject<Integer> mShuffleModeSubject = BehaviorSubject.create();
+    private final BehaviorSubject<Integer> mShuffleModeSubject = BehaviorSubject.create();
 
     public Subscription subscribeShuffleModeChanges(Action1<Integer> onNext) {
-        return mShuffleModeSubject.asObservable().subscribe(onNext);
+        return mShuffleModeSubject.subscribe(onNext);
     }
 
     /*
      * end subscriptions
      */
 
-    final MediaController.Callback mCallback = new MediaController.Callback() {
+    public void connect() {
+        mImpl.connect();
+    }
+
+    public void disconnect() {
+        mImpl.disconnect();
+    }
+
+    /*
+     *
+     */
+
+    private boolean hasController() {
+        return mImpl.isConnected();
+    }
+
+    private IMediaControllerProxy.TransportControlsProxy getTransportControls() {
+        return mImpl.getTransportControls();
+    }
+
+    /*
+     * Hooks for impl
+     */
+
+    void onConnected() {
+        mImpl.getMediaController().registerCallback(mCallback, mCallbackHandler);
+        final PlaybackStateCompat state = mImpl.getMediaController().getPlaybackState();
+        if (state != null) {
+            mPlayStateSubject.onNext(state);
+        }
+        final MediaMetadataCompat meta = mImpl.getMediaController().getMetadata();
+        if (meta != null) {
+            mMetaSubject.onNext(meta);
+        }
+        final List<MediaSessionCompat.QueueItem> queue = mImpl.getMediaController().getQueue();
+        if (queue != null) {
+            mQueueSubject.onNext(queue);
+        }
+        fetchRepeatMode();
+        fetchShuffleMode();
+        fetchAudioSessionId();
+    }
+
+    final IMediaControllerProxy.Callback mCallback = new IMediaControllerProxy.Callback() {
         @Override
         public void onSessionDestroyed() {
-            onDisconnect();
+            mImpl.disconnect();
         }
 
         @Override
         @DebugLog
         public void onSessionEvent(@NonNull String event, Bundle extras) {
             switch (event) {
-                case EVENT.NEW_AUDIO_SESSION_ID:{
+                case PlaybackConstants.EVENT.NEW_AUDIO_SESSION_ID:{
                     if (VersionUtils.hasMarshmallow()) {
                         mAudioSessionIdSubject.onNext(BundleHelper.getInt(extras));
                     } else{
@@ -396,7 +419,7 @@ public class PlaybackController {
                     }
                     break;
                 }
-                case EVENT.REPEAT_CHANGED: {
+                case PlaybackConstants.EVENT.REPEAT_CHANGED: {
                     if (VersionUtils.hasMarshmallow()) {
                         mRepeatModeSubject.onNext(BundleHelper.getInt(extras));
                     } else {
@@ -405,7 +428,7 @@ public class PlaybackController {
                     }
                     break;
                 }
-                case EVENT.QUEUE_SHUFFLED: {
+                case PlaybackConstants.EVENT.QUEUE_SHUFFLED: {
                     if (VersionUtils.hasMarshmallow()) {
                         mShuffleModeSubject.onNext(BundleHelper.getInt(extras));
                     } else {
@@ -418,110 +441,30 @@ public class PlaybackController {
         }
 
         @Override
-        public void onPlaybackStateChanged(@NonNull PlaybackState state) {
-            mPlayStateSubject.onNext(PlaybackStateCompat.fromPlaybackState(state));
+        public void onPlaybackStateChanged(@NonNull PlaybackStateCompat state) {
+            mPlayStateSubject.onNext(state);
         }
 
         @Override
-        public void onMetadataChanged(MediaMetadata metadata) {
-            mMetaSubject.onNext(MediaMetadataCompat.fromMediaMetadata(metadata));
+        public void onMetadataChanged(MediaMetadataCompat metadata) {
+            mMetaSubject.onNext(metadata);
         }
 
         @Override
-        public void onQueueChanged(List<MediaSession.QueueItem> queue) {
-            List<MediaSessionCompat.QueueItem> list = new ArrayList<>(queue.size());
-            for (MediaSession.QueueItem item : queue) {
-                MediaSessionCompat.QueueItem qi = MediaSessionCompat.QueueItem.obtain(item);
-                list.add(qi);
-            }
-            mQueueSubject.onNext(list);
+        public void onQueueChanged(List<MediaSessionCompat.QueueItem> queue) {
+            mQueueSubject.onNext(queue);
         }
 
         @Override
         public void onQueueTitleChanged(CharSequence title) {
-            super.onQueueTitleChanged(title);
         }
 
         @Override
         public void onExtrasChanged(Bundle extras) {
-            super.onExtrasChanged(extras);
         }
 
         @Override
-        public void onAudioInfoChanged(MediaController.PlaybackInfo info) {
-            super.onAudioInfoChanged(info);
+        public void onAudioInfoChanged(Object info) {
         }
     };
-
-    boolean hasController() {
-        if (mMediaController == null) {
-            connect();
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    MediaController.TransportControls getTransportControls() {
-        if (!hasController()) {
-            throw new IllegalStateException("called getTransportControls without checking hasController");
-        }
-        return mTransportControls;
-    }
-
-    public void connect() {
-        if (mMediaBrowser.isConnected() || mWaitingForService) {
-            return;
-        }
-        mWaitingForService = true;
-        mMediaBrowser.connect();
-    }
-
-    public void disconnect() {
-        mMediaBrowser.disconnect();
-        onDisconnect();
-    }
-
-    void onDisconnect() {
-        mMediaController = null;
-        mTransportControls = null;
-        mWaitingForService = false;
-    }
-
-    final MediaBrowser.ConnectionCallback mConnectionCallback = new MediaBrowser.ConnectionCallback() {
-        @Override
-        public void onConnected() {
-            mMediaController = new MediaController(mAppContext, mMediaBrowser.getSessionToken());
-            mMediaController.registerCallback(mCallback, mCallbackHandler);
-            mTransportControls = mMediaController.getTransportControls();
-            mWaitingForService = false;
-            final PlaybackState state = mMediaController.getPlaybackState();
-            if (state != null) {
-                mCallback.onPlaybackStateChanged(state);
-            }
-            final MediaMetadata meta = mMediaController.getMetadata();
-            if (meta != null) {
-                mCallback.onMetadataChanged(meta);
-            }
-            final List<MediaSession.QueueItem> queue = mMediaController.getQueue();
-            if (queue != null) {
-                mCallback.onQueueChanged(queue);
-            }
-            fetchRepeatMode();
-            fetchShuffleMode();
-            fetchAudioSessionId();
-        }
-
-        @Override
-        public void onConnectionSuspended() {
-            onDisconnect();
-        }
-
-        @Override
-        public void onConnectionFailed() {
-            mWaitingForService = false;
-            Timber.e(new IllegalStateException("Shouldn't be here"), "onConnectionFailed()");
-        }
-    };
-
 }

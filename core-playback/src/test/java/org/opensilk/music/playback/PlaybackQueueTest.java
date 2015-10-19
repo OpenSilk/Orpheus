@@ -20,13 +20,15 @@ package org.opensilk.music.playback;
 import android.media.MediaDescription;
 import android.media.session.MediaSession;
 import android.net.Uri;
+import android.support.v4.media.MediaDescriptionCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.opensilk.music.index.client.IndexClient;
-import org.opensilk.music.playback.service.PlaybackService;
+import org.opensilk.music.playback.service.PlaybackServiceProxy;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -46,7 +48,7 @@ import static org.mockito.Mockito.*;
 public class PlaybackQueueTest {
 
     IndexClient mClient;
-    PlaybackService mService;
+    PlaybackServiceProxy mService;
     PlaybackQueue mPlaybackQueue;
     PlaybackQueue.QueueChangeListener mListener;
 
@@ -57,13 +59,13 @@ public class PlaybackQueueTest {
         when(mClient.getLastQueuePosition()).thenReturn(-1);
         when(mClient.getLastQueueRepeatMode()).thenReturn(-1);
         when(mClient.getLastQueueShuffleMode()).thenReturn(-1);
-        mService = Mockito.mock(PlaybackService.class);
+        mService = Mockito.mock(PlaybackServiceProxy.class);
         when(mService.getScheduler()).thenReturn(Schedulers.immediate());
         mPlaybackQueue = new PlaybackQueue(mClient, mService) {
-            @Override MediaSession.QueueItem makeNewQueueItem(Uri uri, List<MediaDescription> descriptions) {
-                for (MediaDescription desc : descriptions) {
+            @Override MediaSessionCompat.QueueItem makeNewQueueItem(Uri uri, List<MediaDescriptionCompat> descriptions) {
+                for (MediaDescriptionCompat desc : descriptions) {
                     if (uri.toString().equals(desc.getMediaId())) {
-                        MediaSession.QueueItem item = mock(MediaSession.QueueItem.class);
+                        MediaSessionCompat.QueueItem item = mock(MediaSessionCompat.QueueItem.class);
                         when(item.getDescription()).thenReturn(desc);
                         when(item.getQueueId()).thenReturn(mIdGenerator.incrementAndGet());
                         return item;
@@ -88,10 +90,10 @@ public class PlaybackQueueTest {
         verify(mListener, never()).onQueueChanged();
     }
 
-    void checkListsMatch(List<Uri> uris, List<MediaSession.QueueItem> items) {
+    void checkListsMatch(List<Uri> uris, List<MediaSessionCompat.QueueItem> items) {
         assertThat(uris.size()).isEqualTo(items.size());
         Iterator<Uri> urisI = uris.iterator();
-        Iterator<MediaSession.QueueItem> itemsI = items.iterator();
+        Iterator<MediaSessionCompat.QueueItem> itemsI = items.iterator();
         while (urisI.hasNext() && itemsI.hasNext()) {
             assertThat(urisI.next().toString()).isEqualTo(
                     itemsI.next().getDescription().getMediaId()
@@ -102,11 +104,11 @@ public class PlaybackQueueTest {
     @Test
     public void testAddNextOnEmptyQueue() {
         List<Uri> queue = new ArrayList<>(10);
-        List<MediaDescription> descriptions = new ArrayList<>(10);
+        List<MediaDescriptionCompat> descriptions = new ArrayList<>(10);
         for (int ii=0; ii<10; ii++) {
             Uri uri = Uri.parse("content://test/track/" + ii);
             queue.add(uri);
-            MediaDescription desc = mock(MediaDescription.class);
+            MediaDescriptionCompat desc = mock(MediaDescriptionCompat.class);
             when(desc.getMediaId()).thenReturn(uri.toString());
             descriptions.add(desc);
         }
@@ -125,11 +127,11 @@ public class PlaybackQueueTest {
         //populate with some stuff
         testAddNextOnEmptyQueue();
         List<Uri> queue = new ArrayList<>(1);
-        List<MediaDescription> descriptions = new ArrayList<>(1);
+        List<MediaDescriptionCompat> descriptions = new ArrayList<>(1);
         for (int ii=0; ii<1; ii++) {
             Uri uri = Uri.parse("content://test2/track/" + ii);
             queue.add(uri);
-            MediaDescription desc = mock(MediaDescription.class);
+            MediaDescriptionCompat desc = mock(MediaDescriptionCompat.class);
             when(desc.getMediaId()).thenReturn(uri.toString());
             descriptions.add(desc);
         }
@@ -196,11 +198,11 @@ public class PlaybackQueueTest {
         mPlaybackQueue.goToItem(4);
         assertThat(mPlaybackQueue.getCurrentPos()).isEqualTo(4);
         List<Uri> queue = new ArrayList<>(1);
-        List<MediaDescription> descriptions = new ArrayList<>(1);
+        List<MediaDescriptionCompat> descriptions = new ArrayList<>(1);
         for (int ii=0; ii<1; ii++) {
             Uri uri = Uri.parse("content://test2/track/" + ii);
             queue.add(uri);
-            MediaDescription desc = mock(MediaDescription.class);
+            MediaDescriptionCompat desc = mock(MediaDescriptionCompat.class);
             when(desc.getMediaId()).thenReturn(uri.toString());
             descriptions.add(desc);
         }
@@ -224,11 +226,11 @@ public class PlaybackQueueTest {
         //populate with some stuff
         testMoveToNextRepeatOff();
         List<Uri> queue = new ArrayList<>(1);
-        List<MediaDescription> descriptions = new ArrayList<>(1);
+        List<MediaDescriptionCompat> descriptions = new ArrayList<>(1);
         for (int ii=0; ii<1; ii++) {
             Uri uri = Uri.parse("content://test2/track/" + ii);
             queue.add(uri);
-            MediaDescription desc = mock(MediaDescription.class);
+            MediaDescriptionCompat desc = mock(MediaDescriptionCompat.class);
             when(desc.getMediaId()).thenReturn(uri.toString());
             descriptions.add(desc);
         }
@@ -250,11 +252,11 @@ public class PlaybackQueueTest {
     @Test
     public void testAddEndOnEmptyQueue() {
         List<Uri> queue = new ArrayList<>(10);
-        List<MediaDescription> descriptions = new ArrayList<>(10);
+        List<MediaDescriptionCompat> descriptions = new ArrayList<>(10);
         for (int ii=0; ii<10; ii++) {
             Uri uri = Uri.parse("content://test/track/" + ii);
             queue.add(uri);
-            MediaDescription desc = mock(MediaDescription.class);
+            MediaDescriptionCompat desc = mock(MediaDescriptionCompat.class);
             when(desc.getMediaId()).thenReturn(uri.toString());
             descriptions.add(desc);
         }
@@ -272,11 +274,11 @@ public class PlaybackQueueTest {
     public void testAddEndWithQueue() {
         testAddEndOnEmptyQueue();
         List<Uri> queue = new ArrayList<>(10);
-        List<MediaDescription> descriptions = new ArrayList<>(10);
+        List<MediaDescriptionCompat> descriptions = new ArrayList<>(10);
         for (int ii=0; ii<10; ii++) {
             Uri uri = Uri.parse("content://test2/track/" + ii);
             queue.add(uri);
-            MediaDescription desc = mock(MediaDescription.class);
+            MediaDescriptionCompat desc = mock(MediaDescriptionCompat.class);
             when(desc.getMediaId()).thenReturn(uri.toString());
             descriptions.add(desc);
         }
@@ -297,11 +299,11 @@ public class PlaybackQueueTest {
         verify(mListener, times(2)).onCurrentPosChanged();
         verify(mListener, times(1)).onQueueChanged();
         List<Uri> queue = new ArrayList<>(10);
-        List<MediaDescription> descriptions = new ArrayList<>(10);
+        List<MediaDescriptionCompat> descriptions = new ArrayList<>(10);
         for (int ii=0; ii<10; ii++) {
             Uri uri = Uri.parse("content://test2/track/" + ii);
             queue.add(uri);
-            MediaDescription desc = mock(MediaDescription.class);
+            MediaDescriptionCompat desc = mock(MediaDescriptionCompat.class);
             when(desc.getMediaId()).thenReturn(uri.toString());
             descriptions.add(desc);
         }
@@ -323,11 +325,11 @@ public class PlaybackQueueTest {
         testAddNextOnEmptyQueue();
         verify(mListener, times(2)).onCurrentPosChanged();
         List<Uri> queue = new ArrayList<>(10);
-        List<MediaDescription> descriptions = new ArrayList<>(10);
+        List<MediaDescriptionCompat> descriptions = new ArrayList<>(10);
         for (int ii=0; ii<10; ii++) {
             Uri uri = Uri.parse("content://test2/track/" + ii);
             queue.add(uri);
-            MediaDescription desc = mock(MediaDescription.class);
+            MediaDescriptionCompat desc = mock(MediaDescriptionCompat.class);
             when(desc.getMediaId()).thenReturn(uri.toString());
             descriptions.add(desc);
         }
@@ -635,7 +637,7 @@ public class PlaybackQueueTest {
     public void testgetPosOfId() {
         //populate with some stuff
         testAddEndOnEmptyQueue();
-        MediaSession.QueueItem item = mPlaybackQueue.getQueueItems().get(4);
+        MediaSessionCompat.QueueItem item = mPlaybackQueue.getQueueItems().get(4);
         int pos = mPlaybackQueue.getPosOfId(item.getQueueId());
         assertThat(pos).isEqualTo(4);
     }

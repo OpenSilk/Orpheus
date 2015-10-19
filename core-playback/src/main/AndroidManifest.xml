@@ -19,13 +19,22 @@
           package="org.opensilk.music.playback">
 
     <application>
-      <service android:name=".service.PlaybackService"
+      <service android:name=".service.PlaybackServiceL"
           android:exported="true"
-          android:process=":service">
+          android:process=":service"
+          android:enabled="@bool/hasL">
           <intent-filter>
               <action android:name="android.media.browse.MediaBrowserService" />
           </intent-filter>
       </service>
+        <service android:name=".service.PlaybackServiceK"
+            android:exported="true"
+            android:process=":service"
+            android:enabled="@bool/notL">
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserServiceCompat"/>
+            </intent-filter>
+        </service>
         <receiver android:name=".service.MediaButtonIntentReceiver"
                   android:process=":service">
             <intent-filter>
