@@ -82,7 +82,7 @@ public class App extends BaseApp {
         } else if (isServiceProcess()) {
 
         } else {
-            throw new RuntimeException("Unable to determine our process");
+            Timber.e("Unable to determine our process");
         }
 
         // Enable strict mode logging (we do this after reading the process to avoid a warning)
@@ -98,7 +98,8 @@ public class App extends BaseApp {
         } else if (isServiceProcess()) {
             return PlaybackComponent.FACTORY.call(this);
         } else {
-            throw new RuntimeException("Unable to determine our process");
+            Timber.e("Unable to determine our process");
+            return EmulatorComponent.FACTORY.call(this);
         }
     }
 
