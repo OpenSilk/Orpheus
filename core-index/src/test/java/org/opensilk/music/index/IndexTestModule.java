@@ -99,6 +99,16 @@ public class IndexTestModule {
             }
 
             @Override
+            public Call<Artist> getArtistbyMbid(@Query("mbid") String mbid) {
+                return null;
+            }
+
+            @Override
+            public Call<Album> getAlbumbyMbid(@Query("mbid") String mbid) {
+                return null;
+            }
+
+            @Override
             public Call<Album> getAlbum(@Query("artist") final String artist, @Query("album") final String album) {
                 return new Call<Album>() {
                     @Override
@@ -130,6 +140,8 @@ public class IndexTestModule {
                         return this;
                     }
                 };
+
+
             }
 
             @Override
