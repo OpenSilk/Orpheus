@@ -23,6 +23,7 @@
 
     <!--LetterTileDrawable-->
     <item name="letter_to_tile_ratio" type="fraction">67%</item>
+    <item name="letter_to_tile_ratio2" type="fraction">57%</item>
 
     <!-- navigation drawers -->
     <dimen name="drawer_width">240dp</dimen>

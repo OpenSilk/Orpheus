@@ -39,8 +39,6 @@ import org.opensilk.common.ui.R;
  */
 public class LetterTileDrawable extends Drawable {
 
-    private final String TAG = LetterTileDrawable.class.getSimpleName();
-
     private final Paint mPaint;
 
     /** Letter tile */
@@ -48,14 +46,16 @@ public class LetterTileDrawable extends Drawable {
     private static int sDefaultColor;
     private static int sTileFontColor;
     private static float sLetterToTileRatio;
+    private static float sLetterToTileRatio2;
 
     /** Reusable components to avoid new allocations */
     private static final Paint sPaint = new Paint();
     private static final Rect sRect = new Rect();
     private static final char[] sFirstChar = new char[1];
+    private static final char[] sFirstChar2 = new char[2];
 
-    private String mIdentifier;
-    private char mDrawableChar;
+    private char mDrawableChar = '@';
+    private char mDrawableChar2 = '@';
     private float mScale = 1.0f;
     private float mOffset = 0.0f;
     private boolean mIsCircle = true;
@@ -70,6 +70,7 @@ public class LetterTileDrawable extends Drawable {
             sDefaultColor = res.getColor(R.color.letter_tile_default_color);
             sTileFontColor = res.getColor(R.color.letter_tile_font_color);
             sLetterToTileRatio = res.getFraction(R.fraction.letter_to_tile_ratio, 1, 1);
+            sLetterToTileRatio2 = res.getFraction(R.fraction.letter_to_tile_ratio2, 1, 1);
             sPaint.setTypeface(Typeface.create(
                     res.getString(R.string.letter_tile_letter_font_family), Typeface.NORMAL));
             sPaint.setTextAlign(Align.CENTER);
@@ -116,7 +117,12 @@ public class LetterTileDrawable extends Drawable {
 
     private void drawLetterTile(final Canvas canvas) {
         // Draw background color.
-        sPaint.setColor(pickColor(mIdentifier));
+        if (isDigit(mDrawableChar2)) {
+            //use second digit
+            sPaint.setColor(pickColor(mDrawableChar2));
+        } else {
+            sPaint.setColor(pickColor(mDrawableChar));
+        }
 
         sPaint.setAlpha(mPaint.getAlpha());
         final Rect bounds = getBounds();
@@ -129,21 +135,37 @@ public class LetterTileDrawable extends Drawable {
         }
 
         // Draw letter/digit only if the first character is an english letter
-        if (!TextUtils.isEmpty(mIdentifier) && isEnglishLetter(mDrawableChar)) {
-            // Draw letter or digit.
-            sFirstChar[0] = Character.toUpperCase(mDrawableChar);
+        if (isEnglishLetter(mDrawableChar)) {
+            if (isDigit(mDrawableChar2)) {
+                // Draw digits.
+                sFirstChar2[0] = mDrawableChar;
+                sFirstChar2[1] = mDrawableChar2;
 
-            // Scale text by canvas bounds and user selected scaling factor
-            sPaint.setTextSize(mScale * sLetterToTileRatio * minDimension);
-            //sPaint.setTextSize(sTileLetterFontSize);
-            sPaint.getTextBounds(sFirstChar, 0, 1, sRect);
-            sPaint.setColor(sTileFontColor);
+                // Scale text by canvas bounds and user selected scaling factor
+                sPaint.setTextSize(mScale * sLetterToTileRatio2 * minDimension);
+                sPaint.getTextBounds(sFirstChar2, 0, 2, sRect);
+                sPaint.setColor(sTileFontColor);
 
-            // Draw the letter in the canvas, vertically shifted up or down by the user-defined
-            // offset
-            canvas.drawText(sFirstChar, 0, 1, bounds.centerX(),
-                    bounds.centerY() + mOffset * bounds.height() + sRect.height() / 2,
-                    sPaint);
+                // Draw the letter in the canvas, vertically shifted up or down by the user-defined
+                // offset
+                canvas.drawText(sFirstChar2, 0, 2, bounds.centerX(),
+                        bounds.centerY() + mOffset * bounds.height() + sRect.height() / 2,
+                        sPaint);
+            } else {
+                // Draw letter or digit.
+                sFirstChar[0] = Character.toUpperCase(mDrawableChar);
+
+                // Scale text by canvas bounds and user selected scaling factor
+                sPaint.setTextSize(mScale * sLetterToTileRatio * minDimension);
+                sPaint.getTextBounds(sFirstChar, 0, 1, sRect);
+                sPaint.setColor(sTileFontColor);
+
+                // Draw the letter in the canvas, vertically shifted up or down by the user-defined
+                // offset
+                canvas.drawText(sFirstChar, 0, 1, bounds.centerX(),
+                        bounds.centerY() + mOffset * bounds.height() + sRect.height() / 2,
+                        sPaint);
+            }
         } else {
             // Draw the default image if there is no letter/digit to be drawn
 //            final Bitmap bitmap = getBitmapForContactType(mContactType);
@@ -152,21 +174,14 @@ public class LetterTileDrawable extends Drawable {
         }
     }
 
-    public int getColor() {
-        return pickColor(mIdentifier);
-    }
-
     /**
      * Returns a deterministic color based on the provided contact identifier string.
      */
-    private int pickColor(final String identifier) {
-        if (TextUtils.isEmpty(identifier)) {
+    private static int pickColor(final char c) {
+        if (!isEnglishLetter(c)) {
             return sDefaultColor;
         }
-        if (!isEnglishLetter(mDrawableChar)) {
-            return sDefaultColor;
-        }
-        final int color = Math.abs(mDrawableChar) % sColors.length();
+        final int color = Math.abs(c) % sColors.length();
         return sColors.getColor(color, sDefaultColor);
     }
 
@@ -185,6 +200,16 @@ public class LetterTileDrawable extends Drawable {
             return findFirstUsableCharacter(identifier.substring(1));
         }
         return identifier.charAt(idx);
+    }
+
+    static char findSecondDigit(@NonNull String identifier, char firstChar) {
+        if (isDigit(firstChar)) {
+            int idx = identifier.indexOf(firstChar) + 1;
+            if (idx < identifier.length() && isDigit(identifier.charAt(idx))) {
+                return identifier.charAt(idx);
+            }
+        }
+        return '@';
     }
 
     private static boolean isDigit(final char c) {
@@ -238,11 +263,12 @@ public class LetterTileDrawable extends Drawable {
     }
 
     public LetterTileDrawable setText(final String identifier) {
-        mIdentifier = null;
-        mDrawableChar = 0;
         if (!TextUtils.isEmpty(identifier)) {
-            mIdentifier = identifier;
             mDrawableChar = findFirstUsableCharacter(identifier);
+            mDrawableChar2 = findSecondDigit(identifier, mDrawableChar);
+        } else {
+            mDrawableChar = '@';
+            mDrawableChar2 = '@';
         }
         return this;
     }

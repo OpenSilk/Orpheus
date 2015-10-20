@@ -63,4 +63,13 @@ public class LetterTileDrawableTest {
         c = LetterTileDrawable.findFirstUsableCharacter("000.txt");
         assertThat(c).isEqualTo('0');
     }
+
+    @Test
+    public void testFindSecondDigit() {
+        assertThat(LetterTileDrawable.findSecondDigit("10", '1')).isEqualTo('0');
+        assertThat(LetterTileDrawable.findSecondDigit("01", '1')).isEqualTo('@');
+        assertThat(LetterTileDrawable.findSecondDigit("100", '1')).isEqualTo('0');
+        assertThat(LetterTileDrawable.findSecondDigit("01 ", '1')).isEqualTo('@');
+        assertThat(LetterTileDrawable.findSecondDigit("012310", '1')).isEqualTo('2');
+    }
 }
