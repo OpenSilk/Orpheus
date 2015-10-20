@@ -20,9 +20,9 @@ package org.opensilk.music.ui3.profile;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.music.R;
 
 import javax.inject.Inject;
@@ -38,10 +38,10 @@ public class ProfileHeroView extends FrameLayout {
 
     @Inject ProfileHeroViewPresenter mPresenter;
 
-    @InjectView(R.id.hero_image) AnimatedImageView mArtwork;
-    @InjectView(R.id.hero_image2) @Optional AnimatedImageView mArtwork2;
-    @InjectView(R.id.hero_image3) @Optional AnimatedImageView mArtwork3;
-    @InjectView(R.id.hero_image4) @Optional AnimatedImageView mArtwork4;
+    @InjectView(R.id.hero_image) ImageView mArtwork;
+    @InjectView(R.id.hero_image2) @Optional ImageView mArtwork2;
+    @InjectView(R.id.hero_image3) @Optional ImageView mArtwork3;
+    @InjectView(R.id.hero_image4) @Optional ImageView mArtwork4;
 
     public ProfileHeroView(Context context, AttributeSet attrs) {
         super(context, attrs);
