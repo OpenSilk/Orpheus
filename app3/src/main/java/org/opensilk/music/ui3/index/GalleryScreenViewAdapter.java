@@ -44,10 +44,10 @@ class GalleryScreenViewAdapter extends MortarPagerAdapter<Screen, BundleableRecy
         this.pages = pages;
     }
 
-    @Override
+    @Override @SuppressWarnings("unchecked")
     public void setPrimaryItem(ViewGroup container, int position, Object object) {
         if (object != mCurrentPrimaryItem) {
-            Page currentPage = (Page) object;
+            Page<Screen, BundleableRecyclerView> currentPage = (Page<Screen, BundleableRecyclerView>) object;
             BundleablePresenter childPresenter = (currentPage.view).getPresenter();
             ActionBarMenuHandler menuConfig = null;
             if (childPresenter != null) {
