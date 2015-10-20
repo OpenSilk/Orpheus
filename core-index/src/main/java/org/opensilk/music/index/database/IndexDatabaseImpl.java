@@ -1229,6 +1229,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
             cv.put(IndexSchema.Meta.Album.ALBUM_BIO_SUMMARY, bioSummary);
             cv.put(IndexSchema.Meta.Album.ALBUM_BIO_DATE_MOD, lastMod > 0 ? lastMod : System.currentTimeMillis());
         }
+        Timber.v("Inserting album %s", cv.toString());
         long id = insert(IndexSchema.Meta.Album.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
         if (id > 0) {
             mAppContext.getContentResolver().notifyChange(IndexUris.albums(indexAuthority), null);
@@ -1304,6 +1305,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
             cv.put(IndexSchema.Meta.Artist.ARTIST_BIO_SUMMARY, bioSummary);
             cv.put(IndexSchema.Meta.Artist.ARTIST_BIO_DATE_MOD, lastMod > 0 ? lastMod : System.currentTimeMillis());
         }
+        Timber.d("Inserting Artist %s", cv.toString());
         long id = insert(IndexSchema.Meta.Artist.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
         if (id > 0) {
             mAppContext.getContentResolver().notifyChange(IndexUris.artists(indexAuthority), null);
@@ -1358,6 +1360,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
         String name = meta.getString(Metadata.KEY_GENRE_NAME);
         cv.put(IndexSchema.Meta.Genre.GENRE_NAME, name);
         cv.put(IndexSchema.Meta.Genre.GENRE_KEY, keyFor(name));
+        Timber.d("Inserting Genre %s", cv.toString());
         long id = insert(IndexSchema.Meta.Genre.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
         if (id > 0) {
             mAppContext.getContentResolver().notifyChange(IndexUris.genres(indexAuthority), null);
