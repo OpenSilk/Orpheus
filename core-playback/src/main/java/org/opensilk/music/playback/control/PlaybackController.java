@@ -40,6 +40,7 @@ import org.opensilk.music.playback.service.PlaybackServiceK;
 import org.opensilk.music.playback.service.PlaybackServiceL;
 import org.opensilk.music.playback.session.IMediaControllerProxy;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -392,9 +393,7 @@ public class PlaybackController {
             mMetaSubject.onNext(meta);
         }
         final List<MediaSessionCompat.QueueItem> queue = mImpl.getMediaController().getQueue();
-        if (queue != null) {
-            mQueueSubject.onNext(queue);
-        }
+        mQueueSubject.onNext(queue != null ? queue : Collections.<MediaSessionCompat.QueueItem>emptyList());
         fetchRepeatMode();
         fetchShuffleMode();
         fetchAudioSessionId();
@@ -452,7 +451,7 @@ public class PlaybackController {
 
         @Override
         public void onQueueChanged(List<MediaSessionCompat.QueueItem> queue) {
-            mQueueSubject.onNext(queue);
+            mQueueSubject.onNext(queue != null ? queue : Collections.<MediaSessionCompat.QueueItem>emptyList());
         }
 
         @Override

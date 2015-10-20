@@ -943,6 +943,7 @@ public class PlaybackService {
                 setTrack();
             } else {
                 Timber.i("Queue is gone. stopping playback");
+                mSessionHolder.setQueue(null);
                 handleStop();
             }
         }
@@ -953,8 +954,8 @@ public class PlaybackService {
                 mSessionHolder.setQueue(mQueue.getQueueItems());
                 setNextTrack();
             } else {
-                Timber.e(new IllegalStateException("Got onQueueChanged with empty queue but " +
-                                "should have got onCurrentPosChanged"), "fix this");
+                throw new IllegalStateException("Got onQueueChanged with empty queue but " +
+                                "should have got onCurrentPosChanged");
             }
         }
 
