@@ -21,6 +21,7 @@ import android.support.annotation.NonNull;
 
 import org.opensilk.common.core.mortar.MortarActivity;
 import org.opensilk.common.ui.mortar.LayoutCreator;
+import org.opensilk.common.ui.mortar.Lifecycle;
 import org.opensilk.common.ui.mortar.PauseAndResumeActivity;
 import org.opensilk.common.ui.mortar.PauseAndResumePresenter;
 import org.opensilk.common.ui.mortar.ScreenScoper;
@@ -28,6 +29,7 @@ import org.opensilk.common.ui.mortar.ScreenScoper;
 import javax.inject.Inject;
 
 import mortar.MortarScope;
+import rx.subjects.BehaviorSubject;
 import timber.log.Timber;
 
 /**
@@ -39,10 +41,13 @@ public abstract class MortarFragmentActivity extends MortarActivity
     @Inject protected FragmentManagerOwner mFragmentManagerOwner;
     @Inject protected PauseAndResumePresenter mPausesAndResumesPresenter;
 
+    private final BehaviorSubject<Lifecycle> mLifecycleSubject = BehaviorSubject.create();
+
     protected abstract void performInjection();
 
     @Override
     protected void onPreCreateScope(MortarScope.Builder buidler) {
+        super.onPreCreateScope(buidler);
         buidler.withService(ScreenScoper.SERVICE_NAME, new ScreenScoper())
                 .withService(LayoutCreator.SERVICE_NAME, new LayoutCreator());
     }
@@ -56,28 +61,37 @@ public abstract class MortarFragmentActivity extends MortarActivity
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        mFragmentManagerOwner.takeView(this);
+        mLifecycleSubject.onNext(Lifecycle.START);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         mFragmentManagerOwner.takeView(this);
         mPausesAndResumesPresenter.activityResumed();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mFragmentManagerOwner.takeView(this);
+        mLifecycleSubject.onNext(Lifecycle.RESUME);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         mPausesAndResumesPresenter.activityPaused();
+        mLifecycleSubject.onNext(Lifecycle.PAUSE);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         mFragmentManagerOwner.dropView(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mLifecycleSubject.onNext(Lifecycle.STOP);
     }
 
     @Override
