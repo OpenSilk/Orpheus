@@ -186,7 +186,11 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView> {
                         if (hasView()) {
                             if (needupdate) {
                                 Timber.d("Replacing queue");
-                                getView().getAdapter().replaceAll(queue);
+                                if (queue.isEmpty()) {
+                                    getView().getAdapter().clear();
+                                } else {
+                                    getView().getAdapter().replaceAll(queue);
+                                }
                             }
                             getView().getAdapter().setActiveItem(lastPlayingId);
                         }
