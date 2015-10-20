@@ -20,7 +20,6 @@ package org.opensilk.music.ui3.profile;
 import android.os.Bundle;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
-import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.ui3.common.UtilsCommon;
@@ -31,7 +30,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import mortar.ViewPresenter;
-import rx.subscriptions.CompositeSubscription;
 
 /**
  * Created by drew on 5/5/15.
@@ -41,8 +39,6 @@ public class ProfileHeroViewPresenter extends ViewPresenter<ProfileHeroView> {
 
     final ArtworkRequestManager requestor;
     final List<ArtInfo> artInfos;
-
-    CompositeSubscription cs = new CompositeSubscription();
 
     @Inject
     public ProfileHeroViewPresenter(
@@ -58,29 +54,12 @@ public class ProfileHeroViewPresenter extends ViewPresenter<ProfileHeroView> {
         super.onLoad(savedInstanceState);
         UtilsCommon.loadMultiArtwork(
                 requestor,
-                cs,
                 getView().mArtwork,
                 getView().mArtwork2,
                 getView().mArtwork3,
                 getView().mArtwork4,
-                artInfos,
-                artInfos.size() > 1 ? ArtworkType.LARGE : ArtworkType.THUMBNAIL
+                artInfos
         );
     }
 
-    @Override
-    protected void onSave(Bundle outState) {
-        super.onSave(outState);
-        if (!hasView() && cs != null) {
-            cs.unsubscribe();
-        }
-    }
-
-    @Override
-    protected void onExitScope() {
-        super.onExitScope();
-        if (cs != null) {
-            cs.unsubscribe();
-        }
-    }
 }
