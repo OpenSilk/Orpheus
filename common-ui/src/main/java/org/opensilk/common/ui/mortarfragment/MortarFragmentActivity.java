@@ -63,6 +63,12 @@ public abstract class MortarFragmentActivity extends MortarActivity
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        mFragmentManagerOwner.takeView(this);
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         mPausesAndResumesPresenter.activityPaused();

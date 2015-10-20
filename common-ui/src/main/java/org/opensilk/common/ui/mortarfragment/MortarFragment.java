@@ -35,6 +35,8 @@ import org.opensilk.common.ui.mortar.LifecycleService;
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortar.ScreenScoper;
 
+import java.util.Arrays;
+
 import javax.inject.Inject;
 
 import mortar.MortarScope;
@@ -122,9 +124,21 @@ public abstract class MortarFragment extends Fragment implements HasScope {
             Timber.d("Reusing fragment scope %s", getScopeName());
         }
         if (scope == null) {
-            ScreenScoper scoper = ScreenScoper.getService(getActivity());
-            scope = scoper.getScreenScope(getActivity(), getScreen(),
-                    LifecycleService.LIFECYCLE_SERVICE, lifecycleSubject.asObservable());
+            final ScreenScoper scoper = ScreenScoper.getService(getActivity());
+            final Object[] otherServices = getAdditionalServices();
+            final Object[] services;
+            if (otherServices == null || otherServices.length == 0) {
+                services = new Object[] {
+                        LifecycleService.LIFECYCLE_SERVICE,
+                        lifecycleSubject.asObservable()
+                };
+            } else {
+                services = new Object[otherServices.length + 2];
+                System.arraycopy(otherServices, 0, services, 0, otherServices.length);
+                services[services.length-2] = LifecycleService.LIFECYCLE_SERVICE;
+                services[services.length-1] = lifecycleSubject.asObservable();
+            }
+            scope = scoper.getScreenScope(getActivity(), getScreen(), services);
             Timber.d("Created new fragment scope %s", getScopeName());
         }
         return scope;
@@ -148,6 +162,14 @@ public abstract class MortarFragment extends Fragment implements HasScope {
             mScreen = newScreen();
         }
         return mScreen;
+    }
+
+    /**
+     * Override to add additional services to this scope
+     * @return Name(string), Object(service)
+     */
+    protected Object[] getAdditionalServices() {
+        return null;
     }
 
     public static <T extends MortarFragment> T factory(Context context, String name, Bundle args) {
