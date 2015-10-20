@@ -46,11 +46,6 @@ public class ArtworkFetcherModule {
         return service;
     }
 
-    @Provides @ArtworkFetcherScope
-    public UriMatcher provideUriMatcher(@Named("artworkauthority") String authority) {
-        return ArtworkUris.makeMatcher(authority);
-    }
-
     @Provides @ArtworkFetcherScope @Named("ObserveOnScheduler")
     public Scheduler provideObserveOnScheduler() {
         return HandlerScheduler.from(new Handler(service.getHandlerThread().getLooper()));

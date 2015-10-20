@@ -18,68 +18,22 @@
 package org.opensilk.music.artwork;
 
 import android.content.UriMatcher;
-import android.net.Uri;
-
-import org.opensilk.music.model.ArtInfo;
 
 /**
  * Created by drew on 4/30/15.
  */
 public class ArtworkUris {
 
-    static final String content = "content";
-    static final String artwork = "artwork";
-    static final String thumbnail = "thumbnail";
-    static final String albumReq = "req/album";
-    static final String artistReq = "req/artist";
     static final String artInfo = "artInfo";
 
-    /**
-     * @return Uri to retrieve large (fullscreen) artwork for specified albumId
-     */
-    public static Uri createArtworkUri(String authority, String artistName, String albumName) {
-        return new Uri.Builder().scheme(content).authority(authority).appendPath(artwork)
-                .appendPath(artistName).appendPath(albumName).build();
-    }
-
-    /**
-     * @return Uri to retrieve thumbnail for specified albumId
-     */
-    public static Uri createThumbnailUri(String authority, String artistName, String albumName) {
-        return new Uri.Builder().scheme(content).authority(authority).appendPath(thumbnail)
-                .appendPath(artistName).appendPath(albumName).build();
-    }
-
-    public static Uri createAlbumReq(String authority, String base64Artinfo, ArtworkType type) {
-        return new Uri.Builder().scheme(content).authority(authority).appendEncodedPath(albumReq)
-                .appendQueryParameter("q", base64Artinfo).appendQueryParameter("t", type.toString()).build();
-    }
-
-    public static Uri createArtistReq(String authority, String base64Artinfo, ArtworkType type) {
-        return new Uri.Builder().scheme(content).authority(authority).appendEncodedPath(artistReq)
-                .appendQueryParameter("q", base64Artinfo).appendQueryParameter("t", type.toString()).build();
-    }
-
-    public static Uri forArtInfo(String authority, ArtInfo artInfo, ArtworkType type) {
-        return artInfo.asUri(authority).buildUpon().appendQueryParameter("t", type.toString()).build();
-    }
-
     public interface MATCH {
-        int ARTWORK = 1;
-        int THUMBNAIL = 2;
-        int ALBUM_REQ = 3;
-        int ARTIST_REQ = 4;
-        int ARTINFO = 5;
+        int ARTINFO = 1;
     }
 
-    //XXX when adding new matches be sure to update both the provider and the fetchermanager
     public static UriMatcher makeMatcher(String authority) {
         UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
-        matcher.addURI(authority, artwork + "/*/*", MATCH.ARTWORK);
-        matcher.addURI(authority, thumbnail + "/*/*", MATCH.THUMBNAIL);
-        matcher.addURI(authority, albumReq, MATCH.ALBUM_REQ);
-        matcher.addURI(authority, artistReq, MATCH.ARTIST_REQ);
         matcher.addURI(authority, artInfo, MATCH.ARTINFO);
         return matcher;
     }
+
 }

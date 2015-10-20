@@ -19,7 +19,6 @@ package org.opensilk.music.artwork.fetcher;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.UriMatcher;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
@@ -73,7 +72,6 @@ public class ArtworkFetcherManager {
     final CoverArtArchive mCoverArtArchive;
     final OkHttpClient mOkHttpClient;
 
-    final UriMatcher mUriMatcher;
     final Scheduler mObserveOn;
     final Scheduler mSubscribeOn;
 
@@ -83,7 +81,6 @@ public class ArtworkFetcherManager {
             ArtworkPreferences mPreferences,
             BitmapDiskCache mL2Cache,
             ConnectivityManager mConnectivityManager,
-            UriMatcher mUriMatcher,
             @Named("ObserveOnScheduler") Scheduler mObserveOn,
             @Named("SubscribeOnScheduler") Scheduler mSubscribeOn,
             LastFM mLastFM,
@@ -94,7 +91,6 @@ public class ArtworkFetcherManager {
         this.mPreferences = mPreferences;
         this.mL2Cache = mL2Cache;
         this.mConnectivityManager = mConnectivityManager;
-        this.mUriMatcher = mUriMatcher;
         this.mObserveOn = mObserveOn;
         this.mSubscribeOn = mSubscribeOn;
         this.mLastFM = mLastFM;
