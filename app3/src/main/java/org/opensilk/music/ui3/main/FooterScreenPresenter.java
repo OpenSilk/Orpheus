@@ -22,13 +22,13 @@ import android.os.Bundle;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
-import org.apache.commons.lang3.tuple.Triple;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.core.rx.RxUtils;
+import org.opensilk.common.ui.mortar.Lifecycle;
+import org.opensilk.common.ui.mortar.LifecycleService;
 import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
-import org.opensilk.common.ui.mortar.PausesAndResumes;
 import org.opensilk.music.AppPreferences;
-import org.opensilk.music.playback.PlaybackStateHelper;
 import org.opensilk.music.playback.control.PlaybackController;
 
 import java.util.ArrayList;
@@ -39,6 +39,7 @@ import javax.inject.Inject;
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
+import rx.Observable;
 import rx.Subscription;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
@@ -51,13 +52,15 @@ import static org.opensilk.common.core.rx.RxUtils.isSubscribed;
  * Created by drew on 4/20/15.
  */
 @ScreenScope
-public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> implements PausesAndResumes {
+public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> {
 
     final Context appContext;
     final PlaybackController playbackController;
     final PauseAndResumeRegistrar pauseAndResumeRegistrar;
     final AppPreferences settings;
 
+    Observable<Lifecycle> lifecycle;
+    Subscription lifecycleSub;
     CompositeSubscription broadcastSubscriptions;
     final ArrayList<FooterPageScreen> screens = new ArrayList<>();
     long lastPlayingId;
@@ -86,67 +89,48 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
     protected void onEnterScope(MortarScope scope) {
         Timber.v("onEnterScope()");
         super.onEnterScope(scope);
-        pauseAndResumeRegistrar.register(scope, this);
+        lifecycle = LifecycleService.getLifecycle(scope);
     }
 
     @Override
     protected void onExitScope() {
         Timber.v("onExitScope()");
         super.onExitScope();
-        teardown();
+        RxUtils.unsubscribe(lifecycleSub);
+        lifecycleSub = null;
     }
 
     @Override
     protected void onLoad(Bundle savedInstanceState) {
         Timber.v("onLoad()");
         super.onLoad(savedInstanceState);
-        if (pauseAndResumeRegistrar.isRunning()) {
-            Timber.v("missed onResume()");
-            init();
-        }
-    }
-
-    @Override
-    protected void onSave(Bundle outState) {
-        Timber.v("onSave()");
-        super.onSave(outState);
-        if (pauseAndResumeRegistrar.isRunning()) {
-            Timber.v("missed onPause()");
-            teardown();
-        }
-    }
-
-    @Override
-    public void onResume() {
-        Timber.v("onResume()");
-        if (hasView()) {
-            init();
-        }
-    }
-
-    @Override
-    public void onPause() {
-        Timber.v("onPause");
-        teardown();
-    }
-
-    void init() {
-        //progress is always updated
-        subscribeBroadcasts();
         if(!screens.isEmpty()) {
             getView().onNewItems(screens);
             updatePagerWithCurrentItem(lastPlayingId);
         }
-    }
-
-    void teardown() {
-        unsubscribeBroadcasts();
-        mProgressUpdater.unsubscribeProgress();
+        RxUtils.unsubscribe(lifecycleSub);
+        lifecycleSub = lifecycle.subscribe(new Action1<Lifecycle>() {
+            @Override
+            @DebugLog
+            public void call(Lifecycle lifecycle) {
+                switch (lifecycle) {
+                    case RESUME:
+                        //progress is always updated
+                        subscribeBroadcasts();
+                        break;
+                    case PAUSE:
+                        unsubscribeBroadcasts();
+                        mProgressUpdater.unsubscribeProgress();
+                        break;
+                }
+            }
+        });
     }
 
     void skipToQueueItem(int pos) {
         if (pos > 0  && pos < screens.size()) {
             long id = screens.get(pos).queueItem.getQueueId();
+            lastPlayingId = id;
             playbackController.skipToQueueItem(id);
         }
     }
