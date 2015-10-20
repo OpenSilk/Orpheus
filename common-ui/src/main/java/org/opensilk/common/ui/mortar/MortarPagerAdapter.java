@@ -21,8 +21,8 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -30,9 +30,9 @@ import org.opensilk.common.ui.util.ViewUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+
+import mortar.MortarScope;
 
 
 /**
@@ -45,27 +45,25 @@ import java.util.Map;
  */
 public class MortarPagerAdapter<S extends Screen, V extends View> extends PagerAdapter {
 
-    protected final class Page {
-        public final S screen;
-        public final V view;
-        Page(S screen, V view) {
+    protected static final class Page<SS extends Screen, VV extends View> {
+        public final SS screen;
+        public final VV view;
+        Page(SS screen, VV view) {
             this.screen = screen;
             this.view = view;
         }
     }
 
-    //TODO pull the layout creator from mortar
-    protected final LayoutCreator layoutCreater = new LayoutCreator();
-    protected final MortarContextFactory contextFactory = new MortarContextFactory();
-    protected final Map<Integer, Page> activePages = new LinkedHashMap<>();
+    protected final LayoutCreator layoutCreater;
+    protected final MortarContextFactory contextFactory;
+    protected final SparseArray<Page<S,V>> activePages = new SparseArray<>();
     protected Bundle savedState = new Bundle();
 
     protected final Context context;
     protected final ArrayList<S> screens;
 
     public MortarPagerAdapter(Context context) {
-        this.context = context;
-        this.screens = new ArrayList<>();
+        this (context, new ArrayList<S>());
     }
 
     public MortarPagerAdapter(Context context, S[] screens) {
@@ -74,6 +72,17 @@ public class MortarPagerAdapter<S extends Screen, V extends View> extends PagerA
 
     public MortarPagerAdapter(@NonNull Context context, @NonNull List<S> screens) {
         this.context = context;
+        MortarScope scope = MortarScope.getScope(context);
+        if (scope.hasService(LayoutCreator.SERVICE_NAME)) {
+            layoutCreater = scope.getService(LayoutCreator.SERVICE_NAME);
+        } else {
+            layoutCreater = new LayoutCreator();
+        }
+        if (scope.hasService(ScreenScoper.SERVICE_NAME)) {
+            contextFactory = new MortarContextFactory(scope.<ScreenScoper>getService(ScreenScoper.SERVICE_NAME));
+        } else {
+            contextFactory = new MortarContextFactory();
+        }
         this.screens = new ArrayList<>(screens);
     }
 
@@ -84,7 +93,7 @@ public class MortarPagerAdapter<S extends Screen, V extends View> extends PagerA
         V newChild = ViewUtils.inflate(newChildContext, layoutCreater.getLayout(screens.get(position)), container, false);
         ViewUtils.restoreState(newChild, savedState, screen.getName());
         container.addView(newChild);
-        Page newPage = new Page(screen, newChild);
+        Page<S,V> newPage = new Page<S,V>(screen, newChild);
         activePages.put(position, newPage);
         return newPage;
     }
@@ -110,7 +119,9 @@ public class MortarPagerAdapter<S extends Screen, V extends View> extends PagerA
 
     @Override
     public Parcelable saveState() {
-        for (Page p : activePages.values()) {
+        final int size = activePages.size();
+        for (int ii=0; ii<size; ii++) {
+            Page<S,V> p = activePages.valueAt(ii);
             ViewUtils.saveState(p.view, savedState, p.screen.getName());
         }
         return savedState;

@@ -3,6 +3,7 @@ package org.opensilk.common.ui.mortar;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.view.LayoutInflater;
+
 import mortar.MortarScope;
 
 /**
@@ -10,9 +11,14 @@ import mortar.MortarScope;
  * Pager uses this to take care of scoping
  */
 public final class MortarContextFactory {
-  private final ScreenScoper screenScoper = new ScreenScoper();
+  private final ScreenScoper screenScoper;
 
   public MortarContextFactory() {
+    this.screenScoper = new ScreenScoper();
+  }
+
+  public MortarContextFactory(ScreenScoper screenScoper) {
+    this.screenScoper = screenScoper;
   }
 
   public Context setUpContext(Screen path, Context parentContext) {
