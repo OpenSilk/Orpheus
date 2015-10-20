@@ -35,6 +35,14 @@ public class RxUtils {
         return subscription != null && !subscription.isUnsubscribed();
     }
 
+    public static boolean unsubscribe(Subscription subscription) {
+        if (isSubscribed(subscription)) {
+            subscription.unsubscribe();
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Slightly less typing
      */
