@@ -53,6 +53,7 @@ public class BundleableSubscriber<T extends Bundleable> extends Subscriber<List<
     public void onCompleted() {
         try {
             wrapped.onCompleted();
+            wrapped.asBinder().unlinkToDeath(this, 0);
         } catch (RemoteException e) {
             Log.e(TAG, "onCompleted", e);
         }
