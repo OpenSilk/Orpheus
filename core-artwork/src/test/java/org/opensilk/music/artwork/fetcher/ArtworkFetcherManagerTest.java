@@ -93,8 +93,8 @@ public class ArtworkFetcherManagerTest {
     }
 
     private static class TestFetcher extends ArtworkFetcherManager {
-        public TestFetcher(@ForApplication Context mContext, ArtworkPreferences mPreferences, BitmapDiskCache mL2Cache, ConnectivityManager mConnectivityManager, UriMatcher mUriMatcher, @Named("ObserveOnScheduler") Scheduler mObserveOn, @Named("SubscribeOnScheduler") Scheduler mSubscribeOn, LastFM mLastFM, CoverArtArchive mCoverArtArchive, OkHttpClient mOkHttpClient, MockWebServer mServer) {
-            super(mContext, mPreferences, mL2Cache, mConnectivityManager, mUriMatcher, mObserveOn, mSubscribeOn, mLastFM, mCoverArtArchive, mOkHttpClient);
+        public TestFetcher(@ForApplication Context mContext, ArtworkPreferences mPreferences, BitmapDiskCache mL2Cache, ConnectivityManager mConnectivityManager, @Named("ObserveOnScheduler") Scheduler mObserveOn, @Named("SubscribeOnScheduler") Scheduler mSubscribeOn, LastFM mLastFM, CoverArtArchive mCoverArtArchive, OkHttpClient mOkHttpClient, MockWebServer mServer) {
+            super(mContext, mPreferences, mL2Cache, mConnectivityManager, mObserveOn, mSubscribeOn, mLastFM, mCoverArtArchive, mOkHttpClient);
             this.mServer = mServer;
         }
         final MockWebServer mServer;
@@ -119,7 +119,6 @@ public class ArtworkFetcherManagerTest {
                 mPreferences,
                 mL2Cache,
                 mConnectivityManager,
-                ArtworkUris.makeMatcher("test"),
                 Schedulers.immediate(),
                 Schedulers.immediate(),
                 lastFM,
