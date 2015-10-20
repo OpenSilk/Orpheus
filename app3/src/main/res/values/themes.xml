@@ -20,12 +20,6 @@
     <!--Common styles for light theme-->
     <style name="Theme.LightOverlay" parent="Theme.LightParent">
 
-        <item name="fabPlayStyle">@style/fabLight.Play</item>
-        <item name="fabNextStyle">@style/fabLight.Next</item>
-        <item name="fabPrevStyle">@style/fabLight.Prev</item>
-        <item name="fabShuffleStyle">@style/fabLight.Shuffle</item>
-        <item name="fabRepeatStyle">@style/fabLight.Repeat</item>
-
         <item name="gridTileDescriptionStyle">@style/GridTileDescriptionLight</item>
         <item name="gridTileDescriptionTitleStyle">@style/GridTileDescriptionTitle.Light</item>
         <item name="gridTileDescriptionSubTitleStyle">@style/GridTileDescriptionSubTitle.Light</item>
@@ -65,12 +59,6 @@
     <!--Common styles for dark theme-->
 
     <style name="Theme.DarkOverlay" parent="Theme.DarkParent">
-
-        <item name="fabPlayStyle">@style/fabDark.Play</item>
-        <item name="fabNextStyle">@style/fabDark.Next</item>
-        <item name="fabPrevStyle">@style/fabDark.Prev</item>
-        <item name="fabShuffleStyle">@style/fabDark.Shuffle</item>
-        <item name="fabRepeatStyle">@style/fabDark.Repeat</item>
 
         <item name="gridTileDescriptionStyle">@style/GridTileDescriptionDark</item>
         <item name="gridTileDescriptionTitleStyle">@style/GridTileDescriptionTitle.Dark</item>
@@ -119,10 +107,5 @@
     </style>
 
     <!-- end settings themes -->
-
-    <!-- Carmode theme also in v21-->
-    <style name="Theme.Carmode" parent="Theme.DarkBase">
-        <item name="colorAccent">@color/white</item>
-    </style>
 
 </resources>

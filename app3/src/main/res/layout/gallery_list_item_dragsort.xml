@@ -31,23 +31,17 @@
 
     <ImageView
         android:id="@+id/artwork_thumb"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
         tools:src="@drawable/default_artwork"/>
 
     <include layout="@layout/gallery_list_item_common"/>
 
-    <ImageView
+    <ImageButton
         android:id="@+id/drag_handle"
         android:layout_gravity="center_vertical"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_drag_black_vector_36dp"
-        android:tint="@color/grey_600"/>
+        android:layout_height="wrap_content"
+        style="@style/DragHandle"/>
 
 </org.opensilk.common.ui.widget.ForegroundLinearLayout>

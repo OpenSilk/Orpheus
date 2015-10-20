@@ -34,6 +34,12 @@
         <item name="android:background">?selectableItemBackgroundBorderless</item>
     </style>
 
+    <style name="DragHandle" parent="Widget.AppCompat.ActionButton">
+        <item name="android:src">@drawable/ic_drag_vertical_black_vector_24dp</item>
+        <item name="android:tint">@color/grey_600</item>
+        <item name="android:background">?selectableItemBackgroundBorderless</item>
+    </style>
+
     <style name="nowPlayingActionDark">
         <item name="android:scaleType">centerInside</item>
         <item name="android:padding">@dimen/now_playing_button_padding</item>
@@ -43,12 +49,11 @@
     <style name="nowPlayingActionLight">
         <item name="android:scaleType">centerInside</item>
         <item name="android:padding">@dimen/now_playing_button_padding</item>
-        <item name="android:tint">@color/white</item>
         <item name="android:background">?android:selectableItemBackgroundBorderless</item>
     </style>
 
     <style name="nowPlayingActionLight.Play">
-        <item name="android:src">@drawable/ic_play_pause_toggle_white_animated_48dp</item>
+        <item name="android:src">@drawable/ic_play_pause_toggle_black_animated_36dp</item>
         <item name="android:contentDescription">@string/accessibility_play</item>
     </style>
 
@@ -202,11 +207,13 @@
     <style name="LibraryRootRefresh" parent="Widget.AppCompat.ActionButton">
         <item name="android:src">@drawable/ic_refresh_black_vector_24dp</item>
         <item name="android:tint">@color/grey_600</item>
+        <item name="android:background">?selectableItemBackgroundBorderless</item>
     </style>
 
     <style name="LibraryRootOverflow" parent="Widget.AppCompat.ActionButton">
         <item name="android:src">@drawable/ic_dots_vertical_white_vector_24dp</item>
         <item name="android:tint">@color/grey_600</item>
+        <item name="android:background">?selectableItemBackgroundBorderless</item>
     </style>
 
     <!--profile-->

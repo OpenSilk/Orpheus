@@ -117,73 +117,11 @@
         <item name="android:background">?selectableItemBackground</item>
     </style>
 
+    <style name="DragHandle" parent="Widget.AppCompat.ActionButton">
+        <item name="android:src">@drawable/ic_drag_vertical_grey600_24dp</item>
+    </style>
+
     <!-- end tiles -->
-
-    <!-- fabs -->
-
-    <style name="fabDark">
-        <item name="fabColor">black</item>
-        <item name="android:scaleType">centerInside</item>
-    </style>
-
-    <style name="fabLight">
-        <item name="fabColor">white</item>
-        <item name="android:scaleType">centerInside</item>
-    </style>
-
-    <style name="fabLight.Play">
-        <item name="fabColor">accent</item>
-        <item name="android:src">@drawable/action_playpause_black_24dp</item>
-        <item name="android:contentDescription">@string/accessibility_play</item>
-    </style>
-
-    <style name="fabDark.Play">
-        <item name="fabColor">accent</item>
-        <item name="android:src">@drawable/action_playpause_white_24dp</item>
-        <item name="android:contentDescription">@string/accessibility_play</item>
-    </style>
-
-    <style name="fabLight.Next">
-        <item name="android:src">@drawable/ic_skip_next_black_24dp</item>
-        <item name="android:contentDescription">@string/accessibility_next</item>
-    </style>
-
-    <style name="fabDark.Next">
-        <item name="android:src">@drawable/ic_skip_next_white_24dp</item>
-        <item name="android:contentDescription">@string/accessibility_next</item>
-    </style>
-
-    <style name="fabLight.Prev">
-        <item name="android:src">@drawable/ic_skip_previous_black_24dp</item>
-        <item name="android:contentDescription">@string/accessibility_prev</item>
-    </style>
-
-    <style name="fabDark.Prev">
-        <item name="android:src">@drawable/ic_skip_previous_white_24dp</item>
-        <item name="android:contentDescription">@string/accessibility_prev</item>
-    </style>
-
-    <style name="fabLight.Shuffle">
-        <item name="android:src">@drawable/action_shuffle_black_24dp</item>
-        <item name="android:contentDescription">@string/accessibility_shuffle</item>
-    </style>
-
-    <style name="fabDark.Shuffle">
-        <item name="android:src">@drawable/action_shuffle_white_24dp</item>
-        <item name="android:contentDescription">@string/accessibility_shuffle</item>
-    </style>
-
-    <style name="fabLight.Repeat">
-        <item name="android:src">@drawable/action_repeat_black_24dp</item>
-        <item name="android:contentDescription">@string/accessibility_repeat</item>
-    </style>
-
-    <style name="fabDark.Repeat">
-        <item name="android:src">@drawable/action_repeat_white_24dp</item>
-        <item name="android:contentDescription">@string/accessibility_repeat</item>
-    </style>
-
-    <!-- end fabs-->
 
     <!-- now playing buttons -->
 
@@ -202,32 +140,32 @@
     </style>
 
     <style name="nowPlayingActionLight.Play">
-        <item name="android:src">@drawable/action_playpause_black_36dp</item>
+        <item name="android:src">@drawable/action_playpause_black_48dp</item>
         <item name="android:contentDescription">@string/accessibility_play</item>
     </style>
 
     <style name="nowPlayingActionDark.Play">
-        <item name="android:src">@drawable/action_playpause_white_36dp</item>
+        <item name="android:src">@drawable/action_playpause_white_48dp</item>
         <item name="android:contentDescription">@string/accessibility_play</item>
     </style>
 
     <style name="nowPlayingActionLight.Next">
-        <item name="android:src">@drawable/ic_skip_next_black_vector_36dp</item>
+        <item name="android:src">@drawable/ic_skip_next_black_48dp</item>
         <item name="android:contentDescription">@string/accessibility_next</item>
     </style>
 
     <style name="nowPlayingActionDark.Next">
-        <item name="android:src">@drawable/ic_skip_next_white_36dp</item>
+        <item name="android:src">@drawable/ic_skip_next_white_48dp</item>
         <item name="android:contentDescription">@string/accessibility_next</item>
     </style>
 
     <style name="nowPlayingActionLight.Prev">
-        <item name="android:src">@drawable/ic_skip_previous_black_vector_36dp</item>
+        <item name="android:src">@drawable/ic_skip_previous_black_48dp</item>
         <item name="android:contentDescription">@string/accessibility_prev</item>
     </style>
 
     <style name="nowPlayingActionDark.Prev">
-        <item name="android:src">@drawable/ic_skip_previous_white_36dp</item>
+        <item name="android:src">@drawable/ic_skip_previous_white_48dp</item>
         <item name="android:contentDescription">@string/accessibility_prev</item>
     </style>
 
