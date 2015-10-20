@@ -28,9 +28,10 @@
         <item name="android:stateListAnimator">@anim/raise</item>
     </style>
 
-    <style name="TileOverflow" parent="Widget.AppCompat.ActionButton.Overflow">
-        <item name="android:src">@drawable/ic_menu_moreoverflow_mtrl_alpha</item>
-        <item name="android:tint">?attr/colorControlNormal</item>
+    <style name="GalleryBioMore" parent="Widget.AppCompat.ActionButton">
+        <item name="android:src">@drawable/ic_more_black_vector_24dp</item>
+        <item name="android:tint">@color/grey_600</item>
+        <item name="android:background">?selectableItemBackgroundBorderless</item>
     </style>
 
     <style name="nowPlayingActionDark">
@@ -198,12 +199,14 @@
         <item name="android:elevation">8dp</item>
     </style>
 
-    <style name="LibraryRootRefresh.Light">
+    <style name="LibraryRootRefresh" parent="Widget.AppCompat.ActionButton">
         <item name="android:src">@drawable/ic_refresh_black_vector_24dp</item>
+        <item name="android:tint">@color/grey_600</item>
     </style>
 
-    <style name="LibraryRootRefresh.Dark">
-        <item name="android:src">@drawable/ic_refresh_white_vector_24dp</item>
+    <style name="LibraryRootOverflow" parent="Widget.AppCompat.ActionButton">
+        <item name="android:src">@drawable/ic_dots_vertical_white_vector_24dp</item>
+        <item name="android:tint">@color/grey_600</item>
     </style>
 
     <!--profile-->

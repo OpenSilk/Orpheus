@@ -57,13 +57,13 @@
                 android:id="@+id/btn_retry"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="?libraryRootRefresh"/>
+                style="@style/LibraryRootRefresh"/>
 
-            <org.opensilk.common.ui.widget.TintImageButton
+            <ImageButton
                 android:id="@+id/tile_overflow"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                style="@style/TileOverflow"/>
+                style="@style/LibraryRootOverflow"/>
 
         </LinearLayout>
 

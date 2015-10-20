@@ -22,7 +22,6 @@
         <attr name="controlsRepeatStyle" format="reference"/>
         <attr name="mainContentTopMargin" format="reference"/>
         <attr name="footerPlayStyle" format="reference"/>
-        <attr name="libraryRootRefresh" format="reference"/>
     </declare-styleable>
 
     <declare-styleable name="CircularSeekBar">
