@@ -30,7 +30,6 @@
         android:id="@+id/artwork_thumb"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:transitionName="artwork"
         style="@style/Orpheus.Thumbnail"/>
 
     <include layout="@layout/gallery_grid_item_description"
