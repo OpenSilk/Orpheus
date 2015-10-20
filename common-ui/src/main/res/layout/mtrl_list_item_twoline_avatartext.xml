@@ -21,7 +21,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/mtrl.TwoLineListItem">
     
-    <org.opensilk.common.ui.widget.CircleImageView
+    <ImageView
         android:id="@+id/avatar"
         style="@style/mtrl.TwoLineListItemInner.Avatar"/>
     

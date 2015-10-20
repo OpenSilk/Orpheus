@@ -19,11 +19,12 @@ package org.opensilk.common.ui.widget;
 import android.content.Context;
 import android.graphics.Matrix;
 import android.util.AttributeSet;
+import android.widget.ImageView;
 
 /**
  * Created by andrew on 2/26/14.
  */
-public class BottomCropSquareImageView extends AnimatedImageView {
+public class BottomCropSquareImageView extends ImageView {
 
     public BottomCropSquareImageView(Context context, AttributeSet attrs) {
         super(context, attrs);

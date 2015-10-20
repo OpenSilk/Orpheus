@@ -69,7 +69,7 @@ public class TintImageButton extends ImageButton {
                 }
 
                 // Finally set the color filter
-                getDrawable().setColorFilter(filter);
+                getDrawable().mutate().setColorFilter(filter);
             }
         }
 
