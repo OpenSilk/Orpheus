@@ -33,9 +33,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import org.opensilk.bundleable.Bundleable;
-import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.music.R;
-import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.UtilsArt;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.model.ArtInfo;
@@ -44,8 +42,6 @@ import org.opensilk.music.model.Track;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import rx.subscriptions.CompositeSubscription;
 
 /**
  * Created by drew on 5/2/15.
@@ -88,20 +84,6 @@ public class UtilsCommon {
 
     public static ArtInfo makeBestfitArtInfo(String artist, String altArtist, String album, Uri uri) {
         return UtilsArt.makeBestfitArtInfo(artist, altArtist, album, uri);
-    }
-
-    @Deprecated
-    public static void loadMultiArtwork(
-            ArtworkRequestManager requestor,
-            CompositeSubscription cs,
-            ImageView artwork,
-            ImageView artwork2,
-            ImageView artwork3,
-            ImageView artwork4,
-            List<ArtInfo> artInfos,
-            ArtworkType artworkType
-    ) {
-        loadMultiArtwork(requestor, artwork, artwork2, artwork3, artwork4, artInfos);
     }
 
     public static void loadMultiArtwork(
