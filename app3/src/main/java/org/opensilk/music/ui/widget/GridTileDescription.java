@@ -18,20 +18,12 @@
 package org.opensilk.music.ui.widget;
 
 import android.content.Context;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
-import android.support.v7.graphics.Palette;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.opensilk.common.ui.util.ThemeUtils;
-import org.opensilk.common.ui.widget.SquareImageView;
 import org.opensilk.music.R;
-import org.opensilk.music.artwork.PaletteObserver;
-import org.opensilk.music.artwork.PaletteResponse;
 import org.opensilk.common.glide.Paletteable;
 
 import java.util.Collections;
@@ -48,53 +40,14 @@ public class GridTileDescription extends LinearLayout implements Paletteable {
     @InjectView(R.id.tile_title) TextView mTitle;
     @InjectView(R.id.tile_subtitle) TextView mSubTitle;
 
-    final PaletteObserver paletteObserver;
-    final boolean lightTheme;
-    Drawable originalBackground;
-
     public GridTileDescription(Context context, AttributeSet attrs) {
         super(context, attrs);
-        lightTheme = ThemeUtils.isLightTheme(getContext());
-        paletteObserver = new PaletteObserver() {
-            @Override
-            public void onNext(PaletteResponse paletteResponse) {
-                Palette palette = paletteResponse.palette;
-                Palette.Swatch swatch = lightTheme ? palette.getLightVibrantSwatch() : palette.getDarkVibrantSwatch();
-                if (swatch == null) swatch = palette.getVibrantSwatch();
-                if (swatch != null) {
-                    if (paletteResponse.shouldAnimate) {
-                        originalBackground = getBackground();
-                        Drawable d = getBackground();
-                        Drawable d2 = new ColorDrawable(swatch.getRgb());
-                        TransitionDrawable td = new TransitionDrawable(new Drawable[]{d,d2});
-                        td.setCrossFadeEnabled(true);
-                        setBackgroundDrawable(td);
-                        td.startTransition(SquareImageView.TRANSITION_DURATION);
-                    } else {
-                        originalBackground = getBackground();
-                        setBackgroundColor(swatch.getRgb());
-//                        mTitle.setTextColor(swatch.getTitleTextColor());
-//                        mSubTitle.setTextColor(swatch.getBodyTextColor());
-                    }
-                }
-            }
-        };
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
         ButterKnife.inject(this);
-    }
-
-    public PaletteObserver getPaletteObserver() {
-        return paletteObserver;
-    }
-
-    public void resetBackground() {
-        if (originalBackground != null) {
-            setBackgroundDrawable(originalBackground);
-        }
     }
 
     public TextView getTitle() {
