@@ -23,8 +23,6 @@ import android.graphics.drawable.AnimatedStateListDrawable;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
-import android.view.View;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -35,9 +33,6 @@ import com.jakewharton.rxbinding.view.ViewLongClickEvent;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.core.util.VersionUtils;
-import org.opensilk.common.ui.widget.AnimatedImageView;
-import org.opensilk.common.ui.widget.ForegroundLinearLayout;
-import org.opensilk.common.ui.widget.ForegroundRelativeLayout;
 import org.opensilk.common.ui.widget.ImageButtonCheckable;
 import org.opensilk.music.R;
 
