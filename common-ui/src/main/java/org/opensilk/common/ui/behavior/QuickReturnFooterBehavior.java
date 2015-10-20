@@ -9,6 +9,8 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.Interpolator;
 
+import org.opensilk.common.core.util.VersionUtils;
+
 /**
  * CoordinatorLayout Behavior for a quick return footer
  *
@@ -44,9 +46,17 @@ public class QuickReturnFooterBehavior extends CoordinatorLayout.Behavior<View> 
         mDySinceDirectionChange += dy;
 
         if (mDySinceDirectionChange > child.getHeight() && child.getVisibility() == View.VISIBLE) {
-            hide(child);
+            if (VersionUtils.hasLollipop()) {
+                hide(child);
+            } else {
+                child.setVisibility(View.GONE);
+            }
         } else if (mDySinceDirectionChange < 0 && child.getVisibility() == View.GONE) {
-            show(child);
+            if (VersionUtils.hasLollipop()) {
+                show(child);
+            } else {
+                child.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -66,6 +76,7 @@ public class QuickReturnFooterBehavior extends CoordinatorLayout.Behavior<View> 
                 .setListener(new ViewPropertyAnimatorListener() {
                     @Override
                     public void onAnimationStart(View view) {
+
                     }
 
                     @Override
