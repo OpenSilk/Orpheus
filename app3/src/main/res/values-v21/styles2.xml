@@ -202,6 +202,8 @@
     <style name="FoldersFab" parent="Widget.Design.FloatingActionButton">
         <item name="android:src">@drawable/ic_plus_minus_box_white_animated_24dp</item>
         <item name="android:elevation">8dp</item>
+        <item name="elevation">8dp</item>
+        <item name="android:stateListAnimator">@anim/raise_fab</item>
     </style>
 
     <style name="LibraryRootRefresh" parent="Widget.AppCompat.ActionButton">
@@ -220,6 +222,8 @@
     <style name="ProfileFab" parent="Widget.Design.FloatingActionButton">
         <item name="android:src">@drawable/ic_play_white_vector_24dp</item>
         <item name="android:elevation">8dp</item>
+        <item name="elevation">8dp</item>
+        <item name="android:stateListAnimator">@anim/raise_fab</item>
     </style>
 
 </resources>

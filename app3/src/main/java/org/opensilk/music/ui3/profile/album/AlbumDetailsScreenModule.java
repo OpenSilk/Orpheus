@@ -93,6 +93,7 @@ public class AlbumDetailsScreenModule {
     ) {
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(false)
+                .setWantsNumberedTracks(true)
                 .setItemClickListener(itemClickListener)
                 .setMenuConfig(menuConfig)
                 .setDefaultSortOrder(TrackSortOrder.PLAYORDER)

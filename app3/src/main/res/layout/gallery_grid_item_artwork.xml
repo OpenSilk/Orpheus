@@ -34,6 +34,6 @@
 
     <include layout="@layout/gallery_grid_item_description"
         android:layout_width="match_parent"
-        android:layout_height="58dp"/>
+        android:layout_height="68dp"/>
 
 </org.opensilk.common.ui.widget.ForegroundLinearLayout>

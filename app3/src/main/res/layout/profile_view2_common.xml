@@ -36,7 +36,7 @@
             app:contentScrim="?colorPrimary"
             app:collapsedTitleTextAppearance="@style/TextAppearanceCollapsingToolbar"
             app:expandedTitleTextAppearance="@style/TextAppearanceCollapsingToolbar.Expanded"
-            app:expandedTitleMarginStart="48dp"
+            app:expandedTitleMarginStart="36dp"
             app:expandedTitleMarginEnd="64dp">
 
             <android.support.v7.widget.Toolbar

@@ -76,7 +76,8 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
     protected final ActionModePresenter actionModePresenter;
     protected final PlaybackController playbackController;
 
-    protected Boolean wantGrid;
+    protected boolean wantGrid;
+    protected boolean wantsNumberedTracks;
 
     protected Subscription subscription;
     protected boolean adapterIsDirty;
@@ -102,6 +103,7 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
         this.loaderSeed = config.loaderSeed;
         this.actionModePresenter = actionModePresenter;
         this.playbackController = playbackController;
+        this.wantsNumberedTracks = config.wantsNumberedTracks;
     }
 
     @Override
@@ -267,6 +269,10 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
 
     public boolean isGrid() {
         return wantGrid;
+    }
+
+    public boolean wantsNumberedTracks() {
+        return wantsNumberedTracks;
     }
 
     public BundleableLoader getLoader() {

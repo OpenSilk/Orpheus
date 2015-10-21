@@ -296,6 +296,7 @@
     <!--libraries-->
     <style name="FoldersFab" parent="Widget.Design.FloatingActionButton">
         <item name="android:src">@drawable/action_plusminus_box_white_24dp</item>
+        <item name="elevation">8dp</item>
     </style>
 
     <style name="LibraryRootRefresh" parent="Widget.AppCompat.ActionButton">
@@ -309,6 +310,7 @@
     <!--profile-->
     <style name="ProfileFab" parent="Widget.Design.FloatingActionButton">
         <item name="android:src">@drawable/ic_play_white_24dp</item>
+        <item name="elevation">8dp</item>
     </style>
 
 </resources>

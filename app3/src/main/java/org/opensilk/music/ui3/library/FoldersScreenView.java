@@ -107,6 +107,7 @@ public class FoldersScreenView extends CoordinatorLayout implements BundleableRe
 
     public void setupRecyclerView() {
         mAdapter.setGridStyle(mPresenter.isGrid());
+        mAdapter.setNumberTracks(mPresenter.wantsNumberedTracks());
         getListView().getRecycledViewPool().clear();
         getListView().setLayoutManager(getLayoutManager());
     }

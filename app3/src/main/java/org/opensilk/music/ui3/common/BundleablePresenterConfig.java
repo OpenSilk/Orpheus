@@ -29,6 +29,7 @@ import java.util.List;
  */
 public class BundleablePresenterConfig {
     public final boolean wantsGrid;
+    public final boolean wantsNumberedTracks;
     public final ItemClickListener itemClickListener;
     public final MenuHandler menuConfig;
     public final List<Bundleable> loaderSeed;
@@ -36,12 +37,14 @@ public class BundleablePresenterConfig {
 
     public BundleablePresenterConfig(
             boolean wantsGrid,
+            boolean wantsNumberedTracks,
             ItemClickListener itemClickListener,
             MenuHandler menuConfig,
             List<Bundleable> loaderSeed,
             String defaultSortOrder
     ) {
         this.wantsGrid = wantsGrid;
+        this.wantsNumberedTracks = wantsNumberedTracks;
         this.itemClickListener = itemClickListener;
         this.menuConfig = menuConfig;
         this.loaderSeed = loaderSeed;
@@ -54,6 +57,7 @@ public class BundleablePresenterConfig {
 
     public static class Builder {
         boolean wantsGrid;
+        boolean wantsNumberedTracks;
         ItemClickListener itemClickListener;
         MenuHandler menuConfig;
         List<Bundleable> loaderSeed = new ArrayList<>();
@@ -61,6 +65,17 @@ public class BundleablePresenterConfig {
 
         public Builder setWantsGrid(boolean wantsGrid) {
             this.wantsGrid = wantsGrid;
+            if (wantsGrid) {
+                setWantsNumberedTracks(false);
+            }
+            return this;
+        }
+
+        public Builder setWantsNumberedTracks(boolean wantsNumberedTracks) {
+            this.wantsNumberedTracks = wantsNumberedTracks;
+            if (wantsNumberedTracks) {
+                setWantsGrid(false);
+            }
             return this;
         }
 
@@ -90,7 +105,8 @@ public class BundleablePresenterConfig {
         }
 
         public BundleablePresenterConfig build() {
-            return new BundleablePresenterConfig(wantsGrid, itemClickListener, menuConfig,
+            return new BundleablePresenterConfig(wantsGrid, wantsNumberedTracks,
+                    itemClickListener, menuConfig,
                     loaderSeed, preferedSortOrder);
         }
     }

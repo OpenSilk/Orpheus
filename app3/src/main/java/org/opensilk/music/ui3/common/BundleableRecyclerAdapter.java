@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
@@ -56,8 +55,6 @@ import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.TrackList;
 import org.opensilk.music.ui.widget.GridTileDescription;
-import org.opensilk.music.ui3.ProfileActivity;
-import org.opensilk.music.ui3.profile.bio.BioScreen;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,6 +97,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
     boolean gridStyle;
     boolean dragableList;
     boolean lightTheme;
+    boolean numberTracks;
 
     @Inject
     public BundleableRecyclerAdapter(
@@ -236,7 +234,9 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
             ((HasExtraInfo) holder).setExtraInfo(UtilsCommon.makeTimeString(holder.itemView.getContext(),
                     track.getResources().get(0).getDurationS()));
         }
-        if (artInfo == ArtInfo.NULLINSTANCE) {
+        if (numberTracks) {
+            setLetterTileDrawable(holder, String.valueOf(track.getTrackNumber()));
+        } else if (artInfo == ArtInfo.NULLINSTANCE) {
             setLetterTileDrawable(holder, track.getName());
         } else {
             loadArtwork(artInfo, holder);
@@ -278,6 +278,10 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
 
     public void setGridStyle(boolean gridStyle) {
         this.gridStyle = gridStyle;
+    }
+
+    public void setNumberTracks(boolean numberTiles) {
+        this.numberTracks = numberTiles;
     }
 
     public void setDragableList(boolean dragable) {
@@ -419,7 +423,6 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
 
     public static class BioVH extends ViewHolder {
         @InjectView(R.id.summary_text) TextView summary;
-        @InjectView(R.id.btn_show_more) View showmore;
         public BioVH(View itemView) {
             super(itemView);
             ButterKnife.inject(this, itemView);
@@ -432,7 +435,6 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         @Override
         public void reset() {
             super.reset();
-            showmore.setOnClickListener(null);
         }
     }
 

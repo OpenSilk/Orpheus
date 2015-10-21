@@ -128,6 +128,7 @@ public class ProfileView2Portrait extends CoordinatorLayout implements Bundleabl
 
     public void setupRecyclerView() {
         mAdapter.setGridStyle(mPresenter.isGrid());
+        mAdapter.setNumberTracks(mPresenter.wantsNumberedTracks());
         getListView().getRecycledViewPool().clear();
         getListView().setLayoutManager(getLayoutManager());
     }

@@ -128,6 +128,7 @@ public class ProfileView2Land extends CoordinatorLayout implements BundleableRec
 
     public void setupRecyclerView() {
         mAdapter.setGridStyle(mPresenter.isGrid());
+        mAdapter.setNumberTracks(mPresenter.wantsNumberedTracks());
         getListView().getRecycledViewPool().clear();
         getListView().setLayoutManager(getLayoutManager());
     }

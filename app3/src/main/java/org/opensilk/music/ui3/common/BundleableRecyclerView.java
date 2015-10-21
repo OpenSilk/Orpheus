@@ -67,6 +67,7 @@ public class BundleableRecyclerView extends RecyclerListFrame implements Bundlea
 
     public void setupRecyclerView() {
         mAdapter.setGridStyle(mPresenter.isGrid());
+        mAdapter.setNumberTracks(mPresenter.wantsNumberedTracks());
         getListView().getRecycledViewPool().clear();
         getListView().setLayoutManager(getLayoutManager());
     }
