@@ -73,6 +73,11 @@ public abstract class LibraryProvider extends ContentProvider {
      */
     protected abstract LibraryConfig getLibraryConfig();
 
+    protected void setScheduler(Scheduler scheduler) {
+        if (scheduler == null) throw new NullPointerException("Scheduler cannot be null");
+        this.scheduler = scheduler;
+    }
+
     @Override
     public final Bundle call(String method, String arg, Bundle extras) {
 
@@ -184,13 +189,7 @@ public abstract class LibraryProvider extends ContentProvider {
 
     protected void listObjsInternal(final Uri uri, final IBinder binder, final Bundle args){
         final BundleableSubscriber<Model> subscriber = new BundleableSubscriber<>(binder);
-        Observable<Model> o = Observable.create(
-                new Observable.OnSubscribe<Model>() {
-                    @Override
-                    public void call(Subscriber<? super Model> subscriber) {
-                        listObjs(uri, subscriber, args);
-                    }
-                })
+        Observable<Model> o = getListObjsObservable(uri, args)
                 .subscribeOn(scheduler);
         o.compose(
                 new BundleableListTransformer<Model>(FolderTrackCompare.func(LibraryExtras.getSortOrder(args)))
@@ -199,13 +198,7 @@ public abstract class LibraryProvider extends ContentProvider {
 
     protected void getObjInternal(final Uri uri, final IBinder binder, final Bundle args){
         final BundleableSubscriber<Model> subscriber = new BundleableSubscriber<>(binder);
-        Observable<Model> o = Observable.create(
-                new Observable.OnSubscribe<Model>() {
-                    @Override
-                    public void call(Subscriber<? super Model> subscriber) {
-                        getObj(uri, subscriber, args);
-                    }
-                })
+        Observable<Model> o = getGetObjObservable(uri, args)
                 .subscribeOn(scheduler);
         o.compose(
                 new BundleableListTransformer<Model>(null)
@@ -214,13 +207,7 @@ public abstract class LibraryProvider extends ContentProvider {
 
     protected void multiGetObjsInternal(final List<Uri> uriList, final IBinder binder,final Bundle args) {
         final BundleableSubscriber<Model> subscriber = new BundleableSubscriber<>(binder);
-        Observable<Model> o = Observable.create(
-                new Observable.OnSubscribe<Model>() {
-                    @Override
-                    public void call(Subscriber<? super Model> subscriber) {
-                        multiGetObjs(uriList, subscriber, args);
-                    }
-                })
+        Observable<Model> o = getMultiGetObjsObservale(uriList, args)
                 .subscribeOn(scheduler);
         o.compose(
                 new BundleableListTransformer<Model>(new Func2<Model, Model, Integer>() {
@@ -236,13 +223,7 @@ public abstract class LibraryProvider extends ContentProvider {
 
     protected void scanObjsInternal(final Uri uri, final IBinder binder, final Bundle args){
         final BundleableSubscriber<Model> subscriber = new BundleableSubscriber<>(binder);
-        Observable<Model> o = Observable.create(
-                new Observable.OnSubscribe<Model>() {
-                    @Override
-                    public void call(Subscriber<? super Model> subscriber) {
-                        scanObjs(uri, subscriber, args);
-                    }
-                })
+        Observable<Model> o = getScanObjsObservable(uri, args)
                 .subscribeOn(scheduler);
         o.compose(
                 new BundleableListTransformer<Model>(null)
@@ -251,13 +232,7 @@ public abstract class LibraryProvider extends ContentProvider {
 
     protected void listRootsInternal(final Uri uri, final IBinder binder, final Bundle args){
         final BundleableSubscriber<Container> subscriber = new BundleableSubscriber<>(binder);
-        Observable<Container> o = Observable.create(
-                new Observable.OnSubscribe<Container>() {
-                    @Override
-                    public void call(Subscriber<? super Container> subscriber) {
-                        listRoots(uri, subscriber, args);
-                    }
-                })
+        Observable<Container> o= getListRootsObservable(uri, args)
                 .subscribeOn(scheduler);
         o.compose(
                 new BundleableListTransformer<Container>(null)
@@ -270,27 +245,71 @@ public abstract class LibraryProvider extends ContentProvider {
      * You must call subscriber.onComplete after emitting the list
      */
 
+    @Deprecated
     protected void listObjs(Uri uri, Subscriber<? super Model> subscriber, Bundle args) {
         subscriber.onError(new UnsupportedOperationException());
     }
 
+    protected Observable<Model> getListObjsObservable(final Uri uri, final Bundle args) {
+        return Observable.create(new Observable.OnSubscribe<Model>() {
+            @Override
+            public void call(Subscriber<? super Model> subscriber) {
+                listObjs(uri, subscriber, args);
+            }
+        });
+    }
+
+    @Deprecated
     protected void getObj(Uri uri, Subscriber<? super Model> subscriber, Bundle args) {
         subscriber.onError(new UnsupportedOperationException());
+    }
+
+    protected Observable<Model> getGetObjObservable(final Uri uri, final Bundle args) {
+        return Observable.create(new Observable.OnSubscribe<Model>() {
+            @Override
+            public void call(Subscriber<? super Model> subscriber) {
+                getObj(uri, subscriber, args);
+            }
+        });
     }
 
     /**
      * Emitted items need not be sorted
      */
+    @Deprecated
     protected void multiGetObjs(List<Uri> uriList, Subscriber<? super Model> subscriber, Bundle args) {
         subscriber.onError(new UnsupportedOperationException());
     }
 
-    protected void scanObjs(Uri uri, Subscriber<? super Model> subscriber, Bundle args) {
+    protected Observable<Model> getMultiGetObjsObservale(final List<Uri> uriList, final Bundle args) {
+        return Observable.create(new Observable.OnSubscribe<Model>() {
+            @Override
+            public void call(Subscriber<? super Model> subscriber) {
+                multiGetObjs(uriList, subscriber, args);
+            }
+        });
+    }
+
+    /**
+     * By default just does a listing, can be overridden for special handling
+     * @return Observable created by {@link #getListObjsObservable(Uri, Bundle)}
+     */
+    protected Observable<Model> getScanObjsObservable(final Uri uri, final Bundle args) {
+        return getGetObjObservable(uri, args);
+    }
+
+    @Deprecated
+    protected void listRoots(Uri uri, Subscriber<? super Container> subscriber, Bundle args) {
         subscriber.onError(new UnsupportedOperationException());
     }
 
-    protected void listRoots(Uri uri, Subscriber<? super Container> subscriber, Bundle args) {
-        subscriber.onError(new UnsupportedOperationException());
+    protected Observable<Container> getListRootsObservable(final Uri uri, final Bundle args) {
+        return Observable.create(new Observable.OnSubscribe<Container>() {
+            @Override
+            public void call(Subscriber<? super Container> subscriber) {
+                listRoots(uri, subscriber, args);
+            }
+        });
     }
 
     /*
@@ -302,13 +321,7 @@ public abstract class LibraryProvider extends ContentProvider {
      */
 
     protected void deleteObjInternal(final Uri uri, final Subscriber<List<Uri>> subscriber, final Bundle args) {
-        Observable.create(
-                new Observable.OnSubscribe<Uri>() {
-                    @Override
-                    public void call(Subscriber<? super Uri> subscriber) {
-                        deleteObj(uri, subscriber, args);
-                    }
-                })
+        getDeleteObjObservable(uri, args)
                 .subscribeOn(scheduler)
                 .doOnCompleted(new Action0() {
                     @Override
@@ -335,8 +348,18 @@ public abstract class LibraryProvider extends ContentProvider {
      * Delete the object specified by <code>uri</code>. Emmit all uri's removed by change (ie
      * children of object)
      */
+    @Deprecated
     protected void deleteObj(final Uri uri, final Subscriber<? super Uri> subscriber, final Bundle args) {
         throw new UnsupportedOperationException();
+    }
+
+    protected Observable<Uri> getDeleteObjObservable(final Uri uri, final Bundle args) {
+        return Observable.create(new Observable.OnSubscribe<Uri>() {
+            @Override
+            public void call(Subscriber<? super Uri> subscriber) {
+                deleteObj(uri, subscriber, args);
+            }
+        });
     }
 
     /*
