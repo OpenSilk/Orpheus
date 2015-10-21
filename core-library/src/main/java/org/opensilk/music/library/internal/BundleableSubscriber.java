@@ -53,24 +53,27 @@ public class BundleableSubscriber<T extends Bundleable> extends Subscriber<List<
     public void onCompleted() {
         try {
             wrapped.onCompleted();
-            wrapped.asBinder().unlinkToDeath(this, 0);
         } catch (RemoteException e) {
             Log.e(TAG, "onCompleted", e);
+        } finally {
+            unlink();
         }
     }
 
     @Override
     public void onError(Throwable e) {
-            try {
-                if (e instanceof LibraryException) {
-                    wrapped.onError((LibraryException) e);
-                } else {
-                    Log.w(TAG, "Wrapping " + e.getClass() + " in a LibraryException for IPC transport");
-                    wrapped.onError(new LibraryException(e));
-                }
-            } catch (RemoteException e2) {
-                Log.e(TAG, "onError", e2);
+        try {
+            if (e instanceof LibraryException) {
+                wrapped.onError((LibraryException) e);
+            } else {
+                Log.w(TAG, "Wrapping " + e.getClass() + " in a LibraryException for IPC transport");
+                wrapped.onError(LibraryException.unwrap(e));
             }
+        } catch (RemoteException e2) {
+            Log.e(TAG, "onError", e2);
+        } finally {
+            unlink();
+        }
     }
 
     @Override
@@ -87,5 +90,9 @@ public class BundleableSubscriber<T extends Bundleable> extends Subscriber<List<
     @Override
     public void binderDied() {
         unsubscribe();
+    }
+
+    private void unlink() {
+        wrapped.asBinder().unlinkToDeath(this, 0);
     }
 }

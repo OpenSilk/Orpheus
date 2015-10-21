@@ -78,7 +78,7 @@ public class LibraryException extends Exception implements Parcelable {
     }
 
     public LibraryException(int code, Throwable wrappedCause) {
-        super(wrappedCause);
+        super(wrappedCause != null ? wrappedCause : new Exception());
         this.code = code;
     }
 
@@ -111,4 +111,13 @@ public class LibraryException extends Exception implements Parcelable {
             return new LibraryException[size];
         }
     };
+
+    public static LibraryException unwrap(Throwable throwable) {
+        if (throwable instanceof RuntimeException && throwable.getCause() != null) {
+            if (throwable.getCause() instanceof LibraryException) {
+                return (LibraryException) throwable.getCause();
+            }
+        }
+        return new LibraryException(throwable);
+    }
 }
