@@ -81,7 +81,7 @@ public class UpnpServiceService extends AndroidUpnpServiceImpl {
         mUpnpCDAuthority = cmp.unpnAuthority();
         mRegistryListener = new UpnpRegistryListener();
         binder.getRegistry().addListener(mRegistryListener);
-        binder.getControlPoint().search();
+//        binder.getControlPoint().search();
     }
 
     @Override
@@ -154,7 +154,7 @@ public class UpnpServiceService extends AndroidUpnpServiceImpl {
 
     class UpnpRegistryListener extends DefaultRegistryListener {
         @Override public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
-            notifyUri(device.getIdentity().getUdn().getIdentifierString());
+//            notifyUri(device.getIdentity().getUdn().getIdentifierString());
         }
         @Override public void remoteDeviceUpdated(Registry registry, RemoteDevice device) {
 //            notifyUri(device.getIdentity().getUdn().getIdentifierString());
