@@ -18,13 +18,19 @@
 package org.opensilk.music.index.database;
 
 import android.content.Context;
+import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import org.apache.commons.io.FileUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
+
+import java.io.File;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import timber.log.Timber;
 
 /**
  * Created by drew on 8/25/15.
@@ -37,7 +43,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
     @Inject
     public IndexDatabaseHelper(@ForApplication Context context) {
-        super(context, DB_NAME, null, DB_VERSION, null);
+        super(context, DB_NAME, null, DB_VERSION, new ErrorHandler());
     }
 
     @Override
@@ -451,6 +457,15 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
         super.onConfigure(db);
         db.execSQL("PRAGMA foreign_keys = ON;");
         db.execSQL("PRAGMA encoding = 'UTF-8';");
+    }
+
+    static class ErrorHandler implements DatabaseErrorHandler {
+        @Override
+        public void onCorruption(SQLiteDatabase dbObj) {
+            //delete the db then kill the app
+            FileUtils.deleteQuietly(new File(dbObj.getPath()));
+            throw new RuntimeException("Corrupt database");
+        }
     }
 
 }
