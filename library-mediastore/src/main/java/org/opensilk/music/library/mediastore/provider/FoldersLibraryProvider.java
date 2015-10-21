@@ -105,12 +105,6 @@ public class FoldersLibraryProvider extends LibraryProvider {
     }
 
     @Override
-    protected void scanObjs(Uri uri, Subscriber<? super Model> subscriber, Bundle args) {
-        args.putBoolean("fldr.isscan", true);
-        listObjs(uri, subscriber, args);
-    }
-
-    @Override
     protected void getObj(Uri uri, Subscriber<? super Model> subscriber, Bundle args) {
         switch (mUriMatcher.match(uri)) {
             case FoldersUris.M_FOLDERS: {
