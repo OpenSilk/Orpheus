@@ -25,6 +25,7 @@ import android.support.annotation.NonNull;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
+import org.opensilk.music.index.BuildConfig;
 import org.opensilk.music.model.Metadata;
 import org.opensilk.music.model.Track;
 
@@ -43,7 +44,7 @@ import static org.opensilk.music.model.Metadata.*;
 @ScannerScope
 public class MetaExtractorImpl implements MetaExtractor {
 
-    static boolean DUMP_META = false;
+    static boolean DUMP_META = BuildConfig.DEBUG;
     final Context appContext;
 
     @Inject
@@ -84,11 +85,11 @@ public class MetaExtractorImpl implements MetaExtractor {
             if (StringUtils.startsWith(uri.getScheme(), "http")) {
                 mmr.setDataSource(uri.toString(), headers);
             } else if (StringUtils.equals(uri.getScheme(), "content")) {
-                ParcelFileDescriptor pfd = appContext.getContentResolver().openFileDescriptor(uri, "r");
-                mmr.setDataSource(pfd.getFileDescriptor());
-                pfd.close();
+                mmr.setDataSource(appContext, uri);
             } else if (StringUtils.equals(uri.getScheme(), "file")) {
                 mmr.setDataSource(uri.getPath());
+            } else {
+                throw new IllegalArgumentException("Unknown scheme " + uri.getScheme());
             }
 
             bob.putString(KEY_ALBUM_NAME, mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM));
