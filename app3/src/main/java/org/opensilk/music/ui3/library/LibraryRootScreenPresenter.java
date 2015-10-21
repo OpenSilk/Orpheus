@@ -41,6 +41,7 @@ import javax.inject.Inject;
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
+import rx.Subscriber;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.subscriptions.CompositeSubscription;
@@ -59,6 +60,9 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
     final Uri rootUri;
 
     final CompositeSubscription subscriptions = new CompositeSubscription();
+
+    boolean clearAdapterOnload = true;
+    ArrayList<Container> rootsList = new ArrayList<>();
 
     @Inject
     public LibraryRootScreenPresenter(
@@ -87,11 +91,16 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
         if (d == null) {
             d = ContextCompat.getDrawable(getView().getContext(), R.drawable.ic_extension_grey600_24dp);
         }
-//            int bounds = (int) (24 * holder.itemView.getResources().getDisplayMetrics().density);
-//            d.setBounds(0, 0, bounds, bounds);
         getView().avatar.setImageDrawable(d);
-        getView().setloading();
-        subscribeRoots();
+        if (!rootsList.isEmpty()) {
+            getView().addRoots(rootsList, clearAdapterOnload);
+            clearAdapterOnload = false;
+        } else if (!subscriptions.hasSubscriptions()) {
+            subscribeRoots();
+            getView().setloading();
+        } else {
+            getView().setloading();
+        }
     }
 
     @Override
@@ -109,6 +118,8 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
     @DebugLog
     public void reload() {
         subscriptions.clear();
+        if (hasView()) getView().setloading();
+        clearAdapterOnload = true;
         subscribeRoots();
     }
 
@@ -130,20 +141,14 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
                         return containers;
                     }
                 })
-                .subscribe(new Action1<List<Container>>() {
+                .subscribe(new Subscriber<List<Container>>() {
                     @Override
-                    public void call(List<Container> roots) {
-                        if (hasView()) {
-                            if (roots.size() > 0) {
-                                getView().addRoots(roots);
-                            } else {
-                                getView().setRetry();
-                            }
-                        }
+                    public void onCompleted() {
+//                        clearAdapterOnload = true;
                     }
-                }, new Action1<Throwable>() {
+
                     @Override
-                    public void call(Throwable throwable) {
+                    public void onError(Throwable throwable) {
                         Timber.w(throwable, "getRootListing(%s)", providerInfo.getAuthority());
                         if (throwable instanceof LibraryException) {
                             LibraryException e = (LibraryException) throwable;
@@ -156,6 +161,15 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
                         }
                         if (hasView()) {
                             getView().setRetry();
+                        }
+                    }
+
+                    @Override
+                    public void onNext(List<Container> roots) {
+                        rootsList.addAll(roots);
+                        if (hasView()) {
+                            getView().addRoots(roots, clearAdapterOnload);
+                            clearAdapterOnload = false;
                         }
                     }
                 }));
