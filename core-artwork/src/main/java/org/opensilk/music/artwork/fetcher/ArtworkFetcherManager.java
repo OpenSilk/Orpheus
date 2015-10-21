@@ -446,8 +446,13 @@ public class ArtworkFetcherManager {
         if (activeNetwork != null) {
             state = activeNetwork.isConnectedOrConnecting();
         }
-        if (wifiOnly && state) {
-            return activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
+        if (state) {
+            if (activeNetwork.getType() == ConnectivityManager.TYPE_ETHERNET) {
+                //ethernet in always true
+                return true;
+            } else if (wifiOnly) {
+                return activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
+            }
         }
         return state;
     }
