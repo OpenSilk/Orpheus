@@ -30,6 +30,7 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subjects.BehaviorSubject;
+import timber.log.Timber;
 
 /**
  * Created by drew on 10/20/15.
@@ -57,15 +58,18 @@ public class DriveAuthService {
         return credential.newChooseAccountIntent();
     }
 
-    public Subscription getToken(Subscriber<String> subscriber, boolean force) {
+    public Subscription getToken(String account, Subscriber<String> subscriber, boolean force) {
         if (tokenSubject == null || force) {
+            credential.setSelectedAccountName(account);
             tokenSubject = BehaviorSubject.create();
             Observable.create(
                     new Observable.OnSubscribe<String>() {
                         @Override
                         public void call(Subscriber<? super String> subscriber) {
                             try {
+                                Timber.d("Fetching token");
                                 String token = credential.getToken();
+                                Timber.d("Found token");
                                 subscriber.onNext(token);
                             } catch (Throwable e) {
                                 subscriber.onError(e);

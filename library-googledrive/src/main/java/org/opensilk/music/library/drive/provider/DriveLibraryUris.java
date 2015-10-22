@@ -37,8 +37,8 @@ public class DriveLibraryUris {
         return baseUri(authority, account).appendPath(folder).appendPath(folderId).build();
     }
 
-    public static Uri file(String authority, String account, String fileId) {
-        return baseUri(authority, account).appendPath(file).appendPath(fileId).build();
+    public static Uri file(String authority, String account, String parentId, String fileId) {
+        return baseUri(authority, account).appendPath(file).appendPath(parentId).appendPath(fileId).build();
     }
 
     public static Uri rootFolder(String authority, String account) {
@@ -49,8 +49,12 @@ public class DriveLibraryUris {
         return uri.getPathSegments().get(0);
     }
 
-    public static String extractId(Uri uri) {
+    public static String extractFolderId(Uri uri) {
         return uri.getPathSegments().get(2);
+    }
+
+    public static String extractFileId(Uri uri) {
+        return uri.getPathSegments().get(3);
     }
 
     public static Uri call(String authority) {
@@ -69,7 +73,7 @@ public class DriveLibraryUris {
 
         m.addURI(authority, baseMatch + rootFolder, M_ROOT_FOLDER);
         m.addURI(authority, baseMatch + folder + slashWild, M_FOLDER);
-        m.addURI(authority, baseMatch + file + slashWild, M_FILE);
+        m.addURI(authority, baseMatch + file + slashWild + slashWild, M_FILE);
 
         return m;
     }

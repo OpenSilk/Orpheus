@@ -40,6 +40,7 @@ public class DriveClientModule {
 
     @Provides @DriveClientScope
     public GoogleAccountCredential provideCredential(@ForApplication Context context) {
-        return GoogleAccountCredential.usingOAuth2(context, Constants.SCOPES);
+        return GoogleAccountCredential.usingOAuth2(context, Constants.SCOPES)
+                .setSelectedAccountName(accountName);
     }
 }

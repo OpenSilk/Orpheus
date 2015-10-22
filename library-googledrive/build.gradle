@@ -52,6 +52,7 @@ dependencies {
 
     compile project(':common-ui')
     compile project(':core-library')
+    compile project(':core-okhttp')
 
     //https://github.com/google/google-api-java-client/releases
     compile ('com.google.api-client:google-api-client-android:1.20.0') {

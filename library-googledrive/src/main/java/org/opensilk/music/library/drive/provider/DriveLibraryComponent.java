@@ -17,11 +17,9 @@
 
 package org.opensilk.music.library.drive.provider;
 
-import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.music.library.drive.client.DriveClientComponent;
 import org.opensilk.music.library.drive.client.DriveClientModule;
-
-import javax.inject.Singleton;
+import org.opensilk.music.okhttp.OkHttpComponent;
 
 import dagger.Component;
 import rx.functions.Func2;
@@ -31,18 +29,20 @@ import rx.functions.Func2;
  */
 @DriveLibraryScope
 @Component(
-        dependencies = AppContextComponent.class,
+        dependencies = {
+                OkHttpComponent.class,
+        },
         modules = {
                 DriveLibraryModule.class
         }
 )
 public interface DriveLibraryComponent {
-        Func2<AppContextComponent, DriveLibraryModule, DriveLibraryComponent> FACTORY =
-                new Func2<AppContextComponent, DriveLibraryModule, DriveLibraryComponent>() {
+        Func2<OkHttpComponent, DriveLibraryModule, DriveLibraryComponent> FACTORY =
+                new Func2<OkHttpComponent, DriveLibraryModule, DriveLibraryComponent>() {
                         @Override
-                        public DriveLibraryComponent call(AppContextComponent driveComponent, DriveLibraryModule driveLibraryModule) {
+                        public DriveLibraryComponent call(OkHttpComponent driveComponent, DriveLibraryModule driveLibraryModule) {
                                 return DaggerDriveLibraryComponent.builder()
-                                        .appContextComponent(driveComponent)
+                                        .okHttpComponent(driveComponent)
                                         .driveLibraryModule(driveLibraryModule)
                                         .build();
                         }

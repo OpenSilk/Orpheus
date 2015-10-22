@@ -39,14 +39,21 @@ public interface Constants {
     String AUDIO_OGG_MIMETYPE = "application/ogg";
     String IMAGE_MIME_WILDCARD = "image";
 
-    String BASE_FOLDERS_TRACKS_QUERY = " in parents and trashed=false and "
+    String IMAGE_TITLE_QUERY = "title contains 'cover' or title contains 'albumart' " +
+            "or title contains 'album' or title contains 'front'";
+
+    String BASE_QUERY = " in parents and trashed=false and "
             + "(mimeType='" + FOLDER_MIMETYPE  + "' or mimeType contains '"
             + AUDIO_MIME_WILDCARD + "' or mimeType='" + AUDIO_OGG_MIMETYPE
-            + "' or mimeType contains '" + IMAGE_MIME_WILDCARD + "')";
+            + "' or (mimeType contains '" + IMAGE_MIME_WILDCARD + "' and ("+ IMAGE_TITLE_QUERY + ")))" ;
+
+    String FILE_WITH_IMAGES = "id='%s' or ('%s' in parents and trashed=false and mimeType contains '" +
+            IMAGE_MIME_WILDCARD + "' and (" + IMAGE_TITLE_QUERY + "))";
 
     String TRACKS_QUERY = "trashed=false and " +
             "(mimeType contains '" + AUDIO_MIME_WILDCARD + "' or mimeType='" + AUDIO_OGG_MIMETYPE + "')";
 
-    String LIST_FIELDS = "items/id,items/mimeType,items/parents,items/title,items/downloadUrl,items/modifiedDate";
+    String LIST_FIELDS = "items/id,items/mimeType,items/parents,items/title," +
+            "items/downloadUrl,items/modifiedDate,items/fileSize";
 
 }

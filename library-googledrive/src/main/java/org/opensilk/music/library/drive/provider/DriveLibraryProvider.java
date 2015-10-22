@@ -25,10 +25,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 
-import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.library.drive.R;
 import org.opensilk.music.library.drive.client.DriveClient;
 import org.opensilk.music.library.drive.client.DriveClientModule;
 import org.opensilk.music.library.drive.ui.ChooserActivity;
@@ -39,6 +39,7 @@ import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Model;
+import org.opensilk.music.okhttp.OkHttpComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +56,8 @@ import static org.opensilk.music.library.drive.provider.DriveLibraryUris.M_FILE;
 import static org.opensilk.music.library.drive.provider.DriveLibraryUris.M_FOLDER;
 import static org.opensilk.music.library.drive.provider.DriveLibraryUris.M_ROOT_FOLDER;
 import static org.opensilk.music.library.drive.provider.DriveLibraryUris.extractAccount;
-import static org.opensilk.music.library.drive.provider.DriveLibraryUris.extractId;
+import static org.opensilk.music.library.drive.provider.DriveLibraryUris.extractFileId;
+import static org.opensilk.music.library.drive.provider.DriveLibraryUris.extractFolderId;
 
 /**
  * Created by drew on 4/28/15.
@@ -73,7 +75,7 @@ public class DriveLibraryProvider extends LibraryProvider {
 
     @Override
     public boolean onCreate() {
-        AppContextComponent parent = DaggerService.getDaggerComponent(getContext());
+        OkHttpComponent parent = DaggerService.getDaggerComponent(getContext());
         mComponent = DriveLibraryComponent.FACTORY.call(parent, new DriveLibraryModule());
         mComponent.inject(this);
         mUriMatcher = DriveLibraryUris.matcher(mAuthority);
@@ -82,8 +84,11 @@ public class DriveLibraryProvider extends LibraryProvider {
 
     @Override
     protected LibraryConfig getLibraryConfig() {
+        //noinspection ConstantConditions
         return LibraryConfig.builder()
                 .setAuthority(mAuthority)
+                .setLabel(getContext().getString(R.string.drive_name))
+                .setFlag(LibraryConfig.FLAG_REQUIRES_AUTH)
                 .setLoginComponent(new ComponentName(getContext(), ChooserActivity.class))
                 .build();
     }
@@ -102,7 +107,7 @@ public class DriveLibraryProvider extends LibraryProvider {
                 return client.listFolder(DEFAULT_ROOT_FOLDER);
             }
             case M_FOLDER: {
-                return client.listFolder(extractId(uri));
+                return client.listFolder(extractFolderId(uri));
             }
             default:
                 return super.getListObjsObservable(uri, args);
@@ -114,9 +119,11 @@ public class DriveLibraryProvider extends LibraryProvider {
         final DriveClient client = mComponent.driveClientComponent(
                 new DriveClientModule(extractAccount(uri))).client();
         switch (mUriMatcher.match(uri)) {
-            case M_FOLDER:
+            case M_FOLDER: {
+                return client.getFolder(extractFolderId(uri));
+            }
             case M_FILE: {
-                return client.getFile(extractId(uri));
+                return client.getFile(extractFolderId(uri), extractFileId(uri));
             }
             default:
                 return super.getGetObjObservable(uri, args);
@@ -130,7 +137,8 @@ public class DriveLibraryProvider extends LibraryProvider {
             public void call(Subscriber<? super Container> subscriber) {
                 List<Container> accounts = getAccounts();
                 if (accounts.isEmpty()) {
-                    subscriber.onError(new LibraryException(LibraryException.Kind.AUTH_FAILURE, null));
+                    subscriber.onError(new LibraryException(LibraryException.Kind.AUTH_FAILURE,
+                            new Exception("No Accounts")));
                 } else {
                     for (Container account: accounts) {
                         subscriber.onNext(account);
@@ -152,6 +160,8 @@ public class DriveLibraryProvider extends LibraryProvider {
                 long id = mDB.getWritableDatabase().insertWithOnConflict(
                         ACCOUNT.TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
                 ok.putOk(id > 0);
+                //noinspection ConstantConditions
+                getContext().getContentResolver().notifyChange(LibraryUris.rootUri(mAuthority), null);
                 return ok.get();
             }
             case INVALIDATE_ACCOUNT: {
@@ -162,6 +172,8 @@ public class DriveLibraryProvider extends LibraryProvider {
                         ACCOUNT.TABLE, cv, ACCOUNT.ACCOUNT + "=?",
                         new String[]{BundleHelper.getString(extras)});
                 ok.putOk(num > 0);
+                //noinspection ConstantConditions
+                getContext().getContentResolver().notifyChange(LibraryUris.rootUri(mAuthority), null);
                 return ok.get();
             }
             default:

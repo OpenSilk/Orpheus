@@ -28,7 +28,6 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
-import com.google.api.services.drive.model.ParentReference;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.RecursiveToStringStyle;
@@ -37,6 +36,7 @@ import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.music.library.drive.provider.DriveLibraryProvider;
 import org.opensilk.music.library.drive.provider.DriveLibraryUris;
 import org.opensilk.music.library.internal.LibraryException;
+import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Track;
@@ -57,7 +57,7 @@ import rx.functions.Func0;
 import rx.functions.Func1;
 import timber.log.Timber;
 
-import static org.opensilk.music.library.drive.Constants.BASE_FOLDERS_TRACKS_QUERY;
+import static org.opensilk.music.library.drive.Constants.BASE_QUERY;
 import static org.opensilk.music.library.drive.Constants.LIST_FIELDS;
 import static org.opensilk.music.library.drive.client.ModelUtil.IS_AUDIO;
 import static org.opensilk.music.library.drive.client.ModelUtil.IS_FOLDER;
@@ -95,42 +95,18 @@ public class DriveClient {
     }
 
     public Observable<Model> listFolder(final String identity) {
-        final String q = identity + BASE_FOLDERS_TRACKS_QUERY;
+        final String q = "'" + identity + "'" + BASE_QUERY;
         return getFiles(q)
-                .collect(new Func0<Collector>() {
-                    @Override
-                    public Collector call() {
-                        try {
-                            String token = mCredential.getToken();
-                            return new Collector(token);
-                        } catch (GoogleAuthException e) {
-                            removeAccount();
-                            throw Exceptions.propagate(new LibraryException(LibraryException.Kind.AUTH_FAILURE, e));
-                        } catch (IOException e) {
-                            throw Exceptions.propagate(new LibraryException(LibraryException.Kind.NETWORK, e));
-                        }
-                    }
-                }, new Action2<Collector, List<File>>() {
-                    @Override
-                    public void call(Collector collector, List<File> files) {
-                        for (File file : files) {
-                            if (IS_AUDIO.call(file)) {
-                                collector.files.add(file);
-                            } else if (IS_FOLDER.call(file)) {
-                                collector.folders.add(file);
-                            } else if (IS_IMAGE.call(file)) {
-                                collector.images.add(file);
-                            }
-                        }
-                    }
-                })
+                .collect(collectorFactory, collectAction)
                 .flatMap(new Func1<Collector, Observable<Model>>() {
                     @Override
                     public Observable<Model> call(Collector collector) {
                         Uri artworkUri = null;
                         if (!collector.images.isEmpty()) {
+                            Timber.d("Found %d images in folder", collector.images.size());
                             File artwork = pickSuitableImage(collector.images);
                             if (artwork != null) {
+                                Timber.d("Found suitable coverart %s", artwork.getTitle());
                                 artworkUri = buildDownloadUri(artwork.getDownloadUrl(), collector.token);
                             }
                         }
@@ -146,17 +122,14 @@ public class DriveClient {
                 });
     }
 
-    public Observable<Model> getFile(final String identity) {
+    public Observable<Model> getFolder(final String identity) {
         return Observable.create(new Observable.OnSubscribe<Model>() {
             @Override
             public void call(Subscriber<? super Model> subscriber) {
                 try {
                     File file = mDrive.files().get(identity).execute();
                     if (file != null && !subscriber.isUnsubscribed()) {
-                        if (IS_AUDIO.call(file)) {
-                            subscriber.onNext(buildTrack(null, mCredential.getToken(), null, file));
-                            subscriber.onCompleted();
-                        } else if (IS_FOLDER.call(file)) {
+                        if (IS_FOLDER.call(file)) {
                             subscriber.onNext(buildFolder(null, file));
                             subscriber.onCompleted();
                         } else {
@@ -165,11 +138,24 @@ public class DriveClient {
                     } else if (!subscriber.isUnsubscribed()) {
                         subscriber.onError(new IllegalArgumentException("Unknown file " + identity));
                     }
-                } catch (GoogleAuthException | IOException e) {
+                } catch (IOException e) {
                     handleException(e, subscriber);
                 }
             }
         });
+    }
+
+    //TODO look into batchrequest for getting file info and artwork in one call
+    public Observable<Model> getFile(final String parentId, final String identity) {
+        //We just reuse this as it is probably already cached
+        return listFolder(parentId)
+                .takeFirst(new Func1<Model, Boolean>() {
+                    @Override
+                    public Boolean call(Model model) {
+                        return (model instanceof Track)
+                                && StringUtils.equals(DriveLibraryUris.extractFileId(model.getUri()), identity);
+                    }
+                });
     }
 
     @DebugLog
@@ -227,19 +213,8 @@ public class DriveClient {
 
     Track buildTrack(String parentFolder, String authToken, Uri artworkUri, File f) {
         final String id = f.getId();
-        final Uri uri = DriveLibraryUris.folder(mAuthority, mAccount, id);
-        final Uri parentUri;
-        if (StringUtils.isEmpty(parentFolder)) {
-            //TODO how to better handle multiple parents?
-            final List<ParentReference> parents = f.getParents();
-            if (parents != null && !parents.isEmpty() && !parents.get(0).getIsRoot()) {
-                parentUri = DriveLibraryUris.folder(mAuthority, mAccount, parents.get(0).getId());
-            } else {
-                parentUri = DriveLibraryUris.rootFolder(mAuthority, mAccount);
-            }
-        } else {
-            parentUri = DriveLibraryUris.folder(mAuthority, mAccount, parentFolder);
-        }
+        final Uri uri = DriveLibraryUris.file(mAuthority, mAccount, parentFolder, id);
+        final Uri parentUri = DriveLibraryUris.folder(mAuthority, mAccount, parentFolder);
         final String title = f.getTitle();
         final Track.Builder bob = Track.builder()
                 .setUri(uri)
@@ -262,11 +237,12 @@ public class DriveClient {
     }
 
     void removeAccount() {
-        mCredential.getContext().getContentResolver().call(DriveLibraryUris.call(mAuthority),
+        mCredential.getContext().getContentResolver().call(LibraryUris.call(mAuthority),
                 DriveLibraryProvider.INVALIDATE_ACCOUNT, null, BundleHelper.b().putString(mAccount).get());
     }
 
     void handleException(Throwable e, Subscriber<?> subscriber) {
+        Timber.e(e, "handleException");
         LibraryException ex = null;
         if (e instanceof UserRecoverableAuthIOException) {
             ex = new LibraryException(AUTH_FAILURE, e);
@@ -282,6 +258,36 @@ public class DriveClient {
             subscriber.onError(ex);
         }
     }
+
+    final Func0<Collector> collectorFactory = new Func0<Collector>() {
+        @Override
+        public Collector call() {
+            try {
+                String token = mCredential.getToken();
+                return new Collector(token);
+            } catch (GoogleAuthException e) {
+                removeAccount();
+                throw Exceptions.propagate(new LibraryException(LibraryException.Kind.AUTH_FAILURE, e));
+            } catch (IOException e) {
+                throw Exceptions.propagate(new LibraryException(LibraryException.Kind.NETWORK, e));
+            }
+        }
+    };
+
+    final Action2<Collector, List<File>> collectAction = new Action2<Collector, List<File>>() {
+        @Override
+        public void call(Collector collector, List<File> files) {
+            for (File file : files) {
+                if (IS_AUDIO.call(file)) {
+                    collector.files.add(file);
+                } else if (IS_FOLDER.call(file)) {
+                    collector.folders.add(file);
+                } else if (IS_IMAGE.call(file)) {
+                    collector.images.add(file);
+                }
+            }
+        }
+    };
 
     static class Collector {
         final ArrayList<File> images = new ArrayList<>();

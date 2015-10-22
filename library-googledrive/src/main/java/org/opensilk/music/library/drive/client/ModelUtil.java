@@ -92,11 +92,7 @@ public class ModelUtil {
     }
 
     public static boolean isAlbumArt(String name) {
-        return (StringUtils.containsIgnoreCase(name, "albumart")
-                || StringUtils.containsIgnoreCase(name, "album")
-                || StringUtils.containsIgnoreCase(name, "front")
-                || StringUtils.containsIgnoreCase(name, "cover")
-        ) && !StringUtils.containsIgnoreCase(name, "thumb");
+        return !StringUtils.containsIgnoreCase(name, "thumb");
     }
 
     public static Uri buildDownloadUri(String url, String authToken) {

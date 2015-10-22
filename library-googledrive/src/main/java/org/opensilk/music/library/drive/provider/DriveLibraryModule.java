@@ -25,9 +25,11 @@ import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
+import com.squareup.okhttp.OkHttpClient;
 
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.library.drive.DriveAuthorityModule;
+import org.opensilk.music.library.drive.transport.OkHttpTransport;
 
 import javax.inject.Named;
 
@@ -43,8 +45,8 @@ import dagger.Provides;
 public class DriveLibraryModule {
 
     @Provides @DriveLibraryScope
-    public HttpTransport provideHttpTransport() {
-        return AndroidHttp.newCompatibleTransport();
+    public HttpTransport provideHttpTransport(OkHttpClient okHttpClient) {
+        return new OkHttpTransport(okHttpClient);
     }
 
     @Provides @DriveLibraryScope

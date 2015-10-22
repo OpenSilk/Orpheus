@@ -34,8 +34,8 @@ import org.opensilk.common.core.rx.RxUtils;
 import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.music.library.drive.R;
 import org.opensilk.music.library.drive.provider.DriveLibraryProvider;
-import org.opensilk.music.library.drive.provider.DriveLibraryUris;
 import org.opensilk.music.library.provider.LibraryExtras;
+import org.opensilk.music.library.provider.LibraryUris;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -44,6 +44,7 @@ import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import rx.Subscriber;
 import rx.Subscription;
+import timber.log.Timber;
 
 /**
  * Created by drew on 6/15/14.
@@ -85,7 +86,7 @@ public class ChooserActivity extends MortarActivity {
         } else {
             mAccountName = savedInstanceState.getString("account");
             if (mAuthService.isFetchingToken()) {
-                authSubscription = mAuthService.getToken(new TokenSubscriber(), false);
+                authSubscription = mAuthService.getToken(mAccountName, new TokenSubscriber(), false);
             }
         }
 
@@ -119,7 +120,7 @@ public class ChooserActivity extends MortarActivity {
                     mAccountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
                     // After we select an account we still need to authorize ourselves
                     // for drive access.
-                    fetchToken(false);
+                    fetchToken();
                 } else {
                     finishFailure();
                 }
@@ -127,7 +128,7 @@ public class ChooserActivity extends MortarActivity {
             case REQUEST_AUTH_APPROVAL:
                 if (resultCode == RESULT_OK) {
                     //retry
-                    fetchToken(true);
+                    fetchToken();
                 } else {
                     finishFailure();
                 }
@@ -139,12 +140,13 @@ public class ChooserActivity extends MortarActivity {
 
     private void finishSuccess() {
         //add the account to the db
-        Bundle reply = getContentResolver().call(DriveLibraryUris.call(mAuthority),
+        Bundle reply = getContentResolver().call(LibraryUris.call(mAuthority),
                 DriveLibraryProvider.INSERT_ACCOUNT, null, BundleHelper.b().putString(mAccountName).get());
         if (LibraryExtras.getOk(reply)) {
             setResult(RESULT_OK, new Intent());
             finish();
         } else {
+            Timber.e("Error saving account");
             finishFailure();
         }
     }
@@ -155,9 +157,9 @@ public class ChooserActivity extends MortarActivity {
         finish();
     }
 
-    private void fetchToken(boolean retry) {
+    private void fetchToken() {
         ProgressFragment.newInstance().show(getFragmentManager(), ProgressFragment.TAG);
-        authSubscription = mAuthService.getToken(new TokenSubscriber(), retry);
+        authSubscription = mAuthService.getToken(mAccountName, new TokenSubscriber(), true);
     }
 
     class TokenSubscriber extends Subscriber<String> {
@@ -168,6 +170,7 @@ public class ChooserActivity extends MortarActivity {
 
         @Override
         public void onError(Throwable e) {
+            Timber.e(e, "Error fetching token");
             if (e instanceof UserRecoverableAuthIOException) {
                 startActivityForResult(((UserRecoverableAuthIOException) e).getIntent(), REQUEST_AUTH_APPROVAL);
             } else if (e instanceof UserRecoverableAuthException) {
