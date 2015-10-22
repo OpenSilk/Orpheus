@@ -48,6 +48,7 @@ import org.opensilk.music.artwork.coverartarchive.CoverArtArchiveModule;
 import org.opensilk.music.artwork.shared.ArtworkPreferences;
 import org.opensilk.music.lastfm.LastFMModule;
 import org.opensilk.music.model.ArtInfo;
+import org.opensilk.music.okhttp.OkHttpModule;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -110,7 +111,8 @@ public class ArtworkFetcherManagerTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         LastFMModule lfm = new LastFMModule();
-        OkHttpClient client = lfm.provideOkHttpClient(RuntimeEnvironment.application, "foo", mServer.url("/lfm/").toString());
+        OkHttpClient okHttpClient = new OkHttpModule().provideOkClient(RuntimeEnvironment.application);
+        OkHttpClient client = lfm.provideOkHttpClient(okHttpClient, "foo", mServer.url("/lfm/").toString());
         LastFM lastFM = lfm.provideLastFM(mServer.url("/lfm/").toString(), client);
         CoverArtArchiveModule caa= new CoverArtArchiveModule();
         CoverArtArchive coverArtArchive = caa.provideCoverArtArchive(client, mServer.url("/caa/").toString());
