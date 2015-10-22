@@ -17,10 +17,8 @@
 
 package org.opensilk.music.ui3.library;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +26,6 @@ import android.view.ViewGroup;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
-import org.opensilk.common.ui.mortar.ActivityResultsListener;
 import org.opensilk.common.ui.mortar.LayoutCreator;
 import org.opensilk.common.ui.mortar.MortarContextFactory;
 import org.opensilk.common.ui.mortar.ScreenScoper;
@@ -40,7 +37,7 @@ import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryProviderInfo;
 import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.library.provider.LibraryUris;
-import org.opensilk.music.loader.LibraryProviderInfoLoader;
+import org.opensilk.music.library.client.LibraryProviderInfoLoader;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
 

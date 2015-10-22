@@ -148,7 +148,7 @@ dependencies {
 
     compile project(':core-model')
     compile project(':core-library')
-    compile project(':core-loader')
+    compile project(':core-library-client')
     compile project(':core-artwork')
     compile project(':core-playback')
     compile project(':core-translations')

@@ -18,18 +18,15 @@
 package org.opensilk.music.ui3.profile.bio;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 
-import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.rx.RxUtils;
 import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.music.index.model.BioSummary;
 import org.opensilk.music.library.provider.LibraryMethods;
-import org.opensilk.music.loader.BundleableLoader;
-import org.opensilk.music.loader.TypedBundleableLoader;
+import org.opensilk.music.library.client.TypedBundleableLoader;
 import org.opensilk.music.model.Model;
 
 import java.util.ArrayList;

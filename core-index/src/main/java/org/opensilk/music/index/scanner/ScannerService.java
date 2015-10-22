@@ -29,7 +29,7 @@ import org.opensilk.music.index.IndexComponent;
 import org.opensilk.music.index.database.IndexDatabase;
 import org.opensilk.music.index.provider.LastFMHelper;
 import org.opensilk.music.library.provider.LibraryExtras;
-import org.opensilk.music.loader.BundleableLoader;
+import org.opensilk.music.library.client.BundleableLoader;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Metadata;
 import org.opensilk.music.model.Track;

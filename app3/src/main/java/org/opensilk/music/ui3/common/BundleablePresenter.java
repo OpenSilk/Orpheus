@@ -37,7 +37,7 @@ import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
-import org.opensilk.music.loader.BundleableLoader;
+import org.opensilk.music.library.client.BundleableLoader;
 import org.opensilk.bundleable.Bundleable;
 import org.opensilk.music.model.Model;
 import org.opensilk.music.playback.control.PlaybackController;

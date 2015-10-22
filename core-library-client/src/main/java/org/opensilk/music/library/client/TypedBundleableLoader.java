@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.loader;
+package org.opensilk.music.library.client;
 
 import android.content.Context;
 import android.database.ContentObserver;
@@ -25,14 +25,14 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 
+import org.opensilk.bundleable.Bundleable;
+import org.opensilk.bundleable.BundleableListSlice;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.rx.RxLoader;
 import org.opensilk.common.core.util.Preconditions;
-import org.opensilk.bundleable.BundleableListSlice;
 import org.opensilk.music.library.internal.IBundleableObserver;
 import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.provider.LibraryExtras;
-import org.opensilk.bundleable.Bundleable;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;

@@ -53,8 +53,8 @@ dependencies {
 
     compile project(':common-core')
     compile project(':core-library')
+    compile project(':core-library-client')
     compile project(':core-lastfm')
-    compile project(':core-loader')
     compile project(':core-artwork')
 
     testCompile (group:"junit", name:"junit", version: rootProject.ext.testJunitVersion)

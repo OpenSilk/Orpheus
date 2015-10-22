@@ -33,8 +33,7 @@ import org.opensilk.music.library.LibraryProviderInfo;
 import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.library.provider.LibraryUris;
-import org.opensilk.music.loader.BundleableLoader;
-import org.opensilk.music.loader.TypedBundleableLoader;
+import org.opensilk.music.library.client.BundleableLoader;
 import org.opensilk.music.model.Container;
 import org.opensilk.bundleable.Bundleable;
 

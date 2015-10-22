@@ -15,13 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.loader;
+package org.opensilk.music.library.client;
 
 import android.content.Context;
 import android.net.Uri;
 
-import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.bundleable.Bundleable;
+import org.opensilk.common.core.dagger2.ForApplication;
 
 import javax.inject.Inject;
 

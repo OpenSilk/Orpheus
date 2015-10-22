@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 OpenSilk Productions LLC
+ * Copyright (c) 2015 OpenSilk Productions LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.loader;
+package org.opensilk.music.library.client;
 
 import android.annotation.TargetApi;
 import android.content.ComponentName;
@@ -26,20 +26,14 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.util.VersionUtils;
-import org.opensilk.music.AppPreferences;
-import org.opensilk.music.library.LibraryCapability;
-import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryProviderInfo;
 import org.opensilk.music.library.provider.LibraryProvider;
-import org.opensilk.music.library.provider.LibraryProviderOld;
-import org.opensilk.music.library.provider.LibraryUris;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -50,23 +44,18 @@ import rx.functions.Func1;
 import rx.functions.Func2;
 import timber.log.Timber;
 
-import static org.opensilk.music.library.provider.LibraryMethods.CONFIG;
-
 /**
  * Created by drew on 11/15/14.
  */
 public class LibraryProviderInfoLoader {
 
     final Context context;
-    final AppPreferences settings;
 
     @Inject
     public LibraryProviderInfoLoader(
-            @ForApplication Context context,
-            AppPreferences settings
+            @ForApplication Context context
     ) {
         this.context = context;
-        this.settings = settings;
     }
 
     public Observable<List<LibraryProviderInfo>> getActivePlugins() {
@@ -104,7 +93,7 @@ public class LibraryProviderInfoLoader {
     }
 
     private Observable<LibraryProviderInfo> _makeObservable() {
-        final List<String> disabledPlugins = settings.readDisabledPlugins();
+        final List<String> disabledPlugins = Collections.emptyList();// settings.readDisabledPlugins();
         return Observable.create(new Observable.OnSubscribe<List<ProviderInfo>>() {
             @Override
             public void call(Subscriber<? super List<ProviderInfo>> subscriber) {
@@ -158,7 +147,7 @@ public class LibraryProviderInfoLoader {
 
     @TargetApi(19)
     private Observable<LibraryProviderInfo> makeObservableApi19() {
-        final List<String> disabledPlugins = settings.readDisabledPlugins();
+        final List<String> disabledPlugins = Collections.emptyList();// settings.readDisabledPlugins();
         return Observable.create(new Observable.OnSubscribe<List<ResolveInfo>>() {
             @Override
             public void call(Subscriber<? super List<ResolveInfo>> subscriber) {
