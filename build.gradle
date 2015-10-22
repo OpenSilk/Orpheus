@@ -36,6 +36,8 @@ ext.commonsLangVersion = "3.3.2"
 ext.butterKnifeVersion = "6.0.0"
 ext.commonsIoVersion = "2.4"
 ext.gsonVersion = "2.3"
+ext.okHttpVersion = "2.5.0"
+ext.okIoVersion = "1.6.0"
 
 ext.testJunitVersion = "4.12"
 ext.testAssertJVersion = "1.7.0"
