@@ -15,28 +15,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.lastfm;
+package org.opensilk.music.okhttp;
 
-import org.opensilk.common.core.dagger2.AppContextModule;
-import org.opensilk.music.okhttp.OkHttpComponent;
+import android.content.Context;
+
+import com.squareup.okhttp.Cache;
+import com.squareup.okhttp.OkHttpClient;
+
+import org.opensilk.common.core.dagger2.ForApplication;
+
+import java.io.File;
 
 import javax.inject.Singleton;
 
-import dagger.Component;
-import de.umass.lastfm.LastFM;
+import dagger.Module;
+import dagger.Provides;
 
 /**
- * Extend to provide LastFM to child scopes
- *
- * Created by drew on 9/1/15.
+ * Created by drew on 10/22/15.
  */
-@Singleton
-@Component(
-        modules = {
-                AppContextModule.class,
-                LastFMModule.class
-        }
-)
-public interface LastFMComponent extends OkHttpComponent {
-    LastFM lastFM();
+@Module
+public class OkHttpModule {
+
+    static final int _8MB = 8*1024*1024;
+
+    @Provides @Singleton
+    public OkHttpClient provideOkClient(@ForApplication Context context) {
+        final File cacheDir = new File(context.getCacheDir(), "okhttp/1");
+        final OkHttpClient client = new OkHttpClient();
+        client.setCache(new Cache(cacheDir, _8MB));
+        return client;
+    }
 }

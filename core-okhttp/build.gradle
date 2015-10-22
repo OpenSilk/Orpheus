@@ -43,32 +43,13 @@ android {
         targetCompatibility JavaVersion.VERSION_1_7
     }
 
-    if (file('../../KeyStore').exists()) {
-        def Properties otherProps = new Properties();
-        otherProps.load(new FileInputStream(file('../../KeyStore/orpheus.properties')))
-        defaultConfig.buildConfigField "String", "LASTFM_KEY", otherProps.lastfmKey
-    } else {
-        println "No KeyStore directory found! (You can ignore this warning if your name is not drew)"
-        defaultConfig.buildConfigField "String", "LASTFM_KEY", "null"
-    }
-
     defaultPublishConfig "debug"
 
 }
 
 dependencies {
     provided(group: 'com.google.dagger', name:'dagger-compiler', version: rootProject.ext.dagger2Version)
-
-    compile 'com.squareup.retrofit:retrofit:2.0.0-beta2'
-    compile 'com.squareup.retrofit:adapter-rxjava:2.0.0-beta2'
-
+    compile (group: 'com.squareup.okhttp', name:'okhttp', version: rootProject.ext.okHttpVersion)
+    compile (group: 'com.squareup.okio', name:'okio', version: rootProject.ext.okIoVersion)
     compile project(':common-core')
-    compile project(':core-okhttp')
-
-    testCompile (group:"junit", name:"junit", version: rootProject.ext.testJunitVersion)
-    testCompile (group:"org.assertj", name:"assertj-core", version: rootProject.ext.testAssertJVersion)
-    testCompile (group:"org.robolectric", name:"robolectric", version : rootProject.ext.testRobolectricVersion)
-    testCompile (group:"org.mockito", name:"mockito-core", version: rootProject.ext.testMockitoVersion)
-    testCompile "commons-io:commons-io:2.4"
-    testCompile 'com.squareup.okhttp:mockwebserver:2.5.0'
 }

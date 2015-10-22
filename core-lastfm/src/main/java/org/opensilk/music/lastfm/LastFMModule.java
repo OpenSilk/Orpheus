@@ -17,18 +17,14 @@
 
 package org.opensilk.music.lastfm;
 
-import android.content.Context;
-
-import com.squareup.okhttp.Cache;
 import com.squareup.okhttp.HttpUrl;
 import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
-import org.opensilk.common.core.dagger2.ForApplication;
+import org.opensilk.music.okhttp.OkHttpModule;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 
@@ -46,15 +42,16 @@ import timber.log.Timber;
 /**
  * Created by drew on 9/16/15.
  */
-@Module
+@Module(
+        includes = OkHttpModule.class
+)
 public class LastFMModule {
 
-    static final int _8MB = 8*1024*1024;
 
     @Provides @Singleton
     public LastFM provideLastFM(
             final @Named("LFMEndpoint") String endpoint,
-            OkHttpClient client
+            @Named("LastFM") OkHttpClient client
     ) {
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -76,15 +73,13 @@ public class LastFMModule {
         return BuildConfig.LASTFM_KEY;
     }
 
-    @Provides @Singleton
+    @Provides @Singleton @Named("LastFM")
     public OkHttpClient provideOkHttpClient(
-            @ForApplication Context context,
+            OkHttpClient okHttpClient,
             final @Named("LFMApiKey") String apiKey,
             final @Named("LFMEndpoint") String endpoint
     ) {
-        final File cacheDir = new File(context.getCacheDir(), "okhttp/1");
-        final OkHttpClient client = new OkHttpClient();
-        client.setCache(new Cache(cacheDir, _8MB));
+        OkHttpClient client = okHttpClient.clone();
         client.interceptors().add(new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {
