@@ -393,7 +393,7 @@ public class PlaybackService {
         //Always build with default first to ensure it shows promptly
         mSessionHolder.setMetadata(new MediaMetadataCompat.Builder(meta).putBitmap(
                 MediaMetadataCompat.METADATA_KEY_ART, bitmap.getBitmap()).build());
-        if (!bitmap.fromCache()) {
+        if (!bitmap.fromCache() && artUri != null) {
             //Then go for artwork, since it could take a while
             mArtworkSubscription = mArtworkHelper.getArtwork(artUri)
                     .observeOn(getScheduler())

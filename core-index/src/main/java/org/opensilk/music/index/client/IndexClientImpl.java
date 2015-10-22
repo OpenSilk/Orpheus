@@ -66,15 +66,15 @@ import rx.functions.Func0;
 import rx.functions.Func1;
 import timber.log.Timber;
 
-import static android.media.MediaMetadata.METADATA_KEY_ALBUM;
-import static android.media.MediaMetadata.METADATA_KEY_ALBUM_ARTIST;
-import static android.media.MediaMetadata.METADATA_KEY_ALBUM_ART_URI;
-import static android.media.MediaMetadata.METADATA_KEY_ARTIST;
-import static android.media.MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE;
-import static android.media.MediaMetadata.METADATA_KEY_DISPLAY_TITLE;
-import static android.media.MediaMetadata.METADATA_KEY_DURATION;
-import static android.media.MediaMetadata.METADATA_KEY_MEDIA_ID;
-import static android.media.MediaMetadata.METADATA_KEY_TITLE;
+import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_ALBUM;
+import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST;
+import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI;
+import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_ARTIST;
+import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE;
+import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE;
+import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_DURATION;
+import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_MEDIA_ID;
+import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_TITLE;
 
 /**
  * Created by drew on 9/17/15.
@@ -335,15 +335,17 @@ public class IndexClientImpl implements IndexClient {
                 //convert tracks to descriptions on the fly then add them all to the final list
                 for (Track track : tracks) {
                     Timber.d("track=%s", track.toString());
-                    MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
+                    MediaDescriptionCompat.Builder description = new MediaDescriptionCompat.Builder()
                             .setTitle(track.getName())
                             .setSubtitle(track.getArtistName())
-                            .setMediaId(track.getUri().toString())
-                            .setIconUri(UtilsArt.makeBestfitArtInfo(track.getAlbumArtistName(),
-                                    track.getArtistName(), track.getAlbumName(),
-                                    track.getArtworkUri()).asUri(artworkAuthority))
-                            .build();
-                    mediaDescriptions.add(description);
+                            .setMediaId(track.getUri().toString());
+                    ArtInfo artInfo = UtilsArt.makeBestfitArtInfo(track.getAlbumArtistName(),
+                            track.getArtistName(), track.getAlbumName(),
+                            track.getArtworkUri());
+                    if (artInfo != ArtInfo.NULLINSTANCE) {
+                        description.setIconUri(artInfo.asUri(artworkAuthority));
+                    }
+                    mediaDescriptions.add(description.build());
                 }
             }
         });
@@ -353,7 +355,7 @@ public class IndexClientImpl implements IndexClient {
     public MediaMetadataCompat convertToMediaMetadata(Track track) {
         Track t = track;
         Track.Res r = track.getResources().get(0);
-        MediaMetadataCompat m = new MediaMetadataCompat.Builder()
+        MediaMetadataCompat.Builder m = new MediaMetadataCompat.Builder()
                 .putString(METADATA_KEY_MEDIA_ID, track.getUri().toString())
                 .putString(METADATA_KEY_TITLE, t.getName())
                 .putString(METADATA_KEY_DISPLAY_TITLE, t.getName())
@@ -364,13 +366,13 @@ public class IndexClientImpl implements IndexClient {
                         StringUtils.isEmpty(t.getAlbumArtistName())
                                 ? t.getArtistName() : t.getAlbumArtistName())
                 .putString(METADATA_KEY_ALBUM, t.getAlbumName())
-                .putLong(METADATA_KEY_DURATION, r.getDuration())
-                .putString(METADATA_KEY_ALBUM_ART_URI, UtilsArt
-                        .makeBestfitArtInfo(track.getAlbumArtistName(),
-                                track.getArtistName(), track.getAlbumName(),
-                                track.getArtworkUri()).asUri(artworkAuthority).toString())
-                .build();
-        return m;
+                .putLong(METADATA_KEY_DURATION, r.getDuration());
+        ArtInfo artInfo = UtilsArt.makeBestfitArtInfo(track.getAlbumArtistName(),
+                track.getArtistName(), track.getAlbumName(), track.getArtworkUri());
+        if (artInfo != ArtInfo.NULLINSTANCE) {
+            m.putString(METADATA_KEY_ALBUM_ART_URI, artInfo.asUri(artworkAuthority).toString());
+        }
+        return m.build();
     }
 
     @Override
