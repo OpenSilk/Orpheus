@@ -17,19 +17,24 @@
 
 package org.opensilk.music.ui3.library;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.PopupMenu;
+import android.view.MenuItem;
 
 import org.opensilk.common.core.dagger2.SubScreenScope;
 import org.opensilk.common.core.rx.RxLoader;
 import org.opensilk.music.R;
+import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryProviderInfo;
 import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.loader.BundleableLoader;
+import org.opensilk.music.loader.TypedBundleableLoader;
 import org.opensilk.music.model.Container;
 import org.opensilk.bundleable.Bundleable;
 
@@ -42,7 +47,7 @@ import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Subscriber;
-import rx.functions.Action1;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
@@ -123,12 +128,29 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
         subscribeRoots();
     }
 
+    void populateMenu(Context context, PopupMenu popupMenu) {
+        LibraryConfig config = parentPresenter.getConfig(providerInfo.getAuthority());
+        if (config.hasFlag(LibraryConfig.FLAG_REQUIRES_AUTH)) {
+            popupMenu.inflate(R.menu.popup_login);
+        }
+    }
+
+    void handlePopupItemClick(Context context, MenuItem item) {
+        LibraryConfig config = parentPresenter.getConfig(providerInfo.getAuthority());
+        switch (item.getItemId()) {
+            case R.id.popup_menu_login: {
+                getParent().startLoginActivity(config);
+                break;
+            }
+        }
+    }
+
     LibraryScreenPresenter getParent() {
         return parentPresenter;
     }
 
     void subscribeRoots() {
-        subscriptions.add(loader.getListObservable()
+        subscriptions.add(loader.createObservable()
                 .map(new Func1<List<Bundleable>, List<Container>>() {
                     @Override
                     public List<Container> call(List<Bundleable> bundleables) {
@@ -141,6 +163,7 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
                         return containers;
                     }
                 })
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<List<Container>>() {
                     @Override
                     public void onCompleted() {
@@ -150,6 +173,9 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
                     @Override
                     public void onError(Throwable throwable) {
                         Timber.w(throwable, "getRootListing(%s)", providerInfo.getAuthority());
+                        rootsList.clear();
+                        clearAdapterOnload = true;
+                        String msg = throwable.getMessage();
                         if (throwable instanceof LibraryException) {
                             LibraryException e = (LibraryException) throwable;
                             if (e.getCode() == LibraryException.Kind.AUTH_FAILURE) {
@@ -158,9 +184,10 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
                                     return;
                                 }
                             }
+                            msg = e.getCause().getMessage();
                         }
                         if (hasView()) {
-                            getView().setRetry();
+                            getView().setError(msg);
                         }
                     }
 
@@ -174,5 +201,7 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
                     }
                 }));
     }
+
+
 
 }

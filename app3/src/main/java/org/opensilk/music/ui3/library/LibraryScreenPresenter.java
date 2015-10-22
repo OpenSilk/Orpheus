@@ -17,7 +17,9 @@
 
 package org.opensilk.music.ui3.library;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -26,8 +28,10 @@ import android.view.ViewGroup;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
+import org.opensilk.common.ui.mortar.ActivityResultsListener;
 import org.opensilk.common.ui.mortar.LayoutCreator;
 import org.opensilk.common.ui.mortar.MortarContextFactory;
+import org.opensilk.common.ui.mortar.ScreenScoper;
 import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.common.ui.mortarfragment.MortarFragment;
 import org.opensilk.common.ui.util.ViewUtils;
@@ -38,11 +42,13 @@ import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.loader.LibraryProviderInfoLoader;
 import org.opensilk.music.model.Container;
+import org.opensilk.music.ui3.common.ActivityRequestCodes;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
+import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.functions.Action1;
 import timber.log.Timber;
@@ -59,9 +65,8 @@ public class LibraryScreenPresenter extends ViewPresenter<LibraryScreenView> {
     final FragmentManagerOwner fm;
     final ActivityResultsController activityResultsController;
 
-    //TODO inject these
-    final MortarContextFactory contextFactory = new MortarContextFactory();
-    final LayoutCreator layoutCreator = new LayoutCreator();
+    MortarContextFactory contextFactory;
+    LayoutCreator layoutCreator;
 
     @Inject
     public LibraryScreenPresenter(
@@ -76,6 +81,22 @@ public class LibraryScreenPresenter extends ViewPresenter<LibraryScreenView> {
         this.settings = settings;
         this.fm = fm;
         this.activityResultsController = activityResultsController;
+    }
+
+    @Override
+    protected void onEnterScope(MortarScope scope) {
+        super.onEnterScope(scope);
+        if (scope.hasService(LayoutCreator.SERVICE_NAME)) {
+            layoutCreator = LayoutCreator.getService(scope);
+        } else {
+            layoutCreator = new LayoutCreator();
+        }
+        if (scope.hasService(ScreenScoper.SERVICE_NAME)) {
+            ScreenScoper screenScoper = ScreenScoper.getService(scope);
+            contextFactory = new MortarContextFactory(screenScoper);
+        } else {
+            contextFactory = new MortarContextFactory();
+        }
     }
 
     @Override
@@ -101,15 +122,21 @@ public class LibraryScreenPresenter extends ViewPresenter<LibraryScreenView> {
     }
 
     void onRootClick(View view, Container root) {
-        Uri callUri = LibraryUris.call(root.getUri().getAuthority());
-        Bundle config = appContext.getContentResolver().call(callUri,
-                LibraryMethods.CONFIG, null, null);
-        if (config == null) {
-            Timber.e("Unable to get library config");
-            return; //TODO notify user
-        }
-        MortarFragment f = FoldersScreenFragment.ni(appContext, LibraryConfig.materialize(config), root);
+        LibraryConfig config = getConfig(root.getUri().getAuthority());
+        MortarFragment f = FoldersScreenFragment.ni(appContext, config, root);
         fm.replaceMainContent(f, true);
     }
 
+    public LibraryConfig getConfig(String authority) {
+        Bundle reply = appContext.getContentResolver()
+                .call(LibraryUris.call(authority),
+                        LibraryMethods.CONFIG, null, null);
+        return LibraryConfig.materialize(reply);
+    }
+
+    public void startLoginActivity(LibraryConfig config) {
+        Intent intent = new Intent().setComponent(config.getLoginComponent());
+        activityResultsController.startActivityForResult(intent, ActivityRequestCodes.LIBRARY_PICKER, null);
+        //todo handle result heere
+    }
 }

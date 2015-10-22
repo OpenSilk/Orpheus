@@ -46,13 +46,6 @@
                 style="@style/mtrl.SingleLineListItemTextView"
                 tools:text="Titel"/>
 
-            <Button
-                android:id="@+id/btn_login"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/libraries_login"
-                style="?android:buttonStyleSmall"/>
-
             <ImageButton
                 android:id="@+id/btn_retry"
                 android:layout_width="wrap_content"
@@ -73,6 +66,15 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             style="?android:progressBarStyle"/>
+
+        <TextView
+            android:id="@+id/error_msg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="16dp"
+            android:textColor="@color/red2_500"
+            android:visibility="gone"/>
 
         <LinearLayout
             android:id="@+id/roots_container"

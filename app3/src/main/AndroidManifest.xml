@@ -165,7 +165,7 @@
             android:authorities="${applicationId}.provider.foldersLibrary"
             android:permission="${applicationId}.permission.LIBRARY_FULL_ACCESS"
             android:name="org.opensilk.music.library.mediastore.provider.FoldersLibraryProvider"
-            tools:replace="authorities,permission"/>
+            tools:replace="authorities"/>
 
         <!--Index provider-->
         <provider
@@ -178,7 +178,14 @@
             android:authorities="${applicationId}.provider.upnp"
             android:permission="${applicationId}.permission.LIBRARY_FULL_ACCESS"
             android:name="org.opensilk.music.library.upnp.provider.UpnpCDProvider"
-            tools:replace="authorities,permission"/>
+            tools:replace="authorities"/>
+
+        <!--Google drive provider-->
+        <provider
+            android:authorities="${applicationId}.provider.driveLibrary"
+            android:permission="${applicationId}.permission.LIBRARY_FULL_ACCESS"
+            android:name="org.opensilk.music.library.drive.provider.DriveLibraryProvider"
+            tools:replace="authorities"/>
 
         <!--Android auto-->
         <meta-data android:name="com.google.android.gms.car.application"

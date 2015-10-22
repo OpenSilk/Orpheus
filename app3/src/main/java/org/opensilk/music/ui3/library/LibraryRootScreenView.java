@@ -19,10 +19,11 @@ package org.opensilk.music.ui3.library;
 
 import android.content.Context;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.PopupMenu;
 import android.util.AttributeSet;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -55,10 +56,10 @@ public class LibraryRootScreenView extends CardView {
     @InjectView(R.id.title) TextView title;
     @InjectView(R.id.avatar) ImageView avatar;
     @InjectView(R.id.loading_progress) ProgressBar progress;
-    @InjectView(R.id.btn_login) Button loginBtn;
     @InjectView(R.id.btn_retry) ImageButton retryBtn;
     @InjectView(R.id.tile_overflow) View overflow;
     @InjectView(R.id.roots_container) ViewGroup rootsContainer;
+    @InjectView(R.id.error_msg) TextView errorMsg;
 
     final CompositeSubscription clicksSubs = new CompositeSubscription();
 
@@ -80,6 +81,15 @@ public class LibraryRootScreenView extends CardView {
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (!isInEditMode()) {
+            mPresenter.takeView(this);
+        }
+        subscribeClicks();
+    }
+
+    @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mPresenter.dropView(this);
@@ -91,14 +101,17 @@ public class LibraryRootScreenView extends CardView {
                 .subscribe(new Action1<ViewClickEvent>() {
                     @Override
                     public void call(ViewClickEvent viewClickEvent) {
-                        //TODO;
-                    }
-                }));
-        clicksSubs.add(RxView.clickEvents(loginBtn)
-                .subscribe(new Action1<ViewClickEvent>() {
-                    @Override
-                    public void call(ViewClickEvent viewClickEvent) {
-
+                        final View view = viewClickEvent.view();
+                        PopupMenu popupMenu = new PopupMenu(getContext(), view);
+                        mPresenter.populateMenu(getContext(), popupMenu);
+                        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                            @Override
+                            public boolean onMenuItemClick(MenuItem item) {
+                                mPresenter.handlePopupItemClick(getContext(), item);
+                                return true;
+                            }
+                        });
+                        popupMenu.show();
                     }
                 }));
         clicksSubs.add(RxView.clickEvents(retryBtn)
@@ -136,25 +149,33 @@ public class LibraryRootScreenView extends CardView {
             ));
             rootsContainer.addView(tv);
         }
-        setRetry();
+        showRetry();
     }
 
     void setloading() {
         progress.setVisibility(VISIBLE);
-        loginBtn.setVisibility(GONE);
+        errorMsg.setVisibility(GONE);
         retryBtn.setVisibility(GONE);
     }
 
     void setNeedsAuth() {
         progress.setVisibility(GONE);
-        loginBtn.setVisibility(VISIBLE);
+        errorMsg.setText("Authorization failed");
+        errorMsg.setVisibility(VISIBLE);
         retryBtn.setVisibility(GONE);
         clearRoots();
     }
 
-    void setRetry() {
+    void showRetry() {
         progress.setVisibility(GONE);
-        loginBtn.setVisibility(GONE);
+        errorMsg.setVisibility(GONE);
         retryBtn.setVisibility(VISIBLE);
+    }
+
+    void setError(String msg) {
+        showRetry();
+        clearRoots();
+        errorMsg.setText(msg);
+        errorMsg.setVisibility(VISIBLE);
     }
 }

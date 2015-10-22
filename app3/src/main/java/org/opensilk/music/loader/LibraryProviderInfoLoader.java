@@ -129,6 +129,7 @@ public class LibraryProviderInfoLoader {
         }).map(new Func1<ProviderInfo, LibraryProviderInfo>() {
             @Override
             public LibraryProviderInfo call(ProviderInfo providerInfo) {
+                Timber.i("Found plugin %s", providerInfo.authority);
                 final PackageManager pm = context.getPackageManager();
                 final String authority = providerInfo.authority;
                 final CharSequence title = providerInfo.loadLabel(pm);
@@ -183,6 +184,7 @@ public class LibraryProviderInfoLoader {
         }).map(new Func1<ResolveInfo, LibraryProviderInfo>() {
             @Override
             public LibraryProviderInfo call(ResolveInfo resolveInfo) {
+                Timber.i("Found plugin %s", resolveInfo.providerInfo.authority);
                 ProviderInfo providerInfo = resolveInfo.providerInfo;
                 final PackageManager pm = context.getPackageManager();
                 final String authority = providerInfo.authority;

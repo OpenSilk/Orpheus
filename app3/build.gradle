@@ -157,8 +157,9 @@ dependencies {
     compile project(':library-mediastore')
     compile project(':core-index')
     compile project(':library-upnp')
+    compile project(':library-googledrive')
 
-    compile 'com.android.support:multidex:1.0.0'
+    compile 'com.android.support:multidex:1.0.1'
 
     testCompile('junit:junit:4.12')
     testCompile('org.robolectric:robolectric:2.4') {
