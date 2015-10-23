@@ -23,7 +23,6 @@ import android.os.Bundle;
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.ui3.common.BundleableFragment;
 
 /**

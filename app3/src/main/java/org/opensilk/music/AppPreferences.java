@@ -29,7 +29,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.app.PreferencesWrapper;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.model.sort.BaseSortOrder;
 import org.opensilk.music.ui.theme.OrpheusTheme;
 import org.opensilk.music.ui3.index.GalleryPage;
@@ -301,28 +300,6 @@ public class AppPreferences extends PreferencesWrapper {
         } catch (Exception e) {
             Timber.w(e, "Unable to serialize %s", Arrays.toString(authorities.toArray()));
         }
-    }
-
-    public LibraryInfo getLibraryInfo(LibraryConfig pluginInfo, String pref) {
-        String json = getString(makePluginPrefKey(pluginInfo, pref), null);
-        if (json == null) return null;
-        try {
-            return gson.fromJson(json, LibraryInfo.class);
-        } catch (Exception e) {
-            removeLibraryInfo(pluginInfo, pref);
-            return null;
-        }
-    }
-
-    public void setLibraryInfo(LibraryConfig pluginInfo, String pref, LibraryInfo libraryInfo) {
-        String json = gson.toJson(libraryInfo);
-        if (json != null) {
-            putString(makePluginPrefKey(pluginInfo, pref), json);
-        }
-    }
-
-    public void removeLibraryInfo(LibraryConfig pluginInfo, String pref) {
-        remove(makePluginPrefKey(pluginInfo, pref));
     }
 
     public String makePluginPrefKey(LibraryConfig libraryConfig, String key) {

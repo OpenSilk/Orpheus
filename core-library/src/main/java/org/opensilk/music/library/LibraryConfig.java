@@ -86,14 +86,14 @@ public class LibraryConfig {
     }
 
     /**
-     * Checks if an {@link LibraryCapability} is declared
+     * Checks if a flag is declared
      */
     public boolean hasFlag(long flag) {
         return (flags & flag) != 0;
     }
 
     /**
-     * @return Bitmask of {@link LibraryCapability}s
+     * @return Bitmask of flags
      */
     public long getFlags() {
         return flags;
@@ -143,14 +143,7 @@ public class LibraryConfig {
     }
 
     /**
-     * Component for activity to allow user to choose from available libraries.
-     * The activity should be of Dialog Style, and should take care of everything needed
-     * to allow user to access the library, including selecting from an available library (or
-     * account) and any auth/sign in required. The activity must return {@link android.app.Activity#RESULT_OK}
-     * with the extra {@link LibraryConstants#EXTRA_LIBRARY_ID} in the Intent containing the identity Orpheus will pass
-     * to all subsequent calls. Or pass a {@link org.opensilk.music.library.LibraryInfo} as the extra
-     * {@link LibraryConstants#EXTRA_LIBRARY_INFO} with the {@link org.opensilk.music.library.LibraryInfo#libraryId}
-     * and {@link org.opensilk.music.library.LibraryInfo#libraryName} populated.
+     * Component for activity to any auth/sign in required to access library
      * <p>
      * Although not required, it is preferable the activity utilizes
      * {@link LibraryConstants#EXTRA_WANT_LIGHT_THEME} to style the activity to match the
@@ -205,6 +198,13 @@ public class LibraryConfig {
             return this;
         }
 
+        /**
+         * Component for login activity.
+         * <p>
+         * Although not required, it is preferable the activity utilizes
+         * {@link LibraryConstants#EXTRA_WANT_LIGHT_THEME} to style the activity to match the
+         * current Orpheus theme.
+         */
         public Builder setLoginComponent(ComponentName component) {
             setFlag(FLAG_REQUIRES_AUTH);
             meta.putParcelable(META_LOGIN_COMPONENT, component);
@@ -212,9 +212,7 @@ public class LibraryConfig {
         }
 
         /**
-         * Component for settings activity. The settings activity must process the
-         * {@link LibraryConstants#EXTRA_LIBRARY_ID} and only manipulate preferences concerning the
-         * given identity.
+         * Component for settings activity.
          * <p>
          * Although not required, it is preferable the activity utilizes
          * {@link LibraryConstants#EXTRA_WANT_LIGHT_THEME} to style the activity to match the

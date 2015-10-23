@@ -18,9 +18,7 @@
 package org.opensilk.music.library.internal;
 
 import android.net.Uri;
-import android.os.Binder;
-import android.os.Bundle;
-import android.os.RemoteException;
+import android.os.*;
 import android.util.Log;
 
 import org.opensilk.music.library.provider.LibraryExtras;
@@ -39,9 +37,9 @@ public class DeleteSubscriber extends Subscriber<List<Uri>> {
     public static final int ERROR = 2;
     public static final int COMPLETE = 3;
 
-    final ResultReceiver resultReceiver;
+    final android.os.ResultReceiver resultReceiver;
 
-    public DeleteSubscriber(ResultReceiver resultReceiver) {
+    public DeleteSubscriber(android.os.ResultReceiver resultReceiver) {
         this.resultReceiver = resultReceiver;
     }
 

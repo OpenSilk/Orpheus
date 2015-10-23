@@ -30,21 +30,6 @@ public interface LibraryConstants {
      */
     int API_VERSION_MINOR = 3;
     /**
-     * Intent extra containing {@link String} library identity, used in multiple places
-     */
-    @Deprecated
-    String EXTRA_LIBRARY_ID = "org.opensilk.music.library.extra.LIBRARY_ID";
-    /**
-     * Intent extra containing the {@link org.opensilk.music.library.LibraryInfo}
-     */
-    @Deprecated
-    String EXTRA_LIBRARY_INFO = "org.opensilk.music.api.LIBRARY_INFO";
-    /**
-     * Intent extra containing the library's content authority
-     */
-    @Deprecated
-    String EXTRA_LIBRARY_AUTHORITY = "org.opensilk.music.library.extra.LIBRARY_AUTHORITY";
-    /**
      * Intent extra passed by Orpheus to plugin activities to help them determine whether to use light or dark themes
      */
     String EXTRA_WANT_LIGHT_THEME = "org.opensilk.music.library.extra.WANT_LIGHT_THEME";

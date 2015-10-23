@@ -7,6 +7,3 @@ and override at a minimum listObjs(), getObj(), and listRoots()...
 
 There is much more to be said here. Will update once api is more finalized
 email me if you have questions
-
-TODOS
-    remove LibraryProviderOld and other deprecated classes

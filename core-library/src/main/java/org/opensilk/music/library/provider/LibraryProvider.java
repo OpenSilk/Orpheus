@@ -23,6 +23,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.ResultReceiver;
 import android.util.Log;
 
 import org.opensilk.music.library.LibraryConfig;
@@ -32,7 +33,6 @@ import org.opensilk.music.library.internal.BundleableListTransformer;
 import org.opensilk.music.library.internal.BundleableSubscriber;
 import org.opensilk.music.library.internal.DeleteSubscriber;
 import org.opensilk.music.library.internal.LibraryException;
-import org.opensilk.music.library.internal.ResultReceiver;
 import org.opensilk.music.model.sort.BaseSortOrder;
 import org.opensilk.music.model.Container;
 

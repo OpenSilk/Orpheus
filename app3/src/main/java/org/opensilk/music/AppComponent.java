@@ -63,6 +63,5 @@ public interface AppComponent extends AppContextComponent, ArtworkRequestorCompo
     void inject(App app);
     AppPreferences appPreferences();
     PlaybackController playbackController();
-    @Named("mediaStoreLibraryAuthority") String mediaStoreLibraryAuthority();
     @Named("IndexProviderAuthority") String indexProviderAuthority();
 }
