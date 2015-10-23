@@ -48,7 +48,8 @@ public class ItemClickSupport {
 
         @Override
         public void onChildViewDetachedFromWindow(View view) {
-
+            view.setOnClickListener(null);
+            view.setOnLongClickListener(null);
         }
     };
 
