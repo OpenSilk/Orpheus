@@ -19,6 +19,7 @@ package org.opensilk.music.index.client;
 
 import android.annotation.TargetApi;
 import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.media.browse.MediaBrowser;
 import android.net.Uri;
@@ -39,6 +40,7 @@ import org.opensilk.music.artwork.UtilsArt;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.index.provider.Methods;
 import org.opensilk.bundleable.BundleableListSlice;
+import org.opensilk.music.library.client.BundleableObserver;
 import org.opensilk.music.library.internal.IBundleableObserver;
 import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.provider.LibraryExtras;
@@ -54,7 +56,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Singleton;
 
 import hugo.weaving.DebugLog;
 import rx.Observable;
@@ -77,13 +78,12 @@ import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_TITLE;
 /**
  * Created by drew on 9/17/15.
  */
-@Singleton
 public class IndexClientImpl implements IndexClient {
 
     final Context appContext;
     final Uri callUri;
     final String artworkAuthority;
-    ContentProviderClient client;
+    ClientCompat client;
 
 
     @Inject
@@ -93,7 +93,7 @@ public class IndexClientImpl implements IndexClient {
             @Named("artworkauthority") String artworkAuthority
     ) {
         this.appContext = appContext;
-        callUri = IndexUris.call(authority);
+        this.callUri = IndexUris.call(authority);
         this.artworkAuthority = artworkAuthority;
     }
 
@@ -244,31 +244,11 @@ public class IndexClientImpl implements IndexClient {
         return Observable.create(new Observable.OnSubscribe<List<Track>>() {
             @Override
             public void call(final Subscriber<? super List<Track>> subscriber) {
-                final IBundleableObserver o = new IBundleableObserver.Stub() {
-                    @DebugLog
-                    @Override public void onNext(BundleableListSlice slice) throws RemoteException {
-                        List<Track> list = new ArrayList<>(slice.getList());
-                        if (!subscriber.isUnsubscribed()) {
-                            subscriber.onNext(list);
-                        }
-                    }
-                    @Override public void onError(LibraryException e) throws RemoteException {
-                        if (!subscriber.isUnsubscribed()) {
-                            subscriber.onError(e);
-                        }
-                    }
-                    @Override public void onCompleted() throws RemoteException {
-                        if (!subscriber.isUnsubscribed()) {
-                            subscriber.onCompleted();
-                        }
-                    }
-                };
-
+                final IBundleableObserver o = new BundleableObserver<Track>(subscriber);
                 final Bundle extras = LibraryExtras.b()
                         .putUriList(queue)
                         .putBundleableObserverCallback(o)
                         .get();
-
                 Bundle repl = makeCall(Methods.GET_TRACK_LIST, extras);
                 if (!checkCall(repl) && !subscriber.isUnsubscribed()) {
                     subscriber.onError(new Exception("Call failed"));
@@ -374,6 +354,17 @@ public class IndexClientImpl implements IndexClient {
     }
 
     @Override
+    public void connect() {
+        if (client == null) {
+            if (VersionUtils.hasJellyBeanMR1()) {
+                client = new ClientCompatJBMR1(appContext, callUri);
+            } else {
+                client = new ClientCompatBase(appContext, callUri);
+            }
+        }
+    }
+
+    @Override
     public void release() {
         synchronized (this) {
             if (client != null) {
@@ -387,24 +378,13 @@ public class IndexClientImpl implements IndexClient {
         return checkCall(makeCall(method, args));
     }
 
-    @TargetApi(17)
     private Bundle makeCall(String method, Bundle args) {
-        if (VersionUtils.hasJellyBeanMR1()) {
-            if (client == null) {
-                synchronized (this) {
-                    if (client == null) {
-                        client = appContext.getContentResolver().acquireUnstableContentProviderClient(callUri);
-                    }
-                }
-            }
-            try {
-                return client.call(method, null, args);
-            } catch (RemoteException e) {
-                release();
-                return makeCall(method, args);
-            }
-        } else {
-            return appContext.getContentResolver().call(callUri, method, null, args);
+        connect();
+        try {
+            return client.call(method, args);
+        } catch (RemoteException e) {
+            release();
+            return makeCall(method, args);
         }
     }
 
@@ -416,4 +396,48 @@ public class IndexClientImpl implements IndexClient {
         return LibraryExtras.getOk(result);
     }
 
+    interface ClientCompat {
+        Bundle call(String method, Bundle args) throws RemoteException;
+        void release();
+    }
+
+    static class ClientCompatBase implements ClientCompat {
+        final ContentResolver contentResolver;
+        final Uri callUri;
+
+        public ClientCompatBase(Context context, Uri callUri) {
+            this.contentResolver = context.getContentResolver();
+            this.callUri = callUri;
+        }
+
+        @Override
+        public Bundle call(String method, Bundle args) throws RemoteException {
+            return contentResolver.call(callUri, method, null, args);
+        }
+
+        @Override
+        public void release() {
+            //noop
+        }
+    }
+
+    @TargetApi(17)
+    static class ClientCompatJBMR1 implements ClientCompat {
+        final ContentProviderClient client;
+
+        public ClientCompatJBMR1(Context context, Uri callUri) {
+            this.client = context.getContentResolver()
+                    .acquireContentProviderClient(callUri);
+        }
+
+        @Override
+        public Bundle call(String method, Bundle args) throws RemoteException {
+            return client.call(method, null, args);
+        }
+
+        @Override
+        public void release() {
+            client.release();
+        }
+    }
 }

@@ -87,5 +87,6 @@ public interface IndexClient {
     Observable<List<Uri>> getTrackUris(Uri uri, String sordOrder);
     MediaMetadataCompat convertToMediaMetadata(Track track);
 
+    void connect();
     void release();
 }
