@@ -29,6 +29,7 @@ import android.view.View;
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.rx.RxLoader;
+import org.opensilk.common.core.rx.RxUtils;
 import org.opensilk.common.core.rx.SimpleObserver;
 import org.opensilk.common.ui.mortar.ActionBarMenuHandler;
 import org.opensilk.common.ui.mortar.ActionModePresenter;
@@ -37,6 +38,7 @@ import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
+import org.opensilk.music.index.client.IndexClient;
 import org.opensilk.music.library.client.BundleableLoader;
 import org.opensilk.bundleable.Bundleable;
 import org.opensilk.music.model.Model;
@@ -75,12 +77,16 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
     protected final List<Bundleable> loaderSeed;
     protected final ActionModePresenter actionModePresenter;
     protected final PlaybackController playbackController;
+    protected final IndexClient indexClient;
+
 
     protected boolean wantGrid;
     protected boolean wantsNumberedTracks;
 
     protected Subscription subscription;
     protected boolean adapterIsDirty;
+
+    private boolean isLoading;
 
     @Inject
     public BundleablePresenter(
@@ -91,7 +97,8 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
             BundleablePresenterConfig config,
             @Named("loader_uri") Uri uri,
             ActionModePresenter actionModePresenter,
-            PlaybackController playbackController
+            PlaybackController playbackController,
+            IndexClient indexClient
     ) {
         this.preferences = preferences;
         this.requestor = requestor;
@@ -104,6 +111,7 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
         this.actionModePresenter = actionModePresenter;
         this.playbackController = playbackController;
         this.wantsNumberedTracks = config.wantsNumberedTracks;
+        this.indexClient = indexClient;
     }
 
     @Override
@@ -115,6 +123,15 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
     protected void onEnterScope(MortarScope scope) {
         super.onEnterScope(scope);
         loader.addContentChangedListener(this);
+        indexClient.connect();
+    }
+
+    @Override
+    protected void onExitScope() {
+        super.onExitScope();
+        RxUtils.unsubscribe(subscription);
+        loader.removeContentChangedListener(this);
+        indexClient.release();
     }
 
     @Override
@@ -122,15 +139,9 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
     protected void onLoad(Bundle savedInstanceState) {
         super.onLoad(savedInstanceState);
         setupRecyclerView(false);
-//        if (savedInstanceState != null) {
-//            addAll(BundleableUtil.unflatten(savedInstanceState));
-//            getView().setListShown(true, false);
-//            adapterIsDirty = true;
-//        } else {
-            getView().setLoading(true);
-//        }
-        if (notSubscribed(subscription)) {
+        if (!isLoading) {
             load();
+            getView().showLoading();
         }
     }
 
@@ -138,26 +149,14 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
     @DebugLog
     protected void onSave(Bundle outState) {
         super.onSave(outState);
-//        if (hasView()) {
-//            BundleableUtil.flatten(outState, getView().getAdapter().getItems());
-//        }
-    }
-
-    @Override
-    protected void onExitScope() {
-        super.onExitScope();
-        if (subscription != null) subscription.unsubscribe();
-        loader.removeContentChangedListener(this);
     }
 
     protected void setupRecyclerView(boolean clear) {
         if (hasView()) {
             getView().setupRecyclerView();
             if (clear) {
-                if (isSubscribed(subscription)) {
-                    subscription.unsubscribe();
-                }
                 adapterIsDirty = true;
+                RxUtils.unsubscribe(subscription);
                 load();
             }
         }
@@ -168,47 +167,33 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
         setupRecyclerView(true);
     }
 
-    protected void showRecyclerView() {
-        if (hasView()) {
-            getView().setListShown(true, true);
-        }
-    }
-
-    protected void showEmptyView() {
-        if (hasView()) {
-            setEmptyText();
-            getView().setListEmpty(true, true);
-        }
-    }
-
-    protected void setEmptyText() {
-        if (hasView()) {
-            getView().setEmptyText(R.string.empty_music);
-        }
-    }
-
     // start the loader
     @DebugLog
     protected void load() {
+        isLoading = true;
         subscription = loader.getListObservable().subscribe(new SimpleObserver<List<Bundleable>>() {
             @Override
             @DebugLog
             public void onNext(List<Bundleable> bundleables) {
-                if (!loaderSeed.isEmpty()) {
-                    List<Bundleable> toadd = new ArrayList<>(loaderSeed.size() + bundleables.size());
-                    toadd.addAll(loaderSeed);
-                    toadd.addAll(bundleables);
-                    addAll(toadd);
-                } else {
-                    addAll(bundleables);
-                }
+                addAll(bundleables);
             }
 
             @Override
             public void onCompleted() {
-                if (hasView() && getView().getAdapter().isEmpty()){
-                    showEmptyView();
+                if (hasView() && getView().getAdapter().isEmpty()) {
+                    getView().setEmptyText(R.string.empty_music);
+                    getView().showEmpty(true);
                 }
+                isLoading = false;
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                if (hasView()) {
+                    getView().setEmptyText(R.string.error_loading_list);
+                    getView().showEmpty(true);
+                }
+                isLoading = false;
             }
         });
     }
@@ -216,9 +201,7 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
     // cancels any ongoing load and starts a new one
     @DebugLog
     public void reload() {
-        if (isSubscribed(subscription)) {
-            subscription.unsubscribe();
-        }
+        RxUtils.unsubscribe(subscription);
         adapterIsDirty = true;
         loader.reset();
         load();
@@ -229,11 +212,18 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
             if (adapterIsDirty) {
                 adapterIsDirty = false;
                 getView().notifyAdapterResetIncoming();
-                getView().getAdapter().replaceAll(collection);
+                if (!loaderSeed.isEmpty()) {
+                    List<Bundleable> toAdd = new ArrayList<>(loaderSeed.size() + collection.size());
+                    toAdd.addAll(loaderSeed);
+                    toAdd.addAll(collection);
+                    getView().getAdapter().replaceAll(toAdd);
+                } else {
+                    getView().getAdapter().replaceAll(collection);
+                }
             } else {
                 getView().getAdapter().addAll(collection);
             }
-            showRecyclerView();
+            getView().showList(true);
         }
     }
 
@@ -245,7 +235,7 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
                 getView().getAdapter().clear();
             }
             getView().getAdapter().addItem(item);
-            showRecyclerView();
+            getView().showList(true);
         }
     }
 
@@ -312,6 +302,10 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
 
     public PlaybackController getPlaybackController() {
         return playbackController;
+    }
+
+    public IndexClient getIndexClient() {
+        return indexClient;
     }
 
     public void onFabClicked(View view) {

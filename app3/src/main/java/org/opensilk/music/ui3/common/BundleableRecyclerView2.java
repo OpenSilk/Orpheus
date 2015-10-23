@@ -24,10 +24,10 @@ import android.content.Context;
  */
 public interface BundleableRecyclerView2 {
     Context getContext();
-    void setLoading(boolean loading);
+    void showLoading();
     void setupRecyclerView();
-    void setListShown(boolean show, boolean animate);
-    void setListEmpty(boolean show, boolean animate);
+    void showList(boolean animate);
+    void showEmpty(boolean animate);
     void setEmptyText(int resId);
     BundleableRecyclerAdapter getAdapter();
     void notifyAdapterResetIncoming();

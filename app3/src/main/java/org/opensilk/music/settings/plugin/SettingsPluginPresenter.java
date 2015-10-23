@@ -58,7 +58,7 @@ public class SettingsPluginPresenter extends ViewPresenter<SettingsPluginRecycle
             public void call(List<LibraryProviderInfo> libraryProviderInfos) {
                 if (hasView()) {
                     getView().getAdapter().replaceAll(libraryProviderInfos);
-                    getView().setListShown(true, false);
+                    getView().showList(false);
                 }
             }
         }, new Action1<Throwable>() {
@@ -70,7 +70,7 @@ public class SettingsPluginPresenter extends ViewPresenter<SettingsPluginRecycle
             @Override
             public void call() {
                 if (hasView() && getView().getAdapter().isEmpty()) {
-                    getView().setListEmpty(true, false);
+                    getView().showEmpty(false);
                     //TODO
                 }
             }

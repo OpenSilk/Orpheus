@@ -19,26 +19,18 @@ package org.opensilk.music;
 
 import android.content.ComponentCallbacks2;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.os.Environment;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.app.BaseApp;
 import org.opensilk.common.core.app.SimpleComponentCallbacks;
 import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.music.artwork.fetcher.ArtworkFetcherService;
-import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
-import org.opensilk.music.index.client.IndexClient;
 import org.opensilk.music.playback.PlaybackComponent;
-import org.opensilk.music.playback.service.PlaybackServiceComponent;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-
-import javax.inject.Inject;
 
 import hugo.weaving.DebugLog;
 import rx.functions.Action1;
@@ -46,8 +38,6 @@ import timber.log.Timber;
 
 public class App extends BaseApp {
     private static final boolean DEBUG = BuildConfig.DEBUG;
-
-    @Inject IndexClient mIndexClient;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -143,10 +133,7 @@ public class App extends BaseApp {
         public void onTrimMemory(int level) {
             Timber.d("Trim memory for process %s", getProcName());
             if (level >= TRIM_MEMORY_UI_HIDDEN) {
-                if (isUiProcess()) {
-                    //todo find a better place for this
-                    mIndexClient.release();
-                }
+
             }
         }
     };

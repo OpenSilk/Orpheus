@@ -64,9 +64,10 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
     final Uri rootUri;
 
     final CompositeSubscription subscriptions = new CompositeSubscription();
+    final ArrayList<Container> rootsList = new ArrayList<>();
 
     boolean clearAdapterOnload = true;
-    ArrayList<Container> rootsList = new ArrayList<>();
+    boolean isLoading;
 
     @Inject
     public LibraryRootScreenPresenter(
@@ -88,21 +89,27 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
     }
 
     @Override
+    @DebugLog
+    protected void onExitScope() {
+        super.onExitScope();
+        subscriptions.clear();
+        loader.removeContentChangedListener(this);
+    }
+
+    @Override
     protected void onLoad(Bundle savedInstanceState) {
         super.onLoad(savedInstanceState);
         getView().title.setText(providerInfo.getTitle());
         Drawable d = providerInfo.getIcon();
         if (d == null) {
-            d = ContextCompat.getDrawable(getView().getContext(), R.drawable.ic_extension_grey600_24dp);
+            d = ContextCompat.getDrawable(getView().getContext(), R.drawable.puzzle_grey600_36dp);
         }
         getView().avatar.setImageDrawable(d);
         if (!rootsList.isEmpty()) {
             getView().addRoots(rootsList, clearAdapterOnload);
             clearAdapterOnload = false;
-        } else if (!subscriptions.hasSubscriptions()) {
+        } else if (isLoading) {
             subscribeRoots();
-            getView().setloading();
-        } else {
             getView().setloading();
         }
     }
@@ -113,18 +120,14 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
     }
 
     @Override
-    protected void onExitScope() {
-        super.onExitScope();
-        subscriptions.clear();
-    }
-
-    @Override
     @DebugLog
     public void reload() {
         subscriptions.clear();
-        if (hasView()) getView().setloading();
         clearAdapterOnload = true;
         subscribeRoots();
+        if (hasView()) {
+            getView().setloading();
+        }
     }
 
     void populateMenu(Context context, PopupMenu popupMenu) {
@@ -149,7 +152,8 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
     }
 
     void subscribeRoots() {
-        subscriptions.add(loader.createObservable()
+        isLoading = true;
+        subscriptions.add(loader.getListObservable()
                 .map(new Func1<List<Bundleable>, List<Container>>() {
                     @Override
                     public List<Container> call(List<Bundleable> bundleables) {
@@ -162,11 +166,10 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
                         return containers;
                     }
                 })
-                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<List<Container>>() {
                     @Override
                     public void onCompleted() {
-//                        clearAdapterOnload = true;
+                        isLoading = false;
                     }
 
                     @Override
@@ -192,6 +195,7 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
 
                     @Override
                     public void onNext(List<Container> roots) {
+                        isLoading = false;
                         rootsList.addAll(roots);
                         if (hasView()) {
                             getView().addRoots(roots, clearAdapterOnload);
@@ -200,7 +204,5 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
                     }
                 }));
     }
-
-
 
 }

@@ -175,17 +175,17 @@ public class ProfileView2Portrait extends CoordinatorLayout implements Bundleabl
     }
 
     @Override
-    public void setLoading(boolean loading) {
+    public void showLoading() {
 
     }
 
     @Override
-    public void setListShown(boolean show, boolean animate) {
+    public void showList(boolean animate) {
 
     }
 
     @Override
-    public void setListEmpty(boolean show, boolean animate) {
+    public void showEmpty(boolean animate) {
 
     }
 

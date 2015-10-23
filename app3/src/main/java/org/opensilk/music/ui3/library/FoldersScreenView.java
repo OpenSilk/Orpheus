@@ -24,6 +24,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
+import android.view.View;
+import android.widget.ProgressBar;
 
 import com.jakewharton.rxbinding.view.RxView;
 import com.jakewharton.rxbinding.view.ViewClickEvent;
@@ -31,6 +33,7 @@ import com.jakewharton.rxbinding.view.ViewClickEvent;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.ToolbarOwner;
+import org.opensilk.common.ui.recycler.RecyclerListCoordinator;
 import org.opensilk.common.ui.widget.FloatingActionButtonCheckable;
 import org.opensilk.music.R;
 import org.opensilk.music.index.client.IndexClient;
@@ -50,25 +53,25 @@ import rx.subscriptions.CompositeSubscription;
 /**
  * Created by drew on 9/17/15.
  */
-public class FoldersScreenView extends CoordinatorLayout implements BundleableRecyclerView2 {
+public class FoldersScreenView extends RecyclerListCoordinator implements BundleableRecyclerView2 {
 
     @Inject BundleablePresenter mPresenter;
     @Inject BundleableRecyclerAdapter mAdapter;
     @Inject ToolbarOwner mToolbarOwner;
     @Inject @Named("folders_title") String mTitle;
     @Inject Container mThisContainer;
-    @Inject IndexClient mIndexClient;
 
     @InjectView(R.id.toolbar) Toolbar mToolbar;
-    @InjectView(R.id.recyclerview) RecyclerView mList;
     @InjectView(R.id.floating_action_button) FloatingActionButtonCheckable mFab;
 
     CompositeSubscription mSubscriptions = new CompositeSubscription();
 
     public FoldersScreenView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        FoldersScreenComponent component = DaggerService.getDaggerComponent(getContext());
-        component.inject(this);
+        if (!isInEditMode()) {
+            FoldersScreenComponent component = DaggerService.getDaggerComponent(getContext());
+            component.inject(this);
+        }
     }
 
     @Override
@@ -76,9 +79,11 @@ public class FoldersScreenView extends CoordinatorLayout implements BundleableRe
         super.onFinishInflate();
         ButterKnife.inject(this);
         initRecyclerView();
-        mPresenter.takeView(this);
         updateFab();
         subscribeClicks();
+        if (!isInEditMode()) {
+            mPresenter.takeView(this);
+        }
     }
 
     @Override
@@ -141,31 +146,8 @@ public class FoldersScreenView extends CoordinatorLayout implements BundleableRe
         return mPresenter;
     }
 
-    RecyclerView getListView() {
-        return mList;
-    }
-
-    @Override
-    public void setLoading(boolean loading) {
-
-    }
-
-    @Override
-    public void setListShown(boolean show, boolean animate) {
-
-    }
-
-    @Override
-    public void setListEmpty(boolean show, boolean animate) {
-
-    }
-
-    @Override
-    public void setEmptyText(int resId) {
-    }
-
     void updateFab() {
-        mFab.setChecked(mIndexClient.isIndexed(mThisContainer));
+        mFab.setChecked(mPresenter.getIndexClient().isIndexed(mThisContainer));
     }
 
     void subscribeClicks() {
@@ -173,11 +155,11 @@ public class FoldersScreenView extends CoordinatorLayout implements BundleableRe
                 new Action1<ViewClickEvent>() {
                     @Override
                     public void call(ViewClickEvent onClickEvent) {
-                        if (!mIndexClient.isIndexed(mThisContainer)) {
-                            mIndexClient.add(mThisContainer);
+                        if (!mPresenter.getIndexClient().isIndexed(mThisContainer)) {
+                            mPresenter.getIndexClient().add(mThisContainer);
                             mFab.setChecked(true);
                         } else {
-                            mIndexClient.remove(mThisContainer);
+                            mPresenter.getIndexClient().remove(mThisContainer);
                             //TODO show toast
                             mFab.setChecked(false);
                         }

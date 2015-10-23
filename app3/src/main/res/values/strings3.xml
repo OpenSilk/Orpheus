@@ -40,4 +40,7 @@
 
     <!--menus-->
     <string name="menu_login">Login</string>
+
+    <!--lists-->
+    <string name="error_loading_list">There was an error loading the items.</string>
 </resources>
