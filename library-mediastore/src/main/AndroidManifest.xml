@@ -20,18 +20,10 @@
 
     <application>
 
-        <activity android:name=".ui.FakeStorageActivity"
-            android:theme="@android:style/Theme.NoDisplay"
-            android:process=":ui"/>
-
-        <activity android:name=".ui.StoragePickerActivity"
-            android:theme="@style/FoldersThemeTranslucentDark"
-            android:process=":ui"/>
-
         <provider
             android:authorities="override_me"
             android:name=".provider.FoldersLibraryProvider"
-            android:icon="@drawable/ic_folder_grey600_24dp"
+            android:icon="@drawable/folder_grey600_36dp"
             android:label="@string/folders_library_label"
             android:description="@string/folders_library_description"
             android:exported="false"

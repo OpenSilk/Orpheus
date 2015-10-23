@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.library.mediastore;
+package org.opensilk.music.library.mediastore.provider;
 
 import javax.inject.Scope;
 
@@ -23,5 +23,5 @@ import javax.inject.Scope;
  * Created by drew on 5/4/15.
  */
 @Scope
-public @interface MediaStoreLibraryScope {
+public @interface FoldersLibraryScope {
 }

@@ -26,7 +26,6 @@ import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.internal.LibraryException;
-import org.opensilk.music.library.mediastore.MediaStoreLibraryComponent;
 import org.opensilk.music.library.mediastore.R;
 import org.opensilk.music.library.mediastore.util.CursorHelpers;
 import org.opensilk.music.library.mediastore.util.FilesHelper;
@@ -60,14 +59,8 @@ public class FoldersLibraryProvider extends LibraryProvider {
 
     @Override
     public boolean onCreate() {
-        final AppContextComponent acc;
-        if (MediaStoreLibraryProvider.TESTING) {
-            Timber.plant(new Timber.DebugTree());
-            acc = AppContextComponent.FACTORY.call(getContext());
-        } else {
-            acc = DaggerService.getDaggerComponent(getContext());
-        }
-        MediaStoreLibraryComponent.FACTORY.call(acc).inject(this);
+        final AppContextComponent acc = DaggerService.getDaggerComponent(getContext());
+        FoldersLibraryComponent.FACTORY.call(acc).inject(this);
         super.onCreate();
         mUriMatcher = FoldersUris.makeMatcher(mAuthority);
         return true;

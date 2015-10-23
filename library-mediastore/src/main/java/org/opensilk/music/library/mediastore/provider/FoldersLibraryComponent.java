@@ -15,12 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.library.mediastore;
+package org.opensilk.music.library.mediastore.provider;
 
 import org.opensilk.common.core.dagger2.AppContextComponent;
-import org.opensilk.music.library.mediastore.provider.FoldersLibraryProvider;
-import org.opensilk.music.library.mediastore.provider.MediaStoreLibraryProvider;
-import org.opensilk.music.library.mediastore.ui.StoragePickerActivity;
+import org.opensilk.music.library.mediastore.MediaStoreLibraryAuthorityModule;
 
 import dagger.Component;
 import rx.functions.Func1;
@@ -28,24 +26,22 @@ import rx.functions.Func1;
 /**
  * Created by drew on 5/4/15.
  */
-@MediaStoreLibraryScope
+@FoldersLibraryScope
 @Component(
         dependencies = AppContextComponent.class,
         modules = {
                 MediaStoreLibraryAuthorityModule.class,
         }
 )
-public interface MediaStoreLibraryComponent extends AppContextComponent {
-    Func1<AppContextComponent, MediaStoreLibraryComponent> FACTORY =
-            new Func1<AppContextComponent, MediaStoreLibraryComponent>() {
+public interface FoldersLibraryComponent extends AppContextComponent {
+    Func1<AppContextComponent, FoldersLibraryComponent> FACTORY =
+            new Func1<AppContextComponent, FoldersLibraryComponent>() {
                 @Override
-                public MediaStoreLibraryComponent call(AppContextComponent appContextComponent) {
-                    return DaggerMediaStoreLibraryComponent.builder()
+                public FoldersLibraryComponent call(AppContextComponent appContextComponent) {
+                    return DaggerFoldersLibraryComponent.builder()
                             .appContextComponent(appContextComponent)
                             .build();
                 }
             };
-    void inject(MediaStoreLibraryProvider provider);
     void inject(FoldersLibraryProvider provider);
-    void inject(StoragePickerActivity activity);
 }

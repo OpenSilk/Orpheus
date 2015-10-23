@@ -1,8 +1,5 @@
 This library provides tracks stored on the devices sdcard.
 
-Orpheus is still in a transition phase so most of this library
-is scheduled for removal.
-
 The provider of interest is the FoldersLibraryProvider. It works
 by querying some hidden apis via the StorageLookup class. And provides
 storages as roots ie Internal(emulated)storage, each sdcard, and even
@@ -21,4 +18,3 @@ mediastore for metadata and fallback to basic info we can get from the File obje
 TODOS
     Use mediastore ids for everything, this will make uris more stable
     Add missing files and directories to the mediastore
-    Remove mediastorelibraryprovider and friends

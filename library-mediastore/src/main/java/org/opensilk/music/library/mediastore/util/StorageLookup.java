@@ -25,8 +25,7 @@ import android.text.TextUtils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.music.library.LibraryInfo;
-import org.opensilk.music.library.mediastore.MediaStoreLibraryScope;
+import org.opensilk.music.library.mediastore.provider.FoldersLibraryScope;
 import org.opensilk.music.library.mediastore.R;
 
 import java.io.File;
@@ -44,7 +43,7 @@ import timber.log.Timber;
 /**
  * Created by drew on 4/28/15.
  */
-@MediaStoreLibraryScope
+@FoldersLibraryScope
 public class StorageLookup {
 
     public static final int DEFAULT_PRIMARY_STORAGE_ID = 0;
