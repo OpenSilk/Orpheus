@@ -23,18 +23,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.RemoteException;
 
 import org.opensilk.bundleable.Bundleable;
-import org.opensilk.bundleable.BundleableListSlice;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.rx.RxLoader;
 import org.opensilk.common.core.util.Preconditions;
 import org.opensilk.music.library.internal.IBundleableObserver;
-import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.provider.LibraryExtras;
 
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,6 +42,7 @@ import rx.Scheduler;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Func0;
 import rx.functions.Func1;
 import timber.log.Timber;
 
@@ -96,6 +93,7 @@ public class TypedBundleableLoader<T extends Bundleable> implements RxLoader<T> 
 
     public Observable<List<T>> getListObservable() {
         registerContentObserver();
+        //The reason we cache it is for layout changes
         if (cachedObservable == null) {
             cachedObservable = createObservable()
                     .doOnError(new Action1<Throwable>() {
@@ -105,7 +103,6 @@ public class TypedBundleableLoader<T extends Bundleable> implements RxLoader<T> 
                             dump(throwable);
                         }
                     })
-                    .onErrorResumeNext(Observable.<List<T>>empty())
                     .observeOn(observeOnScheduler)
                     .cache();
         }
@@ -122,45 +119,42 @@ public class TypedBundleableLoader<T extends Bundleable> implements RxLoader<T> 
     }
 
     public Observable<List<T>> createObservable() {
-        return Observable.create(new Observable.OnSubscribe<List<T>>() {
-            @Override
-            public void call(final Subscriber<? super List<T>> subscriber) {
-                final IBundleableObserver o = new IBundleableObserver.Stub() {
+        return Observable.using(
+                new Func0<LibraryClient>() {
                     @Override
-                    public void onNext(BundleableListSlice slice) throws RemoteException {
-                        List<T> list = new ArrayList<>(slice.getList());
-                        if (!subscriber.isUnsubscribed()) {
-                            subscriber.onNext(list);
-                        }
+                    public LibraryClient call() {
+                        //We use a client to help ensure the provider
+                        //wont disappear while sending us the list
+                        return LibraryClient.create(context, uri);
                     }
-
+                },
+                new Func1<LibraryClient, Observable<? extends List<T>>>() {
                     @Override
-                    public void onError(LibraryException e) throws RemoteException {
-                        if (!subscriber.isUnsubscribed()) {
-                            subscriber.onError(e);
-                        }
+                    public Observable<? extends List<T>> call(final LibraryClient libraryClient) {
+                        return Observable.create(new Observable.OnSubscribe<List<T>>() {
+                            @Override
+                            public void call(final Subscriber<? super List<T>> subscriber) {
+                                IBundleableObserver callback = new BundleableObserver<T>(subscriber);
+                                LibraryExtras.Builder extras = LibraryExtras.b()
+                                        .putUri(uri)
+                                        .putSortOrder(sortOrder)
+                                        .putBundleableObserverCallback(callback);
+                                Bundle ok = libraryClient.makeCall(method, extras.get());
+                                if (!LibraryExtras.getOk(ok)) {
+                                    subscriber.onError(LibraryExtras.getCause(ok));
+                                }
+                            }
+                        });
                     }
-
+                },
+                new Action1<LibraryClient>() {
                     @Override
-                    public void onCompleted() throws RemoteException {
-                        if (!subscriber.isUnsubscribed()) {
-                            subscriber.onCompleted();
-                        }
+                    public void call(LibraryClient libraryClient) {
+                        libraryClient.release();
                     }
-                };
-
-                final Bundle extras = LibraryExtras.b()
-                        .putUri(uri)
-                        .putSortOrder(sortOrder)
-                        .putBundleableObserverCallback(o)
-                        .get();
-
-                Bundle ok = context.getContentResolver().call(uri, method, null, extras);
-                if (!LibraryExtras.getOk(ok)) {
-                    subscriber.onError(LibraryExtras.getCause(ok));
-                }
-            }
-        });
+                },
+                true //We may not receive an unsubscribe
+        );
     }
 
     public void reset() {
