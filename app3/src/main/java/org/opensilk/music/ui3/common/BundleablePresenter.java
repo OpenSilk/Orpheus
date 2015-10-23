@@ -56,6 +56,7 @@ import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.Presenter;
 import mortar.bundler.BundleService;
+import rx.Subscriber;
 import rx.Subscription;
 
 import static org.opensilk.common.core.rx.RxUtils.isSubscribed;
@@ -140,8 +141,8 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
         super.onLoad(savedInstanceState);
         setupRecyclerView(false);
         if (!isLoading) {
-            load();
             getView().showLoading();
+            load();
         }
     }
 
@@ -171,7 +172,7 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
     @DebugLog
     protected void load() {
         isLoading = true;
-        subscription = loader.getListObservable().subscribe(new SimpleObserver<List<Bundleable>>() {
+        subscription = loader.getListObservable().subscribe(new Subscriber<List<Bundleable>>() {
             @Override
             @DebugLog
             public void onNext(List<Bundleable> bundleables) {
@@ -180,20 +181,20 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
 
             @Override
             public void onCompleted() {
+                isLoading = false;
                 if (hasView() && getView().getAdapter().isEmpty()) {
                     getView().setEmptyText(R.string.empty_music);
                     getView().showEmpty(true);
                 }
-                isLoading = false;
             }
 
             @Override
             public void onError(Throwable e) {
+                isLoading = false;
                 if (hasView()) {
                     getView().setEmptyText(R.string.error_loading_list);
                     getView().showEmpty(true);
                 }
-                isLoading = false;
             }
         });
     }
