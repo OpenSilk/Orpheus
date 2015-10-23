@@ -35,7 +35,6 @@ import org.fourthline.cling.android.AndroidUpnpService;
 import org.fourthline.cling.model.action.ActionInvocation;
 import org.fourthline.cling.model.message.UpnpResponse;
 import org.fourthline.cling.model.message.header.UDAServiceTypeHeader;
-import org.fourthline.cling.model.message.header.UDNHeader;
 import org.fourthline.cling.model.meta.RemoteDevice;
 import org.fourthline.cling.model.meta.RemoteService;
 import org.fourthline.cling.model.types.UDAServiceType;
@@ -91,6 +90,7 @@ import rx.functions.Func0;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
+import timber.log.Timber;
 
 /**
  * Created by drew on 9/17/15.
@@ -293,7 +293,7 @@ public class UpnpCDProvider extends LibraryProvider {
             //check cache first
             final RemoteDevice rd = upnpService.getRegistry().getRemoteDevice(udn, false);
             if (rd != null) {
-                final RemoteService rs = rd.findService(new UDAServiceType("ContentDirectory", 1));
+                final RemoteService rs = rd.findService(sCDServiceType);
                 if (rs != null) {
                     subscriber.onNext(rs);
                     subscriber.onCompleted();
@@ -305,10 +305,12 @@ public class UpnpCDProvider extends LibraryProvider {
                 AtomicBoolean once = new AtomicBoolean(true);
                 @Override
                 public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
-                    final RemoteService rs = device.findService(new UDAServiceType("ContentDirectory", 1));
-                    if (rs != null && once.compareAndSet(true, false)) {
-                        subscriber.onNext(rs);
-                        subscriber.onCompleted();
+                    if (udn.equals(device.getIdentity().getUdn())) {
+                        final RemoteService rs = device.findService(sCDServiceType);
+                        if (rs != null && once.compareAndSet(true, false)) {
+                            subscriber.onNext(rs);
+                            subscriber.onCompleted();
+                        }
                     }
                 }
             };
@@ -321,7 +323,9 @@ public class UpnpCDProvider extends LibraryProvider {
             }));
             //register listener
             upnpService.getRegistry().addListener(listener);
-            upnpService.getControlPoint().search(new UDNHeader(udn));
+            Timber.d("Sending a new search for %s", udn);
+//            upnpService.getControlPoint().search(new UDNHeader(udn));//doesnt work
+            upnpService.getControlPoint().search(new UDAServiceTypeHeader(sCDServiceType));
         }
     }
 
