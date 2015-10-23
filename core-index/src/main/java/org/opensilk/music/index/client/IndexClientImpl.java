@@ -281,22 +281,29 @@ public class IndexClientImpl implements IndexClient {
                         }
                     }
                 }
-                List<Observable<List<Track>>> loaders = new ArrayList<>(unknowns.size());
-                //start with the tracks we have
-                if (!tracks.isEmpty()) {
-                    loaders.add(Observable.just(tracks));
-                }
                 //todo throw multiget into the mix
-                for (Uri uri : unknowns) {
-                    Timber.d("Fetching from library uri=%s", uri);
-                    loaders.add(TypedBundleableLoader.<Track>create(appContext)
-                            .setUri(uri).setMethod(LibraryMethods.GET)
-                            .createObservable());
-                }
+                Observable<Observable<List<Track>>> loaderCreator = Observable.from(unknowns)
+                        .map(new Func1<Uri, Observable<List<Track>>>() {
+                            @Override
+                            public Observable<List<Track>> call(final Uri uri) {
+                                //Use defer for lazy creation
+                                return Observable.defer(new Func0<Observable<List<Track>>>() {
+                                    @Override
+                                    public Observable<List<Track>> call() {
+                                        return TypedBundleableLoader.<Track>create(appContext)
+                                                .setUri(uri).setMethod(LibraryMethods.GET)
+                                                .createObservable();
+                                    }
+                                });
+                            }
+                        });
                 //we make requests for all the remaining uris and
                 //merge them into the same stream
-                return Observable.merge(loaders);
-
+                if (!tracks.isEmpty()) {
+                    return Observable.just(tracks).mergeWith(Observable.mergeDelayError(loaderCreator, 10));
+                } else {
+                    return Observable.mergeDelayError(loaderCreator, 10);
+                }
             }
             //we use collect here instead of map because the merge will
         }).collect(new Func0<List<MediaDescriptionCompat>>() {
