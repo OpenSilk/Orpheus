@@ -252,7 +252,7 @@ public class PlaybackController {
      */
 
     //exposed for testing
-    static final int maxListsize = 200;
+    static final int maxListsize = 500;
     /*package*/ static List<Uri> clampList(List<Uri> list, int startpos) {
         if (list.size() > maxListsize) {
             //XXX flood prevention
