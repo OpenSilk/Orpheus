@@ -25,17 +25,17 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.PopupMenu;
 import android.view.MenuItem;
 
+import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.dagger2.SubScreenScope;
 import org.opensilk.common.core.rx.RxLoader;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryProviderInfo;
+import org.opensilk.music.library.client.BundleableLoader;
 import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.library.provider.LibraryUris;
-import org.opensilk.music.library.client.BundleableLoader;
 import org.opensilk.music.model.Container;
-import org.opensilk.bundleable.Bundleable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,10 +46,8 @@ import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.subscriptions.CompositeSubscription;
-import timber.log.Timber;
 
 /**
  * Created by drew on 9/23/15.
@@ -108,10 +106,10 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
         if (!rootsList.isEmpty()) {
             getView().addRoots(rootsList, clearAdapterOnload);
             clearAdapterOnload = false;
-        } else if (isLoading) {
+        } else if (!isLoading) {
             subscribeRoots();
             getView().setloading();
-        }
+        }//else isLoading
     }
 
     @Override
@@ -174,7 +172,7 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
 
                     @Override
                     public void onError(Throwable throwable) {
-                        Timber.w(throwable, "getRootListing(%s)", providerInfo.getAuthority());
+                        isLoading = false;
                         rootsList.clear();
                         clearAdapterOnload = true;
                         String msg = throwable.getMessage();
@@ -195,7 +193,6 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
 
                     @Override
                     public void onNext(List<Container> roots) {
-                        isLoading = false;
                         rootsList.addAll(roots);
                         if (hasView()) {
                             getView().addRoots(roots, clearAdapterOnload);
