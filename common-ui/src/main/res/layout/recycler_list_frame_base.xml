@@ -22,34 +22,26 @@
        android:layout_width="match_parent"
        android:layout_height="match_parent">
 
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        style="@style/mtrl.List"/>
+
     <FrameLayout
-        android:id="@+id/list_container"
+        android:id="@+id/empty_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone">
 
-        <FrameLayout
-            android:id="@+id/empty_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/empty_text"
-                android:layout_width="240dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:textAppearance="?android:textAppearanceLarge"
-                android:textStyle="bold" />
-
-        </FrameLayout>
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recyclerview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            style="@style/mtrl.List"/>
+        <TextView
+            android:id="@+id/empty_text"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textAppearance="?android:textAppearanceMedium"
+            android:textStyle="bold" />
 
     </FrameLayout>
 

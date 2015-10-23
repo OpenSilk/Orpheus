@@ -17,11 +17,11 @@
 package org.opensilk.common.ui.recycler;
 
 import android.content.Context;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.AnimationUtils;
-import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -32,7 +32,7 @@ import butterknife.ButterKnife;
 /**
  * Created by drew on 11/24/14.
  */
-public class RecyclerListFrame extends FrameLayout {
+public class RecyclerListCoordinator extends CoordinatorLayout {
 
     protected RecyclerView mList;
     protected View mEmptyView;
@@ -43,7 +43,7 @@ public class RecyclerListFrame extends FrameLayout {
     protected boolean mListShown;
     protected boolean mEmptyShown;
 
-    public RecyclerListFrame(Context context, AttributeSet attrs) {
+    public RecyclerListCoordinator(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
