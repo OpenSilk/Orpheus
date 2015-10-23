@@ -40,6 +40,7 @@ import org.opensilk.music.playback.service.PlaybackServiceK;
 import org.opensilk.music.playback.service.PlaybackServiceL;
 import org.opensilk.music.playback.session.IMediaControllerProxy;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -203,7 +204,7 @@ public class PlaybackController {
     }
 
     public void enqueueAll(List<Uri> queue, int where) {
-        sendCustomAction(CMD.ENQUEUE, BundleHelper.builder().putInt(where).putList(queue).get());
+        sendCustomAction(CMD.ENQUEUE, BundleHelper.b().putList(clampList(queue, 0)).putInt(where).get());
     }
 
     public void enqueueAllNext(List<Uri> list) {
@@ -214,43 +215,16 @@ public class PlaybackController {
         enqueueAll(list, PlaybackConstants.ENQUEUE_LAST);
     }
 
-    @DebugLog
     public void playAll(List<Uri> list, int startpos) {
-        sendCustomAction(CMD.PLAY_ALL, BundleHelper.builder().putList(list).putInt(startpos).get());
-    }
-
-    public void shuffleAll(List<Uri> list) {
-        playAll(list, -1);
-    }
-
-    public void enqueueTracksFrom(Uri uri, int where, String sortorder) {
-        sendCustomAction(CMD.ENQUEUE_TRACKS_FROM, BundleHelper.builder()
-                .putUri(uri).putInt(where).putString(sortorder).get());
-    }
-
-    public void enqueueTracksNextFrom(Uri uri, String sortorder) {
-        enqueueTracksFrom(uri, PlaybackConstants.ENQUEUE_NEXT, sortorder);
-    }
-
-    public void addTracksToQueueFrom(Uri uri, String sortorder) {
-        enqueueTracksFrom(uri, PlaybackConstants.ENQUEUE_LAST, sortorder);
-    }
-
-    public void playTracksFrom(Uri uri, int startpos, String sortorder) {
-        sendCustomAction(CMD.PLAY_TRACKS_FROM, BundleHelper.builder()
-                .putUri(uri).putInt(startpos).putString(sortorder).get());
-    }
-
-    public void shuffleTracksFrom(Uri uri) {
-        playTracksFrom(uri, -1, null);
+        sendCustomAction(CMD.PLAY_ALL, BundleHelper.b().putList(clampList(list, startpos)).putInt(startpos).get());
     }
 
     public void removeQueueItem(Uri uri) {
-        sendCustomAction(CMD.REMOVE_QUEUE_ITEM, BundleHelper.builder().putUri(uri).get());
+        sendCustomAction(CMD.REMOVE_QUEUE_ITEM, BundleHelper.b().putUri(uri).get());
     }
 
     public void removeQueueItemAt(int pos) {
-        sendCustomAction(CMD.REMOVE_QUEUE_ITEM_AT, BundleHelper.builder().putInt(pos).get());
+        sendCustomAction(CMD.REMOVE_QUEUE_ITEM_AT, BundleHelper.b().putInt(pos).get());
     }
 
     public void clearQueue() {
@@ -258,15 +232,15 @@ public class PlaybackController {
     }
 
     public void moveQueueItemTo(Uri uri, int newPos) {
-        sendCustomAction(CMD.MOVE_QUEUE_ITEM_TO, BundleHelper.builder().putUri(uri).putInt(newPos).get());
+        sendCustomAction(CMD.MOVE_QUEUE_ITEM_TO, BundleHelper.b().putUri(uri).putInt(newPos).get());
     }
 
     public void moveQueueItem(int from, int to) {
-        sendCustomAction(CMD.MOVE_QUEUE_ITEM, BundleHelper.builder().putInt(from).putInt2(to).get());
+        sendCustomAction(CMD.MOVE_QUEUE_ITEM, BundleHelper.b().putInt(from).putInt2(to).get());
     }
 
     public void moveQueueItemToNext(int pos) {
-        sendCustomAction(CMD.MOVE_QUEUE_ITEM_TO_NEXT, BundleHelper.builder().putInt(pos).get());
+        sendCustomAction(CMD.MOVE_QUEUE_ITEM_TO_NEXT, BundleHelper.b().putInt(pos).get());
     }
 
     /*
@@ -276,6 +250,38 @@ public class PlaybackController {
     /*
      * Misc
      */
+
+    //exposed for testing
+    static final int maxListsize = 200;
+    /*package*/ static List<Uri> clampList(List<Uri> list, int startpos) {
+        if (list.size() > maxListsize) {
+            //XXX flood prevention
+            int start, end;
+            if ((startpos + maxListsize / 2) > list.size()) {
+                //start pos is too close to end of list
+                start = max(0, list.size() - maxListsize);
+                end = list.size();
+            } else if ((startpos - maxListsize / 2) < 0) {
+                //start pos is too close to start of list
+                start = 0;
+                end = min(list.size(), maxListsize);
+            } else {
+                //items surrounding are within list bounds (we clamp anyway to be safe)
+                start = max(0, startpos - maxListsize / 2);
+                end = min(list.size(), startpos + maxListsize / 2);
+            }
+            return list.subList(start, end);
+        }
+        return list;
+    }
+
+    private static int max(int i1, int i2) {
+        return i1 > i2 ? i1 : i2;
+    }
+
+    private static int min(int i1, int i2) {
+        return i1 < i2 ? i1 : i2;
+    }
 
     private void fetchRepeatMode() {
         if (hasController()) {
