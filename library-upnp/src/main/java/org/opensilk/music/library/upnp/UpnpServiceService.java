@@ -17,6 +17,7 @@
 
 package org.opensilk.music.library.upnp;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 
@@ -33,13 +34,14 @@ import org.fourthline.cling.model.types.ServiceType;
 import org.fourthline.cling.model.types.UDAServiceType;
 import org.fourthline.cling.registry.DefaultRegistryListener;
 import org.fourthline.cling.registry.Registry;
+import org.fourthline.cling.transport.impl.DatagramIOImpl;
 import org.fourthline.cling.transport.impl.RecoveringSOAPActionProcessorImpl;
+import org.fourthline.cling.transport.spi.DatagramIO;
 import org.fourthline.cling.transport.spi.SOAPActionProcessor;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.upnp.provider.UpnpCDUris;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -117,10 +119,6 @@ public class UpnpServiceService extends AndroidUpnpServiceImpl {
     @Override
     protected UpnpServiceConfiguration createConfiguration() {
         return new AndroidUpnpServiceConfiguration() {
-            @Override
-            protected ExecutorService createDefaultExecutorService() {
-                return new UpnpExecutor.ClingExecutor();
-            }
 
             @Override
             public ServiceType[] getExclusiveServiceTypes() {
@@ -139,7 +137,7 @@ public class UpnpServiceService extends AndroidUpnpServiceImpl {
                             super.readBody(responseMsg, actionInvocation);
                         } catch (Exception e) {
                             //Hack for X_GetFeatureList embedding this in the body
-                            String fixedBody = StringUtils.remove(getMessageBody(responseMsg), "<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+                            String fixedBody = StringUtils.remove(getMessageBody(responseMsg),"<?xml version=\"1.0\" encoding=\"utf-8\"?>");
                             responseMsg.setBody(fixedBody);
                             super.readBody(responseMsg, actionInvocation);
                         }
@@ -152,6 +150,23 @@ public class UpnpServiceService extends AndroidUpnpServiceImpl {
                 return 2500;//10000;
             }
         };
+    }
+
+    class UpnpRegistryListener extends DefaultRegistryListener {
+        @Override public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
+//            notifyUri(device.getIdentity().getUdn().getIdentifierString());
+        }
+        @Override public void remoteDeviceUpdated(Registry registry, RemoteDevice device) {
+//            notifyUri(device.getIdentity().getUdn().getIdentifierString());
+        }
+        @Override public void remoteDeviceRemoved(Registry registry, RemoteDevice device) {
+            notifyUri(device.getIdentity().getUdn().getIdentifierString());
+        }
+        @DebugLog
+        void notifyUri(String deviceId) {
+            getContentResolver().notifyChange(UpnpCDUris.makeUri(mUpnpCDAuthority, deviceId, null), null);
+            getContentResolver().notifyChange(LibraryUris.rootUri(mUpnpCDAuthority), null);
+        }
     }
 
     private void pokeService() {
@@ -186,22 +201,5 @@ public class UpnpServiceService extends AndroidUpnpServiceImpl {
                 stopSelf();
             }
         }, 20, TimeUnit.MINUTES);
-    }
-
-    class UpnpRegistryListener extends DefaultRegistryListener {
-        @Override public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
-//            notifyUri(device.getIdentity().getUdn().getIdentifierString());
-        }
-        @Override public void remoteDeviceUpdated(Registry registry, RemoteDevice device) {
-//            notifyUri(device.getIdentity().getUdn().getIdentifierString());
-        }
-        @Override public void remoteDeviceRemoved(Registry registry, RemoteDevice device) {
-            notifyUri(device.getIdentity().getUdn().getIdentifierString());
-        }
-        @DebugLog
-        void notifyUri(String deviceId) {
-            getContentResolver().notifyChange(UpnpCDUris.makeUri(mUpnpCDAuthority, deviceId, null), null);
-            getContentResolver().notifyChange(LibraryUris.rootUri(mUpnpCDAuthority), null);
-        }
     }
 }
