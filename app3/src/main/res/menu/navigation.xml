@@ -20,10 +20,10 @@
 
     <group android:checkableBehavior="single">
         <item android:id="@+id/my_library"
-            android:icon="@drawable/ic_my_library_music_grey600_24dp"
+            android:icon="@drawable/library_music_grey600_36dp"
             android:title="@string/my_library"/>
         <item android:id="@+id/libraries"
-            android:icon="@drawable/ic_folder_grey600_24dp"
+            android:icon="@drawable/puzzle_grey600_36dp"
             android:title="@string/libraries_title"/>
     </group>
 
