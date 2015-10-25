@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- drawable/library-music.xml -->
+<!-- drawable/playlist-play.xml -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:height="36dp"
     android:width="36dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
-    <path android:fillColor="@color/grey_600" android:pathData="@string/library_music_vector_path" />
+    <path android:fillColor="@color/grey_600" android:pathData="@string/playlist_play_vector_path" />
 </vector>
