@@ -42,6 +42,10 @@ public class Album extends Container {
         return metadata.getInt(Metadata.KEY_CHILD_TRACKS_COUNT);
     }
 
+    public Uri getTracksUri() {
+        return metadata.getUri(Metadata.KEY_CHILD_TRACKS_URI);
+    }
+
     public String getYear() {
         return metadata.getString(Metadata.KEY_RELEASE_YEAR);
     }
@@ -126,6 +130,11 @@ public class Album extends Container {
 
         public Builder setTrackCount(int trackCount) {
             bob.putInt(Metadata.KEY_CHILD_TRACKS_COUNT, trackCount);
+            return this;
+        }
+
+        public Builder setTracksUri(Uri uri) {
+            bob.putUri(Metadata.KEY_CHILD_TRACKS_URI, uri);
             return this;
         }
 
