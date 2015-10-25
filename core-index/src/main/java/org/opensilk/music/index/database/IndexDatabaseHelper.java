@@ -33,12 +33,19 @@ import javax.inject.Singleton;
 import timber.log.Timber;
 
 /**
+ * Note to the uninitiated (including you) invalid or 'bad' foreign keys
+ * in *any* table will throw an exception no matter what table you access
+ * (including unrelated ones) this can be very confusing and frustrating.
+ * Just remember. everything in here is working as expected.
+ * It is YOUR changes that fucked it up. If you don't believe me just
+ * stash your changes and rerun the tests to confirm
+ *
  * Created by drew on 8/25/15.
  */
 @Singleton
 public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
-    public static final int DB_VERSION = 33;
+    public static final int DB_VERSION = 35;
     public static final String DB_NAME = "music.db";
 
     @Inject
@@ -107,6 +114,14 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
         }
         if (oldVersion < 33) {
             db.execSQL("DROP VIEW IF EXISTS album_artist_info;");
+        }
+        if (oldVersion < 35) {
+            db.execSQL("DROP VIEW IF EXISTS playlist_album_map;");
+            db.execSQL("DROP VIEW IF EXISTS playlist_info;");
+            db.execSQL("DROP VIEW IF EXISTS playlist_track_info;");
+            db.execSQL("DROP TABLE IF EXISTS playlist_track;");
+            db.execSQL("DROP TABLE IF EXISTS playlist_meta;");
+            db.execSQL("DROP TABLE IF EXISTS playlist_track_meta;");
         }
         //end mistakes cleanup
 
@@ -203,24 +218,18 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "duration INTEGER " +
                     ");");
 
-//            db.execSQL("CREATE TABLE IF NOT EXISTS playlists (" +
-//                    "playlist_id INTEGER PRIMARY KEY, " +
-//                    "playlist_name TEXT NOT NULL, " +
-//                    "date_added INTEGER, " +
-//                    "date_modified INTEGER" +
-//                    ");");
-//            db.execSQL("CREATE TABLE IF NOT EXISTS tracks_playlists_map (" +
-//                    "playlist_id INTEGER REFERENCES playlists(playlist_id), " +
-//                    "track_id INTEGER REFERENCES track_meta(track_id), " +
-//                    "track_number INTEGER, " +
-//                    "UNIQUE(playlist_id, track_id, track_number)" +
-//                    ");");
+            db.execSQL("CREATE TABLE IF NOT EXISTS playlist_meta (" +
+                    "_id INTEGER PRIMARY KEY, " +
+                    "playlist_name TEXT NOT NULL, " +
+                    "date_added INTEGER, " +
+                    "date_modified INTEGER" +
+                    ");");
 
-            // Provides a unified track/artist/album info view.
-//            db.execSQL("CREATE VIEW IF NOT EXISTS track_full as SELECT * FROM track_meta " +
-//                    "LEFT OUTER JOIN artist_meta ON track_meta.artist_id = artist_meta.artist_id " +
-//                    "LEFT OUTER JOIN album_meta ON track_meta.album_id = album_meta.album_id" +
-//                    ";");
+            db.execSQL("CREATE TABLE IF NOT EXISTS playlist_track_meta (" +
+                    "playlist_id INTEGER REFERENCES playlist_meta(_id) ON DELETE CASCADE ON UPDATE CASCADE, " +
+                    "track_id INTEGER REFERENCES track_meta(_id), " +//this has a trigger to reorder
+                    "play_order INTEGER " +
+                    ");");
 
             db.execSQL("CREATE VIEW IF NOT EXISTS artist_info AS SELECT " +
                     "a1._id, " +
@@ -277,6 +286,21 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "GROUP BY g1._id" +
                     ";");
 
+            db.execSQL("CREATE VIEW IF NOT EXISTS playlist_info AS SELECT " +
+                    "p._id, " +
+                    "p.playlist_name as name, " +
+                    "p.date_added, " +
+                    "p.date_modified, " +
+                    "COUNT(DISTINCT t.artist_id) AS number_of_artists, " +
+                    "COUNT(DISTINCT t.album_id) AS number_of_albums, " +
+                    "COUNT(DISTINCT t.genre_id) AS number_of_genres, " +
+                    "COUNT(DISTINCT t.track_id) AS number_of_tracks " +
+                    "FROM playlist_track_meta pt " +
+                    "LEFT OUTER JOIN playlist_meta p ON pt.playlist_id = p._id " +
+                    "LEFT OUTER JOIN track_meta t ON pt.track_id = t._id " +
+                    "GROUP BY p._id" +
+                    ";");
+
             db.execSQL("CREATE VIEW IF NOT EXISTS track_parent_map as SELECT " +
                     "t1._id, " +
                     "c1.uri " +
@@ -317,11 +341,18 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "LEFT OUTER JOIN genre_meta g1 ON t1.genre_id = g1._id " +
                     ";");
 
+            db.execSQL("CREATE VIEW IF NOT EXISTS playlist_track_info AS SELECT " +
+                    "* " +
+                    "FROM track_info t1 " +
+                    "JOIN playlist_track_meta t2 ON t1._id = t2.track_id " +
+                    ";");
+
             db.execSQL("CREATE VIEW IF NOT EXISTS genre_album_map AS SELECT " +
                     "g1._id, " +
                     "t1.album_id, " +
                     "t1.album as album_name, " +
-                    "t1.album_artist " +
+                    "t1.album_artist, " +
+                    "t1.artwork_uri " +
                     "FROM genre_meta g1 " +
                     "JOIN track_info t1 ON g1._id = t1.genre_id " +
                     "GROUP BY t1.album_id" +
@@ -331,9 +362,21 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "a1._id, " +
                     "t1.album_id, " +
                     "t1.album as album_name, " +
-                    "t1.album_artist " +
+                    "t1.album_artist, " +
+                    "t1.artwork_uri " +
                     "FROM artist_meta a1 " +
                     "JOIN track_info t1 ON a1._id = t1.artist_id " +
+                    "GROUP BY t1.album_id" +
+                    ";");
+
+            db.execSQL("CREATE VIEW IF NOT EXISTS playlist_album_map AS SELECT " +
+                    "pt.playlist_id as _id, " +
+                    "t1.album_id, " +
+                    "t1.album as album_name, " +
+                    "t1.album_artist, " +
+                    "t1.artwork_uri " +
+                    "FROM playlist_track_meta pt " +
+                    "JOIN track_info t1 ON pt.track_id = t1._id " +
                     "GROUP BY t1.album_id" +
                     ";");
 

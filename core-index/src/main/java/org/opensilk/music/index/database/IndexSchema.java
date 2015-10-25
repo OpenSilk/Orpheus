@@ -94,6 +94,24 @@ public class IndexSchema {
             String DATE_ADDED = "date_added";
         }
 
+        interface Playlist extends BaseColumns {
+            String TABLE = "playlist_info";
+            String NAME = "name";
+            String DATE_ADDED = "date_added";
+            String DATE_MODIFIED = "date_modified";
+            String NUMBER_OF_ARTISTS = "number_of_artists";
+            String NUMBER_OF_ALBUMS = "number_of_albums";
+            String NUMBER_OF_GENRES = "number_of_genres";
+            String NUMBER_OF_TRACKS = "number_of_tracks";
+        }
+
+        interface PlaylistTrack extends Track {
+            String TABLE = "playlist_track_info";
+            String TRACK_ID = "track_id";
+            String PLAYLIST_ID = "playlist_id";
+            String PLAY_ORDER = "play_order";
+        }
+
     }
 
     public interface Meta {
@@ -139,6 +157,20 @@ public class IndexSchema {
             String DURATION = "duration";
         }
 
+        interface Playlist extends BaseColumns {
+            String TABLE = "playlist_meta";
+            String NAME = "playlist_name";
+            String DATE_ADDED = "date_added";
+            String DATE_MODIFIED = "date_modified";
+        }
+
+        interface PlaylistTrack {
+            String TABLE = "playlist_track_meta";
+            String TRACK_ID = "track_id";
+            String PLAYLIST_ID = "playlist_id";
+            String PLAY_ORDER = "play_order";
+        }
+
     }
 
     public interface Misc {
@@ -147,6 +179,7 @@ public class IndexSchema {
             String ALBUM_ID = "album_id";
             String ALBUM_NAME = "album_name";
             String ALBUM_ARTIST = "album_artist";
+            String ARTWORK_URI = "artwork_uri";
         }
 
         interface GenreAlbumMap extends AlbumMap {
@@ -155,6 +188,10 @@ public class IndexSchema {
 
         interface ArtistAlbumMap extends AlbumMap {
             String TABLE = "artist_album_map";
+        }
+
+        interface PlaylistAlbumMap extends AlbumMap {
+            String TABLE = "playlist_album_map";
         }
     }
 

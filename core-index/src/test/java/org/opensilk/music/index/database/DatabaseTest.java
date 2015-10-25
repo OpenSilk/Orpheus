@@ -31,9 +31,15 @@ import org.opensilk.music.index.IndexTestApplication;
 import org.opensilk.music.index.IndexTestComponent;
 import org.opensilk.music.model.Metadata;
 import org.opensilk.music.model.Track;
+import org.opensilk.music.model.sort.TrackSortOrder;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Created by drew on 9/20/15.
@@ -61,14 +67,13 @@ public class DatabaseTest {
 
     @Test
     public void testAddRemoveContainers() {
-        Uri uri = new Uri.Builder().scheme("content").authority("sample").appendPath("foo").appendPath("bar").build();
-        Uri parentUri = new Uri.Builder().scheme("content").authority("sample").appendPath("foo").build();
+        Uri uri = Uri.parse("content://sample/foo/bar");
+        Uri parentUri = Uri.parse("content://sample/foo");
         long insId = mDb.insertContainer(uri, parentUri);
         long lookId = mDb.hasContainer(uri);
         Assertions.assertThat(lookId).isEqualTo(insId);
         for (int ii=0; ii<10; ii++) {
-            Uri child = new Uri.Builder().scheme("content").authority("sample")
-                    .appendPath("foo").appendPath("bar").appendPath(String.valueOf(ii)).build();
+            Uri child = Uri.parse("content://sample/foo/bar/"+ii);
             long iid = mDb.insertContainer(child, uri);
             long lid = mDb.hasContainer(child);
             Assertions.assertThat(iid).isEqualTo(lid);
@@ -79,8 +84,8 @@ public class DatabaseTest {
 
     @Test
     public void testDoubleContainerInsert() {
-        Uri uri = new Uri.Builder().scheme("content").authority("sample").appendPath("foo2").appendPath("bar").build();
-        Uri parentUri = new Uri.Builder().scheme("content").authority("sample").appendPath("foo2").build();
+        Uri uri = Uri.parse("content://sample/foo2/bar");
+        Uri parentUri = Uri.parse("content://sample/foo2");
         long insId = mDb.insertContainer(uri, parentUri);
         long insId2 =mDb.insertContainer(uri, parentUri);
         Assertions.assertThat(insId).isEqualTo(insId2);
@@ -126,5 +131,186 @@ public class DatabaseTest {
         Assertions.assertThat(mDb.getTracks(null).size()).isEqualTo(0);
     }
 
+    @Test
+    public void testPlaylistOperations() {
+        Uri containerUri = Uri.parse("content://sample2/foo/bar");
+        Uri containerParentUri = Uri.parse("content://sample2/foo");
+        mDb.insertContainer(containerUri, containerParentUri);
+
+        long[] trackIds = null;
+        for (int ii=0; ii<10; ii++) {
+            Track track = Track.builder()
+                    .setUri(Uri.parse("content://sample2/track" + ii))
+                    .setName("track" + ii)
+                    .setParentUri(containerUri)
+                    .addRes(Track.Res.builder().setUri(Uri.parse("content://sample2/res"+ii)).build())
+                    .build();
+            Metadata meta = Metadata.builder()
+                    .putString(Metadata.KEY_TRACK_NAME, "metatrack"+ii)
+                    .putString(Metadata.KEY_ALBUM_NAME, "album"+ii%2)
+                    .putString(Metadata.KEY_ARTIST_NAME, "artist" + ii % 2)
+                    .putString(Metadata.KEY_ALBUM_ARTIST_NAME, "artist"+ii%2)
+                    .build();
+            long trackId = mDb.insertTrack(track, meta);
+            Assertions.assertThat(trackId).isGreaterThan(0);
+            trackIds = ArrayUtils.add(trackIds, trackId);
+        }
+
+        long plid = mDb.insertPlaylist("Pl1");
+        Assertions.assertThat(plid).isGreaterThan(0);
+
+        //test initial insert
+        List<Uri> list = new ArrayList<>(5);
+        for (int ii=0; ii<5; ii++) {
+            list.add(Uri.parse("content://sample2/track" + ii));
+        }
+        Collections.shuffle(list);
+        long num = mDb.addToPlaylist(String.valueOf(plid), list);
+        Assertions.assertThat(num).isEqualTo(list.size());
+        List<Track> pltracks = mDb.getPlaylistTracks(String.valueOf(plid), TrackSortOrder.PLAYORDER);
+        Assertions.assertThat(pltracks.size()).isEqualTo(list.size());
+        Iterator<Uri> uii = list.iterator();
+        Iterator<Track> tii = pltracks.iterator();
+        while (uii.hasNext() && tii.hasNext()) {
+            Assertions.assertThat(uii.next()).isEqualTo(tii.next().getUri());
+        }
+
+        mDb.getTracks(null);
+
+        List<Uri> list2 = new ArrayList<>(4);
+        for (int ii= 7; ii< 10; ii++) {
+            list2.add(Uri.parse("content://sample2/track" + ii));
+        }
+
+        //test additonal insert
+        Collections.shuffle(list2);
+        long num2 = mDb.addToPlaylist(String.valueOf(plid), list2);
+        Assertions.assertThat(num2).isEqualTo(list2.size());
+        list.addAll(list2);
+        pltracks = mDb.getPlaylistTracks(String.valueOf(plid), TrackSortOrder.PLAYORDER);
+        Assertions.assertThat(pltracks.size()).isEqualTo(list.size());
+        uii = list.iterator();
+        tii = pltracks.iterator();
+        while (uii.hasNext() && tii.hasNext()) {
+            Assertions.assertThat(uii.next()).isEqualTo(tii.next().getUri());
+        }
+
+        //check the order
+        tii = pltracks.iterator();
+        int zz=0;
+        while (tii.hasNext()) {
+            Assertions.assertThat(tii.next().getTrackNumber()).isEqualTo(zz++);
+        }
+
+        //
+        // move from < to
+
+        plid = mDb.insertPlaylist("Pl2");
+        Assertions.assertThat(plid).isGreaterThan(0);
+
+        list = new ArrayList<>(8);
+        for (int ii=0; ii<8; ii++) {
+            list.add(Uri.parse("content://sample2/track" + ii));
+        }
+
+        mDb.addToPlaylist(String.valueOf(plid), list);
+        List<Track> pltracks4 = mDb.getPlaylistTracks(String.valueOf(plid), TrackSortOrder.PLAYORDER);
+
+        mDb.movePlaylistEntry(String.valueOf(plid), 3, 6);
+        List<Track> pltracks5 = mDb.getPlaylistTracks(String.valueOf(plid), TrackSortOrder.PLAYORDER);
+        Iterator<Track> tii3 = pltracks4.iterator();
+        Iterator<Track> tii4 = pltracks5.iterator();
+        while (tii3.hasNext() && tii4.hasNext()) {
+            Track next = tii3.next();
+            Track next2 = tii4.next();
+            System.out.println("" + next.getTrackNumber() + "  " + next.getUri() +
+            "  " + next2.getTrackNumber() + "  " + next2.getUri());
+        }
+        Assertions.assertThat(pltracks5.get(0).getUri()).isEqualTo(pltracks4.get(0).getUri());
+        Assertions.assertThat(pltracks5.get(1).getUri()).isEqualTo(pltracks4.get(1).getUri());
+        Assertions.assertThat(pltracks5.get(2).getUri()).isEqualTo(pltracks4.get(2).getUri());
+        Assertions.assertThat(pltracks5.get(3).getUri()).isEqualTo(pltracks4.get(4).getUri());
+        Assertions.assertThat(pltracks5.get(4).getUri()).isEqualTo(pltracks4.get(5).getUri());
+        Assertions.assertThat(pltracks5.get(5).getUri()).isEqualTo(pltracks4.get(6).getUri());
+        Assertions.assertThat(pltracks5.get(6).getUri()).isEqualTo(pltracks4.get(3).getUri());
+        Assertions.assertThat(pltracks5.get(7).getUri()).isEqualTo(pltracks4.get(7).getUri());
+
+        //
+        // move from > to
+
+        plid = mDb.insertPlaylist("Pl3");
+        Assertions.assertThat(plid).isGreaterThan(0);
+
+        list = new ArrayList<>(8);
+        for (int ii=0; ii<8; ii++) {
+            list.add(Uri.parse("content://sample2/track" + ii));
+        }
+
+        mDb.addToPlaylist(String.valueOf(plid), list);
+        pltracks4 = mDb.getPlaylistTracks(String.valueOf(plid), TrackSortOrder.PLAYORDER);
+
+        mDb.movePlaylistEntry(String.valueOf(plid), 5, 2);
+        pltracks5 = mDb.getPlaylistTracks(String.valueOf(plid), TrackSortOrder.PLAYORDER);
+        tii3 = pltracks4.iterator();
+        tii4 = pltracks5.iterator();
+        while (tii3.hasNext() && tii4.hasNext()) {
+            Track next = tii3.next();
+            Track next2 = tii4.next();
+            System.out.println("" + next.getTrackNumber() + "  " + next.getUri() +
+                    "  " + next2.getTrackNumber() + "  " + next2.getUri());
+        }
+        Assertions.assertThat(pltracks5.get(0).getUri()).isEqualTo(pltracks4.get(0).getUri());
+        Assertions.assertThat(pltracks5.get(1).getUri()).isEqualTo(pltracks4.get(1).getUri());
+        Assertions.assertThat(pltracks5.get(2).getUri()).isEqualTo(pltracks4.get(5).getUri());
+        Assertions.assertThat(pltracks5.get(3).getUri()).isEqualTo(pltracks4.get(2).getUri());
+        Assertions.assertThat(pltracks5.get(4).getUri()).isEqualTo(pltracks4.get(3).getUri());
+        Assertions.assertThat(pltracks5.get(5).getUri()).isEqualTo(pltracks4.get(4).getUri());
+        Assertions.assertThat(pltracks5.get(6).getUri()).isEqualTo(pltracks4.get(6).getUri());
+        Assertions.assertThat(pltracks5.get(7).getUri()).isEqualTo(pltracks4.get(7).getUri());
+
+        //
+        //removing
+
+        plid = mDb.insertPlaylist("Pl4");
+        Assertions.assertThat(plid).isGreaterThan(0);
+
+        list = new ArrayList<>(8);
+        for (int ii=0; ii<8; ii++) {
+            list.add(Uri.parse("content://sample2/track" + ii));
+        }
+
+        mDb.addToPlaylist(String.valueOf(plid), list);
+        pltracks4 = mDb.getPlaylistTracks(String.valueOf(plid), TrackSortOrder.PLAYORDER);
+
+        mDb.removeFromPlaylist(String.valueOf(plid), Uri.parse("content://sample2/track4"));
+        pltracks5 = mDb.getPlaylistTracks(String.valueOf(plid), TrackSortOrder.PLAYORDER);
+        tii3 = pltracks4.iterator();
+        tii4 = pltracks5.iterator();
+        while (tii3.hasNext() && tii4.hasNext()) {
+            Track next = tii3.next();
+            Track next2 = tii4.next();
+            System.out.println("" + next.getTrackNumber() + "  " + next.getUri() +
+                    "  " + next2.getTrackNumber() + "  " + next2.getUri());
+        }
+
+        Assertions.assertThat(pltracks5.size()).isEqualTo(7);
+
+        //check the order
+        tii = pltracks5.iterator();
+        zz=0;
+        while (tii.hasNext()) {
+            Assertions.assertThat(tii.next().getTrackNumber()).isEqualTo(zz++);
+        }
+
+        Assertions.assertThat(pltracks5.get(0).getUri()).isEqualTo(pltracks4.get(0).getUri());
+        Assertions.assertThat(pltracks5.get(1).getUri()).isEqualTo(pltracks4.get(1).getUri());
+        Assertions.assertThat(pltracks5.get(2).getUri()).isEqualTo(pltracks4.get(2).getUri());
+        Assertions.assertThat(pltracks5.get(3).getUri()).isEqualTo(pltracks4.get(3).getUri());
+        Assertions.assertThat(pltracks5.get(4).getUri()).isEqualTo(pltracks4.get(5).getUri());
+        Assertions.assertThat(pltracks5.get(5).getUri()).isEqualTo(pltracks4.get(6).getUri());
+        Assertions.assertThat(pltracks5.get(6).getUri()).isEqualTo(pltracks4.get(7).getUri());
+        //Assertions.assertThat(pltracks5.get(7).getUri()).isEqualTo(pltracks4.get(7).getUri());
+
+    }
 
 }

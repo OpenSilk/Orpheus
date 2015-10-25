@@ -29,6 +29,7 @@ import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.Metadata;
 import org.opensilk.music.model.Model;
+import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
 
 import java.util.List;
@@ -63,6 +64,13 @@ public interface IndexDatabase {
     List<Album> getGenreAlbums(String id, String sortOrder);
     List<Model> getGenreDetails(String id, String sortOrder);
     List<Track> getGenreTracks(String id, String sortOrder);
+    List<Playlist> getPlaylists(String sortOrder);
+    Playlist getPlaylist(String id);
+    List<Track> getPlaylistTracks(String id, String sortOrder);
+    long insertPlaylist(String name);
+    int addToPlaylist(String playlist_id, List<Uri> uriList);
+    int movePlaylistEntry(String playlist_id, int from, int to);
+    int removeFromPlaylist(String playlist_id, Uri uri);
 
     long hasContainer(Uri uri);
     @NonNull List<Pair<Uri, Uri>> findTopLevelContainers(@Nullable String authority);

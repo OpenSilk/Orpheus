@@ -34,6 +34,7 @@ public class IndexTestApplication extends BaseApp {
     @Override
     public void onCreate() {
         super.onCreate();
+        Timber.uprootAll();
         Timber.plant(new Timber.DebugTree());
     }
 

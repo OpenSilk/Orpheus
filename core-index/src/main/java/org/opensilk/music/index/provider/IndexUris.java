@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Genre;
+import org.opensilk.music.model.Playlist;
 
 import timber.log.Timber;
 
@@ -158,6 +159,12 @@ public class IndexUris {
             return modelBase(authority).appendPath(playlists).build();
         }
         return modelBase(authority).appendPath(playlist).appendPath(id).build();
+    }
+
+    public static Uri playlistTracks(Playlist playlist) {
+        final String authority = playlist.getUri().getAuthority();
+        final String id = playlist.getUri().getLastPathSegment();
+        return playlistTracks(authority, id);
     }
 
     public static Uri playlistTracks(String authority, String id) {

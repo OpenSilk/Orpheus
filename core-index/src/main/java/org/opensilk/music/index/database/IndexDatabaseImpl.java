@@ -23,6 +23,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.provider.BaseColumns;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Pair;
@@ -39,10 +40,12 @@ import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.Metadata;
 import org.opensilk.music.model.Model;
+import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.TrackList;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -351,6 +354,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
                 .setArtistName(artistName)
                 .setArtistUri(IndexUris.artist(indexAuthority, artistId))
                 .setTrackCount(trackNum)
+                .setTracksUri(IndexUris.albumTracks(indexAuthority, id))
                 .build();
     }
 
@@ -495,7 +499,9 @@ public class IndexDatabaseImpl implements IndexDatabase {
                     final String album = getStringOrNull(c2, 1);
                     final String albumArtist = getStringOrNull(c2, 2);
                     if (album != null && albumArtist != null) {
-                        bob.addArtInfo(ArtInfo.forAlbum(albumArtist, album, null));
+                        final String artwork = getStringOrNull(c2, 3);
+                        Uri artworkUri = artwork != null ? Uri.parse(artwork) : null;
+                        bob.addArtInfo(ArtInfo.forAlbum(albumArtist, album, artworkUri));
                     }
                 }
             } while (c2.moveToNext());
@@ -507,6 +513,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
             IndexSchema.Misc.AlbumMap._ID,
             IndexSchema.Misc.AlbumMap.ALBUM_NAME,
             IndexSchema.Misc.AlbumMap.ALBUM_ARTIST,
+            IndexSchema.Misc.AlbumMap.ARTWORK_URI,
     };
 
     @Override
@@ -562,7 +569,9 @@ public class IndexDatabaseImpl implements IndexDatabase {
                             final String album = getStringOrNull(c2, 1);
                             final String albumArtist = getStringOrNull(c2, 2);
                             if (album != null && albumArtist != null) {
-                                tlb.addArtInfo(ArtInfo.forAlbum(albumArtist, album, null));
+                                final String artwork = getStringOrNull(c2, 3);
+                                Uri artworkUri = artwork != null ? Uri.parse(artwork) : null;
+                                tlb.addArtInfo(ArtInfo.forAlbum(albumArtist, album, artworkUri));
                             }
                         } while (c2.moveToNext());
                     }
@@ -645,6 +654,96 @@ public class IndexDatabaseImpl implements IndexDatabase {
         return lst;
     }
 
+    static final String[] playlistCols = new String[] {
+            IndexSchema.Info.Playlist._ID,
+            IndexSchema.Info.Playlist.NAME,
+            IndexSchema.Info.Playlist.DATE_ADDED,
+            IndexSchema.Info.Playlist.DATE_MODIFIED,
+            IndexSchema.Info.Playlist.NUMBER_OF_ARTISTS,
+            IndexSchema.Info.Playlist.NUMBER_OF_ALBUMS,//5
+            IndexSchema.Info.Playlist.NUMBER_OF_GENRES,
+            IndexSchema.Info.Playlist.NUMBER_OF_TRACKS,
+    };
+
+    Playlist buildPlaylist(Cursor c, Uri parentUri, Cursor c2) {
+        Playlist.Builder bob = Playlist.builder();
+        final String id = c.getString(0);
+        final String name = c.getString(1);
+        //2
+        //3
+        //final int numArtists = c.getInt(4);
+        //final int numAlbums = c.getInt(5);
+        //final int numGenres = c.getInt(6);
+        final int numTracks = c.getInt(7);
+        bob.setUri(IndexUris.playlist(indexAuthority, id))
+                .setName(name)
+                .setParentUri(parentUri)
+                .setTracksUri(IndexUris.playlistTracks(indexAuthority, id))
+                .setTrackCount(numTracks)
+        ;
+        long gid = Long.valueOf(id);
+        if (c2 != null && c2.moveToFirst()) {
+            do {
+                if (c2.getLong(0) == gid) {
+                    final String album = getStringOrNull(c2, 1);
+                    final String albumArtist = getStringOrNull(c2, 2);
+                    if (album != null && albumArtist != null) {
+                        final String artwork = getStringOrNull(c2, 3);
+                        Uri artworkUri = artwork != null ? Uri.parse(artwork) : null;
+                        bob.addArtInfo(ArtInfo.forAlbum(albumArtist, album, artworkUri));
+                    }
+                }
+            } while (c2.moveToNext());
+        }
+        return bob.build();
+    }
+
+    @Override
+    public List<Playlist> getPlaylists(String sortOrder) {
+        List<Playlist> lst = new ArrayList<>();
+        Cursor c = null;
+        Cursor c2 = null;
+        try {
+            c = query(IndexSchema.Info.Playlist.TABLE, playlistCols, null, null, null, null, sortOrder);
+            c2 = query(IndexSchema.Misc.PlaylistAlbumMap.TABLE, album_map_cols, null, null, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                final Uri parentUri = IndexUris.genres(indexAuthority);
+                do {
+                    lst.add(buildPlaylist(c, parentUri, c2));
+                } while (c.moveToNext());
+            }
+        } finally {
+            closeCursor(c);
+            closeCursor(c2);
+        }
+        return lst;
+    }
+
+    @Override
+    public Playlist getPlaylist(String id) {
+        return null;
+    }
+
+    static final String playlistTracksSel = IndexSchema.Info.PlaylistTrack.PLAYLIST_ID + "=?";
+
+    @Override
+    public List<Track> getPlaylistTracks(String id, String sortOrder) {
+        List<Track> lst = new ArrayList<>();
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.Info.PlaylistTrack.TABLE, playlistTrackCols, playlistTracksSel,
+                    new String[]{id}, null, null, sortOrder);
+            if (c != null && c.moveToFirst()) {
+                do {
+                    lst.add(buildTrack(c));
+                } while (c.moveToNext());
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return lst;
+    }
+
     static final String[] tracks_cols = new String[] {
             IndexSchema.Info.Track._ID,
             IndexSchema.Info.Track.URI,
@@ -669,6 +768,12 @@ public class IndexDatabaseImpl implements IndexDatabase {
             IndexSchema.Info.Track.RES_DURATION, //20
             IndexSchema.Info.Track.ARTWORK_URI
     };
+    static final String[] playlistTrackCols = Arrays.copyOf(tracks_cols, tracks_cols.length);
+    static {
+        //fix sort
+        playlistTrackCols[10] = IndexSchema.Info.PlaylistTrack.PLAY_ORDER + " AS " +
+                IndexSchema.Info.Track.TRACK;
+    }
 
     Track buildTrack(Cursor c) {
         Track.Builder bob = Track.builder();
@@ -698,7 +803,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
         }
         //9
         int track = getIntOrNeg(c, 10);
-        if (track > 0) {
+        if (track >= 0) {
             bob.setTrackNumber(track);
         }
         int disc = getIntOrNeg(c, 11);
@@ -796,20 +901,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
         List<Track> lst = new ArrayList<>(uris.size());
         Cursor c = null;
         try {
-            StringBuilder sel = new StringBuilder(IndexSchema.Info.Track.URI)
-                    .append(" IN (");
-            String[] selArgs = new String[uris.size()];
-            int ii=0;
-            for (Uri u : uris) {
-                selArgs[ii] = u.toString();
-                if (ii++ > 0) {
-                    sel.append(",");
-                }
-                sel.append("?");
-            }
-            sel.append(")");
-            c = query(IndexSchema.Info.Track.TABLE, tracks_cols,
-                    sel.toString(), selArgs, null, null, null);
+            c = getTrackListCursor(uris, tracks_cols);
             if (c != null && c.moveToFirst()) {
                 do {
                     lst.add(buildTrack(c));
@@ -830,8 +922,24 @@ public class IndexDatabaseImpl implements IndexDatabase {
         return lst;
     }
 
+    Cursor getTrackListCursor(final List<Uri> uris, String[] cols) {
+        StringBuilder sel = new StringBuilder(IndexSchema.Info.Track.URI)
+                .append(" IN (");
+        String[] selArgs = new String[uris.size()];
+        int ii=0;
+        for (Uri u : uris) {
+            selArgs[ii] = u.toString();
+            if (ii++ > 0) {
+                sel.append(",");
+            }
+            sel.append("?");
+        }
+        sel.append(")");
+        return query(IndexSchema.Info.Track.TABLE, cols,
+                sel.toString(), selArgs, null, null, null);
+    }
+
     static final String containerUriSel = IndexSchema.Containers.URI + "=?";
-    static final Map<Uri, Long> sConainerIdsCache = new HashMap<>();
 
     Cursor getContainerCursor(Uri uri) {
         String[] selArgs = new String[] {uri.toString()};
@@ -840,10 +948,11 @@ public class IndexDatabaseImpl implements IndexDatabase {
     }
 
     @Override
+    @DebugLog
     public long hasContainer(Uri uri) {
-        synchronized (sConainerIdsCache) {
-            if (sConainerIdsCache.containsKey(uri)) {
-                return sConainerIdsCache.get(uri);
+        synchronized (mConainerIdsCache) {
+            if (mConainerIdsCache.containsKey(uri)) {
+                return mConainerIdsCache.get(uri);
             }
         }
         Cursor c = null;
@@ -852,8 +961,8 @@ public class IndexDatabaseImpl implements IndexDatabase {
             if (c != null && c.moveToFirst()) {
                 long id = c.getLong(0);
                 if (id > 0) {
-                    synchronized (sConainerIdsCache) {
-                        sConainerIdsCache.put(uri, id);
+                    synchronized (mConainerIdsCache) {
+                        mConainerIdsCache.put(uri, id);
                     }
                 }
                 return id;
@@ -969,6 +1078,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
         }
         where.append(")");
 
+        Timber.d("Removing containers %s", Arrays.toString(containers));
         int num = delete(IndexSchema.Containers.TABLE, where.toString(), containers);
         if (num > 0) {
             //notify everyone
@@ -1167,15 +1277,14 @@ public class IndexDatabaseImpl implements IndexDatabase {
 
     static final String checkAlbumSel = IndexSchema.Info.Album.ALBUM_KEY
             + "=? AND " + IndexSchema.Info.Album.ARTIST_KEY + "=?";
-    static final Map<String, Long> sAlbumIdsCache = new HashMap<>();
 
     public long getAlbumIdForName(String albumArtist, String album) {
         if (StringUtils.isEmpty(albumArtist) || StringUtils.isEmpty(album)) {
             return -1;
         }
-        synchronized (sAlbumIdsCache) {
-            if (sAlbumIdsCache.containsKey(albumArtist+album)) {
-                return sAlbumIdsCache.get(albumArtist+album);
+        synchronized (mAlbumIdsCache) {
+            if (mAlbumIdsCache.containsKey(albumArtist+album)) {
+                return mAlbumIdsCache.get(albumArtist+album);
             }
         }
         albumArtist = StringUtils.trim(albumArtist);
@@ -1205,8 +1314,8 @@ public class IndexDatabaseImpl implements IndexDatabase {
                 }
             }
             if (id > 0) {
-                synchronized (sAlbumIdsCache) {
-                    sAlbumIdsCache.put(albumArtist+album, id);
+                synchronized (mAlbumIdsCache) {
+                    mAlbumIdsCache.put(albumArtist + album, id);
                 }
             }
             return id;
@@ -1215,7 +1324,6 @@ public class IndexDatabaseImpl implements IndexDatabase {
         }
     }
 
-    @DebugLog
     long insertAlbum(Metadata meta, long albumArtistId) {
         ContentValues cv = new ContentValues(10);
         cv.put(IndexSchema.Meta.Album.ALBUM_NAME, meta.getString(Metadata.KEY_ALBUM_NAME));
@@ -1238,16 +1346,15 @@ public class IndexDatabaseImpl implements IndexDatabase {
     }
 
     static final String checkArtistSel = IndexSchema.Info.Artist.ARTIST_KEY + "=?";
-    static final Map<String, Long> sArtistIdsCache = new HashMap<>();
 
     public long getArtistIdForName(String artist) {
         if (StringUtils.isEmpty(artist)) {
             return -1;
         }
         artist = StringUtils.trim(artist);
-        synchronized (sArtistIdsCache) {
-            if (sArtistIdsCache.containsKey(artist)) {
-                return sArtistIdsCache.get(artist);
+        synchronized (mArtistIdsCache) {
+            if (mArtistIdsCache.containsKey(artist)) {
+                return mArtistIdsCache.get(artist);
             }
         }
         long id = -1;
@@ -1282,8 +1389,8 @@ public class IndexDatabaseImpl implements IndexDatabase {
                 }
             }
             if (id > 0) {
-                synchronized (sArtistIdsCache) {
-                    sArtistIdsCache.put(artist, id);
+                synchronized (mArtistIdsCache) {
+                    mArtistIdsCache.put(artist, id);
                 }
             }
             return id;
@@ -1292,7 +1399,6 @@ public class IndexDatabaseImpl implements IndexDatabase {
         }
     }
 
-    @DebugLog
     long insertArtist(Metadata meta) {
         ContentValues cv = new ContentValues(10);
         cv.put(IndexSchema.Meta.Artist.ARTIST_NAME, meta.getString(Metadata.KEY_ARTIST_NAME));
@@ -1315,15 +1421,14 @@ public class IndexDatabaseImpl implements IndexDatabase {
     }
 
     static final String checkGenreSel = IndexSchema.Info.Genre.GENRE_KEY + "=?";
-    static final Map<String, Long> sGenreIdsCache = new HashMap<>();
 
     public long getGenreIdForName(String genre) {
         if (StringUtils.isEmpty(genre)) {
             return -1;
         }
-        synchronized (sGenreIdsCache) {
-            if(sGenreIdsCache.containsKey(genre)) {
-                return sGenreIdsCache.get(genre);
+        synchronized (mGenreIdsCache) {
+            if(mGenreIdsCache.containsKey(genre)) {
+                return mGenreIdsCache.get(genre);
             }
         }
         long id = -1;
@@ -1345,8 +1450,8 @@ public class IndexDatabaseImpl implements IndexDatabase {
                 }
             }
             if (id > 0) {
-                synchronized (sGenreIdsCache) {
-                    sGenreIdsCache.put(genre, id);
+                synchronized (mGenreIdsCache) {
+                    mGenreIdsCache.put(genre, id);
                 }
             }
             return id;
@@ -1368,18 +1473,218 @@ public class IndexDatabaseImpl implements IndexDatabase {
         return id;
     }
 
+    public long insertPlaylist(String name) {
+        ContentValues cv = new ContentValues(5);
+        cv.put(IndexSchema.Meta.Playlist.NAME, name);
+        cv.put(IndexSchema.Meta.Playlist.DATE_ADDED, System.currentTimeMillis());
+        cv.put(IndexSchema.Meta.Playlist.DATE_MODIFIED, System.currentTimeMillis());
+        long id = insert(IndexSchema.Meta.Playlist.TABLE, null, cv, SQLiteDatabase.CONFLICT_NONE);
+        if (id > 0) {
+            mAppContext.getContentResolver().notifyChange(IndexUris.playlists(indexAuthority), null);
+        }
+        return id;
+    }
+
+    static final String[] highestPlaylistPlayPosCols = new String[] {
+            IndexSchema.Meta.PlaylistTrack.PLAY_ORDER
+    };
+    static final String playlistTrackPlaylistIdSel = IndexSchema.Meta.PlaylistTrack.PLAYLIST_ID + "=?";
+
+    int getHighestPlaylistPlayPosition(String playlist_id) {
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.Meta.PlaylistTrack.TABLE, highestPlaylistPlayPosCols,
+                    playlistTrackPlaylistIdSel, new String[]{playlist_id}, null, null,
+                    IndexSchema.Meta.PlaylistTrack.PLAY_ORDER);
+            if (c != null && c.moveToLast()) {
+                return c.getInt(0);
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return 0;
+    }
+
+    static final String[] addToPlaylistCols = new String[] {
+            IndexSchema.Info.Track._ID,
+            IndexSchema.Info.Track.URI,
+    };
+
+    public int addToPlaylist(String playlist_id, List<Uri> uriList) {
+        int numinserted = 0;
+        Cursor c = null;
+        try {
+            //playorders start at 1
+            int startOrder = getHighestPlaylistPlayPosition(playlist_id);
+            if (startOrder != 0) {
+                startOrder += 1;
+            }
+            c = getTrackListCursor(uriList, addToPlaylistCols);
+            if (c != null && c.moveToFirst()) {
+                mLock.writeLock().lock();
+                SQLiteDatabase db = helper.getWritableDatabase();
+                db.beginTransaction();
+                try {
+                    ContentValues cv = new ContentValues(5);
+                    do {
+                        long id = c.getLong(0);
+                        Uri uri = Uri.parse(c.getString(1));
+                        int idx = uriList.indexOf(uri);
+                        cv.put(IndexSchema.Meta.PlaylistTrack.PLAYLIST_ID, playlist_id);
+                        cv.put(IndexSchema.Meta.PlaylistTrack.TRACK_ID, id);
+                        cv.put(IndexSchema.Meta.PlaylistTrack.PLAY_ORDER, startOrder + idx);
+                        if (db.insert(IndexSchema.Meta.PlaylistTrack.TABLE, null, cv) > 0) {
+                            numinserted++;
+                        }
+                        cv.clear();
+                    } while (c.moveToNext());
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                    mLock.writeLock().unlock();
+                }
+            }
+        } finally {
+            closeCursor(c);
+        }
+        //todo if num inserted != list.size reorder the playlist tracks
+        return numinserted;
+    }
+
+    static final String[] movePlaylistEntryCols = new String[] {
+            IndexSchema.Meta.PlaylistTrack.PLAY_ORDER,
+    };
+    static final String movePlaylistEntrySel =
+            IndexSchema.Meta.PlaylistTrack.PLAYLIST_ID + "=?";
+
+    @Override
+    public int movePlaylistEntry(String playlist_id, int from, int to) {
+        if (from == to) {
+            return 0;
+        }
+        int numlines = 0;
+        mLock.writeLock().lock();
+        SQLiteDatabase db = helper.getWritableDatabase();
+        db.beginTransaction();
+        Cursor c = null;
+        try {
+            //find the from play_order
+            c = db.query(IndexSchema.Meta.PlaylistTrack.TABLE,
+                    movePlaylistEntryCols, movePlaylistEntrySel,
+                    new String[] {playlist_id}, null, null,
+                    IndexSchema.Meta.PlaylistTrack.PLAY_ORDER,
+                    from + ",1");
+            if (c == null || !c.moveToFirst()) {
+                return 0;
+            }
+            int from_play_order = c.getInt(0);
+            closeCursor(c);
+            //find the to play_order
+            c = db.query(IndexSchema.Meta.PlaylistTrack.TABLE,
+                    movePlaylistEntryCols, movePlaylistEntrySel,
+                    new String[] {playlist_id}, null, null,
+                    IndexSchema.Meta.PlaylistTrack.PLAY_ORDER,
+                    to + ",1");
+            if (c == null || !c.moveToFirst()) {
+                return 0;
+            }
+            int to_play_order = c.getInt(0);
+            //re order the list
+            db.execSQL("UPDATE " + IndexSchema.Meta.PlaylistTrack.TABLE + " SET" +
+                    " play_order=-1" +
+                    " WHERE play_order=" + from_play_order +
+                    " AND playlist_id=" + playlist_id);
+            if (from < to) {
+                db.execSQL("UPDATE " + IndexSchema.Meta.PlaylistTrack.TABLE + " SET" +
+                        " play_order=play_order-1" +
+                        " WHERE play_order<=" + to_play_order +
+                        " AND play_order>" + from_play_order +
+                        " AND playlist_id=" + playlist_id);
+                numlines = to - from + 1;
+            } else {
+                db.execSQL("UPDATE " + IndexSchema.Meta.PlaylistTrack.TABLE + " SET" +
+                        " play_order=play_order+1" +
+                        " WHERE play_order>=" + to_play_order +
+                        " AND play_order<" + from_play_order +
+                        " AND playlist_id=" + playlist_id);
+                numlines = from - to + 1;
+            }
+            db.execSQL("UPDATE " + IndexSchema.Meta.PlaylistTrack.TABLE + " SET" +
+                    " play_order=" + to_play_order +
+                    " WHERE play_order=-1 AND playlist_id=" + playlist_id);
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+            mLock.writeLock().unlock();
+            closeCursor(c);
+        }
+        mAppContext.getContentResolver().notifyChange(IndexUris.playlist(indexAuthority, playlist_id), null);
+        return numlines;
+    }
+
+    @Override
+    public int removeFromPlaylist(String playlist_id, Uri uri) {
+        int numlines = 0;
+        mLock.writeLock().lock();
+        Cursor c = null;
+        SQLiteDatabase db = helper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            //first get the track id from the uri
+            c = db.query(IndexSchema.Info.Track.TABLE, idCols, trackUriSel,
+                    new String[]{uri.toString()}, null, null, null);
+            if (c == null || !c.moveToFirst()) {
+                return 0;
+            }
+            String id = c.getString(0);
+            closeCursor(c);
+            //then find that tracks play_order in the playlist
+            c = db.query(IndexSchema.Meta.PlaylistTrack.TABLE,
+                    movePlaylistEntryCols,
+                    " track_id=" + id +
+                    " AND playlist_id=" + playlist_id,
+                    null, null, null, null);
+            if (c == null || !c.moveToFirst()) {
+                return 0;
+            }
+            int play_order = c.getInt(0);
+            //then delete the item
+            db.delete(IndexSchema.Meta.PlaylistTrack.TABLE,
+                    " track_id=" + id +
+                    " AND playlist_id=" + playlist_id,
+                    null);
+            //decrement the play orders following it
+            db.execSQL("UPDATE " + IndexSchema.Meta.PlaylistTrack.TABLE + " SET" +
+                    " play_order=play_order-1" +
+                    " WHERE play_order>" + play_order +
+                    " AND playlist_id=" + playlist_id);
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+            mLock.writeLock().unlock();
+            closeCursor(c);
+        }
+        mAppContext.getContentResolver().notifyChange(IndexUris.playlist(indexAuthority, playlist_id), null);
+        return numlines;
+    }
+
+    final Map<Uri, Long> mConainerIdsCache = new HashMap<>();
+    final Map<String, Long> mAlbumIdsCache = new HashMap<>();
+    final Map<String, Long> mArtistIdsCache = new HashMap<>();
+    final Map<String, Long> mGenreIdsCache = new HashMap<>();
+
     void clearCaches() {
-        synchronized (sConainerIdsCache) {
-            sConainerIdsCache.clear();
+        synchronized (mConainerIdsCache) {
+            mConainerIdsCache.clear();
         }
-        synchronized (sAlbumIdsCache) {
-            sArtistIdsCache.clear();
+        synchronized (mAlbumIdsCache) {
+            mAlbumIdsCache.clear();
         }
-        synchronized (sArtistIdsCache) {
-            sArtistIdsCache.clear();
+        synchronized (mArtistIdsCache) {
+            mArtistIdsCache.clear();
         }
-        synchronized (sGenreIdsCache) {
-            sGenreIdsCache.clear();
+        synchronized (mGenreIdsCache) {
+            mGenreIdsCache.clear();
         }
     }
 
