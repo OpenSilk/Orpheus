@@ -62,7 +62,7 @@ public class DragSwipeAdapterWrapper<VH extends RecyclerView.ViewHolder>
 
     @Override
     public boolean onItemMove(int fromPosition, int toPosition) {
-        boolean success = wrappedAdapter.swap(fromPosition, toPosition);
+        boolean success = wrappedAdapter.move(fromPosition, toPosition);
         if (success && listener != null) {
             listener.onChange();
         }

@@ -129,6 +129,7 @@ public abstract class RecyclerListAdapter<T, VH extends RecyclerView.ViewHolder>
         try {
             Collections.swap(items, pos1, pos2);
             notifyItemMoved(pos1, pos2);
+            notifyItemMoved(pos2, pos1);
             return true;
         } catch (IndexOutOfBoundsException e) {
             return false;
@@ -137,6 +138,16 @@ public abstract class RecyclerListAdapter<T, VH extends RecyclerView.ViewHolder>
 
     public boolean swap(T item1, T item2) {
         return swap(indexOf(item1), indexOf(item2));
+    }
+
+    public boolean move(int from, int to) {
+        if (from < 0 || to > items.size()) {
+            return false;
+        }
+        T item = items.remove(from);
+        items.add(to, item);
+        notifyItemMoved(from, to);
+        return true;
     }
 
     public void clear() {
