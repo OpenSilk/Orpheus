@@ -70,7 +70,6 @@ public class ChooserActivity extends MortarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //We Ignore light/dark theme suggestion since google login starts dark then goes to light so fuck it.
         super.onCreate(savedInstanceState);
 
         ChooserActivityComponent cmp = DaggerService.getDaggerComponent(this);
@@ -78,23 +77,23 @@ public class ChooserActivity extends MortarActivity {
 
         setResult(RESULT_CANCELED);
 
-        mAuthService = DriveAuthService.getService(this);
-
-        if (savedInstanceState == null) {
-            Intent i = mAuthService.getAccountChooserIntent();
-            startActivityForResult(i, REQUEST_ACCOUNT_PICKER);
-        } else {
-            mAccountName = savedInstanceState.getString("account");
-            if (mAuthService.isFetchingToken()) {
-                authSubscription = mAuthService.getToken(mAccountName, new TokenSubscriber(), false);
-            }
-        }
-
         int error;
         if (ConnectionResult.SUCCESS !=
                 (error = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this))) {
             if (!GoogleApiAvailability.getInstance().isUserResolvableError(error)) {
                 finishFailure();
+            }
+        } else {
+            mAuthService = DriveAuthService.getService(this);
+
+            if (savedInstanceState == null) {
+                Intent i = mAuthService.getAccountChooserIntent();
+                startActivityForResult(i, REQUEST_ACCOUNT_PICKER);
+            } else {
+                mAccountName = savedInstanceState.getString("account");
+                if (mAuthService.isFetchingToken()) {
+                    authSubscription = mAuthService.getToken(mAccountName, new TokenSubscriber(), false);
+                }
             }
         }
     }
