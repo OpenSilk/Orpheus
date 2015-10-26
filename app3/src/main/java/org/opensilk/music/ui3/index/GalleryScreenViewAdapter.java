@@ -24,7 +24,7 @@ import org.opensilk.common.ui.mortar.ActionBarMenuHandler;
 import org.opensilk.common.ui.mortar.MortarPagerAdapter;
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.music.ui3.common.BundleablePresenter;
-import org.opensilk.music.ui3.common.BundleableRecyclerView;
+import org.opensilk.music.ui3.common.BundleableRecyclerList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ import java.util.Locale;
 /**
  * Created by drew on 4/20/15.
  */
-class GalleryScreenViewAdapter extends MortarPagerAdapter<Screen, BundleableRecyclerView> {
+class GalleryScreenViewAdapter extends MortarPagerAdapter<Screen, BundleableRecyclerList> {
     private Object mCurrentPrimaryItem;
     private GalleryScreenPresenter presenter;
     private List<GalleryPage> pages;
@@ -47,7 +47,7 @@ class GalleryScreenViewAdapter extends MortarPagerAdapter<Screen, BundleableRecy
     @Override @SuppressWarnings("unchecked")
     public void setPrimaryItem(ViewGroup container, int position, Object object) {
         if (object != mCurrentPrimaryItem) {
-            Page<Screen, BundleableRecyclerView> currentPage = (Page<Screen, BundleableRecyclerView>) object;
+            Page<Screen, BundleableRecyclerList> currentPage = (Page<Screen, BundleableRecyclerList>) object;
             BundleablePresenter childPresenter = (currentPage.view).getPresenter();
             ActionBarMenuHandler menuConfig = null;
             if (childPresenter != null) {

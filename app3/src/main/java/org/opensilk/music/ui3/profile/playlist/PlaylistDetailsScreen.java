@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.playlistsprofile;
+package org.opensilk.music.ui3.profile.playlist;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -24,6 +24,7 @@ import android.os.Parcel;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ComponentFactory;
 import org.opensilk.common.ui.mortar.Layout;
+import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortar.WithComponentFactory;
 import org.opensilk.common.ui.mortarfragment.MortarFragment;
 import org.opensilk.music.R;
@@ -38,14 +39,13 @@ import mortar.MortarScope;
 /**
  * Created by drew on 5/5/15.
  */
-@Layout(R.layout.bundleable_recycler_tracksdragswipe)
-@WithComponentFactory(PlaylistsProfileScreen.Factory.class)
-public class PlaylistsProfileScreen extends BundleableScreen implements ProfileScreen {
+@Layout(R.layout.profile_view2_dragswipe)
+@WithComponentFactory(PlaylistDetailsScreen.Factory.class)
+public class PlaylistDetailsScreen extends Screen implements ProfileScreen {
 
     final Playlist playlist;
 
-    public PlaylistsProfileScreen(LibraryConfig libraryConfig, Playlist playlist) {
-        super(libraryConfig);
+    public PlaylistDetailsScreen(Playlist playlist) {
         this.playlist = playlist;
     }
 
@@ -56,7 +56,7 @@ public class PlaylistsProfileScreen extends BundleableScreen implements ProfileS
 
     @Override
     public MortarFragment getFragment(Context context) {
-        return PlaylistsProfileScreenFragment.ni(context, this);
+        return PlaylistDetailsScreenFragment.ni(context, this);
     }
 
     @Override
@@ -66,30 +66,28 @@ public class PlaylistsProfileScreen extends BundleableScreen implements ProfileS
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeBundle(libraryConfig.dematerialize());
         dest.writeBundle(playlist.toBundle());
     }
 
-    public static final Creator<PlaylistsProfileScreen> CREATOR = new Creator<PlaylistsProfileScreen>() {
+    public static final Creator<PlaylistDetailsScreen> CREATOR = new Creator<PlaylistDetailsScreen>() {
         @Override
-        public PlaylistsProfileScreen createFromParcel(Parcel source) {
-            return new PlaylistsProfileScreen(
-                    LibraryConfig.materialize(source.readBundle()),
+        public PlaylistDetailsScreen createFromParcel(Parcel source) {
+            return new PlaylistDetailsScreen(
                     Playlist.BUNDLE_CREATOR.fromBundle(source.readBundle())
             );
         }
 
         @Override
-        public PlaylistsProfileScreen[] newArray(int size) {
-            return new PlaylistsProfileScreen[size];
+        public PlaylistDetailsScreen[] newArray(int size) {
+            return new PlaylistDetailsScreen[size];
         }
     };
 
-    public static class Factory extends ComponentFactory<PlaylistsProfileScreen> {
+    public static class Factory extends ComponentFactory<PlaylistDetailsScreen> {
         @Override
-        protected Object createDaggerComponent(Resources resources, MortarScope parentScope, PlaylistsProfileScreen screen) {
+        protected Object createDaggerComponent(Resources resources, MortarScope parentScope, PlaylistDetailsScreen screen) {
             MusicActivityComponent activityComponent = DaggerService.getDaggerComponent(parentScope);
-            return PlaylistsProfileScreenComponent.FACTORY.call(activityComponent, screen);
+            return PlaylistDetailsScreenComponent.FACTORY.call(activityComponent, screen);
         }
     }
 }

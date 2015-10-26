@@ -20,6 +20,7 @@ package org.opensilk.music.ui3;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
@@ -34,6 +35,10 @@ import org.opensilk.common.ui.mortar.ActionModeDelegateCallback;
 import org.opensilk.common.ui.mortar.ActionModePresenter;
 import org.opensilk.common.ui.mortar.ActivityResultsActivity;
 import org.opensilk.common.ui.mortar.ActivityResultsOwner;
+import org.opensilk.common.ui.mortar.DialogFactory;
+import org.opensilk.common.ui.mortar.DialogFactoryFragment;
+import org.opensilk.common.ui.mortar.DialogPresenter;
+import org.opensilk.common.ui.mortar.DialogPresenterActivity;
 import org.opensilk.common.ui.mortar.DrawerOwner;
 import org.opensilk.common.ui.mortar.DrawerOwnerDelegate;
 import org.opensilk.common.ui.mortar.ToolbarOwner;
@@ -55,13 +60,15 @@ import mortar.MortarScope;
  * Created by drew on 5/1/15.
  */
 public abstract class MusicActivity extends MortarFragmentActivity
-        implements ActivityResultsActivity, ToolbarOwnerDelegate.Callback, ActionModeActivity {
+        implements ActivityResultsActivity, ToolbarOwnerDelegate.Callback,
+        ActionModeActivity, DialogPresenterActivity {
 
     @Inject protected ActivityResultsOwner mActivityResultsOwner;
     @Inject protected PlaybackController mPlaybackController;
     @Inject protected ToolbarOwner mToolbarOwner;
     @Inject protected DrawerOwner mDrawerOwner;
     @Inject protected ActionModePresenter mActionModePresenter;
+    @Inject protected  DialogPresenter mDialogPresenter;
 
     protected ToolbarOwnerDelegate<MusicActivity> mToolbarOwnerDelegate;
     protected DrawerOwnerDelegate<MusicActivity> mDrawerOwnerDelegate;
@@ -98,6 +105,7 @@ public abstract class MusicActivity extends MortarFragmentActivity
         }
         mToolbarOwnerDelegate.onCreate();
         mActionModePresenter.takeView(this);
+        mDialogPresenter.takeView(this);
     }
 
     @Override
@@ -114,6 +122,7 @@ public abstract class MusicActivity extends MortarFragmentActivity
         if (mDrawerOwnerDelegate != null) mDrawerOwnerDelegate.onDestroy();
         mActionModePresenter.dropView(this);
         cancelActionMode();
+        mDialogPresenter.dropView(this);
     }
 
     @Override
@@ -218,5 +227,23 @@ public abstract class MusicActivity extends MortarFragmentActivity
 
     protected boolean hasLeftDrawer() {
         return true;
+    }
+
+        /*
+     * Dialog
+     */
+
+    @Override
+    public void showDialog(DialogFactory factory) {
+        dismissDialog();
+        DialogFactoryFragment.ni(factory).show(getSupportFragmentManager(), "dialogg");
+    }
+
+    @Override
+    public void dismissDialog() {
+        DialogFragment f = (DialogFragment) getSupportFragmentManager().findFragmentByTag("dialogg");
+        if (f != null) {
+            f.dismiss();
+        }
     }
 }

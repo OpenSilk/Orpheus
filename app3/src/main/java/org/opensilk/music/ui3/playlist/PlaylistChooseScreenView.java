@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.library;
+package org.opensilk.music.ui3.playlist;
 
 import android.content.Context;
 import android.support.v7.widget.GridLayoutManager;
@@ -33,40 +33,38 @@ import org.opensilk.common.ui.mortar.ToolbarOwner;
 import org.opensilk.common.ui.recycler.RecyclerListCoordinator;
 import org.opensilk.common.ui.widget.FloatingActionButtonCheckable;
 import org.opensilk.music.R;
-import org.opensilk.music.model.Container;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleableRecyclerAdapter;
 import org.opensilk.music.ui3.common.BundleableRecyclerCoordinator;
 import org.opensilk.music.ui3.common.BundleableRecyclerView;
-import org.opensilk.music.ui3.main.FooterScreenComponent;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 
 /**
- * Created by drew on 9/17/15.
+ * Created by drew on 10/24/15.
  */
-public class FoldersScreenView extends BundleableRecyclerCoordinator {
-
-    @Inject @Named("folders_title") String mTitle;
-    @Inject Container mThisContainer;
+public class PlaylistChooseScreenView extends BundleableRecyclerCoordinator {
 
     @InjectView(R.id.floating_action_button) FloatingActionButtonCheckable mFab;
 
+    @Inject @Named("fabaction") Action1<ViewClickEvent> mFabAction;
+
     CompositeSubscription mSubscriptions = new CompositeSubscription();
 
-    public FoldersScreenView(Context context, AttributeSet attrs) {
+    public PlaylistChooseScreenView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
     @Override
     protected void inject() {
-        FoldersScreenComponent cmp = DaggerService.getDaggerComponent(getContext());
+        PlaylistChooseScreenComponent cmp = DaggerService.getDaggerComponent(getContext());
         cmp.inject(this);
     }
 
@@ -90,25 +88,13 @@ public class FoldersScreenView extends BundleableRecyclerCoordinator {
     }
 
     void updateFab() {
-        mFab.setChecked(mPresenter.getIndexClient().isIndexed(mThisContainer));
+
     }
 
     void subscribeClicks() {
-        mSubscriptions.add(RxView.clickEvents(mFab).subscribe(
-                new Action1<ViewClickEvent>() {
-                    @Override
-                    public void call(ViewClickEvent onClickEvent) {
-                        if (!mPresenter.getIndexClient().isIndexed(mThisContainer)) {
-                            mPresenter.getIndexClient().add(mThisContainer);
-                            mFab.setChecked(true);
-                        } else {
-                            mPresenter.getIndexClient().remove(mThisContainer);
-                            //TODO show toast
-                            mFab.setChecked(false);
-                        }
-                    }
-                }
-        ));
+        mSubscriptions.add(
+                RxView.clickEvents(mFab).subscribe(mFabAction)
+        );
     }
 
 }

@@ -19,40 +19,45 @@ package org.opensilk.music.ui3.profile;
 
 import android.content.Context;
 import android.support.v7.view.ActionMode;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.recycler.DragSwipeAdapterWrapper;
+import org.opensilk.common.ui.recycler.DragSwipeViewHolder;
+import org.opensilk.common.ui.recycler.SimpleItemTouchHelperCallback;
 import org.opensilk.music.R;
+import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleableRecyclerAdapter;
 import org.opensilk.music.ui3.common.UtilsCommon;
+
+import javax.inject.Inject;
 
 /**
  * Created by drew on 9/5/15.
  */
 public class ProfileView2DragSwipePortrait extends ProfileView2Portrait {
 
-    private ActionMode mActionMode;
+    boolean inSelectionMode;
 
     public ProfileView2DragSwipePortrait(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
     @Override
-    public void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        if (mActionMode != null) {
-            mActionMode.finish();
-        }
+    protected void inject() {
+        ProfileComponentDragSwipe cmp = DaggerService.getDaggerComponent(getContext());
+        cmp.inject(this);
     }
 
     @Override
     protected void initRecyclerView() {
         getListView().setHasFixedSize(true);
         DragSwipeAdapterWrapper<BundleableRecyclerAdapter.ViewHolder> wrapper =
-                new DragSwipeAdapterWrapper<>(mAdapter, mAdapterCallback);
+                new DragSwipeAdapterWrapper<>(mAdapter, mMoveListener);
         getListView().setAdapter(wrapper);
     }
 
@@ -62,54 +67,24 @@ public class ProfileView2DragSwipePortrait extends ProfileView2Portrait {
         mAdapter.setDragableList(true);
     }
 
-    protected void startActionMode() {
-        if (mActionMode == null) {
-            mActionMode = UtilsCommon.findActivity(getContext()).startSupportActionMode(mActionModeCallback);
-        }
-    }
-
-    final DragSwipeAdapterWrapper.Listener mAdapterCallback = new DragSwipeAdapterWrapper.Listener() {
-        @Override
-        public void onChange() {
-            startActionMode();
-        }
+    final DragSwipeAdapterWrapper.Listener mMoveListener =
+            new DragSwipeAdapterWrapper.Listener() {
+                @Override
+                public void onChange() {
+                    if (!inSelectionMode) {
+                        inSelectionMode = true;
+                        mPresenter.onStartSelectionMode(mSelectionModeListener);
+                    }
+                }
     };
 
-    final ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
-        boolean wasSaved = false;
-
-        @Override
-        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            MenuInflater inflater = mode.getMenuInflater();
-            inflater.inflate(R.menu.action_save, menu);
-            return true;
-        }
-
-        @Override
-        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            return false;
-        }
-
-        @Override
-        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.action_save:
-                    wasSaved = true;
-                    //TODO
-                    mode.finish();
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-        @Override
-        public void onDestroyActionMode(ActionMode mode) {
-            mActionMode = null;
-            if (!wasSaved) {
-                mPresenter.reload();
-            }
-        }
+    final BundleableRecyclerAdapter.OnSelectionModeEnded mSelectionModeListener =
+            new BundleableRecyclerAdapter.OnSelectionModeEnded() {
+                @Override
+                public void onEndSelectionMode() {
+                    inSelectionMode = false;
+                    mPresenter.reload();
+                }
     };
 
 }

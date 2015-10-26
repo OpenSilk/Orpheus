@@ -139,6 +139,14 @@
         </activity>
 
         <activity
+            android:name=".ui3.PlaylistManageActivity"
+            android:theme="@style/Theme.Dark"
+            android:process=":ui">
+            <meta-data android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
+        </activity>
+
+        <activity
             android:name=".settings.SettingsActivity"
             android:theme="@style/Theme.Settings.Dark"
             android:process=":ui">

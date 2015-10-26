@@ -15,76 +15,79 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.profile.album;
+package org.opensilk.music.ui3.profile.playlist;
 
 import android.content.Context;
 import android.net.Uri;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import org.opensilk.bundleable.Bundleable;
+import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.R;
 import org.opensilk.music.index.model.BioSummary;
 import org.opensilk.music.index.provider.IndexUris;
-import org.opensilk.music.model.Album;
+import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.Model;
+import org.opensilk.music.model.Track;
 import org.opensilk.music.model.sort.TrackSortOrder;
-import org.opensilk.music.ui3.ProfileActivity;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
-import org.opensilk.music.ui3.common.PlayAllItemClickListener;
 import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
+import org.opensilk.music.ui3.common.PlayAllItemClickListener;
+import org.opensilk.music.ui3.common.UtilsCommon;
 import org.opensilk.music.ui3.profile.bio.BioScreen;
 import org.opensilk.music.ui3.profile.bio.BioScreenFragment;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
+import timber.log.Timber;
 
 /**
  * Created by drew on 5/5/15.
  */
 @Module
-public class AlbumDetailsScreenModule {
-    final AlbumDetailsScreen screen;
+public class PlaylistDetailsScreenModule {
+    final PlaylistDetailsScreen screen;
 
-    public AlbumDetailsScreenModule(AlbumDetailsScreen screen) {
+    public PlaylistDetailsScreenModule(PlaylistDetailsScreen screen) {
         this.screen = screen;
     }
 
     @Provides @Named("loader_uri")
     public Uri provideLoaderUri(@Named("IndexProviderAuthority") String authority) {
-        return IndexUris.albumDetails(screen.album);
+        return IndexUris.playlistTracks(screen.playlist);
     }
 
     @Provides @Named("profile_heros")
     public Boolean provideWantMultiHeros() {
-        return false;
+        return screen.playlist.getArtInfos().size() > 1;
     }
 
     @Provides @Named("profile_heros")
     public List<ArtInfo> provideHeroArtinfos() {
-        final Album album = screen.album;
-        return Collections.singletonList(ArtInfo.forAlbum(album.getArtistName(),
-                album.getName(), album.getArtworkUri()));
+        return screen.playlist.getArtInfos();
     }
 
     @Provides @Named("profile_title")
     public String provideProfileTitle() {
-        return screen.album.getName();
+        return screen.playlist.getName();
     }
 
     @Provides @Named("profile_subtitle")
-    public String provideProfileSubTitle() {
-        return screen.album.getArtistName();
+    public String provideProfileSubTitle(@ForApplication Context context) {
+        return UtilsCommon.makeLabel(context, R.plurals.Nsongs, screen.playlist.getTracksCount());
     }
 
     @Provides @ScreenScope
@@ -94,7 +97,7 @@ public class AlbumDetailsScreenModule {
     ) {
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(false)
-                .setWantsNumberedTracks(true)
+//                .setWantsNumberedTracks(true)
                 .setItemClickListener(itemClickListener)
                 .setMenuConfig(menuConfig)
                 .setDefaultSortOrder(TrackSortOrder.PLAYORDER)
@@ -103,80 +106,67 @@ public class AlbumDetailsScreenModule {
 
     @Provides @ScreenScope
     public ItemClickListener provideItemClickListener() {
-        return new ItemClickListener() {
-            @Override
-            public void onItemClicked(BundleablePresenter presenter, Context context, Model item) {
-                if (item instanceof BioSummary) {
-                    presenter.getFm().replaceMainContent(BioScreenFragment.ni(context,
-                            new BioScreen(provideHeroArtinfos(), (BioSummary)item)), true);
-//                    ProfileActivity.startSelf(context, new BioScreen(provideHeroArtinfos(), (BioSummary)item));
-                } else {
-                    new PlayAllItemClickListener().onItemClicked(presenter, context, item);
-                }
-            }
-        };
+        return new PlayAllItemClickListener();
     }
 
     @Provides @ScreenScope
-    public MenuHandler provideMenuHandler(@Named("loader_uri") final Uri loaderUri) {
+    public MenuHandler provideMenuHandler(@Named("loader_uri") Uri loaderUri) {
         return new MenuHandlerImpl(loaderUri) {
             @Override
             public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
-                inflateMenu(R.menu.album_song_sort_by, menuInflater, menu);
-                inflateMenu(R.menu.add_to_queue, menuInflater, menu);
-                inflateMenu(R.menu.play_next, menuInflater, menu);
-                return true;
+                return false;
             }
 
             @Override
             public boolean onMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
-                switch (menuItem.getItemId()) {
-                    case R.id.menu_sort_by_track_list:
-                        setNewSortOrder(presenter, TrackSortOrder.PLAYORDER);
-                        return true;
-                    case R.id.menu_sort_by_az:
-                        setNewSortOrder(presenter, TrackSortOrder.A_Z);
-                        return true;
-                    case R.id.menu_sort_by_za:
-                        setNewSortOrder(presenter, TrackSortOrder.Z_A);
-                        return true;
-                    case R.id.menu_sort_by_duration:
-                        setNewSortOrder(presenter, TrackSortOrder.LONGEST);
-                        return true;
-                    case R.id.menu_sort_by_artist:
-                        setNewSortOrder(presenter, TrackSortOrder.ARTIST);
-                        return true;
-                    case R.id.add_to_queue:
-                        addItemsToQueue(presenter);
-                        return true;
-                    case R.id.play_next:
-                        playItemsNext(presenter);
-                        return true;
-                    default:
-                        return false;
-                }
+                return false;
             }
 
             @Override
             public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,
-                        R.menu.add_to_queue,
-                        R.menu.play_next
-                );
+                        R.menu.action_save
+                        );
                 return true;
             }
 
             @Override
             public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
-                    case R.id.add_to_queue:
-                        addSelectedItemsToQueue(presenter);
+                    case R.id.action_save: {
+                        List<Bundleable> tracks = presenter.getItems();
+                        List<Uri> list = new ArrayList<>(tracks.size());
+                        for (Bundleable b : tracks) {
+                            list.add(((Track)b).getUri());
+                        }
+                        presenter.getIndexClient().updatePlaylist(screen.playlist.getUri(), list);
                         return true;
-                    case R.id.play_next:
-                        playSelectedItemsNext(presenter);
-                        return true;
+                    }
                     default:
                         return false;
+                }
+            }
+        };
+    }
+
+    @Provides
+    public RecyclerView.AdapterDataObserver provideObserver(final BundleablePresenter presenter) {
+        return new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onItemRangeRemoved(int positionStart, int itemCount) {
+                if (itemCount == 1) {
+                    presenter.getIndexClient().removeFromPlaylist(screen.playlist.getUri(), positionStart);
+                } else {
+                    Timber.e("Removing multiple items unsupported");
+                }
+            }
+
+            @Override
+            public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+                if (itemCount == 1) {
+                    presenter.getIndexClient().movePlaylistEntry(screen.playlist.getUri(), fromPosition, toPosition);
+                } else {
+                    Timber.e("Moving multiple items unsupported");
                 }
             }
         };

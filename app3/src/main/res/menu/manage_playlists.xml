@@ -16,14 +16,11 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<org.opensilk.music.ui3.common.BundleableRecyclerView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/bundleable_recycler_frame"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <include layout="@layout/recycler_list_frame_base"/>
-
-</org.opensilk.music.ui3.common.BundleableRecyclerView>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_manage_playlists"
+        android:title="@string/menu_manage_playlists"
+        android:orderInCategory="99"
+        app:showAsAction="never"/>
+</menu>

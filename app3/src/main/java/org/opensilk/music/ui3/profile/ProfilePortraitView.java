@@ -42,7 +42,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.artwork.PaletteObserver;
 import org.opensilk.music.artwork.PaletteResponse;
 import org.opensilk.music.ui3.common.BundleableRecyclerAdapter;
-import org.opensilk.music.ui3.common.BundleableRecyclerView;
+import org.opensilk.music.ui3.common.BundleableRecyclerList;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -53,7 +53,7 @@ import butterknife.InjectView;
 /**
  * Created by drew on 11/18/14.
  */
-public class ProfilePortraitView extends BundleableRecyclerView {
+public class ProfilePortraitView extends BundleableRecyclerList {
 
     @Inject @Named("profile_heros") Boolean wantMultiHeros;
     @Inject @Named("profile_title") String mTitleText;

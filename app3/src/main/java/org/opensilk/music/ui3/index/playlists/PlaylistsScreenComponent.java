@@ -15,12 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.playlistsprofile;
+package org.opensilk.music.ui3.index.playlists;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.ui3.MusicActivityComponent;
 import org.opensilk.music.ui3.common.BundleableComponent;
-import org.opensilk.music.ui3.profile.ProfileComponent;
+import org.opensilk.music.ui3.main.FooterScreenComponent;
 
 import dagger.Component;
 import rx.functions.Func2;
@@ -28,21 +28,20 @@ import rx.functions.Func2;
 /**
  * Created by drew on 5/5/15.
  */
-//@ScreenScope
-//@Component(
-//        dependencies = MusicActivityComponent.class,
-//        modules = PlaylistsProfileScreenModule.class
-//)
-public interface PlaylistsProfileScreenComponent extends BundleableComponent {
-    Func2<MusicActivityComponent, PlaylistsProfileScreen, PlaylistsProfileScreenComponent> FACTORY =
-            new Func2<MusicActivityComponent, PlaylistsProfileScreen, PlaylistsProfileScreenComponent>() {
+@ScreenScope
+@Component(
+        dependencies = MusicActivityComponent.class,
+        modules = PlaylistsScreenModule.class
+)
+public interface PlaylistsScreenComponent extends BundleableComponent, FooterScreenComponent {
+    Func2<MusicActivityComponent, PlaylistsScreen, PlaylistsScreenComponent> FACTORY =
+            new Func2<MusicActivityComponent, PlaylistsScreen, PlaylistsScreenComponent>() {
                 @Override
-                public PlaylistsProfileScreenComponent call(MusicActivityComponent musicActivityComponent, PlaylistsProfileScreen screen) {
-//                    return DaggerPlaylistsProfileScreenComponent.builder()
-//                            .musicActivityComponent(musicActivityComponent)
-//                            .playlistsProfileScreenModule(new PlaylistsProfileScreenModule(screen))
-//                            .build();
-                    return null;
+                public PlaylistsScreenComponent call(MusicActivityComponent musicActivityComponent, PlaylistsScreen screen) {
+                    return DaggerPlaylistsScreenComponent.builder()
+                            .musicActivityComponent(musicActivityComponent)
+                            .playlistsScreenModule(new PlaylistsScreenModule(screen))
+                            .build();
                 }
             };
 }

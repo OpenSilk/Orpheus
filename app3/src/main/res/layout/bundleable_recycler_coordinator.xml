@@ -16,7 +16,7 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<org.opensilk.music.ui3.library.FoldersScreenView
+<org.opensilk.music.ui3.common.BundleableRecyclerCoordinator
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -26,14 +26,4 @@
 
     <include layout="@layout/recycler_coordinator_base"/>
 
-    <org.opensilk.common.ui.widget.FloatingActionButtonCheckable
-        android:id="@+id/floating_action_button"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_gravity="bottom|end"
-        app:layout_behavior="org.opensilk.music.ui3.library.FabFooterBehavior"
-        android:layout_margin="16dp"
-        android:clickable="true"
-        style="@style/FoldersFab"/>
-
-</org.opensilk.music.ui3.library.FoldersScreenView>
+</org.opensilk.music.ui3.common.BundleableRecyclerCoordinator>

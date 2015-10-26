@@ -20,27 +20,25 @@ package org.opensilk.music.ui3;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.View;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
+import org.opensilk.music.model.Playlist;
 import org.opensilk.music.settings.SettingsActivity;
 import org.opensilk.music.ui.theme.OrpheusTheme;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
 import org.opensilk.music.ui3.common.ActivityResultCodes;
 import org.opensilk.music.ui3.index.GalleryScreenFragment;
 import org.opensilk.music.ui3.library.LibraryScreenFragment;
+import org.opensilk.music.ui3.index.playlists.PlaylistsScreenFragment;
+import org.opensilk.music.ui3.profile.playlist.PlaylistDetailsScreen;
 
 import javax.inject.Inject;
 
@@ -128,6 +126,13 @@ public class LauncherActivity extends MusicActivity {
                         break;
                 }
                 break;
+            case ActivityRequestCodes.PLAYLIST_MANAGE: {
+                if (resultCode == RESULT_OK) {
+                    Playlist playlist = Playlist.BUNDLE_CREATOR.fromBundle(data.getBundleExtra("plist"));
+                    ProfileActivity.startSelf(this, new PlaylistDetailsScreen(playlist));
+                }
+                break;
+            }
             default:
                 super.onActivityResult(requestCode, resultCode, data);
         }
@@ -139,18 +144,25 @@ public class LauncherActivity extends MusicActivity {
         public boolean onNavigationItemSelected(MenuItem menuItem) {
             mDrawerOwnerDelegate.closeDrawer(GravityCompat.START);
             switch (menuItem.getItemId()) {
-                case R.id.my_library: {
+                case R.id.nav_my_library: {
                     mFm.killBackStack();
                     mFm.replaceMainContent(GalleryScreenFragment.ni(LauncherActivity.this), false);
                     menuItem.setChecked(true);
                     break;
                 }
-                case R.id.libraries:
+                case R.id.nav_libraries: {
                     mFm.killBackStack();
                     mFm.replaceMainContent(LibraryScreenFragment.ni(), false);
                     menuItem.setChecked(true);
                     break;
-                case R.id.settings: {
+                }
+                case R.id.nav_playlists: {
+                    mFm.killBackStack();
+                    mFm.replaceMainContent(PlaylistsScreenFragment.ni(LauncherActivity.this), false);
+                    menuItem.setChecked(true);
+                    break;
+                }
+                case R.id.nav_settings: {
                     Intent i = new Intent(LauncherActivity.this, SettingsActivity.class);
                     mActivityResultsOwner.startActivityForResult(i, ActivityRequestCodes.APP_SETTINGS, null);
                     break;

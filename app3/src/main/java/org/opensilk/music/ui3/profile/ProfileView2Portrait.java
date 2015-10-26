@@ -39,7 +39,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.index.model.BioSummary;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleableRecyclerAdapter;
-import org.opensilk.music.ui3.common.BundleableRecyclerView2;
+import org.opensilk.music.ui3.common.BundleableRecyclerView;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -52,7 +52,7 @@ import rx.subscriptions.CompositeSubscription;
 /**
  * Created by drew on 9/3/15.
  */
-public class ProfileView2Portrait extends CoordinatorLayout implements BundleableRecyclerView2 {
+public class ProfileView2Portrait extends CoordinatorLayout implements BundleableRecyclerView {
 
     @Inject @Named("profile_heros") Boolean wantMultiHeros;
     @Inject @Named("profile_title") String mTitleText;
@@ -70,6 +70,10 @@ public class ProfileView2Portrait extends CoordinatorLayout implements Bundleabl
 
     public ProfileView2Portrait(Context context, AttributeSet attrs) {
         super(context, attrs);
+        inject();
+    }
+
+    protected void inject() {
         if (!isInEditMode()) {
             ProfileComponent component = DaggerService.getDaggerComponent(getContext());
             component.inject(this);

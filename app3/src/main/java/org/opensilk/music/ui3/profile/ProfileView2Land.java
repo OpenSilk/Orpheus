@@ -36,13 +36,12 @@ import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.ToolbarOwner;
 import org.opensilk.common.ui.recycler.HeaderRecyclerAdapter;
 import org.opensilk.common.ui.recycler.ItemClickSupport;
-import org.opensilk.common.ui.recycler.RecyclerListAdapter;
 import org.opensilk.common.ui.util.ViewUtils;
 import org.opensilk.music.R;
 import org.opensilk.music.index.model.BioSummary;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleableRecyclerAdapter;
-import org.opensilk.music.ui3.common.BundleableRecyclerView2;
+import org.opensilk.music.ui3.common.BundleableRecyclerView;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -55,7 +54,7 @@ import rx.subscriptions.CompositeSubscription;
 /**
  * Created by drew on 10/17/15.
  */
-public class ProfileView2Land extends CoordinatorLayout implements BundleableRecyclerView2 {
+public class ProfileView2Land extends CoordinatorLayout implements BundleableRecyclerView {
 
     @Inject @Named("profile_heros") Boolean wantMultiHeros;
     @Inject @Named("profile_title") String mTitleText;

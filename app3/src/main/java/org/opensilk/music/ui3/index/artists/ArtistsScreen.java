@@ -32,7 +32,7 @@ import mortar.MortarScope;
 /**
  * Created by drew on 5/5/15.
  */
-@Layout(R.layout.bundleable_recycler)
+@Layout(R.layout.bundleable_recycler_list)
 @WithComponentFactory(ArtistsScreen.Factory.class)
 public class ArtistsScreen extends Screen {
     public static class Factory extends ComponentFactory<ArtistsScreen> {

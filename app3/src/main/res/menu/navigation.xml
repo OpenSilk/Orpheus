@@ -19,16 +19,19 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group android:checkableBehavior="single">
-        <item android:id="@+id/my_library"
+        <item android:id="@+id/nav_my_library"
             android:icon="@drawable/library_music_grey600_36dp"
             android:title="@string/my_library"/>
-        <item android:id="@+id/libraries"
+        <item android:id="@+id/nav_libraries"
             android:icon="@drawable/puzzle_grey600_36dp"
             android:title="@string/libraries_title"/>
+        <item android:id="@+id/nav_playlists"
+            android:icon="@drawable/playlist_play_grey600_36dp"
+            android:title="@string/page_playlists"/>
     </group>
 
     <item
-        android:id="@+id/settings"
+        android:id="@+id/nav_settings"
         android:icon="@drawable/ic_settings_grey600_24dp"
         android:title="@string/settings_title"/>
 

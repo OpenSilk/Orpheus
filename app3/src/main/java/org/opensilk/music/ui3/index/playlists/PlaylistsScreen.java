@@ -15,35 +15,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.playlistsprofile;
+package org.opensilk.music.ui3.index.playlists;
 
-import android.content.Context;
-import android.os.Bundle;
+import android.content.res.Resources;
 
 import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.common.ui.mortar.ToolbarOwner;
+import org.opensilk.common.ui.mortar.ComponentFactory;
+import org.opensilk.common.ui.mortar.Layout;
 import org.opensilk.common.ui.mortar.Screen;
+import org.opensilk.common.ui.mortar.WithComponentFactory;
 import org.opensilk.music.R;
 import org.opensilk.music.ui3.MusicActivityComponent;
-import org.opensilk.music.ui3.common.BundleableFragment;
-import org.opensilk.music.ui3.common.UtilsCommon;
+
+import mortar.MortarScope;
 
 /**
  * Created by drew on 5/5/15.
  */
-public class PlaylistsProfileScreenFragment extends BundleableFragment {
-    public static final String NAME = PlaylistsProfileScreenFragment.class.getName();
-
-    public static PlaylistsProfileScreenFragment ni(Context context, PlaylistsProfileScreen screen) {
-        Bundle args = new Bundle();
-        args.putParcelable("screen", screen);
-        return factory(context, NAME, args);
+@Layout(R.layout.bundleable_recycler_coordinator)
+@WithComponentFactory(PlaylistsScreen.Factory.class)
+public class PlaylistsScreen extends Screen {
+    public static class Factory extends ComponentFactory<PlaylistsScreen> {
+        @Override
+        protected Object createDaggerComponent(Resources resources, MortarScope parentScope, PlaylistsScreen screen) {
+            MusicActivityComponent activityComponent = DaggerService.getDaggerComponent(parentScope);
+            return PlaylistsScreenComponent.FACTORY.call(activityComponent, screen);
+        }
     }
-
-    @Override
-    protected Screen newScreen() {
-        getArguments().setClassLoader(getClass().getClassLoader());
-        return getArguments().<PlaylistsProfileScreen>getParcelable("screen");
-    }
-
 }

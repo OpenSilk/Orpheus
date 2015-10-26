@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.playlists;
+package org.opensilk.music.ui3.index.playlists;
 
 import android.content.Context;
 import android.net.Uri;
@@ -25,27 +25,25 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
-import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.model.Model;
+import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.sort.PlaylistSortOrder;
-import org.opensilk.bundleable.Bundleable;
-import org.opensilk.music.ui3.common.BundleableComponent;
+import org.opensilk.music.ui3.ProfileActivity;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
+import org.opensilk.music.ui3.PlaylistManageActivity;
+import org.opensilk.music.ui3.profile.playlist.PlaylistDetailsScreen;
 
 import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
-import mortar.MortarScope;
-import rx.functions.Func2;
 
 /**
  * Created by drew on 5/5/15.
@@ -58,14 +56,9 @@ public class PlaylistsScreenModule {
         this.screen = screen;
     }
 
-    @Provides
-    public LibraryConfig provideLibraryConfig() {
-        return screen.libraryConfig;
-    }
-
     @Provides @Named("loader_uri")
-    public Uri provideLoaderUri() {
-        return Uri.EMPTY;
+    public Uri provideLoaderUri(@Named("IndexProviderAuthority") String authority) {
+        return IndexUris.playlists(authority);
     }
 
     @Provides @ScreenScope
@@ -85,7 +78,7 @@ public class PlaylistsScreenModule {
         return new ItemClickListener() {
             @Override
             public void onItemClicked(BundleablePresenter presenter, Context context, Model item) {
-//                TracksDragSwipeActivity.startSelf(context, new PlaylistsProfileScreen(screen.libraryConfig, (Playlist) item));
+                ProfileActivity.startSelf(context, new PlaylistDetailsScreen((Playlist) item));
             }
         };
     }
@@ -97,7 +90,8 @@ public class PlaylistsScreenModule {
             public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,
                         R.menu.playlist_sort_by,
-                        R.menu.view_as
+                        R.menu.view_as,
+                        R.menu.manage_playlists
                 );
                 return true;
             }
@@ -120,6 +114,9 @@ public class PlaylistsScreenModule {
                         return true;
                     case R.id.menu_view_as_grid:
                         updateLayout(presenter, AppPreferences.GRID);
+                        return true;
+                    case R.id.menu_manage_playlists:
+                        PlaylistManageActivity.startSelf(context);
                         return true;
                     default:
                         return false;

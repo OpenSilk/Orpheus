@@ -15,18 +15,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.common;
+package org.opensilk.music.ui3.index.playlists;
 
-import org.opensilk.music.AppPreferences;
-import org.opensilk.music.playback.control.PlaybackController;
+import android.content.Context;
+
+import org.opensilk.common.ui.mortar.Screen;
+import org.opensilk.music.ui3.common.BundleableFragment;
 
 /**
- * Created by drew on 5/2/15.
+ * Created by drew on 5/5/15.
  */
-public interface BundleableComponent {
-    void inject(BundleableRecyclerList view);
-    void inject(BundleableRecyclerCoordinator view);
-    PlaybackController playbackController();
-    AppPreferences appPreferences();
-    BundleablePresenter presenter();
+public class PlaylistsScreenFragment extends BundleableFragment {
+    public static final String NAME = PlaylistsScreenFragment.class.getName();
+
+    public static PlaylistsScreenFragment ni(Context context) {
+        return factory(context, NAME, null);
+    }
+
+    @Override
+    protected Screen newScreen() {
+        return new PlaylistsScreen();
+    }
 }

@@ -15,37 +15,41 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.playlists;
+package org.opensilk.music.ui3.playlist;
 
 import android.content.res.Resources;
+import android.net.Uri;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ComponentFactory;
 import org.opensilk.common.ui.mortar.Layout;
+import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortar.WithComponentFactory;
 import org.opensilk.music.R;
-import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.ui3.MusicActivityComponent;
-import org.opensilk.music.ui3.common.BundleableScreen;
+
+import java.util.List;
 
 import mortar.MortarScope;
 
 /**
- * Created by drew on 5/5/15.
+ * Created by drew on 10/24/15.
  */
-@Layout(R.layout.bundleable_recycler)
-@WithComponentFactory(PlaylistsScreen.Factory.class)
-public class PlaylistsScreen extends BundleableScreen {
+@Layout(R.layout.screen_playlistchoose)
+@WithComponentFactory(PlaylistChooseScreen.Factory.class)
+public class PlaylistChooseScreen extends Screen {
 
-    public PlaylistsScreen(LibraryConfig libraryConfig) {
-        super(libraryConfig);
+    final List<Uri> tracksUris;
+
+    public PlaylistChooseScreen(List<Uri> tracksUris) {
+        this.tracksUris = tracksUris;
     }
 
-    public static class Factory extends ComponentFactory<PlaylistsScreen> {
+    public static class Factory extends ComponentFactory<PlaylistChooseScreen> {
         @Override
-        protected Object createDaggerComponent(Resources resources, MortarScope parentScope, PlaylistsScreen screen) {
-            MusicActivityComponent activityComponent = DaggerService.getDaggerComponent(parentScope);
-            return PlaylistsScreenComponent.FACTORY.call(activityComponent, screen);
+        protected Object createDaggerComponent(Resources resources, MortarScope parentScope, PlaylistChooseScreen screen) {
+            MusicActivityComponent parent = DaggerService.getDaggerComponent(parentScope);
+            return PlaylistChooseScreenComponent.FACTORY.call(parent, new PlaylistChooseScreenModule(screen));
         }
     }
 }

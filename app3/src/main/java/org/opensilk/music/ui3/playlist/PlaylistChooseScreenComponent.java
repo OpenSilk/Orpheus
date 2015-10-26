@@ -15,32 +15,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.playlists;
+package org.opensilk.music.ui3.playlist;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.ui3.MusicActivityComponent;
 import org.opensilk.music.ui3.common.BundleableComponent;
+import org.opensilk.music.ui3.main.FooterScreenComponent;
 
 import dagger.Component;
 import rx.functions.Func2;
 
 /**
- * Created by drew on 5/5/15.
+ * Created by drew on 10/24/15.
  */
 @ScreenScope
 @Component(
         dependencies = MusicActivityComponent.class,
-        modules = PlaylistsScreenModule.class
+        modules = PlaylistChooseScreenModule.class
 )
-public interface PlaylistsScreenComponent extends BundleableComponent {
-    Func2<MusicActivityComponent, PlaylistsScreen, PlaylistsScreenComponent> FACTORY =
-            new Func2<MusicActivityComponent, PlaylistsScreen, PlaylistsScreenComponent>() {
+public interface PlaylistChooseScreenComponent extends BundleableComponent, FooterScreenComponent {
+    Func2<MusicActivityComponent, PlaylistChooseScreenModule, PlaylistChooseScreenComponent> FACTORY =
+            new Func2<MusicActivityComponent, PlaylistChooseScreenModule, PlaylistChooseScreenComponent>() {
                 @Override
-                public PlaylistsScreenComponent call(MusicActivityComponent musicActivityComponent, PlaylistsScreen screen) {
-                    return DaggerPlaylistsScreenComponent.builder()
+                public PlaylistChooseScreenComponent call(MusicActivityComponent musicActivityComponent,
+                                                          PlaylistChooseScreenModule playlistChooseScreenModule) {
+                    return DaggerPlaylistChooseScreenComponent.builder()
                             .musicActivityComponent(musicActivityComponent)
-                            .playlistsScreenModule(new PlaylistsScreenModule(screen))
+                            .playlistChooseScreenModule(playlistChooseScreenModule)
                             .build();
                 }
             };
+    void inject(PlaylistChooseScreenView view);
 }

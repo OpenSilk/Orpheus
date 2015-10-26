@@ -16,24 +16,26 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<org.opensilk.music.ui3.library.FoldersScreenView
+<android.support.v4.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
-    <include layout="@layout/recycler_coordinator_base"/>
+    <FrameLayout
+        android:id="@+id/main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
-    <org.opensilk.common.ui.widget.FloatingActionButtonCheckable
-        android:id="@+id/floating_action_button"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_gravity="bottom|end"
-        app:layout_behavior="org.opensilk.music.ui3.library.FabFooterBehavior"
-        android:layout_margin="16dp"
-        android:clickable="true"
-        style="@style/FoldersFab"/>
+    <fragment
+        android:id="@+id/controls_fragment"
+        android:layout_width="@dimen/drawer_width"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        class="org.opensilk.music.ui3.main.ControlsScreenFragment"
+        tools:layout="@layout/screen_controls"/>
 
-</org.opensilk.music.ui3.library.FoldersScreenView>
+</android.support.v4.widget.DrawerLayout>

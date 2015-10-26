@@ -15,30 +15,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.playlists;
+package org.opensilk.music.ui3.playlist;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 
+import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.common.ui.mortar.Screen;
-import org.opensilk.music.R;
-import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.ui3.common.BundleableFragment;
+import org.opensilk.common.ui.mortarfragment.MortarFragment;
 
 /**
- * Created by drew on 5/5/15.
+ * Created by drew on 10/25/15.
  */
-public class PlaylistsScreenFragment extends BundleableFragment {
-    public static final String NAME = PlaylistsScreenFragment.class.getName();
+public class PlaylistChooseScreenFragment extends MortarFragment {
+    public static final String NAME = PlaylistChooseScreenFragment.class.getName();
 
-    public static PlaylistsScreenFragment ni(Context context, LibraryConfig config) {
-        Bundle args = makeCommonArgsBundle(config, context.getString(R.string.page_playlists));
+    public static PlaylistChooseScreenFragment ni(Context context, Bundle args) {
         return factory(context, NAME, args);
     }
 
     @Override
     protected Screen newScreen() {
-        extractCommonArgs();
-        return new PlaylistsScreen(mLibraryConfig);
+        return new PlaylistChooseScreen(BundleHelper.<Uri>getList(getArguments()));
     }
 }

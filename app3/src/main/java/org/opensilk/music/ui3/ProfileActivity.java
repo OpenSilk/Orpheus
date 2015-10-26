@@ -75,8 +75,11 @@ public class ProfileActivity extends MusicActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ProfileScreen screen = getIntent().getParcelableExtra("screen");
-        mFragmentManagerOwner.replaceMainContent(screen.getFragment(this), false);
+        if (savedInstanceState == null) {
+            ProfileScreen screen = getIntent().getParcelableExtra("screen");
+            mFragmentManagerOwner.replaceMainContent(screen.getFragment(this), false);
+        }
+
     }
 
     /*

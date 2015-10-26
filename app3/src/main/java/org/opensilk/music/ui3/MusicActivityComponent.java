@@ -23,6 +23,7 @@ import org.opensilk.common.core.dagger2.ActivityScope;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.ui.mortar.ActionModePresenter;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
+import org.opensilk.common.ui.mortar.DialogPresenter;
 import org.opensilk.common.ui.mortar.DrawerController;
 import org.opensilk.common.ui.mortar.DrawerListenerRegistrar;
 import org.opensilk.common.ui.mortar.DrawerOwner;
@@ -57,4 +58,5 @@ public interface MusicActivityComponent extends MortarFragmentActivityComponent 
     DrawerOwner drawerOwner();
     ActionModePresenter actionModePresenter();
     @Named("artworkauthority") String artworkAuthority();
+    DialogPresenter dialogPresenter();
 }

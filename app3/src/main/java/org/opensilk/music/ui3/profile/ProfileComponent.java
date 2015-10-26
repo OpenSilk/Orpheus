@@ -26,6 +26,5 @@ import org.opensilk.music.ui3.main.FooterScreenComponent;
 public interface ProfileComponent extends BundleableComponent, FooterScreenComponent, ProfileHeroComponent {
     void inject(ProfilePortraitView view);
     void inject(ProfileView2Portrait view);
-    void inject(ProfileView2DragSwipePortrait view);
     void inject(ProfileView2Land view);
 }

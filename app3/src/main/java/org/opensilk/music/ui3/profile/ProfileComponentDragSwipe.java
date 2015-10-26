@@ -15,20 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.common;
-
-import android.content.Context;
+package org.opensilk.music.ui3.profile;
 
 /**
- * Created by drew on 9/3/15.
+ * Created by drew on 10/25/15.
  */
-public interface BundleableRecyclerView2 {
-    Context getContext();
-    void showLoading();
-    void setupRecyclerView();
-    void showList(boolean animate);
-    void showEmpty(boolean animate);
-    void setEmptyText(int resId);
-    BundleableRecyclerAdapter getAdapter();
-    void notifyAdapterResetIncoming();
+public interface ProfileComponentDragSwipe extends ProfileComponent {
+    void inject(ProfileView2DragSwipePortrait view);
 }

@@ -16,13 +16,11 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<org.opensilk.music.ui3.library.FoldersScreenView
+<org.opensilk.music.ui3.playlist.PlaylistChooseScreenView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <include layout="@layout/recycler_coordinator_base"/>
 
@@ -33,7 +31,7 @@
         android:layout_gravity="bottom|end"
         app:layout_behavior="org.opensilk.music.ui3.library.FabFooterBehavior"
         android:layout_margin="16dp"
-        android:clickable="true"
-        style="@style/FoldersFab"/>
+        android:src="@drawable/plus_white_24dp"
+        android:clickable="true"/>
 
-</org.opensilk.music.ui3.library.FoldersScreenView>
+</org.opensilk.music.ui3.playlist.PlaylistChooseScreenView>

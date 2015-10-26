@@ -30,7 +30,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.rx.RxLoader;
 import org.opensilk.common.core.rx.RxUtils;
-import org.opensilk.common.core.rx.SimpleObserver;
 import org.opensilk.common.ui.mortar.ActionBarMenuHandler;
 import org.opensilk.common.ui.mortar.ActionModePresenter;
 import org.opensilk.common.ui.mortar.HasOptionsMenu;
@@ -59,14 +58,11 @@ import mortar.bundler.BundleService;
 import rx.Subscriber;
 import rx.Subscription;
 
-import static org.opensilk.common.core.rx.RxUtils.isSubscribed;
-import static org.opensilk.common.core.rx.RxUtils.notSubscribed;
-
 /**
  * Created by drew on 5/2/15.
  */
 @ScreenScope
-public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
+public class BundleablePresenter extends Presenter<BundleableRecyclerView>
         implements RxLoader.ContentChangedListener, HasOptionsMenu, ActionBarMenuHandler {
 
     protected final AppPreferences preferences;
@@ -116,7 +112,7 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
     }
 
     @Override
-    protected BundleService extractBundleService(BundleableRecyclerView2 view) {
+    protected BundleService extractBundleService(BundleableRecyclerView view) {
         return BundleService.getBundleService(view.getContext());
     }
 

@@ -40,6 +40,7 @@
 
     <!--menus-->
     <string name="menu_login">Login</string>
+    <string name="menu_manage_playlists">Manage playlists</string>
 
     <!--lists-->
     <string name="error_loading_list">There was an error loading the items.</string>
