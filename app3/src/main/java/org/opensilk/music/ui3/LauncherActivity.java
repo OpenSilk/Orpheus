@@ -21,6 +21,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.view.MenuItem;
@@ -126,10 +127,12 @@ public class LauncherActivity extends MusicActivity {
                         break;
                 }
                 break;
-            case ActivityRequestCodes.PLAYLIST_MANAGE: {
+            case ActivityRequestCodes.PLAYLIST_ADD: {
                 if (resultCode == RESULT_OK) {
                     Playlist playlist = Playlist.BUNDLE_CREATOR.fromBundle(data.getBundleExtra("plist"));
-                    ProfileActivity.startSelf(this, new PlaylistDetailsScreen(playlist));
+                    mActivityResultsOwner.startActivityForResult(
+                            ProfileActivity.makeIntent(this, new PlaylistDetailsScreen(playlist)),
+                            ActivityRequestCodes.PROFILE, null);
                 }
                 break;
             }

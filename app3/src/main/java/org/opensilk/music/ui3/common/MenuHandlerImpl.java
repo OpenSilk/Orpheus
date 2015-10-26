@@ -17,13 +17,20 @@
 
 package org.opensilk.music.ui3.common;
 
+import android.content.Context;
 import android.net.Uri;
 import android.view.Menu;
 import android.view.MenuInflater;
 
 import org.apache.commons.lang3.StringUtils;
+import org.opensilk.bundleable.Bundleable;
+import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.AppPreferences;
+import org.opensilk.music.model.Track;
+import org.opensilk.music.ui3.PlaylistManageActivity;
+import org.opensilk.music.ui3.profile.ProfileScreen;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,9 +39,11 @@ import java.util.List;
 public abstract class MenuHandlerImpl implements MenuHandler {
 
     final Uri loaderUri;
+    protected final ActivityResultsController activityResultsController;
 
-    public MenuHandlerImpl(Uri loaderUri) {
+    public MenuHandlerImpl(Uri loaderUri, ActivityResultsController activityResultsController) {
         this.loaderUri = loaderUri;
+        this.activityResultsController = activityResultsController;
     }
 
     public void inflateMenu(int item, MenuInflater inflater, Menu menu) {
@@ -91,6 +100,22 @@ public abstract class MenuHandlerImpl implements MenuHandler {
             return; //TODO toast?
         }
         presenter.getPlaybackController().enqueueAllNext(toPlay);
+    }
+
+    public void addToPlaylistFromTracksUris(Context context, List<Uri> tracksUriList) {
+        activityResultsController.startActivityForResult(
+                PlaylistManageActivity.makeAddIntent(context, tracksUriList),
+                ActivityRequestCodes.PLAYLIST_ADD, null);
+    }
+
+    public void addToPlaylistFromTracks(Context context, List<Bundleable> tracks) {
+        List<Uri> uris = new ArrayList<>(tracks.size());
+        for (Bundleable track: tracks) {
+            uris.add(((Track)track).getUri());
+        }
+        activityResultsController.startActivityForResult(
+                PlaylistManageActivity.makeAddIntent2(context, uris),
+                ActivityRequestCodes.PLAYLIST_ADD, null);
     }
 
 }

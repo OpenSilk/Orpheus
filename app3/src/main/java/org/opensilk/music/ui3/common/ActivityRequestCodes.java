@@ -26,5 +26,7 @@ public interface ActivityRequestCodes {
 
     int APP_SETTINGS = 2001;
 
+    int PLAYLIST_ADD = 3000;
     int PLAYLIST_MANAGE = 3001;
+    int PROFILE = 3002;
 }

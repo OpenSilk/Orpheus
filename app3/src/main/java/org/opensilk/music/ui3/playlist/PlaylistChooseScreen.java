@@ -40,9 +40,11 @@ import mortar.MortarScope;
 public class PlaylistChooseScreen extends Screen {
 
     final List<Uri> tracksUris;
+    final List<Uri> tracks;
 
-    public PlaylistChooseScreen(List<Uri> tracksUris) {
+    public PlaylistChooseScreen(List<Uri> tracksUris, List<Uri> tracks) {
         this.tracksUris = tracksUris;
+        this.tracks = tracks;
     }
 
     public static class Factory extends ComponentFactory<PlaylistChooseScreen> {

@@ -27,6 +27,7 @@ import android.view.MenuItem;
 import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.R;
 import org.opensilk.music.index.model.BioSummary;
 import org.opensilk.music.index.provider.IndexUris;
@@ -110,8 +111,8 @@ public class PlaylistDetailsScreenModule {
     }
 
     @Provides @ScreenScope
-    public MenuHandler provideMenuHandler(@Named("loader_uri") Uri loaderUri) {
-        return new MenuHandlerImpl(loaderUri) {
+    public MenuHandler provideMenuHandler(@Named("loader_uri") Uri loaderUri, final ActivityResultsController activityResultsController) {
+        return new MenuHandlerImpl(loaderUri, activityResultsController) {
             @Override
             public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 return false;

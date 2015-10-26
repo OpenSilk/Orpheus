@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.index.model.BioSummary;
@@ -41,7 +42,9 @@ import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
+import org.opensilk.music.ui3.common.OpenProfileItemClickListener;
 import org.opensilk.music.ui3.common.UtilsCommon;
+import org.opensilk.music.ui3.profile.ProfileScreen;
 import org.opensilk.music.ui3.profile.album.AlbumDetailsScreen;
 import org.opensilk.music.ui3.profile.bio.BioScreen;
 import org.opensilk.music.ui3.profile.tracklist.TrackListScreen;
@@ -112,24 +115,26 @@ public class ArtistDetailsScreenModule {
     }
 
     @Provides @ScreenScope
-    public ItemClickListener provideItemClickListener() {
-        return new ItemClickListener() {
+    public ItemClickListener provideItemClickListener(ActivityResultsController activityResultsController) {
+        return new OpenProfileItemClickListener(activityResultsController, new OpenProfileItemClickListener.ProfileScreenFactory() {
             @Override
-            public void onItemClicked(BundleablePresenter presenter, Context context, Model item) {
+            public ProfileScreen call(Model item) {
                 if (item instanceof Album) {
-                    ProfileActivity.startSelf(context, new AlbumDetailsScreen((Album)item));
+                    return new AlbumDetailsScreen((Album)item);
                 } else if (item instanceof TrackList) {
-                    ProfileActivity.startSelf(context, new TrackListScreen((TrackList)item));
+                    return new TrackListScreen((TrackList)item);
                 } else if (item instanceof BioSummary) {
-                    ProfileActivity.startSelf(context, new BioScreen(provideHeroArtinfos(), (BioSummary)item));
+                    return new BioScreen(provideHeroArtinfos(), (BioSummary)item);
+                } else {
+                    throw new IllegalArgumentException("Unkown model type " + item.getClass());
                 }
             }
-        };
+        });
     }
 
     @Provides @ScreenScope
-    public MenuHandler provideMenuHandler(@Named("loader_uri") final Uri loaderUri) {
-        return new MenuHandlerImpl(loaderUri) {
+    public MenuHandler provideMenuHandler(@Named("loader_uri") final Uri loaderUri, final ActivityResultsController activityResultsController) {
+        return new MenuHandlerImpl(loaderUri, activityResultsController) {
             @Override
             public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,

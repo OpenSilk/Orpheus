@@ -85,6 +85,8 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView>
 
     private boolean isLoading;
 
+    private final boolean allowLongPressSelection;
+
     @Inject
     public BundleablePresenter(
             AppPreferences preferences,
@@ -109,6 +111,7 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView>
         this.playbackController = playbackController;
         this.wantsNumberedTracks = config.wantsNumberedTracks;
         this.indexClient = indexClient;
+        this.allowLongPressSelection = config.allowLongPressSelection;
     }
 
     @Override
@@ -260,6 +263,10 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView>
 
     public boolean wantsNumberedTracks() {
         return wantsNumberedTracks;
+    }
+
+    public boolean isAllowLongPressSelection() {
+        return allowLongPressSelection;
     }
 
     public BundleableLoader getLoader() {

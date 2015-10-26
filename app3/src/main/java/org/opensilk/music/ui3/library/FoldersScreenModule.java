@@ -25,6 +25,7 @@ import android.view.MenuItem;
 
 import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.model.Container;
@@ -102,8 +103,8 @@ public class FoldersScreenModule {
     }
 
     @Provides @ScreenScope
-    public MenuHandler provideMenuHandler(@Named("loader_uri") final Uri loaderUri) {
-        return new MenuHandlerImpl(loaderUri) {
+    public MenuHandler provideMenuHandler(@Named("loader_uri") final Uri loaderUri, final ActivityResultsController activityResultsController) {
+        return new MenuHandlerImpl(loaderUri, activityResultsController) {
             @Override
             public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenu(R.menu.folder_sort_by, menuInflater, menu);

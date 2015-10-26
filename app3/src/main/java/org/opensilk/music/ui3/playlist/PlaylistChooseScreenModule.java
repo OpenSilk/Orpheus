@@ -39,19 +39,21 @@ import org.opensilk.common.core.rx.RxUtils;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.common.ui.mortar.DialogFactory;
 import org.opensilk.common.ui.mortar.DialogPresenter;
-import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.index.provider.IndexUris;
+import org.opensilk.music.library.client.TypedBundleableLoader;
 import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Playlist;
+import org.opensilk.music.model.Track;
 import org.opensilk.music.model.sort.PlaylistSortOrder;
-import org.opensilk.music.ui3.ProfileActivity;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
-import org.opensilk.music.ui3.profile.playlist.PlaylistDetailsScreen;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Named;
 
@@ -63,6 +65,9 @@ import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Func0;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by drew on 10/24/15.
@@ -98,39 +103,101 @@ public class PlaylistChooseScreenModule {
         return new ItemClickListener() {
             @Override
             public void onItemClicked(final BundleablePresenter presenter, final Context context, final Model item) {
-                final Subscription s = presenter.getIndexClient().addToPlaylist(item.getUri(), screen.tracksUris)
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Subscriber<Integer>() {
-                            @Override
-                            public void onCompleted() {
-                                Intent intent = new Intent().putExtra("plist", ((Playlist)item).toBundle());
-                                activityResultsController.setResultAndFinish(Activity.RESULT_OK, intent);
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-                                dialogPresenter.showDialog(new DialogFactory() {
-                                    @Override
-                                    public Dialog call(Context context) {
-                                        return new AlertDialog.Builder(context)
-                                                .setMessage(R.string.err_generic)
-                                                .create();
+                final Subscription s;
+                if (screen.tracksUris == null) {
+                    s = Observable.create(
+                            new Observable.OnSubscribe<Integer>() {
+                                @Override
+                                public void call(Subscriber<? super Integer> subscriber) {
+                                    int count =presenter.getIndexClient().addToPlaylist(item.getUri(), screen.tracks);
+                                    if (!subscriber.isUnsubscribed()) {
+                                        subscriber.onNext(count);
+                                        subscriber.onCompleted();
                                     }
-                                });
-                            }
+                                }
+                            })
+                            .subscribeOn(Schedulers.computation())
+                            .subscribe(new Subscriber<Integer>() {
+                                @Override
+                                public void onCompleted() {
+                                    Intent intent = new Intent().putExtra("plist", ((Playlist) item).toBundle());
+                                    activityResultsController.setResultAndFinish(Activity.RESULT_OK, intent);
+                                }
 
+                                @Override
+                                public void onError(Throwable e) {
+                                    Toast.makeText(context, R.string.err_generic, Toast.LENGTH_SHORT).show();
+                                    Intent intent = new Intent();
+                                    activityResultsController.setResultAndFinish(Activity.RESULT_CANCELED, intent);
+                                }
+
+                                @Override
+                                public void onNext(Integer integer) {
+                                    //pass
+                                }
+                            });
+                } else {
+                    Observable<Observable<List<Track>>> loaderCreator = Observable.from(screen.tracksUris)
+                            .map(new Func1<Uri, Observable<List<Track>>>() {
+                                @Override
+                                public Observable<List<Track>> call(final Uri uri) {
+                                    //Use defer for lazy creation
+                                    return Observable.defer(new Func0<Observable<List<Track>>>() {
+                                        @Override
+                                        public Observable<List<Track>> call() {
+                                            return TypedBundleableLoader.<Track>create(context)
+                                                    .setUri(uri).createObservable();
+                                        }
+                                    });
+                                }
+                            });
+                    s = Observable.mergeDelayError(loaderCreator, 5)
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(new Subscriber<List<Track>>() {
+                                @Override
+                                public void onCompleted() {
+                                    Intent intent = new Intent().putExtra("plist", ((Playlist)item).toBundle());
+                                    activityResultsController.setResultAndFinish(Activity.RESULT_OK, intent);
+                                }
+
+                                @Override
+                                public void onError(Throwable e) {
+                                    Toast.makeText(context, R.string.err_generic, Toast.LENGTH_SHORT).show();
+                                    Intent intent = new Intent();
+                                    activityResultsController.setResultAndFinish(Activity.RESULT_CANCELED, intent);
+                                }
+
+                                @Override
+                                public void onNext(List<Track> tracks) {
+                                    List<Uri> uris = new ArrayList<Uri>(tracks.size());
+                                    for (Track track : tracks) {
+                                        uris.add(track.getUri());
+                                    }
+                                    presenter.getIndexClient().addToPlaylist(item.getUri(), uris);
+                                }
+                            });
+                }
+                dialogPresenter.showDialog(new DialogFactory() {
+                    @Override
+                    public Dialog call(Context context) {
+                        ProgressDialog pd = new ProgressDialog(context);
+                        pd.setIndeterminate(true);
+                        pd.setOnCancelListener(new DialogInterface.OnCancelListener() {
                             @Override
-                            public void onNext(Integer integer) {
-                                //pass
+                            public void onCancel(DialogInterface dialog) {
+                                RxUtils.unsubscribe(s);
                             }
                         });
+                        return pd;
+                    }
+                });
             }
         };
     }
 
     @Provides @ScreenScope
-    public MenuHandler provideMenuHandler(@Named("loader_uri") final Uri loaderUri) {
-        return new MenuHandlerImpl(loaderUri) {
+    public MenuHandler provideMenuHandler(@Named("loader_uri") final Uri loaderUri, final ActivityResultsController activityResultsController) {
+        return new MenuHandlerImpl(loaderUri, activityResultsController) {
             @Override
             public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,

@@ -25,6 +25,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.R;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.model.sort.TrackSortOrder;
@@ -74,8 +75,8 @@ public class TracksScreenModule {
     }
 
     @Provides @ScreenScope
-    public MenuHandler provideMenuHandler(@Named("loader_uri") final Uri loaderUri) {
-        return new MenuHandlerImpl(loaderUri) {
+    public MenuHandler provideMenuHandler(@Named("loader_uri") final Uri loaderUri, final ActivityResultsController activityResultsController) {
+        return new MenuHandlerImpl(loaderUri, activityResultsController) {
             @Override
             public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenu(R.menu.song_sort_by, menuInflater, menu);
@@ -121,7 +122,8 @@ public class TracksScreenModule {
             public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,
                         R.menu.add_to_queue,
-                        R.menu.play_next
+                        R.menu.play_next,
+                        R.menu.popup_add_to_playlist
                 );
                 return true;
             }
@@ -134,6 +136,9 @@ public class TracksScreenModule {
                         return true;
                     case R.id.play_next:
                         playSelectedItemsNext(presenter);
+                        return true;
+                    case R.id.popup_add_to_playlist:
+                        addToPlaylistFromTracks(context, presenter.getSelectedItems());
                         return true;
                     default:
                         return false;

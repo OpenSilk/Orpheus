@@ -23,7 +23,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.index.provider.IndexUris;
@@ -35,8 +37,12 @@ import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
+import org.opensilk.music.ui3.common.OpenProfileItemClickListener;
+import org.opensilk.music.ui3.profile.ProfileScreen;
 import org.opensilk.music.ui3.profile.artist.ArtistDetailsScreen;
-import org.opensilk.music.ui3.ProfileActivity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Named;
 
@@ -72,18 +78,18 @@ public class ArtistsScreenModule {
     }
 
     @Provides @ScreenScope
-    public ItemClickListener provideItemClickListener() {
-        return new ItemClickListener() {
+    public ItemClickListener provideItemClickListener(ActivityResultsController activityResultsController) {
+        return new OpenProfileItemClickListener(activityResultsController, new OpenProfileItemClickListener.ProfileScreenFactory() {
             @Override
-            public void onItemClicked(BundleablePresenter presenter, Context context, Model item) {
-                ProfileActivity.startSelf(context, new ArtistDetailsScreen((Artist)item));
+            public ProfileScreen call(Model model) {
+                return new ArtistDetailsScreen((Artist)model);
             }
-        };
+        });
     }
 
     @Provides @ScreenScope
-    public MenuHandler provideMenuHandler(@Named("loader_uri") final Uri loaderUri) {
-        return new MenuHandlerImpl(loaderUri) {
+    public MenuHandler provideMenuHandler(@Named("loader_uri") final Uri loaderUri, final ActivityResultsController activityResultsController) {
+        return new MenuHandlerImpl(loaderUri, activityResultsController) {
             @Override
             public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenu(R.menu.artist_sort_by, menuInflater, menu);
@@ -119,12 +125,27 @@ public class ArtistsScreenModule {
 
             @Override
             public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
-                return false;
+                inflateMenus(menuInflater, menu,
+                        R.menu.popup_add_to_playlist
+                );
+                return true;
             }
 
             @Override
             public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
-                return false;
+                switch (menuItem.getItemId()) {
+                    case R.id.popup_add_to_playlist: {
+                        List<Bundleable> list = presenter.getSelectedItems();
+                        List<Uri> uris = new ArrayList<>(list.size());
+                        for (Bundleable b : list) {
+                            uris.add(((Artist)b).getTracksUri());
+                        }
+                        addToPlaylistFromTracksUris(context, uris);
+                        return true;
+                    }
+                    default:
+                        return false;
+                }
             }
         };
     }

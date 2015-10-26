@@ -65,6 +65,7 @@ public class ProfileView2DragSwipePortrait extends ProfileView2Portrait {
     public void setupRecyclerView() {
         super.setupRecyclerView();
         mAdapter.setDragableList(true);
+        mAdapter.setAllowSelectionMode(false);
     }
 
     final DragSwipeAdapterWrapper.Listener mMoveListener =

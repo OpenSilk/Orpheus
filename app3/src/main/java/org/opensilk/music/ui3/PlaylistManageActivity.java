@@ -21,23 +21,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.Toolbar;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.core.util.BundleHelper;
-import org.opensilk.common.ui.mortar.DialogFactory;
-import org.opensilk.common.ui.mortar.DialogFactoryFragment;
-import org.opensilk.common.ui.mortar.DialogPresenter;
 import org.opensilk.common.ui.mortar.DialogPresenterActivity;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
+import org.opensilk.music.library.drive.provider.DriveLibraryDB;
 import org.opensilk.music.ui3.playlist.PlaylistChooseScreenFragment;
 
 import java.util.List;
-
-import javax.inject.Inject;
 
 import mortar.MortarScope;
 
@@ -46,17 +42,24 @@ import mortar.MortarScope;
  */
 public class PlaylistManageActivity extends MusicActivity implements DialogPresenterActivity {
 
-    public static void startSelf(Context context) {
-        startSelf(context, null);
+    static final String ACTION_ADD = PlaylistManageActivity.class.getName() + ".action.add";
+    static final String ACTION_MANAGE = PlaylistManageActivity.class.getName() + ".action.manage";
+
+    public static Intent makeAddIntent(Context context, List<Uri> tracksUris) {
+        Intent i = new Intent(context, PlaylistManageActivity.class).setAction(ACTION_ADD);
+        i.putExtra("b", BundleHelper.b().putInt(1).putList(tracksUris).get());
+        return i;
     }
 
-    public static void startSelf(Context context, List<Uri> tracksUris) {
-        context.startActivity(makeIntent(context, tracksUris));
+    public static Intent makeAddIntent2(Context context, List<Uri> tracks) {
+        Intent i = new Intent(context, PlaylistManageActivity.class).setAction(ACTION_ADD);
+        i.putExtra("b", BundleHelper.b().putInt(2).putList(tracks).get());
+        return i;
     }
 
-    public static Intent makeIntent(Context context, List<Uri> tracksUris) {
-        Intent i = new Intent(context, PlaylistManageActivity.class);
-        i.putExtra("b", BundleHelper.b().putList(tracksUris).get());
+    public static Intent makeManageIntent(Context context) {
+        Intent i = new Intent(context, PlaylistManageActivity.class).setAction(ACTION_MANAGE);
+        i.putExtra("b", BundleHelper.b().get());
         return i;
     }
 
@@ -93,9 +96,13 @@ public class PlaylistManageActivity extends MusicActivity implements DialogPrese
         super.onCreate(savedInstanceState);
         setResult(RESULT_CANCELED);
         if (savedInstanceState == null) {
-            Bundle args = getIntent().getBundleExtra("b");
-            mFragmentManagerOwner.replaceMainContent(
-                    PlaylistChooseScreenFragment.ni(this, args), false);
+            if (StringUtils.equals(ACTION_ADD, getIntent().getAction())) {
+                Bundle args = getIntent().getBundleExtra("b");
+                mFragmentManagerOwner.replaceMainContent(
+                        PlaylistChooseScreenFragment.ni(this, args), false);
+            } else {
+
+            }
         }
     }
 

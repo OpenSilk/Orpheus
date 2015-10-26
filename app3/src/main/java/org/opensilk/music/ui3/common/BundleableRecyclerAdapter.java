@@ -99,6 +99,8 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
     boolean lightTheme;
     boolean numberTracks;
 
+    boolean allowSelectionMode = true;
+
     @Inject
     public BundleableRecyclerAdapter(
             BundleablePresenter presenter
@@ -288,6 +290,10 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         this.dragableList = dragable;
     }
 
+    public void setAllowSelectionMode(boolean allow) {
+        this.allowSelectionMode = allow;
+    }
+
     protected boolean wantsMultiArtwork(Bundleable item) {
         if (item instanceof Genre) {
             return ((Genre) item).getArtInfos().size() > 1;
@@ -362,7 +368,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
     @Override
     public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
         ViewHolder holder = (ViewHolder) recyclerView.getChildViewHolder(v);
-        if (!inSelectionMode ) {
+        if (allowSelectionMode && !inSelectionMode) {
             if (holder instanceof SelectableItemViewHolder) {
                 selectedItems.put(position, true);
                 inSelectionMode = true;

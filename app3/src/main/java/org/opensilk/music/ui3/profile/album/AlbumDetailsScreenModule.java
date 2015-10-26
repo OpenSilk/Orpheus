@@ -24,6 +24,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.R;
 import org.opensilk.music.index.model.BioSummary;
 import org.opensilk.music.index.provider.IndexUris;
@@ -32,12 +33,15 @@ import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.Model;
 import org.opensilk.music.model.sort.TrackSortOrder;
 import org.opensilk.music.ui3.ProfileActivity;
+import org.opensilk.music.ui3.common.ActivityRequestCodes;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
+import org.opensilk.music.ui3.common.OpenProfileItemClickListener;
 import org.opensilk.music.ui3.common.PlayAllItemClickListener;
 import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
+import org.opensilk.music.ui3.profile.ProfileScreen;
 import org.opensilk.music.ui3.profile.bio.BioScreen;
 import org.opensilk.music.ui3.profile.bio.BioScreenFragment;
 
@@ -102,14 +106,14 @@ public class AlbumDetailsScreenModule {
     }
 
     @Provides @ScreenScope
-    public ItemClickListener provideItemClickListener() {
+    public ItemClickListener provideItemClickListener(final ActivityResultsController activityResultsController) {
         return new ItemClickListener() {
             @Override
             public void onItemClicked(BundleablePresenter presenter, Context context, Model item) {
                 if (item instanceof BioSummary) {
-                    presenter.getFm().replaceMainContent(BioScreenFragment.ni(context,
-                            new BioScreen(provideHeroArtinfos(), (BioSummary)item)), true);
-//                    ProfileActivity.startSelf(context, new BioScreen(provideHeroArtinfos(), (BioSummary)item));
+                    activityResultsController.startActivityForResult(
+                            ProfileActivity.makeIntent(context, new BioScreen(provideHeroArtinfos(), (BioSummary)item)),
+                            ActivityRequestCodes.PROFILE, null);
                 } else {
                     new PlayAllItemClickListener().onItemClicked(presenter, context, item);
                 }
@@ -118,8 +122,8 @@ public class AlbumDetailsScreenModule {
     }
 
     @Provides @ScreenScope
-    public MenuHandler provideMenuHandler(@Named("loader_uri") final Uri loaderUri) {
-        return new MenuHandlerImpl(loaderUri) {
+    public MenuHandler provideMenuHandler(@Named("loader_uri") final Uri loaderUri, final ActivityResultsController activityResultsController) {
+        return new MenuHandlerImpl(loaderUri, activityResultsController) {
             @Override
             public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenu(R.menu.album_song_sort_by, menuInflater, menu);
@@ -161,7 +165,8 @@ public class AlbumDetailsScreenModule {
             public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,
                         R.menu.add_to_queue,
-                        R.menu.play_next
+                        R.menu.play_next,
+                        R.menu.popup_add_to_playlist
                 );
                 return true;
             }
@@ -174,6 +179,9 @@ public class AlbumDetailsScreenModule {
                         return true;
                     case R.id.play_next:
                         playSelectedItemsNext(presenter);
+                        return true;
+                    case R.id.popup_add_to_playlist:
+                        addToPlaylistFromTracks(context, presenter.getSelectedItems());
                         return true;
                     default:
                         return false;

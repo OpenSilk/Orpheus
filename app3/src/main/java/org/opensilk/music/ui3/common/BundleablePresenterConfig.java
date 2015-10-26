@@ -34,6 +34,7 @@ public class BundleablePresenterConfig {
     public final MenuHandler menuConfig;
     public final List<Bundleable> loaderSeed;
     public final String defaultSortOrder;
+    public final boolean allowLongPressSelection;
 
     public BundleablePresenterConfig(
             boolean wantsGrid,
@@ -41,7 +42,8 @@ public class BundleablePresenterConfig {
             ItemClickListener itemClickListener,
             MenuHandler menuConfig,
             List<Bundleable> loaderSeed,
-            String defaultSortOrder
+            String defaultSortOrder,
+            boolean allowLongPressSelection
     ) {
         this.wantsGrid = wantsGrid;
         this.wantsNumberedTracks = wantsNumberedTracks;
@@ -49,6 +51,7 @@ public class BundleablePresenterConfig {
         this.menuConfig = menuConfig;
         this.loaderSeed = loaderSeed;
         this.defaultSortOrder = defaultSortOrder;
+        this.allowLongPressSelection = allowLongPressSelection;
     }
 
     public static Builder builder() {
@@ -62,6 +65,7 @@ public class BundleablePresenterConfig {
         MenuHandler menuConfig;
         List<Bundleable> loaderSeed = new ArrayList<>();
         String preferedSortOrder = BaseSortOrder.A_Z;
+        boolean allowLongPressSelection = true;
 
         public Builder setWantsGrid(boolean wantsGrid) {
             this.wantsGrid = wantsGrid;
@@ -104,10 +108,15 @@ public class BundleablePresenterConfig {
             return this;
         }
 
+        public Builder setAllowLongPressSelection(boolean allowLongPressSelection) {
+            this.allowLongPressSelection = allowLongPressSelection;
+            return this;
+        }
+
         public BundleablePresenterConfig build() {
             return new BundleablePresenterConfig(wantsGrid, wantsNumberedTracks,
                     itemClickListener, menuConfig,
-                    loaderSeed, preferedSortOrder);
+                    loaderSeed, preferedSortOrder,allowLongPressSelection);
         }
     }
 }

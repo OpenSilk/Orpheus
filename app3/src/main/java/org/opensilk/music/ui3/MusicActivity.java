@@ -17,6 +17,8 @@
 
 package org.opensilk.music.ui3;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -48,7 +50,11 @@ import org.opensilk.common.ui.util.ThemeUtils;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConstants;
+import org.opensilk.music.model.Playlist;
 import org.opensilk.music.playback.control.PlaybackController;
+import org.opensilk.music.ui3.common.ActivityRequestCodes;
+import org.opensilk.music.ui3.common.ActivityResultCodes;
+import org.opensilk.music.ui3.profile.playlist.PlaylistDetailsScreen;
 
 import javax.inject.Inject;
 
@@ -200,8 +206,20 @@ public abstract class MusicActivity extends MortarFragmentActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (!mActivityResultsOwner.onActivityResult(requestCode, resultCode, data)) {
-            super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case ActivityRequestCodes.PLAYLIST_ADD: {
+                if (resultCode == RESULT_OK) {
+                    Playlist playlist = Playlist.BUNDLE_CREATOR.fromBundle(data.getBundleExtra("plist"));
+                    mActivityResultsOwner.startActivityForResult(
+                            ProfileActivity.makeIntent(this, new PlaylistDetailsScreen(playlist)),
+                            ActivityRequestCodes.PROFILE, null);
+                }
+                break;
+            }
+            default:
+                if (!mActivityResultsOwner.onActivityResult(requestCode, resultCode, data)) {
+                    super.onActivityResult(requestCode, resultCode, data);
+                }
         }
     }
 

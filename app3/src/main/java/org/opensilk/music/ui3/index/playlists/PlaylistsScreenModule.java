@@ -24,21 +24,31 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.index.provider.IndexUris;
+import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.sort.PlaylistSortOrder;
 import org.opensilk.music.ui3.ProfileActivity;
+import org.opensilk.music.ui3.common.ActivityRequestCodes;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
 import org.opensilk.music.ui3.PlaylistManageActivity;
+import org.opensilk.music.ui3.common.OpenProfileItemClickListener;
+import org.opensilk.music.ui3.profile.ProfileScreen;
+import org.opensilk.music.ui3.profile.album.AlbumDetailsScreen;
 import org.opensilk.music.ui3.profile.playlist.PlaylistDetailsScreen;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Named;
 
@@ -74,24 +84,23 @@ public class PlaylistsScreenModule {
     }
 
     @Provides @ScreenScope
-    public ItemClickListener provideItemClickListener() {
-        return new ItemClickListener() {
+    public ItemClickListener provideItemClickListener(ActivityResultsController activityResultsController) {
+        return new OpenProfileItemClickListener(activityResultsController, new OpenProfileItemClickListener.ProfileScreenFactory() {
             @Override
-            public void onItemClicked(BundleablePresenter presenter, Context context, Model item) {
-                ProfileActivity.startSelf(context, new PlaylistDetailsScreen((Playlist) item));
+            public ProfileScreen call(Model model) {
+                return new PlaylistDetailsScreen((Playlist)model);
             }
-        };
+        });
     }
 
     @Provides @ScreenScope
-    public MenuHandler provideMenuHandler(@Named("loader_uri") final Uri loaderUri) {
-        return new MenuHandlerImpl(loaderUri) {
+    public MenuHandler provideMenuHandler(@Named("loader_uri") final Uri loaderUri, final ActivityResultsController activityResultsController) {
+        return new MenuHandlerImpl(loaderUri, activityResultsController) {
             @Override
             public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,
                         R.menu.playlist_sort_by,
-                        R.menu.view_as,
-                        R.menu.manage_playlists
+                        R.menu.view_as
                 );
                 return true;
             }
@@ -106,17 +115,13 @@ public class PlaylistsScreenModule {
                         setNewSortOrder(presenter, PlaylistSortOrder.Z_A);
                         return true;
                     case R.id.menu_sort_by_date_added:
-                        Toast.makeText(context, R.string.err_unimplemented, Toast.LENGTH_LONG).show();
-                        //TODO
+                        setNewSortOrder(presenter, PlaylistSortOrder.DATE_ADDED);
                         return true;
                     case R.id.menu_view_as_simple:
                         updateLayout(presenter, AppPreferences.SIMPLE);
                         return true;
                     case R.id.menu_view_as_grid:
                         updateLayout(presenter, AppPreferences.GRID);
-                        return true;
-                    case R.id.menu_manage_playlists:
-                        PlaylistManageActivity.startSelf(context);
                         return true;
                     default:
                         return false;
@@ -125,12 +130,26 @@ public class PlaylistsScreenModule {
 
             @Override
             public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
-                return false;
+                inflateMenus(menuInflater, menu,
+                        R.menu.popup_delete
+                );
+                return true;
             }
 
             @Override
             public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
-                return false;
+                switch (menuItem.getItemId()) {
+                    case R.id.popup_delete: {
+                        List<Uri> uris = new ArrayList<>(presenter.getSelectedItems().size());
+                        for (Bundleable m : presenter.getSelectedItems()) {
+                            uris.add(((Playlist) m).getUri());
+                        }
+                        presenter.getIndexClient().removePlaylists(uris);
+                        return true;
+                    }
+                    default:
+                        return false;
+                }
             }
         };
     }

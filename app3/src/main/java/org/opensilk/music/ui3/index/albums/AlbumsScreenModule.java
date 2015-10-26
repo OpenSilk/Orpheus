@@ -32,15 +32,14 @@ import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Model;
 import org.opensilk.music.model.sort.AlbumSortOrder;
-import org.opensilk.music.ui3.common.ActivityRequestCodes;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
-import org.opensilk.music.ui3.PlaylistManageActivity;
+import org.opensilk.music.ui3.common.OpenProfileItemClickListener;
+import org.opensilk.music.ui3.profile.ProfileScreen;
 import org.opensilk.music.ui3.profile.album.AlbumDetailsScreen;
-import org.opensilk.music.ui3.ProfileActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,19 +78,18 @@ public class AlbumsScreenModule {
     }
 
     @Provides @ScreenScope
-    public ItemClickListener provideItemClickListener() {
-        return new ItemClickListener() {
+    public ItemClickListener provideItemClickListener(ActivityResultsController activityResultsController) {
+        return new OpenProfileItemClickListener(activityResultsController, new OpenProfileItemClickListener.ProfileScreenFactory() {
             @Override
-            public void onItemClicked(BundleablePresenter presenter, Context context, Model item) {
-                ProfileActivity.startSelf(context, new AlbumDetailsScreen((Album)item));
+            public ProfileScreen call(Model model) {
+                return new AlbumDetailsScreen(((Album)model));
             }
-        };
+        });
     }
 
     @Provides @ScreenScope
-    public MenuHandler provideMenuHandler(@Named("loader_uri") final Uri loaderUri,
-                                          final ActivityResultsController activityResultsController) {
-        return new MenuHandlerImpl(loaderUri) {
+    public MenuHandler provideMenuHandler(@Named("loader_uri") final Uri loaderUri, final ActivityResultsController activityResultsController) {
+        return new MenuHandlerImpl(loaderUri, activityResultsController) {
             @Override
             public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,
@@ -147,9 +145,7 @@ public class AlbumsScreenModule {
                         for (Bundleable b : list) {
                             uris.add(((Album)b).getTracksUri());
                         }
-                        activityResultsController.startActivityForResult(
-                                PlaylistManageActivity.makeIntent(context, uris),
-                                ActivityRequestCodes.PLAYLIST_MANAGE, null);
+                        addToPlaylistFromTracksUris(context, uris);
                         return true;
                     }
                     default:

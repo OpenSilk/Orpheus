@@ -36,10 +36,8 @@ import mortar.MortarScope;
  */
 public class ProfileActivity extends MusicActivity {
 
-    public static void startSelf(Context context, ProfileScreen screen) {
-        Intent i = new Intent(context, ProfileActivity.class)
-                .putExtra("screen", screen);
-        context.startActivity(i);
+    public static Intent makeIntent(Context context, ProfileScreen screen) {
+        return new Intent(context, ProfileActivity.class).putExtra("screen", screen);
     }
 
     @Override

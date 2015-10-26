@@ -37,6 +37,11 @@ public class PlaylistChooseScreenFragment extends MortarFragment {
 
     @Override
     protected Screen newScreen() {
-        return new PlaylistChooseScreen(BundleHelper.<Uri>getList(getArguments()));
+        Bundle args = getArguments();
+        if (BundleHelper.getInt(args) == 1) {
+            return new PlaylistChooseScreen(BundleHelper.<Uri>getList(args), null);
+        } else {
+            return new PlaylistChooseScreen(null, BundleHelper.<Uri>getList(args));
+        }
     }
 }
