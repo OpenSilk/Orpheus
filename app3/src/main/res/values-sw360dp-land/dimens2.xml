@@ -16,6 +16,5 @@
   -->
 
 <resources>
-    <!-- Daydream -->
-    <dimen name="dream_art_size">220dp</dimen>
+
 </resources>

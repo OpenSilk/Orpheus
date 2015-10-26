@@ -106,11 +106,6 @@ public class AppPreferences extends PreferencesWrapper {
     public static final String NOW_PLAYING_VIEW_VIS_CIRCLE_BAR = "vis_circle_bar";
     public static final String NOW_PLAYING_VIEW_VIS_LINES = "vis_lines";
 
-    public static final String NOW_PLAYING_ARTWORK_SCALE = "now_playing_artwork_scale";
-    //values must mirror array
-    public static final String NOW_PLAYING_ARTWORK_FILL = "fill";
-    public static final String NOW_PLAYING_ARTWORK_FIT = "fit";
-
     // action button
     public static final String FAB_CLICK = "fab_click";
     public static final String FAB_DOUBLE_CLICK = "fab_double_click";

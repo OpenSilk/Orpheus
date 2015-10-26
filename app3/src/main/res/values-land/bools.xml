@@ -17,5 +17,5 @@
   -->
 
 <resources>
-    <bool name="in_landscape">false</bool>
+    <bool name="in_landscape">true</bool>
 </resources>

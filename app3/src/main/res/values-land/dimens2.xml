@@ -16,16 +16,11 @@
   -->
 
 <resources>
-    <!-- Daydream -->
-    <dimen name="dream_art_size">200dp</dimen>
 
     <integer name="grid_columns">4</integer>
 
     <!--now playing-->
     <dimen name="now_playing_button_padding">4dp</dimen>
-
-    <dimen name="carmode_bottom_margin">16dp</dimen>
-    <dimen name="carmode_seekbar_padding">8dp</dimen>
 
     <!--profile-->
     <dimen name="profile_appbar_height">180dp</dimen>

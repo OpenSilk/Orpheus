@@ -22,7 +22,7 @@
     <item
         android:id="@+id/menu_keep_screen_on"
         app:showAsAction="never"
-        android:title="@string/settings_keep_screen_on"/>
+        android:title="@string/now_playing_keep_screen_on"/>
 
     <item
         android:id="@+id/menu_visualizer"

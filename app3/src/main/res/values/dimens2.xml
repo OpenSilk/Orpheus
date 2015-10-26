@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!--Panel-->
-    <dimen name="panel_header_height">68dp</dimen>
+    <integer name="grid_columns">2</integer>
+
+    <dimen name="footer_height">64dp</dimen>
+
+    <!--now playing-->
+    <dimen name="now_playing_button_padding">8dp</dimen>
+
+    <!--bio screen-->
+    <dimen name="bio_card_margin">16dp</dimen>
 
     <!--Widgets-->
     <dimen name="music_widget_large_min_width">250dp</dimen>
@@ -21,33 +28,4 @@
     <dimen name="music_widget_large_button_bar_width">48.0dip</dimen>
     <!--end Widgets-->
 
-    <!--Daydream-->
-    <dimen name="dream_art_size">300dp</dimen>
-
-    <integer name="profile_grid_cols_vertical">2</integer>
-    <integer name="profile_grid_cols_horizontal">2</integer>
-    <integer name="grid_columns">2</integer>
-
-    <!--Fab-->
-    <dimen name="fab_margin_end">32dp</dimen>
-
-    <!--footer dont change this without updating fab margins-->
-    <dimen name="footer_height">64dp</dimen>
-
-    <!--profile-->
-    <dimen name="hero_margin_top">2dp</dimen>
-    <dimen name="hero_margin_bottom">2dp</dimen>
-    <dimen name="hero_margin_right">2dp</dimen>
-    <dimen name="hero_margin_left">2dp</dimen>
-
-    <!--now playing-->
-    <dimen name="now_playing_button_padding">8dp</dimen>
-
-    <dimen name="profile_stickheader_bottom_padding">4dp</dimen>
-
-    <dimen name="carmode_bottom_margin">32dp</dimen>
-    <dimen name="carmode_seekbar_padding">16dp</dimen>
-
-    <!--bio screen-->
-    <dimen name="bio_card_margin">16dp</dimen>
 </resources>
