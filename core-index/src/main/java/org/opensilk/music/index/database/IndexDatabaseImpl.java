@@ -157,6 +157,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
                 .setName(name)
                 .setAlbumCount(num_albums)
                 .setTrackCount(num_tracks)
+                .setTracksUri(IndexUris.artistTracks(indexAuthority, id))
                 .build();
     }
 
@@ -658,24 +659,20 @@ public class IndexDatabaseImpl implements IndexDatabase {
     static final String[] playlistCols = new String[] {
             IndexSchema.Info.Playlist._ID,
             IndexSchema.Info.Playlist.NAME,
-            IndexSchema.Info.Playlist.DATE_ADDED,
-            IndexSchema.Info.Playlist.DATE_MODIFIED,
             IndexSchema.Info.Playlist.NUMBER_OF_ARTISTS,
-            IndexSchema.Info.Playlist.NUMBER_OF_ALBUMS,//5
+            IndexSchema.Info.Playlist.NUMBER_OF_ALBUMS,
             IndexSchema.Info.Playlist.NUMBER_OF_GENRES,
-            IndexSchema.Info.Playlist.NUMBER_OF_TRACKS,
+            IndexSchema.Info.Playlist.NUMBER_OF_TRACKS,//5
     };
 
     Playlist buildPlaylist(Cursor c, Uri parentUri, Cursor c2) {
         Playlist.Builder bob = Playlist.builder();
         final String id = c.getString(0);
         final String name = c.getString(1);
-        //2
-        //3
-        //final int numArtists = c.getInt(4);
-        //final int numAlbums = c.getInt(5);
-        //final int numGenres = c.getInt(6);
-        final int numTracks = c.getInt(7);
+        //final int numArtists = c.getInt(2);
+        //final int numAlbums = c.getInt(3);
+        //final int numGenres = c.getInt(4);
+        final int numTracks = c.getInt(5);
         bob.setUri(IndexUris.playlist(indexAuthority, id))
                 .setName(name)
                 .setParentUri(parentUri)
@@ -1728,6 +1725,23 @@ public class IndexDatabaseImpl implements IndexDatabase {
         }
         mAppContext.getContentResolver().notifyChange(IndexUris.playlist(indexAuthority, playlist_id), null);
         return numlines;
+    }
+
+    @Override
+    public int removePlaylists(String[] playlist_ids) {
+        int num = 0;
+        if (playlist_ids != null && playlist_ids.length > 0) {
+            StringBuilder sb = new StringBuilder(IndexSchema.Meta.Playlist._ID).append(" IN (?");
+            for (int ii=1; ii<playlist_ids.length; ii++) {
+                sb.append(",?");
+            }
+            sb.append(")");
+            num = delete(IndexSchema.Meta.Playlist.TABLE, sb.toString(), playlist_ids);
+        }
+        if (num > 0) {
+            mAppContext.getContentResolver().notifyChange(IndexUris.playlists(indexAuthority), null);
+        }
+        return num;
     }
 
     final Map<Uri, Long> mConainerIdsCache = new HashMap<>();

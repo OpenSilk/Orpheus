@@ -279,6 +279,20 @@ public class IndexProvider extends LibraryProvider {
                     return reply.putOk(false).get();
                 }
             }
+            case Methods.REMOVE_PLAYLISTS: {
+                List<Uri> plists = BundleHelper.getList(extras);
+                if (plists != null) {
+                    String[] ids = new String[plists.size()];
+                    for (int ii=0; ii<plists.size(); ii++) {
+                        ids[ii] = plists.get(ii).getLastPathSegment();
+                    }
+                    int count = mDataBase.removePlaylists(ids);
+                    return reply.putOk(count > 0).putExtrasBundle(
+                            BundleHelper.b().putInt(count).get()).get();
+                } else {
+                    return reply.putOk(false).get();
+                }
+            }
             default: {
                 return super.callCustom(method, arg, extras);
             }

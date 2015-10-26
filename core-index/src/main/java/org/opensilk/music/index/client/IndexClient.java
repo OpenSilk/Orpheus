@@ -87,12 +87,13 @@ public interface IndexClient {
     Observable<List<Uri>> getTrackUris(Uri uri, String sordOrder);
     MediaMetadataCompat convertToMediaMetadata(Track track);
 
-    void connect();
-    void release();
-
     Uri createPlaylist(String name);
-    Observable<Integer> addToPlaylist(Uri playlist, List<Uri> trackUrislist);
+    int addToPlaylist(Uri playlist, List<Uri> tracks);
     int movePlaylistEntry(Uri playlist, int from, int to);
     int removeFromPlaylist(Uri playlist, int position);
     int updatePlaylist(Uri playlist, List<Uri> uris);
+    boolean removePlaylists(List<Uri> playlists);
+
+    void connect();
+    void release();
 }

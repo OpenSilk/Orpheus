@@ -73,6 +73,7 @@ public interface IndexDatabase {
     int removeFromPlaylist(String playlist_id, Uri uri);
     int removeFromPlaylist(String playlist_id, int pos);
     int updatePlaylist(String playlist_id, List<Uri> uriList);
+    int removePlaylists(String[] playlist_ids);
 
     long hasContainer(Uri uri);
     @NonNull List<Pair<Uri, Uri>> findTopLevelContainers(@Nullable String authority);

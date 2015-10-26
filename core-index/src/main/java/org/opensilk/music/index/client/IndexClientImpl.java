@@ -61,6 +61,7 @@ import javax.inject.Named;
 import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action2;
 import rx.functions.Func0;
 import rx.functions.Func1;
@@ -372,46 +373,14 @@ public class IndexClientImpl implements IndexClient {
     }
 
     @Override
-    public Observable<Integer> addToPlaylist(final Uri playlist, List<Uri> tracksUriList) {
-        Observable<Observable<List<Track>>> loaderCreator = Observable.from(tracksUriList)
-                .map(new Func1<Uri, Observable<List<Track>>>() {
-                    @Override
-                    public Observable<List<Track>> call(final Uri uri) {
-                        //Use defer for lazy creation
-                        return Observable.defer(new Func0<Observable<List<Track>>>() {
-                            @Override
-                            public Observable<List<Track>> call() {
-                                return TypedBundleableLoader.<Track>create(appContext)
-                                        .setUri(uri).createObservable();
-                            }
-                        });
-                    }
-                });
-        return Observable.mergeDelayError(loaderCreator, 5)
-                .collect(new Func0<List<Uri>>() {
-                    @Override
-                    public List<Uri> call() {
-                        return new ArrayList<Uri>();
-                    }
-                }, new Action2<List<Uri>, List<Track>>() {
-                    @Override
-                    public void call(List<Uri> uris, List<Track> tracks) {
-                        for (Track track : tracks) {
-                            uris.add(track.getUri());
-                        }
-                    }
-                }).map(new Func1<List<Uri>, Integer>() {
-                    @Override
-                    public Integer call(List<Uri> uris) {
-                        Bundle reply = makeCall(Methods.ADD_TO_PLAYLIST, BundleHelper.b()
-                                .putUri(playlist).putList(uris).get());
-                        if (checkCall(reply)) {
-                            return BundleHelper.getInt(LibraryExtras.getExtrasBundle(reply));
-                        } else {
-                            return 0;
-                        }
-                    }
-                });
+    public int addToPlaylist(Uri playlist, List<Uri> tracks) {
+        Bundle reply = makeCall(Methods.ADD_TO_PLAYLIST, BundleHelper.b()
+                .putUri(playlist).putList(tracks).get());
+        if (checkCall(reply)) {
+            return BundleHelper.getInt(LibraryExtras.getExtrasBundle(reply));
+        } else {
+            return 0;
+        }
     }
 
     @Override
@@ -445,6 +414,11 @@ public class IndexClientImpl implements IndexClient {
         } else {
             return 0;
         }
+    }
+
+    @Override
+    public boolean removePlaylists(List<Uri> playlists) {
+        return makeCheckedCall(Methods.REMOVE_PLAYLISTS, BundleHelper.b().putList(playlists).get());
     }
 
     @Override

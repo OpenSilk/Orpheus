@@ -97,8 +97,6 @@ public class IndexSchema {
         interface Playlist extends BaseColumns {
             String TABLE = "playlist_info";
             String NAME = "name";
-            String DATE_ADDED = "date_added";
-            String DATE_MODIFIED = "date_modified";
             String NUMBER_OF_ARTISTS = "number_of_artists";
             String NUMBER_OF_ALBUMS = "number_of_albums";
             String NUMBER_OF_GENRES = "number_of_genres";

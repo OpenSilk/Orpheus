@@ -42,4 +42,5 @@ public interface Methods {
     String REMOVE_FROM_PLAYLIST = "idx.remove.from.playlist";
     String MOVE_PLAYLIST_MEMBER = "idx.move.playlist.member";
     String UPDATE_PLAYLIST = "idx.update.playlist";
+    String REMOVE_PLAYLISTS = "idx.remove.playlists";
 }
