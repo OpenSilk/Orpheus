@@ -17,13 +17,8 @@
 
 package org.opensilk.music.artwork.service;
 
-import android.content.Context;
-
-import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.music.artwork.UtilsArt;
 import org.opensilk.music.artwork.cache.BitmapLruCache;
 import org.opensilk.music.artwork.shared.ArtworkAuthorityModule;
-import org.opensilk.music.artwork.shared.GsonModule;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -37,7 +32,6 @@ import dagger.Provides;
 @Module(
         includes = {
                 ArtworkAuthorityModule.class,
-                GsonModule.class
         }
 )
 public class ArtworkProviderHelperModule {

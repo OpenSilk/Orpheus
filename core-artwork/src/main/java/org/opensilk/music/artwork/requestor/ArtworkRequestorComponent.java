@@ -18,9 +18,7 @@
 package org.opensilk.music.artwork.requestor;
 
 import org.opensilk.common.core.dagger2.AppContextModule;
-import org.opensilk.common.core.gson.GsonComponentStub;
 import org.opensilk.music.artwork.shared.ArtworkComponentCommon;
-import org.opensilk.music.artwork.shared.GsonModule;
 
 import javax.inject.Singleton;
 
@@ -37,10 +35,9 @@ import dagger.Component;
 @Component(
         modules = {
                 ArtworkRequestorModule.class,
-                GsonModule.class,
                 AppContextModule.class
         }
 )
-public interface ArtworkRequestorComponent extends ArtworkComponentCommon, GsonComponentStub {
+public interface ArtworkRequestorComponent extends ArtworkComponentCommon {
     ArtworkRequestManager artworkRequestManager();
 }

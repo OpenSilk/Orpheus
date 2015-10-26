@@ -26,7 +26,6 @@ import org.opensilk.music.artwork.cache.CacheUtil;
 import org.opensilk.music.artwork.coverartarchive.CoverArtArchiveModule;
 import org.opensilk.music.artwork.shared.ArtworkAuthorityModule;
 import org.opensilk.music.artwork.shared.ArtworkPreferences;
-import org.opensilk.music.artwork.shared.GsonModule;
 import org.opensilk.music.lastfm.LastFMModule;
 
 import javax.inject.Named;
@@ -45,7 +44,6 @@ import static org.opensilk.music.artwork.Constants.DISK_CACHE_DIRECTORY;
 @Module(
         includes = {
                 ArtworkAuthorityModule.class,
-                GsonModule.class,
                 SystemServicesModule.class,
                 LastFMModule.class,
                 CoverArtArchiveModule.class

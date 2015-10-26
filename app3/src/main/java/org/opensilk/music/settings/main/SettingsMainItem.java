@@ -24,7 +24,6 @@ import org.opensilk.music.settings.SettingsAboutFragment;
 import org.opensilk.music.settings.SettingsAudioFragment;
 import org.opensilk.music.settings.SettingsDataFragment;
 import org.opensilk.music.settings.SettingsInterfaceFragment;
-import org.opensilk.music.settings.plugin.SettingsPluginFragment;
 
 /**
  * Created by drew on 5/18/15.
@@ -40,9 +39,6 @@ public enum SettingsMainItem {
     AUDIO(SettingsAudioFragment.class.getName(),
         R.string.settings_audio_category,
         R.drawable.ic_tune_grey600_36dp),
-//    PLUGIN(SettingsPluginFragment.class.getName(),
-//        R.string.settings_plugin_category,
-//        R.drawable.ic_extension_grey600_36dp),
     // XXX add new items above this one.
     DONATE("donate", //XXX hack
         R.string.settings_donate_category,

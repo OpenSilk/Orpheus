@@ -20,22 +20,11 @@ package org.opensilk.music.artwork;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.net.Uri;
-import android.util.Base64;
-
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import org.opensilk.common.core.app.BaseApp;
 import org.opensilk.music.model.ArtInfo;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.nio.charset.Charset;
-
-import de.umass.util.StringUtilities;
-
-import static org.opensilk.music.artwork.Constants.*;
+import static org.opensilk.music.artwork.Constants.THUMB_MEM_CACHE_DIVIDER;
 
 /**
  * Created by drew on 4/30/15.
@@ -71,14 +60,6 @@ public class UtilsArt {
                     .append(artInfo.albumName)
                     .toString();
         }
-    }
-
-    public static String base64EncodedJsonArtInfo(Gson gson, ArtInfo artInfo) {
-        return Base64.encodeToString(gson.toJson(artInfo).getBytes(), Base64.URL_SAFE|Base64.NO_WRAP|Base64.NO_PADDING);
-    }
-
-    public static ArtInfo artInfoFromBase64EncodedJson(Gson gson, String string) {
-        return gson.fromJson(new String(Base64.decode(string, Base64.URL_SAFE), Charset.defaultCharset()), ArtInfo.class);
     }
 
     public static int calculateL1CacheSize(Context context, boolean forceLarge) {

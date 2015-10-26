@@ -19,7 +19,6 @@ package org.opensilk.music;
 
 import org.opensilk.music.artwork.provider.ArtworkModule;
 import org.opensilk.music.artwork.requestor.ArtworkRequestorModule;
-import org.opensilk.music.artwork.shared.GsonModule;
 import org.opensilk.music.index.IndexModule;
 import org.opensilk.music.index.IndexProviderAuthorityModule;
 import org.opensilk.music.index.client.IndexClientModule;
@@ -41,7 +40,6 @@ import rx.functions.Func1;
         modules = {
                 AppModule.class,
                 ArtworkRequestorModule.class,
-                GsonModule.class,
                 MediaStoreLibraryAuthorityModule.class,
                 IndexProviderAuthorityModule.class,
                 IndexClientModule.class,

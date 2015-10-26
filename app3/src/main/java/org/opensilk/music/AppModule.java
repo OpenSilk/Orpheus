@@ -17,13 +17,8 @@
 package org.opensilk.music;
 
 import android.content.Context;
-import android.net.ConnectivityManager;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.music.artwork.shared.ArtworkAuthorityModule;
 
 import javax.inject.Singleton;
 

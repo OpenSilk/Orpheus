@@ -22,14 +22,10 @@ import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.util.Base64;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.app.PreferencesWrapper;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.model.sort.BaseSortOrder;
 import org.opensilk.music.ui.theme.OrpheusTheme;
 import org.opensilk.music.ui3.index.GalleryPage;
 
@@ -146,13 +142,11 @@ public class AppPreferences extends PreferencesWrapper {
 
     private final Context appContext;
     private final SharedPreferences prefs;
-    private final Gson gson;
 
     @Inject
-    public AppPreferences(@ForApplication Context context, Gson gson) {
+    public AppPreferences(@ForApplication Context context) {
         appContext = context;
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        this.gson = gson;
         checkSchemaVersion();
     }
 
@@ -224,86 +218,6 @@ public class AppPreferences extends PreferencesWrapper {
         if (schema < MY_VERSION) {
             putInt(VERSION, MY_VERSION);
         }
-    }
-
-    /*
-     * Home pages
-     */
-
-    public final void saveGalleryPages(List<GalleryPage> pages) {
-        try {
-            Type type = new TypeToken<List<GalleryPage>>() {}.getType();
-            putString(GALLERY_HOME_PAGES, gson.toJson(pages, type));
-        } catch (Exception e) {
-            remove(GALLERY_HOME_PAGES);
-        }
-    }
-
-    public final List<GalleryPage> getGalleryPages() {
-        String pgs = getString(GALLERY_HOME_PAGES, null);
-        if (pgs != null) {
-            try {
-                Type type = new TypeToken<List<GalleryPage>>() {}.getType();
-                return gson.fromJson(pgs, type);
-            } catch (Exception ignored) {
-                remove(GALLERY_HOME_PAGES);
-            }
-        }
-        return Arrays.asList(GalleryPage.values());
-    }
-
-    /*
-     * Plugins
-     */
-
-    public void setPluginEnabled(String authority) {
-        List<String> disabledPlugins = new ArrayList<>(readDisabledPlugins());
-        Iterator<String> ii = disabledPlugins.iterator();
-        while (ii.hasNext()) {
-            if (authority.equals(ii.next())) {
-                ii.remove();
-            }
-        }
-        writeDisabledPlugins(disabledPlugins);
-    }
-
-    public void setPluginDisabled(String authority) {
-        List<String> disabledPlugins = new ArrayList<>(readDisabledPlugins());
-        for (String cn : disabledPlugins) {
-            if (authority.equals(cn)) {
-                return;
-            }
-        }
-        disabledPlugins.add(authority);
-        writeDisabledPlugins(disabledPlugins);
-    }
-
-    public List<String> readDisabledPlugins() {
-        String json = getString(DISABLED_PLUGINS, null);
-        Timber.v("Read disabled plugins=" + json);
-        if (json != null) {
-            try {
-                return gson.fromJson(json, new TypeToken<List<String>>(){}.getType());
-            } catch (Exception e) {
-                Timber.w(e, "Unable to deserialize %s", json);
-                remove(DISABLED_PLUGINS);
-            }
-        }
-        return Collections.emptyList();
-    }
-
-    public void writeDisabledPlugins(List<String> authorities) {
-        try {
-            String json = gson.toJson(authorities, new TypeToken<List<String>>(){}.getType());
-            Timber.v("Write disabled plugins=%s", json);
-            putString(DISABLED_PLUGINS, json);
-        } catch (Exception e) {
-            Timber.w(e, "Unable to serialize %s", Arrays.toString(authorities.toArray()));
-        }
-    }
-
-    public String makePluginPrefKey(LibraryConfig libraryConfig, String key) {
-        return makePrefKey(libraryConfig.getAuthority(), key);
     }
 
     public String makePrefKey(String root, String key) {

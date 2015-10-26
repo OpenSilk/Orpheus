@@ -17,25 +17,16 @@
 package org.opensilk.music.artwork.service;
 
 import android.content.Context;
-import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.support.v4.content.ContextCompat;
 
-import com.google.gson.Gson;
-
 import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.artwork.ArtworkUris;
 import org.opensilk.music.artwork.R;
-import org.opensilk.music.artwork.UtilsArt;
 import org.opensilk.music.artwork.cache.BitmapLruCache;
-import org.opensilk.music.model.ArtInfo;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -47,9 +38,6 @@ import javax.inject.Singleton;
 import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Subscriber;
-import rx.Subscription;
-import rx.functions.Action0;
-import rx.functions.Action1;
 import timber.log.Timber;
 
 /**

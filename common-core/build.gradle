@@ -56,8 +56,6 @@ dependencies {
     compile 'com.squareup.mortar:mortar:0.19'
     compile (group: 'com.android.support', name: 'support-v4', version: rootProject.ext.supportLibVersion)
     compile (group: 'com.android.support', name: 'appcompat-v7', version: rootProject.ext.supportLibVersion)
-    //we dont add this here its just for the gsoncomonent stub
-    provided(group: 'com.google.code.gson', name: 'gson', version: rootProject.ext.gsonVersion)
 
     //not needed as compile but prevents having to add it as provided for all modules
     compile 'javax.annotation:jsr250-api:1.0'
