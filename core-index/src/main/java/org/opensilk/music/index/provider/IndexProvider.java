@@ -293,6 +293,17 @@ public class IndexProvider extends LibraryProvider {
                     return reply.putOk(false).get();
                 }
             }
+            case Methods.GET_PLAYLIST: {
+                Uri plist = BundleHelper.getUri(extras);
+                if (plist != null) {
+                    String id = plist.getLastPathSegment();
+                    Playlist playlist = mDataBase.getPlaylist(id);
+                    if (playlist != null) {
+                        return reply.putOk(true).putBundleable(playlist).get();
+                    }
+                }
+                return reply.putOk(false).get();
+            }
             default: {
                 return super.callCustom(method, arg, extras);
             }

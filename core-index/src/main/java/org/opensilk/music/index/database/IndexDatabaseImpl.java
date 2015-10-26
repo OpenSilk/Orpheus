@@ -719,6 +719,20 @@ public class IndexDatabaseImpl implements IndexDatabase {
 
     @Override
     public Playlist getPlaylist(String id) {
+        Cursor c = null;
+        Cursor c2 = null;
+        try {
+            c = query(IndexSchema.Info.Playlist.TABLE, playlistCols,
+                    IndexSchema.Info.Playlist._ID + "=?", new String[]{id}, null, null, null);
+            c2 = query(IndexSchema.Misc.PlaylistAlbumMap.TABLE, album_map_cols, null, null, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                final Uri parentUri = IndexUris.genres(indexAuthority);
+                return buildPlaylist(c, parentUri, c2);
+            }
+        } finally {
+            closeCursor(c);
+            closeCursor(c2);
+        }
         return null;
     }
 

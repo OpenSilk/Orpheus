@@ -30,6 +30,7 @@ import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 
 import org.opensilk.music.model.Container;
+import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
 
 import java.util.List;
@@ -93,6 +94,7 @@ public interface IndexClient {
     int removeFromPlaylist(Uri playlist, int position);
     int updatePlaylist(Uri playlist, List<Uri> uris);
     boolean removePlaylists(List<Uri> playlists);
+    Playlist getPlaylist(Uri playlist);
 
     void connect();
     void release();

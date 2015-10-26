@@ -45,7 +45,7 @@ import timber.log.Timber;
 @Singleton
 public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
-    public static final int DB_VERSION = 36;
+    public static final int DB_VERSION = 37;
     public static final String DB_NAME = "music.db";
 
     @Inject
@@ -122,6 +122,10 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP TABLE IF EXISTS playlist_track;");
             db.execSQL("DROP TABLE IF EXISTS playlist_meta;");
             db.execSQL("DROP TABLE IF EXISTS playlist_track_meta;");
+        }
+        if (oldVersion < 37) {
+            db.execSQL("DROP VIEW IF EXISTS genre_album_map;");
+            db.execSQL("DROP VIEW IF EXISTS artist_album_map;");
         }
         //end mistakes cleanup
 

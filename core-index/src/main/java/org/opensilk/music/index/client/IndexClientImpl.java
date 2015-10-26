@@ -49,6 +49,7 @@ import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.library.client.TypedBundleableLoader;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.Container;
+import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
 
 import java.util.ArrayList;
@@ -419,6 +420,16 @@ public class IndexClientImpl implements IndexClient {
     @Override
     public boolean removePlaylists(List<Uri> playlists) {
         return makeCheckedCall(Methods.REMOVE_PLAYLISTS, BundleHelper.b().putList(playlists).get());
+    }
+
+    @Override
+    public Playlist getPlaylist(Uri playlist) {
+        Bundle reply = makeCall(Methods.GET_PLAYLIST, BundleHelper.b().putUri(playlist).get());
+        if (checkCall(reply)) {
+            return LibraryExtras.getBundleable(reply);
+        } else {
+            return null;
+        }
     }
 
     @Override
