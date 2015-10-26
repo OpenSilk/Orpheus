@@ -17,8 +17,5 @@
   -->
 
 <resources>
-    <style name="SeekArcSleepTimer" parent="SeekArcLight">
-        <item name="android:layout_height">380dp</item>
-        <item name="android:layout_width">match_parent</item>
-    </style>
+
 </resources>

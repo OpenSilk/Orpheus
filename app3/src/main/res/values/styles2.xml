@@ -21,18 +21,6 @@
         <!--namespace-->
     </style>
 
-    <style name="DragSortList">
-        <!-- Setup dragsort options-->
-        <item name="use_default_controller">true</item>
-        <item name="drag_handle_id">@id/drag_handle</item>
-        <item name="fling_handle_id">@id/drag_handle</item>
-        <item name="remove_enabled">true</item>
-        <item name="remove_mode">flingRemove</item>
-        <item name="drag_enabled">true</item>
-        <item name="drag_start_mode">onMove</item>
-        <item name="float_background_color">@android:color/transparent</item>
-    </style>
-
     <style name="Orpheus.Thumbnail">
         <item name="android:scaleType">centerCrop</item>
         <item name="android:layout_gravity">center</item>
@@ -42,17 +30,6 @@
     <style name="SingleLineTextView">
         <item name="android:ellipsize">end</item>
         <item name="android:singleLine">true</item>
-    </style>
-
-    <style name="SeekArcSleepTimer" parent="SeekArcLight">
-        <item name="android:layout_height">300dp</item>
-        <item name="android:layout_width">match_parent</item>
-    </style>
-
-    <style name="SeekArcNowPlaying" parent="SeekArcLight">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:padding">48dp</item>
     </style>
 
     <style name="GalleryTabs">

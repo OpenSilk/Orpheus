@@ -39,7 +39,6 @@
         <item name="controlsShuffleStyle">@style/controlsActionLight.Shuffle</item>
         <item name="controlsRepeatStyle">@style/controlsActionLight.Repeat</item>
 
-        <item name="seekArcStyle">@style/SeekArcNowPlaying</item>
         <item name="windowActionModeOverlay">true</item>
 
     </style>
@@ -79,7 +78,6 @@
         <item name="controlsShuffleStyle">@style/controlsActionDark.Shuffle</item>
         <item name="controlsRepeatStyle">@style/controlsActionDark.Repeat</item>
 
-        <item name="seekArcStyle">@style/SeekArcNowPlaying</item>
         <item name="windowActionModeOverlay">true</item>
 
     </style>

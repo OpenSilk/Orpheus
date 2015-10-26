@@ -122,31 +122,16 @@ android {
 dependencies {
     //SDK
     compile (group: 'com.android.support', name: 'cardview-v7', version: rootProject.ext.supportLibVersion)
-    compile (group: 'com.android.support', name: 'recyclerview-v7', version: rootProject.ext.supportLibVersion)
-    compile (group: 'com.android.support', name: 'mediarouter-v7', version: rootProject.ext.supportLibVersion)
-    //jake wharton
-    compile (group: 'com.jakewharton', name: 'butterknife', version: rootProject.ext.butterKnifeVersion)
-    compile (group:'com.jakewharton.timber', name:'timber', version:rootProject.ext.timberVersion)
     //square
     provided(group: 'com.google.dagger', name:'dagger-compiler', version: rootProject.ext.dagger2Version)
     //apache
     compile (group: 'commons-io', name: 'commons-io', version: rootProject.ext.commonsIoVersion)
-    //greenrobot
-    compile 'de.greenrobot:eventbus:2.4.0'
 
 //    compile(group: 'com.google.android.exoplayer', name: 'exoplayer', version: 'r1.2.4', ext: 'aar')
-
-    compile 'com.sothree.slidinguppanel:library:3.0.0'
-
-    compile 'com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.7.0'
-//    compile project(':../../apps/android-advancedrecyclerview/library')
 
     compile 'com.ogaclejapan.arclayout:library:1.0.1@aar'
 
     //local m2
-    compile 'com.mobeta.android.dslv:library:0.6.1-SNAPSHOT@aar'
-    compile 'com.triggertrap:seekarc:1.1.1-SNAPSHOT@aar'
-//    compile project(':../../apps/SeekArc/SeekArc_library')
 
     compile project(':core-model')
     compile project(':core-library')
