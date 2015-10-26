@@ -45,7 +45,7 @@ import timber.log.Timber;
 @Singleton
 public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
-    public static final int DB_VERSION = 35;
+    public static final int DB_VERSION = 36;
     public static final String DB_NAME = "music.db";
 
     @Inject
@@ -115,7 +115,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
         if (oldVersion < 33) {
             db.execSQL("DROP VIEW IF EXISTS album_artist_info;");
         }
-        if (oldVersion < 35) {
+        if (oldVersion < 36) {
             db.execSQL("DROP VIEW IF EXISTS playlist_album_map;");
             db.execSQL("DROP VIEW IF EXISTS playlist_info;");
             db.execSQL("DROP VIEW IF EXISTS playlist_track_info;");
@@ -295,8 +295,8 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "COUNT(DISTINCT t.album_id) AS number_of_albums, " +
                     "COUNT(DISTINCT t.genre_id) AS number_of_genres, " +
                     "COUNT(DISTINCT t.track_id) AS number_of_tracks " +
-                    "FROM playlist_track_meta pt " +
-                    "LEFT OUTER JOIN playlist_meta p ON pt.playlist_id = p._id " +
+                    "FROM playlist_meta p " +
+                    "LEFT OUTER JOIN playlist_track_meta pt ON pt.playlist_id = p._id " +
                     "LEFT OUTER JOIN track_meta t ON pt.track_id = t._id " +
                     "GROUP BY p._id" +
                     ";");

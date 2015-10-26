@@ -37,5 +37,9 @@ public interface Methods {
     String SAVE_SEEK_POSITION = "idx.saveseekposition";
     String GET_TRACK = "idx.get.track";
     String GET_TRACK_LIST = "idx.get.track.list";
-
+    String CREATE_PLAYLIST = "idx.create.playlist";
+    String ADD_TO_PLAYLIST = "idx.add.to.playlist";
+    String REMOVE_FROM_PLAYLIST = "idx.remove.from.playlist";
+    String MOVE_PLAYLIST_MEMBER = "idx.move.playlist.member";
+    String UPDATE_PLAYLIST = "idx.update.playlist";
 }

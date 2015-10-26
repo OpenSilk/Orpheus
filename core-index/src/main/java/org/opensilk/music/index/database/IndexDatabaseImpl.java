@@ -43,6 +43,7 @@ import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.TrackList;
+import org.opensilk.music.model.sort.TrackSortOrder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -732,7 +733,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
         Cursor c = null;
         try {
             c = query(IndexSchema.Info.PlaylistTrack.TABLE, playlistTrackCols, playlistTracksSel,
-                    new String[]{id}, null, null, sortOrder);
+                    new String[]{id}, null, null, TrackSortOrder.PLAYORDER);//ignore sort order
             if (c != null && c.moveToFirst()) {
                 do {
                     lst.add(buildTrack(c));
@@ -1490,63 +1491,86 @@ public class IndexDatabaseImpl implements IndexDatabase {
     };
     static final String playlistTrackPlaylistIdSel = IndexSchema.Meta.PlaylistTrack.PLAYLIST_ID + "=?";
 
-    int getHighestPlaylistPlayPosition(String playlist_id) {
-        Cursor c = null;
-        try {
-            c = query(IndexSchema.Meta.PlaylistTrack.TABLE, highestPlaylistPlayPosCols,
-                    playlistTrackPlaylistIdSel, new String[]{playlist_id}, null, null,
-                    IndexSchema.Meta.PlaylistTrack.PLAY_ORDER);
-            if (c != null && c.moveToLast()) {
-                return c.getInt(0);
-            }
-        } finally {
-            closeCursor(c);
-        }
-        return 0;
-    }
-
     static final String[] addToPlaylistCols = new String[] {
             IndexSchema.Info.Track._ID,
             IndexSchema.Info.Track.URI,
     };
 
-    public int addToPlaylist(String playlist_id, List<Uri> uriList) {
+    int addToPlaylistLocked(String playlist_id, List<Uri> uriList, SQLiteDatabase db) {
         int numinserted = 0;
         Cursor c = null;
         try {
-            //playorders start at 1
-            int startOrder = getHighestPlaylistPlayPosition(playlist_id);
-            if (startOrder != 0) {
-                startOrder += 1;
+            c = db.query(IndexSchema.Meta.PlaylistTrack.TABLE, highestPlaylistPlayPosCols,
+                    playlistTrackPlaylistIdSel, new String[]{playlist_id}, null, null,
+                    IndexSchema.Meta.PlaylistTrack.PLAY_ORDER);
+            int startOrder = 0;
+            if (c != null && c.moveToLast()) {
+                startOrder = c.getInt(0) + 1;
             }
+            closeCursor(c);
             c = getTrackListCursor(uriList, addToPlaylistCols);
             if (c != null && c.moveToFirst()) {
-                mLock.writeLock().lock();
-                SQLiteDatabase db = helper.getWritableDatabase();
-                db.beginTransaction();
-                try {
-                    ContentValues cv = new ContentValues(5);
-                    do {
-                        long id = c.getLong(0);
-                        Uri uri = Uri.parse(c.getString(1));
-                        int idx = uriList.indexOf(uri);
-                        cv.put(IndexSchema.Meta.PlaylistTrack.PLAYLIST_ID, playlist_id);
-                        cv.put(IndexSchema.Meta.PlaylistTrack.TRACK_ID, id);
-                        cv.put(IndexSchema.Meta.PlaylistTrack.PLAY_ORDER, startOrder + idx);
-                        if (db.insert(IndexSchema.Meta.PlaylistTrack.TABLE, null, cv) > 0) {
-                            numinserted++;
-                        }
-                        cv.clear();
-                    } while (c.moveToNext());
-                    db.setTransactionSuccessful();
-                } finally {
-                    db.endTransaction();
-                    mLock.writeLock().unlock();
-                }
+                ContentValues cv = new ContentValues(5);
+                do {
+                    long id = c.getLong(0);
+                    Uri uri = Uri.parse(c.getString(1));
+                    int idx = uriList.indexOf(uri);
+                    cv.put(IndexSchema.Meta.PlaylistTrack.PLAYLIST_ID, playlist_id);
+                    cv.put(IndexSchema.Meta.PlaylistTrack.TRACK_ID, id);
+                    cv.put(IndexSchema.Meta.PlaylistTrack.PLAY_ORDER, startOrder + idx);
+                    if (db.insert(IndexSchema.Meta.PlaylistTrack.TABLE, null, cv) > 0) {
+                        numinserted++;
+                    }
+                    cv.clear();
+                } while (c.moveToNext());
             }
         } finally {
             closeCursor(c);
         }
+        return numinserted;
+    }
+
+    public int addToPlaylist(String playlist_id, List<Uri> uriList) {
+        int numinserted = 0;
+        mLock.writeLock().lock();
+        SQLiteDatabase db = helper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            numinserted = addToPlaylistLocked(playlist_id, uriList, db);
+            if (numinserted > 0) {
+                db.setTransactionSuccessful();
+            }
+        } finally {
+            db.endTransaction();
+            mLock.writeLock().unlock();
+        }
+        mAppContext.getContentResolver().notifyChange(IndexUris.playlist(indexAuthority, playlist_id), null);
+        //todo if num inserted != list.size reorder the playlist tracks
+        return numinserted;
+    }
+
+    @Override
+    public int updatePlaylist(String playlist_id, List<Uri> uriList) {
+        int numinserted = 0;
+        mLock.writeLock().lock();
+        SQLiteDatabase db = helper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            db.delete(IndexSchema.Meta.PlaylistTrack.TABLE,
+                    IndexSchema.Meta.PlaylistTrack.PLAYLIST_ID + "=" + playlist_id, null);
+            if (!uriList.isEmpty()) {
+                numinserted = addToPlaylistLocked(playlist_id, uriList, db);
+            } else {
+                numinserted = 1;//todo num removed
+            }
+            if (numinserted > 0) {
+                db.setTransactionSuccessful();
+            }
+        } finally {
+            db.endTransaction();
+            mLock.writeLock().unlock();
+        }
+        mAppContext.getContentResolver().notifyChange(IndexUris.playlist(indexAuthority, playlist_id), null);
         //todo if num inserted != list.size reorder the playlist tracks
         return numinserted;
     }
@@ -1658,6 +1682,44 @@ public class IndexDatabaseImpl implements IndexDatabase {
                     " play_order=play_order-1" +
                     " WHERE play_order>" + play_order +
                     " AND playlist_id=" + playlist_id);
+            numlines = 1;//TODO actual number of entries changed;
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+            mLock.writeLock().unlock();
+            closeCursor(c);
+        }
+        mAppContext.getContentResolver().notifyChange(IndexUris.playlist(indexAuthority, playlist_id), null);
+        return numlines;
+    }
+
+    @Override
+    public int removeFromPlaylist(String playlist_id, int position) {
+        int numlines = 0;
+        mLock.writeLock().lock();
+        Cursor c = null;
+        SQLiteDatabase db = helper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            //see if its a valid pos
+            c = db.query(IndexSchema.Meta.PlaylistTrack.TABLE,
+                    movePlaylistEntryCols,
+                    " play_order=" + position + " AND playlist_id=" + playlist_id,
+                    null, null, null, null);
+            if (c == null || c.getCount() == 0) {
+                return 0;
+            }
+            //then delete the item
+            db.delete(IndexSchema.Meta.PlaylistTrack.TABLE,
+                    " play_order=" + position +
+                            " AND playlist_id=" + playlist_id,
+                    null);
+            //decrement the play orders following it
+            db.execSQL("UPDATE " + IndexSchema.Meta.PlaylistTrack.TABLE + " SET" +
+                    " play_order=play_order-1" +
+                    " WHERE play_order>" + position +
+                    " AND playlist_id=" + playlist_id);
+            numlines = 1;//TODO actual number of entries changed;
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();

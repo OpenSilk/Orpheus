@@ -311,6 +311,94 @@ public class DatabaseTest {
         Assertions.assertThat(pltracks5.get(6).getUri()).isEqualTo(pltracks4.get(7).getUri());
         //Assertions.assertThat(pltracks5.get(7).getUri()).isEqualTo(pltracks4.get(7).getUri());
 
+        //
+        //removing with pos
+
+        plid = mDb.insertPlaylist("Pl5");
+        Assertions.assertThat(plid).isGreaterThan(0);
+
+        list = new ArrayList<>(8);
+        for (int ii=0; ii<8; ii++) {
+            list.add(Uri.parse("content://sample2/track" + ii));
+        }
+
+        mDb.addToPlaylist(String.valueOf(plid), list);
+        pltracks4 = mDb.getPlaylistTracks(String.valueOf(plid), TrackSortOrder.PLAYORDER);
+
+        mDb.removeFromPlaylist(String.valueOf(plid), 4);
+        pltracks5 = mDb.getPlaylistTracks(String.valueOf(plid), TrackSortOrder.PLAYORDER);
+        tii3 = pltracks4.iterator();
+        tii4 = pltracks5.iterator();
+        while (tii3.hasNext() && tii4.hasNext()) {
+            Track next = tii3.next();
+            Track next2 = tii4.next();
+            System.out.println("" + next.getTrackNumber() + "  " + next.getUri() +
+                    "  " + next2.getTrackNumber() + "  " + next2.getUri());
+        }
+
+        Assertions.assertThat(pltracks5.size()).isEqualTo(7);
+
+        //check the order
+        tii = pltracks5.iterator();
+        zz=0;
+        while (tii.hasNext()) {
+            Assertions.assertThat(tii.next().getTrackNumber()).isEqualTo(zz++);
+        }
+
+        Assertions.assertThat(pltracks5.get(0).getUri()).isEqualTo(pltracks4.get(0).getUri());
+        Assertions.assertThat(pltracks5.get(1).getUri()).isEqualTo(pltracks4.get(1).getUri());
+        Assertions.assertThat(pltracks5.get(2).getUri()).isEqualTo(pltracks4.get(2).getUri());
+        Assertions.assertThat(pltracks5.get(3).getUri()).isEqualTo(pltracks4.get(3).getUri());
+        Assertions.assertThat(pltracks5.get(4).getUri()).isEqualTo(pltracks4.get(5).getUri());
+        Assertions.assertThat(pltracks5.get(5).getUri()).isEqualTo(pltracks4.get(6).getUri());
+        Assertions.assertThat(pltracks5.get(6).getUri()).isEqualTo(pltracks4.get(7).getUri());
+
+        //
+        //update Pl5
+
+        list = new ArrayList<>(8);
+        for (int ii=0; ii<8; ii++) {
+            list.add(Uri.parse("content://sample2/track" + ii));
+        }
+
+        Collections.shuffle(list);
+
+        mDb.updatePlaylist(String.valueOf(plid), list);
+        pltracks5 = mDb.getPlaylistTracks(String.valueOf(plid), TrackSortOrder.PLAYORDER);
+        tii3 = pltracks4.iterator();
+        tii4 = pltracks5.iterator();
+        while (tii3.hasNext() && tii4.hasNext()) {
+            Track next = tii3.next();
+            Track next2 = tii4.next();
+            System.out.println("" + next.getTrackNumber() + "  " + next.getUri() +
+                    "  " + next2.getTrackNumber() + "  " + next2.getUri());
+        }
+
+        Assertions.assertThat(pltracks5.size()).isEqualTo(8);
+
+        //check the order
+        tii = pltracks5.iterator();
+        zz=0;
+        while (tii.hasNext()) {
+            Assertions.assertThat(tii.next().getTrackNumber()).isEqualTo(zz++);
+        }
+
+        Assertions.assertThat(pltracks5.get(0).getUri()).isEqualTo(list.get(0));
+        Assertions.assertThat(pltracks5.get(1).getUri()).isEqualTo(list.get(1));
+        Assertions.assertThat(pltracks5.get(2).getUri()).isEqualTo(list.get(2));
+        Assertions.assertThat(pltracks5.get(3).getUri()).isEqualTo(list.get(3));
+        Assertions.assertThat(pltracks5.get(4).getUri()).isEqualTo(list.get(4));
+        Assertions.assertThat(pltracks5.get(5).getUri()).isEqualTo(list.get(5));
+        Assertions.assertThat(pltracks5.get(6).getUri()).isEqualTo(list.get(6));
+        Assertions.assertThat(pltracks5.get(7).getUri()).isEqualTo(list.get(7));
+
+        //update remove all
+
+        list.clear();
+        mDb.updatePlaylist(String.valueOf(plid), list);
+        pltracks5 = mDb.getPlaylistTracks(String.valueOf(plid), TrackSortOrder.PLAYORDER);
+        Assertions.assertThat(pltracks5.size()).isEqualTo(0);
+
     }
 
 }

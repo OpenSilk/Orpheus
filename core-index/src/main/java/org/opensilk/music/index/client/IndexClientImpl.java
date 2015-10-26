@@ -37,6 +37,7 @@ import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.artwork.UtilsArt;
+import org.opensilk.music.index.provider.IndexProvider;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.index.provider.Methods;
 import org.opensilk.bundleable.BundleableListSlice;
@@ -358,6 +359,92 @@ public class IndexClientImpl implements IndexClient {
             m.putString(METADATA_KEY_ALBUM_ART_URI, artInfo.asUri(artworkAuthority).toString());
         }
         return m.build();
+    }
+
+    @Override
+    public Uri createPlaylist(String name) {
+        Bundle reply = makeCall(Methods.CREATE_PLAYLIST, BundleHelper.b().putString(name).get());
+        if (checkCall(reply)) {
+            return BundleHelper.getUri(LibraryExtras.getExtrasBundle(reply));
+        } else {
+            return Uri.EMPTY;
+        }
+    }
+
+    @Override
+    public Observable<Integer> addToPlaylist(final Uri playlist, List<Uri> tracksUriList) {
+        Observable<Observable<List<Track>>> loaderCreator = Observable.from(tracksUriList)
+                .map(new Func1<Uri, Observable<List<Track>>>() {
+                    @Override
+                    public Observable<List<Track>> call(final Uri uri) {
+                        //Use defer for lazy creation
+                        return Observable.defer(new Func0<Observable<List<Track>>>() {
+                            @Override
+                            public Observable<List<Track>> call() {
+                                return TypedBundleableLoader.<Track>create(appContext)
+                                        .setUri(uri).createObservable();
+                            }
+                        });
+                    }
+                });
+        return Observable.mergeDelayError(loaderCreator, 5)
+                .collect(new Func0<List<Uri>>() {
+                    @Override
+                    public List<Uri> call() {
+                        return new ArrayList<Uri>();
+                    }
+                }, new Action2<List<Uri>, List<Track>>() {
+                    @Override
+                    public void call(List<Uri> uris, List<Track> tracks) {
+                        for (Track track : tracks) {
+                            uris.add(track.getUri());
+                        }
+                    }
+                }).map(new Func1<List<Uri>, Integer>() {
+                    @Override
+                    public Integer call(List<Uri> uris) {
+                        Bundle reply = makeCall(Methods.ADD_TO_PLAYLIST, BundleHelper.b()
+                                .putUri(playlist).putList(uris).get());
+                        if (checkCall(reply)) {
+                            return BundleHelper.getInt(LibraryExtras.getExtrasBundle(reply));
+                        } else {
+                            return 0;
+                        }
+                    }
+                });
+    }
+
+    @Override
+    public int movePlaylistEntry(Uri playlist, int from, int to) {
+        Bundle reply = makeCall(Methods.MOVE_PLAYLIST_MEMBER, BundleHelper.b()
+                .putUri(playlist).putInt(from).putInt2(to).get());
+        if (checkCall(reply)) {
+            return BundleHelper.getInt(LibraryExtras.getExtrasBundle(reply));
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public int removeFromPlaylist(Uri playlist, int position) {
+        Bundle reply = makeCall(Methods.REMOVE_FROM_PLAYLIST, BundleHelper.b()
+                .putUri(playlist).putInt(position).get());
+        if (checkCall(reply)) {
+            return BundleHelper.getInt(LibraryExtras.getExtrasBundle(reply));
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public int updatePlaylist(Uri playlist, List<Uri> uris) {
+        Bundle reply = makeCall(Methods.UPDATE_PLAYLIST, BundleHelper.b()
+                .putUri(playlist).putList(uris).get());
+        if (checkCall(reply)) {
+            return BundleHelper.getInt(LibraryExtras.getExtrasBundle(reply));
+        } else {
+            return 0;
+        }
     }
 
     @Override

@@ -71,6 +71,8 @@ public interface IndexDatabase {
     int addToPlaylist(String playlist_id, List<Uri> uriList);
     int movePlaylistEntry(String playlist_id, int from, int to);
     int removeFromPlaylist(String playlist_id, Uri uri);
+    int removeFromPlaylist(String playlist_id, int pos);
+    int updatePlaylist(String playlist_id, List<Uri> uriList);
 
     long hasContainer(Uri uri);
     @NonNull List<Pair<Uri, Uri>> findTopLevelContainers(@Nullable String authority);

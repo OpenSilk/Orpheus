@@ -41,6 +41,7 @@ import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.Model;
+import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
 import org.opensilk.bundleable.Bundleable;
 
@@ -72,10 +73,13 @@ import static org.opensilk.music.index.provider.IndexUris.M_GENRES;
 import static org.opensilk.music.index.provider.IndexUris.M_GENRE_ALBUMS;
 import static org.opensilk.music.index.provider.IndexUris.M_GENRE_DETAILS;
 import static org.opensilk.music.index.provider.IndexUris.M_GENRE_TRACKS;
+import static org.opensilk.music.index.provider.IndexUris.M_PLAYLISTS;
+import static org.opensilk.music.index.provider.IndexUris.M_PLAYLIST_TRACKS;
 import static org.opensilk.music.index.provider.IndexUris.M_TRACKS;
 import static org.opensilk.music.index.provider.IndexUris.album;
 import static org.opensilk.music.index.provider.IndexUris.artist;
 import static org.opensilk.music.index.provider.IndexUris.makeMatcher;
+import static org.opensilk.music.index.provider.IndexUris.playlist;
 
 /**
  * Created by drew on 7/11/15.
@@ -215,6 +219,65 @@ public class IndexProvider extends LibraryProvider {
                 getTracksInList(LibraryExtras.getUriList(extras),
                         binder, LibraryExtras.sanitize(extras));
                 return reply.putOk(true).get();
+            }
+            case Methods.CREATE_PLAYLIST: {
+                String name = BundleHelper.getString(extras);
+                if (!StringUtils.isEmpty(name)) {
+                    long id = mDataBase.insertPlaylist(name);
+                    return reply.putOk(id > 0).putExtrasBundle(BundleHelper.b().putUri(
+                            IndexUris.playlist(mAuthority, String.valueOf(id))).get()).get();
+                } else {
+                    return reply.putOk(false).get();
+                }
+            }
+            case Methods.ADD_TO_PLAYLIST: {
+                Uri plist = BundleHelper.getUri(extras);
+                List<Uri> list = BundleHelper.getList(extras);
+                if (plist != null && list != null && !list.isEmpty()) {
+                    String id = plist.getLastPathSegment();
+                    int count = mDataBase.addToPlaylist(id, list);
+                    return reply.putOk(count > 0).putExtrasBundle(
+                            BundleHelper.b().putInt(count).get()).get();
+                } else {
+                    return reply.putOk(false).get();
+                }
+            }
+            case Methods.REMOVE_FROM_PLAYLIST: {
+                Uri plist = BundleHelper.getUri(extras);
+                int pos = BundleHelper.getInt(extras);
+                if (plist != null) {
+                    String id = plist.getLastPathSegment();
+                    int count = mDataBase.removeFromPlaylist(id, pos);
+                    return reply.putOk(count > 0).putExtrasBundle(
+                            BundleHelper.b().putInt(count).get()).get();
+                } else {
+                    return reply.putOk(false).get();
+                }
+            }
+            case Methods.MOVE_PLAYLIST_MEMBER: {
+                Uri plist = BundleHelper.getUri(extras);
+                int from = BundleHelper.getInt(extras);
+                int to = BundleHelper.getInt2(extras);
+                if (plist != null && from != to) {
+                    String id = plist.getLastPathSegment();
+                    int count = mDataBase.movePlaylistEntry(id, from, to);
+                    return reply.putOk(count > 0).putExtrasBundle(
+                            BundleHelper.b().putInt(count).get()).get();
+                } else {
+                    return reply.putOk(false).get();
+                }
+            }
+            case Methods.UPDATE_PLAYLIST: {
+                Uri plist = BundleHelper.getUri(extras);
+                List<Uri> list = BundleHelper.getList(extras);
+                if (plist != null && list != null) {
+                    String id = plist.getLastPathSegment();
+                    int count = mDataBase.updatePlaylist(id, list);
+                    return reply.putOk(count > 0).putExtrasBundle(
+                            BundleHelper.b().putInt(count).get()).get();
+                } else {
+                    return reply.putOk(false).get();
+                }
             }
             default: {
                 return super.callCustom(method, arg, extras);
@@ -430,6 +493,28 @@ public class IndexProvider extends LibraryProvider {
                             }
                         })
                         .subscribe(subscriber);
+                break;
+            }
+            case M_PLAYLISTS: {
+                final BundleableSubscriber<Playlist> subscriber = new BundleableSubscriber<>(binder);
+                String sort = LibraryExtras.getSortOrder(args);
+                List<Playlist> list = mDataBase.getPlaylists(sort);
+                if (!subscriber.isUnsubscribed()) {
+                    subscriber.onNext(list);
+                    subscriber.onCompleted();
+                }
+                break;
+            }
+            case M_PLAYLIST_TRACKS: {
+                final BundleableSubscriber<Track> subscriber = new BundleableSubscriber<>(binder);
+                List<String> segments = uri.getPathSegments();
+                String id = segments.get(segments.size() - 2);
+                String sort = LibraryExtras.getSortOrder(args);
+                List<Track> list = mDataBase.getPlaylistTracks(id, sort);
+                if (!subscriber.isUnsubscribed()) {
+                    subscriber.onNext(list);
+                    subscriber.onCompleted();
+                }
                 break;
             }
             default: {

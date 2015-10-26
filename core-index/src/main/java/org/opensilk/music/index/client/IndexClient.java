@@ -89,4 +89,10 @@ public interface IndexClient {
 
     void connect();
     void release();
+
+    Uri createPlaylist(String name);
+    Observable<Integer> addToPlaylist(Uri playlist, List<Uri> trackUrislist);
+    int movePlaylistEntry(Uri playlist, int from, int to);
+    int removeFromPlaylist(Uri playlist, int position);
+    int updatePlaylist(Uri playlist, List<Uri> uris);
 }
