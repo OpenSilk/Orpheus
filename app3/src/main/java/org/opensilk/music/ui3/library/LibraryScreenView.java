@@ -64,7 +64,7 @@ public class LibraryScreenView extends CoordinatorLayout {
         super.onAttachedToWindow();
         if (!isInEditMode()) {
             mToolbarOwner.attachToolbar(mToolbar);
-            mToolbarOwner.setConfig(ActionBarConfig.builder().setTitle(R.string.libraries_title).build());
+            mToolbarOwner.setConfig(ActionBarConfig.builder().setTitle(R.string.title_libraries).build());
             mPresenter.takeView(this);
         }
     }

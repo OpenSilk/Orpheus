@@ -122,7 +122,7 @@ public class PlaylistDetailsScreenModule {
             @Override
             public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,
-                        R.menu.action_save
+                        R.menu.playlist_save
                         );
                 return true;
             }
@@ -130,7 +130,7 @@ public class PlaylistDetailsScreenModule {
             @Override
             public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
-                    case R.id.action_save: {
+                    case R.id.playlist_save: {
                         List<Bundleable> tracks = presenter.getItems();
                         List<Uri> list = new ArrayList<>(tracks.size());
                         for (Bundleable b : tracks) {

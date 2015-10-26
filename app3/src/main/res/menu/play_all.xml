@@ -16,11 +16,11 @@
   ~ limitations under the License.
   -->
 
-<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:initialLayout="@layout/music_widget_small"
-    android:previewImage="@drawable/widget_preview_small"
-    android:minHeight="@dimen/music_widget_small_min_height"
-    android:minWidth="@dimen/music_widget_small_min_width"
-    android:updatePeriodMillis="0"
-    android:resizeMode="horizontal"
-    android:widgetCategory="keyguard|home_screen" />
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/play_all"
+        android:title="@string/menu_play_all"
+        android:orderInCategory="50"
+        app:showAsAction="ifRoom"/>
+</menu>

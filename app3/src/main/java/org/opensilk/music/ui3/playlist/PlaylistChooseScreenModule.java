@@ -262,7 +262,7 @@ public class PlaylistChooseScreenModule {
                     @Override
                     public Dialog call(Context context) {
                         AlertDialog.Builder b = new AlertDialog.Builder(context)
-                                .setTitle(R.string.create_playlist_prompt);
+                                .setTitle(R.string.new_playlist);
                         final EditText editText = new EditText(context);
                         editText.setSingleLine(true);
                         editText.setInputType(editText.getInputType()

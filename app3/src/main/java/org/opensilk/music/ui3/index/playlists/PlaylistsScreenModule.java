@@ -125,7 +125,7 @@ public class PlaylistsScreenModule {
             @Override
             public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,
-                        R.menu.popup_delete
+                        R.menu.delete
                 );
                 return true;
             }
@@ -133,7 +133,7 @@ public class PlaylistsScreenModule {
             @Override
             public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
-                    case R.id.popup_delete: {
+                    case R.id.delete: {
                         List<Uri> uris = new ArrayList<>(presenter.getSelectedItems().size());
                         for (Bundleable m : presenter.getSelectedItems()) {
                             uris.add(((Playlist) m).getUri());

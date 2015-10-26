@@ -163,7 +163,7 @@ public class AlbumDetailsScreenModule {
                 inflateMenus(menuInflater, menu,
                         R.menu.add_to_queue,
                         R.menu.play_next,
-                        R.menu.popup_add_to_playlist
+                        R.menu.add_to_playlist
                 );
                 return true;
             }
@@ -177,7 +177,7 @@ public class AlbumDetailsScreenModule {
                     case R.id.play_next:
                         playSelectedItemsNext(presenter);
                         return true;
-                    case R.id.popup_add_to_playlist:
+                    case R.id.add_to_playlist:
                         addToPlaylistFromTracks(context, presenter.getSelectedItems());
                         return true;
                     default:

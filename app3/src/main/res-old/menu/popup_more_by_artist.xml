@@ -20,7 +20,7 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/popup_more_by_artist"
-        android:title="@string/context_menu_more_by_artist"
+        android:title="@string/menu_more_by_artist"
         android:orderInCategory="50"
         app:showAsAction="never"/>
 </menu>

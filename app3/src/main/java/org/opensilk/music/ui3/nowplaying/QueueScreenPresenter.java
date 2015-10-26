@@ -133,9 +133,9 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView> {
 
     public boolean onMenuItemClicked(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.popup_menu_save_queue:
+            case R.id.save_queue:
                 return true;
-            case R.id.popup_menu_clear_queue:
+            case R.id.clear_queue:
                 playbackController.clearQueue();
                 return true;
             default:

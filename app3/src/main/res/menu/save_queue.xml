@@ -18,9 +18,8 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:id="@+id/popup_set_ringtone"
-        android:title="@string/context_menu_use_as_ringtone"
+    <item android:id="@+id/save_queue"
+        android:title="@string/menu_save_queue"
         android:orderInCategory="50"
-        app:showAsAction="never"/>
+        app:showAsAction="ifRoom"/>
 </menu>

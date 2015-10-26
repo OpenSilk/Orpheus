@@ -30,7 +30,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/settings_data_category">
+        android:title="@string/settings_storage_category">
 
         <ListPreference
             android:key="image_cache_size"

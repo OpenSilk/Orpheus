@@ -131,14 +131,14 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
     void populateMenu(Context context, PopupMenu popupMenu) {
         LibraryConfig config = parentPresenter.getConfig(providerInfo.getAuthority());
         if (config.hasFlag(LibraryConfig.FLAG_REQUIRES_AUTH)) {
-            popupMenu.inflate(R.menu.popup_login);
+            popupMenu.inflate(R.menu.library_login);
         }
     }
 
     void handlePopupItemClick(Context context, MenuItem item) {
         LibraryConfig config = parentPresenter.getConfig(providerInfo.getAuthority());
         switch (item.getItemId()) {
-            case R.id.popup_menu_login: {
+            case R.id.library_login: {
                 getParent().startLoginActivity(config);
                 break;
             }

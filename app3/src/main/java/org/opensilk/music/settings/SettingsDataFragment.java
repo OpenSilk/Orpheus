@@ -101,13 +101,13 @@ public class SettingsDataFragment extends SettingsFragment {
                 @Override
                 public boolean onPreferenceClick(final Preference preference) {
                     final Context context = getActivity();
-                    new AlertDialog.Builder(context).setMessage(R.string.delete_warning)
+                    new AlertDialog.Builder(context).setMessage(R.string.settings_delete_warning)
                             .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(final DialogInterface dialog, final int which) {
                                     dialog.dismiss();
                                     clearCache(context);
-                                    Toast.makeText(context, "Caches cleared", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(context, R.string.settings_msg_cache_cleared, Toast.LENGTH_LONG).show();
                                     setCacheSizeSummary(getCacheSize());
                                 }
                             })

@@ -18,13 +18,22 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
+    <string name="app_name" translatable="false">Orpheus</string>
+
     <!-- Page titles -->
-    <string name="page_recent">Recent</string>
-    <string name="page_artists">Artists</string>
-    <string name="page_albums">Albums</string>
-    <string name="page_songs">Songs</string>
-    <string name="page_playlists">Playlists</string>
-    <string name="page_genres">Genres</string>
+    <string name="title_recent">Recent</string>
+    <string name="title_artists">Artists</string>
+    <string name="title_albums">Albums</string>
+    <string name="title_songs">Songs</string>
+    <string name="title_playlists">Playlists</string>
+    <string name="title_genres">Genres</string>
+    <string name="title_all_songs">All songs</string>
+    <string name="title_queue">Queue</string>
+    <string name="title_now_playing">Now playing</string>
+    <string name="title_libraries">Libraries</string>
+    <string name="title_local_storage">Local Storage</string>
+    <string name="title_my_library">My Library</string>
+    <string name="title_folders">Folders</string>
 
     <!-- Option menu items -->
     <string name="menu_settings">Settings</string>
@@ -38,17 +47,10 @@
     <string name="menu_share">Share</string>
     <string name="menu_add_to_homescreen">Pin to home screen</string>
     <string name="menu_equalizer">Equalizer</string>
-    <string name="menu_simple">Simple</string>
+    <string name="menu_list">List</string>
     <string name="menu_detailed">Detailed</string>
     <string name="menu_grid">Grid</string>
     <string name="menu_view_as">View as</string>
-
-    <!-- Playlist items -->
-    <string name="add_to_playlist">Add to playlist</string>
-    <string name="add_to_favorites">Add to favorites</string>
-    <string name="add_to_queue">Add to queue</string>
-    <string name="remove_from_favorites">Remove from favorites</string>
-    <string name="remove_from_queue">Remove from queue</string>
 
     <!-- Sort orders -->
     <string name="sort_order_entry_az">A-Z</string>
@@ -63,39 +65,40 @@
     <string name="sort_order_entry_number_of_albums">Number of albums</string>
     <string name="sort_order_entry_filename">Filename</string>
 
-    <!-- Default playlist names -->
-    <!-- playlist_favorite used in voice search processing only -->
-    <string name="playlist_favorite">Favorite</string>
-    <string name="playlist_favorites">Favorites</string>
-    <string name="playlist_last_added">Last added</string>
-
     <!-- AlertDialog items -->
     <string name="new_playlist">New playlist</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     <string name="overwrite">Overwrite</string>
-    <string name="new_playlist_name_template">Playlist <xliff:g id="number">%d</xliff:g></string>
-    <string name="create_playlist_prompt">Playlist name</string>
     <string name="delete_dialog_title">Delete <xliff:g id="item" example="album">%s</xliff:g>?</string>
     <string name="cannot_be_undone">This cannot be undone</string>
-    <string name="delete_warning">This will permanently delete the cached image entries</string>
-    <string name="new_photo">Choose photo from Gallery</string>
-    <string name="google_search">Google search</string>
-    <string name="use_default">Use default photo</string>
-    <string name="old_photo">Use old photo</string>
+    <string name="btn_cancel_current_timer">Cancel current timer</string>
+    <string name="error">Error</string>
+    <string name="retry">Retry</string>
+    <string name="dash"> - </string>
 
     <!-- Context menu items -->
-    <string name="context_menu_play_selection">Play</string>
-    <string name="context_menu_play_next">Play next</string>
-    <string name="context_menu_more_by_artist">More by artist</string>
-    <string name="context_menu_rename_playlist">Rename</string>
-    <string name="context_menu_delete">Delete</string>
-    <string name="context_menu_fetch_album_art">Fetch album art</string>
-    <string name="context_menu_fetch_artist_image">Fetch artist image</string>
-    <string name="context_menu_open_in_play_store">Open in Play Store</string>
-    <string name="context_menu_remove_from_recent">Remove from recent</string>
-    <string name="context_menu_use_as_ringtone">Use as ringtone</string>
-    <string name="context_menu_remove_from_playlist">Remove from playlist</string>
+    <string name="menu_play_selection">Play</string>
+    <string name="menu_play_next">Play next</string>
+    <string name="menu_more_by_artist">More by artist</string>
+    <string name="menu_rename_playlist">Rename</string>
+    <string name="menu_delete">Delete</string>
+    <string name="menu_fetch_album_art">Fetch album art</string>
+    <string name="menu_fetch_artist_image">Fetch artist image</string>
+    <string name="menu_open_in_play_store">Open in Play Store</string>
+    <string name="menu_remove_from_recent">Remove from recent</string>
+    <string name="menu_use_as_ringtone">Use as ringtone</string>
+    <string name="menu_remove_from_playlist">Remove from playlist</string>
+    <string name="menu_add_to_playlist">Add to playlist</string>
+    <string name="menu_add_to_favorites">Add to favorites</string>
+    <string name="menu_add_to_queue">Enqueue</string>
+    <string name="menu_remove_from_favorites">Remove from favorites</string>
+    <string name="menu_remove_from_queue">Remove from queue</string>
+    <string name="menu_refresh">Refresh</string>
+    <string name="menu_sleep_timer">Sleep timer</string>
+    <string name="menu_library_settings">Library settings</string>
+    <string name="menu_login">Login</string>
+    <string name="menu_manage_playlists">Manage playlists</string>
 
     <!-- Content descriptions -->
     <string name="accessibility_play">Play</string>
@@ -107,22 +110,73 @@
     <string name="accessibility_repeat">Repeat</string>
     <string name="accessibility_repeat_all">Repeat all</string>
     <string name="accessibility_repeat_one">Repeat one</string>
+    <string name="accessibility_add">Add</string>
+    <string name="accessibility_select">Select</string>
+    <string name="accessibility_artwork">Artwork</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <!-- Toast messages -->
-    <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> pinned to your home screen</string>
-    <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> could not be pinned to your home screen</string>
-    <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' set as ringtone</string>
-    <string name="theme_set"><xliff:g id="name">%s</xliff:g> set as the theme</string>
+    <!-- Toast messages/errors -->
+    <string name="no_effects_for_you">The equalizer could not be opened.</string>
+    <string name="err_generic">Operation failed</string>
+    <string name="err_unimplemented">FIXME Unimplemented</string>
+    <string name="err_addtoqueue">Unable to enqueue songs</string>
+    <string name="err_opening_settings">Unable to open settings</string>
+    <string name="err_retrieving_items">Unable to retrieve items</string>
+    <string name="err_authentication">Error not authorized… Please login again</string>
+    <string name="err_connecting_library">Error connecting library</string>
+    <string name="err_unable_to_fetch_songs">Unable to get songs</string>
+    <string name="err_offline">You are offline</string>
+    <string name="err_unsupported_for_library">Operation only supported with local songs</string>
+    <string name="err_no_visualizations_foru">Unable to create visualizer</string>
+    <string name="msg_sleep_timer_set">Sleep timer set for %d minutes</string>
+    <string name="msg_fetching_song_list">Fetching song list…</string>
+    <string name="msg_newer_plugin_needed">Update required</string>
+    <string name="msg_newer_plugin_message">Orpheus requires a newer version of %s.</string>
+
+    <!--Now playing menu options-->
+    <string name="now_playing_visualizer">Visualizer</string>
+    <string name="now_playing_visualizer_circles_lines">Circle (lines)</string>
+    <string name="now_playing_visualizer_circles_lines_checked">Circle (lines) \u2713</string>
+    <string name="now_playing_visualizer_circle_bars">Circle (bars)</string>
+    <string name="now_playing_visualizer_circle_bars_checked">Circle (bars) \u2713</string>
+    <string name="now_playing_visualizer_off">Off</string>
+    <string name="now_playing_visualizer_off_checked">Off \u2713</string>
+    <string name="now_playing_keep_screen_on">Keep screen on</string>
+    <string name="now_playing_keep_screen_on_checked">Keep screen on \u2713</string>
+    <string name="now_playing_close_reopen">Please press back then reopen Now Playing to apply changes</string>
+
+    <!--Bio Screen-->
+    <string name="bio_biography_title">Biography</string>
+    <string name="bio_similar_artists_title">Similar Artists</string>
+
+    <!-- misc -->
+    <string name="opensilk_org_url" translatable="false">http://opensilk.org/</string>
+    <string name="playstore_package_url" translatable="false">https://play.google.com/store/apps/details?id=%s</string>
+
+    <!-- Empty list  -->
+    <string name="empty_music">To add music to the library browse to a folder and click the add button.</string>
+    <string name="error_loading_list">There was an error loading the items.</string>
 
     <!-- Settings -->
     <!-- Main settings screen -->
     <string name="settings_title">Settings</string>
-    <!-- about NOTE some string in res/ -->
+    <!-- about -->
+    <string name="settings_about_category">About</string>
+    <!--about orpheus -->
+    <string name="settings_about_apollo">About Orpheus</string>
     <string name="settings_created_by">Created by OpenSilk Productions LLC</string>
-    <!-- about version -->
+    <string name="settings_feedback">Send feedback</string>
+    <string name="settings_feedback_url" translatable="false">mailto:market.opensilk@gmail.com</string>
+    <string name="settings_feedback_email_subject" translatable="false">Feedback: Orpheus Music Player</string>
+    <string name="settings_send_crash_reports">Send crash reports</string>
+    <string name="settings_send_crash_reports_summary">Crash reports are anonymous and secure</string>
+    <string name="settings_version_title">Version number</string>
     <string name="settings_changes_dialog_title">What\'s new</string>
     <!-- legal -->
     <string name="settings_legal_category">Legal</string>
+    <string name="settings_open_source_licenses">Open source licenses</string>
+    <string name="settings_special_thanks">Special thanks</string>
     <!-- legal last.fm -->
     <string name="settings_thanks_dialog_lfm" translatable="false">Last.fm</string>
     <string name="settings_thanks_dialog_lfm_desc">Cover art and artist images</string>
@@ -137,12 +191,8 @@
     <string name="settings_thanks_dialog_mc" translatable="false">Matthew Carter</string>
     <string name="settings_thanks_dialog_mc_desc">Banner and icon design</string>
     <string name="settings_thanks_dialog_mc_url" translatable="false">https://plus.google.com/111519147913981849095/about</string>
-    <string name="settings_feedback">Send feedback</string>
-    <string name="settings_feedback_url" translatable="false">mailto:market.opensilk@gmail.com</string>
-    <string name="settings_feedback_email_subject" translatable="false">Feedback: Orpheus Music Player</string>
-    <!-- legal bugreports -->
-    <string name="settings_send_crash_reports">Send crash reports</string>
-    <string name="settings_send_crash_reports_summary">Crash reports are anonymous and secure</string>
+    <!-- interface -->
+    <string name="settings_ui_category">Interface</string>
     <!-- interface theme -->
     <string name="settings_theme_category">Theme</string>
     <string name="settings_dark_theme">Use dark theme</string>
@@ -151,79 +201,34 @@
     <string name="settings_theme_preview">Theme Preview</string>
     <string name="settings_theme_picker_help">Swipe to change</string>
     <string name="settings_msg_restart_app">Orpheus will now restart to apply changes</string>
-    <!-- data NOTE Some strings in res/-->
+    <!-- data res/-->
+    <string name="settings_data_category">Data</string>
     <!-- data download -->
     <string name="settings_download_category">Download</string>
+    <string name="settings_download_only_on_wifi_title">Download via Wi-Fi only</string>
+    <string name="settings_download_only_on_wifi_summary">To reduce carrier charges, don\'t download over mobile networks</string>
+    <string name="settings_download_missing_artwork_title">Download missing album art</string>
     <string name="settings_prefer_download_art">Prefer downloading artwork</string>
+    <string name="settings_download_artist_images_title">Download missing artist images</string>
     <!-- data storage -->
+    <string name="settings_storage_category">Storage</string>
+    <string name="settings_delete_cache_title">Delete cache</string>
+    <string name="settings_delete_cache_summary">Remove all cached images</string>
+    <string name="settings_delete_warning">This will permanently delete the cached image entries</string>
+    <string name="settings_msg_cache_cleared">Cache cleared</string>
     <string name="settings_cache_size">Set image cache limit</string>
     <string name="settings_cache_size_20" translatable="false">20MB</string>
     <string name="settings_cache_size_40" translatable="false">40MB</string>
     <string name="settings_cache_size_60" translatable="false">60MB</string>
     <string name="settings_cache_size_80" translatable="false">80MB</string>
-    <!-- audio NOTE Some strings in res/-->
+    <!-- audio -->
     <string name="settings_audio_category">Audio</string>
     <!-- audio general -->
     <string name="settings_general_category">General</string>
     <string name="settings_equalizer_summary">Fine tune audio settings</string>
     <string name="settings_equalizer_none">No equalizer found</string>
     <string name="settings_err_no_audio_id">Could not get audio id. Please play a song and try again.</string>
-    <!-- plugins -->
-    <string name="settings_plugin_category">Plugins</string>
-    <string name="settings_get_plugins">Get plugins</string>
-    <string name="settings_get_plugins_summary">Search Play Store for Orpheus plugins</string>
     <!-- donate -->
     <string name="settings_donate_category">Donate</string>
-
-    <string name="settings_ui_category">Interface</string>
-    <string name="settings_storage_category">Storage</string>
-    <string name="settings_data_category">Data</string>
-    <string name="settings_about_category">About</string>
-    <string name="settings_author_title">Author</string>
-    <string name="settings_about_apollo">About Orpheus</string>
-    <string name="settings_special_thanks">Special thanks</string>
-    <string name="settings_cyanogenmod_title" translatable="false">CyanogenMod</string>
-    <string name="settings_self_title" translatable="false">Andrew Neal</string>
-    <string name="settings_lopez_title" translatable="false">A.J. Lopez</string>
-    <string name="settings_lopez_summary">Icon and Play Store banner design</string>
-    <string name="settings_color_scheme_title">Choose Orpheus\'s default color scheme</string>
-    <string name="settings_color_scheme_summary">Changes the accent color in Orpheus</string>
-    <string name="settings_theme_chooser_title">Theme chooser</string>
-    <string name="settings_delete_cache_title">Delete cache</string>
-    <string name="settings_delete_cache_summary">Remove all cached images</string>
-    <string name="settings_download_only_on_wifi_title">Download via Wi-Fi only</string>
-    <string name="settings_download_only_on_wifi_summary">To reduce carrier charges, don\'t download over mobile networks</string>
-    <string name="settings_download_missing_artwork_title">Download missing album art</string>
-    <string name="settings_download_artist_images_title">Download missing artist images</string>
-    <string name="settings_open_source_licenses">Open source licenses</string>
-    <string name="settings_version_title">Version number</string>
-
-    <!-- Share Intent -->
-    <string name="now_listening_to">#NowPlaying <xliff:g id="title">%1$s</xliff:g> by <xliff:g id="artist">%2$s</xliff:g> #Orpheus</string>
-    <string name="share_track_using">Share track using:</string>
-
-    <!-- ColorPicker -->
-    <string name="color_picker_title">Color scheme</string>
-    <string name="hex" translatable="false">#</string>
-    <string name="current_color">Current</string>
-    <string name="new_color">New</string>
-
-    <!-- App widget -->
-    <string name="app_widget_small" translatable="false">Orpheus: 4×1</string>
-    <string name="app_widget_large" translatable="false">Orpheus: 4×2</string>
-    <string name="app_widget_large_alt">Orpheus: 4×2 (alternate)</string>
-    <string name="app_widget_recent">Orpheus: recently listened</string>
-    <string name="app_widget_text_separator" translatable="false">-</string>
-
-    <!-- What keywords to use when shopping for Orpheus themes -->
-    <string name="apollo_themes_shop_key" translatable="false">Orpheus Themes</string>
-
-    <!-- Empty list / error messages -->
-    <string name="no_effects_for_you">The equalizer could not be opened.</string>
-    <string name="empty_music">To copy music from your computer to your device, use a USB cable.</string>
-    <string name="empty_last_added">Songs you have added over the last month will be shown here.</string>
-    <string name="empty_search">No search results found</string>
-    <string name="empty_favorite">Songs you mark as favorites will be shown here.</string>
-    <string name="empty_recent">Albums you have listened to will show up here. Try playing some music.</string>
 
 </resources>

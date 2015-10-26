@@ -141,48 +141,6 @@ public class UtilsCommon {
         }
     }
 
-    /**
-     * @param context The {@link Context} to use
-     * @param id The song ID.
-     */
-    public static boolean setRingtone(final Context context, final long id) {
-        final ContentResolver resolver = context.getContentResolver();
-        final Uri uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id);
-        try {
-            final ContentValues values = new ContentValues(2);
-            values.put(MediaStore.Audio.AudioColumns.IS_RINGTONE, "1");
-            values.put(MediaStore.Audio.AudioColumns.IS_ALARM, "1");
-            resolver.update(uri, values, null, null);
-        } catch (final UnsupportedOperationException ingored) {
-            Toast.makeText(context, R.string.err_generic, Toast.LENGTH_SHORT).show();
-            return false;
-        }
-
-        final String[] projection = new String[] {
-                BaseColumns._ID, MediaStore.MediaColumns.DATA, MediaStore.MediaColumns.TITLE
-        };
-
-        final String selection = BaseColumns._ID + "=" + id;
-        Cursor cursor = resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection,
-                selection, null, null);
-        try {
-            if (cursor != null && cursor.getCount() == 1) {
-                cursor.moveToFirst();
-                Settings.System.putString(resolver, Settings.System.RINGTONE, uri.toString());
-                Toast.makeText(context, context.getString(R.string.set_as_ringtone,
-                        cursor.getString(2)), Toast.LENGTH_SHORT).show();
-                return true;
-            }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-                cursor = null;
-            }
-        }
-        Toast.makeText(context, R.string.err_generic, Toast.LENGTH_SHORT).show();
-        return false;
-    }
-
     public static List<Uri> filterTracks(List<Bundleable> adapterItems) {
         if (adapterItems == null || adapterItems.isEmpty()) {
             return Collections.emptyList();

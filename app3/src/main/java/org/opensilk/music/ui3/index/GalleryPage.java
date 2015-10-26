@@ -36,25 +36,25 @@ public enum GalleryPage {
 //            return new PlaylistsScreen();
 //        }
 //    }),
-    ARTIST(R.string.page_artists, new Func0<Screen>() {
+    ARTIST(R.string.title_artists, new Func0<Screen>() {
         @Override
         public Screen call() {
             return new ArtistsScreen();
         }
     }),
-    ALBUM(R.string.page_albums, new Func0<Screen>() {
+    ALBUM(R.string.title_albums, new Func0<Screen>() {
         @Override
         public Screen call() {
             return new AlbumsScreen();
         }
     }),
-    SONG(R.string.page_songs, new Func0<Screen>() {
+    SONG(R.string.title_songs, new Func0<Screen>() {
         @Override
         public Screen call() {
             return new TracksScreen();
         }
     }),
-    GENRE(R.string.page_genres, new Func0<Screen>() {
+    GENRE(R.string.title_genres, new Func0<Screen>() {
         @Override
         public Screen call() {
             return new GenresScreen();

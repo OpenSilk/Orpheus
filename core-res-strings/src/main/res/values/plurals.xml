@@ -52,4 +52,9 @@
         <item quantity="one"><xliff:g id="songs_to_delete" example="1">%d</xliff:g> song was deleted.</item>
         <item quantity="other"><xliff:g id="songs_to_delete">%d</xliff:g> songs were deleted.</item>
     </plurals>
+
+    <plurals name="Nitems">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
 </resources>

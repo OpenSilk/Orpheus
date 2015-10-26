@@ -98,7 +98,7 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
             delegateActionHandler = new DelegateActionHandler();
         }
         return ActionBarConfig.builder()
-                .setTitle(R.string.my_library)
+                .setTitle(R.string.title_my_library)
                 .setMenuConfig(delegateActionHandler)
                 .build();
     }

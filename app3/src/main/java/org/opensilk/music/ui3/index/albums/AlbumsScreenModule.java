@@ -131,7 +131,7 @@ public class AlbumsScreenModule {
             @Override
             public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,
-                        R.menu.popup_add_to_playlist
+                        R.menu.add_to_playlist
                         );
                 return true;
             }
@@ -139,7 +139,7 @@ public class AlbumsScreenModule {
             @Override
             public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
-                    case R.id.popup_add_to_playlist: {
+                    case R.id.add_to_playlist: {
                         List<Bundleable> list = presenter.getSelectedItems();
                         List<Uri> uris = new ArrayList<>(list.size());
                         for (Bundleable b : list) {
