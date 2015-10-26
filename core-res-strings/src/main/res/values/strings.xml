@@ -2,6 +2,7 @@
 <!--
      Copyright (C) 2012-2013 Andrew Neal
      Copyright (C) 2012-2014 The CyanogenMod Project
+     Copyright (c) 2015 OpenSilk Productions LLC
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -16,7 +17,6 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-
 
     <!-- Page titles -->
     <string name="page_recent">Recent</string>
@@ -115,6 +115,66 @@
     <string name="theme_set"><xliff:g id="name">%s</xliff:g> set as the theme</string>
 
     <!-- Settings -->
+    <!-- Main settings screen -->
+    <string name="settings_title">Settings</string>
+    <!-- about NOTE some string in res/ -->
+    <string name="settings_created_by">Created by OpenSilk Productions LLC</string>
+    <!-- about version -->
+    <string name="settings_changes_dialog_title">What\'s new</string>
+    <!-- legal -->
+    <string name="settings_legal_category">Legal</string>
+    <!-- legal last.fm -->
+    <string name="settings_thanks_dialog_lfm" translatable="false">Last.fm</string>
+    <string name="settings_thanks_dialog_lfm_desc">Cover art and artist images</string>
+    <string name="settings_thanks_dialog_lfm_url">http://last.fm/</string><!--has localized domains-->
+    <!-- legal coverartarchive.org-->
+    <string name="settings_thanks_dialog_caa" translatable="false">coverartarchive.org</string>
+    <string name="settings_thanks_dialog_caa_desc">Cover art</string>
+    <string name="settings_thanks_dialog_caa_url" translatable="false">http://coverartarchive.org/</string>
+    <!-- lecal people -->
+    <string name="settings_thanks_dialog_an" translatable="false">Andrew Neal</string>
+    <string name="settings_thanks_dialog_an_desc" translatable="false">Apollo</string>
+    <string name="settings_thanks_dialog_mc" translatable="false">Matthew Carter</string>
+    <string name="settings_thanks_dialog_mc_desc">Banner and icon design</string>
+    <string name="settings_thanks_dialog_mc_url" translatable="false">https://plus.google.com/111519147913981849095/about</string>
+    <string name="settings_feedback">Send feedback</string>
+    <string name="settings_feedback_url" translatable="false">mailto:market.opensilk@gmail.com</string>
+    <string name="settings_feedback_email_subject" translatable="false">Feedback: Orpheus Music Player</string>
+    <!-- legal bugreports -->
+    <string name="settings_send_crash_reports">Send crash reports</string>
+    <string name="settings_send_crash_reports_summary">Crash reports are anonymous and secure</string>
+    <!-- interface theme -->
+    <string name="settings_theme_category">Theme</string>
+    <string name="settings_dark_theme">Use dark theme</string>
+    <string name="settings_pick_theme">Pick theme</string>
+    <!-- interface theme picker activity -->
+    <string name="settings_theme_preview">Theme Preview</string>
+    <string name="settings_theme_picker_help">Swipe to change</string>
+    <string name="settings_msg_restart_app">Orpheus will now restart to apply changes</string>
+    <!-- data NOTE Some strings in res/-->
+    <!-- data download -->
+    <string name="settings_download_category">Download</string>
+    <string name="settings_prefer_download_art">Prefer downloading artwork</string>
+    <!-- data storage -->
+    <string name="settings_cache_size">Set image cache limit</string>
+    <string name="settings_cache_size_20" translatable="false">20MB</string>
+    <string name="settings_cache_size_40" translatable="false">40MB</string>
+    <string name="settings_cache_size_60" translatable="false">60MB</string>
+    <string name="settings_cache_size_80" translatable="false">80MB</string>
+    <!-- audio NOTE Some strings in res/-->
+    <string name="settings_audio_category">Audio</string>
+    <!-- audio general -->
+    <string name="settings_general_category">General</string>
+    <string name="settings_equalizer_summary">Fine tune audio settings</string>
+    <string name="settings_equalizer_none">No equalizer found</string>
+    <string name="settings_err_no_audio_id">Could not get audio id. Please play a song and try again.</string>
+    <!-- plugins -->
+    <string name="settings_plugin_category">Plugins</string>
+    <string name="settings_get_plugins">Get plugins</string>
+    <string name="settings_get_plugins_summary">Search Play Store for Orpheus plugins</string>
+    <!-- donate -->
+    <string name="settings_donate_category">Donate</string>
+
     <string name="settings_ui_category">Interface</string>
     <string name="settings_storage_category">Storage</string>
     <string name="settings_data_category">Data</string>
