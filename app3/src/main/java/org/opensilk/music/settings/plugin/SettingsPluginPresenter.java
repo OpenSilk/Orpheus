@@ -17,13 +17,14 @@
 
 package org.opensilk.music.settings.plugin;
 
-import android.content.Context;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.ui.recycler.ItemClickSupport;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.library.LibraryProviderInfo;
-import org.opensilk.music.ui3.common.RecyclerAdapterItemClickDelegate;
 import org.opensilk.music.library.client.LibraryProviderInfoLoader;
 
 import java.util.List;
@@ -39,7 +40,7 @@ import rx.functions.Action1;
  */
 @ScreenScope
 public class SettingsPluginPresenter extends ViewPresenter<SettingsPluginRecyclerView>
-        implements RecyclerAdapterItemClickDelegate.ItemClickListener {
+        implements ItemClickSupport.OnItemClickListener {
 
     final LibraryProviderInfoLoader loader;
     final AppPreferences settings;
@@ -78,9 +79,9 @@ public class SettingsPluginPresenter extends ViewPresenter<SettingsPluginRecycle
     }
 
     @Override
-    public void onItemClicked(Context context, int pos) {
+    public void onItemClicked(RecyclerView recyclerView, int position, View v) {
         if (!hasView()) return;
-        LibraryProviderInfo item = getView().getAdapter().getItem(pos);
+        LibraryProviderInfo item = getView().getAdapter().getItem(position);
         if (item.isActive) {
             item.isActive = false;
             settings.setPluginDisabled(item.authority);
@@ -88,6 +89,7 @@ public class SettingsPluginPresenter extends ViewPresenter<SettingsPluginRecycle
             item.isActive = true;
             settings.setPluginEnabled(item.authority);
         }
-        getView().getAdapter().notifyItemChanged(pos);
+        getView().getAdapter().notifyItemChanged(position);
     }
+
 }

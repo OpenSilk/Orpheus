@@ -22,12 +22,12 @@ import android.content.res.Resources;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ComponentFactory;
 import org.opensilk.common.ui.mortar.Layout;
+import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortar.WithComponentFactory;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.ui3.MusicActivityComponent;
-import org.opensilk.music.ui3.common.BundleableScreen;
 
 import mortar.MortarScope;
 
@@ -36,12 +36,13 @@ import mortar.MortarScope;
  */
 @Layout(R.layout.screen_folders)
 @WithComponentFactory(FoldersScreen.Factory.class)
-public class FoldersScreen extends BundleableScreen {
+public class FoldersScreen extends Screen {
 
+    final LibraryConfig libraryConfig;
     final Container container;
 
     public FoldersScreen(LibraryConfig libraryConfig, Container container) {
-        super(libraryConfig);
+        this.libraryConfig = libraryConfig;
         this.container = container;
     }
 

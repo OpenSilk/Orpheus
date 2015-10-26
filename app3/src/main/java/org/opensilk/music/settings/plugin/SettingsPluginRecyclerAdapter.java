@@ -26,10 +26,10 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.opensilk.common.ui.recycler.ItemClickSupport;
 import org.opensilk.common.ui.recycler.RecyclerListAdapter;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryProviderInfo;
-import org.opensilk.music.ui3.common.RecyclerAdapterItemClickDelegate;
 
 import javax.inject.Inject;
 
@@ -39,15 +39,25 @@ import butterknife.InjectView;
 /**
  * Created by drew on 5/23/15.
  */
-public class SettingsPluginRecyclerAdapter extends RecyclerListAdapter<LibraryProviderInfo, SettingsPluginRecyclerAdapter.ViewHolder> {
+public class SettingsPluginRecyclerAdapter extends RecyclerListAdapter<LibraryProviderInfo,
+        SettingsPluginRecyclerAdapter.ViewHolder> {
 
-    final RecyclerAdapterItemClickDelegate<ViewHolder> itemClickDelegate;
     final SettingsPluginPresenter presenter;
 
     @Inject
     public SettingsPluginRecyclerAdapter(SettingsPluginPresenter presenter) {
         this.presenter = presenter;
-        itemClickDelegate = new RecyclerAdapterItemClickDelegate<ViewHolder>(presenter);
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        ItemClickSupport.addTo(recyclerView)
+                .setOnItemClickListener(presenter);
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
+        ItemClickSupport.removeFrom(recyclerView);
     }
 
     @Override
@@ -61,7 +71,7 @@ public class SettingsPluginRecyclerAdapter extends RecyclerListAdapter<LibraryPr
         Resources res = holder.itemView.getResources();
         Drawable d = item.icon;
         if (d == null) {
-            d = res.getDrawable(R.drawable.ic_extension_grey600_24dp);
+            d = res.getDrawable(R.drawable.puzzle_grey600_36dp);
         }
         int bounds = (int) (24 * res.getDisplayMetrics().density);
         d.setBounds(0, 0, bounds, bounds);
@@ -69,17 +79,14 @@ public class SettingsPluginRecyclerAdapter extends RecyclerListAdapter<LibraryPr
         holder.text.setText(item.title);
         holder.subtext.setText(item.description);
         holder.checkBox.setChecked(item.isActive);
-        itemClickDelegate.bindClickListener(holder, position);
     }
 
     @Override
     public void onViewRecycled(ViewHolder holder) {
         super.onViewRecycled(holder);
-        itemClickDelegate.onViewRecycled(holder);
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder
-            implements RecyclerAdapterItemClickDelegate.ClickableItem {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         @InjectView(R.id.icon) ImageView icon;
         @InjectView(R.id.line1) TextView text;
         @InjectView(R.id.line2) TextView subtext;
@@ -90,9 +97,5 @@ public class SettingsPluginRecyclerAdapter extends RecyclerListAdapter<LibraryPr
             ButterKnife.inject(this, itemView);
         }
 
-        @Override
-        public View getContentView() {
-            return itemView;
-        }
     }
 }

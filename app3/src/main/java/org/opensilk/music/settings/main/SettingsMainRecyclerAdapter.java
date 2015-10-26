@@ -22,21 +22,34 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import org.opensilk.common.ui.recycler.ItemClickSupport;
 import org.opensilk.common.ui.recycler.RecyclerListAdapter;
 import org.opensilk.music.R;
-import org.opensilk.music.ui3.common.RecyclerAdapterItemClickDelegate;
 
 import java.util.Arrays;
 
 /**
  * Created by drew on 5/18/15.
  */
-public class SettingsMainRecyclerAdapter extends RecyclerListAdapter<SettingsMainItem, SettingsMainRecyclerAdapter.ViewHolder> {
+public class SettingsMainRecyclerAdapter extends RecyclerListAdapter<SettingsMainItem,
+        SettingsMainRecyclerAdapter.ViewHolder> {
 
-    RecyclerAdapterItemClickDelegate<ViewHolder> itemClickDelegate;
+    private ItemClickSupport.OnItemClickListener clickListener;
 
-    public SettingsMainRecyclerAdapter() {
+    public SettingsMainRecyclerAdapter(ItemClickSupport.OnItemClickListener l) {
         super(Arrays.asList(SettingsMainItem.values()));
+        this.clickListener = l;
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        ItemClickSupport.addTo(recyclerView)
+                .setOnItemClickListener(clickListener);
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
+        ItemClickSupport.removeFrom(recyclerView);
     }
 
     @Override
@@ -50,32 +63,11 @@ public class SettingsMainRecyclerAdapter extends RecyclerListAdapter<SettingsMai
         TextView tv = (TextView) holder.itemView;
         tv.setText(item.title);
         tv.setCompoundDrawablesWithIntrinsicBounds(item.iconRes, 0, 0, 0);
-        if (itemClickDelegate != null) {
-            itemClickDelegate.bindClickListener(holder, position);
-        }
     }
 
-    @Override
-    public void onViewRecycled(ViewHolder holder) {
-        super.onViewRecycled(holder);
-        if (itemClickDelegate != null) {
-            itemClickDelegate.onViewRecycled(holder);
-        }
-    }
-
-    void setClickListener(RecyclerAdapterItemClickDelegate.ItemClickListener l) {
-        itemClickDelegate = new RecyclerAdapterItemClickDelegate<>(l);
-    }
-
-    public static class ViewHolder extends RecyclerView.ViewHolder
-            implements RecyclerAdapterItemClickDelegate.ClickableItem {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         public ViewHolder(View itemView) {
             super(itemView);
-        }
-
-        @Override
-        public View getContentView() {
-            return itemView;
         }
     }
 }

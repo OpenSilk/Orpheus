@@ -40,9 +40,9 @@ public enum SettingsMainItem {
     AUDIO(SettingsAudioFragment.class.getName(),
         R.string.settings_audio_category,
         R.drawable.ic_tune_grey600_36dp),
-    PLUGIN(SettingsPluginFragment.class.getName(),
-        R.string.settings_plugin_category,
-        R.drawable.ic_extension_grey600_36dp),
+//    PLUGIN(SettingsPluginFragment.class.getName(),
+//        R.string.settings_plugin_category,
+//        R.drawable.ic_extension_grey600_36dp),
     // XXX add new items above this one.
     DONATE("donate", //XXX hack
         R.string.settings_donate_category,

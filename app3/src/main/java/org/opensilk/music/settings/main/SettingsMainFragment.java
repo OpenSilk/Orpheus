@@ -19,7 +19,6 @@ package org.opensilk.music.settings.main;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -28,8 +27,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.opensilk.common.ui.recycler.ItemClickSupport;
 import org.opensilk.music.R;
-import org.opensilk.music.ui3.common.RecyclerAdapterItemClickDelegate;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -37,7 +36,7 @@ import butterknife.InjectView;
 /**
  * Created by andrew on 3/1/14.
  */
-public class SettingsMainFragment extends Fragment implements RecyclerAdapterItemClickDelegate.ItemClickListener {
+public class SettingsMainFragment extends Fragment implements ItemClickSupport.OnItemClickListener {
 
     @InjectView(R.id.recyclerview) RecyclerView mList;
     SettingsMainRecyclerAdapter mAdapter;
@@ -51,8 +50,7 @@ public class SettingsMainFragment extends Fragment implements RecyclerAdapterIte
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.inject(this, view);
-        mAdapter = new SettingsMainRecyclerAdapter();
-        mAdapter.setClickListener(this);
+        mAdapter = new SettingsMainRecyclerAdapter(this);
         mList.setLayoutManager(new LinearLayoutManager(getActivity()));
         mList.setHasFixedSize(true);
         mList.setAdapter(mAdapter);
@@ -73,8 +71,8 @@ public class SettingsMainFragment extends Fragment implements RecyclerAdapterIte
     }
 
     @Override
-    public void onItemClicked(Context context, int pos) {
-        SettingsMainItem item = mAdapter.getItem(pos);
+    public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+        SettingsMainItem item = mAdapter.getItem(position);
         if ("donate".equals(item.className)) {
 //            mDonateManager.launchDonateActivity(getActivity());
         } else {

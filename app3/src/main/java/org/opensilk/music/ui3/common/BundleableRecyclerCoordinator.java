@@ -92,6 +92,7 @@ public class BundleableRecyclerCoordinator extends RecyclerListCoordinator imple
     public void setupRecyclerView() {
         mAdapter.setGridStyle(mPresenter.isGrid());
         mAdapter.setNumberTracks(mPresenter.wantsNumberedTracks());
+        mAdapter.setAllowSelectionMode(mPresenter.isAllowLongPressSelection());
         getListView().getRecycledViewPool().clear();
         getListView().setLayoutManager(getLayoutManager());
     }
