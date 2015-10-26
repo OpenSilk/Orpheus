@@ -30,7 +30,6 @@ import org.opensilk.common.ui.mortar.DialogPresenterActivity;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.library.drive.provider.DriveLibraryDB;
 import org.opensilk.music.ui3.playlist.PlaylistChooseScreenFragment;
 
 import java.util.List;

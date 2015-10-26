@@ -28,7 +28,6 @@ import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.index.model.BioSummary;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.ArtInfo;
@@ -44,9 +43,7 @@ import org.opensilk.music.ui3.common.OpenProfileItemClickListener;
 import org.opensilk.music.ui3.common.UtilsCommon;
 import org.opensilk.music.ui3.profile.ProfileScreen;
 import org.opensilk.music.ui3.profile.album.AlbumDetailsScreen;
-import org.opensilk.music.ui3.profile.bio.BioScreen;
 import org.opensilk.music.ui3.profile.tracklist.TrackListScreen;
-import org.opensilk.music.ui3.ProfileActivity;
 
 import java.util.List;
 

@@ -23,10 +23,7 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.view.View;
 
-import org.apache.commons.lang3.tuple.Triple;
 import org.opensilk.common.core.dagger2.ScreenScope;
-import org.opensilk.common.core.util.BundleHelper;
-import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.common.ui.mortar.DrawerOwner;
 import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.ui.mortar.PausesAndResumes;

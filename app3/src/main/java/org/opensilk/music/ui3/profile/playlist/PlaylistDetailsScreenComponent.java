@@ -19,8 +19,6 @@ package org.opensilk.music.ui3.profile.playlist;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.ui3.MusicActivityComponent;
-import org.opensilk.music.ui3.common.BundleableComponent;
-import org.opensilk.music.ui3.profile.ProfileComponent;
 import org.opensilk.music.ui3.profile.ProfileComponentDragSwipe;
 
 import dagger.Component;

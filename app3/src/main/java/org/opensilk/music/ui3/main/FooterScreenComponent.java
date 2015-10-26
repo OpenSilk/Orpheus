@@ -18,15 +18,10 @@
 package org.opensilk.music.ui3.main;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
-import org.opensilk.common.ui.mortar.DrawerOwner;
-import org.opensilk.music.AppPreferences;
-import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
-import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.MusicActivityComponent;
 
 import dagger.Component;
 import rx.functions.Func1;
-import rx.functions.Func2;
 
 /**
  * Created by drew on 5/6/15.

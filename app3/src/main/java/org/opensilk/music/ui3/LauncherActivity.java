@@ -21,7 +21,6 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.view.MenuItem;
@@ -37,8 +36,8 @@ import org.opensilk.music.ui.theme.OrpheusTheme;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
 import org.opensilk.music.ui3.common.ActivityResultCodes;
 import org.opensilk.music.ui3.index.GalleryScreenFragment;
-import org.opensilk.music.ui3.library.LibraryScreenFragment;
 import org.opensilk.music.ui3.index.playlists.PlaylistsScreenFragment;
+import org.opensilk.music.ui3.library.LibraryScreenFragment;
 import org.opensilk.music.ui3.profile.playlist.PlaylistDetailsScreen;
 
 import javax.inject.Inject;

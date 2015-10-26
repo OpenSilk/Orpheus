@@ -22,7 +22,6 @@ import android.os.Bundle;
 
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortarfragment.MortarFragment;
-import org.opensilk.music.ui3.profile.album.AlbumDetailsScreen;
 
 /**
  * Created by drew on 10/18/15.

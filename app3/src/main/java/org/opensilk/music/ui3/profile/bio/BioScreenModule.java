@@ -17,8 +17,6 @@
 
 package org.opensilk.music.ui3.profile.bio;
 
-import android.support.design.widget.TabLayout;
-
 import org.opensilk.music.index.model.BioSummary;
 import org.opensilk.music.model.ArtInfo;
 

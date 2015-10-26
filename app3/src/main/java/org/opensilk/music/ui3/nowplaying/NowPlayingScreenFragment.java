@@ -17,10 +17,8 @@
 
 package org.opensilk.music.ui3.nowplaying;
 
-import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortarfragment.MortarFragment;
-import org.opensilk.music.AppPreferences;
 
 /**
  * Created by drew on 5/9/15.

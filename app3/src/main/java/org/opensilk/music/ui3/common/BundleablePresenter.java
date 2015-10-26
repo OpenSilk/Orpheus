@@ -27,6 +27,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import org.apache.commons.lang3.StringUtils;
+import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.rx.RxLoader;
 import org.opensilk.common.core.rx.RxUtils;
@@ -39,7 +40,6 @@ import org.opensilk.music.R;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.index.client.IndexClient;
 import org.opensilk.music.library.client.BundleableLoader;
-import org.opensilk.bundleable.Bundleable;
 import org.opensilk.music.model.Model;
 import org.opensilk.music.playback.control.PlaybackController;
 

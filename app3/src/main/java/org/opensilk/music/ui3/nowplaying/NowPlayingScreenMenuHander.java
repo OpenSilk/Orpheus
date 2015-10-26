@@ -18,16 +18,10 @@
 package org.opensilk.music.ui3.nowplaying;
 
 import android.content.Context;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
-
-import com.pheelicks.visualizer.renderer.CircleBarRenderer;
-import com.pheelicks.visualizer.renderer.CircleRenderer;
 
 import org.opensilk.common.ui.mortar.ActionBarMenuHandler;
 import org.opensilk.music.AppPreferences;
@@ -38,7 +32,6 @@ import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_ARTWORK;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_VIS_CIRCLE;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_VIS_CIRCLE_BAR;
-import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_VIS_LINES;
 
 /**
  * Created by drew on 10/12/15.

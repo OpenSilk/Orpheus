@@ -18,10 +18,6 @@
 package org.opensilk.music.ui3.main;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
-import org.opensilk.common.ui.mortar.DrawerController;
-import org.opensilk.common.ui.mortar.DrawerListenerRegistrar;
-import org.opensilk.music.ui3.LauncherActivityComponent;
-import org.opensilk.music.ui3.MusicActivity;
 import org.opensilk.music.ui3.MusicActivityComponent;
 
 import dagger.Component;

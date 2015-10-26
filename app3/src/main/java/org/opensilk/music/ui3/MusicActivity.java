@@ -17,8 +17,6 @@
 
 package org.opensilk.music.ui3;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -28,10 +26,8 @@ import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
 
 import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.common.ui.mortar.ActionModeActivity;
 import org.opensilk.common.ui.mortar.ActionModeDelegateCallback;
 import org.opensilk.common.ui.mortar.ActionModePresenter;
@@ -53,13 +49,11 @@ import org.opensilk.music.library.LibraryConstants;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
-import org.opensilk.music.ui3.common.ActivityResultCodes;
 import org.opensilk.music.ui3.profile.playlist.PlaylistDetailsScreen;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
-import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 
 /**

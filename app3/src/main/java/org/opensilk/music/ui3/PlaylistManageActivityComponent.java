@@ -18,7 +18,6 @@
 package org.opensilk.music.ui3;
 
 import org.opensilk.common.core.dagger2.ActivityScope;
-import org.opensilk.common.ui.mortar.DialogPresenter;
 import org.opensilk.music.AppComponent;
 
 import dagger.Component;

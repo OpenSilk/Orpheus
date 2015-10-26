@@ -48,7 +48,6 @@ import org.opensilk.music.ui3.profile.ProfileScreen;
 import org.opensilk.music.ui3.profile.album.AlbumDetailsScreen;
 import org.opensilk.music.ui3.profile.bio.BioScreen;
 import org.opensilk.music.ui3.profile.tracklist.TrackListScreen;
-import org.opensilk.music.ui3.ProfileActivity;
 
 import java.util.Collections;
 import java.util.List;

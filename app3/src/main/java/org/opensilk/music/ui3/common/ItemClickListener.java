@@ -19,7 +19,6 @@ package org.opensilk.music.ui3.common;
 
 import android.content.Context;
 
-import org.opensilk.bundleable.Bundleable;
 import org.opensilk.music.model.Model;
 
 /**

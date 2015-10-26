@@ -18,27 +18,16 @@
 package org.opensilk.music.ui3.library;
 
 import android.content.Context;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 
 import com.jakewharton.rxbinding.view.RxView;
 import com.jakewharton.rxbinding.view.ViewClickEvent;
 
 import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.common.ui.mortar.ActionBarConfig;
-import org.opensilk.common.ui.mortar.ToolbarOwner;
-import org.opensilk.common.ui.recycler.RecyclerListCoordinator;
 import org.opensilk.common.ui.widget.FloatingActionButtonCheckable;
 import org.opensilk.music.R;
 import org.opensilk.music.model.Container;
-import org.opensilk.music.ui3.common.BundleablePresenter;
-import org.opensilk.music.ui3.common.BundleableRecyclerAdapter;
 import org.opensilk.music.ui3.common.BundleableRecyclerCoordinator;
-import org.opensilk.music.ui3.common.BundleableRecyclerView;
-import org.opensilk.music.ui3.main.FooterScreenComponent;
 
 import javax.inject.Inject;
 import javax.inject.Named;

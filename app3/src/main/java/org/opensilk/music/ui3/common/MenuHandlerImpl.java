@@ -28,7 +28,6 @@ import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.ui3.PlaylistManageActivity;
-import org.opensilk.music.ui3.profile.ProfileScreen;
 
 import java.util.ArrayList;
 import java.util.List;

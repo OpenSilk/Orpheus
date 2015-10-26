@@ -18,19 +18,16 @@
 package org.opensilk.music.ui3.nowplaying;
 
 import android.content.Context;
-import android.support.v7.internal.view.menu.MenuBuilder;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.view.MenuItem;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.recycler.DragSwipeAdapterWrapper;
 import org.opensilk.music.R;
-import org.opensilk.music.ui3.common.BundleableRecyclerAdapter;
 
 import javax.inject.Inject;
 

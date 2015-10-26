@@ -19,26 +19,19 @@ package org.opensilk.music.ui3;
 
 import android.content.Context;
 
-import org.opensilk.common.core.dagger2.ActivityScope;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.ui.mortar.ActionModePresenter;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.common.ui.mortar.DialogPresenter;
-import org.opensilk.common.ui.mortar.DrawerController;
-import org.opensilk.common.ui.mortar.DrawerListenerRegistrar;
 import org.opensilk.common.ui.mortar.DrawerOwner;
 import org.opensilk.common.ui.mortar.ToolbarOwner;
 import org.opensilk.common.ui.mortarfragment.MortarFragmentActivityComponent;
-import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
-import org.opensilk.music.index.IndexComponent;
 import org.opensilk.music.index.client.IndexClient;
 import org.opensilk.music.playback.control.PlaybackController;
 
 import javax.inject.Named;
-
-import dagger.Component;
 
 /**
  * Subclasses must include {@link MusicActivityModule}

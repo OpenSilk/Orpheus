@@ -30,15 +30,10 @@ import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.DrawerOwner;
 import org.opensilk.common.ui.mortar.Lifecycle;
 import org.opensilk.common.ui.mortar.LifecycleService;
-import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
-import org.opensilk.common.ui.mortar.PausesAndResumes;
-import org.opensilk.common.ui.mortar.ToolbarOwner;
 import org.opensilk.music.AppPreferences;
-import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.playback.PlaybackStateHelper;
 import org.opensilk.music.playback.control.PlaybackController;
-import org.opensilk.music.ui3.common.UtilsCommon;
 import org.opensilk.music.ui3.main.ProgressUpdater;
 
 import javax.inject.Inject;
@@ -52,7 +47,9 @@ import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
-import static android.support.v4.media.MediaMetadataCompat.*;
+import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI;
+import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_ARTIST;
+import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_TITLE;
 import static org.opensilk.common.core.rx.RxUtils.isSubscribed;
 
 /**

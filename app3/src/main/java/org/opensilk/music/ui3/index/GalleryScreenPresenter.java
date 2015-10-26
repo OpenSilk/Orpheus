@@ -27,7 +27,6 @@ import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.ActionBarMenuHandler;
 import org.opensilk.common.ui.mortar.ActionModePresenter;
-import org.opensilk.common.ui.mortar.ToolbarOwner;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 

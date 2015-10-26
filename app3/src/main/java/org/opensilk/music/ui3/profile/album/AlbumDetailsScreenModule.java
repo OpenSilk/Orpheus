@@ -37,13 +37,10 @@ import org.opensilk.music.ui3.common.ActivityRequestCodes;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
-import org.opensilk.music.ui3.common.OpenProfileItemClickListener;
-import org.opensilk.music.ui3.common.PlayAllItemClickListener;
 import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
-import org.opensilk.music.ui3.profile.ProfileScreen;
+import org.opensilk.music.ui3.common.PlayAllItemClickListener;
 import org.opensilk.music.ui3.profile.bio.BioScreen;
-import org.opensilk.music.ui3.profile.bio.BioScreenFragment;
 
 import java.util.Collections;
 import java.util.List;

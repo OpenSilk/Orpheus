@@ -19,7 +19,6 @@ package org.opensilk.music.ui3.main;
 
 import org.opensilk.common.core.dagger2.SubScreenScope;
 
-import dagger.Component;
 import dagger.Subcomponent;
 import rx.functions.Func2;
 

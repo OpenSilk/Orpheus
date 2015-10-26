@@ -40,11 +40,8 @@ import org.opensilk.music.model.Model;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import retrofit.http.HEAD;
 
 /**
  * Created by drew on 10/18/15.

@@ -17,6 +17,16 @@
 
 package org.opensilk.music.ui3.nowplaying;
 
+import android.content.res.Resources;
+import android.net.Uri;
+import android.support.v4.media.MediaDescriptionCompat;
+import android.support.v4.media.session.MediaSessionCompat.QueueItem;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
 import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.common.ui.recycler.DragSwipeViewHolder;
 import org.opensilk.common.ui.recycler.ItemClickSupport;
@@ -28,17 +38,6 @@ import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui.widget.PlayingIndicator;
-
-import android.content.res.Resources;
-import android.graphics.Color;
-import android.net.Uri;
-import android.support.v4.media.MediaDescriptionCompat;
-import android.support.v7.widget.RecyclerView;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.support.v4.media.session.MediaSessionCompat.QueueItem;
 
 import java.util.List;
 

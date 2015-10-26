@@ -17,16 +17,10 @@
 
 package org.opensilk.music.ui3;
 
-import org.opensilk.common.core.dagger2.ActivityScope;
 import org.opensilk.common.ui.mortar.ActivityResultsOwnerModule;
-import org.opensilk.common.ui.mortar.DrawerController;
-import org.opensilk.common.ui.mortar.DrawerListenerRegistrar;
-import org.opensilk.common.ui.mortar.DrawerOwner;
-import org.opensilk.common.ui.mortar.DrawerOwnerModule;
 import org.opensilk.common.ui.mortar.PauseAndResumeModule;
 
 import dagger.Module;
-import dagger.Provides;
 
 /**
  * Created by drew on 5/24/15.

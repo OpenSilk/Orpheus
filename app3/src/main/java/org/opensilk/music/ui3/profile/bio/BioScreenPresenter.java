@@ -25,8 +25,8 @@ import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.rx.RxUtils;
 import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.music.index.model.BioSummary;
-import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.library.client.TypedBundleableLoader;
+import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.model.Model;
 
 import java.util.ArrayList;

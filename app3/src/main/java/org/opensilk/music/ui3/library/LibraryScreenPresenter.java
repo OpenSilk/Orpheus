@@ -35,9 +35,9 @@ import org.opensilk.common.ui.util.ViewUtils;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryProviderInfo;
+import org.opensilk.music.library.client.LibraryProviderInfoLoader;
 import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.library.provider.LibraryUris;
-import org.opensilk.music.library.client.LibraryProviderInfoLoader;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
 

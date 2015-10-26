@@ -18,23 +18,11 @@
 package org.opensilk.music.ui3.profile;
 
 import android.content.Context;
-import android.support.v7.view.ActionMode;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.recycler.DragSwipeAdapterWrapper;
-import org.opensilk.common.ui.recycler.DragSwipeViewHolder;
-import org.opensilk.common.ui.recycler.SimpleItemTouchHelperCallback;
-import org.opensilk.music.R;
-import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleableRecyclerAdapter;
-import org.opensilk.music.ui3.common.UtilsCommon;
-
-import javax.inject.Inject;
 
 /**
  * Created by drew on 9/5/15.

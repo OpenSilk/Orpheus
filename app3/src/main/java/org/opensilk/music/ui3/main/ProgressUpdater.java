@@ -20,7 +20,6 @@ package org.opensilk.music.ui3.main;
 import android.os.SystemClock;
 import android.support.v4.media.session.PlaybackStateCompat;
 
-import org.apache.commons.lang3.tuple.Triple;
 import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.playback.PlaybackStateHelper;

@@ -19,7 +19,6 @@ package org.opensilk.music.ui3.profile;
 
 import android.content.Context;
 import android.os.Parcelable;
-import android.support.v4.app.Fragment;
 
 import org.opensilk.common.ui.mortarfragment.MortarFragment;
 
