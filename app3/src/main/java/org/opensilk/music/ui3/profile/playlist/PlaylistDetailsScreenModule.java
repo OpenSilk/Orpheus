@@ -94,6 +94,7 @@ public class PlaylistDetailsScreenModule {
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(false)
 //                .setWantsNumberedTracks(true)
+                .setAllowLongPressSelection(false)
                 .setItemClickListener(itemClickListener)
                 .setMenuConfig(menuConfig)
                 .setDefaultSortOrder(TrackSortOrder.PLAYORDER)

@@ -101,6 +101,7 @@ public class GenreDetailsScreenModule {
     ) {
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(true)
+                .setAllowLongPressSelection(false)
                 .setItemClickListener(itemClickListener)
                 .setMenuConfig(menuConfig)
                 .build();

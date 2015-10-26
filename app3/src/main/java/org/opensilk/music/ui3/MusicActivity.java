@@ -203,7 +203,9 @@ public abstract class MusicActivity extends MortarFragmentActivity
         switch (requestCode) {
             case ActivityRequestCodes.PLAYLIST_ADD: {
                 if (resultCode == RESULT_OK) {
-                    Playlist playlist = Playlist.BUNDLE_CREATOR.fromBundle(data.getBundleExtra("plist"));
+                    data.setExtrasClassLoader(MusicActivity.class.getClassLoader());
+                    Bundle b = data.getBundleExtra("plist");
+                    Playlist playlist = Playlist.BUNDLE_CREATOR.fromBundle(b);
                     mActivityResultsOwner.startActivityForResult(
                             ProfileActivity.makeIntent(this, new PlaylistDetailsScreen(playlist)),
                             ActivityRequestCodes.PROFILE, null);

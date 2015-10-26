@@ -109,6 +109,7 @@ public class ArtistDetailsScreenModule {
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(true)
                 .setItemClickListener(itemClickListener)
+                .setAllowLongPressSelection(false)
                 .setMenuConfig(menuConfig)
                 .build();
     }

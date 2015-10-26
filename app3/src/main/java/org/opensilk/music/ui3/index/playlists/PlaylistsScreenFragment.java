@@ -20,12 +20,12 @@ package org.opensilk.music.ui3.index.playlists;
 import android.content.Context;
 
 import org.opensilk.common.ui.mortar.Screen;
-import org.opensilk.music.ui3.common.BundleableFragment;
+import org.opensilk.common.ui.mortarfragment.MortarFragment;
 
 /**
  * Created by drew on 5/5/15.
  */
-public class PlaylistsScreenFragment extends BundleableFragment {
+public class PlaylistsScreenFragment extends MortarFragment {
     public static final String NAME = PlaylistsScreenFragment.class.getName();
 
     public static PlaylistsScreenFragment ni(Context context) {

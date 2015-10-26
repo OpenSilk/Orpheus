@@ -21,12 +21,12 @@ import android.content.Context;
 import android.os.Bundle;
 
 import org.opensilk.common.ui.mortar.Screen;
-import org.opensilk.music.ui3.common.BundleableFragment;
+import org.opensilk.common.ui.mortarfragment.MortarFragment;
 
 /**
  * Created by drew on 5/5/15.
  */
-public class ArtistDetailsScreenFragment extends BundleableFragment {
+public class ArtistDetailsScreenFragment extends MortarFragment {
     public static final String NAME = ArtistDetailsScreenFragment.class.getName();
 
     public static ArtistDetailsScreenFragment ni(Context context, ArtistDetailsScreen screen) {

@@ -54,6 +54,7 @@ import org.opensilk.music.ui3.common.MenuHandlerImpl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Named;
 
@@ -103,13 +104,32 @@ public class PlaylistChooseScreenModule {
         return new ItemClickListener() {
             @Override
             public void onItemClicked(final BundleablePresenter presenter, final Context context, final Model item) {
+                final Subscriber<Playlist> subscriber = new Subscriber<Playlist>() {
+                    @Override
+                    public void onCompleted() {
+                        //pass
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Toast.makeText(context, R.string.err_generic, Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent();
+                        activityResultsController.setResultAndFinish(Activity.RESULT_CANCELED, intent);
+                    }
+
+                    @Override
+                    public void onNext(Playlist playlist) {
+                        Intent intent = new Intent().putExtra("plist", playlist.toBundle());
+                        activityResultsController.setResultAndFinish(Activity.RESULT_OK, intent);
+                    }
+                };
                 final Subscription s;
                 if (screen.tracksUris == null) {
                     s = Observable.create(
                             new Observable.OnSubscribe<Integer>() {
                                 @Override
                                 public void call(Subscriber<? super Integer> subscriber) {
-                                    int count =presenter.getIndexClient().addToPlaylist(item.getUri(), screen.tracks);
+                                    int count = presenter.getIndexClient().addToPlaylist(item.getUri(), screen.tracks);
                                     if (!subscriber.isUnsubscribed()) {
                                         subscriber.onNext(count);
                                         subscriber.onCompleted();
@@ -117,25 +137,19 @@ public class PlaylistChooseScreenModule {
                                 }
                             })
                             .subscribeOn(Schedulers.computation())
-                            .subscribe(new Subscriber<Integer>() {
+                            .delay(1, TimeUnit.SECONDS)
+                            .map(new Func1<Integer, Playlist>() {
                                 @Override
-                                public void onCompleted() {
-                                    Intent intent = new Intent().putExtra("plist", ((Playlist) item).toBundle());
-                                    activityResultsController.setResultAndFinish(Activity.RESULT_OK, intent);
+                                public Playlist call(Integer integer) {
+                                    Playlist playlist = presenter.getIndexClient().getPlaylist(item.getUri());
+                                    if (playlist == null) {
+                                        playlist = (Playlist) item;
+                                    }
+                                    return playlist;
                                 }
-
-                                @Override
-                                public void onError(Throwable e) {
-                                    Toast.makeText(context, R.string.err_generic, Toast.LENGTH_SHORT).show();
-                                    Intent intent = new Intent();
-                                    activityResultsController.setResultAndFinish(Activity.RESULT_CANCELED, intent);
-                                }
-
-                                @Override
-                                public void onNext(Integer integer) {
-                                    //pass
-                                }
-                            });
+                            })
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(subscriber);
                 } else {
                     Observable<Observable<List<Track>>> loaderCreator = Observable.from(screen.tracksUris)
                             .map(new Func1<Uri, Observable<List<Track>>>() {
@@ -152,30 +166,31 @@ public class PlaylistChooseScreenModule {
                                 }
                             });
                     s = Observable.mergeDelayError(loaderCreator, 5)
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(new Subscriber<List<Track>>() {
+                            .subscribeOn(Schedulers.computation())
+                            .map(new Func1<List<Track>, Integer>() {
                                 @Override
-                                public void onCompleted() {
-                                    Intent intent = new Intent().putExtra("plist", ((Playlist)item).toBundle());
-                                    activityResultsController.setResultAndFinish(Activity.RESULT_OK, intent);
-                                }
-
-                                @Override
-                                public void onError(Throwable e) {
-                                    Toast.makeText(context, R.string.err_generic, Toast.LENGTH_SHORT).show();
-                                    Intent intent = new Intent();
-                                    activityResultsController.setResultAndFinish(Activity.RESULT_CANCELED, intent);
-                                }
-
-                                @Override
-                                public void onNext(List<Track> tracks) {
+                                public Integer call(List<Track> tracks) {
                                     List<Uri> uris = new ArrayList<Uri>(tracks.size());
                                     for (Track track : tracks) {
                                         uris.add(track.getUri());
                                     }
-                                    presenter.getIndexClient().addToPlaylist(item.getUri(), uris);
+                                    return presenter.getIndexClient().addToPlaylist(item.getUri(), uris);
                                 }
-                            });
+                            })
+                            .last()
+                            .delay(1, TimeUnit.SECONDS)
+                            .map(new Func1<Integer, Playlist>() {
+                                @Override
+                                public Playlist call(Integer integer) {
+                                    Playlist playlist = presenter.getIndexClient().getPlaylist(item.getUri());
+                                    if (playlist == null) {
+                                        playlist = (Playlist) item;
+                                    }
+                                    return playlist;
+                                }
+                            })
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(subscriber);
                 }
                 dialogPresenter.showDialog(new DialogFactory() {
                     @Override
