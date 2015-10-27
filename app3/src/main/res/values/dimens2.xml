@@ -11,6 +11,9 @@
     <!--bio screen-->
     <dimen name="bio_card_margin">16dp</dimen>
 
+    <!--profile-->
+    <dimen name="profile_fab_margin">16dp</dimen>
+
     <!--Widgets-->
     <dimen name="music_widget_large_min_width">250dp</dimen>
     <dimen name="music_widget_large_min_height">110dp</dimen>

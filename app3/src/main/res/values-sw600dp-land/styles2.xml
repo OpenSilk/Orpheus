@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (c) 2014 OpenSilk Productions LLC
+  ~ Copyright (c) 2015 OpenSilk Productions LLC
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -17,5 +17,24 @@
   -->
 
 <resources>
+    <!--profile-->
+    <style name="ProfileFab" parent="Widget.Design.FloatingActionButton">
+        <item name="android:src">@drawable/ic_play_white_24dp</item>
+        <item name="elevation">8dp</item>
+    </style>
 
+    <style name="ProfileCollapsingToolbar">
+        <item name="expandedTitleMarginStart">@dimen/profile_appbar_title_padding_left</item>
+        <item name="expandedTitleMarginEnd">64dp</item>
+        <item name="expandedTitleMarginBottom">@dimen/profile_appbar_title_padding_bottom</item>
+        <!--<item name="collapsedTitleTextAppearance">@style/TextAppearanceCollapsingToolbar</item>-->
+        <!--<item name="expandedTitleTextAppearance">@style/TextAppearanceCollapsingToolbar.Expanded</item>-->
+    </style>
+
+    <style name="ProfileRecycler" parent="mtrl.List">
+        <item name="android:layout_marginLeft">@dimen/profile_list_margin</item>
+        <item name="android:layout_marginRight">@dimen/profile_list_margin</item>
+        <item name="behavior_overlapTop">@dimen/profile_list_overlap</item>
+        <item name="android:background">?android:colorBackground</item>
+    </style>
 </resources>

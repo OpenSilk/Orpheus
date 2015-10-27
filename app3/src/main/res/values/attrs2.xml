@@ -20,7 +20,6 @@
         <attr name="controlsPrevStyle" format="reference"/>
         <attr name="controlsShuffleStyle" format="reference"/>
         <attr name="controlsRepeatStyle" format="reference"/>
-        <attr name="mainContentTopMargin" format="reference"/>
         <attr name="footerPlayStyle" format="reference"/>
     </declare-styleable>
 

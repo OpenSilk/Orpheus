@@ -18,13 +18,11 @@
 
 <resources>
     <style name="Theme.LightConfig" parent="Theme.LightOverlay">
-        <item name="mainContentTopMargin">?actionBarSize</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
     <style name="Theme.DarkConfig" parent="Theme.DarkOverlay">
-        <item name="mainContentTopMargin">?actionBarSize</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>

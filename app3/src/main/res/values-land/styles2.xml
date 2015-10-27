@@ -16,8 +16,33 @@
   -->
 
 <resources>
-    <!-- Settings -->
-    <style name="SettingsGridBase">
-        <item name="android:numColumns">2</item>
+    <!--now playing-->
+    <style name="NowPlayingSomething">
+        <item name="android:layout_alignParentStart">true</item>
+        <item name="android:layout_alignParentLeft">true</item>
+    </style>
+
+    <style name="NowPlayingControls">
+        <item name="android:layout_toEndOf">@id/now_playing_something</item>
+        <item name="android:layout_toRightOf">@id/now_playing_something</item>
+        <item name="android:layout_alignParentBottom">true</item>
+    </style>
+
+    <style name="NowPlayingProgress" parent="Base.Widget.AppCompat.ProgressBar.Horizontal">
+        <item name="android:layout_above">@id/now_playing_controls</item>
+        <item name="android:layout_toEndOf">@id/now_playing_something</item>
+        <item name="android:layout_toRightOf">@id/now_playing_something</item>
+    </style>
+
+    <style name="NowPlayingSubTitle">
+        <item name="android:layout_above">@id/now_playing_progress</item>
+        <item name="android:layout_toEndOf">@id/now_playing_something</item>
+        <item name="android:layout_toRightOf">@id/now_playing_something</item>
+    </style>
+
+    <style name="NowPlayingTitle">
+        <item name="android:layout_above">@id/now_playing_subtitle</item>
+        <item name="android:layout_toEndOf">@id/now_playing_something</item>
+        <item name="android:layout_toRightOf">@id/now_playing_something</item>
     </style>
 </resources>

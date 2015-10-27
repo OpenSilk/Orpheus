@@ -35,18 +35,6 @@
     <style name="GalleryTabs">
     </style>
 
-    <!-- Settings -->
-    <style name="SettingsGridBase">
-        <item name="android:numColumns">1</item>
-    </style>
-
-    <style name="SettingsGrid" parent="SettingsGridBase">
-        <item name="android:stretchMode">columnWidth</item>
-        <item name="android:verticalSpacing">8dp</item>
-        <item name="android:horizontalSpacing">8dp</item>
-        <item name="android:scrollbars">none</item>
-    </style>
-
     <!-- Tiles -->
 
     <style name="GalleryGridTile">
@@ -288,6 +276,38 @@
     <style name="ProfileFab" parent="Widget.Design.FloatingActionButton">
         <item name="android:src">@drawable/ic_play_white_24dp</item>
         <item name="elevation">8dp</item>
+    </style>
+
+    <style name="ProfileCollapsingToolbar">
+        <item name="expandedTitleMarginStart">36dp</item>
+        <item name="expandedTitleMarginEnd">64dp</item>
+        <!--<item name="collapsedTitleTextAppearance">@style/TextAppearanceCollapsingToolbar</item>-->
+        <!--<item name="expandedTitleTextAppearance">@style/TextAppearanceCollapsingToolbar.Expanded</item>-->
+    </style>
+
+    <style name="ProfileRecycler" parent="mtrl.List">
+
+    </style>
+
+    <!--now playing-->
+    <style name="NowPlayingSomething">
+        <item name="android:layout_alignParentTop">true</item>
+    </style>
+
+    <style name="NowPlayingControls">
+        <item name="android:layout_alignParentBottom">true</item>
+    </style>
+
+    <style name="NowPlayingProgress" parent="Base.Widget.AppCompat.ProgressBar.Horizontal">
+        <item name="android:layout_above">@id/now_playing_controls</item>
+    </style>
+
+    <style name="NowPlayingSubTitle">
+        <item name="android:layout_above">@id/now_playing_progress</item>
+    </style>
+
+    <style name="NowPlayingTitle">
+        <item name="android:layout_above">@id/now_playing_subtitle</item>
     </style>
 
 </resources>

@@ -50,7 +50,7 @@
                 android:id="@+id/now_playing_something"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_alignParentTop="true">
+                style="@style/NowPlayingSomething">
 
                 <org.opensilk.common.ui.widget.SquareImageView
                     android:id="@+id/now_playing_image"
@@ -65,8 +65,8 @@
                 android:id="@+id/now_playing_controls"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:gravity="center">
+                android:gravity="center"
+                style="@style/NowPlayingControls">
 
                 <ImageButton
                     android:id="@+id/now_playing_previous"
@@ -95,36 +95,35 @@
                 android:id="@+id/now_playing_progress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_above="@id/now_playing_controls"
                 android:layout_marginBottom="-4dp"
                 android:max="1000"
-                style="?android:progressBarStyleHorizontal"/>
+                style="@style/NowPlayingProgress"/>
 
             <TextView
                 android:id="@+id/now_playing_subtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_above="@id/now_playing_progress"
                 android:textAppearance="?android:textAppearanceMedium"
                 android:textSize="20sp"
                 android:ellipsize="marquee"
                 android:singleLine="true"
                 android:paddingLeft="16dp"
                 android:paddingRight="16dp"
-                tools:text="Subtitle"/>
+                tools:text="Subtitle"
+                style="@style/NowPlayingSubTitle"/>
 
             <TextView
                 android:id="@+id/now_playing_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_above="@id/now_playing_subtitle"
                 android:textAppearance="?android:textAppearanceLarge"
                 android:textSize="34sp"
                 android:ellipsize="marquee"
                 android:singleLine="true"
                 android:paddingLeft="16dp"
                 android:paddingRight="16dp"
-                tools:text="Title"/>
+                tools:text="Title"
+                style="@style/NowPlayingTitle"/>
 
         </RelativeLayout>
 
