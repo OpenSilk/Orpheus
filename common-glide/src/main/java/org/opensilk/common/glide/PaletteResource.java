@@ -35,7 +35,7 @@ public class PaletteResource implements Resource<Palette> {
 
     public static PaletteResource obtain(Bitmap bitmap) {
         final Palette palette = Palette.from(bitmap)
-                .maximumColorCount(24) //TODO allow configure
+                .maximumColorCount(32) //TODO allow configure
                 .generate(); //Compute heavy, must be on background thread
         return new PaletteResource(palette);
     }
