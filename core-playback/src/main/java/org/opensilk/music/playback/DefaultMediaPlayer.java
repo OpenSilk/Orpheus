@@ -23,6 +23,8 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.PowerManager;
 
+import org.opensilk.music.playback.renderer.IMediaPlayer;
+
 import java.io.IOException;
 import java.util.Map;
 

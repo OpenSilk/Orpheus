@@ -27,6 +27,7 @@ import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.playback.player.IPlayer;
+import org.opensilk.music.playback.renderer.IMediaPlayer;
 import org.opensilk.music.playback.service.PlaybackServiceK;
 import org.opensilk.music.playback.service.PlaybackServiceL;
 import org.opensilk.music.playback.service.PlaybackServiceScope;

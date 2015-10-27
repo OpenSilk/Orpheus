@@ -22,6 +22,8 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 
+import org.opensilk.music.playback.renderer.IMediaPlayer;
+
 import java.io.IOException;
 import java.util.Map;
 

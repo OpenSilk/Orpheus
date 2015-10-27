@@ -39,9 +39,8 @@ import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.artwork.service.ArtworkProviderHelper;
 import org.opensilk.music.index.client.IndexClient;
 import org.opensilk.music.model.Track;
-import org.opensilk.music.playback.AudioManagerHelper;
 import org.opensilk.music.playback.DefaultMediaPlayer;
-import org.opensilk.music.playback.IMediaPlayer;
+import org.opensilk.music.playback.renderer.IMediaPlayer;
 import org.opensilk.music.playback.MediaMetadataHelper;
 import org.opensilk.music.playback.NotificationHelper2;
 import org.opensilk.music.playback.Playback;
@@ -93,7 +92,6 @@ public class PlaybackService {
     private final Context mContext;
     private final NotificationHelper2 mNotificationHelper;
     private final DelayedShutdownHandler mDelayedShutdownHandler;
-    private final AudioManagerHelper mAudioManagerHelper;
     private final PlaybackQueue mQueue;
     private final PowerManager.WakeLock mWakeLock;
     private final ArtworkProviderHelper mArtworkProviderHelper;
@@ -133,7 +131,6 @@ public class PlaybackService {
             @ForApplication Context mContext,
             NotificationHelper2 mNotificationHelper,
             DelayedShutdownHandler mDelayedShutdownHandler,
-            AudioManagerHelper mAudioManagerHelper,
             PlaybackQueue mQueue,
             PowerManager.WakeLock mWakeLock,
             ArtworkProviderHelper mArtworkProviderHelper,
@@ -145,7 +142,6 @@ public class PlaybackService {
         this.mContext = mContext;
         this.mNotificationHelper = mNotificationHelper;
         this.mDelayedShutdownHandler = mDelayedShutdownHandler;
-        this.mAudioManagerHelper = mAudioManagerHelper;
         this.mQueue = mQueue;
         this.mWakeLock = mWakeLock;
         this.mArtworkProviderHelper = mArtworkProviderHelper;
@@ -179,7 +175,6 @@ public class PlaybackService {
 
         updatePlaybackState(null);
 
-        mAudioSessionId = mAudioManagerHelper.getAudioSessionId();
         mHandler.post(mLoadQueueRunnable);
     }
 
