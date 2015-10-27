@@ -104,6 +104,7 @@ public class NowPlayingScreenView extends RelativeLayout {
     String visualizerType = "none";
     int rendererColor = Color.argb(255, 222, 92, 143);
     int sessionId = 0;
+    boolean isPlaying;
 
     CompositeSubscription clicks;
 
@@ -269,6 +270,7 @@ public class NowPlayingScreenView extends RelativeLayout {
     }
 
     public void setPlaying(boolean playing) {
+        isPlaying = playing;
         if (playing) {
             if (visualizerView == null) {
                 initVisualizer();
@@ -420,10 +422,12 @@ public class NowPlayingScreenView extends RelativeLayout {
 
     final Palette.PaletteAsyncListener mListener = new Palette.PaletteAsyncListener() {
         @Override
+        @DebugLog
         public void onGenerated(Palette palette) {
             Palette.Swatch s1 = palette.getDarkVibrantSwatch();
             Palette.Swatch s2 = palette.getVibrantSwatch();
             if (s1 != null && s2 != null) {
+                Timber.d("Themeing view");
                 ViewBackgroundDrawableTarget.builder()
                         .into(getView())
                         .using(PaletteSwatchType.VIBRANT_DARK)
@@ -435,11 +439,19 @@ public class NowPlayingScreenView extends RelativeLayout {
                 getView().title.setTextColor(s2.getTitleTextColor());
                 getView().subTitle.setTextColor(s2.getBodyTextColor());
                 ThemeUtils.themeProgressBar2(getView().progress, s1.getRgb());
-                getView().reInitRenderer(s1.getRgb());
                 if (VersionUtils.hasLollipop()) {
                     themeStatusbar21(s1.getRgb());
                 }
+                final boolean playing = isPlaying;
+                getView().reInitRenderer(s1.getRgb());
+                getView().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        setPlaying(playing);
+                    }
+                }, 100);
             } else {
+                Timber.d("Resetting view theme");
                 int background = ThemeUtils.getThemeAttrColor(getView().getContext(),
                         android.R.attr.colorBackground);
                 getView().setBackgroundColor(background);
@@ -455,12 +467,19 @@ public class NowPlayingScreenView extends RelativeLayout {
                 int accent = ThemeUtils.getThemeAttrColor(getView().getContext(),
                         R.attr.colorAccent);
                 ThemeUtils.themeProgressBar2(getView().progress, accent);
-                getView().reInitRenderer(accent);
                 int primaryDark = ThemeUtils.getThemeAttrColor(getContext(),
                         R.attr.colorPrimaryDark);
                 if (VersionUtils.hasLollipop()) {
                     themeStatusbar21(primaryDark);
                 }
+                final boolean playing = isPlaying;
+                getView().reInitRenderer(accent);
+                getView().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        setPlaying(playing);
+                    }
+                }, 100);
             }
         }
     };

@@ -24,14 +24,14 @@
     android:layout_height="match_parent">
 
     <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
+        android:id="@id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?actionBarSize"
         android:background="@null"
         style="?toolbarStyle"/>
 
     <android.support.v7.widget.CardView
-        android:id="@+id/now_playing_card"
+        android:id="@id/now_playing_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/toolbar"
@@ -42,18 +42,21 @@
         android:layout_marginRight="24dp"
         android:layout_marginBottom="?actionBarSize">
 
-        <LinearLayout
+        <RelativeLayout
+            android:id="@id/card_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <org.opensilk.common.ui.widget.SquareFrameLayout
-                android:id="@+id/now_playing_something"
+                android:id="@id/now_playing_something"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true">
 
                 <org.opensilk.common.ui.widget.SquareImageView
-                    android:id="@+id/now_playing_image"
+                    android:id="@id/now_playing_image"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
@@ -62,71 +65,79 @@
             </org.opensilk.common.ui.widget.SquareFrameLayout>
 
             <LinearLayout
-                android:orientation="vertical"
+                android:id="@id/now_playing_controls"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="bottom">
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_toEndOf="@id/now_playing_something"
+                android:layout_toRightOf="@id/now_playing_something"
+                android:layout_alignParentBottom="true">
 
-                <TextView
-                    android:id="@+id/now_playing_title"
-                    android:layout_width="match_parent"
+                <ImageButton
+                    android:id="@id/now_playing_previous"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAppearance="?android:textAppearanceLarge"
-                    android:textSize="34sp"
-                    android:paddingLeft="16dp"
-                    android:paddingRight="16dp"
-                    tools:text="Title"/>
+                    tools:src="@drawable/ic_skip_previous_black_vector_36dp"
+                    style="?nowPlayingPrevStyle"/>
 
-                <TextView
-                    android:id="@+id/now_playing_subtitle"
-                    android:layout_width="match_parent"
+                <org.opensilk.common.ui.widget.ImageButtonCheckable
+                    android:id="@id/now_playing_playpause"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAppearance="?android:textAppearanceMedium"
-                    android:textSize="20sp"
-                    android:paddingLeft="16dp"
-                    android:paddingRight="16dp"
-                    tools:text="Subtitle"/>
+                    tools:src="@drawable/ic_play_black_vector_36dp"
+                    style="?nowPlayingPlayStyle"/>
 
-                <ProgressBar
-                    android:id="@+id/now_playing_progress"
-                    android:layout_width="match_parent"
+                <ImageButton
+                    android:id="@id/now_playing_next"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="-6dp"
-                    android:max="1000"
-                    style="?android:progressBarStyleHorizontal"/>
-
-                <LinearLayout
-                    android:id="@+id/now_playing_controls"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center">
-
-                    <ImageButton
-                        android:id="@+id/now_playing_previous"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:src="@drawable/ic_skip_previous_black_vector_36dp"
-                        style="?nowPlayingPrevStyle"/>
-
-                    <org.opensilk.common.ui.widget.ImageButtonCheckable
-                        android:id="@+id/now_playing_playpause"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:src="@drawable/ic_play_black_vector_36dp"
-                        style="?nowPlayingPlayStyle"/>
-
-                    <ImageButton
-                        android:id="@+id/now_playing_next"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:src="@drawable/ic_skip_next_black_vector_36dp"
-                        style="?nowPlayingNextStyle"/>
-
-                </LinearLayout>
+                    tools:src="@drawable/ic_skip_next_black_vector_36dp"
+                    style="?nowPlayingNextStyle"/>
 
             </LinearLayout>
 
-        </LinearLayout>
+            <ProgressBar
+                android:id="@id/now_playing_progress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/now_playing_controls"
+                android:layout_toEndOf="@id/now_playing_something"
+                android:layout_toRightOf="@id/now_playing_something"
+                android:layout_marginBottom="-4dp"
+                android:max="1000"
+                style="?android:progressBarStyleHorizontal"/>
+
+            <TextView
+                android:id="@id/now_playing_subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/now_playing_progress"
+                android:layout_toEndOf="@id/now_playing_something"
+                android:layout_toRightOf="@id/now_playing_something"
+                android:textAppearance="?android:textAppearanceMedium"
+                android:textSize="20sp"
+                android:ellipsize="marquee"
+                android:singleLine="true"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                tools:text="Subtitle"/>
+
+            <TextView
+                android:id="@id/now_playing_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/now_playing_subtitle"
+                android:layout_toEndOf="@id/now_playing_something"
+                android:layout_toRightOf="@id/now_playing_something"
+                android:textAppearance="?android:textAppearanceLarge"
+                android:textSize="34sp"
+                android:ellipsize="marquee"
+                android:singleLine="true"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                tools:text="Title"/>
+
+        </RelativeLayout>
 
     </android.support.v7.widget.CardView>
 
