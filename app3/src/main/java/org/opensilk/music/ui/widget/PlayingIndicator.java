@@ -60,7 +60,7 @@ public class PlayingIndicator extends ImageView {
 
     public PlayingIndicator(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setImageResource(R.drawable.now_playing_indicator);
+        setImageResource(R.drawable.now_playing_animated);
         mRotateDrawable = (RotateDrawable) getDrawable();
         if (!VersionUtils.hasLollipop()) {
             mRotateDrawable.setColorFilter(ThemeUtils.getColorAccent(getContext()), PorterDuff.Mode.SRC_IN);
