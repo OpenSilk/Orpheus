@@ -37,7 +37,7 @@
     <!-- Base theme all variations descend from -->
     <style name="Theme.LightBase" parent="Theme.LightConfig">
         <item name="toolbarStyle">@style/Toolbar.Dark.WhiteOverflow</item>
-        <item name="appBarTheme">@style/ThemeOverlay.AppCompat.Light</item>
+        <item name="appBarTheme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
     </style>
 
     <!-- Default theme -->
