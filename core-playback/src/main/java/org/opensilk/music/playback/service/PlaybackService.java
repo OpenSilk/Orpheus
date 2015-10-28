@@ -40,6 +40,7 @@ import org.opensilk.music.artwork.service.ArtworkProviderHelper;
 import org.opensilk.music.index.client.IndexClient;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.playback.DefaultMediaPlayer;
+import org.opensilk.music.playback.renderer.IMediaPlayer;
 import org.opensilk.music.playback.MediaMetadataHelper;
 import org.opensilk.music.playback.NotificationHelper2;
 import org.opensilk.music.playback.Playback;
@@ -48,7 +49,6 @@ import org.opensilk.music.playback.PlaybackConstants.CMD;
 import org.opensilk.music.playback.PlaybackConstants.EVENT;
 import org.opensilk.music.playback.PlaybackQueue;
 import org.opensilk.music.playback.PlaybackStateHelper;
-import org.opensilk.music.playback.renderer.IMediaPlayerFactory;
 import org.opensilk.music.playback.session.IMediaControllerProxy;
 import org.opensilk.music.playback.session.IMediaSessionProxy;
 
@@ -99,7 +99,6 @@ public class PlaybackService {
     private final IndexClient mIndexClient;
     private final Playback mPlayback;
     private final ArtworkProviderHelper mArtworkHelper;
-    private final DefaultMediaPlayer.Factory mDefaultMediaPlayerFactory;
 
     private HandlerThread mHandlerThread;
     private PlaybackServiceProxy mProxy;
@@ -138,8 +137,7 @@ public class PlaybackService {
             MediaSessionHolder mSessionHolder,
             IndexClient mIndexClient,
             Playback mPlayback,
-            ArtworkProviderHelper mArtworkHelper,
-            DefaultMediaPlayer.Factory mDefaultMediaPlayerFactory
+            ArtworkProviderHelper mArtworkHelper
     ) {
         this.mContext = mContext;
         this.mNotificationHelper = mNotificationHelper;
@@ -151,7 +149,6 @@ public class PlaybackService {
         this.mIndexClient = mIndexClient;
         this.mPlayback = mPlayback;
         this.mArtworkHelper = mArtworkHelper;
-        this.mDefaultMediaPlayerFactory = mDefaultMediaPlayerFactory;
     }
 
     //main thread
@@ -174,7 +171,6 @@ public class PlaybackService {
 
         mPlayback.setState(PlaybackStateCompat.STATE_NONE);
         mPlayback.setCallback(new PlaybackCallback());
-        mPlayback.setHandler(mHandler);
         mPlayback.start();
 
         updatePlaybackState(null);
@@ -295,7 +291,6 @@ public class PlaybackService {
         Timber.d("updatePlaybackState(%s) err=%s",
                 PlaybackStateHelper.stringifyState(state), error);
 
-        @SuppressWarnings("ResourceType")
         PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
                 .setActions(getAvailableActions());
 
@@ -327,7 +322,6 @@ public class PlaybackService {
             }
         }
 
-        //noinspection ResourceType
         stateBuilder.setState(state, position,
                 PlaybackStateHelper.PLAYBACK_SPEED, SystemClock.elapsedRealtime());
         if (VersionUtils.hasApi22()) {
@@ -516,8 +510,8 @@ public class PlaybackService {
         }
     }
 
-    IMediaPlayerFactory resolveMediaPlayer(Track track) {
-        return mDefaultMediaPlayerFactory;
+    IMediaPlayer.Factory resolveMediaPlayer(Track track) {
+        return new DefaultMediaPlayer.Factory();
     }
 
     @DebugLog

@@ -21,19 +21,12 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.os.IBinder;
 import android.os.PowerManager;
-import android.os.RemoteException;
 
-import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.music.playback.renderer.Headers;
 import org.opensilk.music.playback.renderer.IMediaPlayer;
-import org.opensilk.music.playback.renderer.IMediaPlayerCallback;
-import org.opensilk.music.playback.renderer.IMediaPlayerFactory;
 
 import java.io.IOException;
-
-import javax.inject.Inject;
+import java.util.Map;
 
 /**
  * Created by drew on 9/27/15.
@@ -41,32 +34,14 @@ import javax.inject.Inject;
 public class DefaultMediaPlayer implements IMediaPlayer, MediaPlayer.OnCompletionListener,
         MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnSeekCompleteListener {
 
-    public static class Factory implements IMediaPlayerFactory {
-        final Context context;
-
-        @Inject
-        public Factory(@ForApplication Context context) {
-            this.context = context;
-        }
-        @Override
-        public IMediaPlayer create() {
-            return new DefaultMediaPlayer(context);
-        }
-
-        @Override
-        public IBinder asBinder() {
-            throw new UnsupportedOperationException("Local process only");
-        }
-    }
-
     private MediaPlayer mMediaPlayer;
-    private IMediaPlayerCallback mCallback;
-    private int mErrorCount;
+    private Callback mCallback;
 
-    private final Context mContext;
-
-    public DefaultMediaPlayer(Context mContext) {
-        this.mContext = mContext;
+    public static class Factory implements IMediaPlayer.Factory {
+        @Override
+        public IMediaPlayer create(Context context) {
+            return new DefaultMediaPlayer();
+        }
     }
 
     void ensurePlayer() {
@@ -74,16 +49,13 @@ public class DefaultMediaPlayer implements IMediaPlayer, MediaPlayer.OnCompletio
             reset();
             release();
         }
-        mErrorCount = 0;
         mMediaPlayer = new MediaPlayer();
         mMediaPlayer.setOnPreparedListener(this);
         mMediaPlayer.setOnCompletionListener(this);
         mMediaPlayer.setOnErrorListener(this);
         mMediaPlayer.setOnSeekCompleteListener(this);
         if (mCallback != null) {
-            try {
-                mCallback.onAudioSessionId(this, mMediaPlayer.getAudioSessionId());
-            } catch (RemoteException ignored) {}
+            mCallback.onAudioSessionId(this, mMediaPlayer.getAudioSessionId());
         }
     }
 
@@ -98,16 +70,11 @@ public class DefaultMediaPlayer implements IMediaPlayer, MediaPlayer.OnCompletio
     }
 
     @Override
-    public boolean setDataSource(Uri uri, Headers headers) {
+    public void setDataSource(Context context, Uri uri, Map<String, String> headers) throws IOException {
         ensurePlayer();
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        mMediaPlayer.setWakeMode(mContext, PowerManager.PARTIAL_WAKE_LOCK);
-        try {
-            mMediaPlayer.setDataSource(mContext, uri, headers);
-            return true;
-        } catch (IOException e) {
-            return false;
-        }
+        mMediaPlayer.setWakeMode(context, PowerManager.PARTIAL_WAKE_LOCK);
+        mMediaPlayer.setDataSource(context, uri, headers);
     }
 
     @Override
@@ -136,7 +103,7 @@ public class DefaultMediaPlayer implements IMediaPlayer, MediaPlayer.OnCompletio
     }
 
     @Override
-    public void setCallback(IMediaPlayerCallback callback) {
+    public void setCallback(Callback callback) {
         mCallback = callback;
     }
 
@@ -156,11 +123,6 @@ public class DefaultMediaPlayer implements IMediaPlayer, MediaPlayer.OnCompletio
         return mMediaPlayer.getDuration();
     }
 
-    @Override
-    public IBinder asBinder() {
-        throw new UnsupportedOperationException("Local process only");
-    }
-
     boolean hasCallback() {
         return mCallback != null;
     }
@@ -168,70 +130,26 @@ public class DefaultMediaPlayer implements IMediaPlayer, MediaPlayer.OnCompletio
     @Override
     public void onCompletion(MediaPlayer mp) {
         if (hasCallback()) {
-            try {
-                mCallback.onCompletion(this);
-            } catch (RemoteException ignored){}
+            mCallback.onCompletion(this);
         }
     }
 
-    /**
-     * Called to indicate an error.
-     *
-     * @param mp      the MediaPlayer the error pertains to
-     * @param what    the type of error that has occurred:
-     * <ul>
-     * <li>{@link #MEDIA_ERROR_UNKNOWN}
-     * <li>{@link #MEDIA_ERROR_SERVER_DIED}
-     * </ul>
-     * @param extra an extra code, specific to the error. Typically
-     * implementation dependent.
-     * <ul>
-     * <li>{@link #MEDIA_ERROR_IO}
-     * <li>{@link #MEDIA_ERROR_MALFORMED}
-     * <li>{@link #MEDIA_ERROR_UNSUPPORTED}
-     * <li>{@link #MEDIA_ERROR_TIMED_OUT}
-     * <li><code>MEDIA_ERROR_SYSTEM (-2147483648)</code> - low-level system error.
-     * </ul>
-     * @return True if the method handled the error, false if it didn't.
-     * Returning false, or not having an OnErrorListener at all, will
-     * cause the OnCompletionListener to be called.
-     */
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
-        String msg;
-        switch (what) {
-            case MediaPlayer.MEDIA_ERROR_UNKNOWN:
-                msg = "MEDIA_ERROR_UNKNOWN";
-                break;
-            case MediaPlayer.MEDIA_ERROR_SERVER_DIED:
-                msg = "MEDIA_ERROR_SERVER_DIED";
-                break;
-            default:
-                msg = "Non standard error code " + what;
-        }
-        if (hasCallback()) {
-            try {
-                mCallback.onError(this, msg, extra);
-            } catch (RemoteException ignored) {}
-        }
-        return true;
+        return hasCallback() && mCallback.onError(this, what, extra);
     }
 
     @Override
     public void onPrepared(MediaPlayer mp) {
         if (hasCallback()) {
-            try {
-                mCallback.onPrepared(this);
-            } catch (RemoteException ignored) {}
+            mCallback.onPrepared(this);
         }
     }
 
     @Override
     public void onSeekComplete(MediaPlayer mp) {
         if (hasCallback()) {
-            try {
-                mCallback.onSeekComplete(this);
-            } catch (RemoteException ignored) {}
+            mCallback.onSeekComplete(this);
         }
     }
 }
