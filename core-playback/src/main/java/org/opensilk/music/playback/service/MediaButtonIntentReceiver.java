@@ -35,9 +35,6 @@ public class MediaButtonIntentReceiver extends WakefulBroadcastReceiver {
         final String intentAction = intent.getAction();
         if (Intent.ACTION_MEDIA_BUTTON.equals(intentAction)) {
             startService(context, copyIntent(context, intent));
-            if (isOrderedBroadcast()) {
-                abortBroadcast();
-            }
         }
     }
 
