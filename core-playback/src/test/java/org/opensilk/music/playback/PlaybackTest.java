@@ -17,22 +17,14 @@
 
 package org.opensilk.music.playback;
 
-import android.content.Context;
 import android.media.AudioManager;
 import android.media.session.PlaybackState;
-import android.net.wifi.WifiManager;
 import android.os.Build;
-import android.os.Handler;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.stubbing.Answer;
-import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.music.index.*;
-import org.opensilk.music.playback.service.PlaybackService;
-import org.opensilk.music.playback.service.PlaybackServiceModule;
-import org.robolectric.Robolectric;
+import org.opensilk.music.playback.renderer.LocalRenderer;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -52,18 +44,18 @@ import static org.mockito.Mockito.*;
 public class PlaybackTest {
 
     AudioManager mAudiomanager;
-    Playback mPlayback;
-    Playback.Callback mCallback;
+    LocalRenderer mPlayback;
+    LocalRenderer.Callback mCallback;
 
     @Before
     public void setup() {
         mAudiomanager = mock(AudioManager.class);
-        mPlayback = new Playback(
+        mPlayback = new LocalRenderer(
                 RuntimeEnvironment.application,
                 mAudiomanager
         );
         mPlayback.setState(PlaybackState.STATE_NONE);
-        mCallback = mock(Playback.Callback.class);
+        mCallback = mock(LocalRenderer.Callback.class);
         mPlayback.setCallback(mCallback);
     }
 

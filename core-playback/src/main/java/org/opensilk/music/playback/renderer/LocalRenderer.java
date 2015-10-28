@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opensilk.music.playback;
+package org.opensilk.music.playback.renderer;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -26,8 +26,8 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.model.Track;
-import org.opensilk.music.playback.player.IPlayer;
-import org.opensilk.music.playback.renderer.IMediaPlayer;
+import org.opensilk.music.playback.PlaybackConstants;
+import org.opensilk.music.playback.PlaybackStateHelper;
 import org.opensilk.music.playback.service.PlaybackServiceK;
 import org.opensilk.music.playback.service.PlaybackServiceL;
 import org.opensilk.music.playback.service.PlaybackServiceScope;
@@ -43,7 +43,7 @@ import timber.log.Timber;
  * A class that implements local media playback using {@link android.media.MediaPlayer}
  */
 @PlaybackServiceScope
-public class Playback implements AudioManager.OnAudioFocusChangeListener, IMediaPlayer.Callback {
+public class LocalRenderer implements AudioManager.OnAudioFocusChangeListener, IMediaPlayer.Callback {
 
     // The volume we set the media player to when we lose audio focus, but are
     // allowed to reduce the volume instead of stopping playback.
@@ -97,7 +97,7 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
     };
 
     @Inject
-    public Playback(
+    public LocalRenderer(
             @ForApplication Context context,
             AudioManager audioManager
     ) {

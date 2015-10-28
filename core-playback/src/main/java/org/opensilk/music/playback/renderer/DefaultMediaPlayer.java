@@ -15,15 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.playback;
+package org.opensilk.music.playback.renderer;
 
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.PowerManager;
-
-import org.opensilk.music.playback.renderer.IMediaPlayer;
 
 import java.io.IOException;
 import java.util.Map;

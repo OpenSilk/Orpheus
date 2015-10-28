@@ -39,11 +39,11 @@ import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.artwork.service.ArtworkProviderHelper;
 import org.opensilk.music.index.client.IndexClient;
 import org.opensilk.music.model.Track;
-import org.opensilk.music.playback.DefaultMediaPlayer;
+import org.opensilk.music.playback.renderer.DefaultMediaPlayer;
 import org.opensilk.music.playback.renderer.IMediaPlayer;
 import org.opensilk.music.playback.MediaMetadataHelper;
 import org.opensilk.music.playback.NotificationHelper2;
-import org.opensilk.music.playback.Playback;
+import org.opensilk.music.playback.renderer.LocalRenderer;
 import org.opensilk.music.playback.PlaybackConstants;
 import org.opensilk.music.playback.PlaybackConstants.CMD;
 import org.opensilk.music.playback.PlaybackConstants.EVENT;
@@ -97,7 +97,7 @@ public class PlaybackService {
     private final ArtworkProviderHelper mArtworkProviderHelper;
     private final MediaSessionHolder mSessionHolder;
     private final IndexClient mIndexClient;
-    private final Playback mPlayback;
+    private final LocalRenderer mPlayback;
     private final ArtworkProviderHelper mArtworkHelper;
 
     private HandlerThread mHandlerThread;
@@ -136,7 +136,7 @@ public class PlaybackService {
             ArtworkProviderHelper mArtworkProviderHelper,
             MediaSessionHolder mSessionHolder,
             IndexClient mIndexClient,
-            Playback mPlayback,
+            LocalRenderer mPlayback,
             ArtworkProviderHelper mArtworkHelper
     ) {
         this.mContext = mContext;
@@ -966,7 +966,7 @@ public class PlaybackService {
 
     }
 
-    class PlaybackCallback implements Playback.Callback {
+    class PlaybackCallback implements LocalRenderer.Callback {
         @Override
         @DebugLog
         public void onPlaybackStatusChanged(int state) {
