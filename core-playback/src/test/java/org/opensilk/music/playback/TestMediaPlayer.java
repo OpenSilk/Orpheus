@@ -21,8 +21,12 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.RemoteException;
 
+import org.opensilk.music.playback.renderer.Headers;
 import org.opensilk.music.playback.renderer.IMediaPlayer;
+import org.opensilk.music.playback.renderer.IMediaPlayerCallback;
+import org.opensilk.music.playback.renderer.IMediaPlayerFactory;
 
 import java.io.IOException;
 import java.util.Map;
@@ -30,11 +34,11 @@ import java.util.Map;
 /**
  * Created by drew on 9/30/15.
  */
-public class TestMediaPlayer implements IMediaPlayer {
+public class TestMediaPlayer extends IMediaPlayer.Stub {
 
-    public static class Factory implements IMediaPlayer.Factory {
+    public static class Factory extends IMediaPlayerFactory.Stub {
         @Override
-        public IMediaPlayer create(Context context) {
+        public IMediaPlayer create() {
             return new TestMediaPlayer();
         }
     }
@@ -45,7 +49,7 @@ public class TestMediaPlayer implements IMediaPlayer {
         myHandler = new Handler(Looper.myLooper());
     }
 
-    Callback mCallback;
+    IMediaPlayerCallback mCallback;
     boolean isPlaying;
 
     @Override
@@ -59,8 +63,8 @@ public class TestMediaPlayer implements IMediaPlayer {
     }
 
     @Override
-    public void setDataSource(Context context, Uri uri, Map<String, String> headers) throws IOException {
-
+    public boolean setDataSource(Uri uri, Headers headers) {
+        return false;
     }
 
     @Override
@@ -68,7 +72,9 @@ public class TestMediaPlayer implements IMediaPlayer {
         myHandler.post(new Runnable() {
             @Override
             public void run() {
-                mCallback.onPrepared(TestMediaPlayer.this);
+                try {
+                    mCallback.onPrepared(TestMediaPlayer.this);
+                } catch (RemoteException e) {}
             }
         });
     }
@@ -83,7 +89,9 @@ public class TestMediaPlayer implements IMediaPlayer {
         myHandler.post(new Runnable() {
             @Override
             public void run() {
-                mCallback.onSeekComplete(TestMediaPlayer.this);
+                try {
+                    mCallback.onSeekComplete(TestMediaPlayer.this);
+                } catch (RemoteException e) {}
             }
         });
     }
@@ -99,7 +107,7 @@ public class TestMediaPlayer implements IMediaPlayer {
     }
 
     @Override
-    public void setCallback(Callback callback) {
+    public void setCallback(IMediaPlayerCallback callback) {
         mCallback = callback;
     }
 

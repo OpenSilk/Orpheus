@@ -21,13 +21,19 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.RemoteException;
 import android.support.v4.media.session.PlaybackStateCompat;
 
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.util.VersionUtils;
+import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
-import org.opensilk.music.playback.player.IPlayer;
+import org.opensilk.music.playback.renderer.Headers;
 import org.opensilk.music.playback.renderer.IMediaPlayer;
+import org.opensilk.music.playback.renderer.IMediaPlayerCallback;
+import org.opensilk.music.playback.renderer.IMediaPlayerFactory;
 import org.opensilk.music.playback.service.PlaybackServiceK;
 import org.opensilk.music.playback.service.PlaybackServiceL;
 import org.opensilk.music.playback.service.PlaybackServiceScope;
@@ -43,7 +49,7 @@ import timber.log.Timber;
  * A class that implements local media playback using {@link android.media.MediaPlayer}
  */
 @PlaybackServiceScope
-public class Playback implements AudioManager.OnAudioFocusChangeListener, IMediaPlayer.Callback {
+public class Playback implements AudioManager.OnAudioFocusChangeListener {
 
     // The volume we set the media player to when we lose audio focus, but are
     // allowed to reduce the volume instead of stopping playback.
@@ -72,6 +78,7 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
     private boolean mPlayerPrepared;
     private boolean mNextPlayerPrepared;
     private int mNextAudioSessionId;
+    private Handler mHandler;
 
     private final IntentFilter mAudioNoisyIntentFilter =
             new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
@@ -105,6 +112,10 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
         this.mAudioManager = audioManager;
     }
 
+    public void setHandler(Handler mHandler) {
+        this.mHandler = mHandler;
+    }
+
     public void start() {
     }
 
@@ -133,19 +144,31 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
     }
 
     public boolean isPlaying() {
-        return mPlayOnFocusGain || (hasPlayer() && mMediaPlayer.isPlaying());
+        try {
+            return mPlayOnFocusGain || (hasPlayer() && mMediaPlayer.isPlaying());
+        } catch (RemoteException e) {
+            return false;
+        }
     }
 
     public long getCurrentStreamPosition() {
-        //we don't actually seek to the saved position until playback starts
-        //so we only ask the player where it is if we are playing
-        return (hasPlayer() && PlaybackStateHelper.isPlaying(mState)) ?
-                mMediaPlayer.getCurrentPosition() : mCurrentPosition;
+        try {
+            //we don't actually seek to the saved position until playback starts
+            //so we only ask the player where it is if we are playing
+            return (hasPlayer() && PlaybackStateHelper.isPlaying(mState)) ?
+                    mMediaPlayer.getCurrentPosition() : mCurrentPosition;
+        } catch (RemoteException e) {
+            return mCurrentPosition;
+        }
     }
 
     public long getDuration() {
-        return (hasPlayer() && mPlayerPrepared) ?
-                mMediaPlayer.getDuration() : PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN;
+        try {
+            return (hasPlayer() && mPlayerPrepared) ?
+                    mMediaPlayer.getDuration() : PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN;
+        } catch (RemoteException e) {
+            return PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN;
+        }
     }
 
     public void prepareForTrack() {
@@ -158,30 +181,33 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
     }
 
     @DebugLog
-    public void loadTrack(Track.Res item, IMediaPlayer.Factory factory) {
+    public void loadTrack(Track.Res item, IMediaPlayerFactory factory) {
         if (mState != PlaybackStateCompat.STATE_CONNECTING) {
             throw  new IllegalStateException("Must call prepareForTrack() first");
         }
         try {
-            mMediaPlayer = factory.create(mContext);
-            mMediaPlayer.setCallback(this);
+            mMediaPlayer = factory.create();
+            mMediaPlayer.setCallback(mMediaPlayerCallbackStub);
 
             mState = PlaybackStateCompat.STATE_BUFFERING;
 
-            mMediaPlayer.setDataSource(mContext, item.getUri(), item.getHeaders());
+            if (mMediaPlayer.setDataSource(item.getUri(), new Headers(item.getHeaders()))) {
+                // Starts preparing the media player in the background. When
+                // it's done, it will call our OnPreparedListener (that is,
+                // the onPrepared() method on this class, since we set the
+                // listener to 'this'). Until the media player is prepared,
+                // we *cannot* call start() on it!
+                mMediaPlayer.prepareAsync();
 
-            // Starts preparing the media player in the background. When
-            // it's done, it will call our OnPreparedListener (that is,
-            // the onPrepared() method on this class, since we set the
-            // listener to 'this'). Until the media player is prepared,
-            // we *cannot* call start() on it!
-            mMediaPlayer.prepareAsync();
-
-            if (mCallback != null) {
-                mCallback.onPlaybackStatusChanged(mState);
+                if (mCallback != null) {
+                    mCallback.onPlaybackStatusChanged(mState);
+                }
+            } else {
+                if (mCallback != null) {
+                    mCallback.onErrorOpenCurrentFailed("Player failed to load the track");
+                }
             }
-
-        } catch (IOException ex) {
+        } catch (RemoteException ex) {
             Timber.e(ex, "Exception loading track");
             if (mCallback != null) {
                 mCallback.onErrorOpenCurrentFailed(ex.getMessage());
@@ -194,7 +220,7 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
     }
 
     @DebugLog
-    public void loadNextTrack(Track.Res item, IMediaPlayer.Factory factory) {
+    public void loadNextTrack(Track.Res item, IMediaPlayerFactory factory) {
         if (!hasPlayer()) {
             throw new IllegalStateException("called loadNextTrack with no current track");
         }
@@ -202,19 +228,23 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
             throw new IllegalStateException("Must call prepareForNextTrack() first");
         }
         try {
-            mNextMediaPlayer = factory.create(mContext);
-            mNextMediaPlayer.setCallback(this);
+            mNextMediaPlayer = factory.create();
+            mNextMediaPlayer.setCallback(mMediaPlayerCallbackStub);
 
-            mNextMediaPlayer.setDataSource(mContext, item.getUri(), item.getHeaders());
+            if (mNextMediaPlayer.setDataSource(item.getUri(), new Headers(item.getHeaders()))) {
+                // Starts preparing the media player in the background. When
+                // it's done, it will call our OnPreparedListener (that is,
+                // the onPrepared() method on this class, since we set the
+                // listener to 'this'). Until the media player is prepared,
+                // we *cannot* call start() on it!
+                mNextMediaPlayer.prepareAsync();
+            } else {
+                if (mCallback != null) {
+                    mCallback.onErrorOpenNextFailed("Player failed to load the track");
+                }
+            }
 
-            // Starts preparing the media player in the background. When
-            // it's done, it will call our OnPreparedListener (that is,
-            // the onPrepared() method on this class, since we set the
-            // listener to 'this'). Until the media player is prepared,
-            // we *cannot* call start() on it!
-            mNextMediaPlayer.prepareAsync();
-
-        } catch (IOException ex) {
+        } catch (RemoteException ex) {
             Timber.e(ex, "Exception loading next track");
             if (mCallback != null) {
                 mCallback.onErrorOpenNextFailed(ex.getMessage());
@@ -267,11 +297,13 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
 
     public void pause() {
         if (mState == PlaybackStateCompat.STATE_PLAYING) {
-            // Pause media player and cancel the 'foreground service' state.
-            if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
-                mMediaPlayer.pause();
-                mCurrentPosition = mMediaPlayer.getCurrentPosition();
-            }
+            try {
+                // Pause media player and cancel the 'foreground service' state.
+                if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+                    mMediaPlayer.pause();
+                    mCurrentPosition = mMediaPlayer.getCurrentPosition();
+                }
+            } catch (RemoteException ignored) {}
         }
         // while paused, retain the MediaPlayer but give up audio focus
         giveUpAudioFocus();
@@ -289,12 +321,19 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
             // If we do not have a current media player, simply update the current position
             mCurrentPosition = position;
         } else {
-            if (mMediaPlayer.isPlaying()) {
-                mState = PlaybackStateCompat.STATE_BUFFERING;
-            }
-            mMediaPlayer.seekTo(position);
-            if (mCallback != null) {
-                mCallback.onPlaybackStatusChanged(mState);
+            try {
+                if (mMediaPlayer.isPlaying()) {
+                    mState = PlaybackStateCompat.STATE_BUFFERING;
+                }
+                mMediaPlayer.seekTo(position);
+                if (mCallback != null) {
+                    mCallback.onPlaybackStatusChanged(mState);
+                }
+            } catch (RemoteException e) {
+                mState = PlaybackStateCompat.STATE_ERROR;
+                if (mCallback != null) {
+                    mCallback.onError("Player died");
+                }
             }
         }
     }
@@ -346,29 +385,36 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
             // If we don't have audio focus and can't duck, we have to pause,
             pause();
         } else {  // we have audio focus:
-            if (mAudioFocus == AUDIO_NO_FOCUS_CAN_DUCK) {
-                if (hasPlayer()) {
-                    mMediaPlayer.setVolume(VOLUME_DUCK, VOLUME_DUCK); // we'll be relatively quiet
-                }
-            } else {
-                if (hasPlayer()) {
-                    mMediaPlayer.setVolume(VOLUME_NORMAL, VOLUME_NORMAL); // we can be loud again
-                } // else do something for remote client.
-            }
-            // If we were playing when we lost focus, we need to resume playing.
-            if (mPlayOnFocusGain) {
-                if (hasPlayer() && !mMediaPlayer.isPlaying()) {
-                    if (mCurrentPosition == mMediaPlayer.getCurrentPosition()) {
-                        mMediaPlayer.start();
-                        mState = PlaybackStateCompat.STATE_PLAYING;
-                    } else {
-                        Timber.d("configMediaPlayerState startMediaPlayer. " +
-                                        "seeking to %s", mCurrentPosition);
-                        mMediaPlayer.seekTo(mCurrentPosition);
-                        mState = PlaybackStateCompat.STATE_BUFFERING;
+            try {
+                if (mAudioFocus == AUDIO_NO_FOCUS_CAN_DUCK) {
+                    if (hasPlayer()) {
+                        mMediaPlayer.setVolume(VOLUME_DUCK, VOLUME_DUCK); // we'll be relatively quiet
                     }
+                } else {
+                    if (hasPlayer()) {
+                        mMediaPlayer.setVolume(VOLUME_NORMAL, VOLUME_NORMAL); // we can be loud again
+                    } // else do something for remote client.
                 }
-                mPlayOnFocusGain = false;
+                // If we were playing when we lost focus, we need to resume playing.
+                if (mPlayOnFocusGain) {
+                    if (hasPlayer() && !mMediaPlayer.isPlaying()) {
+                        if (mCurrentPosition == mMediaPlayer.getCurrentPosition()) {
+                            mMediaPlayer.start();
+                            mState = PlaybackStateCompat.STATE_PLAYING;
+                        } else {
+                            Timber.d("configMediaPlayerState startMediaPlayer. " +
+                                    "seeking to %s", mCurrentPosition);
+                            mMediaPlayer.seekTo(mCurrentPosition);
+                            mState = PlaybackStateCompat.STATE_BUFFERING;
+                        }
+                    }
+                    mPlayOnFocusGain = false;
+                }
+            } catch (RemoteException e) {
+                mState = PlaybackStateCompat.STATE_ERROR;
+                if (mCallback != null) {
+                    mCallback.onError("Player died");
+                }
             }
         }
         if (mCallback != null) {
@@ -413,17 +459,23 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
      *
      * @see android.media.MediaPlayer.OnSeekCompleteListener
      */
-    @Override
     @DebugLog
     public void onSeekComplete(IMediaPlayer player) {
         if (player == mMediaPlayer) {
-            mCurrentPosition = player.getCurrentPosition();
-            if (mState == PlaybackStateCompat.STATE_BUFFERING) {
-                mMediaPlayer.start();
-                mState = PlaybackStateCompat.STATE_PLAYING;
-            }
-            if (mCallback != null) {
-                mCallback.onPlaybackStatusChanged(mState);
+            try {
+                mCurrentPosition = player.getCurrentPosition();
+                if (mState == PlaybackStateCompat.STATE_BUFFERING) {
+                    mMediaPlayer.start();
+                    mState = PlaybackStateCompat.STATE_PLAYING;
+                }
+                if (mCallback != null) {
+                    mCallback.onPlaybackStatusChanged(mState);
+                }
+            } catch (RemoteException e) {
+                mState = PlaybackStateCompat.STATE_ERROR;
+                if (mCallback != null) {
+                    mCallback.onError("Player died");
+                }
             }
         }
     }
@@ -433,7 +485,6 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
      *
      * @see android.media.MediaPlayer.OnCompletionListener
      */
-    @Override
     @DebugLog
     public void onCompletion(IMediaPlayer player) {
         if (player == mMediaPlayer) {
@@ -455,7 +506,6 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
      *
      * @see android.media.MediaPlayer.OnPreparedListener
      */
-    @Override
     @DebugLog
     public void onPrepared(IMediaPlayer player) {
         if (player == mMediaPlayer) {
@@ -482,19 +532,17 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
      *
      * @see android.media.MediaPlayer.OnErrorListener
      */
-    @Override
     @DebugLog
-    public boolean onError(IMediaPlayer mp, int what, int extra) {
-        Timber.d("Media player error: what=" + what + ", extra=" + extra);
+    public boolean onError(IMediaPlayer mp, String msg, int extra) {
+        Timber.d("Media player error: " + msg + ", extra=" + extra);
         stop(false);
         mCurrentPosition = 0;
         if (mCallback != null) {
-            mCallback.onError("MediaPlayer error " + what + " (" + extra + ")");
+            mCallback.onError("MediaPlayer error: '" + msg + "' (" + extra + ")");
         }
         return true; // true indicates we handled the error
     }
 
-    @Override
     @DebugLog
     public void onAudioSessionId(IMediaPlayer mp, int audioSessionId) {
         if (mp == mMediaPlayer) {
@@ -512,8 +560,10 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
     private void releaseMediaPlayer(boolean andNext) {
         // stop and release the Media Player, if it's available
         if (mMediaPlayer != null) {
-            mMediaPlayer.reset();
-            mMediaPlayer.release();
+            try {
+                mMediaPlayer.reset();
+                mMediaPlayer.release();
+            } catch (RemoteException ignored) {}
             mMediaPlayer = null;
             mPlayerPrepared = false;
         }
@@ -524,8 +574,10 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
 
     private void releaseNextMediaPlayer() {
         if (mNextMediaPlayer != null) {
-            mNextMediaPlayer.reset();
-            mNextMediaPlayer.release();
+            try {
+                mNextMediaPlayer.reset();
+                mNextMediaPlayer.release();
+            } catch (RemoteException ignored) {}
             mNextMediaPlayer = null;
             mNextPlayerPrepared = false;
             mNextAudioSessionId = 0;
@@ -549,6 +601,78 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
         }
     }
 
+    private final IMediaPlayerCallback.Stub mMediaPlayerCallbackStub = new IMediaPlayerCallback.Stub() {
+        @Override
+        public void onSeekComplete(final IMediaPlayer mp) throws RemoteException {
+            if (mHandler == null || Looper.myLooper() == mHandler.getLooper()) {
+                Playback.this.onSeekComplete(mp);
+            } else {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Playback.this.onSeekComplete(mp);
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void onCompletion(final IMediaPlayer mp) throws RemoteException {
+            if (mHandler == null || Looper.myLooper() == mHandler.getLooper()) {
+                Playback.this.onCompletion(mp);
+            } else {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Playback.this.onCompletion(mp);
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void onPrepared(final IMediaPlayer mp) throws RemoteException {
+            if (mHandler == null || Looper.myLooper() == mHandler.getLooper()) {
+                Playback.this.onPrepared(mp);
+            } else {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Playback.this.onPrepared(mp);
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void onError(final IMediaPlayer mp, final String msg, final int extra) throws RemoteException {
+            if (mHandler == null || Looper.myLooper() == mHandler.getLooper()) {
+                Playback.this.onError(mp, msg, extra);
+            } else {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Playback.this.onError(mp, msg, extra);
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void onAudioSessionId(final IMediaPlayer mp, final int audioSessionId) throws RemoteException {
+            if (mHandler == null || Looper.myLooper() == mHandler.getLooper()) {
+                Playback.this.onAudioSessionId(mp, audioSessionId);
+            } else {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Playback.this.onAudioSessionId(mp, audioSessionId);
+                    }
+                });
+            }
+        }
+    };
+
     public interface Callback {
         /**
          * on Playback status changed
@@ -558,7 +682,7 @@ public class Playback implements AudioManager.OnAudioFocusChangeListener, IMedia
         void onPlaybackStatusChanged(int state);
 
         /**
-         * player has started playing track loaded with {@link IPlayer#setNextDataSource(Uri)}
+         * player has started playing track loaded with setNextTrack
          */
         void onWentToNext();
 
