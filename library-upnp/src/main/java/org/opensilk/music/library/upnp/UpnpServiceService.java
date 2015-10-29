@@ -17,31 +17,36 @@
 
 package org.opensilk.music.library.upnp;
 
-import android.content.Context;
+import android.app.Service;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.os.IBinder;
 
 import org.apache.commons.lang3.StringUtils;
+import org.fourthline.cling.UpnpService;
 import org.fourthline.cling.UpnpServiceConfiguration;
+import org.fourthline.cling.UpnpServiceImpl;
+import org.fourthline.cling.android.AndroidRouter;
 import org.fourthline.cling.android.AndroidUpnpService;
 import org.fourthline.cling.android.AndroidUpnpServiceConfiguration;
-import org.fourthline.cling.android.AndroidUpnpServiceImpl;
+import org.fourthline.cling.controlpoint.ControlPoint;
 import org.fourthline.cling.model.UnsupportedDataException;
 import org.fourthline.cling.model.action.ActionInvocation;
 import org.fourthline.cling.model.message.control.ActionResponseMessage;
 import org.fourthline.cling.model.meta.RemoteDevice;
 import org.fourthline.cling.model.types.ServiceType;
 import org.fourthline.cling.model.types.UDAServiceType;
+import org.fourthline.cling.protocol.ProtocolFactory;
 import org.fourthline.cling.registry.DefaultRegistryListener;
 import org.fourthline.cling.registry.Registry;
-import org.fourthline.cling.transport.impl.DatagramIOImpl;
+import org.fourthline.cling.transport.Router;
 import org.fourthline.cling.transport.impl.RecoveringSOAPActionProcessorImpl;
-import org.fourthline.cling.transport.spi.DatagramIO;
 import org.fourthline.cling.transport.spi.SOAPActionProcessor;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.upnp.provider.UpnpCDUris;
 
+import java.lang.ref.WeakReference;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -54,9 +59,11 @@ import rx.schedulers.Schedulers;
 /**
  * Created by drew on 6/8/14.
  */
-public class UpnpServiceService extends AndroidUpnpServiceImpl {
+public class UpnpServiceService extends Service {
 
-    String mUpnpCDAuthority;
+    private UpnpService mUpnpService;
+    private Binder mBinder;
+
     UpnpRegistryListener mRegistryListener;
     volatile Scheduler.Worker mShutdownWorker;
     boolean mStarted;
@@ -78,15 +85,19 @@ public class UpnpServiceService extends AndroidUpnpServiceImpl {
 //            Logger.getLogger("org.fourthline.cling.transport.spi.SOAPActionProcessor").setLevel(Level.FINER);
 
         UpnpLibraryComponent cmp = DaggerService.getDaggerComponent(getApplicationContext());
-        mUpnpCDAuthority = cmp.unpnAuthority();
-        mRegistryListener = new UpnpRegistryListener();
-        binder.getRegistry().addListener(mRegistryListener);
-//        binder.getControlPoint().search();
+        String upnpCDAuthority = cmp.unpnAuthority();
+
+        mUpnpService = makeUpnpService();
+        mBinder = new Binder(mUpnpService);
+
+        mRegistryListener = new UpnpRegistryListener(upnpCDAuthority, getContentResolver());
+        mUpnpService.getRegistry().addListener(mRegistryListener);
     }
 
     @Override
     public void onDestroy() {
-        binder.getRegistry().removeListener(mRegistryListener);
+        mUpnpService.getRegistry().removeListener(mRegistryListener);
+        mUpnpService.shutdown();
         super.onDestroy();
         cancelServiceShutdown();
     }
@@ -94,13 +105,13 @@ public class UpnpServiceService extends AndroidUpnpServiceImpl {
     @Override
     @DebugLog
     public IBinder onBind(Intent intent) {
-        final Registry registry = binder.getRegistry();
+        final Registry registry = mUpnpService.getRegistry();
         if (registry.isPaused()) {
             registry.resume();
         }
         cancelServiceShutdown();
         pokeService();
-        return super.onBind(intent);
+        return mBinder;
     }
 
     @Override
@@ -116,19 +127,32 @@ public class UpnpServiceService extends AndroidUpnpServiceImpl {
         return START_NOT_STICKY;
     }
 
-    @Override
-    protected UpnpServiceConfiguration createConfiguration() {
-        return new AndroidUpnpServiceConfiguration() {
+    private UpnpService makeUpnpService() {
+        return new UpnpServiceImpl(createConfiguration()) {
+            @Override protected Router createRouter(ProtocolFactory protocolFactory, Registry registry) {
+                return new AndroidRouter(getConfiguration(), protocolFactory,  UpnpServiceService.this);
+            }
+            @Override public synchronized void shutdown() {
+                // First have to remove the receiver, so Android won't complain about it leaking
+                // when the main UI thread exits.
+                ((AndroidRouter)getRouter()).unregisterBroadcastReceiver();
 
-            @Override
-            public ServiceType[] getExclusiveServiceTypes() {
+                // Now we can concurrently run the Cling shutdown code, without occupying the
+                // Android main UI thread. This will complete probably after the main UI thread
+                // is done.
+                super.shutdown(true);
+            }
+        };
+    }
+
+    private UpnpServiceConfiguration createConfiguration() {
+        return new AndroidUpnpServiceConfiguration() {
+            @Override  public ServiceType[] getExclusiveServiceTypes() {
                 return new ServiceType[] {
                         new UDAServiceType("ContentDirectory", 1)
                 };
             }
-
-            @Override
-            protected SOAPActionProcessor createSOAPActionProcessor() {
+            @Override protected SOAPActionProcessor createSOAPActionProcessor() {
                 return new RecoveringSOAPActionProcessorImpl() {
                     @Override
                     @DebugLog
@@ -144,29 +168,10 @@ public class UpnpServiceService extends AndroidUpnpServiceImpl {
                     }
                 };
             }
-
-            @Override
-            public int getRegistryMaintenanceIntervalMillis() {
+            @Override public int getRegistryMaintenanceIntervalMillis() {
                 return 2500;//10000;
             }
         };
-    }
-
-    class UpnpRegistryListener extends DefaultRegistryListener {
-        @Override public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
-//            notifyUri(device.getIdentity().getUdn().getIdentifierString());
-        }
-        @Override public void remoteDeviceUpdated(Registry registry, RemoteDevice device) {
-//            notifyUri(device.getIdentity().getUdn().getIdentifierString());
-        }
-        @Override public void remoteDeviceRemoved(Registry registry, RemoteDevice device) {
-            notifyUri(device.getIdentity().getUdn().getIdentifierString());
-        }
-        @DebugLog
-        void notifyUri(String deviceId) {
-            getContentResolver().notifyChange(UpnpCDUris.makeUri(mUpnpCDAuthority, deviceId, null), null);
-            getContentResolver().notifyChange(LibraryUris.rootUri(mUpnpCDAuthority), null);
-        }
     }
 
     private void pokeService() {
@@ -189,7 +194,7 @@ public class UpnpServiceService extends AndroidUpnpServiceImpl {
         mShutdownWorker.schedule(new Action0() {
             @Override
             public void call() {
-                AndroidUpnpService service = binder;
+                AndroidUpnpService service = mBinder;
                 if (!service.getRegistry().isPaused()) {
                     service.getRegistry().pause();
                 }
@@ -201,5 +206,47 @@ public class UpnpServiceService extends AndroidUpnpServiceImpl {
                 stopSelf();
             }
         }, 20, TimeUnit.MINUTES);
+    }
+
+    static class UpnpRegistryListener extends DefaultRegistryListener {
+        final String mUpnpCDAuthority;
+        final ContentResolver mContentResolver;
+        public UpnpRegistryListener(String mUpnpCDAuthority, ContentResolver mContentResolver) {
+            this.mUpnpCDAuthority = mUpnpCDAuthority;
+            this.mContentResolver = mContentResolver;
+        }
+        @Override public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
+//            notifyUri(device.getIdentity().getUdn().getIdentifierString());
+        }
+        @Override public void remoteDeviceUpdated(Registry registry, RemoteDevice device) {
+//            notifyUri(device.getIdentity().getUdn().getIdentifierString());
+        }
+        @Override public void remoteDeviceRemoved(Registry registry, RemoteDevice device) {
+            notifyUri(device.getIdentity().getUdn().getIdentifierString());
+        }
+        @DebugLog
+        void notifyUri(String deviceId) {
+            mContentResolver.notifyChange(UpnpCDUris.makeUri(mUpnpCDAuthority, deviceId, null), null);
+            mContentResolver.notifyChange(LibraryUris.rootUri(mUpnpCDAuthority), null);
+        }
+    }
+
+    static class Binder extends android.os.Binder implements AndroidUpnpService {
+        final WeakReference<UpnpService> mUpnpService;
+        public Binder(UpnpService mUpnpService) {
+            this.mUpnpService = new WeakReference<UpnpService>(mUpnpService);
+        }
+        public UpnpService get() {
+            return mUpnpService.get();
+        }
+        public UpnpServiceConfiguration getConfiguration() {
+            return mUpnpService.get().getConfiguration();
+        }
+        public Registry getRegistry() {
+            return mUpnpService.get().getRegistry();
+        }
+        public ControlPoint getControlPoint() {
+            return mUpnpService.get().getControlPoint();
+        }
     }
 }
