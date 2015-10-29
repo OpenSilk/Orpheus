@@ -17,6 +17,7 @@
 
 package org.opensilk.music.playback.control;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
@@ -26,6 +27,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.RatingCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -35,12 +37,12 @@ import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.playback.PlaybackConstants;
+import org.opensilk.music.playback.PlaybackConstants.ACTION;
 import org.opensilk.music.playback.PlaybackConstants.CMD;
 import org.opensilk.music.playback.service.PlaybackServiceK;
 import org.opensilk.music.playback.service.PlaybackServiceL;
 import org.opensilk.music.playback.session.IMediaControllerProxy;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -192,19 +194,19 @@ public class PlaybackController {
      */
 
     public void playorPause() {
-        sendCustomAction(CMD.TOGGLE_PLAYBACK, null);
+        sendCustomAction(ACTION.TOGGLE_PLAYBACK, null);
     }
 
     public void cycleRepeateMode() {
-        sendCustomAction(CMD.CYCLE_REPEAT, null);
+        sendCustomAction(ACTION.CYCLE_REPEAT, null);
     }
 
     public void shuffleQueue() {
-        sendCustomAction(CMD.TOGGLE_SHUFFLE_MODE, null);
+        sendCustomAction(ACTION.TOGGLE_SHUFFLE_MODE, null);
     }
 
     public void enqueueAll(List<Uri> queue, int where) {
-        sendCustomAction(CMD.ENQUEUE, BundleHelper.b().putList(clampList(queue, 0)).putInt(where).get());
+        sendCustomAction(ACTION.ENQUEUE, BundleHelper.b().putList(clampList(queue, 0)).putInt(where).get());
     }
 
     public void enqueueAllNext(List<Uri> list) {
@@ -216,31 +218,50 @@ public class PlaybackController {
     }
 
     public void playAll(List<Uri> list, int startpos) {
-        sendCustomAction(CMD.PLAY_ALL, BundleHelper.b().putList(clampList(list, startpos)).putInt(startpos).get());
+        sendCustomAction(ACTION.PLAY_ALL, BundleHelper.b().putList(clampList(list, startpos)).putInt(startpos).get());
     }
 
     public void removeQueueItem(Uri uri) {
-        sendCustomAction(CMD.REMOVE_QUEUE_ITEM, BundleHelper.b().putUri(uri).get());
+        sendCustomAction(ACTION.REMOVE_QUEUE_ITEM, BundleHelper.b().putUri(uri).get());
     }
 
     public void removeQueueItemAt(int pos) {
-        sendCustomAction(CMD.REMOVE_QUEUE_ITEM_AT, BundleHelper.b().putInt(pos).get());
+        sendCustomAction(ACTION.REMOVE_QUEUE_ITEM_AT, BundleHelper.b().putInt(pos).get());
     }
 
     public void clearQueue() {
-        sendCustomAction(CMD.CLEAR_QUEUE, null);
+        sendCustomAction(ACTION.CLEAR_QUEUE, null);
     }
 
     public void moveQueueItemTo(Uri uri, int newPos) {
-        sendCustomAction(CMD.MOVE_QUEUE_ITEM_TO, BundleHelper.b().putUri(uri).putInt(newPos).get());
+        sendCustomAction(ACTION.MOVE_QUEUE_ITEM_TO, BundleHelper.b().putUri(uri).putInt(newPos).get());
     }
 
     public void moveQueueItem(int from, int to) {
-        sendCustomAction(CMD.MOVE_QUEUE_ITEM, BundleHelper.b().putInt(from).putInt2(to).get());
+        sendCustomAction(ACTION.MOVE_QUEUE_ITEM, BundleHelper.b().putInt(from).putInt2(to).get());
     }
 
     public void moveQueueItemToNext(int pos) {
-        sendCustomAction(CMD.MOVE_QUEUE_ITEM_TO_NEXT, BundleHelper.b().putInt(pos).get());
+        sendCustomAction(ACTION.MOVE_QUEUE_ITEM_TO_NEXT, BundleHelper.b().putInt(pos).get());
+    }
+
+    public void switchToNewRenderer(@Nullable ComponentName componentName) {
+        if (hasController()) {
+            mImpl.getMediaController().sendCommand(CMD.SWITCH_TO_NEW_RENDERER,
+                    BundleHelper.b().putParcleable(componentName).get(), null);
+        }
+    }
+
+    public void getCurrentRenderer(final Action1<ComponentName> onNext) {
+        if (hasController()) {
+            mImpl.getMediaController().sendCommand(CMD.GET_CURRENT_RENDERER, null,
+                    new ResultReceiver(mCallbackHandler) {
+                        @Override
+                        protected void onReceiveResult(int resultCode, Bundle resultData) {
+                            onNext.call(BundleHelper.<ComponentName>getParcelable(resultData));
+                        }
+                    });
+        }
     }
 
     /*

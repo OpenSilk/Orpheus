@@ -19,9 +19,13 @@ package org.opensilk.music.playback.service;
 
 import android.app.Service;
 import android.content.ComponentCallbacks2;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Bitmap;
+import android.media.MediaRouter;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.os.*;
@@ -39,12 +43,12 @@ import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.artwork.service.ArtworkProviderHelper;
 import org.opensilk.music.index.client.IndexClient;
 import org.opensilk.music.model.Track;
-import org.opensilk.music.playback.renderer.DefaultMediaPlayer;
-import org.opensilk.music.playback.renderer.IMediaPlayer;
 import org.opensilk.music.playback.MediaMetadataHelper;
 import org.opensilk.music.playback.NotificationHelper2;
+import org.opensilk.music.playback.renderer.IMusicRenderer;
 import org.opensilk.music.playback.renderer.LocalRenderer;
 import org.opensilk.music.playback.PlaybackConstants;
+import org.opensilk.music.playback.PlaybackConstants.ACTION;
 import org.opensilk.music.playback.PlaybackConstants.CMD;
 import org.opensilk.music.playback.PlaybackConstants.EVENT;
 import org.opensilk.music.playback.PlaybackQueue;
@@ -52,7 +56,10 @@ import org.opensilk.music.playback.PlaybackStateHelper;
 import org.opensilk.music.playback.session.IMediaControllerProxy;
 import org.opensilk.music.playback.session.IMediaSessionProxy;
 
+import java.io.Closeable;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.inject.Inject;
 
@@ -97,11 +104,14 @@ public class PlaybackService {
     private final ArtworkProviderHelper mArtworkProviderHelper;
     private final MediaSessionHolder mSessionHolder;
     private final IndexClient mIndexClient;
-    private final LocalRenderer mPlayback;
+    private final LocalRenderer mLocalRenderer;
     private final ArtworkProviderHelper mArtworkHelper;
 
     private HandlerThread mHandlerThread;
     private PlaybackServiceProxy mProxy;
+    private RendererServiceConnection mRendererConnection;
+    private volatile IMusicRenderer mPlayback;
+
 
     int mAudioSessionId;
     private Handler mHandler;
@@ -136,7 +146,7 @@ public class PlaybackService {
             ArtworkProviderHelper mArtworkProviderHelper,
             MediaSessionHolder mSessionHolder,
             IndexClient mIndexClient,
-            LocalRenderer mPlayback,
+            LocalRenderer mLocalRenderer,
             ArtworkProviderHelper mArtworkHelper
     ) {
         this.mContext = mContext;
@@ -147,7 +157,7 @@ public class PlaybackService {
         this.mArtworkProviderHelper = mArtworkProviderHelper;
         this.mSessionHolder = mSessionHolder;
         this.mIndexClient = mIndexClient;
-        this.mPlayback = mPlayback;
+        this.mLocalRenderer = mLocalRenderer;
         this.mArtworkHelper = mArtworkHelper;
     }
 
@@ -169,9 +179,7 @@ public class PlaybackService {
         mSessionHolder.setCallback(new MediaSessionCallback(), mHandler);
         proxy.setSessionToken(mSessionHolder.getSessionToken());
 
-        mPlayback.setState(PlaybackStateCompat.STATE_NONE);
-        mPlayback.setCallback(new PlaybackCallback());
-        mPlayback.start();
+        setupLocalRenderer();
 
         updatePlaybackState(null);
 
@@ -200,6 +208,9 @@ public class PlaybackService {
         mDelayedShutdownHandler.cancelDelayedShutdown();
 
         mPlayback.stop(false);
+
+        releaseRendererConnection();
+
         mSessionHolder.release();
 
         mHandler.removeCallbacksAndMessages(null);
@@ -266,7 +277,7 @@ public class PlaybackService {
         } else if (CMDPREVIOUS.equals(command) || PREVIOUS_ACTION.equals(action)) {
             controls.skipToPrevious();
         } else if (CMDTOGGLEPAUSE.equals(command) || TOGGLEPAUSE_ACTION.equals(action)) {
-            controls.sendCustomAction(CMD.TOGGLE_PLAYBACK, null);
+            controls.sendCustomAction(ACTION.TOGGLE_PLAYBACK, null);
         } else if (CMDPAUSE.equals(command) || PAUSE_ACTION.equals(action)) {
             controls.pause();
         } else if (CMDPLAY.equals(command)) {
@@ -274,9 +285,9 @@ public class PlaybackService {
         } else if (CMDSTOP.equals(command) || STOP_ACTION.equals(action)) {
             controls.stop();
         } else if (REPEAT_ACTION.equals(action)) {
-            controls.sendCustomAction(CMD.CYCLE_REPEAT, null);
+            controls.sendCustomAction(ACTION.CYCLE_REPEAT, null);
         } else if (SHUFFLE_ACTION.equals(action)) {
-            controls.sendCustomAction(CMD.TOGGLE_SHUFFLE_MODE, null);
+            controls.sendCustomAction(ACTION.TOGGLE_SHUFFLE_MODE, null);
         }
     }
 
@@ -286,6 +297,7 @@ public class PlaybackService {
     }
 
     //handler thread
+    @SuppressWarnings("ResourceType")
     void updatePlaybackState(String error, boolean fromChecker) {
         int state = mPlayback.getState();
         Timber.d("updatePlaybackState(%s) err=%s",
@@ -510,8 +522,51 @@ public class PlaybackService {
         }
     }
 
-    IMediaPlayer.Factory resolveMediaPlayer(Track track) {
-        return new DefaultMediaPlayer.Factory();
+    private void releaseRendererConnection() {
+        if (mRendererConnection != null) {
+            mRendererConnection.close();
+            mRendererConnection = null;
+        }
+    }
+
+    //handler thread / main thread
+    void setupLocalRenderer() {
+        if (mPlayback != null) {
+            mPlayback.stop(false);
+        }
+        releaseRendererConnection();
+        mPlayback = mLocalRenderer;
+        initPlayback();
+    }
+
+    //handler thread
+    void setupRemoteRenderer(@NonNull ComponentName componentName) {
+        try {
+            if (mPlayback != null) {
+                mPlayback.stop(false);
+                mPlayback = null;
+            }
+            releaseRendererConnection();
+            mRendererConnection = bindRendererService(componentName);
+            mPlayback = mRendererConnection.getService();
+            initPlayback();
+        } catch (InterruptedException e) {
+            Timber.e(e, "setupRemoteRenderer");
+            mPlayback = null;
+            mRendererConnection = null;
+            setupLocalRenderer();
+        }
+    }
+
+    void initPlayback() {
+        mPlayback.setState(PlaybackStateCompat.STATE_NONE);
+        mPlayback.setCallback(new PlaybackCallback());
+        mPlayback.start();
+        if (mPlayback.isRemotePlayback()) {
+            mSessionHolder.setPlaybackToRemote(mPlayback.getVolumeProvider());
+        } else {
+            mSessionHolder.setPlaybackToLocal();
+        }
     }
 
     @DebugLog
@@ -523,7 +578,7 @@ public class PlaybackService {
         if (uri == null) {
             throw new IllegalStateException("Current uri is null for pos " + mQueue.getCurrentPos());
         }
-        if (mCurrentTrack != null && mCurrentTrack.getUri().equals(uri) && mPlayback.hasPlayer()) {
+        if (mCurrentTrack != null && mCurrentTrack.getUri().equals(uri) && mPlayback.hasCurrent()) {
             Timber.e("Current track is up to date");
             if (mPlayWhenReady && !mPlayback.isPlaying()) {
                 mPlayWhenReady = false;
@@ -549,21 +604,26 @@ public class PlaybackService {
                     }
                     @Override public void onNext(Track track) {
                         mCurrentTrack = track;
-                        mPlayback.loadTrack(track.getResources().get(0),
-                                resolveMediaPlayer(track));
-                        if (mQueueReloaded) {
-                            mQueueReloaded = false;
-                            long seek = mIndexClient.getLastSeekPosition();
-                            if (seek > 0) {
-                                mPlayback.seekTo(seek);
+                        if (mPlayback.loadTrack(track.toBundle())) {
+                            if (mQueueReloaded) {
+                                mQueueReloaded = false;
+                                long seek = mIndexClient.getLastSeekPosition();
+                                if (seek > 0) {
+                                    mPlayback.seekTo(seek);
+                                }
                             }
+                            if (mPlayWhenReady) {
+                                mPlayWhenReady = false;
+                                mPlayback.play();
+                            }
+                            updateMeta();
+                            setNextTrack();
+                        } else {
+                            Timber.e("Player rejected track %s ... moving to next", track.getUri());
+                            mQueueReloaded = false;
+                            //will call into onCurrentPosChanged
+                            mQueue.remove(mQueue.getCurrentPos());
                         }
-                        if (mPlayWhenReady) {
-                            mPlayWhenReady = false;
-                            mPlayback.play();
-                        }
-                        updateMeta();
-                        setNextTrack();
                     }
                 });
     }
@@ -601,8 +661,11 @@ public class PlaybackService {
                     }
                     @Override public void onNext(Track track) {
                         mNextTrack = track;
-                        mPlayback.loadNextTrack(track.getResources().get(0),
-                                resolveMediaPlayer(track));
+                        if (!mPlayback.loadNextTrack(track.toBundle())) {
+                            Timber.e("Player rejected track %s ... skipping", track.getUri());
+                            //will call into onQueueChanged
+                            mQueue.remove(mQueue.getNextPos());
+                        }
                     }
                 });
     }
@@ -635,6 +698,36 @@ public class PlaybackService {
                         cb.send(0, reply);
                     } else if (mAudioSessionId != 0) {
                         mSessionHolder.sendSessionEvent(EVENT.NEW_AUDIO_SESSION_ID, reply);
+                    }
+                    break;
+                }
+                case CMD.SWITCH_TO_NEW_RENDERER: {
+                    ComponentName cn = BundleHelper.getParcelable(args);
+                    boolean playing = mPlayback.isPlaying();
+                    onPause();
+                    if (cn != null) {
+                        setupRemoteRenderer(cn);
+                    } else {
+                        setupLocalRenderer();
+                    }
+                    if (mQueueReady) {
+                        if (mQueue.notEmpty()) {
+                            mPlayWhenReady = playing;
+                            setTrack();
+                        } //else ?? TODO
+                    } else {
+                        mPlayWhenReady = playing;
+                    }
+                    break;
+                }
+                case CMD.GET_CURRENT_RENDERER: {
+                    if (cb != null) {
+                        BundleHelper.Builder bob = BundleHelper.b();
+                        if (mRendererConnection != null) {
+                            cb.send(0, bob.putParcleable(mRendererConnection.getComponent()).get());
+                        } else {
+                            cb.send(0, bob.get());
+                        }
                     }
                     break;
                 }
@@ -752,21 +845,21 @@ public class PlaybackService {
         @DebugLog
         public void onCustomAction(@NonNull String action, Bundle extras) {
             switch (action) {
-                case CMD.CYCLE_REPEAT: {
+                case ACTION.CYCLE_REPEAT: {
                     mQueue.toggleRepeat();
                     mSessionHolder.sendSessionEvent(EVENT.REPEAT_CHANGED,
                             BundleHelper.b().putInt(mQueue.getRepeatMode()).get());
                     updatePlaybackState(null);
                     break;
                 }
-                case CMD.TOGGLE_SHUFFLE_MODE: {
+                case ACTION.TOGGLE_SHUFFLE_MODE: {
                     mQueue.toggleShuffle();
                     mSessionHolder.sendSessionEvent(EVENT.QUEUE_SHUFFLED,
                             BundleHelper.b().putInt(mQueue.getShuffleMode()).get());
                     updatePlaybackState(null);
                     break;
                 }
-                case CMD.ENQUEUE: {
+                case ACTION.ENQUEUE: {
                     int where = BundleHelper.getInt(extras);
                     List<Uri> list = BundleHelper.getList(extras);
                     if (where == PlaybackConstants.ENQUEUE_LAST) {
@@ -776,7 +869,7 @@ public class PlaybackService {
                     }
                     break;
                 }
-                case CMD.ENQUEUE_TRACKS_FROM: {
+                case ACTION.ENQUEUE_TRACKS_FROM: {
                     Uri uri = BundleHelper.getUri(extras);
                     String sort = BundleHelper.getString(extras);
                     final int where = BundleHelper.getInt(extras);
@@ -804,7 +897,7 @@ public class PlaybackService {
                             });
                     break;
                 }
-                case CMD.PLAY_ALL: {
+                case ACTION.PLAY_ALL: {
                     List<Uri> list = BundleHelper.getList(extras);
                     int startpos = BundleHelper.getInt(extras);
                     if (!list.equals(mQueue.get())) {
@@ -822,7 +915,7 @@ public class PlaybackService {
                     } //else no change, ignore
                     break;
                 }
-                case CMD.PLAY_TRACKS_FROM: {
+                case ACTION.PLAY_TRACKS_FROM: {
                     Uri uri = BundleHelper.getUri(extras);
                     String sort = BundleHelper.getString(extras);
                     final int startpos = BundleHelper.getInt(extras);
@@ -848,38 +941,38 @@ public class PlaybackService {
                             });
                     break;
                 }
-                case CMD.REMOVE_QUEUE_ITEM: {
+                case ACTION.REMOVE_QUEUE_ITEM: {
                     Uri uri = BundleHelper.getUri(extras);
                     mQueue.remove(uri);
                     break;
                 }
-                case CMD.REMOVE_QUEUE_ITEM_AT: {
+                case ACTION.REMOVE_QUEUE_ITEM_AT: {
                     int pos = BundleHelper.getInt(extras);
                     mQueue.remove(pos);
                     break;
                 }
-                case CMD.CLEAR_QUEUE: {
+                case ACTION.CLEAR_QUEUE: {
                     mQueue.clear();
                     break;
                 }
-                case CMD.MOVE_QUEUE_ITEM_TO: {
+                case ACTION.MOVE_QUEUE_ITEM_TO: {
                     Uri uri = BundleHelper.getUri(extras);
                     int pos = BundleHelper.getInt(extras);
                     mQueue.moveItem(uri, pos);
                     break;
                 }
-                case CMD.MOVE_QUEUE_ITEM: {
+                case ACTION.MOVE_QUEUE_ITEM: {
                     int from = BundleHelper.getInt(extras);
                     int to = BundleHelper.getInt2(extras);
                     mQueue.moveItem(from, to);
                     break;
                 }
-                case CMD.MOVE_QUEUE_ITEM_TO_NEXT: {
+                case ACTION.MOVE_QUEUE_ITEM_TO_NEXT: {
                     int pos = BundleHelper.getInt(extras);
                     mQueue.moveItem(pos, mQueue.getNextPos());
                     break;
                 }
-                case CMD.TOGGLE_PLAYBACK: {
+                case ACTION.TOGGLE_PLAYBACK: {
                     if (mPlayback.isPlaying() || mPlayWhenReady) {
                         onPause();
                     } else {
@@ -966,59 +1059,92 @@ public class PlaybackService {
 
     }
 
-    class PlaybackCallback implements LocalRenderer.Callback {
+    class PlaybackCallback implements IMusicRenderer.Callback {
         @Override
         @DebugLog
-        public void onPlaybackStatusChanged(int state) {
-            updatePlaybackState(null);
+        public void onPlaybackStatusChanged(final int state) {
+            if (Looper.myLooper() == getHandler().getLooper()) {
+                updatePlaybackState(null);
+            } else {
+                getHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        PlaybackCallback.this.onPlaybackStatusChanged(state);
+                    }
+                });
+            }
         }
 
         @Override
         @DebugLog
         public void onCompletion() {
-            mPlayWhenReady = false;
-            if (mQueue.notEmpty()) {
-                //we've finished the list, go back to start
-                mQueue.goToItem(0);
-                updatePlaybackState(null);
+            if (Looper.myLooper() == getHandler().getLooper()) {
+                mPlayWhenReady = false;
+                if (mQueue.notEmpty()) {
+                    //we've finished the list, go back to start
+                    mQueue.goToItem(0);
+                    updatePlaybackState(null);
+                } else {
+                    handleStop();
+                }
             } else {
-                handleStop();
+                getHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        PlaybackCallback.this.onCompletion();
+                    }
+                });
             }
         }
 
         @Override
         @DebugLog
         public void onWentToNext() {
-            //will call into moveToNext
-            mQueue.moveToNext();
+            if (Looper.myLooper() == getHandler().getLooper()) {
+                //will call into moveToNext
+                mQueue.moveToNext();
+            } else {
+                getHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        PlaybackCallback.this.onWentToNext();
+                    }
+                });
+            }
         }
 
         @Override
         @DebugLog
-        public void onErrorOpenCurrentFailed(String msg) {
-            //will call into onCurrentPosChanged
-            mQueue.remove(mQueue.getCurrentPos());
+        public void onError(final String error) {
+            if (Looper.myLooper() == getHandler().getLooper()) {
+                updatePlaybackState(error);
+                handleStop();
+                //TODO better handle
+            } else {
+                getHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        PlaybackCallback.this.onError(error);
+                    }
+                });
+            }
         }
 
         @Override
-        @DebugLog
-        public void onErrorOpenNextFailed(String msg) {
-            //will call into onQueueChanged
-            mQueue.remove(mQueue.getNextPos());
-        }
-
-        @Override
-        @DebugLog
-        public void onError(String error) {
-            updatePlaybackState(error);
-        }
-
-        @Override
-        public void onAudioSessionId(int audioSessionId) {
-            mAudioSessionId = audioSessionId;
-            applyAudioEffects();
-            mSessionHolder.sendSessionEvent(EVENT.NEW_AUDIO_SESSION_ID,
-                    BundleHelper.b().putInt(audioSessionId).get());
+        public void onAudioSessionId(final int audioSessionId) {
+            if (Looper.myLooper() == getHandler().getLooper()) {
+                mAudioSessionId = audioSessionId;
+                applyAudioEffects();
+                mSessionHolder.sendSessionEvent(EVENT.NEW_AUDIO_SESSION_ID,
+                        BundleHelper.b().putInt(audioSessionId).get());
+            } else {
+                getHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        PlaybackCallback.this.onAudioSessionId(audioSessionId);
+                    }
+                });
+            }
         }
     }
 
@@ -1037,5 +1163,66 @@ public class PlaybackService {
             updatePlaybackState(null, true);
         }
     };
+
+    static final class RendererServiceConnection implements Closeable {
+        private final Context context;
+        private final ServiceConnection serviceConnection;
+        private final IMusicRenderer service;
+        private final ComponentName componentName;
+        private RendererServiceConnection(
+                Context context,
+                ServiceConnection serviceConnection,
+                IMusicRenderer service,
+                ComponentName componentName
+        ) {
+            this.context = new ContextWrapper(context);
+            this.serviceConnection = serviceConnection;
+            this.service = service;
+            this.componentName = componentName;
+        }
+        @Override public void close() {
+            context.unbindService(serviceConnection);
+        }
+        public IMusicRenderer getService() {
+            return service;
+        }
+        public ComponentName getComponent() {
+            return componentName;
+        }
+    }
+
+    RendererServiceConnection bindRendererService(ComponentName componentName) throws InterruptedException {
+        ensureNotOnMainThread(mContext);
+        final BlockingQueue<IMusicRenderer> q = new LinkedBlockingQueue<>(1);
+        ServiceConnection keyChainServiceConnection = new ServiceConnection() {
+            volatile boolean mConnectedAtLeastOnce = false;
+
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                if (!mConnectedAtLeastOnce) {
+                    mConnectedAtLeastOnce = true;
+                    //Always one space available
+                    q.offer((IMusicRenderer) service);
+                }
+            }
+            @Override public void onServiceDisconnected(ComponentName name) {}
+        };
+        //noinspection ConstantConditions
+        boolean isBound = mContext.bindService(new Intent().setComponent(componentName),
+                keyChainServiceConnection,
+                Context.BIND_AUTO_CREATE);
+        if (!isBound) {
+            throw new AssertionError("could not bind to KeyChainService");
+        }
+        return new RendererServiceConnection(mContext, keyChainServiceConnection, q.take(), componentName);
+    }
+
+    private static void ensureNotOnMainThread(Context context) {
+        Looper looper = Looper.myLooper();
+        if (looper != null && looper == context.getMainLooper()) {
+            throw new IllegalStateException(
+                    "calling this from your main thread can lead to deadlock");
+        }
+    }
 
 }

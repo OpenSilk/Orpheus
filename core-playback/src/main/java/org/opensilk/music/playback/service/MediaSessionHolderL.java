@@ -22,8 +22,10 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioAttributes;
 import android.media.MediaMetadata;
 import android.media.Rating;
+import android.media.VolumeProvider;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.net.Uri;
@@ -32,6 +34,7 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.RatingCompat;
+import android.support.v4.media.VolumeProviderCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
@@ -112,12 +115,12 @@ class MediaSessionHolderL implements IMediaSessionProxy {
 
     @Override
     public void setMetadata(MediaMetadataCompat metadata) {
-        mSession.setMetadata((MediaMetadata)metadata.getMediaMetadata());
+        mSession.setMetadata((MediaMetadata) metadata.getMediaMetadata());
     }
 
     @Override
     public void setPlaybackState(PlaybackStateCompat state) {
-        mSession.setPlaybackState((PlaybackState)state.getPlaybackState());
+        mSession.setPlaybackState((PlaybackState) state.getPlaybackState());
     }
 
     @Override
@@ -133,6 +136,20 @@ class MediaSessionHolderL implements IMediaSessionProxy {
     @Override
     public IMediaControllerProxy.TransportControlsProxy getTransportControls() {
         return mTransportControlsProxy;
+    }
+
+    @Override
+    public void setPlaybackToLocal() {
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .build();
+        mSession.setPlaybackToLocal(audioAttributes);
+    }
+
+    @Override
+    public void setPlaybackToRemote(VolumeProviderCompat volumeProviderCompat) {
+        mSession.setPlaybackToRemote((VolumeProvider)volumeProviderCompat.getVolumeProvider());
     }
 
     static class MediaSessionCallback extends MediaSession.Callback {

@@ -24,6 +24,9 @@ import android.os.Build;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.opensilk.music.playback.renderer.DefaultMediaPlayer;
+import org.opensilk.music.playback.renderer.IMusicRenderer;
+import org.opensilk.music.playback.renderer.IMusicRenderer.Callback;
 import org.opensilk.music.playback.renderer.LocalRenderer;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
@@ -45,17 +48,18 @@ public class PlaybackTest {
 
     AudioManager mAudiomanager;
     LocalRenderer mPlayback;
-    LocalRenderer.Callback mCallback;
+    IMusicRenderer.Callback mCallback;
 
     @Before
     public void setup() {
         mAudiomanager = mock(AudioManager.class);
         mPlayback = new LocalRenderer(
                 RuntimeEnvironment.application,
-                mAudiomanager
+                mAudiomanager,
+                new DefaultMediaPlayer.Factory()
         );
         mPlayback.setState(PlaybackState.STATE_NONE);
-        mCallback = mock(LocalRenderer.Callback.class);
+        mCallback = mock(IMusicRenderer.Callback.class);
         mPlayback.setCallback(mCallback);
     }
 

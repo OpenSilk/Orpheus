@@ -21,12 +21,14 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.RatingCompat;
+import android.support.v4.media.VolumeProviderCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
@@ -120,6 +122,16 @@ class MediaSessionHolderK implements IMediaSessionProxy {
     @Override
     public IMediaControllerProxy.TransportControlsProxy getTransportControls() {
         return mTransportControlsProxy;
+    }
+
+    @Override
+    public void setPlaybackToLocal() {
+        mSession.setPlaybackToLocal(AudioManager.STREAM_MUSIC);
+    }
+
+    @Override
+    public void setPlaybackToRemote(VolumeProviderCompat volumeProviderCompat) {
+        mSession.setPlaybackToRemote(volumeProviderCompat);
     }
 
     static class MediaSessionCallback extends MediaSessionCompat.Callback {

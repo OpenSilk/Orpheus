@@ -215,7 +215,7 @@ public interface PlaybackConstants {
     //Has int extra
     String FOCUSCHANGE = APOLLO_PACKAGE_NAME + ".cmd.focuschange";
 
-    interface CMD {
+    interface ACTION {
         String CYCLE_REPEAT = "cmd.cyclerepeat";
         String TOGGLE_SHUFFLE_MODE = "cmd.shufflequeue";
         String ENQUEUE  = "cmd.enqueue";
@@ -229,12 +229,19 @@ public interface PlaybackConstants {
         String PLAY_ALL = "cmd.playall";
         String PLAY_TRACKS_FROM = "cmd.playtracksfrom";
         String TOGGLE_PLAYBACK = "cmd.toggleplayback";
+    }
+
+    interface CMD {
         //reply has int extra
         String REQUEST_REPEATMODE_UPDATE = "cmd.request.repeatmodeupdate";
         //reply has int extra
         String REQUEST_SHUFFLEMODE_UPDATE = "cmd.request.shufflemodeupdate";
         //reply has int extra
         String REQUEST_AUDIOSESSION_ID = "cmd.request.audiosessionid";
+        //no reply
+        String SWITCH_TO_NEW_RENDERER = "cmd.switch.to.remote.renderer";
+        //reply has componentname parcelable extra
+        String GET_CURRENT_RENDERER = "cmd.get.current.renderer";
     }
 
     interface EVENT {

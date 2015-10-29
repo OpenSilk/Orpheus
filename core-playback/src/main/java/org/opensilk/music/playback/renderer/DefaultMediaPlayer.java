@@ -23,8 +23,12 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.PowerManager;
 
+import org.opensilk.music.playback.service.PlaybackServiceScope;
+
 import java.io.IOException;
 import java.util.Map;
+
+import javax.inject.Inject;
 
 /**
  * Created by drew on 9/27/15.
@@ -35,7 +39,12 @@ public class DefaultMediaPlayer implements IMediaPlayer, MediaPlayer.OnCompletio
     private MediaPlayer mMediaPlayer;
     private Callback mCallback;
 
+    @PlaybackServiceScope
     public static class Factory implements IMediaPlayer.Factory {
+        @Inject
+        public Factory() {
+        }
+
         @Override
         public IMediaPlayer create(Context context) {
             return new DefaultMediaPlayer();

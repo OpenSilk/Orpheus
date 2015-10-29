@@ -1,0 +1,143 @@
+/*
+ * Copyright (c) 2015 OpenSilk Productions LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package org.opensilk.music.playback.renderer.client;
+
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.text.TextUtils;
+
+import org.opensilk.common.core.dagger2.ForApplication;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import rx.Observable;
+import rx.Subscriber;
+
+/**
+ * Created by drew on 11/15/14.
+ */
+public class RendererPluginLoader {
+
+    public static final String RENDERER_ACTION_FILTER = "org.opensilk.music.action.RENDERER_SERVICE";
+    public static final String META_PICKER_ACTIVITY_KEY = "picker_activity";
+
+    final Context context;
+
+    @Inject
+    public RendererPluginLoader(
+            @ForApplication Context context
+    ) {
+        this.context = context;
+    }
+
+    public Observable<List<RendererInfo>> getObservable() {
+        return Observable.create(new Observable.OnSubscribe<List<RendererInfo>>() {
+            @Override
+            public void call(Subscriber<? super List<RendererInfo>> subscriber) {
+                try {
+                    List<RendererInfo> list = getPluginInfos(true);
+                    if (list == null) {
+                        list = Collections.emptyList();
+                    }
+                    if (subscriber.isUnsubscribed()) return;
+                    subscriber.onNext(list);
+                    subscriber.onCompleted();
+                } catch (Exception e) {
+                    if (subscriber.isUnsubscribed()) return;
+                    subscriber.onError(e);
+                }
+            }
+        });
+    }
+
+    public List<RendererInfo> getPluginInfos() {
+        return getPluginInfos(false);
+    }
+
+    public List<RendererInfo> getPluginInfos(boolean wantIcon) {
+        final PackageManager pm = context.getPackageManager();
+        final List<ResolveInfo> resolveInfos = pm.queryIntentServices(
+                new Intent(RENDERER_ACTION_FILTER), PackageManager.GET_META_DATA);
+        final List<RendererInfo> pluginInfos = new ArrayList<>(resolveInfos.size()+1);
+        for (final ResolveInfo resolveInfo : resolveInfos) {
+            if (resolveInfo == null || resolveInfo.serviceInfo == null)
+                continue;
+            final RendererInfo pi = readResolveInfo(pm, resolveInfo);
+            if (!wantIcon)
+                pi.setIcon(null);
+            pluginInfos.add(pi);
+        }
+        Collections.sort(pluginInfos);
+        RendererInfo localInfo = new RendererInfo("Default", "The local renderer", null);
+        pluginInfos.add(0, localInfo);
+        return pluginInfos;
+    }
+
+    private RendererInfo readResolveInfo(PackageManager pm, ResolveInfo resolveInfo) {
+        boolean hasPermission = false;
+        final String permission = resolveInfo.serviceInfo.permission;
+        if (TextUtils.equals(permission, context.getPackageName() + ".permission.BIND_RENDERER")) {
+            hasPermission = true;
+        }
+        final CharSequence title = resolveInfo.loadLabel(pm);
+        final ComponentName cn = getComponentName(resolveInfo);
+        CharSequence description;
+        try {
+            Context packageContext = context.createPackageContext(cn.getPackageName(), 0);
+            Resources packageRes = packageContext.getResources();
+            description = packageRes.getString(resolveInfo.serviceInfo.descriptionRes);
+        } catch (PackageManager.NameNotFoundException e) {
+            description = null;
+        }
+        final String titleS = title != null ? title.toString() : "";
+        final String descS = description != null ? description.toString() : "";
+        final RendererInfo pluginInfo = new RendererInfo(titleS, descS, cn);
+        final Drawable icon = resolveInfo.loadIcon(pm);
+        pluginInfo.setIcon(icon);
+        final ComponentName activityCn = getActivityComponentName(resolveInfo);
+        pluginInfo.setActivityComponent(activityCn);
+        return pluginInfo;
+    }
+
+    private static ComponentName getComponentName(ResolveInfo resolveInfo) {
+        return new ComponentName(resolveInfo.serviceInfo.packageName, resolveInfo.serviceInfo.name);
+    }
+
+    private static ComponentName getActivityComponentName(ResolveInfo resolveInfo) {
+        if (resolveInfo.serviceInfo.metaData != null) {
+            ServiceInfo serviceInfo = resolveInfo.serviceInfo;
+            Bundle meta = serviceInfo.metaData;
+            if (meta.getString(META_PICKER_ACTIVITY_KEY) != null) {
+                return new ComponentName(serviceInfo.packageName, meta.getString(META_PICKER_ACTIVITY_KEY));
+            }
+        }
+        return null;
+    }
+
+}

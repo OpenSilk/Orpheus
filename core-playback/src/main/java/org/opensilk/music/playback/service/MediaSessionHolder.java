@@ -21,6 +21,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.VolumeProviderCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.KeyEvent;
@@ -101,6 +102,14 @@ public class MediaSessionHolder {
 
     public void release() {
         mProxy.release();
+    }
+
+    public void setPlaybackToLocal() {
+        mProxy.setPlaybackToLocal();
+    }
+
+    public void setPlaybackToRemote(VolumeProviderCompat volumeProviderCompat) {
+        mProxy.setPlaybackToRemote(volumeProviderCompat);
     }
 
 }

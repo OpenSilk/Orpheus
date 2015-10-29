@@ -23,6 +23,7 @@ import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.RatingCompat;
+import android.support.v4.media.VolumeProviderCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
@@ -42,6 +43,8 @@ public interface IMediaSessionProxy {
     void setCallback(Callback cb, Handler handler);
     IMediaControllerProxy getController();
     IMediaControllerProxy.TransportControlsProxy getTransportControls();
+    void setPlaybackToLocal();
+    void setPlaybackToRemote(VolumeProviderCompat volumeProviderCompat);
     interface Callback {
         void onCommand(String command, Bundle args, ResultReceiver cb);
         void onPlay();

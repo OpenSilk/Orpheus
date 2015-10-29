@@ -58,6 +58,7 @@ dependencies {
     compile project(':core-res-drawables')
     compile(group:'org.apache.commons', name:'commons-lang3', version: rootProject.ext.commonsLangVersion)
     compile(group:'io.reactivex', name: 'rxandroid', version: rootProject.ext.rxAndroidVersion)
+//    compile (group: 'com.android.support', name: 'mediarouter-v7', version: rootProject.ext.supportLibVersion)
 
     testCompile (group:"junit", name:"junit", version: rootProject.ext.testJunitVersion)
     testCompile (group:"org.assertj", name:"assertj-core", version: rootProject.ext.testAssertJVersion)
