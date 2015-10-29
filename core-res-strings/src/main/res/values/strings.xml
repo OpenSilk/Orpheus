@@ -34,6 +34,7 @@
     <string name="title_local_storage">Local Storage</string>
     <string name="title_my_library">My Library</string>
     <string name="title_folders">Folders</string>
+    <string name="title_renderers">Set renderer</string>
 
     <!-- Option menu items -->
     <string name="menu_settings">Settings</string>
@@ -99,6 +100,7 @@
     <string name="menu_library_settings">Library settings</string>
     <string name="menu_login">Login</string>
     <string name="menu_manage_playlists">Manage playlists</string>
+    <string name="menu_open_folder">Open folder</string>
 
     <!-- Content descriptions -->
     <string name="accessibility_play">Play</string>
