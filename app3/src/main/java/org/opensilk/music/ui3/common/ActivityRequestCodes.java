@@ -29,4 +29,6 @@ public interface ActivityRequestCodes {
     int PLAYLIST_ADD = 3000;
     int PLAYLIST_MANAGE = 3001;
     int PROFILE = 3002;
+
+    int RENDERER_PICKER = 4000;
 }

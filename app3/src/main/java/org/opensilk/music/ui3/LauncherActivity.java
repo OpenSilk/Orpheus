@@ -39,6 +39,7 @@ import org.opensilk.music.ui3.index.GalleryScreenFragment;
 import org.opensilk.music.ui3.index.playlists.PlaylistsScreenFragment;
 import org.opensilk.music.ui3.library.LibraryScreenFragment;
 import org.opensilk.music.ui3.profile.playlist.PlaylistDetailsScreen;
+import org.opensilk.music.ui3.renderer.RendererScreenFragment;
 
 import javax.inject.Inject;
 
@@ -148,7 +149,7 @@ public class LauncherActivity extends MusicActivity {
             switch (menuItem.getItemId()) {
                 case R.id.nav_my_library: {
                     mFm.killBackStack();
-                    mFm.replaceMainContent(GalleryScreenFragment.ni(LauncherActivity.this), false);
+                    mFm.replaceMainContent(GalleryScreenFragment.ni(), false);
                     menuItem.setChecked(true);
                     break;
                 }
@@ -160,8 +161,12 @@ public class LauncherActivity extends MusicActivity {
                 }
                 case R.id.nav_playlists: {
                     mFm.killBackStack();
-                    mFm.replaceMainContent(PlaylistsScreenFragment.ni(LauncherActivity.this), false);
+                    mFm.replaceMainContent(PlaylistsScreenFragment.ni(), false);
                     menuItem.setChecked(true);
+                    break;
+                }
+                case R.id.nav_renderers: {
+                    mFm.showDialog(RendererScreenFragment.ni());
                     break;
                 }
                 case R.id.nav_settings: {

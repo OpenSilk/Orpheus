@@ -17,8 +17,6 @@
 
 package org.opensilk.music.ui3.index;
 
-import android.content.Context;
-
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortarfragment.MortarFragment;
 
@@ -28,8 +26,8 @@ import org.opensilk.common.ui.mortarfragment.MortarFragment;
 public class GalleryScreenFragment extends MortarFragment {
     public static final String NAME = GalleryScreenFragment.class.getName();
 
-    public static GalleryScreenFragment ni(Context context) {
-        return factory(context, NAME, null);
+    public static GalleryScreenFragment ni() {
+        return new GalleryScreenFragment();
     }
 
     @Override

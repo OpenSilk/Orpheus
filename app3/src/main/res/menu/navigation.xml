@@ -30,6 +30,10 @@
             android:title="@string/title_playlists"/>
     </group>
 
+    <item android:id="@+id/nav_renderers"
+        android:icon="@drawable/cast_grey600_36dp"
+        android:title="@string/title_renderers"/>
+
     <item
         android:id="@+id/nav_settings"
         android:icon="@drawable/settings_box_grey600_36dp"

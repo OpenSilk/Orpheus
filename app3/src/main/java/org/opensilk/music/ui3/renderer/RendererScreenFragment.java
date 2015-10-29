@@ -15,23 +15,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.index.playlists;
+package org.opensilk.music.ui3.renderer;
+
+import android.app.Dialog;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
 
 import org.opensilk.common.ui.mortar.Screen;
-import org.opensilk.common.ui.mortarfragment.MortarFragment;
+import org.opensilk.common.ui.mortarfragment.MortarDialogFragment;
 
 /**
- * Created by drew on 5/5/15.
+ * Created by drew on 10/27/15.
  */
-public class PlaylistsScreenFragment extends MortarFragment {
-    public static final String NAME = PlaylistsScreenFragment.class.getName();
+public class RendererScreenFragment extends MortarDialogFragment {
+    public static final String NAME = RendererScreenFragment.class.getName();
 
-    public static PlaylistsScreenFragment ni() {
-        return new PlaylistsScreenFragment();
+    public static RendererScreenFragment ni() {
+        return new RendererScreenFragment();
+    }
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        setStyle(STYLE_NO_TITLE, 0);
+        return super.onCreateDialog(savedInstanceState);
     }
 
     @Override
     protected Screen newScreen() {
-        return new PlaylistsScreen();
+        return new RendererScreen();
     }
 }
