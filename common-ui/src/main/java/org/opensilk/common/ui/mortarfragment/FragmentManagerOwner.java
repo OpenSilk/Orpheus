@@ -66,6 +66,16 @@ public class FragmentManagerOwner extends Presenter<FragmentManagerOwnerActivity
         }
     }
 
+    public void dismissDialog(String scopeName) {
+        if (hasView()) {
+            MortarDialogFragment f = (MortarDialogFragment) getView()
+                    .getSupportFragmentManager().findFragmentByTag(scopeName);
+            if (f != null) {
+                f.dismiss();
+            }
+        }
+    }
+
     public int addFragment(MortarFragment frag, boolean addToBackstack) {
         if (!hasView()) return -1;
         String tag = frag.getScopeName();

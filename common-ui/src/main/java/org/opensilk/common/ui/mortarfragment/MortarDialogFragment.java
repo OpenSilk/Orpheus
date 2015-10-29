@@ -24,6 +24,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatDialog;
+import android.support.v7.app.AppCompatDialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,7 +39,7 @@ import timber.log.Timber;
 /**
  * Created by drew on 3/16/15.
  */
-public abstract class MortarDialogFragment extends DialogFragment {
+public abstract class MortarDialogFragment extends AppCompatDialogFragment {
     private static final boolean DEBUG_LIFECYCLE = true;
 
     private MortarScope mScope;
@@ -76,6 +77,14 @@ public abstract class MortarDialogFragment extends DialogFragment {
         if (DEBUG_LIFECYCLE) Timber.v("->onActivityCreated %s", getScopeName());
         super.onActivityCreated(savedInstanceState);
         if (DEBUG_LIFECYCLE) Timber.v("<-onActivityCreated %s", getScopeName());
+    }
+
+    @Override
+    public void onDestroyView() {
+        if (shouldRetainScope() && getDialog() != null) {
+            getDialog().setDismissMessage(null);
+        }
+        super.onDestroyView();
     }
 
     @Override
