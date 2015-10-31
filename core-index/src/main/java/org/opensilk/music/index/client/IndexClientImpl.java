@@ -37,13 +37,10 @@ import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.artwork.UtilsArt;
-import org.opensilk.music.index.provider.IndexProvider;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.index.provider.Methods;
-import org.opensilk.bundleable.BundleableListSlice;
 import org.opensilk.music.library.client.BundleableObserver;
 import org.opensilk.music.library.internal.IBundleableObserver;
-import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.library.client.TypedBundleableLoader;
@@ -62,7 +59,6 @@ import javax.inject.Named;
 import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action2;
 import rx.functions.Func0;
 import rx.functions.Func1;
@@ -331,7 +327,7 @@ public class IndexClientImpl implements IndexClient {
                             track.getArtistName(), track.getAlbumName(),
                             track.getArtworkUri());
                     if (artInfo != ArtInfo.NULLINSTANCE) {
-                        description.setIconUri(artInfo.asUri(artworkAuthority));
+                        description.setIconUri(artInfo.asContentUri(artworkAuthority));
                     }
                     mediaDescriptions.add(description.build());
                 }
@@ -358,7 +354,7 @@ public class IndexClientImpl implements IndexClient {
         ArtInfo artInfo = UtilsArt.makeBestfitArtInfo(track.getAlbumArtistName(),
                 track.getArtistName(), track.getAlbumName(), track.getArtworkUri());
         if (artInfo != ArtInfo.NULLINSTANCE) {
-            m.putString(METADATA_KEY_ALBUM_ART_URI, artInfo.asUri(artworkAuthority).toString());
+            m.putString(METADATA_KEY_ALBUM_ART_URI, artInfo.asContentUri(artworkAuthority).toString());
         }
         return m.build();
     }
