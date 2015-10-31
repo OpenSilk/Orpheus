@@ -61,7 +61,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
     }
 
     public void newRequest(ArtInfo artInfo, ImageView imageView, @Nullable Bundle extras) {
-        newRequest(artInfo.asUri(mAuthority), imageView, extras);
+        newRequest(artInfo.asContentUri(mAuthority), imageView, extras);
     }
 
     public void newRequest(Uri uri, ImageView imageView, @Nullable Bundle extras) {
@@ -69,7 +69,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
     }
 
     public void newRequest(ArtInfo artInfo, ImageView imageView, @Nullable Paletteable paletteable, @Nullable Bundle extras) {
-        newRequest(artInfo.asUri(mAuthority), imageView, paletteable, extras);
+        newRequest(artInfo.asContentUri(mAuthority), imageView, paletteable, extras);
     }
 
     public void newRequest(Uri uri, ImageView imageView, @Nullable Paletteable paletteable, @Nullable Bundle extras) {
@@ -99,7 +99,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
     }
 
     public void newRequest(ArtInfo artInfo, ImageView imageView, Palette.PaletteAsyncListener listener, @Nullable Bundle extras) {
-        newRequest(artInfo.asUri(mAuthority), imageView, listener, extras);
+        newRequest(artInfo.asContentUri(mAuthority), imageView, listener, extras);
     }
 
     public void newRequest(Uri uri, ImageView imageView, Palette.PaletteAsyncListener listener, @Nullable Bundle extras) {

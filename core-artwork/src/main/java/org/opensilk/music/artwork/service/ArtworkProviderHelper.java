@@ -22,6 +22,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 
 import org.opensilk.common.core.dagger2.ForApplication;
@@ -51,21 +53,18 @@ public class ArtworkProviderHelper {
     private static final Object sDecodeLock = new Object();
 
     private final Context mContext;
-    private final String mAuthority;
     private final BitmapLruCache mL1Cache;
 
     @Inject
     public ArtworkProviderHelper(
             @ForApplication Context context,
-            @Named("artworkauthority") String authority,
             @Named("helpercache") BitmapLruCache l1cache
     ) {
         mContext = context;
-        mAuthority = authority;
         mL1Cache = l1cache;
     }
 
-    public Observable<Bitmap> getArtwork(final Uri uri) {
+    public Observable<Bitmap> getArtwork(final @NonNull Uri uri) {
         return Observable.create(new Observable.OnSubscribe<Bitmap>() {
             @Override
             public void call(Subscriber<? super Bitmap> subscriber) {
@@ -86,12 +85,12 @@ public class ArtworkProviderHelper {
      * Queries ArtworkProvider for given uri, first checking local cache
      * @return Decoded bitmap
      */
-    public Bitmap queryArtworkProvider(Uri artworkUri, String cacheKey) {
+    public @Nullable Bitmap queryArtworkProvider(@NonNull Uri artworkUri, @NonNull String cacheKey) {
         Bitmap bitmap = mL1Cache.getBitmap(cacheKey);
         if (bitmap == null) {
             ParcelFileDescriptor pfd = null;
             try {
-                pfd = mContext.getContentResolver().openFileDescriptor(artworkUri, "r");
+                pfd = getParcelFileDescriptior(artworkUri);
                 if (pfd != null) {
                     synchronized (sDecodeLock) {
                         try {
@@ -106,8 +105,6 @@ public class ArtworkProviderHelper {
                         mL1Cache.putBitmap(cacheKey, bitmap);
                     }
                 }
-            } catch (FileNotFoundException ignored) {
-                Timber.i("queryArtworkProvider(%s) provider miss", cacheKey);
             } catch (Exception e) {
                 Timber.w(e, "queryArtworkProvider(%s) error", cacheKey);
                 bitmap = null;
@@ -121,6 +118,15 @@ public class ArtworkProviderHelper {
         return bitmap;
     }
 
+    public ParcelFileDescriptor getParcelFileDescriptior(@NonNull Uri artworkUri) {
+        try {
+            return mContext.getContentResolver().openFileDescriptor(artworkUri, "r");
+        } catch (FileNotFoundException ignored) {
+            Timber.i("queryArtworkProvider(%s) provider miss", artworkUri);
+            return null;
+        }
+    }
+
     @DebugLog
     public void evictL1() {
         mL1Cache.evictAll();
@@ -131,9 +137,12 @@ public class ArtworkProviderHelper {
         return ((BitmapDrawable) ContextCompat.getDrawable(mContext, R.drawable.default_artwork)).getBitmap();
     }
 
-    public CacheBitmap getCachedOrDefault(Uri uri) {
+    public @NonNull CacheBitmap getCachedOrDefault(@Nullable Uri uri) {
         boolean fromCache = true;
-        Bitmap bitmap = mL1Cache.getBitmap(uri.toString());
+        Bitmap bitmap = null;
+        if (uri != null) {
+            bitmap = mL1Cache.getBitmap(uri.toString());
+        }
         if (bitmap == null) {
             fromCache = false;
             bitmap = getDefaultArt();
