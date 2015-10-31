@@ -27,7 +27,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
-import org.opensilk.music.artwork.service.ArtworkProviderHelper;
 import org.opensilk.music.renderer.googlecast.CastRendererService;
 
 import java.io.IOException;
@@ -51,22 +50,10 @@ public class ArtHandler extends AbstractHandler {
     final CastRendererService mService;
     final LruCache<String, Uri> mEtagCache;
 
-    ArtworkProviderHelper mArtworkHelper;
-
     @Inject
     public ArtHandler(CastRendererService mService) {
         this.mService = mService;
         this.mEtagCache = new LruCache<>(100);
-    }
-
-    void ensureArtworkHelper() {
-        if (mArtworkHelper == null) {
-            synchronized (this) {
-                if (mArtworkHelper == null) {
-                    mArtworkHelper = mService.getAccessor().getArtworkHelper();
-                }
-            }
-        }
     }
 
     @Override
@@ -90,8 +77,7 @@ public class ArtHandler extends AbstractHandler {
                 return;
             }
         }
-        ensureArtworkHelper();
-        ParcelFileDescriptor pfd = mArtworkHelper.getParcelFileDescriptior(contentUri);
+        ParcelFileDescriptor pfd = mService.getAccessor().getArtwork(contentUri);
         if (pfd == null) {
             response.sendError(HttpStatus.NOT_FOUND_404);
             baseRequest.setHandled(true);

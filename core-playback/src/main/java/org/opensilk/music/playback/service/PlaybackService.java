@@ -1246,8 +1246,8 @@ public class PlaybackService {
         }
 
         @Override
-        public ArtworkProviderHelper getArtworkHelper() {
-            return mService.get().mArtworkHelper;
+        public ParcelFileDescriptor getArtwork(Uri uri) {
+            return mService.get().mArtworkHelper.getParcelFileDescriptior(uri);
         }
 
         @Override

@@ -17,15 +17,15 @@
 
 package org.opensilk.music.playback.renderer;
 
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.support.v4.media.MediaMetadataCompat;
-
-import org.opensilk.music.artwork.service.ArtworkProviderHelper;
 
 /**
  * Created by drew on 10/29/15.
  */
 public interface PlaybackServiceAccessor {
-    ArtworkProviderHelper getArtworkHelper();
+    ParcelFileDescriptor getArtwork(Uri uri);
     MediaMetadataCompat convertTrackToMediaMetadata(Bundle trackBundle);
 }

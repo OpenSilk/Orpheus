@@ -53,11 +53,15 @@ dependencies {
 
     compile 'com.google.android.gms:play-services-cast:8.1.0'
     compile (group: 'com.android.support', name: 'mediarouter-v7', version: rootProject.ext.supportLibVersion)
+    compile (group: 'commons-io', name: 'commons-io', version: rootProject.ext.commonsIoVersion)
+    compile(group:'org.apache.commons', name:'commons-lang3', version: rootProject.ext.commonsLangVersion)
 
     compile 'org.eclipse.jetty:jetty-server:8.1.18.v20150929'
 //    compile 'org.eclipse.jetty:jetty-servlet:8.1.18.v20150929'
 //    compile 'org.eclipse.jetty:jetty-client:8.1.18.v20150929'
 
-    compile project(':core-playback')
+    compile project(':core-playback-renderer')
     compile project(':core-okhttp')
+    compile project(':core-model')
+    compile project(':core-res-drawables')
 }

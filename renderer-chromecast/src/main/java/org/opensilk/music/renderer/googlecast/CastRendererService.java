@@ -47,7 +47,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.model.Track;
-import org.opensilk.music.playback.PlaybackStateHelper;
 import org.opensilk.music.playback.renderer.IMusicRenderer;
 import org.opensilk.music.playback.renderer.PlaybackServiceAccessor;
 import org.opensilk.music.renderer.googlecast.server.CastServer;
@@ -292,7 +291,7 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
     public long getCurrentStreamPosition() {
         //we don't actually seek to the saved position until playback starts
         //so we only ask the player where it is if we are playing
-        return (hasCurrent() && PlaybackStateHelper.isPlaying(mState)) ?
+        return (hasCurrent() && mState == STATE_PLAYING) ?
                 mRemoteMediaPlayer.getApproximateStreamPosition() : mCurrentPosition;
     }
 
