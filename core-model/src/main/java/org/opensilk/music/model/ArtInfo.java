@@ -134,10 +134,15 @@ public class ArtInfo implements Parcelable, Comparable<ArtInfo> {
         return sb.toString();
     }
 
-    public Uri asUri(String authority) {
+    public Uri asContentUri(String authority) {
         Uri.Builder ub = new Uri.Builder()
                 .scheme("content")
-                .authority(authority)
+                .authority(authority);
+        return asUri(ub.build());
+    }
+
+    public Uri asUri(Uri base) {
+        Uri.Builder ub = base.buildUpon()
                 .appendPath("artInfo");
         StringBuilder builder = new StringBuilder();
         builder.append("forArtist=").append(forArtist);
