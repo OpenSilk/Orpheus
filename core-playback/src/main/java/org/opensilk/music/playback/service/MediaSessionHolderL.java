@@ -115,12 +115,12 @@ class MediaSessionHolderL implements IMediaSessionProxy {
 
     @Override
     public void setMetadata(MediaMetadataCompat metadata) {
-        mSession.setMetadata((MediaMetadata) metadata.getMediaMetadata());
+        mSession.setMetadata(metadata != null ? (MediaMetadata) metadata.getMediaMetadata() : null);
     }
 
     @Override
     public void setPlaybackState(PlaybackStateCompat state) {
-        mSession.setPlaybackState((PlaybackState) state.getPlaybackState());
+        mSession.setPlaybackState(state != null ? (PlaybackState) state.getPlaybackState() : null);
     }
 
     @Override

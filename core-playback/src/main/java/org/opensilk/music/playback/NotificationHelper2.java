@@ -28,10 +28,10 @@ import android.graphics.Bitmap;
 import android.media.session.MediaSession;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.support.v7.app.NotificationCompat;
 import android.widget.RemoteViews;
 
 import org.opensilk.common.core.dagger2.ForApplication;
@@ -51,6 +51,7 @@ import timber.log.Timber;
 public class NotificationHelper2 extends BroadcastReceiver {
 
     private static final int NOTIFICATION_ID = 412;
+    private static final int ERROR_NOTIF_ID = 342;
     private static final int REQUEST_CODE = 100;
 
     private static final String MYPKG = BuildConfig.APPLICATION_ID;
@@ -433,6 +434,19 @@ public class NotificationHelper2 extends BroadcastReceiver {
         int height = (int) (bmp.getHeight() * scale);
         int width = (int) (bmp.getWidth() * scale);
         return Bitmap.createScaledBitmap(bmp, width, height, true);
+    }
+
+    public void showError(String msg) {
+        Notification notif = new NotificationCompat.Builder(mContext)
+                .setTicker("Playback encountered an error")
+                .setContentTitle("Playback error")
+                .setContentText(msg)
+                .setCategory(NotificationCompat.CATEGORY_ERROR)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setSmallIcon(R.drawable.stat_notify_music)
+                .build();
+        mNotificationManager.notify(ERROR_NOTIF_ID, notif);
     }
 
 }

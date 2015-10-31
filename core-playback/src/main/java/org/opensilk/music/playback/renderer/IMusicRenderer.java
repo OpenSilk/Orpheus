@@ -44,6 +44,7 @@ public interface IMusicRenderer {
     boolean isRemotePlayback();
     VolumeProviderCompat getVolumeProvider();
     void setCallback(Callback callback);
+    void setAccessor(PlaybackServiceAccessor accessor);
     interface Callback {
         /**
          * on Playback status changed

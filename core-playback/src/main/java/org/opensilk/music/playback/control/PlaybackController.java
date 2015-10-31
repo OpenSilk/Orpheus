@@ -245,6 +245,7 @@ public class PlaybackController {
         sendCustomAction(ACTION.MOVE_QUEUE_ITEM_TO_NEXT, BundleHelper.b().putInt(pos).get());
     }
 
+    @DebugLog
     public void switchToNewRenderer(@Nullable ComponentName componentName) {
         if (hasController()) {
             mImpl.getMediaController().sendCommand(CMD.SWITCH_TO_NEW_RENDERER,

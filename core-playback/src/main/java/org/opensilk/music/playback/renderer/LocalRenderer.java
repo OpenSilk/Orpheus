@@ -312,6 +312,11 @@ public class LocalRenderer implements IMusicRenderer,
         this.mCallback = callback;
     }
 
+    @Override
+    public void setAccessor(PlaybackServiceAccessor accessor) {
+        //pass
+    }
+
     /**
      * Try to get the system audio focus.
      */

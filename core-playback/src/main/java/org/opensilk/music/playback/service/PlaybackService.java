@@ -53,10 +53,12 @@ import org.opensilk.music.playback.PlaybackConstants.CMD;
 import org.opensilk.music.playback.PlaybackConstants.EVENT;
 import org.opensilk.music.playback.PlaybackQueue;
 import org.opensilk.music.playback.PlaybackStateHelper;
+import org.opensilk.music.playback.renderer.PlaybackServiceAccessor;
 import org.opensilk.music.playback.session.IMediaControllerProxy;
 import org.opensilk.music.playback.session.IMediaSessionProxy;
 
 import java.io.Closeable;
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -101,7 +103,6 @@ public class PlaybackService {
     private final DelayedShutdownHandler mDelayedShutdownHandler;
     private final PlaybackQueue mQueue;
     private final PowerManager.WakeLock mWakeLock;
-    private final ArtworkProviderHelper mArtworkProviderHelper;
     private final MediaSessionHolder mSessionHolder;
     private final IndexClient mIndexClient;
     private final LocalRenderer mLocalRenderer;
@@ -143,7 +144,6 @@ public class PlaybackService {
             DelayedShutdownHandler mDelayedShutdownHandler,
             PlaybackQueue mQueue,
             PowerManager.WakeLock mWakeLock,
-            ArtworkProviderHelper mArtworkProviderHelper,
             MediaSessionHolder mSessionHolder,
             IndexClient mIndexClient,
             LocalRenderer mLocalRenderer,
@@ -154,7 +154,6 @@ public class PlaybackService {
         this.mDelayedShutdownHandler = mDelayedShutdownHandler;
         this.mQueue = mQueue;
         this.mWakeLock = mWakeLock;
-        this.mArtworkProviderHelper = mArtworkProviderHelper;
         this.mSessionHolder = mSessionHolder;
         this.mIndexClient = mIndexClient;
         this.mLocalRenderer = mLocalRenderer;
@@ -235,7 +234,7 @@ public class PlaybackService {
     //main thread
     public void onTrimMemory(int level) {
         if (level >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE) {
-            mArtworkProviderHelper.evictL1();
+            mArtworkHelper.evictL1();
             saveState(true);
         }
     }
@@ -313,6 +312,7 @@ public class PlaybackService {
             // stop unexpectedly and persist until the user takes action to fix it.
             stateBuilder.setErrorMessage(error);
             state = PlaybackStateCompat.STATE_ERROR;
+            mNotificationHelper.showError(error);
         }
 
         long position = mPlayback.getCurrentStreamPosition();
@@ -530,6 +530,7 @@ public class PlaybackService {
     }
 
     //handler thread / main thread
+    @DebugLog
     void setupLocalRenderer() {
         if (mPlayback != null) {
             mPlayback.stop(false);
@@ -540,6 +541,7 @@ public class PlaybackService {
     }
 
     //handler thread
+    @DebugLog
     void setupRemoteRenderer(@NonNull ComponentName componentName) {
         try {
             if (mPlayback != null) {
@@ -558,14 +560,18 @@ public class PlaybackService {
         }
     }
 
+    @DebugLog
     void initPlayback() {
         mPlayback.setState(PlaybackStateCompat.STATE_NONE);
         mPlayback.setCallback(new PlaybackCallback());
+        mPlayback.setAccessor(new Accessor(this));
         mPlayback.start();
-        if (mPlayback.isRemotePlayback()) {
-            mSessionHolder.setPlaybackToRemote(mPlayback.getVolumeProvider());
-        } else {
-            mSessionHolder.setPlaybackToLocal();
+        if (mPlayback.getState() != PlaybackStateCompat.STATE_ERROR) {
+            if (mPlayback.isRemotePlayback()) {
+                mSessionHolder.setPlaybackToRemote(mPlayback.getVolumeProvider());
+            } else {
+                mSessionHolder.setPlaybackToLocal();
+            }
         }
     }
 
@@ -710,13 +716,18 @@ public class PlaybackService {
                     } else {
                         setupLocalRenderer();
                     }
-                    if (mQueueReady) {
-                        if (mQueue.notEmpty()) {
+                    if (mPlayback.getState() != PlaybackStateCompat.STATE_ERROR) {
+                        if (mQueueReady) {
+                            if (mQueue.notEmpty()) {
+                                mPlayWhenReady = playing;
+                                setTrack();
+                            } //else ?? TODO
+                        } else {
                             mPlayWhenReady = playing;
-                            setTrack();
-                        } //else ?? TODO
+                        }
                     } else {
-                        mPlayWhenReady = playing;
+                        mPlayWhenReady = false;
+                        //and wait for callback
                     }
                     break;
                 }
@@ -1118,6 +1129,7 @@ public class PlaybackService {
         public void onError(final String error) {
             if (Looper.myLooper() == getHandler().getLooper()) {
                 updatePlaybackState(error);
+                setupLocalRenderer();
                 handleStop();
                 //TODO better handle
             } else {
@@ -1160,7 +1172,8 @@ public class PlaybackService {
     final Runnable mProgressCheckRunnable = new Runnable() {
         @Override
         public void run() {
-            updatePlaybackState(null, true);
+            //TODO remove
+//            updatePlaybackState(null, true);
         }
     };
 
@@ -1225,4 +1238,21 @@ public class PlaybackService {
         }
     }
 
+    static class Accessor implements PlaybackServiceAccessor {
+        final WeakReference<PlaybackService> mService;
+
+        public Accessor(PlaybackService mService) {
+            this.mService = new WeakReference<PlaybackService>(mService);
+        }
+
+        @Override
+        public ArtworkProviderHelper getArtworkHelper() {
+            return mService.get().mArtworkHelper;
+        }
+
+        @Override
+        public MediaMetadataCompat convertTrackToMediaMetadata(Bundle trackBundle) {
+            return mService.get().mIndexClient.convertToMediaMetadata(Track.BUNDLE_CREATOR.fromBundle(trackBundle));
+        }
+    }
 }
