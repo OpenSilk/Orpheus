@@ -62,9 +62,9 @@ dependencies {
     compile 'org.fourthline.cling:cling-core:2.0.1'
     compile 'org.fourthline.cling:cling-support:2.0.1'
 
-    compile 'org.eclipse.jetty:jetty-server:8.1.15.v20140411'//8.1.8.v20121106'
-    compile 'org.eclipse.jetty:jetty-servlet:8.1.15.v20140411'//8.1.8.v20121106'
-    compile 'org.eclipse.jetty:jetty-client:8.1.15.v20140411'//8.1.8.v20121106'
+    compile 'org.eclipse.jetty:jetty-server:8.1.18.v20150929'
+    compile 'org.eclipse.jetty:jetty-servlet:8.1.18.v20150929'
+    compile 'org.eclipse.jetty:jetty-client:8.1.18.v20150929'
 
     compile 'org.seamless:seamless-xml:1.0-alpha3'
 
