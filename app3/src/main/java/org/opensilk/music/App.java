@@ -86,7 +86,8 @@ public class App extends BaseApp {
         } else if (isProviderProcess()) {
             return ProviderComponent.FACTORY.call(this);
         } else if (isServiceProcess()) {
-            return PlaybackComponent.FACTORY.call(this);
+            //return PlaybackComponent.FACTORY.call(this);
+            return ServiceComponent.FACTORY.call(this);
         } else {
             Timber.e("Unable to determine our process");
             return EmulatorComponent.FACTORY.call(this);

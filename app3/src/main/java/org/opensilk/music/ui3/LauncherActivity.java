@@ -19,6 +19,7 @@ package org.opensilk.music.ui3;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -133,6 +134,15 @@ public class LauncherActivity extends MusicActivity {
                     mActivityResultsOwner.startActivityForResult(
                             ProfileActivity.makeIntent(this, new PlaylistDetailsScreen(playlist)),
                             ActivityRequestCodes.PROFILE, null);
+                }
+                break;
+            }
+            case ActivityRequestCodes.RENDERER_PICKER: {
+                if (resultCode == RESULT_OK) {
+                    ComponentName cn = data.getComponent();
+                    if (cn != null) {
+                        mPlaybackController.switchToNewRenderer(cn);
+                    }
                 }
                 break;
             }
