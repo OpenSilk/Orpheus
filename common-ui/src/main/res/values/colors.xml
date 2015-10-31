@@ -43,31 +43,4 @@
     <color name="letter_tile_default_color">#cccccc</color>
     <color name="letter_tile_font_color">#ffffff</color>
 
-    <!-- Colors for colorcoded thumbnail -->
-    <color name="blue">#0000B4</color>
-    <color name="red_violet">#AF0D66</color>
-    <color name="green_yellow">#92F846</color>
-    <color name="yellow_orange">#FFC82F</color>
-    <color name="orange">#FF7600</color>
-    <color name="light_gray">#B9B9B9</color>
-    <color name="off_white">#EBEBDE</color>
-    <color name="gray">#646464</color>
-    <color name="yellow">#FFFF00</color>
-    <color name="dark_purple">#371370</color>
-    <color name="light_yellow">#FFFF96</color>
-    <color name="dark_pink">#CA3E5E</color>
-    <color name="dark_orange">#CD913F</color>
-    <color name="teal">#0C4B64</color>
-    <color name="red">#FF0000</color>
-    <color name="dark_yellow">#AF9B32</color>
-    <color name="dark_green">#254619</color>
-    <color name="purple">#792187</color>
-    <color name="light_blue">#538CD0</color>
-    <color name="green">#009A25</color>
-    <color name="cyan">#B2DCCD</color>
-    <color name="pink">#FF98D5</color>
-    <color name="dark_blue">#00004A</color>
-    <color name="olive_green">#AFC84A</color>
-    <color name="red_brown">#3F190C</color>
-
 </resources>
