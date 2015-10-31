@@ -29,7 +29,7 @@ import javax.inject.Inject;
 /**
  * Created by drew on 10/21/15.
  */
-@DriveLibraryScope
+@DriveLibraryProviderScope
 public class DriveLibraryDB extends SQLiteOpenHelper {
 
     static final String DB_NAME = "driveaccounts.db";

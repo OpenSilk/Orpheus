@@ -28,6 +28,7 @@ import android.os.Bundle;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.library.drive.DriveLibraryComponent;
 import org.opensilk.music.library.drive.R;
 import org.opensilk.music.library.drive.client.DriveClient;
 import org.opensilk.music.library.drive.client.DriveClientModule;
@@ -39,7 +40,6 @@ import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Model;
-import org.opensilk.music.okhttp.OkHttpComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,13 +70,13 @@ public class DriveLibraryProvider extends LibraryProvider {
     @Inject @Named("driveLibraryAuthority") String mAuthority;
     @Inject DriveLibraryDB mDB;
 
-    DriveLibraryComponent mComponent;
+    DriveLibraryProviderComponent mComponent;
     UriMatcher mUriMatcher;
 
     @Override
     public boolean onCreate() {
-        OkHttpComponent parent = DaggerService.getDaggerComponent(getContext());
-        mComponent = DriveLibraryComponent.FACTORY.call(parent, new DriveLibraryModule());
+        DriveLibraryComponent parent = DaggerService.getDaggerComponent(getContext());
+        mComponent = DriveLibraryProviderComponent.FACTORY.call(parent, new DriveLibraryProviderModule());
         mComponent.inject(this);
         mUriMatcher = DriveLibraryUris.matcher(mAuthority);
         return super.onCreate();

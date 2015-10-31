@@ -15,27 +15,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.artwork.provider;
+package org.opensilk.music.library.drive;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-
-import org.opensilk.common.core.dagger2.ForApplication;
+import org.opensilk.common.core.dagger2.AppContextComponent;
+import org.opensilk.common.core.dagger2.AppContextModule;
+import org.opensilk.music.okhttp.OkHttpComponent;
 
 import javax.inject.Singleton;
 
-import dagger.Module;
-import dagger.Provides;
+import dagger.Component;
 
 /**
- * Created by drew on 5/1/15.
+ * Created by drew on 10/31/15.
  */
-@Module
-public class SystemServicesModule {
-
-    @Provides @Singleton
-    public ConnectivityManager provideConnectivityManager(@ForApplication Context appContext) {
-        return (ConnectivityManager)appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-    }
-
+@Singleton
+@Component(
+        modules = {
+                AppContextModule.class,
+                DriveLibraryModule.class
+        }
+)
+public interface DriveLibraryComponent extends OkHttpComponent, AppContextComponent {
 }

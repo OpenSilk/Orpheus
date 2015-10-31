@@ -15,13 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.library.drive.provider;
+package org.opensilk.music.library.drive;
 
-import javax.inject.Scope;
+import org.opensilk.music.okhttp.OkHttpModule;
+
+import dagger.Module;
 
 /**
- * Created by drew on 10/20/15.
+ * Created by drew on 10/31/15.
  */
-@Scope
-public @interface DriveLibraryScope {
+@Module(
+        includes = OkHttpModule.class
+)
+public class DriveLibraryModule {
 }

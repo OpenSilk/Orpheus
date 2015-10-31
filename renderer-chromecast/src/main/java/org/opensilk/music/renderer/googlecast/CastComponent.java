@@ -22,7 +22,9 @@ import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.support.v7.media.MediaRouter;
 
+import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.common.core.dagger2.AppContextModule;
+import org.opensilk.common.core.dagger2.SystemServicesComponent;
 import org.opensilk.music.okhttp.OkHttpComponent;
 
 import javax.inject.Singleton;
@@ -39,6 +41,6 @@ import dagger.Component;
                 CastModule.class,
         }
 )
-public interface CastComponent extends OkHttpComponent {
+public interface CastComponent extends OkHttpComponent, AppContextComponent, SystemServicesComponent {
     MediaRouter mediaRouter();
 }

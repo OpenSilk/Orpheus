@@ -15,13 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.artwork.provider;
+package org.opensilk.music.library.drive.provider;
 
-import android.net.ConnectivityManager;
+import javax.inject.Scope;
 
 /**
- * Created by drew on 5/1/15.
+ * Created by drew on 10/20/15.
  */
-public interface SystemServicesComponent {
-    ConnectivityManager connectivityManager();
+@Scope
+public @interface DriveLibraryProviderScope {
 }

@@ -21,6 +21,7 @@ import android.content.Context;
 import android.support.v7.media.MediaRouter;
 
 import org.opensilk.common.core.dagger2.ForApplication;
+import org.opensilk.common.core.dagger2.SystemServicesModule;
 import org.opensilk.music.okhttp.OkHttpModule;
 
 import dagger.Module;
@@ -30,7 +31,10 @@ import dagger.Provides;
  * Created by drew on 10/29/15.
  */
 @Module(
-        includes = OkHttpModule.class
+        includes = {
+                OkHttpModule.class,
+                SystemServicesModule.class
+        }
 )
 public class CastModule {
 

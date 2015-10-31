@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
-import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -42,19 +41,20 @@ import dagger.Provides;
 @Module(
         includes = DriveAuthorityModule.class
 )
-public class DriveLibraryModule {
+public class DriveLibraryProviderModule {
 
-    @Provides @DriveLibraryScope
+    @Provides @DriveLibraryProviderScope
     public HttpTransport provideHttpTransport(OkHttpClient okHttpClient) {
         return new OkHttpTransport(okHttpClient);
     }
 
-    @Provides @DriveLibraryScope
+    @Provides @DriveLibraryProviderScope
     public JsonFactory provideJsonFactory() {
         return AndroidJsonFactory.getDefaultInstance();
     }
 
-    @Provides @DriveLibraryScope @Named("AppIdentifier")
+    @Provides @DriveLibraryProviderScope
+    @Named("AppIdentifier")
     public String provideAppIdentifier(@ForApplication Context context) {
         try {
             PackageInfo info = context.getPackageManager().getPackageInfo(

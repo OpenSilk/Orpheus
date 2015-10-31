@@ -19,6 +19,7 @@ package org.opensilk.music.artwork.provider;
 import android.content.Context;
 
 import org.opensilk.common.core.dagger2.ForApplication;
+import org.opensilk.common.core.dagger2.SystemServicesModule;
 import org.opensilk.music.artwork.cache.BitmapDiskCache;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.artwork.cache.ByteArrayPool;

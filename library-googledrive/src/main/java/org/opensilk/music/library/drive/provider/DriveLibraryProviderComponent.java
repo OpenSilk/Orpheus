@@ -17,9 +17,9 @@
 
 package org.opensilk.music.library.drive.provider;
 
+import org.opensilk.music.library.drive.DriveLibraryComponent;
 import org.opensilk.music.library.drive.client.DriveClientComponent;
 import org.opensilk.music.library.drive.client.DriveClientModule;
-import org.opensilk.music.okhttp.OkHttpComponent;
 
 import dagger.Component;
 import rx.functions.Func2;
@@ -27,23 +27,23 @@ import rx.functions.Func2;
 /**
  * Created by drew on 10/20/15.
  */
-@DriveLibraryScope
+@DriveLibraryProviderScope
 @Component(
         dependencies = {
-                OkHttpComponent.class,
+                DriveLibraryComponent.class,
         },
         modules = {
-                DriveLibraryModule.class
+                DriveLibraryProviderModule.class
         }
 )
-public interface DriveLibraryComponent {
-        Func2<OkHttpComponent, DriveLibraryModule, DriveLibraryComponent> FACTORY =
-                new Func2<OkHttpComponent, DriveLibraryModule, DriveLibraryComponent>() {
+public interface DriveLibraryProviderComponent {
+        Func2<DriveLibraryComponent, DriveLibraryProviderModule, DriveLibraryProviderComponent> FACTORY =
+                new Func2<DriveLibraryComponent, DriveLibraryProviderModule, DriveLibraryProviderComponent>() {
                         @Override
-                        public DriveLibraryComponent call(OkHttpComponent driveComponent, DriveLibraryModule driveLibraryModule) {
-                                return DaggerDriveLibraryComponent.builder()
-                                        .okHttpComponent(driveComponent)
-                                        .driveLibraryModule(driveLibraryModule)
+                        public DriveLibraryProviderComponent call(DriveLibraryComponent driveComponent, DriveLibraryProviderModule driveLibraryModule) {
+                                return DaggerDriveLibraryProviderComponent.builder()
+                                        .driveLibraryComponent(driveComponent)
+                                        .driveLibraryProviderModule(driveLibraryModule)
                                         .build();
                         }
                 };

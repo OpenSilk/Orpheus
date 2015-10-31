@@ -17,31 +17,11 @@
 
 package org.opensilk.music.renderer.googlecast.ui;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.wifi.WifiManager;
-
-import org.opensilk.common.core.dagger2.ForApplication;
-
 import dagger.Module;
-import dagger.Provides;
 
 /**
  * Created by drew on 10/30/15.
  */
 @Module
 public class DevicePickerActivityModule {
-
-    //TODO these are declared here temporarily to avoid conflicts with PlaybackComponent
-
-    @Provides
-    ConnectivityManager provideConnectivityManager(@ForApplication Context service) {
-        return (ConnectivityManager) service.getSystemService(Context.CONNECTIVITY_SERVICE);
-    }
-
-    @Provides
-    WifiManager provideWifimanager(@ForApplication Context service) {
-        return (WifiManager) service.getSystemService(Context.WIFI_SERVICE);
-    }
-
 }

@@ -18,6 +18,7 @@
 package org.opensilk.music.artwork.provider;
 
 import org.opensilk.common.core.dagger2.AppContextModule;
+import org.opensilk.common.core.dagger2.SystemServicesComponent;
 import org.opensilk.music.artwork.cache.BitmapDiskCache;
 import org.opensilk.music.artwork.coverartarchive.CoverArtArchiveComponent;
 import org.opensilk.music.artwork.shared.ArtworkComponentCommon;

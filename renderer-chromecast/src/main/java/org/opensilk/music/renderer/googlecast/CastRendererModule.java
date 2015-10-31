@@ -17,13 +17,6 @@
 
 package org.opensilk.music.renderer.googlecast;
 
-import android.content.Context;
-import android.media.AudioManager;
-import android.net.ConnectivityManager;
-import android.net.wifi.WifiManager;
-
-import org.opensilk.common.core.dagger2.ForApplication;
-
 import dagger.Module;
 import dagger.Provides;
 
@@ -44,20 +37,4 @@ public class CastRendererModule {
         return service;
     }
 
-    //TODO these are declared here temporarily to avoid conflicts with PlaybackComponent
-
-    @Provides
-    ConnectivityManager provideConnectivityManager(@ForApplication Context service) {
-        return (ConnectivityManager) service.getSystemService(Context.CONNECTIVITY_SERVICE);
-    }
-
-    @Provides
-    WifiManager provideWifimanager(@ForApplication Context service) {
-        return (WifiManager) service.getSystemService(Context.WIFI_SERVICE);
-    }
-
-    @Provides
-    AudioManager provideAudioManager(@ForApplication Context service) {
-        return (AudioManager) service.getSystemService(Context.AUDIO_SERVICE);
-    }
 }

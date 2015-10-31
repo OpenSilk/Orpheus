@@ -17,13 +17,7 @@
 
 package org.opensilk.music.artwork.requestor;
 
-import android.content.Context;
-
-import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.artwork.shared.ArtworkAuthorityModule;
-import org.opensilk.music.artwork.UtilsArt;
-import org.opensilk.music.artwork.cache.ArtworkCache;
-import org.opensilk.music.artwork.cache.ArtworkLruCache;
 
 import javax.inject.Singleton;
 
@@ -37,10 +31,6 @@ import dagger.Provides;
         includes = ArtworkAuthorityModule.class
 )
 public class ArtworkRequestorModule {
-    @Provides @Singleton
-    public ArtworkCache provideArtworkLruCache(@ForApplication Context context) {
-        return new ArtworkLruCache(UtilsArt.calculateL1CacheSize(context, false));
-    }
     @Provides @Singleton
     public ArtworkRequestManager provideArtworkRequestManager(ArtworkRequestManagerImpl iml) {
         return iml;

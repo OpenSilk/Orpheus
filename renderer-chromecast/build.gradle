@@ -60,6 +60,7 @@ dependencies {
 //    compile 'org.eclipse.jetty:jetty-servlet:8.1.18.v20150929'
 //    compile 'org.eclipse.jetty:jetty-client:8.1.18.v20150929'
 
+    compile project(':common-core')
     compile project(':core-playback-renderer')
     compile project(':core-okhttp')
     compile project(':core-model')

@@ -36,6 +36,6 @@ import dagger.Component;
                 OkHttpModule.class
         }
 )
-public interface OkHttpComponent extends AppContextComponent {
+public interface OkHttpComponent {
     OkHttpClient okHttpClient();
 }
