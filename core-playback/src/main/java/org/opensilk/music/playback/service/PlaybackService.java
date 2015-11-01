@@ -477,6 +477,10 @@ public class PlaybackService {
     }
 
     void applyAudioEffects() {
+        if (mAudioSessionId <= 0) {
+            removeAudioEffects();
+            return;
+        }
         //apply audio effects to our new sessionId
         final Intent audioEffectsIntent = new Intent(
                 AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION);
@@ -820,6 +824,7 @@ public class PlaybackService {
         public void onSkipToNext() {
             mHandler.removeCallbacks(mProgressCheckRunnable);
             if (mPlayback.hasNext()) {
+                mInternalState = PlaybackStateCompat.STATE_SKIPPING_TO_NEXT;
                 mPlayback.goToNext();
             } else if (mQueue.notEmpty()) {
                 int next = mQueue.getNextPos();
