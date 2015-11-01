@@ -233,6 +233,12 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
         }
         mSessionId = castRes.getSessionId();
         attachMediaChannel();
+        mCallbackHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                notifyOnAudioSessionId(0);//disable the visualizer
+            }
+        });
     }
 
     private void reset() {
