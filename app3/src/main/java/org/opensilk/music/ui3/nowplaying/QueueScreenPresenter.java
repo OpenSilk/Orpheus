@@ -23,6 +23,7 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.MenuItem;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.core.rx.RxUtils;
 import org.opensilk.common.ui.mortar.Lifecycle;
 import org.opensilk.common.ui.mortar.LifecycleService;
 import org.opensilk.music.R;
@@ -83,9 +84,8 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView> {
     @Override
     protected void onExitScope() {
         super.onExitScope();
-        if (lifcycleSubscripton != null) {
-            lifcycleSubscripton.unsubscribe();
-        }
+        RxUtils.unsubscribe(lifcycleSubscripton);
+        unsubscribeBroadcasts();
     }
 
     @Override
@@ -95,9 +95,7 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView> {
             getView().getAdapter().replaceAll(queue);
             getView().getAdapter().poke();
         }
-        if (lifcycleSubscripton != null) {
-            lifcycleSubscripton.unsubscribe();
-        }
+        RxUtils.unsubscribe(lifcycleSubscripton);
         lifcycleSubscripton = lifecycle.subscribe(new Action1<Lifecycle>() {
             @Override
             @DebugLog

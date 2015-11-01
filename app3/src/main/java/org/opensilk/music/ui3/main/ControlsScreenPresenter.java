@@ -24,9 +24,10 @@ import android.support.v4.widget.DrawerLayout;
 import android.view.View;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.core.rx.RxUtils;
 import org.opensilk.common.ui.mortar.DrawerOwner;
-import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
-import org.opensilk.common.ui.mortar.PausesAndResumes;
+import org.opensilk.common.ui.mortar.Lifecycle;
+import org.opensilk.common.ui.mortar.LifecycleService;
 import org.opensilk.music.playback.PlaybackStateHelper;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.common.UtilsCommon;
@@ -35,7 +36,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Observable;
@@ -43,7 +43,6 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
-import timber.log.Timber;
 
 import static org.opensilk.common.core.rx.RxUtils.isSubscribed;
 
@@ -52,11 +51,13 @@ import static org.opensilk.common.core.rx.RxUtils.isSubscribed;
  */
 @ScreenScope
 public class ControlsScreenPresenter extends ViewPresenter<ControlsScreenView>
-        implements PausesAndResumes, DrawerLayout.DrawerListener {
+        implements DrawerLayout.DrawerListener {
 
-    final PauseAndResumeRegistrar pauseAndResumeRegistrar;
     final PlaybackController playbackController;
     final DrawerOwner drawerOwner;
+
+    Observable<Lifecycle> lifecycle;
+    Subscription lifecycleSubscripton;
 
     CompositeSubscription broadcastSubscription;
     Subscription blinkingSubscription;
@@ -77,11 +78,9 @@ public class ControlsScreenPresenter extends ViewPresenter<ControlsScreenView>
 
     @Inject
     public ControlsScreenPresenter(
-            PauseAndResumeRegistrar pauseAndResumeRegistrar,
             PlaybackController playbackController,
             DrawerOwner drawerOwner
     ) {
-        this.pauseAndResumeRegistrar = pauseAndResumeRegistrar;
         this.playbackController = playbackController;
         this.drawerOwner = drawerOwner;
     }
@@ -89,53 +88,36 @@ public class ControlsScreenPresenter extends ViewPresenter<ControlsScreenView>
     @Override
     protected void onEnterScope(MortarScope scope) {
         super.onEnterScope(scope);
-        pauseAndResumeRegistrar.register(scope, this);
+        lifecycle = LifecycleService.getLifecycle(scope);
         drawerOwner.register(scope, this);
     }
 
     @Override
     protected void onExitScope() {
         super.onExitScope();
+        RxUtils.unsubscribe(lifecycleSubscripton);
         teardown();
     }
 
     @Override
     protected void onLoad(Bundle savedInstanceState) {
         super.onLoad(savedInstanceState);
-        if (pauseAndResumeRegistrar.isRunning()) {
-            Timber.v("missed onResume()");
-            setup();
-        }
+        RxUtils.unsubscribe(lifecycleSubscripton);
+        lifecycleSubscripton = lifecycle.subscribe(new Action1<Lifecycle>() {
+            @Override
+            public void call(Lifecycle lifecycle) {
+                switch (lifecycle) {
+                    case RESUME:
+                        subscribeBroadcasts();
+                        break;
+                    case PAUSE:
+                        teardown();
+                        break;
+                }
+            }
+        });
     }
 
-    @Override
-    protected void onSave(Bundle outState) {
-        super.onSave(outState);
-        if (pauseAndResumeRegistrar.isRunning()) {
-            Timber.v("missed onPause()");
-            teardown();
-        }
-    }
-
-    @Override
-    public void onResume() {
-        if (hasView()) {
-            Timber.v("missed onLoad()");
-            setup();
-        }
-    }
-
-    @Override
-    public void onPause() {
-        teardown();
-    }
-
-    @DebugLog
-    void setup() {
-        subscribeBroadcasts();
-    }
-
-    @DebugLog
     void teardown() {
         unsubscribeBroadcasts();
         mProgressUpdater.unsubscribeProgress();

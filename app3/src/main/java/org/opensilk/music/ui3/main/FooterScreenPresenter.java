@@ -27,7 +27,6 @@ import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.rx.RxUtils;
 import org.opensilk.common.ui.mortar.Lifecycle;
 import org.opensilk.common.ui.mortar.LifecycleService;
-import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.playback.control.PlaybackController;
 
@@ -56,7 +55,6 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> {
 
     final Context appContext;
     final PlaybackController playbackController;
-    final PauseAndResumeRegistrar pauseAndResumeRegistrar;
     final AppPreferences settings;
 
     Observable<Lifecycle> lifecycle;
@@ -77,12 +75,10 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> {
     public FooterScreenPresenter(
             @ForApplication Context context,
             PlaybackController playbackController,
-            PauseAndResumeRegistrar pauseAndResumeRegistrar,
             AppPreferences settings
     ) {
         this.appContext = context;
         this.playbackController = playbackController;
-        this.pauseAndResumeRegistrar = pauseAndResumeRegistrar;
         this.settings = settings;
     }
 
@@ -98,7 +94,7 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> {
         Timber.v("onExitScope()");
         super.onExitScope();
         RxUtils.unsubscribe(lifecycleSub);
-        lifecycleSub = null;
+        teardown();
     }
 
     @Override
@@ -120,12 +116,16 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> {
                         subscribeBroadcasts();
                         break;
                     case PAUSE:
-                        unsubscribeBroadcasts();
-                        mProgressUpdater.unsubscribeProgress();
+                        teardown();
                         break;
                 }
             }
         });
+    }
+
+    void teardown() {
+        unsubscribeBroadcasts();
+        mProgressUpdater.unsubscribeProgress();
     }
 
     void skipToQueueItem(int pos) {

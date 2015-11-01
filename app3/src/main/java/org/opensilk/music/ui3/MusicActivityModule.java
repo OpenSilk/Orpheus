@@ -18,7 +18,6 @@
 package org.opensilk.music.ui3;
 
 import org.opensilk.common.ui.mortar.ActivityResultsOwnerModule;
-import org.opensilk.common.ui.mortar.PauseAndResumeModule;
 
 import dagger.Module;
 
@@ -27,8 +26,7 @@ import dagger.Module;
  */
 @Module(
         includes = {
-                ActivityResultsOwnerModule.class,
-                PauseAndResumeModule.class,
+                ActivityResultsOwnerModule.class
         }
 )
 public class MusicActivityModule {

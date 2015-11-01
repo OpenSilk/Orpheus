@@ -26,6 +26,7 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.core.rx.RxUtils;
 import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.DrawerOwner;
 import org.opensilk.common.ui.mortar.Lifecycle;
@@ -104,6 +105,13 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
     }
 
     @Override
+    protected void onExitScope() {
+        super.onExitScope();
+        RxUtils.unsubscribe(lifcycleSubscripton);
+        teardown();
+    }
+
+    @Override
     protected void onLoad(Bundle savedInstanceState) {
         super.onLoad(savedInstanceState);
         if (lastArtUri != null) {
@@ -115,9 +123,7 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
             onNewPlaybackState(lastState);
         }
         getView().setPlaying(false);
-        if (lifcycleSubscripton != null) {
-            lifcycleSubscripton.unsubscribe();
-        }
+        RxUtils.unsubscribe(lifcycleSubscripton);
         lifcycleSubscripton = lifecycle.subscribe(new Action1<Lifecycle>() {
             @Override
             @DebugLog
@@ -129,9 +135,7 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
                         break;
                     }
                     case PAUSE: {
-                        unsubscribeBroadcasts();
-                        mProgressUpdater.unsubscribeProgress();
-                        destroyVisualizer();
+                        teardown();
                         break;
                     }
                 }
@@ -139,12 +143,10 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
         });
     }
 
-    @Override
-    protected void onExitScope() {
-        super.onExitScope();
-        if (lifcycleSubscripton != null) {
-            lifcycleSubscripton.unsubscribe();
-        }
+    void teardown() {
+        unsubscribeBroadcasts();
+        mProgressUpdater.unsubscribeProgress();
+        destroyVisualizer();
     }
 
     void subscribeBroadcasts() {

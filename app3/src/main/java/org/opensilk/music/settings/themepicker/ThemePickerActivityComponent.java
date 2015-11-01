@@ -19,7 +19,6 @@ package org.opensilk.music.settings.themepicker;
 
 import org.opensilk.common.core.dagger2.ActivityScope;
 import org.opensilk.common.ui.mortar.ActivityResultsOwnerModule;
-import org.opensilk.common.ui.mortar.PauseAndResumeModule;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.ui3.MusicActivityComponent;
 
@@ -33,8 +32,7 @@ import rx.functions.Func1;
 @Component(
         dependencies = AppComponent.class,
         modules = {
-                ActivityResultsOwnerModule.class,
-                PauseAndResumeModule.class,
+                ActivityResultsOwnerModule.class
         }
 )
 public interface ThemePickerActivityComponent extends MusicActivityComponent {
