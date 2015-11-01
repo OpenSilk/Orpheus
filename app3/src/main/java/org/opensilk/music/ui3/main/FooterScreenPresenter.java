@@ -64,6 +64,7 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> {
     CompositeSubscription broadcastSubscriptions;
     final ArrayList<FooterPageScreen> screens = new ArrayList<>();
     long lastPlayingId;
+    boolean selfChange;
 
     final ProgressUpdater mProgressUpdater = new ProgressUpdater(new Action1<Integer>() {
         @Override
@@ -131,6 +132,7 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> {
         if (pos > 0  && pos < screens.size()) {
             long id = screens.get(pos).queueItem.getQueueId();
             lastPlayingId = id;
+            selfChange = true;
             playbackController.skipToQueueItem(id);
         }
     }
@@ -162,8 +164,10 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> {
                     @DebugLog
                     public void call(PlaybackStateCompat playbackState) {
                         mProgressUpdater.subscribeProgress(playbackState);
-                        lastPlayingId = playbackState.getActiveQueueItemId();
-                        updatePagerWithCurrentItem(lastPlayingId);
+                        if (!selfChange) {
+                            lastPlayingId = playbackState.getActiveQueueItemId();
+                            updatePagerWithCurrentItem(lastPlayingId);
+                        }
                     }
                 }
         );
@@ -181,6 +185,7 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> {
                             getView().onNewItems(screens);
                         }
                         updatePagerWithCurrentItem(lastPlayingId);
+                        selfChange = false;
                     }
                 }
         );
