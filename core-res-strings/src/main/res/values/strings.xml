@@ -152,6 +152,9 @@
     <string name="bio_biography_title">Biography</string>
     <string name="bio_similar_artists_title">Similar Artists</string>
 
+    <!--reenderer screen-->
+    <string name="set_renderer_volume">Set renderer volume</string>
+
     <!-- misc -->
     <string name="opensilk_org_url" translatable="false">http://opensilk.org/</string>
     <string name="playstore_package_url" translatable="false">https://play.google.com/store/apps/details?id=%s</string>

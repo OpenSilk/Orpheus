@@ -24,6 +24,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.RatingCompat;
+import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.KeyEvent;
@@ -42,6 +43,8 @@ public interface IMediaControllerProxy {
     void dispatchMediaButtonEvent(KeyEvent event);
     void registerCallback(Callback cb, Handler handler);
     void unregisterCallback(Callback cb);
+    Object getPlaybackInfo();
+    void setVolumeTo(int volume, int flags);
     interface TransportControlsProxy {
         void play();
         void playFromMediaId(String mediaId, Bundle extras);

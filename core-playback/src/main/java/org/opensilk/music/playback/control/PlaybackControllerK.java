@@ -89,6 +89,13 @@ class PlaybackControllerK implements IPlaybackController {
         return mMediaController;
     }
 
+    @Override
+    public PlaybackInfoCompat getPlaybackInfo(Object info) {
+        MediaControllerCompat.PlaybackInfo playbackInfo = (MediaControllerCompat.PlaybackInfo) info;
+        return new PlaybackInfoCompat(playbackInfo.getPlaybackType(), playbackInfo.getVolumeControl(),
+                playbackInfo.getMaxVolume(), playbackInfo.getCurrentVolume());
+    }
+
     final MediaBrowserCompat.ConnectionCallback mConnectionCallback = new MediaBrowserCompat.ConnectionCallback() {
         @Override
         public void onConnected() {

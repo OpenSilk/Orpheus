@@ -99,6 +99,16 @@ public class MediaControllerProxyImplK implements IMediaControllerProxy {
         }
     }
 
+    @Override
+    public MediaControllerCompat.PlaybackInfo getPlaybackInfo() {
+        return mController.getPlaybackInfo();
+    }
+
+    @Override
+    public void setVolumeTo(int volume, int flags) {
+        mController.setVolumeTo(volume, flags);
+    }
+
     static class MediaControllerCallback extends MediaControllerCompat.Callback {
 
         final IMediaControllerProxy.Callback mCallback;

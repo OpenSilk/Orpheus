@@ -22,8 +22,13 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.SeekBar;
 
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.core.util.VersionUtils;
+import org.opensilk.common.ui.util.ThemeUtils;
 import org.opensilk.music.R;
 
 import javax.inject.Inject;
@@ -34,12 +39,14 @@ import butterknife.InjectView;
 /**
  * Created by drew on 10/27/15.
  */
-public class RendererScreenView extends CoordinatorLayout {
+public class RendererScreenView extends LinearLayout {
 
     @Inject RendererScreenPresenter mPresenter;
     @Inject RendererScreenViewAdapter mAdapter;
 
     @InjectView(R.id.recyclerview) RecyclerView mList;
+    @InjectView(R.id.volume_control) ViewGroup mVolumeControl;
+    @InjectView(R.id.volume_seeker) SeekBar mVolumeSeekbar;
 
     public RendererScreenView(Context context, AttributeSet attrs) {
         super(context, attrs);

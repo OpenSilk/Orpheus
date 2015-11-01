@@ -21,12 +21,38 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         style="@style/mtrl.List"/>
+
+    <LinearLayout
+        android:id="@+id/volume_control"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_behavior="org.opensilk.common.ui.behavior.QuickReturnFooterBehavior">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:textAppearanceLarge"
+            android:paddingRight="16dp"
+            android:paddingLeft="16dp"
+            android:text="@string/set_renderer_volume"/>
+
+        <org.opensilk.common.ui.widget.CompatSeekBar
+            android:id="@+id/volume_seeker"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"/>
+
+    </LinearLayout>
 
 </org.opensilk.music.ui3.renderer.RendererScreenView>

@@ -28,4 +28,5 @@ interface IPlaybackController {
     boolean isConnected();
     IMediaControllerProxy.TransportControlsProxy getTransportControls();
     IMediaControllerProxy getMediaController();
+    PlaybackInfoCompat getPlaybackInfo(Object info);
 }

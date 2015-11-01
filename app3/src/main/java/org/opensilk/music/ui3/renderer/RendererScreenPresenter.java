@@ -20,14 +20,18 @@ package org.opensilk.music.ui3.renderer;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.media.VolumeProviderCompat;
+import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.SeekBar;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.common.ui.recycler.ItemClickSupport;
 import org.opensilk.music.playback.control.PlaybackController;
+import org.opensilk.music.playback.control.PlaybackInfoCompat;
 import org.opensilk.music.playback.renderer.client.RendererInfo;
 import org.opensilk.music.playback.renderer.client.RendererPluginLoader;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
@@ -44,13 +48,15 @@ import rx.functions.Action1;
  */
 @ScreenScope
 public class RendererScreenPresenter extends ViewPresenter<RendererScreenView>
-        implements ItemClickSupport.OnItemClickListener {
+        implements ItemClickSupport.OnItemClickListener, SeekBar.OnSeekBarChangeListener {
 
     final RendererPluginLoader loader;
     final PlaybackController controller;
     final ActivityResultsController activityResultsController;
     final FragmentManagerOwner fragmentManagerOwner;
     final RendererScreen screen;
+
+    int lastSeekProgress = -1;
 
     @Inject
     public RendererScreenPresenter(
@@ -87,6 +93,16 @@ public class RendererScreenPresenter extends ViewPresenter<RendererScreenView>
                 }
             }
         });
+        PlaybackInfoCompat playbackInfo = controller.getPlaybackInfo();
+        if (playbackInfo == null || playbackInfo.getPlaybackType() !=
+                MediaControllerCompat.PlaybackInfo.PLAYBACK_TYPE_REMOTE ||
+                playbackInfo.getVolumeControl() != VolumeProviderCompat.VOLUME_CONTROL_ABSOLUTE) {
+            getView().mVolumeControl.setVisibility(View.GONE);
+        } else {
+            getView().mVolumeSeekbar.setMax(playbackInfo.getMaxVolume());
+            getView().mVolumeSeekbar.setProgress(playbackInfo.getCurrentVolume());
+            getView().mVolumeSeekbar.setOnSeekBarChangeListener(this);
+        }
     }
 
     @Override
@@ -101,6 +117,27 @@ public class RendererScreenPresenter extends ViewPresenter<RendererScreenView>
                 controller.switchToNewRenderer(info.getComponentName());
             }
             fragmentManagerOwner.dismissDialog(screen.getName());
+        }
+    }
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        if (!fromUser) {
+            return;
+        }
+        lastSeekProgress = progress;
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+        lastSeekProgress = -1;
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        if (lastSeekProgress != -1) {
+            controller.setVolume(lastSeekProgress);
+            lastSeekProgress = -1;
         }
     }
 }

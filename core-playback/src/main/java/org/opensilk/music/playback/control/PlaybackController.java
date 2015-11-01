@@ -265,6 +265,19 @@ public class PlaybackController {
         }
     }
 
+    public PlaybackInfoCompat getPlaybackInfo() {
+        if (hasController()) {
+            return mImpl.getPlaybackInfo(mImpl.getMediaController().getPlaybackInfo());
+        }
+        return null;
+    }
+
+    public void setVolume(int volume) {
+        if (hasController()) {
+            mImpl.getMediaController().setVolumeTo(volume, 0);
+        }
+    }
+
     /*
      * End custom commands
      */
