@@ -7,6 +7,7 @@
 package com.pheelicks.visualizer;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import android.content.Context;
@@ -148,6 +149,14 @@ public class VisualizerView extends View {
   public void clearRenderers()
   {
     mRenderers.clear();
+  }
+
+  public void removeRenderer(Renderer renderer)
+  {
+    if (renderer != null)
+    {
+      mRenderers.remove(renderer);
+    }
   }
 
   /**

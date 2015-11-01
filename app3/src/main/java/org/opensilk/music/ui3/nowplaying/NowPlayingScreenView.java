@@ -48,6 +48,7 @@ import com.jakewharton.rxbinding.view.ViewLongClickEvent;
 import com.pheelicks.visualizer.VisualizerView;
 import com.pheelicks.visualizer.renderer.CircleBarRenderer;
 import com.pheelicks.visualizer.renderer.CircleRenderer;
+import com.pheelicks.visualizer.renderer.Renderer;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.core.util.VersionUtils;
@@ -103,10 +104,9 @@ public class NowPlayingScreenView extends RelativeLayout {
     VisualizerView visualizerView;
     String visualizerType = "none";
     int rendererColor = Color.argb(255, 222, 92, 143);
-    int sessionId = 0;
-    boolean isPlaying;
 
     CompositeSubscription clicks;
+    Renderer currentRenderer;
 
     public NowPlayingScreenView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -179,8 +179,8 @@ public class NowPlayingScreenView extends RelativeLayout {
                         == ContextCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO)) {
                     visualizerView = ViewUtils.inflate(getContext(),
                             R.layout.now_playing_visualization, placeholder, false);
+                    visualizerView.setVisibility(GONE);
                     placeholder.addView(visualizerView);
-                    placeholder.bringChildToFront(visualizerView);
                     initRenderer();
                 } else {
                     //TODO
@@ -192,7 +192,7 @@ public class NowPlayingScreenView extends RelativeLayout {
 
     @DebugLog
     private void initRenderer() {
-        visualizerView.clearRenderers();
+        Renderer oldRenderer = currentRenderer;
         switch (visualizerType) {
             case NOW_PLAYING_VIEW_VIS_CIRCLE: {
                 Paint paint = new Paint();
@@ -201,6 +201,7 @@ public class NowPlayingScreenView extends RelativeLayout {
                 paint.setColor(rendererColor);
                 CircleRenderer circleRenderer = new CircleRenderer(paint, false);
                 visualizerView.addRenderer(circleRenderer);
+                currentRenderer = circleRenderer;
                 break;
             } case NOW_PLAYING_VIEW_VIS_CIRCLE_BAR: {
                 Paint paint = new Paint();
@@ -210,6 +211,7 @@ public class NowPlayingScreenView extends RelativeLayout {
                 paint.setColor(rendererColor);
                 CircleBarRenderer circleBarRenderer = new CircleBarRenderer(paint, 32, false);
                 visualizerView.addRenderer(circleBarRenderer);
+                currentRenderer = circleBarRenderer;
                 break;
             } case NOW_PLAYING_VIEW_VIS_LINES: {
                 /*
@@ -229,6 +231,9 @@ public class NowPlayingScreenView extends RelativeLayout {
                 break;
             }
         }
+        if (oldRenderer != null) {
+            visualizerView.removeRenderer(oldRenderer);
+        }
     }
 
     public void reInitRenderer() {
@@ -243,16 +248,15 @@ public class NowPlayingScreenView extends RelativeLayout {
     }
 
     public void relinkVisualizer(int sessionId) {
-        this.sessionId = sessionId;
         linkVisualizer();
     }
 
     @DebugLog
     private void linkVisualizer() {
         destroyVisualizer();
-        if (sessionId > 0) {
+        if (presenter.sessionId > 0) {
             if (visualizerView != null) {
-                visualizerView.link(sessionId);
+                visualizerView.link(presenter.sessionId);
             }
         }
     }
@@ -270,7 +274,6 @@ public class NowPlayingScreenView extends RelativeLayout {
     }
 
     public void setPlaying(boolean playing) {
-        isPlaying = playing;
         if (playing) {
             if (visualizerView == null) {
                 initVisualizer();
@@ -316,6 +319,10 @@ public class NowPlayingScreenView extends RelativeLayout {
             if (artwork.getVisibility() != VISIBLE) {
                 animateIn(artwork);
             }
+        }
+        Timber.d("artwork vis = %s", artwork.getVisibility() == VISIBLE ? "VISIBLE" : "INVISIBLE");
+        if (visualizerView != null) {
+            Timber.d("visulazer vis = %s", visualizerView.getVisibility() == VISIBLE ? "VISIBLE" : "GONE");
         }
     }
 
@@ -374,6 +381,7 @@ public class NowPlayingScreenView extends RelativeLayout {
 
     @DebugLog
     private void animateOut(View view) {
+        view.clearAnimation();
         view.setAlpha(1f);
         view.setVisibility(VISIBLE);
         ViewCompat.animate(view)
@@ -404,6 +412,7 @@ public class NowPlayingScreenView extends RelativeLayout {
 
     @DebugLog
     private void animateIn(View view) {
+        view.clearAnimation();
         view.setAlpha(0f);
         view.setVisibility(VISIBLE);
         ViewCompat.animate(view)
@@ -442,14 +451,7 @@ public class NowPlayingScreenView extends RelativeLayout {
                 if (VersionUtils.hasLollipop()) {
                     themeStatusbar21(s1.getRgb());
                 }
-                final boolean playing = isPlaying;
                 getView().reInitRenderer(s1.getRgb());
-                getView().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        setPlaying(playing);
-                    }
-                }, 100);
             } else {
                 Timber.d("Resetting view theme");
                 int background = ThemeUtils.getThemeAttrColor(getView().getContext(),
@@ -472,14 +474,7 @@ public class NowPlayingScreenView extends RelativeLayout {
                 if (VersionUtils.hasLollipop()) {
                     themeStatusbar21(primaryDark);
                 }
-                final boolean playing = isPlaying;
                 getView().reInitRenderer(accent);
-                getView().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        setPlaying(playing);
-                    }
-                }, 100);
             }
         }
     };
