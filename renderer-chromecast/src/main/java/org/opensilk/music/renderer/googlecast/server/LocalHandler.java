@@ -43,6 +43,9 @@ import javax.servlet.http.HttpServletResponse;
 import timber.log.Timber;
 
 /**
+ * Handles content stored locally, assumed to be files but not
+ * necessarily so as long as it is seekable. ie no pipes or sockets
+ *
  * Created by drew on 10/30/15.
  */
 public class LocalHandler extends AbstractHandler {
@@ -63,13 +66,17 @@ public class LocalHandler extends AbstractHandler {
 
         String pathInfo = StringUtils.stripStart(request.getPathInfo(), "/");
         Uri contentUri = Uri.parse(CastServerUtil.decodeString(pathInfo));
-        StringBuilder reqlog = new StringBuilder();
-        reqlog.append("Serving local uri ").append(contentUri).append("\n Method ").append(request.getMethod());
-        for (Enumeration<String> names = request.getHeaderNames(); names.hasMoreElements();) {
-            String name = names.nextElement();
-            reqlog.append("\n HDR: ").append(name).append(":").append(request.getHeader(name));
+
+        if (CastServer.DUMP_REQUEST_HEADERS) {
+            StringBuilder reqlog = new StringBuilder();
+            reqlog.append("Serving artwork uri ").append(contentUri).append("\n Method ").append(request.getMethod());
+            for (Enumeration<String> names = request.getHeaderNames(); names.hasMoreElements();) {
+                String name = names.nextElement();
+                reqlog.append("\n HDR: ").append(name).append(":").append(request.getHeader(name));
+            }
+            Timber.v(reqlog.toString());
         }
-        Timber.v(reqlog.toString());
+
         AssetFileDescriptor afd = mContentResolver.openAssetFileDescriptor(contentUri, "r");
         if (afd == null) {
             Timber.e("Invalid uri");
@@ -130,6 +137,7 @@ public class LocalHandler extends AbstractHandler {
 
         InputStream in = afd.createInputStream();
         try {
+            //XXX out need not be closed
             OutputStream out = response.getOutputStream();
             IOUtils.copy(in, out);
             out.flush();

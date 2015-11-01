@@ -44,6 +44,9 @@ import javax.servlet.http.HttpServletResponse;
 import timber.log.Timber;
 
 /**
+ * Handles serving artwork. Requests are made to the artwork provider via the
+ * PlaybackService accessor.
+ *
  * Created by drew on 10/30/15.
  */
 public class ArtHandler extends AbstractHandler {
@@ -67,13 +70,16 @@ public class ArtHandler extends AbstractHandler {
 
         String pathInfo = StringUtils.stripStart(request.getPathInfo(), "/");
         Uri contentUri = Uri.parse(CastServerUtil.decodeString(pathInfo));
-        StringBuilder reqlog = new StringBuilder();
-        reqlog.append("Serving artwork uri ").append(contentUri).append("\n Method ").append(request.getMethod());
-        for (Enumeration<String> names = request.getHeaderNames(); names.hasMoreElements();) {
-            String name = names.nextElement();
-            reqlog.append("\n HDR: ").append(name).append(":").append(request.getHeader(name));
+
+        if (CastServer.DUMP_REQUEST_HEADERS) {
+            StringBuilder reqlog = new StringBuilder();
+            reqlog.append("Serving artwork uri ").append(contentUri).append("\n Method ").append(request.getMethod());
+            for (Enumeration<String> names = request.getHeaderNames(); names.hasMoreElements();) {
+                String name = names.nextElement();
+                reqlog.append("\n HDR: ").append(name).append(":").append(request.getHeader(name));
+            }
+            Timber.v(reqlog.toString());
         }
-        Timber.v(reqlog.toString());
 
         //TODO cast devices are smart enough to not requery on same url
         //TODO need to implement more permanent etags
@@ -104,6 +110,7 @@ public class ArtHandler extends AbstractHandler {
         AssetFileDescriptor afd = new AssetFileDescriptor(pfd, 0, pfd.getStatSize());
         InputStream in = afd.createInputStream();
         try {
+            //XXX out need not be closed
             OutputStream out = response.getOutputStream();
             IOUtils.copy(in, out);
             out.flush();

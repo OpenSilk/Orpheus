@@ -23,8 +23,8 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.opensilk.music.renderer.googlecast.BuildConfig;
 import org.opensilk.music.renderer.googlecast.CastRendererScope;
 
 import javax.inject.Inject;
@@ -34,6 +34,7 @@ import javax.inject.Inject;
  */
 @CastRendererScope
 public class CastServer extends Server {
+    public static final boolean DUMP_REQUEST_HEADERS = BuildConfig.DEBUG;
 
     public static final int SERVER_PORT = 40959;
 

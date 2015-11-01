@@ -19,6 +19,7 @@ package org.opensilk.music.renderer.googlecast.server;
 
 import android.net.Uri;
 
+import com.squareup.okhttp.CacheControl;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Response;
 
@@ -45,6 +46,12 @@ import javax.servlet.http.HttpServletResponse;
 import timber.log.Timber;
 
 /**
+ * Handles requests that require auth by proxying them through
+ * the device (which has been previously authenticated)
+ *
+ * Note that this in not a true proxy, we merely make the request on their
+ * behalf and feed them the input stream.
+ *
  * Created by drew on 10/30/15.
  */
 public class ProxyHandler extends AbstractHandler {
@@ -70,13 +77,16 @@ public class ProxyHandler extends AbstractHandler {
 
         String pathInfo = StringUtils.stripStart(request.getPathInfo(), "/");
         Uri contentUri = Uri.parse(CastServerUtil.decodeString(pathInfo));
-        StringBuilder reqlog = new StringBuilder();
-        reqlog.append("Serving proxy uri ").append(contentUri).append("\n Method ").append(request.getMethod());
-        for (Enumeration<String> names = request.getHeaderNames(); names.hasMoreElements();) {
-            String name = names.nextElement();
-            reqlog.append("\n HDR: ").append(name).append(":").append(request.getHeader(name));
+
+        if (CastServer.DUMP_REQUEST_HEADERS) {
+            StringBuilder reqlog = new StringBuilder();
+            reqlog.append("Serving artwork uri ").append(contentUri).append("\n Method ").append(request.getMethod());
+            for (Enumeration<String> names = request.getHeaderNames(); names.hasMoreElements();) {
+                String name = names.nextElement();
+                reqlog.append("\n HDR: ").append(name).append(":").append(request.getHeader(name));
+            }
+            Timber.v(reqlog.toString());
         }
-        Timber.v(reqlog.toString());
 
         com.squareup.okhttp.Request.Builder rb = new com.squareup.okhttp.Request.Builder()
                 .url(contentUri.toString());
@@ -98,13 +108,23 @@ public class ProxyHandler extends AbstractHandler {
             rb.addHeader("if-none-match", ifnonematch);
         }
 
+        //dont clog our cache with binaries
+        CacheControl pCC = new CacheControl.Builder().noStore().noCache().build();
+        rb.cacheControl(pCC);
+
         Response pResponse = mOkClient.newCall(rb.get().build()).execute();
 
-        Timber.v("Executed proxy GET request uri %s\n Resp: %d, %s",
-                contentUri, pResponse.code(), pResponse.message());
-        for (String name : pResponse.headers().names()) {
-            Timber.v(" HDR: %s: %s", name, pResponse.header(name));
+        if (CastServer.DUMP_REQUEST_HEADERS) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Executed proxy GET request uri ").append(contentUri)
+                    .append("\n Resp: ").append(pResponse.code())
+                    .append(",").append(pResponse.message());
+            for (String name : pResponse.headers().names()) {
+                sb.append("\n HDR: ").append(name).append(": ").append(pResponse.header(name));
+            }
+            Timber.v(sb.toString());
         }
+
         if (!pResponse.isSuccessful()) {
             response.sendError(pResponse.code(), pResponse.message());
             baseRequest.setHandled(true);
@@ -138,6 +158,7 @@ public class ProxyHandler extends AbstractHandler {
         } else {
             InputStream in = pResponse.body().byteStream();
             try {
+                //XXX out need not be closed
                 OutputStream out = response.getOutputStream();
                 IOUtils.copy(in, out);
                 out.flush();
