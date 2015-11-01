@@ -17,6 +17,7 @@
 
 package org.opensilk.music.renderer.googlecast;
 
+import android.content.Context;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
@@ -30,6 +31,7 @@ import org.opensilk.music.okhttp.OkHttpComponent;
 import javax.inject.Singleton;
 
 import dagger.Component;
+import rx.functions.Func1;
 
 /**
  * Created by drew on 10/29/15.
@@ -42,5 +44,13 @@ import dagger.Component;
         }
 )
 public interface CastComponent extends OkHttpComponent, AppContextComponent, SystemServicesComponent {
+    Func1<Context, CastComponent> FACTORY = new Func1<Context, CastComponent>() {
+        @Override
+        public CastComponent call(Context context) {
+            return DaggerCastComponent.builder()
+                    .appContextModule(new AppContextModule(context))
+                    .build();
+        }
+    };
     MediaRouter mediaRouter();
 }
