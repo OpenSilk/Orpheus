@@ -108,7 +108,7 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
     private boolean mPlayerPrepared;
     private String mSessionId;
     private VolumeProviderCompat mVolumeProvider;
-    private MediaRouter.RouteInfo mSelectedRoute;
+    private CastDevice mSelectedCastDevice;
     private volatile Handler mCallbackHandler;
     private boolean mLoadingCurrentTrack;
     private boolean mSkippedToNext;
@@ -135,7 +135,8 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null && "route_selected".equals(intent.getAction())) {
-            mSelectedRoute = mMediaRouter.getSelectedRoute();
+            MediaRouter.RouteInfo route = mMediaRouter.getSelectedRoute();
+            mSelectedCastDevice = CastDevice.getFromBundle(route.getExtras());
         }
         return START_NOT_STICKY;
     }
@@ -156,22 +157,22 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
             stopWithError("Google services unavailable");
             return;
         }
-        if (mSelectedRoute == null) {
+        if (mSelectedCastDevice == null) {
             stopWithError("No route selected");
             return;
         }
-        CastDevice device = CastDevice.getFromBundle(mSelectedRoute.getExtras());
-        if (device == null || !device.isOnLocalNetwork()) {
+        if (!mSelectedCastDevice.isOnLocalNetwork()) {
             stopWithError("Cast device must be on local network");
             return;
         }
-        Timber.d("Selected device %s {%s}", device.getFriendlyName(), device.getIpAddress().toString());
+        Timber.d("Selected device %s {%s}", mSelectedCastDevice.getFriendlyName(),
+                mSelectedCastDevice.getIpAddress().toString());
         InetAddress bindAddr = null;
         try {
             List<NetworkInterface> networkInterfaces = NetworkUtil.discoverNetworkInterfaces();
             List<InetAddress> bindAddresses = NetworkUtil.discoverBindAddresses(networkInterfaces);
             bindAddr = NetworkUtil.getBindAddressInSubnetOf(
-                    networkInterfaces, bindAddresses, device.getIpAddress());
+                    networkInterfaces, bindAddresses, mSelectedCastDevice.getIpAddress());
         } catch (IllegalArgumentException e) {
             Timber.e(e, "lookup network");
             bindAddr = null;
@@ -202,8 +203,8 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
             stopWithError(e.getMessage());
             return;
         }
-        Timber.d("acquiring a connection to Google Play services for %s", device);
-        Cast.CastOptions.Builder apiOptionsBuilder = Cast.CastOptions.builder(device, new CastListener())
+        Timber.d("acquiring a connection to Google Play services for %s", mSelectedCastDevice);
+        Cast.CastOptions.Builder apiOptionsBuilder = Cast.CastOptions.builder(mSelectedCastDevice, new CastListener())
                 .setVerboseLoggingEnabled(true);
         mApiClient = new GoogleApiClient.Builder(mContext)
                 .addApi(Cast.API, apiOptionsBuilder.build())
@@ -232,11 +233,6 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
         }
         mSessionId = castRes.getSessionId();
         attachMediaChannel();
-        RemoteMediaPlayer.MediaChannelResult playerRes = mRemoteMediaPlayer.requestStatus(mApiClient).await();
-        if (!playerRes.getStatus().isSuccess()) {
-            stopWithError(playerRes.getStatus().getStatusMessage());
-            return;
-        }
     }
 
     private void reset() {

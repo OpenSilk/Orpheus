@@ -62,6 +62,12 @@ public class ProxyHandler extends AbstractHandler {
 
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        if (!HttpMethods.GET.equals(request.getMethod())) {
+            response.sendError(HttpStatus.METHOD_NOT_ALLOWED_405);
+            baseRequest.setHandled(true);
+            return;
+        }
+
         String pathInfo = StringUtils.stripStart(request.getPathInfo(), "/");
         Uri contentUri = Uri.parse(CastServerUtil.decodeString(pathInfo));
         StringBuilder reqlog = new StringBuilder();
@@ -71,95 +77,74 @@ public class ProxyHandler extends AbstractHandler {
             reqlog.append("\n HDR: ").append(name).append(":").append(request.getHeader(name));
         }
         Timber.v(reqlog.toString());
+
         com.squareup.okhttp.Request.Builder rb = new com.squareup.okhttp.Request.Builder()
                 .url(contentUri.toString());
         Track.Res trackRes = mTrackResCache.get(contentUri);
+
         //add resource headers
         Map<String, String> headers = trackRes.getHeaders();
         for (Map.Entry<String, String> e : headers.entrySet()) {
             rb.addHeader(e.getKey(), e.getValue());
         }
-        if (HttpMethods.HEAD.equals(request.getMethod())) {
-            Response pResponse = mOkClient.newCall(rb.head().build()).execute();
-            Timber.v("Executed proxy HEAD request uri %s\n Resp: %d, %s",
-                    contentUri, pResponse.code(), pResponse.message());
-            for (String name : pResponse.headers().names()) {
-                Timber.v(" HDR: %s: %s", name, pResponse.header(name));
-            }
-            if (!pResponse.isSuccessful()) {
-                response.sendError(pResponse.code(), pResponse.message());
-                baseRequest.setHandled(true);
-                return;
-            }
-            String acceptRanges = pResponse.header("Accept-Ranges");
-            if (!StringUtils.isEmpty(acceptRanges)) {
-                response.addHeader("Accept-Ranges", acceptRanges);
-            }
-            String contentLen = pResponse.header("Content-Length");
-            if (!StringUtils.isEmpty(contentLen)) {
-                response.addHeader("Content-Length", contentLen);
-            }
-            String contentType = pResponse.header("Content-Type");
-            if (StringUtils.isEmpty(contentType)) {
-                contentType = "application/octet-stream";
-            }
-            response.addHeader("Content-Type", contentType);
-            response.flushBuffer();
-            baseRequest.setHandled(true);
-        } else if (HttpMethods.GET.equals(request.getMethod())) {
-            String range = request.getHeader("Range");
-            if (!StringUtils.isEmpty(range)) {
-                rb.addHeader("Range", range);
-            }
-            String ifnonematch = request.getHeader("if-none-match");
-            if (!StringUtils.isEmpty(ifnonematch)) {
-                rb.addHeader("if-none-match", ifnonematch);
-            }
-            Response pResponse = mOkClient.newCall(rb.get().build()).execute();
-            Timber.v("Executed proxy GET request uri %s\n Resp: %d, %s",
-                    contentUri, pResponse.code(), pResponse.message());
-            for (String name : pResponse.headers().names()) {
-                Timber.v(" HDR: %s: %s", name, pResponse.header(name));
-            }
-            if (!pResponse.isSuccessful()) {
-                response.sendError(pResponse.code(), pResponse.message());
-                baseRequest.setHandled(true);
-                return;
-            }
-            String acceptRanges = pResponse.header("Accept-Ranges");
-            if (!StringUtils.isEmpty(acceptRanges)) {
-                response.addHeader("Accept-Ranges", acceptRanges);
-            }
-            String contentRange = pResponse.header("Content-Range");
-            if (!StringUtils.isEmpty(contentRange)) {
-                response.addHeader("Content-Range", contentRange);
-            }
-            String contentLen = pResponse.header("Content-Length");
-            if (!StringUtils.isEmpty(contentLen)) {
-                response.addHeader("Content-Length", contentLen);
-            }
-            String contentType = pResponse.header("Content-Type");
-            if (StringUtils.isEmpty(contentType)) {
-                contentType = "application/octet-stream";
-            }
-            response.addHeader("Content-Type", contentType);
-            String etag = pResponse.header("Etag");
-            if (!StringUtils.isEmpty(etag)) {
-                response.addHeader("Etag", etag);
-            }
-            if (HttpStatus.NOT_MODIFIED_304 == pResponse.code()) {
-                response.flushBuffer();
-            } else {
-                InputStream in = pResponse.body().byteStream();
-                OutputStream out = response.getOutputStream();
-                try {
-                    IOUtils.copy(in, out);
-                    out.flush();
-                } finally {
-                    IOUtils.closeQuietly(in);
-                }
-            }
-            baseRequest.setHandled(true);
+
+        String range = request.getHeader("Range");
+        if (!StringUtils.isEmpty(range)) {
+            rb.addHeader("Range", range);
         }
+
+        String ifnonematch = request.getHeader("if-none-match");
+        if (!StringUtils.isEmpty(ifnonematch)) {
+            rb.addHeader("if-none-match", ifnonematch);
+        }
+
+        Response pResponse = mOkClient.newCall(rb.get().build()).execute();
+
+        Timber.v("Executed proxy GET request uri %s\n Resp: %d, %s",
+                contentUri, pResponse.code(), pResponse.message());
+        for (String name : pResponse.headers().names()) {
+            Timber.v(" HDR: %s: %s", name, pResponse.header(name));
+        }
+        if (!pResponse.isSuccessful()) {
+            response.sendError(pResponse.code(), pResponse.message());
+            baseRequest.setHandled(true);
+            return;
+        }
+
+        //build the response
+        String acceptRanges = pResponse.header("Accept-Ranges");
+        if (!StringUtils.isEmpty(acceptRanges)) {
+            response.addHeader("Accept-Ranges", acceptRanges);
+        }
+        String contentRange = pResponse.header("Content-Range");
+        if (!StringUtils.isEmpty(contentRange)) {
+            response.addHeader("Content-Range", contentRange);
+        }
+        String contentLen = pResponse.header("Content-Length");
+        if (!StringUtils.isEmpty(contentLen)) {
+            response.addHeader("Content-Length", contentLen);
+        }
+        String contentType = pResponse.header("Content-Type");
+        if (StringUtils.isEmpty(contentType)) {
+            contentType = "application/octet-stream";
+        }
+        response.addHeader("Content-Type", contentType);
+        String etag = pResponse.header("Etag");
+        if (!StringUtils.isEmpty(etag)) {
+            response.addHeader("Etag", etag);
+        }
+        if (HttpStatus.NOT_MODIFIED_304 == pResponse.code()) {
+            response.flushBuffer();
+        } else {
+            InputStream in = pResponse.body().byteStream();
+            try {
+                OutputStream out = response.getOutputStream();
+                IOUtils.copy(in, out);
+                out.flush();
+            } finally {
+                IOUtils.closeQuietly(in);
+            }
+        }
+        baseRequest.setHandled(true);
     }
 }

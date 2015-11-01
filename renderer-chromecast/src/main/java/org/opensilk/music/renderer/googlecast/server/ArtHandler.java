@@ -24,6 +24,7 @@ import android.support.v4.util.LruCache;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jetty.http.HttpMethods;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
@@ -58,6 +59,12 @@ public class ArtHandler extends AbstractHandler {
 
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        if (!HttpMethods.GET.equals(request.getMethod())) {
+            response.sendError(HttpStatus.METHOD_NOT_ALLOWED_405);
+            baseRequest.setHandled(true);
+            return;
+        }
+
         String pathInfo = StringUtils.stripStart(request.getPathInfo(), "/");
         Uri contentUri = Uri.parse(CastServerUtil.decodeString(pathInfo));
         StringBuilder reqlog = new StringBuilder();
@@ -67,6 +74,9 @@ public class ArtHandler extends AbstractHandler {
             reqlog.append("\n HDR: ").append(name).append(":").append(request.getHeader(name));
         }
         Timber.v(reqlog.toString());
+
+        //TODO cast devices are smart enough to not requery on same url
+        //TODO need to implement more permanent etags
         String etag = request.getHeader("if-none-match");
         if (!StringUtils.isEmpty(etag)) {
             if (contentUri.equals(mEtagCache.get(etag))) {
@@ -77,6 +87,7 @@ public class ArtHandler extends AbstractHandler {
                 return;
             }
         }
+
         ParcelFileDescriptor pfd = mService.getAccessor().getArtwork(contentUri);
         if (pfd == null) {
             response.sendError(HttpStatus.NOT_FOUND_404);
@@ -84,7 +95,7 @@ public class ArtHandler extends AbstractHandler {
             return;
         }
         response.setStatus(HttpStatus.OK_200);
-        //will yield unique etags for this session
+        //will yield unique etags for this session TODO permanent etags
         etag = UUID.randomUUID().toString();
         mEtagCache.put(etag, contentUri);
         response.setHeader("Etag", etag);
@@ -92,8 +103,8 @@ public class ArtHandler extends AbstractHandler {
         response.setContentLength((int)pfd.getStatSize());
         AssetFileDescriptor afd = new AssetFileDescriptor(pfd, 0, pfd.getStatSize());
         InputStream in = afd.createInputStream();
-        OutputStream out = response.getOutputStream();
         try {
+            OutputStream out = response.getOutputStream();
             IOUtils.copy(in, out);
             out.flush();
             baseRequest.setHandled(true);

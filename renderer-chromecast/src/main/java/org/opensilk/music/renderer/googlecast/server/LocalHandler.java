@@ -55,6 +55,12 @@ public class LocalHandler extends AbstractHandler {
 
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        if (!HttpMethods.GET.equals(request.getMethod())) {
+            response.sendError(HttpStatus.METHOD_NOT_ALLOWED_405);
+            baseRequest.setHandled(true);
+            return;
+        }
+
         String pathInfo = StringUtils.stripStart(request.getPathInfo(), "/");
         Uri contentUri = Uri.parse(CastServerUtil.decodeString(pathInfo));
         StringBuilder reqlog = new StringBuilder();
@@ -119,21 +125,17 @@ public class LocalHandler extends AbstractHandler {
             response.setContentType(StringUtils.isEmpty(mime) ? "application/octet-stream" : mime);
             response.addHeader("Content-Length", "" + fileLen);
         }
+        //tell them we support ranges
         response.addHeader("Accept-Ranges", "bytes");
-        if (HttpMethods.HEAD.equals(request.getMethod())) {
-            response.flushBuffer();
-            afd.close();
-            baseRequest.setHandled(true);
-        } else {
-            InputStream in = afd.createInputStream();
+
+        InputStream in = afd.createInputStream();
+        try {
             OutputStream out = response.getOutputStream();
-            try {
-                IOUtils.copy(in, out);
-                out.flush();
-                baseRequest.setHandled(true);
-            } finally {
-                IOUtils.closeQuietly(in);
-            }
+            IOUtils.copy(in, out);
+            out.flush();
+            baseRequest.setHandled(true);
+        } finally {
+            IOUtils.closeQuietly(in);
         }
     }
 }
