@@ -58,6 +58,8 @@ public class DevicePickerActivity extends AppCompatActivity implements Dialog.On
     @Override
     @DebugLog
     protected void onCreate(Bundle savedInstanceState) {
+        boolean light = getIntent().getBooleanExtra("org.opensilk.music.library.extra.WANT_LIGHT_THEME", true);
+        setTheme(light ? R.style.CastThemeTranslucentLight : R.style.CastThemeTranslucentDark);
         super.onCreate(savedInstanceState);
 
         CastComponent parent = DaggerService.getDaggerComponent(getApplicationContext());
@@ -72,6 +74,7 @@ public class DevicePickerActivity extends AppCompatActivity implements Dialog.On
                 .build();
         mCallback = new MediaRouterCallback();
         mMediaRouter.addCallback(selector, mCallback, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY);
+
 
         mDialog = new MediaRouteChooserDialog(this);
         mDialog.setOnDismissListener(this);

@@ -110,6 +110,8 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
     private VolumeProviderCompat mVolumeProvider;
     private MediaRouter.RouteInfo mSelectedRoute;
     private volatile Handler mCallbackHandler;
+    private boolean mLoadingCurrentTrack;
+    private boolean mSkippedToNext;
 
     @Override
     public void onCreate() {
@@ -148,6 +150,7 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
     }
 
     public void start() {
+        mCallbackHandler = new Handler(Looper.myLooper());//same looper as playback
         int availability = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(mContext);
         if (availability != ConnectionResult.SUCCESS) {
             stopWithError("Google services unavailable");
@@ -199,7 +202,6 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
             stopWithError(e.getMessage());
             return;
         }
-        mCallbackHandler = new Handler(Looper.myLooper());//same looper as playback
         Timber.d("acquiring a connection to Google Play services for %s", device);
         Cast.CastOptions.Builder apiOptionsBuilder = Cast.CastOptions.builder(device, new CastListener())
                 .setVerboseLoggingEnabled(true);
@@ -241,6 +243,8 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
         mState = STATE_STOPPED;
         mCurrentPosition = 0;
         mPlayerPrepared = false;
+        mSkippedToNext = false;
+        mLoadingCurrentTrack = false;
         mPlayOnFocusGain = false;
         giveUpAudioFocus();
     }
@@ -269,10 +273,20 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
         }
     }
 
-    private void stopWithError(String error) {
+    private void stopWithError(final String error) {
+        final Handler cbh = mCallbackHandler;
         stop(false);
         mState = STATE_ERROR;
-        notifyOnError(error);
+        if (cbh != null) {
+            cbh.post(new Runnable() {
+                @Override
+                public void run() {
+                    notifyOnError(error);
+                }
+            });
+        } else {
+            notifyOnError(error);
+        }
     }
 
     public void setState(int state) {
@@ -296,8 +310,7 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
     }
 
     public long getDuration() {
-        return (hasCurrent() && mPlayerPrepared) ?
-                mRemoteMediaPlayer.getStreamDuration() : PLAYBACK_POSITION_UNKNOWN;
+        return hasCurrent() ? mRemoteMediaPlayer.getStreamDuration() : PLAYBACK_POSITION_UNKNOWN;
     }
 
     public void prepareForTrack() {
@@ -331,7 +344,7 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
 
         try {
             RemoteMediaPlayer.MediaChannelResult result =
-                    mRemoteMediaPlayer.load(mApiClient, media, true).await();
+                    mRemoteMediaPlayer.load(mApiClient, media, false).await();
 //                    mRemoteMediaPlayer.queueLoad(mApiClient, new MediaQueueItem[]{item}, 0,
 //                            MediaStatus.REPEAT_MODE_REPEAT_OFF, null).await();
 
@@ -346,6 +359,7 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
         }
 
         mPlayerPrepared = true;
+        mLoadingCurrentTrack = true;
 
         mState = STATE_BUFFERING;
         notifyOnPlaybackStatusChanged(mState);
@@ -415,40 +429,42 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
     public void play() {
         mPlayOnFocusGain = true;
         tryToGetAudioFocus();
-        if (mState == PlaybackStateCompat.STATE_PAUSED && hasCurrent() && mPlayerPrepared) {
+        if (mState == STATE_PAUSED && hasCurrent()) {
             configMediaPlayerState();
         } //else wait for prepared
     }
 
     public boolean hasCurrent() {
-        return mRemoteMediaPlayer != null &&
-                mPlayerPrepared && mRemoteMediaPlayer.getMediaStatus().getQueueItemCount() > 0;
+        return mRemoteMediaPlayer != null && mPlayerPrepared
+                && !mLoadingCurrentTrack && mRemoteMediaPlayer.getMediaStatus().getQueueItemCount() > 0;
     }
 
     public boolean hasNext() {
-        return mRemoteMediaPlayer != null &&
-                mPlayerPrepared && mRemoteMediaPlayer.getMediaStatus().getQueueItemCount() > 1;
+        return mRemoteMediaPlayer != null && mPlayerPrepared
+                && !mSkippedToNext && mRemoteMediaPlayer.getMediaStatus().getQueueItemCount() > 1;
     }
 
-    public void goToNext() {
-        if (!hasNext()) {
-            throw  new IllegalStateException("Next player not initialized");
-        }
+    public boolean goToNext() {
         mCurrentPosition = 0;
-        mPlayOnFocusGain = true;
+        mPlayOnFocusGain = false;
+        if (mState != STATE_PLAYING) {
+            //cast auto starts so make sure we have focus
+            tryToGetAudioFocus();
+            if (mAudioFocus != AUDIO_FOCUSED) {
+                return false;
+            }
+        }
         RemoteMediaPlayer.MediaChannelResult result = mRemoteMediaPlayer.queueNext(mApiClient, null).await();
         if (result.getStatus().isSuccess()) {
-            notifyOnWentToNext();
-            configMediaPlayerState();
+            mSkippedToNext = true;
+            return true;
         } else {
-            mState = STATE_ERROR;
-            notifyOnError(result.getStatus().getStatusMessage());
+            return false;
         }
     }
 
     public void pause() {
-        if (mState == PlaybackStateCompat.STATE_PLAYING) {
-            // Pause media player and cancel the 'foreground service' state.
+        if (mState == STATE_PLAYING) {
             if (hasCurrent()) {
                 RemoteMediaPlayer.MediaChannelResult result = mRemoteMediaPlayer
                         .pause(mApiClient, null).await();
@@ -460,25 +476,22 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
                 }
             }
         }
-        // while paused, retain the MediaPlayer but give up audio focus
+        // while paused, give up audio focus
         giveUpAudioFocus();
         mPlayOnFocusGain = false;
-        mState = PlaybackStateCompat.STATE_PAUSED;
+        mState = STATE_PAUSED;
         notifyOnPlaybackStatusChanged(mState);
     }
 
     @DebugLog
     public void seekTo(long position) {
-        if (mState == STATE_ERROR) {
-            return;
-        }
-        if (!hasCurrent() || !mPlayerPrepared) {
+        if (!hasCurrent()) {
             // If we do not have a current media player, simply update the current position
             mCurrentPosition = position;
         } else {
             mRemoteMediaPlayer.seek(mApiClient, position, RemoteMediaPlayer.RESUME_STATE_UNCHANGED);
-//            mState = PlaybackStateCompat.STATE_BUFFERING;
-//            notifyOnPlaybackStatusChanged(mState);
+            mState = STATE_BUFFERING;
+            notifyOnPlaybackStatusChanged(mState);
         }
     }
 
@@ -565,12 +578,12 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
                     if (status != null && status.getPlayerState() != MediaStatus.PLAYER_STATE_PLAYING) {
                         if (mCurrentPosition == mRemoteMediaPlayer.getApproximateStreamPosition()) {
                             mRemoteMediaPlayer.play(mApiClient);
-                            //mState = PlaybackStateCompat.STATE_PLAYING;
+                            mState = PlaybackStateCompat.STATE_PLAYING;
                         } else {
                             Timber.d("configMediaPlayerState startMediaPlayer. " +
                                     "seeking to %s", mCurrentPosition);
                             mRemoteMediaPlayer.seek(mApiClient, mCurrentPosition, RemoteMediaPlayer.RESUME_STATE_PLAY);
-                            //mState = PlaybackStateCompat.STATE_BUFFERING;
+                            mState = PlaybackStateCompat.STATE_BUFFERING;
                         }
                     }
                 }
@@ -691,10 +704,11 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
                 int state = mediaStatus.getPlayerState();
                 if (state == MediaStatus.PLAYER_STATE_PLAYING) {
                     Timber.d("RemoteMediaPlayer::onStatusUpdated() Player status = playing");
-                    if (mState != STATE_PLAYING) {
+                    if (mState != STATE_PLAYING && mState != STATE_NONE) {
                         mState = STATE_PLAYING;
                         notifyOnPlaybackStatusChanged(mState);
                     }
+                    //TODO better way?
                     if (mediaStatus.getQueueItemCount() > 1) {
                         if (mediaStatus.getQueueItem(1).getItemId() == mediaStatus.getCurrentItemId()) {
                             notifyOnWentToNext();
@@ -702,13 +716,16 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
                     }
                 } else if (state == MediaStatus.PLAYER_STATE_PAUSED) {
                     Timber.d("RemoteMediaPlayer::onStatusUpdated() Player status = paused");
-                    if (mState != STATE_PAUSED) {
+                    if (mLoadingCurrentTrack) {
+                        mLoadingCurrentTrack = false;
+                        configMediaPlayerState();
+                    } else if (mState != STATE_PAUSED && mState != STATE_NONE) {
                         mState = STATE_PAUSED;
                         notifyOnPlaybackStatusChanged(mState);
                     }
                 } else if (state == MediaStatus.PLAYER_STATE_BUFFERING) {
                     Timber.d("RemoteMediaPlayer::onStatusUpdated() Player status = buffering");
-                    if (mState != STATE_BUFFERING) {
+                    if (mState != STATE_BUFFERING && mState != STATE_NONE) {
                         mState = STATE_BUFFERING;
                         notifyOnPlaybackStatusChanged(mState);
                     }
@@ -734,6 +751,11 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
                         }
                         case MediaStatus.IDLE_REASON_INTERRUPTED: {
                             Timber.d("RemoteMediaPlayer::onStatusUpdated() IDLE reason = INTERRUPTED");
+                            if (mSkippedToNext) {
+                                mSkippedToNext = false;
+//                                configMediaPlayerState();
+//                                notifyOnWentToNext();
+                            }
                             break;
                         }
                         default: {
@@ -846,6 +868,7 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
                 if (mState != STATE_ERROR) {
                     double volume = Cast.CastApi.getVolume(mApiClient);
                     Timber.d("new volume %f", volume);
+                    mVolumeProvider.setCurrentVolume((int) Math.round(volume * 100));
                 }
             } else {
                 mCallbackHandler.post(new Runnable() {

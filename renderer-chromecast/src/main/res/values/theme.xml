@@ -27,4 +27,15 @@
              activity will be used. -->
         <item name="android:windowAnimationStyle">@android:style/Animation</item>
     </style>
+
+    <!--Base theme for picker activity that just starts another activity -->
+    <style name="CastThemeTranslucentLight" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <!-- Note that we use the base animation style here (that is no
+             animations) because we really have no idea how this kind of
+             activity will be used. -->
+        <item name="android:windowAnimationStyle">@android:style/Animation</item>
+    </style>
 </resources>

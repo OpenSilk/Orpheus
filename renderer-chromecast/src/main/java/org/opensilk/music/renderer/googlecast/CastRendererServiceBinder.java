@@ -111,8 +111,8 @@ public class CastRendererServiceBinder extends Binder implements IMusicRenderer 
     }
 
     @Override
-    public void goToNext() {
-        mService.get().goToNext();
+    public boolean goToNext() {
+        return mService.get().goToNext();
     }
 
     @Override
