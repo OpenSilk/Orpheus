@@ -92,9 +92,8 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView> {
     protected void onLoad(Bundle savedInstanceState) {
         super.onLoad(savedInstanceState);
         if (!queue.isEmpty()) {
-            getView().getAdapter().addAll(queue);
-            getView().getAdapter().setActiveItem(lastPlayingId);
-            getView().getAdapter().setPlaying(isPlaying);
+            getView().getAdapter().replaceAll(queue);
+            getView().getAdapter().poke();
         }
         if (lifcycleSubscripton != null) {
             lifcycleSubscripton.unsubscribe();
@@ -154,8 +153,7 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView> {
                         isPlaying = PlaybackStateHelper.isPlaying(playbackState.getState());
                         lastPlayingId = playbackState.getActiveQueueItemId();
                         if (hasView()) {
-                            getView().getAdapter().setPlaying(isPlaying);
-                            getView().getAdapter().setActiveItem(lastPlayingId);
+                            getView().getAdapter().poke();
                         }
                     }
                 }
@@ -192,7 +190,7 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView> {
                                     getView().getAdapter().replaceAll(queue);
                                 }
                             }
-                            getView().getAdapter().setActiveItem(lastPlayingId);
+                            getView().getAdapter().poke();
                         }
                     }
                 }

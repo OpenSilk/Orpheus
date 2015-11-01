@@ -46,21 +46,17 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import hugo.weaving.DebugLog;
-import timber.log.Timber;
 
 /**
  * Created by drew on 5/10/15.
  */
 public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem,
-        QueueScreenViewAdapter.ViewHolder> implements ItemClickSupport.OnItemClickListener,
-        ItemClickSupport.OnItemLongClickListener {
+        QueueScreenViewAdapter.ViewHolder> implements ItemClickSupport.OnItemClickListener {
 
     final ArtworkRequestManager requestor;
     final QueueScreenPresenter presenter;
     final PlaybackController playbackController;
 
-    long activeId = -1;
-    boolean isPlaying;
     private final Object INDICATOR_UPDATE = new Object();
 
     @Inject
@@ -79,8 +75,7 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem,
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         ItemClickSupport.addTo(recyclerView)
-                .setOnItemClickListener(this)
-                .setOnItemLongClickListener(this);
+                .setOnItemClickListener(this);
     }
 
     @Override
@@ -116,7 +111,7 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem,
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position, List<Object> payloads) {
-        if (isIndacotorUpdate(payloads)) {
+        if (isIndicatorUpdate(payloads)) {
             setItemActive(holder, getItem(position));
         } else {
             onBindViewHolder(holder, position);
@@ -124,8 +119,8 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem,
     }
 
     void setItemActive(ViewHolder holder, QueueItem item) {
-        if (activeId == item.getQueueId()) {
-            if (isPlaying) {
+        if (presenter.lastPlayingId == item.getQueueId()) {
+            if (presenter.isPlaying) {
                 holder.playingIndicator.startAnimating();
             } else {
                 holder.playingIndicator.setVisibility(View.VISIBLE);
@@ -143,7 +138,7 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem,
         holder.artwork.setImageDrawable(drawable);
     }
 
-    boolean isIndacotorUpdate(List<Object> payloads) {
+    boolean isIndicatorUpdate(List<Object> payloads) {
         if(payloads == null || payloads.isEmpty()) {
             return false;
         }
@@ -165,30 +160,13 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem,
         return getItem(position).getQueueId();
     }
 
-    public void setActiveItem(long newId) {
-        if (activeId != newId) {
-            activeId = newId;
-            notifyItemRangeChanged(0, getItemCount(), INDICATOR_UPDATE);
-            Timber.v("Active item updated %d", newId);
-        }
-    }
-
-    public void setPlaying(boolean playing) {
-        if (isPlaying != playing) {
-            isPlaying = playing;
-            notifyItemRangeChanged(0, getItemCount(), INDICATOR_UPDATE);
-            Timber.v("Playing updated playing=%s", playing);
-        }
+    public void poke() {
+        notifyItemRangeChanged(0, getItemCount(), INDICATOR_UPDATE);
     }
 
     @Override
     public void onItemClicked(RecyclerView recyclerView, int position, View v) {
         presenter.onItemClicked(getItem(position));
-    }
-
-    @Override
-    public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
-        return false;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements DragSwipeViewHolder {
