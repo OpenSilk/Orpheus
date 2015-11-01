@@ -16,8 +16,7 @@
  -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools"
-    package="org.opensilk.music"
-    android:sharedUserId="${applicationId}">
+    package="org.opensilk.music">
 
     <!-- Used for caching and creating new playlists -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />

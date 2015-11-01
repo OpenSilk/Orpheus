@@ -44,10 +44,6 @@ ext.testAssertJVersion = "1.7.0"
 ext.testRobolectricVersion = "3.0"
 ext.testMockitoVersion = "1.10.19"
 
-//Shared process for playback and renderers
-ext.playbackProcess = "org.opensilk.music.playback"
-ext.playbackProcessDebug = "org.opensilk.music.debug.playback"
-
 def gitSha() {
     return 'git rev-parse --short HEAD'.execute().text.trim()
 }
