@@ -129,7 +129,6 @@ public class PlaybackService {
     //
     private boolean mServiceStarted = false;
     private volatile int mConnectedClients = 0;
-    private volatile boolean shouldReleaseClient;
     private boolean mRendererChanged;
     private long mSeekForNewRenderer;
     private int mInternalState;
@@ -189,7 +188,6 @@ public class PlaybackService {
 
     //main thread
     public void onDestroy() {
-        shouldReleaseClient = true;
         saveState(true); //fire early as possible
 
         if (mCurrentTrackSub != null) {
@@ -359,9 +357,9 @@ public class PlaybackService {
         }
 
         mHandler.removeCallbacks(mProgressCheckRunnable);
-        if (PlaybackStateHelper.isPlaying(state)) {
+        if (PlaybackStateHelper.isPlaying(state) && !fromChecker) {
             //if not a schedule update recheck in 2 sec in case duration wasnt ready
-            mHandler.postDelayed(mProgressCheckRunnable, fromChecker ? 30000 : 2000);
+            mHandler.postDelayed(mProgressCheckRunnable, 2000);
         }
     }
 
@@ -441,6 +439,7 @@ public class PlaybackService {
             @Override
             @DebugLog
             protected Void doInBackground(Object... params) {
+                mIndexClient.startBatch();
                 if (full) {
                     mIndexClient.saveQueue(qSnapshot.q);
                 }
@@ -448,13 +447,8 @@ public class PlaybackService {
                 mIndexClient.saveQueueRepeatMode(qSnapshot.repeat);
                 mIndexClient.saveQueueShuffleMode(qSnapshot.shuffle);
                 mIndexClient.saveLastSeekPosition(seekPos);
+                mIndexClient.endBatch();
                 return null;
-            }
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                if (shouldReleaseClient) {
-                    mIndexClient.release();
-                }
             }
         }.execute();
     }
@@ -898,34 +892,6 @@ public class PlaybackService {
                     }
                     break;
                 }
-                case ACTION.ENQUEUE_TRACKS_FROM: {
-                    Uri uri = BundleHelper.getUri(extras);
-                    String sort = BundleHelper.getString(extras);
-                    final int where = BundleHelper.getInt(extras);
-                    if (mQueueListSub != null) {
-                        mQueueListSub.unsubscribe();
-                    }
-                    mQueueListSub = mIndexClient.getTrackUris(uri, sort)
-                            .first()
-                            .observeOn(getScheduler())
-                            .subscribe(new Subscriber<List<Uri>>() {
-                                @Override public void onCompleted() {
-                                    mQueueListSub = null;
-                                }
-                                @Override public void onError(Throwable e) {
-                                    mQueueListSub = null;
-                                    ///TODO
-                                }
-                                @Override public void onNext(List<Uri> uris) {
-                                    if (where == PlaybackConstants.ENQUEUE_LAST) {
-                                        mQueue.addEnd(uris);
-                                    } else if (where == PlaybackConstants.ENQUEUE_NEXT) {
-                                        mQueue.addNext(uris);
-                                    }
-                                }
-                            });
-                    break;
-                }
                 case ACTION.PLAY_ALL: {
                     List<Uri> list = BundleHelper.getList(extras);
                     int startpos = BundleHelper.getInt(extras);
@@ -942,32 +908,6 @@ public class PlaybackService {
                             mQueue.goToItem(startpos);
                         }
                     } //else no change, ignore
-                    break;
-                }
-                case ACTION.PLAY_TRACKS_FROM: {
-                    Uri uri = BundleHelper.getUri(extras);
-                    String sort = BundleHelper.getString(extras);
-                    final int startpos = BundleHelper.getInt(extras);
-                    mPlayback.prepareForTrack();
-                    if (mQueueListSub != null) {
-                        mQueueListSub.unsubscribe();
-                    }
-                    mQueueListSub = mIndexClient.getTrackUris(uri, sort)
-                            .first()
-                            .observeOn(getScheduler())
-                            .subscribe(new Subscriber<List<Uri>>() {
-                                @Override public void onCompleted() {
-                                    mQueueListSub = null;
-                                }
-                                @Override public void onError(Throwable e) {
-                                    mQueueListSub = null;
-                                    ///TODO
-                                }
-                                @Override public void onNext(List<Uri> uris) {
-                                    mQueue.replace(uris, startpos);
-                                    mPlayWhenReady = true;
-                                }
-                            });
                     break;
                 }
                 case ACTION.REMOVE_QUEUE_ITEM: {
@@ -1189,8 +1129,7 @@ public class PlaybackService {
     final Runnable mProgressCheckRunnable = new Runnable() {
         @Override
         public void run() {
-            //TODO remove
-//            updatePlaybackState(null, true);
+            updatePlaybackState(null, true);
         }
     };
 

@@ -17,8 +17,6 @@
 
 package org.opensilk.music.index.client;
 
-import android.media.MediaDescription;
-import android.media.MediaMetadata;
 import android.media.browse.MediaBrowser;
 import android.net.Uri;
 import android.os.Bundle;
@@ -41,25 +39,20 @@ import rx.Observable;
  * Created by drew on 9/17/15.
  */
 public interface IndexClient {
-    /**
-     * @param uri
-     * @return True if uri or any ancestor is indexed
+
+    /*
+     * Index methods
      */
+
     boolean isIndexed(Container container);
-
-    /**
-     *
-     * @param uri
-     * @return True if succeeded, false on error or if {@link #isIndexed(Uri)} returns true;
-     */
     boolean add(Container container);
-
-    /**
-     *
-     * @param uri
-     * @return True if success, false on error or if {@link #isIndexed(Uri)} returns false;
-     */
     boolean remove(Container container);
+    void rescan();
+
+
+    /*
+     * Android auto entry points
+     */
 
     MediaBrowserService.BrowserRoot browserGetRootL(@NonNull String clientPackageName, int clientUid, Bundle rootHints);
     void browserLoadChildrenL(@NonNull String parentId, @NonNull MediaBrowserService.Result<List<MediaBrowser.MediaItem>> result);
@@ -67,6 +60,9 @@ public interface IndexClient {
     MediaBrowserServiceCompat.BrowserRoot browserGetRootK(@NonNull String clientPackageName, int clientUid, Bundle rootHints);
     void browserLoadChildrenK(@NonNull String parentId, @NonNull MediaBrowserServiceCompat.Result<List<MediaBrowserCompat.MediaItem>> result);
 
+    /*
+     * Playback settings
+     */
 
     List<Uri> getLastQueue();
     int getLastQueuePosition();
@@ -78,15 +74,20 @@ public interface IndexClient {
     void saveQueueShuffleMode(int mode);
     void saveQueueRepeatMode(int mode);
 
-    Observable<List<MediaDescriptionCompat>> getDescriptions(List<Uri> queue);
-
     long getLastSeekPosition();
     void saveLastSeekPosition(long pos);
 
+    /*
+     * Queue / Playback helper
+     */
+
+    Observable<List<MediaDescriptionCompat>> getDescriptions(List<Uri> queue);
     Observable<Track> getTrack(Uri uri);
-    Observable<List<Track>> getTracks(Uri uri, String sortOrder);
-    Observable<List<Uri>> getTrackUris(Uri uri, String sordOrder);
     MediaMetadataCompat convertToMediaMetadata(Track track);
+
+    /*
+     * Playlist helpers
+     */
 
     Uri createPlaylist(String name);
     int addToPlaylist(Uri playlist, List<Uri> tracks);
@@ -96,6 +97,10 @@ public interface IndexClient {
     boolean removePlaylists(List<Uri> playlists);
     Playlist getPlaylist(Uri playlist);
 
-    void connect();
-    void release();
+    /*
+     * setup/destroy
+     */
+
+    void startBatch();
+    void endBatch();
 }

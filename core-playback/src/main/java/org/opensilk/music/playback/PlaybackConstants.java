@@ -206,15 +206,6 @@ public interface PlaybackConstants {
      */
     long REWIND_INSTEAD_PREVIOUS_THRESHOLD = 3000;
 
-    /**
-     * The max size allowed for the track history
-     */
-    int MAX_HISTORY_SIZE = 100;
-
-    String BOOL_ARG = "bool_arg";
-    //Has int extra
-    String FOCUSCHANGE = APOLLO_PACKAGE_NAME + ".cmd.focuschange";
-
     interface ACTION {
         String CYCLE_REPEAT = "cmd.cyclerepeat";
         String TOGGLE_SHUFFLE_MODE = "cmd.shufflequeue";
@@ -225,9 +216,7 @@ public interface PlaybackConstants {
         String MOVE_QUEUE_ITEM_TO = "cmd.movequeueitemto";
         String MOVE_QUEUE_ITEM = "cmd.movequeueitem";
         String MOVE_QUEUE_ITEM_TO_NEXT = "cmd.movequeueitemtonext";
-        String ENQUEUE_TRACKS_FROM = "cmd.enqueuetracksfrom";
         String PLAY_ALL = "cmd.playall";
-        String PLAY_TRACKS_FROM = "cmd.playtracksfrom";
         String TOGGLE_PLAYBACK = "cmd.toggleplayback";
     }
 

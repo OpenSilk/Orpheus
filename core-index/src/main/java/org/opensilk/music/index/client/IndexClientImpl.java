@@ -21,6 +21,7 @@ import android.annotation.TargetApi;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.media.browse.MediaBrowser;
 import android.net.Uri;
 import android.os.Bundle;
@@ -39,6 +40,7 @@ import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.artwork.UtilsArt;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.index.provider.Methods;
+import org.opensilk.music.index.scanner.ScannerService;
 import org.opensilk.music.library.client.BundleableObserver;
 import org.opensilk.music.library.internal.IBundleableObserver;
 import org.opensilk.music.library.provider.LibraryExtras;
@@ -55,6 +57,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 
 import hugo.weaving.DebugLog;
 import rx.Observable;
@@ -77,13 +80,14 @@ import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_TITLE;
 /**
  * Created by drew on 9/17/15.
  */
+@Singleton
 public class IndexClientImpl implements IndexClient {
 
     final Context appContext;
     final Uri callUri;
     final String artworkAuthority;
-    ClientCompat client;
 
+    final ThreadLocal<ClientCompat> localClientCompat = new ThreadLocal<>();
 
     @Inject
     public IndexClientImpl(
@@ -112,6 +116,13 @@ public class IndexClientImpl implements IndexClient {
     public boolean remove(Container container) {
         Bundle args = LibraryExtras.b().putBundleable(container).get();
         return makeCheckedCall(Methods.REMOVE, args);
+    }
+
+    @Override
+    public void rescan() {
+        Intent intent = new Intent(appContext, ScannerService.class)
+                .setAction(ScannerService.ACTION_RESCAN);
+        appContext.startService(intent);
     }
 
     @Override @TargetApi(21)
@@ -220,16 +231,6 @@ public class IndexClientImpl implements IndexClient {
                         return Observable.from(tracks);
                     }
                 });
-    }
-
-    @Override
-    public Observable<List<Track>> getTracks(Uri uri, String sortOrder) {
-        return Observable.empty();
-    }
-
-    @Override
-    public Observable<List<Uri>> getTrackUris(Uri uri, String sordOrder) {
-        return Observable.empty();
     }
 
     /**
@@ -429,23 +430,37 @@ public class IndexClientImpl implements IndexClient {
     }
 
     @Override
-    public void connect() {
+    public void startBatch() {
+        ClientCompat client = localClientCompat.get();
         if (client == null) {
-            if (VersionUtils.hasJellyBeanMR1()) {
-                client = new ClientCompatJBMR1(appContext, callUri);
-            } else {
-                client = new ClientCompatBase(appContext, callUri);
-            }
+            client = makeClient();
+            client.setBatch();
+            localClientCompat.set(client);
         }
     }
 
     @Override
-    public void release() {
-        synchronized (this) {
-            if (client != null) {
-                client.release();
-                client = null;
-            }
+    public void endBatch() {
+        ClientCompat client = localClientCompat.get();
+        if (client != null) {
+            client.release();
+            localClientCompat.set(null);
+        }
+    }
+
+    private ClientCompat getClient() {
+        ClientCompat client = localClientCompat.get();
+        if (client == null) {
+            client = makeClient();
+        }
+        return client;
+    }
+
+    private ClientCompat makeClient() {
+        if (VersionUtils.hasJellyBeanMR1()) {
+            return new ClientCompatJBMR1(appContext, callUri);
+        } else {
+            return new ClientCompatBase(appContext, callUri);
         }
     }
 
@@ -454,12 +469,16 @@ public class IndexClientImpl implements IndexClient {
     }
 
     private Bundle makeCall(String method, Bundle args) {
-        connect();
+        ClientCompat client = getClient();
         try {
             return client.call(method, args);
         } catch (RemoteException e) {
-            release();
-            return makeCall(method, args);
+            endBatch();
+            return LibraryExtras.b().putOk(false).get();
+        } finally {
+            if (!client.isBatch()) {
+                client.release();
+            }
         }
     }
 
@@ -474,11 +493,14 @@ public class IndexClientImpl implements IndexClient {
     interface ClientCompat {
         Bundle call(String method, Bundle args) throws RemoteException;
         void release();
+        boolean isBatch();
+        void setBatch();
     }
 
     static class ClientCompatBase implements ClientCompat {
         final ContentResolver contentResolver;
         final Uri callUri;
+        boolean batch = false;
 
         public ClientCompatBase(Context context, Uri callUri) {
             this.contentResolver = context.getContentResolver();
@@ -494,11 +516,22 @@ public class IndexClientImpl implements IndexClient {
         public void release() {
             //noop
         }
+
+        @Override
+        public boolean isBatch() {
+            return batch;
+        }
+
+        @Override
+        public void setBatch() {
+            batch = true;
+        }
     }
 
     @TargetApi(17)
     static class ClientCompatJBMR1 implements ClientCompat {
         final ContentProviderClient client;
+        boolean batch = false;
 
         public ClientCompatJBMR1(Context context, Uri callUri) {
             this.client = context.getContentResolver()
@@ -513,6 +546,16 @@ public class IndexClientImpl implements IndexClient {
         @Override
         public void release() {
             client.release();
+        }
+
+        @Override
+        public boolean isBatch() {
+            return batch;
+        }
+
+        @Override
+        public void setBatch() {
+            batch = true;
         }
     }
 }
