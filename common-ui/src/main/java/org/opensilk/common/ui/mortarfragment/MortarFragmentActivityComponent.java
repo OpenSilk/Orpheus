@@ -17,14 +17,20 @@
 
 package org.opensilk.common.ui.mortarfragment;
 
-import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
+import org.opensilk.common.core.dagger2.ActivityScope;
+import org.opensilk.common.core.dagger2.AppContextComponent;
+
+import dagger.Component;
 
 /**
  * Base component all subclass components of {@link MortarFragmentActivity} must extend
  *
  * Created by drew on 5/1/15.
  */
+@ActivityScope
+@Component(
+        dependencies = AppContextComponent.class
+)
 public interface MortarFragmentActivityComponent {
     FragmentManagerOwner fragmentnManagerOwner();
-    PauseAndResumeRegistrar pauseAndResumeRegistrar();
 }

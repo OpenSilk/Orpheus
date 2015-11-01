@@ -22,8 +22,6 @@ import org.opensilk.common.core.mortar.MortarActivity;
 import org.opensilk.common.ui.mortar.LayoutCreator;
 import org.opensilk.common.ui.mortar.Lifecycle;
 import org.opensilk.common.ui.mortar.LifecycleService;
-import org.opensilk.common.ui.mortar.PauseAndResumeActivity;
-import org.opensilk.common.ui.mortar.PauseAndResumePresenter;
 import org.opensilk.common.ui.mortar.ScreenScoper;
 
 import javax.inject.Inject;
@@ -35,10 +33,9 @@ import rx.subjects.BehaviorSubject;
  * Created by drew on 3/10/15.
  */
 public abstract class MortarFragmentActivity extends MortarActivity
-        implements FragmentManagerOwnerActivity, PauseAndResumeActivity {
+        implements FragmentManagerOwnerActivity {
 
     @Inject protected FragmentManagerOwner mFragmentManagerOwner;
-    @Inject protected PauseAndResumePresenter mPausesAndResumesPresenter;
 
     private final BehaviorSubject<Lifecycle> mLifecycleSubject = BehaviorSubject.create();
 
@@ -58,7 +55,6 @@ public abstract class MortarFragmentActivity extends MortarActivity
         super.onCreate(savedInstanceState);
         performInjection();
         mFragmentManagerOwner.takeView(this);
-        mPausesAndResumesPresenter.takeView(this);
     }
 
     @Override
@@ -72,14 +68,12 @@ public abstract class MortarFragmentActivity extends MortarActivity
     protected void onResume() {
         super.onResume();
         mFragmentManagerOwner.takeView(this);
-        mPausesAndResumesPresenter.activityResumed();
         mLifecycleSubject.onNext(Lifecycle.RESUME);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mPausesAndResumesPresenter.activityPaused();
         mLifecycleSubject.onNext(Lifecycle.PAUSE);
     }
 
@@ -99,7 +93,6 @@ public abstract class MortarFragmentActivity extends MortarActivity
     protected void onDestroy() {
         super.onDestroy();
         mFragmentManagerOwner.dropView(this);
-        mPausesAndResumesPresenter.dropView(this);
     }
 
     @Override
@@ -109,8 +102,7 @@ public abstract class MortarFragmentActivity extends MortarActivity
         }
     }
 
-    @Override
-    public boolean isRunning() {
+    public final boolean isRunning() {
         return mIsResumed;
     }
 }
