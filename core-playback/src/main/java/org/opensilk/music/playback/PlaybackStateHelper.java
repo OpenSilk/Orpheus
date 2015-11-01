@@ -17,7 +17,10 @@
 
 package org.opensilk.music.playback;
 
+import android.os.SystemClock;
 import android.support.v4.media.session.PlaybackStateCompat;
+
+import timber.log.Timber;
 
 import static android.support.v4.media.session.PlaybackStateCompat.STATE_BUFFERING;
 import static android.support.v4.media.session.PlaybackStateCompat.STATE_CONNECTING;
@@ -180,6 +183,19 @@ public class PlaybackStateHelper {
                 return true;
             default:
                 return isLoadingOrSkipping(state);
+        }
+    }
+
+    public static long getAdjustedSeekPos(PlaybackStateCompat state) {
+        long now = SystemClock.elapsedRealtime();
+        long then = state.getLastPositionUpdateTime();
+        long seekPos = state.getPosition();
+        Timber.d("geetAdjustedSeekPos now=%d, then=%d, pos=%d, adj=%d",
+                now, then, seekPos, seekPos + (now - then));
+        if (isPlaying(state)) {
+            return then == 0 ? 0 : Math.max(0, seekPos + (now - then));
+        } else {
+            return then == 0 ? 0 : Math.max(0, state.getPosition());
         }
     }
 

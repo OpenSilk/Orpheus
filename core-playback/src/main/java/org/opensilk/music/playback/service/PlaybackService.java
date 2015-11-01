@@ -113,24 +113,26 @@ public class PlaybackService {
     private RendererServiceConnection mRendererConnection;
     private volatile IMusicRenderer mPlayback;
 
-
-    int mAudioSessionId;
+    private int mAudioSessionId;
     private Handler mHandler;
     private Scheduler mHandlerScheduler;
 
     //currently playing track
-    Track mCurrentTrack;
+    private Track mCurrentTrack;
     //next track to load
-    Track mNextTrack;
+    private Track mNextTrack;
     //true if we should start playing when loading finishes
-    boolean mPlayWhenReady;
+    private boolean mPlayWhenReady;
     //
-    boolean mQueueReloaded;
-    boolean mQueueReady;
+    private boolean mQueueReloaded;
+    private boolean mQueueReady;
     //
-    boolean mServiceStarted = false;
-    volatile int mConnectedClients = 0;
-    volatile boolean shouldReleaseClient;
+    private boolean mServiceStarted = false;
+    private volatile int mConnectedClients = 0;
+    private volatile boolean shouldReleaseClient;
+    private boolean mRendererChanged;
+    private long mSeekForNewRenderer;
+    private int mInternalState;
 
     Subscription mCurrentTrackSub;
     Subscription mNextTrackSub;
@@ -229,6 +231,7 @@ public class PlaybackService {
     public void onUnbind() {
         saveState(true);
         mConnectedClients--;
+        //todo schedule shutdown;
     }
 
     //main thread
@@ -388,6 +391,15 @@ public class PlaybackService {
         return actions;
     }
 
+    long getCurrentSeekPosition() {
+        PlaybackStateCompat state = mSessionHolder.getPlaybackState();
+        if (state != null) {
+            return PlaybackStateHelper.getAdjustedSeekPos(state);
+        } else {
+            return 0;
+        }
+    }
+
     //handler thread
     void updateMeta() {
         if (mArtworkSubscription != null) {
@@ -423,13 +435,7 @@ public class PlaybackService {
     //handler thread / main thread
     void saveState(final boolean full) {
         final PlaybackQueue.Snapshot qSnapshot = mQueue.snapshot();
-        PlaybackStateCompat state = mSessionHolder.getPlaybackState();
-        final long seekPos;
-        if (state != null) {
-            seekPos = state.getPosition();
-        } else {
-            seekPos = 0;
-        }
+        final long seekPos = getCurrentSeekPosition();
         //Use async to avoid making new thread
         new AsyncTask<Object, Void, Void>() {
             @Override
@@ -442,10 +448,13 @@ public class PlaybackService {
                 mIndexClient.saveQueueRepeatMode(qSnapshot.repeat);
                 mIndexClient.saveQueueShuffleMode(qSnapshot.shuffle);
                 mIndexClient.saveLastSeekPosition(seekPos);
+                return null;
+            }
+            @Override
+            protected void onPostExecute(Void aVoid) {
                 if (shouldReleaseClient) {
                     mIndexClient.release();
                 }
-                return null;
             }
         }.execute();
     }
@@ -611,12 +620,16 @@ public class PlaybackService {
                     @Override public void onNext(Track track) {
                         mCurrentTrack = track;
                         if (mPlayback.loadTrack(track.toBundle())) {
+                            long seek = 0;
                             if (mQueueReloaded) {
                                 mQueueReloaded = false;
-                                long seek = mIndexClient.getLastSeekPosition();
-                                if (seek > 0) {
-                                    mPlayback.seekTo(seek);
-                                }
+                                seek = mIndexClient.getLastSeekPosition();
+                            } else if (mRendererChanged) {
+                                mRendererChanged = false;
+                                seek = mSeekForNewRenderer;
+                            }
+                            if (seek > 0) {
+                                mPlayback.seekTo(seek);
                             }
                             if (mPlayWhenReady) {
                                 mPlayWhenReady = false;
@@ -709,22 +722,22 @@ public class PlaybackService {
                 }
                 case CMD.SWITCH_TO_NEW_RENDERER: {
                     ComponentName cn = BundleHelper.getParcelable(args);
-                    boolean playing = mPlayback.isPlaying();
+                    boolean wasPlaying = mPlayback.isPlaying();
                     onPause();
                     if (cn != null) {
                         setupRemoteRenderer(cn);
                     } else {
                         setupLocalRenderer();
                     }
-                    if (mPlayback.getState() != PlaybackStateCompat.STATE_ERROR) {
+                    if (!PlaybackStateHelper.isError(mPlayback.getState())) {
+                        mPlayWhenReady = cn != null || wasPlaying;//dont auto start localrenderer
                         if (mQueueReady) {
                             if (mQueue.notEmpty()) {
-                                mPlayWhenReady = playing;
+                                mRendererChanged = true;
+                                mSeekForNewRenderer = getCurrentSeekPosition();
                                 setTrack();
                             } //else ?? TODO
-                        } else {
-                            mPlayWhenReady = playing;
-                        }
+                        } //else wait for queue
                     } else {
                         mPlayWhenReady = false;
                         //and wait for callback
@@ -1072,7 +1085,6 @@ public class PlaybackService {
 
     class PlaybackCallback implements IMusicRenderer.Callback {
         @Override
-        @DebugLog
         public void onPlaybackStatusChanged(final int state) {
             if (Looper.myLooper() == getHandler().getLooper()) {
                 updatePlaybackState(null);

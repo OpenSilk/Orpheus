@@ -38,7 +38,7 @@ public interface IMusicRenderer {
     void play();
     boolean hasCurrent();
     boolean hasNext();
-    void goToNext();
+    boolean goToNext();
     void pause();
     void seekTo(long position);
     boolean isRemotePlayback();

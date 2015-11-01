@@ -172,8 +172,6 @@ public class LocalRenderer implements IMusicRenderer,
             mMediaPlayer = mDefaultMediaPlayerFactory.create(mContext);
             mMediaPlayer.setCallback(this);
 
-            mState = PlaybackStateCompat.STATE_BUFFERING;
-
             mMediaPlayer.setDataSource(mContext, item.getUri(), item.getHeaders());
 
             // Starts preparing the media player in the background. When
@@ -183,6 +181,7 @@ public class LocalRenderer implements IMusicRenderer,
             // we *cannot* call start() on it!
             mMediaPlayer.prepareAsync();
 
+            mState = PlaybackStateCompat.STATE_BUFFERING;
             notifyOnPlaybackStatusChanged(mState);
 
             return true;
@@ -245,7 +244,7 @@ public class LocalRenderer implements IMusicRenderer,
         return mNextMediaPlayer != null;
     }
 
-    public void goToNext() {
+    public boolean goToNext() {
         if (!hasNext()) {
             throw  new IllegalStateException("Next player not initialized");
         }
@@ -266,6 +265,7 @@ public class LocalRenderer implements IMusicRenderer,
         mNextAudioSessionId = 0;
         notifyOnAudioSessionId(sessionId);
         notifyOnWentToNext();
+        return true;
     }
 
     public void pause() {
