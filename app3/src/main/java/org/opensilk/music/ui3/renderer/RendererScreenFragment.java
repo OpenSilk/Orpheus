@@ -23,6 +23,7 @@ import android.support.annotation.NonNull;
 
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortarfragment.MortarDialogFragment;
+import org.opensilk.music.R;
 
 /**
  * Created by drew on 10/27/15.
@@ -37,8 +38,10 @@ public class RendererScreenFragment extends MortarDialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        setStyle(STYLE_NO_TITLE, 0);
-        return super.onCreateDialog(savedInstanceState);
+//        setStyle(STYLE_NO_TITLE, 0);
+        Dialog d = super.onCreateDialog(savedInstanceState);
+        d.setTitle(R.string.title_renderers);
+        return d;
     }
 
     @Override
