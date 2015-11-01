@@ -71,7 +71,7 @@ public class BundleableRecyclerCoordinator extends RecyclerListCoordinator imple
         super.onAttachedToWindow();
         if (!isInEditMode()) {
             mToolbarOwner.attachToolbar(mToolbar);
-            mToolbarOwner.setConfig(ActionBarConfig.builder().setTitle(R.string.title_playlists)
+            mToolbarOwner.setConfig(ActionBarConfig.builder().setTitle(mPresenter.getToolbarTitle())
                     .setMenuConfig(mPresenter.getMenuConfig()).build());
             mPresenter.takeView(this);
         }
@@ -125,4 +125,5 @@ public class BundleableRecyclerCoordinator extends RecyclerListCoordinator imple
     public BundleablePresenter getPresenter() {
         return mPresenter;
     }
+
 }

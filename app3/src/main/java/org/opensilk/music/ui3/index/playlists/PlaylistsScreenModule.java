@@ -24,6 +24,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import org.opensilk.bundleable.Bundleable;
+import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.AppPreferences;
@@ -68,12 +69,14 @@ public class PlaylistsScreenModule {
     @Provides @ScreenScope
     public BundleablePresenterConfig providePresenterConfig(
             ItemClickListener itemClickListener,
-            MenuHandler menuConfig
+            MenuHandler menuConfig,
+            @ForApplication Context context
     ) {
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(true)
                 .setItemClickListener(itemClickListener)
                 .setMenuConfig(menuConfig)
+                .setToolbarTitle(context.getString(R.string.title_playlists))
                 .build();
     }
 

@@ -75,17 +75,12 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView>
     protected final ActionModePresenter actionModePresenter;
     protected final PlaybackController playbackController;
     protected final IndexClient indexClient;
-
+    protected final BundleablePresenterConfig presenterConfig;
 
     protected boolean wantGrid;
-    protected boolean wantsNumberedTracks;
-
     protected Subscription subscription;
     protected boolean adapterIsDirty;
-
     private boolean isLoading;
-
-    private final boolean allowLongPressSelection;
 
     @Inject
     public BundleablePresenter(
@@ -109,9 +104,8 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView>
         this.loaderSeed = config.loaderSeed;
         this.actionModePresenter = actionModePresenter;
         this.playbackController = playbackController;
-        this.wantsNumberedTracks = config.wantsNumberedTracks;
         this.indexClient = indexClient;
-        this.allowLongPressSelection = config.allowLongPressSelection;
+        this.presenterConfig = config;
     }
 
     @Override
@@ -123,7 +117,6 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView>
     protected void onEnterScope(MortarScope scope) {
         super.onEnterScope(scope);
         loader.addContentChangedListener(this);
-        indexClient.connect();
     }
 
     @Override
@@ -131,7 +124,6 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView>
         super.onExitScope();
         RxUtils.unsubscribe(subscription);
         loader.removeContentChangedListener(this);
-        indexClient.release();
     }
 
     @Override
@@ -254,6 +246,7 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView>
     }
 
     public void setWantsGrid(boolean yes) {
+
         wantGrid = yes;
     }
 
@@ -262,11 +255,11 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView>
     }
 
     public boolean wantsNumberedTracks() {
-        return wantsNumberedTracks;
+        return presenterConfig.wantsNumberedTracks;
     }
 
     public boolean isAllowLongPressSelection() {
-        return allowLongPressSelection;
+        return presenterConfig.allowLongPressSelection;
     }
 
     public BundleableLoader getLoader() {
@@ -310,6 +303,10 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView>
 
     public IndexClient getIndexClient() {
         return indexClient;
+    }
+
+    public String getToolbarTitle() {
+        return presenterConfig.toolbarTitle;
     }
 
     public void onFabClicked(View view) {

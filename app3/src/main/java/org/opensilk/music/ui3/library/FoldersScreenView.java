@@ -42,7 +42,6 @@ import rx.subscriptions.CompositeSubscription;
  */
 public class FoldersScreenView extends BundleableRecyclerCoordinator {
 
-    @Inject @Named("folders_title") String mTitle;
     @Inject Container mThisContainer;
 
     @InjectView(R.id.floating_action_button) FloatingActionButtonCheckable mFab;

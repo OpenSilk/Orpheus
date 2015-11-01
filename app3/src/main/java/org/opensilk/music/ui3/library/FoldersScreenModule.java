@@ -64,11 +64,6 @@ public class FoldersScreenModule {
         return screen.container.getUri();
     }
 
-    @Provides @Named("folders_title")
-    public String provideTitle() {
-        return screen.container.getName();
-    }
-
     @Provides
     public Container provideTHisContainer() {
         return screen.container;
@@ -82,6 +77,7 @@ public class FoldersScreenModule {
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(false)
                 .setItemClickListener(itemClickListener)
+                .setToolbarTitle(screen.container.getName())
                 .setMenuConfig(menuConfig)
                 .build();
     }

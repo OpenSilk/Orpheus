@@ -122,15 +122,16 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
     public void reload() {
         subscriptions.clear();
         clearAdapterOnload = true;
-        subscribeRoots();
+        loader.reset();
         if (hasView()) {
             getView().setloading();
         }
+        subscribeRoots();
     }
 
     void populateMenu(Context context, PopupMenu popupMenu) {
         LibraryConfig config = parentPresenter.getConfig(providerInfo.getAuthority());
-        if (config.hasFlag(LibraryConfig.FLAG_REQUIRES_AUTH)) {
+        if (config.requiresAuth()) {
             popupMenu.inflate(R.menu.library_login);
         }
     }

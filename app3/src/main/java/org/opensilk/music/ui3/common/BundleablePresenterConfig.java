@@ -35,6 +35,7 @@ public class BundleablePresenterConfig {
     public final List<Bundleable> loaderSeed;
     public final String defaultSortOrder;
     public final boolean allowLongPressSelection;
+    public final String toolbarTitle;
 
     public BundleablePresenterConfig(
             boolean wantsGrid,
@@ -43,7 +44,8 @@ public class BundleablePresenterConfig {
             MenuHandler menuConfig,
             List<Bundleable> loaderSeed,
             String defaultSortOrder,
-            boolean allowLongPressSelection
+            boolean allowLongPressSelection,
+            String toolbarTitle
     ) {
         this.wantsGrid = wantsGrid;
         this.wantsNumberedTracks = wantsNumberedTracks;
@@ -52,6 +54,7 @@ public class BundleablePresenterConfig {
         this.loaderSeed = loaderSeed;
         this.defaultSortOrder = defaultSortOrder;
         this.allowLongPressSelection = allowLongPressSelection;
+        this.toolbarTitle = toolbarTitle;
     }
 
     public static Builder builder() {
@@ -66,6 +69,7 @@ public class BundleablePresenterConfig {
         List<Bundleable> loaderSeed = new ArrayList<>();
         String preferedSortOrder = BaseSortOrder.A_Z;
         boolean allowLongPressSelection = true;
+        String toolbarTitle = "";
 
         public Builder setWantsGrid(boolean wantsGrid) {
             this.wantsGrid = wantsGrid;
@@ -113,10 +117,18 @@ public class BundleablePresenterConfig {
             return this;
         }
 
+        public Builder setToolbarTitle(String toolbarTitle) {
+            this.toolbarTitle = toolbarTitle;
+            return this;
+        }
+
         public BundleablePresenterConfig build() {
-            return new BundleablePresenterConfig(wantsGrid, wantsNumberedTracks,
+            return new BundleablePresenterConfig(
+                    wantsGrid, wantsNumberedTracks,
                     itemClickListener, menuConfig,
-                    loaderSeed, preferedSortOrder,allowLongPressSelection);
+                    loaderSeed, preferedSortOrder,
+                    allowLongPressSelection, toolbarTitle
+            );
         }
     }
 }

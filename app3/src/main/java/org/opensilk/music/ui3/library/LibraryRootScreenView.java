@@ -160,7 +160,7 @@ public class LibraryRootScreenView extends CardView {
 
     void setNeedsAuth() {
         progress.setVisibility(GONE);
-        errorMsg.setText("Authorization failed");
+        errorMsg.setText(R.string.err_authentication);
         errorMsg.setVisibility(VISIBLE);
         retryBtn.setVisibility(GONE);
         clearRoots();

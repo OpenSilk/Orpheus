@@ -34,6 +34,7 @@ import android.widget.Toast;
 
 import com.jakewharton.rxbinding.view.ViewClickEvent;
 
+import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.rx.RxUtils;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
@@ -89,12 +90,14 @@ public class PlaylistChooseScreenModule {
     @Provides @ScreenScope
     public BundleablePresenterConfig providePresenterConfig(
             ItemClickListener itemClickListener,
-            MenuHandler menuConfig
+            MenuHandler menuConfig,
+            @ForApplication Context context
     ) {
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(false)
                 .setItemClickListener(itemClickListener)
                 .setMenuConfig(menuConfig)
+                .setToolbarTitle(context.getString(R.string.title_playlists))
                 .build();
     }
 
