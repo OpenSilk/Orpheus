@@ -25,12 +25,10 @@ import android.support.v4.media.VolumeProviderCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
 import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.playback.PlaybackConstants;
 import org.opensilk.music.playback.PlaybackStateHelper;
-import org.opensilk.music.playback.service.PlaybackServiceK;
-import org.opensilk.music.playback.service.PlaybackServiceL;
+import org.opensilk.music.playback.service.IntentHelper;
 import org.opensilk.music.playback.service.PlaybackServiceScope;
 
 import java.io.IOException;
@@ -85,12 +83,7 @@ public class LocalRenderer implements IMusicRenderer,
             if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
                 Timber.d("Headphones disconnected.");
                 if (isPlaying()) {
-                    final Intent i;
-                    if (VersionUtils.hasLollipop()) {
-                        i = new Intent(context, PlaybackServiceL.class);
-                    } else {
-                        i = new Intent(context, PlaybackServiceK.class);
-                    }
+                    final Intent i = new Intent().setComponent(IntentHelper.getComponent(mContext));
                     i.setAction(PlaybackConstants.SERVICECMD);
                     i.putExtra(PlaybackConstants.CMDNAME, PlaybackConstants.CMDPAUSE);
                     mContext.startService(i);

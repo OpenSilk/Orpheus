@@ -38,6 +38,7 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.KeyEvent;
 
 import org.opensilk.common.core.dagger2.ForApplication;
+import org.opensilk.common.core.rx.RxUtils;
 import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.artwork.service.ArtworkProviderHelper;
@@ -135,7 +136,6 @@ public class PlaybackService {
 
     Subscription mCurrentTrackSub;
     Subscription mNextTrackSub;
-    Subscription mQueueListSub;
     Subscription mArtworkSubscription;
 
     @Inject
@@ -190,18 +190,9 @@ public class PlaybackService {
     public void onDestroy() {
         saveState(true); //fire early as possible
 
-        if (mCurrentTrackSub != null) {
-            mCurrentTrackSub.unsubscribe();
-        }
-        if (mNextTrackSub != null) {
-            mNextTrackSub.unsubscribe();
-        }
-        if (mQueueListSub != null) {
-            mQueueListSub.unsubscribe();
-        }
-        if (mArtworkSubscription != null) {
-            mArtworkSubscription.unsubscribe();
-        }
+        RxUtils.unsubscribe(mCurrentTrackSub);
+        RxUtils.unsubscribe(mNextTrackSub);
+        RxUtils.unsubscribe(mArtworkSubscription);
 
         mNotificationHelper.killNotification();
         mDelayedShutdownHandler.cancelDelayedShutdown();
@@ -251,7 +242,7 @@ public class PlaybackService {
                 mNotificationHelper.setActivityInForeground(intent.getBooleanExtra(NOW_IN_FOREGROUND, false));
             }
 
-            if (Intent.ACTION_MEDIA_BUTTON.equals(action)) {
+            if (Intent.ACTION_MEDIA_BUTTON.equals(action) && intent.hasExtra(Intent.EXTRA_KEY_EVENT)) {
                 mSessionHolder.dispatchMediaButtonEvent(
                         intent.<KeyEvent>getParcelableExtra(Intent.EXTRA_KEY_EVENT));
             } else {
@@ -400,10 +391,7 @@ public class PlaybackService {
 
     //handler thread
     void updateMeta() {
-        if (mArtworkSubscription != null) {
-            mArtworkSubscription.unsubscribe();
-            mArtworkSubscription = null;
-        }
+        RxUtils.unsubscribe(mArtworkSubscription);
         final MediaMetadataCompat meta = mIndexClient.convertToMediaMetadata(mCurrentTrack);
         final Uri artUri = MediaMetadataHelper.getIconUri(meta);
         ArtworkProviderHelper.CacheBitmap bitmap = mArtworkHelper.getCachedOrDefault(artUri);
@@ -416,11 +404,9 @@ public class PlaybackService {
                     .observeOn(getScheduler())
                     .subscribe(new Subscriber<Bitmap>() {
                         @Override public void onCompleted() {
-                            mArtworkSubscription = null;
                         }
                         @Override public void onError(Throwable e) {
                             Timber.w(e, "getArtwork");
-                            mArtworkSubscription = null;
                         }
                         @Override public void onNext(Bitmap bitmap) {
                             mSessionHolder.setMetadata(new MediaMetadataCompat.Builder(meta)
@@ -600,18 +586,14 @@ public class PlaybackService {
         }
         mHandler.removeCallbacks(mProgressCheckRunnable);
         mPlayback.prepareForTrack();
-        if (mCurrentTrackSub != null) {
-            mCurrentTrackSub.unsubscribe();
-        }
+        RxUtils.unsubscribe(mCurrentTrackSub);
         mCurrentTrackSub = mIndexClient.getTrack(uri)
                 .first()
                 .observeOn(getScheduler())
                 .subscribe(new Subscriber<Track>() {
                     @Override public void onCompleted() {
-                        mCurrentTrackSub = null;
                     }
                     @Override public void onError(Throwable e) {
-                        mCurrentTrackSub = null;
                         //will callback in here
                         mQueue.remove(mQueue.getCurrentPos());
                     }
@@ -661,20 +643,16 @@ public class PlaybackService {
             return;
         }
         mPlayback.prepareForNextTrack();
-        if (mNextTrackSub != null) {
-            mNextTrackSub.unsubscribe();
-        }
+        RxUtils.unsubscribe(mNextTrackSub);
         mNextTrackSub = mIndexClient.getTrack(uri)
                 .first()
                 .observeOn(getScheduler())
                 .subscribe(new Subscriber<Track>() {
                     @Override public void onCompleted() {
-                        mNextTrackSub = null;
                     }
                     @Override public void onError(Throwable e) {
                         //will callback into onQueueChanged
                         mQueue.remove(mQueue.getNextPos());
-                        mNextTrackSub = null;
                     }
                     @Override public void onNext(Track track) {
                         mNextTrack = track;

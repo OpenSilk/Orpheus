@@ -17,24 +17,15 @@
 
 package org.opensilk.music.playback.service;
 
+import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.support.v4.content.WakefulBroadcastReceiver;
 
-import org.opensilk.music.playback.PlaybackConstants;
-
-import timber.log.Timber;
-
-public class MediaButtonIntentReceiver extends WakefulBroadcastReceiver {
-
+/**
+ * Created by drew on 11/1/15.
+ */
+public class IntentHelperK implements IntentHelper.Impl {
     @Override
-    public void onReceive(final Context context, final Intent intent) {
-        Timber.v("Received intent: " + intent);
-        final String intentAction = intent.getAction();
-        if (Intent.ACTION_MEDIA_BUTTON.equals(intentAction)) {
-            intent.setComponent(IntentHelper.getComponent(context));
-            intent.putExtra(PlaybackConstants.FROM_MEDIA_BUTTON, true);
-            startWakefulService(context, intent);
-        }
+    public ComponentName getComponent(Context context) {
+        return new ComponentName(context, PlaybackServiceK.class);
     }
 }

@@ -39,8 +39,7 @@ import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.playback.PlaybackConstants;
 import org.opensilk.music.playback.PlaybackConstants.ACTION;
 import org.opensilk.music.playback.PlaybackConstants.CMD;
-import org.opensilk.music.playback.service.PlaybackServiceK;
-import org.opensilk.music.playback.service.PlaybackServiceL;
+import org.opensilk.music.playback.service.IntentHelper;
 import org.opensilk.music.playback.session.IMediaControllerProxy;
 
 import java.util.Collections;
@@ -85,12 +84,7 @@ public class PlaybackController {
         }
 
         if (old == 0 || mForegroundActivities == 0) {
-            final Intent intent;
-            if (VersionUtils.hasLollipop()) {
-                intent = new Intent(mAppContext, PlaybackServiceL.class);
-            } else {
-                intent = new Intent(mAppContext, PlaybackServiceK.class);
-            }
+            final Intent intent = new Intent().setComponent(IntentHelper.getComponent(mAppContext));
             intent.setAction(PlaybackConstants.FOREGROUND_STATE_CHANGED);
             intent.putExtra(PlaybackConstants.NOW_IN_FOREGROUND, mForegroundActivities != 0);
             mAppContext.startService(intent);
