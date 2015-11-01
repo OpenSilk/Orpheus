@@ -27,14 +27,12 @@
     <application>
 
         <activity android:name=".ui.DevicePickerActivity"
-            android:exported="true"
-            android:process=":service"
+            android:process="${playbackProcess}"
             android:theme="@style/CastThemeTranslucentDark" />
 
         <service android:name=".CastRendererService"
-            android:exported="true"
-            android:process=":service"
-            android:logo="@drawable/cast_grey600_36dp"
+            android:process="${playbackProcess}"
+            android:icon="@drawable/cast_grey600_36dp"
             android:label="@string/cast_label"
             android:description="@string/cast_description">
             <meta-data android:name="picker_activity"

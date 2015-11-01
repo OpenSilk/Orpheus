@@ -15,8 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-apply plugin: 'com.android.library'
-apply plugin: 'com.jakewharton.hugo'
+apply plugin: 'com.android.application'
 
 // Versioning
 def versionMajor = 0
@@ -33,10 +32,11 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
+        applicationId "org.opensilk.music.plugin.googlecast"
         minSdkVersion 15
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode versionMajor * 1000000 + versionMinor * 10000 + versionPatch * 100 + versionBuild
-        versionName String.format("%d.%d.%d-SNAPSHOT", versionMajor, versionMinor, versionPatch)
+        versionName String.format("%d.%d.%d", versionMajor, versionMinor, versionPatch)
     }
 
     compileOptions {
@@ -44,38 +44,59 @@ android {
         targetCompatibility JavaVersion.VERSION_1_7
     }
 
+    packagingOptions {
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+    }
+
     buildTypes {
         debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix rootProject.getDebugVersionSuffix()
             manifestPlaceholders = [
+                    sharedId: "org.opensilk.music.debug",
                     playbackProcess: rootProject.ext.playbackProcessDebug
             ]
         }
         release {
             manifestPlaceholders = [
-                    playbackProcess: rootProject.ext.playbackProcess
+                    sharedId: "org.opensilk.music",
+                    playbackProcess: rootProject.ext.playbackProcessDebug
             ]
         }
     }
 
-    defaultPublishConfig "debug"
+    if (file('../../KeyStore').exists()) {
+        signingConfigs {
+            release {
+                def Properties keyProps = new Properties()
+                keyProps.load(new FileInputStream(file('../../KeyStore/release2.properties')))
+                storeFile file(keyProps["store"])
+                keyAlias keyProps["alias"]
+                storePassword keyProps["storePass"]
+                keyPassword keyProps["pass"]
+            }
+        }
+        buildTypes.release.signingConfig signingConfigs.release
+        signingConfigs {
+            debug {
+                def Properties keyProps = new Properties()
+                keyProps.load(new FileInputStream(file('../../KeyStore/debug2.properties')))
+                storeFile file(keyProps["store"])
+                keyAlias keyProps["alias"]
+                storePassword keyProps["storePass"]
+                keyPassword keyProps["pass"]
+            }
+        }
+        buildTypes.debug.signingConfig signingConfigs.debug
+    } else {
+        println "No KeyStore directory found! (You can ignore this warning if your name is not drew)"
+    }
 
 }
 
 dependencies {
     provided(group: 'com.google.dagger', name:'dagger-compiler', version: rootProject.ext.dagger2Version)
 
-    compile 'com.google.android.gms:play-services-cast:8.1.0'
-    compile (group: 'com.android.support', name: 'mediarouter-v7', version: rootProject.ext.supportLibVersion)
-    compile (group: 'commons-io', name: 'commons-io', version: rootProject.ext.commonsIoVersion)
-    compile(group:'org.apache.commons', name:'commons-lang3', version: rootProject.ext.commonsLangVersion)
-
-    compile 'org.eclipse.jetty:jetty-server:8.1.18.v20150929'
-//    compile 'org.eclipse.jetty:jetty-servlet:8.1.18.v20150929'
-//    compile 'org.eclipse.jetty:jetty-client:8.1.18.v20150929'
-
-    compile project(':common-core')
-    compile project(':core-playback-renderer')
-    compile project(':core-okhttp')
-    compile project(':core-model')
-    compile project(':core-res-drawables')
+    compile project(":renderer-chromecast")
 }

@@ -146,7 +146,6 @@ dependencies {
     compile project(':core-index')
     compile project(':library-upnp')
     compile project(':library-googledrive')
-    compile project(':renderer-chromecast')
 
     compile 'com.android.support:multidex:1.0.1'
 

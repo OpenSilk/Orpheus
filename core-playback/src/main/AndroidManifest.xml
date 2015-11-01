@@ -20,7 +20,7 @@
 
     <application>
       <service android:name=".service.PlaybackServiceL"
-          android:process=":service"
+          android:process="${playbackProcess}"
           android:exported="@bool/hasL"
           android:enabled="@bool/hasL">
           <intent-filter>
@@ -28,7 +28,7 @@
           </intent-filter>
       </service>
         <service android:name=".service.PlaybackServiceK"
-            android:process=":service"
+            android:process="${playbackProcess}"
             android:exported="@bool/notL"
             android:enabled="@bool/notL">
             <intent-filter>
@@ -36,7 +36,7 @@
             </intent-filter>
         </service>
         <receiver android:name=".service.MediaButtonIntentReceiver"
-                  android:process=":service">
+                  android:process="${playbackProcess}">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
                 <!--<action android:name="android.media.AUDIO_BECOMING_NOISY" />-->

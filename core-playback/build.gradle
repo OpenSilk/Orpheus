@@ -44,6 +44,19 @@ android {
         targetCompatibility JavaVersion.VERSION_1_7
     }
 
+    buildTypes {
+        debug {
+            manifestPlaceholders = [
+                    playbackProcess: rootProject.ext.playbackProcessDebug
+            ]
+        }
+        release {
+            manifestPlaceholders = [
+                    playbackProcess: rootProject.ext.playbackProcess
+            ]
+        }
+    }
+
     defaultPublishConfig "debug"
 
 }
