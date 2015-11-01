@@ -32,13 +32,13 @@
 
         <service android:name=".CastRendererService"
             android:process=":service"
-            android:logo="@drawable/cast_grey600_36dp"
+            android:icon="@drawable/cast_grey600_36dp"
             android:label="@string/cast_label"
             android:description="@string/cast_description">
-            <meta-data android:name="picker_activity"
+            <meta-data android:name="org.opensilk.music.renderer.META_PICKER_ACTIVITY"
                 android:value="org.opensilk.music.renderer.googlecast.ui.DevicePickerActivity"/>
             <intent-filter>
-                <action android:name="org.opensilk.music.action.RENDERER_SERVICE"/>
+                <action android:name="org.opensilk.music.renderer.action.RENDERER_SERVICE"/>
             </intent-filter>
         </service>
 

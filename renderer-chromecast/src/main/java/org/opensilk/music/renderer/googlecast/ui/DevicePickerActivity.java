@@ -35,6 +35,7 @@ import com.google.android.gms.cast.CastMediaControlIntent;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.okhttp.OkHttpComponent;
+import org.opensilk.music.playback.renderer.RendererConstants;
 import org.opensilk.music.renderer.googlecast.CastComponent;
 import org.opensilk.music.renderer.googlecast.CastRendererService;
 import org.opensilk.music.renderer.googlecast.R;
@@ -58,7 +59,7 @@ public class DevicePickerActivity extends AppCompatActivity implements Dialog.On
     @Override
     @DebugLog
     protected void onCreate(Bundle savedInstanceState) {
-        boolean light = getIntent().getBooleanExtra("org.opensilk.music.library.extra.WANT_LIGHT_THEME", true);
+        boolean light = getIntent().getBooleanExtra(RendererConstants.EXTRA_WANT_LIGHT_THEME, true);
         setTheme(light ? R.style.CastThemeTranslucentLight : R.style.CastThemeTranslucentDark);
         super.onCreate(savedInstanceState);
 

@@ -26,9 +26,9 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.text.TextUtils;
 
 import org.opensilk.common.core.dagger2.ForApplication;
+import org.opensilk.music.playback.renderer.RendererConstants;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,9 +43,6 @@ import rx.Subscriber;
  * Created by drew on 11/15/14.
  */
 public class RendererPluginLoader {
-
-    public static final String RENDERER_ACTION_FILTER = "org.opensilk.music.action.RENDERER_SERVICE";
-    public static final String META_PICKER_ACTIVITY_KEY = "picker_activity";
 
     final Context context;
 
@@ -83,7 +80,7 @@ public class RendererPluginLoader {
     public List<RendererInfo> getPluginInfos(boolean wantIcon) {
         final PackageManager pm = context.getPackageManager();
         final List<ResolveInfo> resolveInfos = pm.queryIntentServices(
-                new Intent(RENDERER_ACTION_FILTER), PackageManager.GET_META_DATA);
+                new Intent(RendererConstants.ACTION_RENDERER_SERVICE), PackageManager.GET_META_DATA);
         final List<RendererInfo> pluginInfos = new ArrayList<>(resolveInfos.size()+1);
         for (final ResolveInfo resolveInfo : resolveInfos) {
             if (resolveInfo == null || resolveInfo.serviceInfo == null)
@@ -100,11 +97,6 @@ public class RendererPluginLoader {
     }
 
     private RendererInfo readResolveInfo(PackageManager pm, ResolveInfo resolveInfo) {
-        boolean hasPermission = false;
-        final String permission = resolveInfo.serviceInfo.permission;
-        if (TextUtils.equals(permission, context.getPackageName() + ".permission.BIND_RENDERER")) {
-            hasPermission = true;
-        }
         final CharSequence title = resolveInfo.loadLabel(pm);
         final ComponentName cn = getComponentName(resolveInfo);
         CharSequence description;
@@ -133,8 +125,9 @@ public class RendererPluginLoader {
         if (resolveInfo.serviceInfo.metaData != null) {
             ServiceInfo serviceInfo = resolveInfo.serviceInfo;
             Bundle meta = serviceInfo.metaData;
-            if (meta.getString(META_PICKER_ACTIVITY_KEY) != null) {
-                return new ComponentName(serviceInfo.packageName, meta.getString(META_PICKER_ACTIVITY_KEY));
+            if (meta.getString(RendererConstants.META_PICKER_ACTIVITY) != null) {
+                return new ComponentName(serviceInfo.packageName,
+                        meta.getString(RendererConstants.META_PICKER_ACTIVITY));
             }
         }
         return null;

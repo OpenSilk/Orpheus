@@ -49,7 +49,8 @@ public class RendererInfo implements Parcelable, Comparable<RendererInfo> {
      */
     private transient boolean isActive = true;
     /**
-     *
+     * Component name of device picker activity meta element
+     * {@link org.opensilk.music.playback.renderer.RendererConstants#META_PICKER_ACTIVITY}
      */
     private ComponentName activityComponent;
 
@@ -71,6 +72,9 @@ public class RendererInfo implements Parcelable, Comparable<RendererInfo> {
         return description;
     }
 
+    /**
+     * Only null for LocalRenderer
+     */
     public @Nullable ComponentName getComponentName() {
         return componentName;
     }
@@ -115,8 +119,7 @@ public class RendererInfo implements Parcelable, Comparable<RendererInfo> {
 
     @Override
     public int hashCode() {
-        int result = (componentName != null ? componentName.hashCode() : 0);
-        return result;
+        return (componentName != null ? componentName.hashCode() : 0);
     }
 
     @Override
@@ -134,14 +137,17 @@ public class RendererInfo implements Parcelable, Comparable<RendererInfo> {
         dest.writeString(title);
         dest.writeString(description);
         dest.writeParcelable(componentName, flags);
+        dest.writeParcelable(activityComponent, flags);
     }
 
     private static RendererInfo readParcel(Parcel in) {
-        return new RendererInfo(
+        RendererInfo info = new RendererInfo(
                 in.readString(),
                 in.readString(),
                 in.<ComponentName>readParcelable(null)
         );
+        info.setActivityComponent(in.<ComponentName>readParcelable(null));
+        return info;
     }
 
     public static final Parcelable.Creator<RendererInfo> CREATOR = new Parcelable.Creator<RendererInfo>() {
