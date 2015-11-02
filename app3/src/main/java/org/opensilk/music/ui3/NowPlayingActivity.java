@@ -94,6 +94,7 @@ public class NowPlayingActivity extends MusicActivity {
     protected void onDestroy() {
         super.onDestroy();
         unsubscribeChargingState();
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     /*
