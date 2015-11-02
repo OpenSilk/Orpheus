@@ -146,6 +146,7 @@ public class PlayingIndicator extends ImageView {
      *
      */
     public void stopAnimating() {
+        mShouldAnimate = false;
         if (isAnimating) {
             isAnimating = false;
             setVisibility(GONE);
