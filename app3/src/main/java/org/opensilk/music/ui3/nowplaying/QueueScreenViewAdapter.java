@@ -89,7 +89,6 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem,
     }
 
     @Override
-    @DebugLog
     public void onBindViewHolder(ViewHolder holder, int position) {
         QueueItem item = getItem(position);
         holder.reset();
