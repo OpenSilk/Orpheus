@@ -27,19 +27,24 @@ import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.core.mortar.MortarIntentService;
 import org.opensilk.music.index.IndexComponent;
 import org.opensilk.music.index.database.IndexDatabase;
+import org.opensilk.music.index.database.TreeNode;
 import org.opensilk.music.index.provider.LastFMHelper;
 import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.client.BundleableLoader;
+import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Metadata;
+import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Track;
 import org.opensilk.bundleable.Bundleable;
 import org.opensilk.music.index.scanner.NotificationHelper.Status;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -48,6 +53,7 @@ import javax.inject.Provider;
 
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
+import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.subjects.PublishSubject;
@@ -124,6 +130,7 @@ public class ScannerService extends MortarIntentService {
     }
 
     @Override
+    @DebugLog
     protected void onHandleIntent(Intent intent) {
         notifSubject = PublishSubject.create();
         notifSubject.asObservable().debounce(1, TimeUnit.SECONDS)
@@ -142,11 +149,19 @@ public class ScannerService extends MortarIntentService {
                     }
                 });
         notifSubject.onNext(Status.SCANNING);
-        String authority = intent.getStringExtra(EXTRA_AUTHORITY);
         if (ACTION_RESCAN.equals(intent.getAction())) {
-            List<Pair<Uri, Uri>> topLevel = mIndexDatabase.findTopLevelContainers(authority);
-            for (Pair<Uri,Uri> p : topLevel) {
-                scan2(p.first, p.second);
+            if (intent.hasExtra(EXTRA_LIBRARY_EXTRAS)) {
+                Bundleable b = LibraryExtras.getBundleable(intent.getBundleExtra(EXTRA_LIBRARY_EXTRAS));
+                if (b != null && (b instanceof Container)) {
+                    Container c = (Container)b;
+                    scan(c.getUri(), c.getParentUri());
+                }
+            } else {
+                String authority = intent.getStringExtra(EXTRA_AUTHORITY);
+                List<Pair<Uri, Uri>> topLevel = mIndexDatabase.findTopLevelContainers(authority);
+                for (Pair<Uri,Uri> p : topLevel) {
+                    scan(p.first, p.second);
+                }
             }
         } else {
             Bundle extras = intent.getBundleExtra(EXTRA_LIBRARY_EXTRAS);
@@ -159,12 +174,11 @@ public class ScannerService extends MortarIntentService {
                 Timber.e("No container in extras");
                 return;
             }
-            scan2(container.getUri(), container.getParentUri());
-
+            scan(container.getUri(), container.getParentUri());
         }
         notifSubject.onNext(Status.COMPLETED);
         notifSubject.onCompleted();
-        mIndexDatabase.removeContainersInError(authority);
+//        mIndexDatabase.removeContainersInError(authority);
     }
 
     void scan2(final Uri uri, final Uri parentUri) {
@@ -240,6 +254,153 @@ public class ScannerService extends MortarIntentService {
             if (b instanceof Container) {
                 Container c = (Container) b;
                 scan2(c.getUri(), c.getParentUri());
+            }
+        }
+    }
+
+    void scan(Uri uri, Uri parentUri) {
+        Timber.i("scan(%s)", uri);
+        final TreeNode currentTree = mIndexDatabase.buildTree(uri, parentUri);
+        final TreeNode newTree = scanChildren(uri, parentUri);
+        indexTree(newTree);
+        removeDifference(currentTree, newTree);
+    }
+
+    private TreeNode scanChildren(Uri uri, Uri parentUri) {
+        Timber.d("scanChildren(%s)", uri);
+        final List<Bundleable> bundleableList =
+                Collections.synchronizedList(new ArrayList<Bundleable>());
+        final CountDownLatch latch = new CountDownLatch(1);
+        BundleableLoader loader = BundleableLoader.create(this)
+                .setMethod(LibraryMethods.SCAN)
+                .setUri(uri);
+        loader.createObservable()
+                .subscribe(new Subscriber<List<Bundleable>>() {
+                    @Override public void onCompleted() {
+                        latch.countDown();
+                    }
+                    @Override public void onError(Throwable e) {
+                        latch.countDown();
+                    }
+                    @Override public void onNext(List<Bundleable> bundleables) {
+                        bundleableList.addAll(bundleables);
+                    }
+                });
+        while (true) {
+            try {
+                latch.await(); break;
+            } catch (InterruptedException ignored) {}
+        }
+        TreeNode node = new TreeNode(uri, parentUri);
+        for (Bundleable b : bundleableList) {
+            if (b instanceof Track) {
+                node.tracks.add((Track)b);
+            } else if (b instanceof Container) {
+                Container c = (Container)b;
+                node.children.add(scanChildren(c.getUri(), c.getParentUri()));
+            } else {
+                Timber.w("Passed an unsupported bundle to scanner class=%s", b.getClass());
+            }
+        }
+        return node;
+    }
+
+    private void indexTree(TreeNode tree) {
+        Timber.i("indexTree(%s)", tree.self);
+        mIndexDatabase.insertContainer(tree.self, tree.parent);
+        //first extract metadata from all tracks in container
+        List<Pair<Track,Metadata>> trackMeta = new ArrayList<>(tree.tracks.size());
+        for (Track item : tree.tracks) {
+            numTotal.incrementAndGet();
+            if (mIndexDatabase.trackNeedsScan(item)) {
+                Track.Res res = item.getResources().get(0);
+                final Metadata meta = mMetaExtractor.extractMetadata(res);
+                trackMeta.add(Pair.create(item, meta));
+            } else {
+                notifySkipped(item.getUri());
+            }
+        }
+        //Second fixup any descrepancies with albumartist/trackartist
+        Set<String> albumArtists = new HashSet<>();
+        Set<String> artists = new HashSet<>();
+        for (Pair<Track,Metadata> pair : trackMeta) {
+            String albumArtist = pair.second.getString(KEY_ALBUM_ARTIST_NAME);
+            if (!StringUtils.isEmpty(albumArtist)) {
+                albumArtists.add(albumArtist);
+            }
+            String artist = pair.second.getString(KEY_ARTIST_NAME);
+            if (!StringUtils.isEmpty(artist)) {
+                //strip of any featured artists
+                artists.add(LastFMHelper.resolveAlbumArtistFromTrackArtist(artist));
+            }
+        }
+        //not all the tracks had album artist set,
+        //but we only have one artist, so use that as album artist for everyone
+        if (albumArtists.size() != trackMeta.size() && artists.size() == 1) {
+            final String artist = artists.toArray(new String[1])[0]; //FIXME ugly
+            final List<Pair<Track,Metadata>> oldTrackMeta = new ArrayList<>();
+            oldTrackMeta.addAll(trackMeta);
+            trackMeta.clear();
+            for (Pair<Track,Metadata> pair : oldTrackMeta) {
+                Metadata m = pair.second.buildUpon()
+                        .putString(KEY_ALBUM_ARTIST_NAME, artist)
+                        .build();
+                trackMeta.add(Pair.create(pair.first, m));
+            }
+        }
+        //add everyone to the db
+        for (Pair<Track,Metadata> pair : trackMeta) {
+            final Track track = pair.first;
+            final Metadata meta = pair.second;
+            final boolean success =
+                    mIndexDatabase.insertTrack(track, meta) > 0;
+            if (success) {
+                notifySuccess(track.getUri());
+            } else {
+                notifyError(track.getUri());
+            }
+        }
+        //continue walking the tree
+        for (TreeNode node : tree.children) {
+            indexTree(node);
+        }
+    }
+
+    void removeDifference(TreeNode currentTree, TreeNode newTree) {
+        //first remove all the tracks not in the current
+        for (Track currentTrack : currentTree.tracks) {
+            if (currentTrack == null) {
+                Timber.e("Null track in collection");
+                continue;
+            }
+            boolean found = false;
+            for (Track newTrack : newTree.tracks) {
+                if (currentTrack.getUri().equals(newTrack.getUri())
+                        && currentTrack.getParentUri().equals(newTrack.getParentUri())) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                Timber.d("Removing stale track %s", currentTrack.getUri());
+                mIndexDatabase.removeTrack(currentTrack.getUri(), currentTrack.getParentUri());
+            }
+        }
+        //now walk down the tree removing any containers not in current
+        for (TreeNode currentNode : currentTree.children) {
+            boolean found = false;
+            for (TreeNode newNode : newTree.children) {
+                if (currentNode.self.equals(newNode.self) &&
+                        currentNode.parent.equals(newNode.parent)) {
+                    found = true;
+                    //walk down this node and remove anything not present
+                    removeDifference(currentNode, newNode);
+                    break;
+                }
+            }
+            if (!found) {
+                Timber.d("Removing stale container %s");
+                mIndexDatabase.removeContainer(currentNode.self);
             }
         }
     }

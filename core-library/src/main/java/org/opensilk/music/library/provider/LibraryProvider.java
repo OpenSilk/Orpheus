@@ -295,7 +295,7 @@ public abstract class LibraryProvider extends ContentProvider {
      * @return Observable created by {@link #getListObjsObservable(Uri, Bundle)}
      */
     protected Observable<Model> getScanObjsObservable(final Uri uri, final Bundle args) {
-        return getGetObjObservable(uri, args);
+        return getListObjsObservable(uri, args);
     }
 
     @Deprecated

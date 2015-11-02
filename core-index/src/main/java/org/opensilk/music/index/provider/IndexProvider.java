@@ -22,6 +22,7 @@ import android.content.UriMatcher;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Pair;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.mortar.DaggerService;
@@ -32,9 +33,12 @@ import org.opensilk.music.index.model.BioContent;
 import org.opensilk.music.index.model.SimilarArtist;
 import org.opensilk.music.index.scanner.ScannerService;
 import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.library.client.TypedBundleableLoader;
+import org.opensilk.music.library.internal.BundleableListTransformer;
 import org.opensilk.music.library.internal.BundleableSubscriber;
 import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.provider.LibraryExtras;
+import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.library.provider.LibraryProvider;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
@@ -44,6 +48,8 @@ import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
 import org.opensilk.bundleable.Bundleable;
+import org.opensilk.music.model.compare.BaseCompare;
+import org.opensilk.music.model.compare.FolderCompare;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +62,10 @@ import de.umass.lastfm.LastFM;
 import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Subscriber;
+import rx.functions.Action2;
+import rx.functions.Func0;
 import rx.functions.Func1;
+import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 
 import static org.opensilk.music.index.provider.IndexUris.M_ALBUMS;
@@ -69,6 +78,7 @@ import static org.opensilk.music.index.provider.IndexUris.M_ARTIST_ALBUMS;
 import static org.opensilk.music.index.provider.IndexUris.M_ARTIST_BIO;
 import static org.opensilk.music.index.provider.IndexUris.M_ARTIST_DETAILS;
 import static org.opensilk.music.index.provider.IndexUris.M_ARTIST_TRACKS;
+import static org.opensilk.music.index.provider.IndexUris.M_FOLDERS;
 import static org.opensilk.music.index.provider.IndexUris.M_GENRES;
 import static org.opensilk.music.index.provider.IndexUris.M_GENRE_ALBUMS;
 import static org.opensilk.music.index.provider.IndexUris.M_GENRE_DETAILS;
@@ -540,6 +550,41 @@ public class IndexProvider extends LibraryProvider {
                     subscriber.onNext(list);
                     subscriber.onCompleted();
                 }
+                break;
+            }
+            case M_FOLDERS: {
+                final BundleableSubscriber<Container> subscriber = new BundleableSubscriber<>(binder);
+                List<Pair<Uri, Uri>> list = mDataBase.findTopLevelContainers(null);
+                if (list.isEmpty()) {
+                    subscriber.onCompleted();
+                    return;
+                }
+                final String sortOrder = LibraryExtras.getSortOrder(args);
+                Observable<Observable<List<Container>>> loaderCreator = Observable.from(list)
+                        .map(new Func1<Pair<Uri,Uri>, Observable<List<Container>>>() {
+                            @Override
+                            public Observable<List<Container>> call(final Pair<Uri,Uri> pair) {
+                                //Use defer for lazy creation
+                                return Observable.defer(new Func0<Observable<List<Container>>>() {
+                                    @Override
+                                    public Observable<List<Container>> call() {
+                                        return TypedBundleableLoader.<Container>create(getContext())
+                                                .setUri(pair.first).setMethod(LibraryMethods.GET)
+                                                .createObservable();
+                                    }
+                                });
+                            }
+                        });
+                Observable.mergeDelayError(loaderCreator, 5)
+                        .onErrorResumeNext(Observable.<List<Container>>empty())
+                        .flatMap(new Func1<List<Container>, Observable<Container>>() {
+                            @Override
+                            public Observable<Container> call(List<Container> containers) {
+                                return Observable.from(containers);
+                            }
+                        })
+                        .compose(new BundleableListTransformer<Container>(BaseCompare.<Container>func(sortOrder)))
+                        .subscribe(subscriber);
                 break;
             }
             default: {

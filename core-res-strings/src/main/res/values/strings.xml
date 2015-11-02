@@ -101,6 +101,7 @@
     <string name="menu_login">Login</string>
     <string name="menu_manage_playlists">Manage playlists</string>
     <string name="menu_open_folder">Open folder</string>
+    <string name="menu_rescan_folder">Rescan</string>
 
     <!-- Content descriptions -->
     <string name="accessibility_play">Play</string>

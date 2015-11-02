@@ -1080,7 +1080,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
             closeCursor(c);
         }
 
-        containers = ArrayUtils.addAll(containers, findChildrenUnder(uri));
+        containers = ArrayUtils.addAll(containers, findChildrenUnder(uri, true));
 
         StringBuilder where = new StringBuilder();
         where.append(IndexSchema.Containers._ID).append(" IN (");
@@ -1107,7 +1107,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
     static final String findChildrenUnderSel = IndexSchema.Containers.PARENT_URI + "=?";
 
     @DebugLog
-    private String[] findChildrenUnder(Uri uri) {
+    private String[] findChildrenUnder(Uri uri, boolean recursive) {
         String[] containers = null;
         HashSet<String> children = new HashSet<>();
         Cursor c = null;
@@ -1124,8 +1124,10 @@ public class IndexDatabaseImpl implements IndexDatabase {
         } finally {
             closeCursor(c);
         }
-        for (String child : children) {
-            ArrayUtils.addAll(containers, findChildrenUnder(Uri.parse(child)));
+        if (recursive) {
+            for (String child : children) {
+                ArrayUtils.addAll(containers, findChildrenUnder(Uri.parse(child), true));
+            }
         }
         return containers;
     }
@@ -1141,12 +1143,100 @@ public class IndexDatabaseImpl implements IndexDatabase {
         return true;
     }
 
+    static final String[] buildTreeContainerCols = new String[] {
+            IndexSchema.Containers.URI,
+            IndexSchema.Containers.PARENT_URI,
+    };
+
+    @Override
+    public TreeNode buildTree(Uri uri, Uri parentUri) {
+        final TreeNode tree = new TreeNode(uri, parentUri);
+        long containerId = hasContainer(uri);
+        if (containerId <= 0) {
+            return tree;
+        }
+        //add tracks under us
+        addTracksUnderContainer(String.valueOf(containerId), tree);
+        //find our direct decendents
+        String[] containers = findChildrenUnder(uri, false);
+        if (containers == null) {
+            return tree;
+        }
+        Cursor c = null;
+        final String[] selArgs = new String[1];
+        for (String id : containers) {
+            selArgs[0] = id;
+            c = query(IndexSchema.Containers.TABLE, buildTreeContainerCols,
+                    idSelection, selArgs, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                TreeNode childTree = new TreeNode(
+                        Uri.parse(c.getString(0)),
+                        Uri.parse(c.getString(1)));
+                addTracksUnderContainer(id, childTree);
+                tree.children.add(childTree);
+            }
+            closeCursor(c);
+        }
+        return tree;
+    }
+
+    static final String[] buildTreeTrackCols = new String[] {
+            IndexSchema.Tracks.URI,
+    };
+    static final String buildTreeTrackSel = IndexSchema.Tracks.CONTAINER_ID + "=?";
+
+    private void addTracksUnderContainer(String containerId, TreeNode tree) {
+        Cursor c = null;
+        final String[] selArgs = new String[]{containerId};
+        try {
+            c = query(IndexSchema.Tracks.TABLE, buildTreeTrackCols,
+                    buildTreeTrackSel, selArgs, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                do {
+                    Track track = getTrack(Uri.parse(c.getString(0)));
+                    if (track != null) {
+                        tree.tracks.add(track);
+                    }
+                } while (c.moveToNext());
+            }
+        } finally {
+            closeCursor(c);
+        }
+    }
+
+    static final String tracksUriSel = IndexSchema.Tracks.URI + "=?";
+
+    @Override
+    public boolean removeTrack(Uri uri, Uri parentUri) {
+        int num = delete(IndexSchema.Tracks.TABLE, tracksUriSel, new String[]{uri.toString()});
+        if (num > 0) {
+            //notify everyone
+            mAppContext.getContentResolver().notifyChange(IndexUris.call(indexAuthority), null);
+        }
+        return num > 0;
+    }
+
+    private long getTracksId(Uri uri) {
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.Tracks.TABLE, idCols, tracksUriSel,
+                    new String[]{uri.toString()}, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                return c.getLong(0);
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return -1;
+    }
+
     @Override
     public long insertTrack(Track track, Metadata metadata) {
         ContentValues cv = new ContentValues(10);
 
         long trackId = insertTrack(track);
         if (trackId < 0) {
+            Timber.d("No track id for track %s", track);
             return -1;
         }
         cv.put(IndexSchema.Meta.Track.TRACK_ID, trackId);
@@ -1202,7 +1292,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
             cv.put(IndexSchema.Meta.Track.DURATION, duration);
         }
 
-        Timber.v("Insering track metadata %s", cv.toString());
+        Timber.v("Inserting track metadata %s", cv.toString());
         long id = insert(IndexSchema.Meta.Track.TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
         if (id > 0) {
             mAppContext.getContentResolver().notifyChange(IndexUris.tracks(indexAuthority), null);
@@ -1215,6 +1305,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
 
         long containerId = hasContainer(track.getParentUri());
         if (containerId < 0) {
+            Timber.e("No container for track %s", track.getName());
             return -1;
         }
         cv.put(IndexSchema.Tracks.CONTAINER_ID, containerId);
@@ -1283,8 +1374,19 @@ public class IndexDatabaseImpl implements IndexDatabase {
             cv.put(IndexSchema.Tracks.RES_DURATION, duration);
         }
         cv.put(IndexSchema.Tracks.DATE_ADDED, System.currentTimeMillis());
-        Timber.v("Inserting track %s", cv.toString());
-        return insert(IndexSchema.Tracks.TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
+        long id = getTracksId(track.getUri());
+        if (id > 0) {
+            Timber.v("Updating track %s", cv.toString());
+            cv.remove(IndexSchema.Tracks.URI);
+            int num = update(IndexSchema.Tracks.TABLE, cv, idSelection, new String[]{String.valueOf(id)});
+            if (num != 1) {
+                Timber.e("Error updating track");
+            }
+        } else {
+            Timber.v("Inserting track %s", cv.toString());
+            id = insert(IndexSchema.Tracks.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+        }
+        return id;
     }
 
     static final String checkAlbumSel = IndexSchema.Info.Album.ALBUM_KEY

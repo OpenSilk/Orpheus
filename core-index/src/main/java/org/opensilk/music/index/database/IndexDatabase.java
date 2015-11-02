@@ -83,6 +83,8 @@ public interface IndexDatabase {
     int removeContainer(Uri uri);
     long insertTrack(Track track, Metadata metadata);
     boolean trackNeedsScan(Track track);
+    TreeNode buildTree(Uri uri, Uri parentUri);
+    boolean removeTrack(Uri uri, Uri parentUri);
 
     List<Uri> getLastQueue();
     void saveQueue(List<Uri> queue);

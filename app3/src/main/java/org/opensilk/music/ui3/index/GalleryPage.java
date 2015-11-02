@@ -21,6 +21,7 @@ import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.music.R;
 import org.opensilk.music.ui3.index.albums.AlbumsScreen;
 import org.opensilk.music.ui3.index.artists.ArtistsScreen;
+import org.opensilk.music.ui3.index.folders.FoldersScreen;
 import org.opensilk.music.ui3.index.genres.GenresScreen;
 import org.opensilk.music.ui3.index.tracks.TracksScreen;
 
@@ -30,12 +31,6 @@ import rx.functions.Func0;
  * Created by drew on 10/3/14.
  */
 public enum GalleryPage {
-//    PLAYLIST(R.string.page_playlists, new Func0<Screen>() {
-//        @Override
-//        public Screen call() {
-//            return new PlaylistsScreen();
-//        }
-//    }),
     ARTIST(R.string.title_artists, new Func0<Screen>() {
         @Override
         public Screen call() {
@@ -48,18 +43,25 @@ public enum GalleryPage {
             return new AlbumsScreen();
         }
     }),
+    GENRE(R.string.title_genres, new Func0<Screen>() {
+        @Override
+        public Screen call() {
+            return new GenresScreen();
+        }
+    }),
     SONG(R.string.title_songs, new Func0<Screen>() {
         @Override
         public Screen call() {
             return new TracksScreen();
         }
     }),
-    GENRE(R.string.title_genres, new Func0<Screen>() {
+    FOLDER(R.string.title_folders, new Func0<Screen>() {
         @Override
         public Screen call() {
-            return new GenresScreen();
+            return new FoldersScreen();
         }
     });
+
 
     public final int titleRes;
     public final Func0<Screen> FACTORY;
