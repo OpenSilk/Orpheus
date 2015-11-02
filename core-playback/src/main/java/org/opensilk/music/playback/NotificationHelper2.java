@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.media.session.MediaSession;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.media.MediaMetadataCompat;
@@ -314,10 +313,10 @@ public class NotificationHelper2 extends BroadcastReceiver {
         initPlaybackActions(mNotificationTemplate, isPlaying);
 
         Bundle extras = new Bundle();
-        if (VersionUtils.hasApi21()) {
-            //tells system we have a mediasession since we dont use mediastyle notification
-            extras.putParcelable(NotificationCompat.EXTRA_MEDIA_SESSION, (MediaSession.Token) mSessionToken);
+        if (VersionUtils.hasLollipop()) {
+            NotificationHelperL.applySessionExtra(extras, mSessionToken);
         }
+
         // Notification Builder
         Notification notification = new NotificationCompat.Builder(mContext)
                 .setSmallIcon(R.drawable.stat_notify_music)
@@ -326,8 +325,8 @@ public class NotificationHelper2 extends BroadcastReceiver {
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setCategory(NotificationCompat.CATEGORY_TRANSPORT)
                 .setOngoing(true)
-                .addExtras(extras)
                 .setContent(mNotificationTemplate)
+                .setExtras(extras)
                 .build();
 
         if (VersionUtils.hasJellyBean()) {
@@ -438,13 +437,13 @@ public class NotificationHelper2 extends BroadcastReceiver {
 
     public void showError(String msg) {
         Notification notif = new NotificationCompat.Builder(mContext)
-                .setTicker("Playback encountered an error")
-                .setContentTitle("Playback error")
+                .setContentTitle(mContext.getString(R.string.msg_title_playback_error))
                 .setContentText(msg)
+                .setContentIntent(createContentIntent())
+                .setSmallIcon(R.drawable.alert_white_24dp)
                 .setCategory(NotificationCompat.CATEGORY_ERROR)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setSmallIcon(R.drawable.stat_notify_music)
                 .build();
         mNotificationManager.notify(ERROR_NOTIF_ID, notif);
     }
