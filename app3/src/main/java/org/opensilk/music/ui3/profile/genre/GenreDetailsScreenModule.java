@@ -68,11 +68,6 @@ public class GenreDetailsScreenModule {
         return IndexUris.genreDetails(screen.genre);
     }
 
-    @Provides @Named("trackcollection_sortorderpref")
-    public String provideTrackCollectionSortOrderPref() {
-        return AppPreferences.GENRE_TRACK_SORT_ORDER;
-    }
-
     @Provides @Named("profile_heros")
     public Boolean provideWantMultiHeros() {
         return screen.genre.getArtInfos().size() > 1;
