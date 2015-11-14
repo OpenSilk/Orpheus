@@ -79,7 +79,6 @@
 
     <style name="nowPlayingActionDark.Prev">
         <item name="android:src">@drawable/ic_skip_previous_white_vector_48dp</item>
-        <item name="android:tint">@color/white</item>
         <item name="android:contentDescription">@string/accessibility_prev</item>
     </style>
 

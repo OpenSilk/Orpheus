@@ -21,6 +21,7 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
@@ -487,11 +488,17 @@ public class NowPlayingScreenView extends RelativeLayout {
                 .getWindow().setStatusBarColor(color);
     }
 
+    static final int[] EMPTY_STATE_SET = new int[0];
     @TargetApi(21)
     void themeButtons(int color) {
-        previousBtn.getDrawable().setTint(color);
-        playPause.getDrawable().setTint(color);
-        nextButton.getDrawable().setTint(color);
+        final int[][] states = new int[1][];
+        final int[] colors = new int[1];
+        states[0] = EMPTY_STATE_SET;
+        colors[0] = color;
+        final ColorStateList stateList = new ColorStateList(states, colors);
+        previousBtn.setImageTintList(stateList);
+        playPause.setImageTintList(stateList);
+        nextButton.setImageTintList(stateList);
     }
 
 }

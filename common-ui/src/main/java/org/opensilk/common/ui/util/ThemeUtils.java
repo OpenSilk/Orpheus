@@ -212,8 +212,10 @@ public class ThemeUtils {
     public static void themeProgressBar2(ProgressBar progressBar, int color) {
         if (VersionUtils.hasLollipop()) {
             progressBar.getProgressDrawable().setTint(color);
+            progressBar.getIndeterminateDrawable().setTint(color);
         } else {
             progressBar.getProgressDrawable().mutate().setColorFilter(color, PorterDuff.Mode.SRC_IN);
+            progressBar.getIndeterminateDrawable().mutate().setColorFilter(color, PorterDuff.Mode.SRC_IN);
         }
     }
 
