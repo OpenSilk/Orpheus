@@ -371,6 +371,7 @@ public class IndexClientImpl implements IndexClient {
     }
 
     @Override
+    @DebugLog
     public int addToPlaylist(Uri playlist, List<Uri> tracks) {
         Bundle reply = makeCall(Methods.ADD_TO_PLAYLIST, BundleHelper.b()
                 .putUri(playlist).putList(tracks).get());

@@ -134,15 +134,6 @@ public class LauncherActivity extends MusicActivity {
                         break;
                 }
                 break;
-            case ActivityRequestCodes.PLAYLIST_ADD: {
-                if (resultCode == RESULT_OK) {
-                    Playlist playlist = Playlist.BUNDLE_CREATOR.fromBundle(data.getBundleExtra("plist"));
-                    mActivityResultsOwner.startActivityForResult(
-                            ProfileActivity.makeIntent(this, new PlaylistDetailsScreen(playlist)),
-                            ActivityRequestCodes.PROFILE, null);
-                }
-                break;
-            }
             case ActivityRequestCodes.RENDERER_PICKER: {
                 if (resultCode == RESULT_OK) {
                     ComponentName cn = data.getComponent();

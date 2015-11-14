@@ -17,6 +17,8 @@
 
 package org.opensilk.music.ui3.nowplaying;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.media.session.MediaSessionCompat.QueueItem;
 import android.support.v4.media.session.PlaybackStateCompat;
@@ -24,12 +26,18 @@ import android.view.MenuItem;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.rx.RxUtils;
+import org.opensilk.common.ui.mortar.ActivityResultsController;
+import org.opensilk.common.ui.mortar.ActivityResultsOwner;
 import org.opensilk.common.ui.mortar.Lifecycle;
 import org.opensilk.common.ui.mortar.LifecycleService;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
+import org.opensilk.music.index.client.IndexClient;
 import org.opensilk.music.playback.PlaybackStateHelper;
 import org.opensilk.music.playback.control.PlaybackController;
+import org.opensilk.music.ui3.PlaylistManageActivity;
+import org.opensilk.music.ui3.common.ActivityRequestCodes;
+import org.opensilk.music.ui3.playlist.PlaylistChooseScreen;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -56,6 +64,8 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView> {
 
     final PlaybackController playbackController;
     final ArtworkRequestManager requestor;
+    final IndexClient indexClient;
+    final ActivityResultsController activityResultsController;
 
     Observable<Lifecycle> lifecycle;
     CompositeSubscription broadcastSubscriptions;
@@ -69,10 +79,14 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView> {
     @Inject
     public QueueScreenPresenter(
             PlaybackController playbackController,
-            ArtworkRequestManager requestor
+            ArtworkRequestManager requestor,
+            IndexClient indexClient,
+            ActivityResultsController activityResultsController
     ) {
         this.playbackController = playbackController;
         this.requestor = requestor;
+        this.indexClient = indexClient;
+        this.activityResultsController = activityResultsController;
     }
 
     @Override
@@ -130,8 +144,22 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView> {
 
     public boolean onMenuItemClicked(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.save_queue:
+            case R.id.save_queue: {
+                if (hasView()) {
+                    List<QueueItem> items = getView().getAdapter().getItems();
+                    List<Uri> uris = new ArrayList<>(items.size());
+                    for (QueueItem i : items) {
+                        uris.add(Uri.parse(i.getDescription().getMediaId()));
+                    }
+                    if (!uris.isEmpty()) {
+                        Intent i = PlaylistManageActivity.makeAddIntent2(
+                                getView().getContext(), uris);
+                        activityResultsController.startActivityForResult(i,
+                                ActivityRequestCodes.PLAYLIST_ADD, null);
+                    }
+                }
                 return true;
+            }
             case R.id.clear_queue:
                 playbackController.clearQueue();
                 return true;
