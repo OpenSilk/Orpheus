@@ -32,13 +32,15 @@
     clicking the same action button. (which will now have a <em>-</em> sign)
 </p>
 <h5>Why do in this way?</h5>
-<ul>
-    <li>The number one request we have received is folder black-listing. This is now
-        implicitly supported. Don't want a folder in <em>My Library</em>? Just don't index it.</li>
-    <li>Before only music stored on the sdcard would show in <em>My Library</em>.
-        Now you can index any folder (from any Library plugin you have installed) and have
-        it show in <em>My Library</em>. This is a major new feature in Orpheus 3.</li>
-</ul>
+<p>
+    The number one request we have received is folder black-listing. This is now
+    implicitly supported. Don't want a folder in <em>My Library</em>? Just don't index it.
+</p>
+<p>
+    Before only music stored on the sdcard would show in <em>My Library</em>.
+    Now you can index any folder (from any Library plugin you have installed) and have
+    it show in <em>My Library</em>. This is a major new feature in Orpheus 3.
+</p>
 <h5>How indexing works</h5>
 <p>
     When you index a folder, Orpheus will recursively walk the hierarchy and read the ID3 tags for <b>every</b>
@@ -92,7 +94,12 @@
 <h4>Playlists</h4>
 <p>
     Orpheus now manages its own playlists. Any playlist you have from other apps or previous
-    versions of Orpheus will need to be imported.
+    versions of Orpheus will need to be recreated. Sorry, it was the only way to support
+    playlists including music from multiple libraries. Which was not supported in Orpheus 2.
+    (Playlist import/export is on the todo list)
+</p>
+<p>
+    Only indexed music can be added to playlists. (This limitation is on the todo list)
 </p>
 <h4>Chromecast</h4>
 <p>

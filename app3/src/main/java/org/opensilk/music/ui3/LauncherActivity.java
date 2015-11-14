@@ -202,7 +202,6 @@ public class LauncherActivity extends MusicActivity {
         final WebView webView = new WebView(this);
         webView.loadUrl("file:///android_asset/whatsnew.html");
         new AlertDialog.Builder(this)
-                .setTitle(R.string.welcome_title)
                 .setView(webView)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
