@@ -105,26 +105,8 @@ public class FooterPageScreenPresenter extends ViewPresenter<FooterPageScreenVie
         playbackController.playorPause();
     }
 
-    void onClick(View view) {
-        handleClick(settings.getString(AppPreferences.FOOTER_CLICK,
-                AppPreferences.ACTION_OPEN_NOW_PLAYING), view);
-    }
-
-    boolean onLongClick(View view) {
-        return handleClick(settings.getString(AppPreferences.FOOTER_LONG_CLICK,
-                AppPreferences.ACTION_NONE), view);
-    }
-
-    boolean handleClick(String action, View view) {
-        switch (action) {
-            case AppPreferences.ACTION_OPEN_QUEUE:
-            case AppPreferences.ACTION_OPEN_NOW_PLAYING:
-                NowPlayingActivity.startSelf(view.getContext(), false);
-                return true;
-            case AppPreferences.ACTION_NONE:
-            default:
-                return false;
-        }
+    void openNowPlaying(View view) {
+        NowPlayingActivity.startSelf(view.getContext(), false);
     }
 
     void openControls() {

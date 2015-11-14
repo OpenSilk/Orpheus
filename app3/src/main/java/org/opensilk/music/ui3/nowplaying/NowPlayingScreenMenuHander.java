@@ -27,7 +27,7 @@ import org.opensilk.common.ui.mortar.ActionBarMenuHandler;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 
-import static org.opensilk.music.AppPreferences.KEEP_SCREEN_ON;
+import static org.opensilk.music.AppPreferences.NOW_PLAYING_KEEP_SCREEN_ON;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_ARTWORK;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_VIS_CIRCLE;
@@ -49,7 +49,7 @@ public class NowPlayingScreenMenuHander implements ActionBarMenuHandler {
     @Override
     public boolean onBuildMenu(MenuInflater menuInflater, Menu menu) {
         menuInflater.inflate(R.menu.now_playing, menu);
-        boolean keepScreenOn = preferences.getBoolean(AppPreferences.KEEP_SCREEN_ON, false);
+        boolean keepScreenOn = preferences.getBoolean(AppPreferences.NOW_PLAYING_KEEP_SCREEN_ON, false);
         if (keepScreenOn) {
             menu.findItem(R.id.menu_keep_screen_on).setChecked(true);
             menu.findItem(R.id.menu_keep_screen_on).setTitle(R.string.now_playing_keep_screen_on_checked);
@@ -98,7 +98,7 @@ public class NowPlayingScreenMenuHander implements ActionBarMenuHandler {
 //                presenter.disableVisualizer();
                 return true;
             case R.id.menu_keep_screen_on:
-                preferences.putBoolean(KEEP_SCREEN_ON, true);
+                preferences.putBoolean(NOW_PLAYING_KEEP_SCREEN_ON, true);
                 showToast(context);
                 return true;
             default:

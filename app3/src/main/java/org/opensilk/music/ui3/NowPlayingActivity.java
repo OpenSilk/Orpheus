@@ -84,7 +84,7 @@ public class NowPlayingActivity extends MusicActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (mSettings.getBoolean(AppPreferences.KEEP_SCREEN_ON, false)) {
+        if (mSettings.getBoolean(AppPreferences.NOW_PLAYING_KEEP_SCREEN_ON, false)) {
 //            subscribeChargingState();
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
@@ -106,7 +106,7 @@ public class NowPlayingActivity extends MusicActivity {
         public void onReceive(Context context, Intent intent) {
             int status = intent != null ? intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) : 0;
             Timber.d("received BATTERY_CHANGED plugged=%s", status != 0);
-            if (mSettings.getBoolean(AppPreferences.KEEP_SCREEN_ON, false) && status != 0) {
+            if (mSettings.getBoolean(AppPreferences.NOW_PLAYING_KEEP_SCREEN_ON, false) && status != 0) {
                 getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             } else {
                 getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);

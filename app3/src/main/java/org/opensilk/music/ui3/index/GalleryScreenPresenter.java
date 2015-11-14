@@ -66,8 +66,7 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
         // init pager
 //        List<GalleryPage> galleryPages = preferences.getGalleryPages();
         List<GalleryPage> galleryPages = Arrays.asList(GalleryPage.values());
-        int startPage = preferences.getInt(preferences.makePrefKey(AppPreferences.KEY_INDEX,
-                AppPreferences.GALLERY_START_PAGE), AppPreferences.DEFAULT_PAGE);
+        int startPage = preferences.getInt(AppPreferences.GALLERY_START_PAGE, AppPreferences.DEFAULT_PAGE);
         getView().setup(galleryPages, startPage);
     }
 
@@ -76,8 +75,7 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
         super.onSave(outState);
         if (hasView()) {
             int pos = getView().mViewPager.getCurrentItem();
-            preferences.putInt(preferences.makePrefKey(AppPreferences.KEY_INDEX,
-                    AppPreferences.GALLERY_START_PAGE), pos);
+            preferences.putInt(AppPreferences.GALLERY_START_PAGE, pos);
         }
     }
 
