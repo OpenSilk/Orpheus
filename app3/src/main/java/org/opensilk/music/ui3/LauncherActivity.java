@@ -20,11 +20,14 @@ package org.opensilk.music.ui3;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
+import android.support.v7.app.AlertDialog;
 import android.view.MenuItem;
+import android.webkit.WebView;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
@@ -96,6 +99,9 @@ public class LauncherActivity extends MusicActivity {
         if (savedInstanceState == null) {
             mNavigaitonClickListener.onNavigationItemSelected(
                     mNavigation.getMenu().getItem(mSettings.getInt(AppPreferences.LAST_NAVIGATION_ITEM, 0)));
+        }
+        if (mSettings.shouldShowIntro()) {
+            showIntroDialog();
         }
     }
 
@@ -192,5 +198,19 @@ public class LauncherActivity extends MusicActivity {
 
     };
 
+    void showIntroDialog() {
+        final WebView webView = new WebView(this);
+        webView.loadUrl("file:///android_asset/whatsnew.html");
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.welcome_title)
+                .setView(webView)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mSettings.setWasShownIntro();
+                    }
+                })
+                .show();
+    }
 
 }
