@@ -234,8 +234,7 @@ public class PlaylistChooseScreenModule {
                         setNewSortOrder(presenter, PlaylistSortOrder.Z_A);
                         return true;
                     case R.id.menu_sort_by_date_added:
-                        Toast.makeText(context, R.string.err_unimplemented, Toast.LENGTH_LONG).show();
-                        //TODO
+                        setNewSortOrder(presenter, PlaylistSortOrder.DATE_ADDED);
                         return true;
                     default:
                         return false;
