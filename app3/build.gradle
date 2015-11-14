@@ -43,15 +43,6 @@ android {
         javaMaxHeapSize "2g"
     }
 
-    sourceSets {
-        main {
-            res {
-                //This appends the extra dirs to res.srcDirs
-                srcDir 'src/main/res-old'
-            }
-        }
-    }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
