@@ -18,6 +18,8 @@
 package org.opensilk.music.plugin.drive;
 
 import org.opensilk.common.core.app.BaseApp;
+import org.opensilk.music.library.drive.DriveLibraryComponent;
+
 /**
  * Created by drew on 6/12/14.
  */
@@ -34,6 +36,6 @@ public class App extends BaseApp {
 
     @Override
     protected Object getRootComponent() {
-        return GlobalComponent.FACTORY.call(this);
+        return DriveLibraryComponent.FACTORY.call(this);
     }
 }

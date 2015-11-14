@@ -17,6 +17,8 @@
 
 package org.opensilk.music.library.drive;
 
+import android.content.Context;
+
 import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.common.core.dagger2.AppContextModule;
 import org.opensilk.music.okhttp.OkHttpComponent;
@@ -24,6 +26,7 @@ import org.opensilk.music.okhttp.OkHttpComponent;
 import javax.inject.Singleton;
 
 import dagger.Component;
+import rx.functions.Func1;
 
 /**
  * Created by drew on 10/31/15.
@@ -36,4 +39,12 @@ import dagger.Component;
         }
 )
 public interface DriveLibraryComponent extends OkHttpComponent, AppContextComponent {
+    Func1<Context, DriveLibraryComponent> FACTORY = new Func1<Context, DriveLibraryComponent>() {
+        @Override
+        public DriveLibraryComponent call(Context context) {
+            return DaggerDriveLibraryComponent.builder()
+                    .appContextModule(new AppContextModule(context))
+                    .build();
+        }
+    };
 }

@@ -16,7 +16,5 @@
   -->
 
 <resources>
-    <!-- Plugin info -->
     <string name="app_name">Orpheus Drive Plugin Debug</string>
-    <string name="plugin_name">Drive Debug</string>
 </resources>

@@ -17,48 +17,26 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.opensilk.music.plugin.drive" >
-
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
-    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS"/>
-    <uses-permission android:name="android.permission.USE_CREDENTIALS"/>
+    xmlns:tools="http://schemas.android.com/tools"
+    package="org.opensilk.music.plugin.drive">
 
     <application
         android:name=".App"
-        android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name">
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:description="@string/app_description"
+        android:allowBackup="true">
 
-        <!-- Library picker activity
-             intent retrieved through PluginConfig#loginComponent -->
-        <activity android:name=".ui.LibraryChooserActivity"
+        <activity android:name="org.opensilk.music.library.drive.ui.ChooserActivity"
+            android:process=":m"
+            tools:replace="process"/>
+
+        <!--Google drive provider-->
+        <provider android:name="org.opensilk.music.library.drive.provider.DriveLibraryProvider"
             android:exported="true"
-            android:theme="@style/AppThemeTranslucentDark"/>
-
-        <!-- Library settings activity
-             intent retrieved through PluginConfig#getMeta(META_SETTINGS_COMPONENT)
-             optional component corresponding to PluginConfig#SETTINGS -->
-        <activity android:name=".ui.SettingsActivity"
-            android:exported="true"
-            android:theme="@style/AppThemeDark"
-            android:launchMode="singleTop"/>
-
-        <activity android:name="org.opensilk.music.plugin.common.FolderPickerActivity">
-            <meta-data android:name="android.support.PARENT_ACTIVITY"
-                       android:value="org.opensilk.music.plugin.drive.ui.SettingsActivity"/>
-        </activity>
-
-        <meta-data android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
-
-        <provider
-            android:name=".provider.DriveLibraryProvider"
-            android:icon="@drawable/ic_launcher"
-            android:label="@string/plugin_name"
-            android:description="@string/plugin_description"
-            android:authorities="orpheus.library.org.opensilk.music.plugin.drive"
-            android:exported="true"/>
+            android:authorities="${applicationId}.provider.driveLibrary"
+            android:process=":m"
+            tools:replace="authorities,process"/>
 
     </application>
 

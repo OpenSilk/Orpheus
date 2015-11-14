@@ -26,4 +26,8 @@
     <string name="drive_authorizing">Authorizing…</string>
     <string name="drive_msg_unable_to_authorize">Authorization failed</string>
 
+    <!-- Settings-->
+    <string name="about_me" translatable="false">OpenSilk Productions LLC</string>
+    <string name="about_me_url" translatable="false">http://www.opensilk.org/</string>
+
 </resources>
