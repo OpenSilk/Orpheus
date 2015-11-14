@@ -181,13 +181,6 @@
             android:name="org.opensilk.music.index.provider.IndexProvider"
             tools:replace="authorities"/>
 
-        <!--Upnp provider-->
-        <provider
-            android:authorities="${applicationId}.provider.upnp"
-            android:permission="${applicationId}.permission.LIBRARY_FULL_ACCESS"
-            android:name="org.opensilk.music.library.upnp.provider.UpnpCDProvider"
-            tools:replace="authorities"/>
-
         <!--Android auto-->
         <meta-data android:name="com.google.android.gms.car.application"
             android:resource="@xml/android_auto_app_desc"/>
