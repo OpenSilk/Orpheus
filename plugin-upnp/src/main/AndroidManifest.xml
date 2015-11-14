@@ -18,46 +18,26 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.opensilk.music.plugin.upnp" >
-
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    xmlns:tools="http://schemas.android.com/tools"
+    package="org.opensilk.music.plugin.upnp">
 
     <application
-        android:name=".UpnpApp"
-        android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name">
+        android:name=".App"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:description="@string/app_description"
+        android:allowBackup="true">
 
-        <!-- Library picker activity
-             intent retrieved through PluginConfig#loginComponent -->
-        <activity android:name=".ui.LibraryPickerActivity"
+        <!--Upnp provider-->
+        <provider android:name="org.opensilk.music.library.upnp.provider.UpnpCDProvider"
             android:exported="true"
-            android:theme="@style/AppThemeDialogLight"/>
+            android:authorities="${applicationId}.provider.cds"
+            android:process=":m"
+            tools:replace="authorities,process"/>
 
-        <!-- Library settings activity
-             intent retrieved through PluginConfig#getMeta(META_SETTINGS_COMPONENT)
-             optional component corresponding to PluginConfig#SETTINGS -->
-        <activity android:name=".ui.SettingsActivity"
-            android:exported="true"
-            android:theme="@style/AppThemeLight"/>
-
-        <!-- RemoteLibrary implementation
-             all items here required for Orpheus to populate the PluginInfo -->
-        <service android:name=".UpnpLibraryService"
-            android:icon="@drawable/ic_launcher"
-            android:label="@string/plugin_name"
-            android:description="@string/plugin_description"
-            android:permission="org.opensilk.music.api.permission.BIND_LIBRARY_SERVICE">
-            <intent-filter>
-                <action android:name="org.opensilk.music.plugin.LIBRARY_SERVICE" />
-            </intent-filter>
-        </service>
-
-        <service android:name=".UpnpServiceService"/>
+        <service android:name="org.opensilk.music.library.upnp.UpnpServiceService"
+            android:process=":m"
+            tools:replace="process"/>
 
     </application>
 

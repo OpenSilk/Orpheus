@@ -17,7 +17,7 @@
 
 package org.opensilk.music.library.upnp;
 
-import android.app.AlarmManager;
+import android.content.Context;
 
 import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.common.core.dagger2.AppContextModule;
@@ -26,6 +26,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Component;
+import rx.functions.Func1;
 
 /**
  * Created by drew on 9/21/15.
@@ -38,5 +39,13 @@ import dagger.Component;
         }
 )
 public interface UpnpLibraryComponent extends AppContextComponent {
+    Func1<Context, UpnpLibraryComponent> FACTORY = new Func1<Context, UpnpLibraryComponent>() {
+        @Override
+        public UpnpLibraryComponent call(Context context) {
+            return DaggerUpnpLibraryComponent.builder()
+                    .appContextModule(new AppContextModule(context))
+                    .build();
+        }
+    };
     @Named("UpnpLibraryAuthority") String unpnAuthority();
 }

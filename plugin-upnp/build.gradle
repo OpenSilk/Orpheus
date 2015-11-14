@@ -17,11 +17,10 @@
 
 apply plugin: 'com.android.application'
 apply plugin: 'com.jakewharton.hugo'
-apply plugin: 'org.robolectric'
 
 // Versioning
 def versionMajor = 0
-def versionMinor = 2
+def versionMinor = 3
 def versionPatch = 0
 def versionBuild = 0 // bump for dogfood builds, public betas, etc.
 
@@ -55,6 +54,8 @@ android {
 
     packagingOptions {
         exclude 'META-INF/beans.xml'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
     }
 
     if (file('../../KeyStore').exists()) {
@@ -86,45 +87,7 @@ android {
 
 }
 
-robolectric {
-    include '**/*Test.class'
-    //jvmArgs '-XX:MaxPermSize=512m', '-XX:-UseSplitVerifier'
-    afterTest {
-        descriptor, result -> println "Executing test for ${descriptor.name} with result: ${result.resultType}"
-    }
-}
-
-repositories {
-    maven { url "http://4thline.org/m2" }
-}
-
 dependencies {
-    compile project(':api')
-    compile 'com.jakewharton:butterknife:6.0.0'
-
-    provided 'com.squareup.dagger:dagger-compiler:1.2.2'
-    compile 'com.squareup.dagger:dagger:1.2.2'
-
-    compile 'org.fourthline.cling:cling-core:2.0-alpha3'
-    compile 'org.fourthline.cling:cling-support:2.0-alpha3'
-//    compile('org.seamless:seamless-android:1.0-alpha3'){
-//        exclude group: 'com.android.support'
-//    }
-
-    compile 'org.eclipse.jetty:jetty-server:8.1.15.v20140411'//8.1.8.v20121106'
-    compile 'org.eclipse.jetty:jetty-servlet:8.1.15.v20140411'//8.1.8.v20121106'
-    compile 'org.eclipse.jetty:jetty-client:8.1.15.v20140411'//8.1.8.v20121106'
-
-    compile 'org.seamless:seamless-xml:1.0-alpha3'
-    compile 'org.apache.commons:commons-lang3:3.3.2'
-
-    compile project(':plugin-common')
-
-    testCompile('junit:junit:4.12')
-    testCompile('org.robolectric:robolectric:2.4') {
-        exclude module: 'commons-logging'
-        exclude module: 'httpclient'
-    }
-    testCompile('com.squareup:fest-android:1.0.0')
-    testCompile('org.mockito:mockito-core:1.10.0')
+    provided(group: 'com.google.dagger', name:'dagger-compiler', version: rootProject.ext.dagger2Version)
+    compile project(':library-upnp')
 }

@@ -31,8 +31,4 @@
     <string name="about_me" translatable="false">OpenSilk Productions LLC</string>
     <string name="about_me_url" translatable="false">http://opensilk.org</string>
 
-    <!-- Orpheus library menu overrides -->
-    <string name="menu_change_source">Select device</string>
-    <string name="menu_library_settings">Upnp settings</string>
-
 </resources>
