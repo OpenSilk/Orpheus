@@ -17,15 +17,7 @@
 
 package org.opensilk.music.library.upnp;
 
-import android.app.AlarmManager;
-import android.content.Context;
-
-import org.opensilk.common.core.dagger2.ForApplication;
-
-import javax.inject.Singleton;
-
 import dagger.Module;
-import dagger.Provides;
 
 /**
  * Created by drew on 9/21/15.

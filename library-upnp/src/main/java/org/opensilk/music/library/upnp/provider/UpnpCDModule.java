@@ -22,8 +22,6 @@ import android.content.Context;
 
 import org.opensilk.common.core.dagger2.ForApplication;
 
-import javax.inject.Singleton;
-
 import dagger.Module;
 import dagger.Provides;
 

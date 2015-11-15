@@ -19,9 +19,7 @@ package org.opensilk.music.library.upnp;
 
 import android.content.Context;
 
-import org.opensilk.common.core.dagger2.ForActivity;
 import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.music.library.provider.LibraryProvider;
 
 import javax.inject.Named;
 
