@@ -34,6 +34,7 @@
         <!--Google drive provider-->
         <provider android:name="org.opensilk.music.library.drive.provider.DriveLibraryProvider"
             android:exported="true"
+            android:permission="${libraryPermission}"
             android:authorities="${applicationId}.provider.driveLibrary"
             android:process=":m"
             tools:replace="authorities,process"/>

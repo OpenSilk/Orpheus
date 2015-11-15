@@ -31,7 +31,8 @@
         <!--Upnp provider-->
         <provider android:name="org.opensilk.music.library.upnp.provider.UpnpCDProvider"
             android:exported="true"
-            android:authorities="${applicationId}.provider.cds"
+            android:permission="${libraryPermission}"
+            android:authorities="${applicationId}.provider.upnp"
             android:process=":m"
             tools:replace="authorities,process"/>
 

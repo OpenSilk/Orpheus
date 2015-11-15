@@ -49,6 +49,10 @@ android {
         debug {
             applicationIdSuffix ".debug"
             versionNameSuffix rootProject.getDebugVersionSuffix()
+            manifestPlaceholders = [ libraryPermission:"org.opensilk.music.debug.permission.LIBRARY_FULL_ACCESS" ]
+        }
+        release {
+            manifestPlaceholders = [ libraryPermission:"org.opensilk.music.permission.LIBRARY_FULL_ACCESS" ]
         }
     }
 
