@@ -18,39 +18,17 @@
           xmlns:tools="http://schemas.android.com/tools"
     package="org.opensilk.music">
 
-    <!-- Used for caching and creating new playlists -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <!-- Used to check for a network connection -->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <!-- Used to download images -->
-    <uses-permission android:name="android.permission.INTERNET" />
-    <!-- Used to keep the service running when the phone sleeps -->
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <!-- The main service uses a sticky broadcast -->
-    <uses-permission android:name="android.permission.BROADCAST_STICKY" />
-    <!-- Lower or raise the music based on the phone state -->
-    <!--<uses-permission android:name="android.permission.READ_PHONE_STATE" />-->
-    <!-- Used to set the devices's ringtone -->
-    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
-    <!-- Used to create launcher shortcuts -->
-    <!--<uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />-->
-    <!-- Used to check if the app is in the background -->
-    <!--<uses-permission android:name="android.permission.GET_TASKS" />-->
-    <!-- Used to get ip address for casting -->
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <!-- Used for the Visualizer -->
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-
-    <!-- sdcard access Kitkat+ -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <!-- permissions for librarys -->
     <permission android:name="${applicationId}.permission.LIBRARY_FULL_ACCESS"
                 android:protectionLevel="signature"/>
     <uses-permission android:name="${applicationId}.permission.LIBRARY_FULL_ACCESS"/>
-
-    <!-- Casting is currently only supported over wifi -->
-    <uses-feature android:name="android.hardware.wifi"/>
 
     <application
         android:name=".App"
