@@ -25,12 +25,14 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application>
-        <!-- Library picker activity
-             intent retrieved through PluginConfig#loginComponent -->
+
         <activity android:name=".ui.ChooserActivity"
-            android:exported="true"
-            android:process=":ui"
-            android:theme="@style/DriveThemeTranslucentDark"/>
+            android:theme="@style/DriveThemeTranslucentDark"
+            android:process=":ui"/>
+
+        <activity android:name=".ui.SettingsActivity"
+            android:theme="@style/DriveDarkTheme"
+            android:process=":ui"/>
 
         <provider
             android:name="org.opensilk.music.library.drive.provider.DriveLibraryProvider"
@@ -43,6 +45,7 @@
                 <action android:name="org.opensilk.music.action.LIBRARY_PROVIDER" />
             </intent-filter>
         </provider>
+
     </application>
 
 </manifest>

@@ -33,6 +33,7 @@ import org.opensilk.music.library.drive.R;
 import org.opensilk.music.library.drive.client.DriveClient;
 import org.opensilk.music.library.drive.client.DriveClientModule;
 import org.opensilk.music.library.drive.ui.ChooserActivity;
+import org.opensilk.music.library.drive.ui.SettingsActivity;
 import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryProvider;
@@ -90,6 +91,7 @@ public class DriveLibraryProvider extends LibraryProvider {
                 .setLabel(getContext().getString(R.string.drive_name))
                 .setFlag(LibraryConfig.FLAG_REQUIRES_AUTH)
                 .setLoginComponent(new ComponentName(getContext(), ChooserActivity.class))
+                .setSettingsComponent(new ComponentName(getContext(), SettingsActivity.class))
                 .build();
     }
 

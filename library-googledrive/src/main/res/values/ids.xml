@@ -17,21 +17,5 @@
   -->
 
 <resources>
-
-    <!-- Plugin info -->
-    <string name="drive_name">Google Drive</string>
-    <string name="drive_description">Google Drive library plugin</string>
-
-    <!-- Library picker -->
-    <string name="drive_authorizing">Authorizing…</string>
-    <string name="drive_msg_unable_to_authorize">Authorization failed</string>
-
-    <!-- Settings-->
-    <string name="drive_about_title">About</string>
-    <string name="drive_about_me" translatable="false">OpenSilk Productions LLC</string>
-    <string name="drive_about_me_url" translatable="false">http://opensilk.org</string>
-    <string name="drive_version">Version</string>
-    <string name="drive_legal_title">Legal</string>
-    <string name="drive_open_source_licenses">Open source licenses</string>
-
+    <item name="main" type="id" />
 </resources>
