@@ -134,6 +134,9 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
         if (config.requiresAuth()) {
             popupMenu.inflate(R.menu.library_login);
         }
+        if (config.hasSettings()) {
+            popupMenu.inflate(R.menu.library_settings);
+        }
     }
 
     void handlePopupItemClick(Context context, MenuItem item) {
@@ -142,6 +145,9 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
             case R.id.library_login: {
                 getParent().startLoginActivity(config);
                 break;
+            }
+            case R.id.library_settings: {
+                getParent().startSettingsActivity(config);
             }
         }
     }

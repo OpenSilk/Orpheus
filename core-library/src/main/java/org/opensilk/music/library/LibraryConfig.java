@@ -62,7 +62,6 @@ public class LibraryConfig {
 
     public static final String META_LOGIN_COMPONENT = "loginComponent";
     public static final String META_SETTINGS_COMPONENT = "settingsComponent";
-    public static final String META_MENU_NAME_SETTINGS = "menu_settings_name";
 
     protected LibraryConfig(
             int apiVersion,
@@ -150,7 +149,15 @@ public class LibraryConfig {
      * current Orpheus theme.
      */
     public ComponentName getLoginComponent() {
-        return meta.<ComponentName>getParcelable(META_LOGIN_COMPONENT);
+        return meta.getParcelable(META_LOGIN_COMPONENT);
+    }
+
+    public boolean hasSettings() {
+        return (flags & FLAG_HAS_SETTINGS) != 0;
+    }
+
+    public ComponentName getSettingsComponent() {
+        return meta.getParcelable(META_SETTINGS_COMPONENT);
     }
 
     public Bundle dematerialize() {
@@ -218,10 +225,9 @@ public class LibraryConfig {
          * {@link LibraryConstants#EXTRA_WANT_LIGHT_THEME} to style the activity to match the
          * current Orpheus theme.
          */
-        public Builder setSettingsComponent(ComponentName settingsComponent, String menuName) {
+        public Builder setSettingsComponent(ComponentName settingsComponent) {
             setFlag(FLAG_HAS_SETTINGS);
             meta.putParcelable(META_SETTINGS_COMPONENT, settingsComponent);
-            meta.putString(META_MENU_NAME_SETTINGS, menuName);
             return this;
         }
 

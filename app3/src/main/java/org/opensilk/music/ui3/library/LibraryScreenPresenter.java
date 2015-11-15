@@ -136,4 +136,9 @@ public class LibraryScreenPresenter extends ViewPresenter<LibraryScreenView> {
         activityResultsController.startActivityForResult(intent, ActivityRequestCodes.LIBRARY_PICKER, null);
         //todo handle result heere
     }
+
+    public void startSettingsActivity(LibraryConfig config) {
+        Intent intent = new Intent().setComponent(config.getSettingsComponent());
+        activityResultsController.startActivityForResult(intent, ActivityRequestCodes.LIBRARY_SETTINGS, null);
+    }
 }
