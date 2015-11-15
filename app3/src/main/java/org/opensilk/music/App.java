@@ -40,12 +40,6 @@ public class App extends BaseApp {
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
     @Override
-    protected void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
-        android.support.multidex.MultiDex.install(this);
-    }
-
-    @Override
     @DebugLog
     public void onCreate() {
         super.onCreate();
