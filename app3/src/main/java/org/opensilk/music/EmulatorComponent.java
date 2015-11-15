@@ -23,7 +23,6 @@ import org.opensilk.music.index.IndexModule;
 import org.opensilk.music.index.IndexProviderAuthorityModule;
 import org.opensilk.music.index.client.IndexClientModule;
 import org.opensilk.music.library.mediastore.MediaStoreLibraryAuthorityModule;
-import org.opensilk.music.library.upnp.UpnpLibraryModule;
 import org.opensilk.music.playback.PlaybackComponent;
 import org.opensilk.music.playback.PlaybackModule;
 
@@ -46,7 +45,6 @@ import rx.functions.Func1;
                 PlaybackModule.class,
                 ArtworkModule.class,
                 IndexModule.class,
-                UpnpLibraryModule.class,
         }
 )
 public interface EmulatorComponent extends AppComponent, ProviderComponent, PlaybackComponent {
