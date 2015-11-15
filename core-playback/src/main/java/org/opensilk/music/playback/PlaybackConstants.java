@@ -206,6 +206,8 @@ public interface PlaybackConstants {
      */
     long REWIND_INSTEAD_PREVIOUS_THRESHOLD = 3000;
 
+    String AUTO_ROOT = "__ROOT__";
+
     interface ACTION {
         String CYCLE_REPEAT = "cmd.cyclerepeat";
         String TOGGLE_SHUFFLE_MODE = "cmd.shufflequeue";

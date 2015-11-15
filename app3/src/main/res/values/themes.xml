@@ -118,4 +118,16 @@
 
     <!-- end settings themes -->
 
+    <style name="CarTheme" parent="Theme.Dark">
+        <!-- colorPrimaryDark is currently used in Android Auto for:
+                - App background
+                - Drawer right side ("more" custom actions) background
+                - Notification icon badge tinting
+                - Overview “now playing” icon tinting-->
+        <!-- colorAccent is used in Android Auto for:
+             - Spinner
+             - progress bar
+             - floating action button background (Play/Pause in media apps)-->
+    </style>
+
 </resources>

@@ -162,18 +162,9 @@
         <!--Android auto-->
         <meta-data android:name="com.google.android.gms.car.application"
             android:resource="@xml/android_auto_app_desc"/>
-        <!-- (OPTIONAL) use this meta data to indicate which icon should be used in media
-             notifications (for example, when the music changes and the user is
-             looking at another app) -->
         <meta-data
-            android:name="com.google.android.gms.car.notification.SmallIcon"
-            android:resource="@drawable/stat_notify_music" />
-        <!-- (OPTIONAL) use this meta data to override the theme from which Android Auto will
-             look for colors. If you don't set this, Android Auto will look
-             for color attributes in your application theme.-->
-        <!--<meta-data-->
-            <!--android:name="com.google.android.gms.car.application.theme"-->
-            <!--android:resource="@style/CarTheme" />-->
+            android:name="com.google.android.gms.car.application.theme"
+            android:resource="@style/CarTheme" />
 
     </application>
 

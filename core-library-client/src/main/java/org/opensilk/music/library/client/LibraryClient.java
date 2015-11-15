@@ -117,7 +117,7 @@ public class LibraryClient {
 
         public ClientCompatJBMR1(Context context, Uri callUri) {
             this.client = context.getContentResolver()
-                    .acquireContentProviderClient(callUri);
+                    .acquireUnstableContentProviderClient(callUri);
         }
 
         @Override

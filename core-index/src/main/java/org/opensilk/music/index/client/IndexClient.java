@@ -17,13 +17,7 @@
 
 package org.opensilk.music.index.client;
 
-import android.media.browse.MediaBrowser;
 import android.net.Uri;
-import android.os.Bundle;
-import android.service.media.MediaBrowserService;
-import android.support.annotation.NonNull;
-import android.support.v4.media.MediaBrowserCompat;
-import android.support.v4.media.MediaBrowserServiceCompat;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 
@@ -53,12 +47,8 @@ public interface IndexClient {
     /*
      * Android auto entry points
      */
+    List<MediaDescriptionCompat> getAutoRoots();
 
-    MediaBrowserService.BrowserRoot browserGetRootL(@NonNull String clientPackageName, int clientUid, Bundle rootHints);
-    void browserLoadChildrenL(@NonNull String parentId, @NonNull MediaBrowserService.Result<List<MediaBrowser.MediaItem>> result);
-
-    MediaBrowserServiceCompat.BrowserRoot browserGetRootK(@NonNull String clientPackageName, int clientUid, Bundle rootHints);
-    void browserLoadChildrenK(@NonNull String parentId, @NonNull MediaBrowserServiceCompat.Result<List<MediaBrowserCompat.MediaItem>> result);
 
     /*
      * Playback settings
@@ -103,4 +93,5 @@ public interface IndexClient {
 
     void startBatch();
     void endBatch();
+
 }

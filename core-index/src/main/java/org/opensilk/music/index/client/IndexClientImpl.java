@@ -22,30 +22,27 @@ import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.media.browse.MediaBrowser;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.service.media.MediaBrowserService;
-import android.support.annotation.NonNull;
-import android.support.v4.media.MediaBrowserCompat;
-import android.support.v4.media.MediaBrowserServiceCompat;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.artwork.UtilsArt;
+import org.opensilk.music.index.R;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.index.provider.Methods;
 import org.opensilk.music.index.scanner.ScannerService;
 import org.opensilk.music.library.client.BundleableObserver;
+import org.opensilk.music.library.client.TypedBundleableLoader;
 import org.opensilk.music.library.internal.IBundleableObserver;
 import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryMethods;
-import org.opensilk.music.library.client.TypedBundleableLoader;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Playlist;
@@ -85,6 +82,7 @@ public class IndexClientImpl implements IndexClient {
 
     final Context appContext;
     final Uri callUri;
+    final String indexAuthority;
     final String artworkAuthority;
 
     final ThreadLocal<ClientCompat> localClientCompat = new ThreadLocal<>();
@@ -97,6 +95,7 @@ public class IndexClientImpl implements IndexClient {
     ) {
         this.appContext = appContext;
         this.callUri = IndexUris.call(authority);
+        this.indexAuthority = authority;
         this.artworkAuthority = artworkAuthority;
     }
 
@@ -125,24 +124,22 @@ public class IndexClientImpl implements IndexClient {
         appContext.startService(intent);
     }
 
-    @Override @TargetApi(21)
-    public MediaBrowserService.BrowserRoot browserGetRootL(@NonNull String clientPackageName, int clientUid, Bundle rootHints) {
-        return new MediaBrowserService.BrowserRoot("__ROOT__", null);
-    }
-
-    @Override @TargetApi(21)
-    public void browserLoadChildrenL(@NonNull String parentId, @NonNull MediaBrowserService.Result<List<MediaBrowser.MediaItem>> result) {
-        result.sendResult(null);
-    }
-
     @Override
-    public MediaBrowserServiceCompat.BrowserRoot browserGetRootK(@NonNull String clientPackageName, int clientUid, Bundle rootHints) {
-        return new MediaBrowserServiceCompat.BrowserRoot("__ROOT__", null);
-    }
-
-    @Override
-    public void browserLoadChildrenK(@NonNull String parentId, @NonNull MediaBrowserServiceCompat.Result<List<MediaBrowserCompat.MediaItem>> result) {
-        result.sendResult(null);
+    public List<MediaDescriptionCompat> getAutoRoots() {
+        Pair[] roots = new Pair[] {
+                Pair.of(IndexUris.albums(indexAuthority), R.string.title_albums),
+                Pair.of(IndexUris.artists(indexAuthority), R.string.title_artists),
+                Pair.of(IndexUris.genres(indexAuthority), R.string.title_genres),
+                Pair.of(IndexUris.playlists(indexAuthority), R.string.title_playlists)
+        };
+        List<MediaDescriptionCompat> list = new ArrayList<>(roots.length);
+        for (Pair p : roots) {
+            list.add(new MediaDescriptionCompat.Builder()
+                    .setMediaId(p.getLeft().toString())
+                    .setTitle(appContext.getString((int)p.getRight()))
+                    .build());
+        }
+        return list;
     }
 
     @Override
@@ -225,6 +222,7 @@ public class IndexClientImpl implements IndexClient {
                 .setUri(uri)
                 .setMethod(LibraryMethods.GET)
                 .createObservable()
+                .retry(1)
                 .flatMap(new Func1<List<Track>, Observable<Track>>() {
                     @Override
                     public Observable<Track> call(List<Track> tracks) {
@@ -292,7 +290,8 @@ public class IndexClientImpl implements IndexClient {
                                     public Observable<List<Track>> call() {
                                         return TypedBundleableLoader.<Track>create(appContext)
                                                 .setUri(uri).setMethod(LibraryMethods.GET)
-                                                .createObservable();
+                                                .createObservable()
+                                                .retry(1);
                                     }
                                 });
                             }
@@ -536,7 +535,7 @@ public class IndexClientImpl implements IndexClient {
 
         public ClientCompatJBMR1(Context context, Uri callUri) {
             this.client = context.getContentResolver()
-                    .acquireContentProviderClient(callUri);
+                    .acquireUnstableContentProviderClient(callUri);
         }
 
         @Override

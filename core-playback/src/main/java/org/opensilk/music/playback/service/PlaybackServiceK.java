@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaBrowserServiceCompat;
@@ -105,12 +106,12 @@ public class PlaybackServiceK extends MediaBrowserServiceCompat implements Playb
     }
 
     @Nullable @Override
-    public BrowserRoot onGetRoot(String clientPackageName, int clientUid, Bundle rootHints) {
-        return mPlaybackService.getIndexClient().browserGetRootK(clientPackageName, clientUid, rootHints);
+    public BrowserRoot onGetRoot(@NonNull String clientPackageName, int clientUid, Bundle rootHints) {
+        return new BrowserRoot("__ROOT__", null);
     }
 
     @Override
-    public void onLoadChildren(String parentId, Result<List<MediaBrowserCompat.MediaItem>> result) {
-        mPlaybackService.getIndexClient().browserLoadChildrenK(parentId, result);
+    public void onLoadChildren(@NonNull String parentId, @NonNull Result<List<MediaBrowserCompat.MediaItem>> result) {
+        result.sendResult(null);
     }
 }

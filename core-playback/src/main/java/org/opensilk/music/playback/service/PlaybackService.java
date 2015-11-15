@@ -25,11 +25,19 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
-import android.media.MediaRouter;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
-import android.os.*;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.ParcelFileDescriptor;
+import android.os.PowerManager;
 import android.os.Process;
+import android.os.ResultReceiver;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.RatingCompat;
@@ -43,23 +51,26 @@ import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.artwork.service.ArtworkProviderHelper;
 import org.opensilk.music.index.client.IndexClient;
+import org.opensilk.music.library.client.TypedBundleableLoader;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.playback.MediaMetadataHelper;
 import org.opensilk.music.playback.NotificationHelper2;
-import org.opensilk.music.playback.renderer.IMusicRenderer;
-import org.opensilk.music.playback.renderer.LocalRenderer;
 import org.opensilk.music.playback.PlaybackConstants;
 import org.opensilk.music.playback.PlaybackConstants.ACTION;
 import org.opensilk.music.playback.PlaybackConstants.CMD;
 import org.opensilk.music.playback.PlaybackConstants.EVENT;
 import org.opensilk.music.playback.PlaybackQueue;
 import org.opensilk.music.playback.PlaybackStateHelper;
+import org.opensilk.music.playback.R;
+import org.opensilk.music.playback.renderer.IMusicRenderer;
+import org.opensilk.music.playback.renderer.LocalRenderer;
 import org.opensilk.music.playback.renderer.PlaybackServiceAccessor;
 import org.opensilk.music.playback.session.IMediaControllerProxy;
 import org.opensilk.music.playback.session.IMediaSessionProxy;
 
 import java.io.Closeable;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -71,6 +82,8 @@ import rx.Scheduler;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.HandlerScheduler;
+import rx.functions.Action1;
+import rx.functions.Func1;
 import timber.log.Timber;
 
 import static org.opensilk.music.playback.PlaybackConstants.CMDNAME;
@@ -137,6 +150,7 @@ public class PlaybackService {
     Subscription mCurrentTrackSub;
     Subscription mNextTrackSub;
     Subscription mArtworkSubscription;
+    Subscription mPlayFromMediaIdSubscription;
 
     @Inject
     public PlaybackService(
@@ -193,6 +207,7 @@ public class PlaybackService {
         RxUtils.unsubscribe(mCurrentTrackSub);
         RxUtils.unsubscribe(mNextTrackSub);
         RxUtils.unsubscribe(mArtworkSubscription);
+        RxUtils.unsubscribe(mPlayFromMediaIdSubscription);
 
         mNotificationHelper.killNotification();
         mDelayedShutdownHandler.cancelDelayedShutdown();
@@ -294,9 +309,7 @@ public class PlaybackService {
         Timber.d("updatePlaybackState(%s) err=%s",
                 PlaybackStateHelper.stringifyState(state), error);
 
-        PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
-                .setActions(getAvailableActions());
-
+        PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder();
 
         // If there is an error message, send it to the playback state:
         if (error != null) {
@@ -306,6 +319,8 @@ public class PlaybackService {
             state = PlaybackStateCompat.STATE_ERROR;
             mNotificationHelper.showError(error);
         }
+
+        setAvailableActions(stateBuilder);
 
         long position = mPlayback.getCurrentStreamPosition();
         long duration = mPlayback.getDuration();
@@ -328,6 +343,8 @@ public class PlaybackService {
 
         stateBuilder.setState(state, position,
                 PlaybackStateHelper.PLAYBACK_SPEED, SystemClock.elapsedRealtime());
+
+        //TODO stop doing this
         if (VersionUtils.hasApi22()) {
             stateBuilder.setExtras(BundleHelper.b()
                     .putLong(duration).get());
@@ -348,27 +365,25 @@ public class PlaybackService {
         }
 
         mHandler.removeCallbacks(mProgressCheckRunnable);
-        if (PlaybackStateHelper.isPlaying(state) && !fromChecker) {
+        if (PlaybackStateHelper.isPlaying(state) && (!fromChecker || duration <= 0)) {
             //if not a schedule update recheck in 2 sec in case duration wasnt ready
             mHandler.postDelayed(mProgressCheckRunnable, 2000);
         }
     }
 
     //handler thread
-    private long getAvailableActions() {
+    private void setAvailableActions(PlaybackStateCompat.Builder builder) {
         long actions = PlaybackStateCompat.ACTION_PLAY
                 | PlaybackStateCompat.ACTION_PLAY_PAUSE
-                //| PlaybackState.ACTION_PLAY_FROM_MEDIA_ID
+                | PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID
                 //| PlaybackState.ACTION_PLAY_FROM_SEARCH
                 ;
         if (mQueue.notEmpty()) {
-            actions |= (PlaybackStateCompat.ACTION_SEEK_TO | PlaybackStateCompat.ACTION_SKIP_TO_QUEUE_ITEM);
+            actions |= PlaybackStateCompat.ACTION_SKIP_TO_QUEUE_ITEM;
             if (mPlayback.isPlaying()) {
                 actions |= PlaybackStateCompat.ACTION_PAUSE;
                 actions &= ~PlaybackStateCompat.ACTION_PLAY;
-            }
-            if (PlaybackStateHelper.isPlayingOrPaused(mPlayback.getState())) {
-                actions |= PlaybackStateCompat.ACTION_STOP;
+                actions |= PlaybackStateCompat.ACTION_SEEK_TO;
             }
             if (mQueue.getPrevious() >= 0) {
                 actions |= PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS;
@@ -376,8 +391,11 @@ public class PlaybackService {
             if (mQueue.getNextPos() >= 0) {
                 actions |= PlaybackStateCompat.ACTION_SKIP_TO_NEXT;
             }
+            builder.addCustomAction(
+                    ACTION.TOGGLE_SHUFFLE_MODE, mContext.getString(R.string.menu_shuffle),
+                    R.drawable.action_shuffle_black_36dp);
         }
-        return actions;
+        builder.setActions(actions);
     }
 
     long getCurrentSeekPosition() {
@@ -765,6 +783,35 @@ public class PlaybackService {
         }
 
         @Override
+        @DebugLog
+        public void onPlayFromMediaId(String mediaId, Bundle extras) {
+            onPause();
+            RxUtils.unsubscribe(mPlayFromMediaIdSubscription);
+            mPlayFromMediaIdSubscription = TypedBundleableLoader.<Track>create(mContext)
+                    .setUri(Uri.parse(mediaId))
+                    .setSortOrder(BundleHelper.getString(extras))
+                    .createObservable()
+                    .map(new Func1<List<Track>, List<Uri>>() {
+                        @Override
+                        public List<Uri> call(List<Track> tracks) {
+                            List<Uri> uris = new ArrayList<Uri>(tracks.size());
+                            for (Track t : tracks) {
+                                uris.add(t.getUri());
+                            }
+                            return uris;
+                        }
+                    })
+                    .observeOn(getScheduler())
+                    .subscribe(new Action1<List<Uri>>() {
+                        @Override
+                        public void call(List<Uri> uris) {
+                            mPlayWhenReady = true;
+                            mQueue.replace(uris);
+                        }
+                    });
+        }
+
+        @Override
         public void onSkipToQueueItem(long id) {
             int pos = mQueue.getPosOfId(id);
             if (pos >= 0) {
@@ -828,6 +875,7 @@ public class PlaybackService {
         @Override
         @DebugLog
         public void onStop() {
+            onPause();
             handleStop();
         }
 

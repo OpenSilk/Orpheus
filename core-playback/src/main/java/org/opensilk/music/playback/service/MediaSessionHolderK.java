@@ -159,7 +159,7 @@ class MediaSessionHolderK implements IMediaSessionProxy {
 
         @Override
         public void onPlayFromMediaId(String mediaId, Bundle extras) {
-            super.onPlayFromMediaId(mediaId, extras);
+            mCallback.onPlayFromMediaId(mediaId, extras);
         }
 
         @Override

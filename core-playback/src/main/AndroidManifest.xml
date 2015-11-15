@@ -31,9 +31,9 @@
             android:process=":service"
             android:exported="@bool/notL"
             android:enabled="@bool/notL">
-            <intent-filter>
-                <action android:name="android.media.browse.MediaBrowserServiceCompat"/>
-            </intent-filter>
+            <!--<intent-filter>-->
+                <!--<action android:name="android.media.browse.MediaBrowserServiceCompat"/>-->
+            <!--</intent-filter>-->
         </service>
         <receiver android:name=".service.MediaButtonIntentReceiver"
                   android:process=":service">

@@ -19,24 +19,49 @@ package org.opensilk.music.playback.service;
 
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.media.MediaDescription;
 import android.media.browse.MediaBrowser;
 import android.media.session.MediaSession;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.service.media.MediaBrowserService;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.media.MediaDescriptionCompat;
 
+import org.apache.commons.lang3.StringUtils;
+import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.core.rx.RxUtils;
+import org.opensilk.common.core.util.BundleHelper;
+import org.opensilk.music.index.client.IndexClient;
+import org.opensilk.music.library.client.BundleableLoader;
+import org.opensilk.music.model.Album;
+import org.opensilk.music.model.Artist;
+import org.opensilk.music.model.Genre;
+import org.opensilk.music.model.Playlist;
+import org.opensilk.music.model.sort.BaseSortOrder;
+import org.opensilk.music.model.sort.TrackSortOrder;
 import org.opensilk.music.playback.PlaybackComponent;
+import org.opensilk.music.playback.PlaybackConstants;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.WeakHashMap;
 
 import javax.inject.Inject;
 
 import hugo.weaving.DebugLog;
+import rx.Observable;
 import rx.Scheduler;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by drew on 10/18/15.
@@ -45,6 +70,8 @@ import rx.Scheduler;
 public class PlaybackServiceL extends MediaBrowserService implements PlaybackServiceProxy {
 
     @Inject PlaybackService mPlaybackService;
+
+    final WeakHashMap<String, Subscription> mLoadChildrenSubscriptions = new WeakHashMap<>();
 
     @Override
     public void onCreate() {
@@ -58,6 +85,10 @@ public class PlaybackServiceL extends MediaBrowserService implements PlaybackSer
     public void onDestroy() {
         super.onDestroy();
         mPlaybackService.onDestroy();
+        for (Subscription s : mLoadChildrenSubscriptions.values()) {
+            RxUtils.unsubscribe(s);
+        }
+        mLoadChildrenSubscriptions.clear();
     }
 
     @Override
@@ -109,13 +140,121 @@ public class PlaybackServiceL extends MediaBrowserService implements PlaybackSer
         return mPlaybackService.getScheduler();
     }
 
-    @Nullable @Override
+    @Nullable @Override //main thread
+    @DebugLog
     public BrowserRoot onGetRoot(@NonNull String clientPackageName, int clientUid, Bundle rootHints) {
-        return mPlaybackService.getIndexClient().browserGetRootL(clientPackageName, clientUid, rootHints);
+        return new BrowserRoot(PlaybackConstants.AUTO_ROOT, null);
+    }
+
+    @Override //main thread
+    @DebugLog
+    public void onLoadChildren(@NonNull final String parentId, @NonNull final Result<List<MediaBrowser.MediaItem>> result) {
+        result.detach();
+        final Observable<List<MediaBrowser.MediaItem>> o;
+        if (StringUtils.equals(PlaybackConstants.AUTO_ROOT, parentId)) {
+            final IndexClient indexClient = mPlaybackService.getIndexClient();
+            o = Observable.create(new Observable.OnSubscribe<List<MediaBrowser.MediaItem>>() {
+                @Override
+                public void call(Subscriber<? super List<MediaBrowser.MediaItem>> subscriber) {
+                    List<MediaBrowser.MediaItem> list = new ArrayList<>();
+                    for (MediaDescriptionCompat md : indexClient.getAutoRoots()) {
+                        list.add(new MediaBrowser.MediaItem(
+                                (MediaDescription)md.getMediaDescription(),
+                                MediaBrowser.MediaItem.FLAG_BROWSABLE));
+                    }
+                    if (!subscriber.isUnsubscribed()) {
+                        subscriber.onNext(list);
+                        subscriber.onCompleted();
+                    }
+                }
+            }).subscribeOn(Schedulers.computation());
+        } else {
+            o = BundleableLoader.create(this)
+                    .setUri(Uri.parse(parentId))
+                    .setSortOrder(BaseSortOrder.A_Z)
+                    .createObservable()
+                    .flatMap(mBundleableListExpandFunc)
+                    .map(mBundleableToMediaItemFunc)
+                    .toList();
+        }
+        Subscription s = mLoadChildrenSubscriptions.remove(parentId);
+        RxUtils.unsubscribe(s);
+        s = o.observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<List<MediaBrowser.MediaItem>>() {
+                    @Override
+                    public void call(List<MediaBrowser.MediaItem> mediaItems) {
+                        result.sendResult(mediaItems);
+                        mLoadChildrenSubscriptions.remove(parentId);
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        result.sendResult(null);
+                        mLoadChildrenSubscriptions.remove(parentId);
+                    }
+                });
+        mLoadChildrenSubscriptions.put(parentId, s);
     }
 
     @Override
-    public void onLoadChildren(@NonNull String parentId, @NonNull Result<List<MediaBrowser.MediaItem>> result) {
-        mPlaybackService.getIndexClient().browserLoadChildrenL(parentId, result);
+    @DebugLog
+    public void onLoadItem(String itemId, final Result<MediaBrowser.MediaItem> result) {
+        //TODO when is this used?
+        super.onLoadItem(itemId, result);
     }
+
+    final Func1<List<Bundleable>, Observable<Bundleable>> mBundleableListExpandFunc =
+            new Func1<List<Bundleable>, Observable<Bundleable>>() {
+                @Override
+                public Observable<Bundleable> call(List<Bundleable> bundleables) {
+                    return Observable.from(bundleables);
+                }
+    };
+
+    final Func1<Bundleable, MediaBrowser.MediaItem> mBundleableToMediaItemFunc =
+            new Func1<Bundleable, MediaBrowser.MediaItem>() {
+                @Override
+                public MediaBrowser.MediaItem call(Bundleable bundleable) {
+                    if (bundleable instanceof Artist) {
+                        Artist a = (Artist) bundleable;
+                        return new MediaBrowser.MediaItem(
+                                new MediaDescription.Builder()
+                                        .setMediaId(a.getTracksUri().toString())
+                                        .setTitle(a.getName())
+                                        .setExtras(BundleHelper.b().putString(TrackSortOrder.ALBUM).get())
+                                        .build(),
+                                MediaBrowser.MediaItem.FLAG_PLAYABLE);
+                    } else if (bundleable instanceof Album) {
+                        Album a = (Album) bundleable;
+                        return new MediaBrowser.MediaItem(
+                                new MediaDescription.Builder()
+                                        .setMediaId(a.getTracksUri().toString())
+                                        .setTitle(a.getName())
+                                        .setSubtitle(a.getArtistName())
+                                        .setExtras(BundleHelper.b().putString(TrackSortOrder.PLAYORDER).get())
+                                        .build(),
+                                MediaBrowser.MediaItem.FLAG_PLAYABLE);
+                    } else if (bundleable instanceof Genre) {
+                        Genre g = (Genre) bundleable;
+                        return new MediaBrowser.MediaItem(
+                                new MediaDescription.Builder()
+                                        .setMediaId(g.getTracksUri().toString())
+                                        .setTitle(g.getName())
+                                        .setExtras(BundleHelper.b().putString(TrackSortOrder.ALBUM).get())
+                                        .build(),
+                                MediaBrowser.MediaItem.FLAG_PLAYABLE);
+                    } else if (bundleable instanceof Playlist) {
+                        Playlist p = (Playlist) bundleable;
+                        return new MediaBrowser.MediaItem(
+                                new MediaDescription.Builder()
+                                        .setMediaId(p.getTracksUri().toString())
+                                        .setTitle(p.getName())
+                                        .setExtras(BundleHelper.b().putString(TrackSortOrder.PLAYORDER).get())
+                                        .build(),
+                                MediaBrowser.MediaItem.FLAG_PLAYABLE);
+                    } else {
+                        throw new IllegalArgumentException("Unsupported bundleable " + bundleable.getClass());
+                    }
+                }
+    };
 }

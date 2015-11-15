@@ -48,6 +48,7 @@ public interface IMediaSessionProxy {
     interface Callback {
         void onCommand(String command, Bundle args, ResultReceiver cb);
         void onPlay();
+        void onPlayFromMediaId(String mediaId, Bundle extras);
         void onSkipToQueueItem(long id);
         void onPause();
         void onSkipToNext();
