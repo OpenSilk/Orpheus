@@ -59,6 +59,7 @@ import org.opensilk.music.library.provider.LibraryProvider;
 import org.opensilk.music.library.upnp.R;
 import org.opensilk.music.library.upnp.UpnpLibraryComponent;
 import org.opensilk.music.library.upnp.UpnpServiceService;
+import org.opensilk.music.library.upnp.ui.SettingsActivity;
 import org.opensilk.music.library.upnp.util.ModelUtil;
 import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Model;
@@ -125,7 +126,8 @@ public class UpnpCDProvider extends LibraryProvider {
         //noinspection ConstantConditions
         return LibraryConfig.builder()
                 .setAuthority(mAuthority)
-                .setLabel(getContext().getResources().getString(R.string.plugin_name))
+                .setLabel(getContext().getResources().getString(R.string.upnp_name))
+                .setSettingsComponent(new ComponentName(getContext(), SettingsActivity.class))
                 .build();
     }
 

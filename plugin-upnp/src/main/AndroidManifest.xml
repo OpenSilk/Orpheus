@@ -28,17 +28,20 @@
         android:description="@string/app_description"
         android:allowBackup="true">
 
+        <activity android:name="org.opensilk.music.library.upnp.ui.SettingsActivity"
+            android:exported="true"
+            tools:remove="process"/>
+
         <!--Upnp provider-->
         <provider android:name="org.opensilk.music.library.upnp.provider.UpnpCDProvider"
             android:exported="true"
             android:permission="${libraryPermission}"
-            android:authorities="${applicationId}.provider.upnp"
-            android:process=":m"
-            tools:replace="authorities,process"/>
+            android:authorities="${applicationId}.provider.cds"
+            tools:replace="authorities"
+            tools:remove="process"/>
 
         <service android:name="org.opensilk.music.library.upnp.UpnpServiceService"
-            android:process=":m"
-            tools:replace="process"/>
+            tools:remove="process"/>
 
     </application>
 

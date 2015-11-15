@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <!--
-  ~ Copyright (c) 2014 OpenSilk Productions LLC
+  ~ Copyright (c) 2015 OpenSilk Productions LLC
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -18,17 +17,5 @@
   -->
 
 <resources>
-
-    <!-- Plugin info-->
-    <string name="upnp_name">Upnp</string>
-    <string name="upnp_description">UPNP/DLNA library plugin</string>
-
-    <!-- Settings-->
-    <string name="upnp_about_title">About</string>
-    <string name="upnp_about_me" translatable="false">OpenSilk Productions LLC</string>
-    <string name="upnp_about_me_url" translatable="false">http://opensilk.org</string>
-    <string name="upnp_version">Version</string>
-    <string name="upnp_legal_title">Legal</string>
-    <string name="upnp_open_source_licenses">Open source licenses</string>
-
+    <item name="main" type="id" />
 </resources>

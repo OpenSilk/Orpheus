@@ -35,6 +35,6 @@ import dagger.Provides;
 public class UpnpLibraryAuthorityModule {
     @Provides @Named("UpnpLibraryAuthority")
     public String provideUpnpLibraryAuthority(@ForApplication Context context) {
-        return context.getPackageName() + ".provider.upnp";
+        return context.getPackageName() + ".provider.cds";
     }
 }

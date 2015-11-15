@@ -26,12 +26,16 @@
 
     <application>
 
+        <activity android:name=".ui.SettingsActivity"
+            android:theme="@style/UpnpDarkTheme"
+            android:process=":ui"/>
+
         <provider
             android:authorities="override_me"
             android:name=".provider.UpnpCDProvider"
             android:icon="@drawable/lan_grey600_36dp"
-            android:label="@string/plugin_name"
-            android:description="@string/plugin_description"
+            android:label="@string/upnp_name"
+            android:description="@string/upnp_description"
             android:process=":prvdr">
             <intent-filter>
                 <action android:name="org.opensilk.music.action.LIBRARY_PROVIDER"/>
