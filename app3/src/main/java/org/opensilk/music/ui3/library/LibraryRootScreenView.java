@@ -18,12 +18,12 @@
 package org.opensilk.music.ui3.library;
 
 import android.content.Context;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.PopupMenu;
 import android.util.AttributeSet;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -49,7 +49,7 @@ import rx.subscriptions.CompositeSubscription;
 /**
  * Created by drew on 9/23/15.
  */
-public class LibraryRootScreenView extends CardView {
+public class LibraryRootScreenView extends FrameLayout {
 
     @Inject LibraryRootScreenPresenter mPresenter;
 
