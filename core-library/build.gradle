@@ -50,8 +50,9 @@ android {
 
 dependencies {
     compile project(':core-model')
-    compile(group:'org.apache.commons', name:'commons-lang3', version: rootProject.ext.commonsLangVersion)
-    compile(group:'io.reactivex', name: 'rxandroid', version: rootProject.ext.rxAndroidVersion)
+    compile (group:'org.apache.commons', name:'commons-lang3', version: rootProject.ext.commonsLangVersion)
+    compile (group: 'io.reactivex', name: 'rxjava', version: rootProject.ext.rxJavaVersion)
+    compile (group:'io.reactivex', name: 'rxandroid', version: rootProject.ext.rxAndroidVersion)
 
     testCompile (group:"junit", name:"junit", version: rootProject.ext.testJunitVersion)
     testCompile (group:"org.assertj", name:"assertj-core", version: rootProject.ext.testAssertJVersion)
