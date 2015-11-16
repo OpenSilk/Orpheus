@@ -21,41 +21,8 @@ package org.opensilk.music.playback;
  * Created by drew on 5/6/15.
  */
 public interface PlaybackConstants {
-    String TAG = "MusicPlaybackService";
-    boolean D = BuildConfig.DEBUG;
 
     String APOLLO_PACKAGE_NAME = BuildConfig.APPLICATION_ID;
-
-    /**
-     * Indicates that the music has paused or resumed
-     */
-    String PLAYSTATE_CHANGED = APOLLO_PACKAGE_NAME+".playstatechanged";
-
-    /**
-     * Indicates that music playback position within
-     * a title was changed
-     */
-    String POSITION_CHANGED = APOLLO_PACKAGE_NAME+".positionchanged";
-
-    /**
-     * Indicates the meta data has changed in some way, like a track change
-     */
-    String META_CHANGED = APOLLO_PACKAGE_NAME+".metachanged";
-
-    /**
-     * Indicates the queue has been updated
-     */
-    String QUEUE_CHANGED = APOLLO_PACKAGE_NAME+".queuechanged";
-
-    /**
-     * Indicates the repeat mode chaned
-     */
-    String REPEATMODE_CHANGED = APOLLO_PACKAGE_NAME+".repeatmodechanged";
-
-    /**
-     * Indicates the shuffle mode chaned
-     */
-    String SHUFFLEMODE_CHANGED = APOLLO_PACKAGE_NAME+".shufflemodechanged";
 
     /**
      * For backwards compatibility reasons, also provide sticky
@@ -64,12 +31,15 @@ public interface PlaybackConstants {
     String MUSIC_PACKAGE_NAME = "com.android.music";
 
     /**
+     * Indicates the meta data has changed in some way, like a track change
+     */
+    String MUSIC_META_CHANGED = MUSIC_PACKAGE_NAME+".metachanged";
+
+    /**
      * Called to indicate a general service commmand. Used in
      * {@link MediaButtonIntentReceiver}
      */
     String SERVICECMD = APOLLO_PACKAGE_NAME+".musicservicecommand";
-
-    String EXTERNAL_SERVICECMD = MUSIC_PACKAGE_NAME+".musicservicecommand";
 
     /**
      * Called to go toggle between pausing and playing the music
@@ -115,22 +85,6 @@ public interface PlaybackConstants {
 
     String FROM_MEDIA_BUTTON = "frommediabutton";
 
-    /**
-     * Used to easily notify a list that it should refresh. i.e. A playlist
-     * changes
-     */
-    String REFRESH = APOLLO_PACKAGE_NAME+".refresh";
-
-    /**
-     * Used by the alarm intent to shutdown the service after being idle
-     */
-    String SHUTDOWN = APOLLO_PACKAGE_NAME+".shutdown";
-
-    /**
-     * Called to update the remote control client
-     */
-    String UPDATE_LOCKSCREEN = APOLLO_PACKAGE_NAME+".updatelockscreen";
-
     String CMDNAME = "command";
 
     String CMDTOGGLEPAUSE = "togglepause";
@@ -144,10 +98,6 @@ public interface PlaybackConstants {
     String CMDPREVIOUS = "previous";
 
     String CMDNEXT = "next";
-
-    String CMDNOTIF = "buttonId";
-
-    int IDCOLIDX = 0;
 
     /**
      * Moves a list to the front of the queue
@@ -242,17 +192,6 @@ public interface PlaybackConstants {
         String REPEAT_CHANGED = "event.repeatchanged";
         //reply has int extra
         String NEW_AUDIO_SESSION_ID = "event.newaudiosessionid";
-    }
-
-    interface EXTRA {
-        String DURATION = "duration";
-        String AUDIO_SESSION_ID = "audio_session_id";
-        String REPEAT_MODE = "repeat_mode";
-        String SHUFFLE_MODE = "shuffle_mode";
-    }
-
-    interface META {
-        String TRACK_ARTWORK_URI = "meta.trackartworkuri";
     }
 
 }

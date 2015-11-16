@@ -432,6 +432,18 @@ public class PlaybackService {
                         }
                     });
         }
+        if (mIndexClient.broadcastMeta()) {
+            //For SimpleLastFmScrobbler
+            final Intent musicIntent = new Intent(PlaybackConstants.MUSIC_META_CHANGED);
+            musicIntent.putExtra("artist", MediaMetadataHelper.getArtistName(meta));
+            musicIntent.putExtra("album", MediaMetadataHelper.getAlbumName(meta));
+            musicIntent.putExtra("track", MediaMetadataHelper.getDisplayName(meta));
+            musicIntent.putExtra("player", mContext.getString(R.string.app_name));
+            musicIntent.putExtra("package", mContext.getPackageName());
+            try {
+                mContext.sendStickyBroadcast(musicIntent);
+            } catch (SecurityException ignored) {}
+        }
     }
 
     //handler thread / main thread

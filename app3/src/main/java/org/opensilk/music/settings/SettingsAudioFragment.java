@@ -26,12 +26,14 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.media.audiofx.AudioEffect;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.widget.Toast;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.R;
+import org.opensilk.music.index.client.IndexClient;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.common.ActivityResultCodes;
 
@@ -41,14 +43,16 @@ import javax.inject.Inject;
  * Created by andrew on 3/1/14.
  */
 public class SettingsAudioFragment extends SettingsFragment implements
-        Preference.OnPreferenceClickListener {
+        Preference.OnPreferenceClickListener, Preference.OnPreferenceChangeListener {
 
     private static final String PREF_EQUALIZER = "pref_equalizer";
 
     @Inject PlaybackController mMusicService;
     @Inject ActivityResultsController mActivytResultsController;
+    @Inject IndexClient mIndexClient;
 
     private Preference mEqualizer;
+    private CheckBoxPreference mBroadcastMeta;
 
     @Override
     public void onAttach(Activity activity) {
@@ -66,6 +70,10 @@ public class SettingsAudioFragment extends SettingsFragment implements
         mEqualizer = mPrefSet.findPreference(PREF_EQUALIZER);
         mEqualizer.setOnPreferenceClickListener(this);
         resolveEqualizer();
+
+        mBroadcastMeta = (CheckBoxPreference) mPrefSet.findPreference("service.broadcastmeta");
+        mBroadcastMeta.setChecked(mIndexClient.broadcastMeta());
+        mBroadcastMeta.setOnPreferenceChangeListener(this);
     }
 
     @Override
@@ -79,6 +87,15 @@ public class SettingsAudioFragment extends SettingsFragment implements
             } catch (final ActivityNotFoundException notFound) {
                 Toast.makeText(getActivity(), getString(R.string.no_effects_for_you), Toast.LENGTH_LONG).show();
             }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onPreferenceChange(Preference preference, Object newValue) {
+        if (preference == mBroadcastMeta) {
+            mIndexClient.setBroadcastMeta((Boolean)newValue);
             return true;
         }
         return false;

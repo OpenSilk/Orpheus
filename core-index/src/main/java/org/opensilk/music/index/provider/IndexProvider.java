@@ -210,8 +210,14 @@ public class IndexProvider extends LibraryProvider {
                 mDataBase.saveLastSeekPosition(BundleHelper.getLong(extras));
                 return reply.putOk(true).get();
             }
-            case Methods.MEDIA_DESCRIPTIONS: {
-                return null;
+            case Methods.GET_BROADCAST_META: {
+                boolean b = mDataBase.getBroadcastMeta();
+                return BundleHelper.from(reply.putOk(true).get())
+                        .putInt(b ? 1 : 0).get();
+            }
+            case Methods.SAVE_BROADCAST_META: {
+                mDataBase.setBroadcastMeta(BundleHelper.getInt(extras) == 1);
+                return reply.putOk(true).get();
             }
             case Methods.GET_TRACK: {
                 Track track = mDataBase.getTrack(BundleHelper.getUri(extras));

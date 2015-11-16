@@ -32,9 +32,10 @@ public interface Methods {
     String SAVE_QUEUE_POSITION = "idx.savequeue.position";
     String SAVE_QUEUE_REPEAT = "idx.savequeue.repeat";
     String SAVE_QUEUE_SHUFFLE = "idx.savequeue.shuffle";
-    String MEDIA_DESCRIPTIONS = "idx.mediadescriptions";
     String LAST_SEEK_POSITION = "idx.lastseekposition";
     String SAVE_SEEK_POSITION = "idx.saveseekposition";
+    String GET_BROADCAST_META = "idx.get.broadcastmeta";
+    String SAVE_BROADCAST_META = "idx.save.broadcastmeta";
     String GET_TRACK = "idx.get.track";
     String GET_TRACK_LIST = "idx.get.track.list";
     String CREATE_PLAYLIST = "idx.create.playlist";

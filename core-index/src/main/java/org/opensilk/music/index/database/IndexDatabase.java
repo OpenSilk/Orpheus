@@ -96,5 +96,7 @@ public interface IndexDatabase {
     void saveQueueRepeatMode(int mode);
     long getLastSeekPosition();
     void saveLastSeekPosition(long pos);
+    boolean getBroadcastMeta();
+    void setBroadcastMeta(boolean broadcast);
 
 }

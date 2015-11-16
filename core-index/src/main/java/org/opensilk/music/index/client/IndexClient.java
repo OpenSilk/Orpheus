@@ -67,6 +67,9 @@ public interface IndexClient {
     long getLastSeekPosition();
     void saveLastSeekPosition(long pos);
 
+    boolean broadcastMeta();
+    void setBroadcastMeta(boolean broadcastMeta);
+
     /*
      * Queue / Playback helper
      */

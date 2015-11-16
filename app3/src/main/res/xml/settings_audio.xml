@@ -18,14 +18,15 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory
-        android:title="@string/settings_general_category">
+    <Preference
+        android:key="pref_equalizer"
+        android:title="@string/menu_equalizer"
+        android:summary="@string/settings_equalizer_summary"/>
 
-        <Preference
-            android:key="pref_equalizer"
-            android:title="@string/menu_equalizer"
-            android:summary="@string/settings_equalizer_summary"/>
-
-    </PreferenceCategory>
+    <CheckBoxPreference
+        android:key="service.broadcastmeta"
+        android:title="@string/settings_broadcast_meta"
+        android:summary="@string/settings_broadcast_meta_summary"
+        android:persistent="false"/>
 
 </PreferenceScreen>

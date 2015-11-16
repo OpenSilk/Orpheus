@@ -245,6 +245,8 @@ public class IndexSchema {
         String KEY_LAST_QUEUE_SHUFFLE = "last_queue_shuffle";
         //LONG
         String KEY_LAST_SEEK_POS = "last_seek_pos";
+        //INT
+        String BROADCAST_META = "broadcast_meta";
     }
 
 }

@@ -230,11 +230,12 @@
     <string name="settings_cache_size_80" translatable="false">80MB</string>
     <!-- audio -->
     <string name="settings_audio_category">Audio</string>
-    <!-- audio general -->
-    <string name="settings_general_category">General</string>
     <string name="settings_equalizer_summary">Fine tune audio settings</string>
     <string name="settings_equalizer_none">No equalizer found</string>
     <string name="settings_err_no_audio_id">Could not get audio id. Please play a song and try again.</string>
+    <string name="settings_broadcast_meta">Broadcast track metadata</string>
+    <string name="settings_broadcast_meta_summary">Enable to use external scrobblers</string>
+
     <!-- donate -->
     <string name="settings_donate_category">Donate</string>
 
