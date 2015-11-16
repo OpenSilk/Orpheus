@@ -57,6 +57,25 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
+                <action android:name="org.opensilk.music.AUDIO_PLAYER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.PICK" />-->
+                <!--<category android:name="android.intent.category.DEFAULT" />-->
+                <!--<category android:name="android.intent.category.OPENABLE" />-->
+                <!--<data android:mimeType="vnd.android.cursor.dir/audio"/>-->
+            <!--</intent-filter>-->
+        </activity-alias>
+
+        <activity
+            android:name=".ui3.NowPlayingActivity"
+            android:theme="@style/Theme.Dark"
+            android:process=":ui">
+            <meta-data android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
+            <!--
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="content" />
@@ -84,33 +103,18 @@
                 <data android:mimeType="application/x-ogg" />
                 <data android:mimeType="application/itunes" />
             </intent-filter>
+            -->
+            <!--
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="vnd.android.cursor.dir/playlist" />
             </intent-filter>
-            <intent-filter>
-                <action android:name="org.opensilk.music.AUDIO_PLAYER" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.PICK" />-->
-                <!--<category android:name="android.intent.category.DEFAULT" />-->
-                <!--<category android:name="android.intent.category.OPENABLE" />-->
-                <!--<data android:mimeType="vnd.android.cursor.dir/audio"/>-->
-            <!--</intent-filter>-->
-        </activity-alias>
-
-        <activity
-            android:name=".ui3.ProfileActivity"
-            android:theme="@style/Theme.Dark"
-            android:process=":ui">
-            <meta-data android:name="android.support.PARENT_ACTIVITY"
-                       android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
+            -->
         </activity>
 
         <activity
-            android:name=".ui3.NowPlayingActivity"
+            android:name=".ui3.ProfileActivity"
             android:theme="@style/Theme.Dark"
             android:process=":ui">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
@@ -158,6 +162,7 @@
         <provider
             android:authorities="${applicationId}.provider.index"
             android:name="org.opensilk.music.index.provider.IndexProvider"
+            android:exported="false"
             tools:replace="authorities"/>
 
         <!--Android auto-->
