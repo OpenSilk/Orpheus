@@ -17,9 +17,7 @@
 
 package org.opensilk.music.playback.service;
 
-import android.os.HandlerThread;
 import android.os.PowerManager;
-import android.os.Process;
 
 import dagger.Module;
 import dagger.Provides;

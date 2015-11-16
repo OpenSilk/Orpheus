@@ -21,7 +21,8 @@ import android.content.Context;
 
 import org.opensilk.common.core.dagger2.AppContextModule;
 import org.opensilk.music.index.client.IndexClientModule;
-import org.opensilk.music.playback.service.PlaybackServiceComponent;
+import org.opensilk.music.playback.service.PlaybackServiceKComponent;
+import org.opensilk.music.playback.service.PlaybackServiceLComponent;
 import org.opensilk.music.playback.service.PlaybackServiceModule;
 
 import javax.inject.Singleton;
@@ -50,5 +51,6 @@ public interface PlaybackComponent {
                             .build();
                 }
             };
-    PlaybackServiceComponent playbackServiceComponent(PlaybackServiceModule module);
+    PlaybackServiceKComponent playbackServiceKComponent(PlaybackServiceModule module);
+    PlaybackServiceLComponent playbackServiceLComponent(PlaybackServiceModule module);
 }

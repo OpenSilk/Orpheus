@@ -46,7 +46,7 @@ public class PlaybackServiceK extends MediaBrowserServiceCompat implements Playb
     @Override
     public void onCreate() {
         PlaybackComponent parent = DaggerService.getDaggerComponent(getApplicationContext());
-        parent.playbackServiceComponent(PlaybackServiceModule.create(this)).inject(this);
+        parent.playbackServiceKComponent(PlaybackServiceModule.create(this)).inject(this);
         super.onCreate();
         mPlaybackService.onCreate(this);
     }

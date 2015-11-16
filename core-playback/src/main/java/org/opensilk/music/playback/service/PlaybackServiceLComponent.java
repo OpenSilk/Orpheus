@@ -20,15 +20,12 @@ package org.opensilk.music.playback.service;
 import dagger.Subcomponent;
 
 /**
- * Created by drew on 5/6/15.
+ * Created by drew on 11/15/15.
  */
 @PlaybackServiceScope
 @Subcomponent(
-        modules = {
-                PlaybackServiceModule.class,
-        }
+        modules = PlaybackServiceModule.class
 )
-public interface PlaybackServiceComponent {
-    void inject(PlaybackServiceK service);
+public interface PlaybackServiceLComponent {
     void inject(PlaybackServiceL service);
 }
