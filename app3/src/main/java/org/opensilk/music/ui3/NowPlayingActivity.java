@@ -17,12 +17,8 @@
 
 package org.opensilk.music.ui3;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.BatteryManager;
-import android.os.Bundle;
 import android.view.WindowManager;
 
 import org.opensilk.common.core.mortar.DaggerService;
@@ -35,7 +31,6 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import mortar.MortarScope;
-import timber.log.Timber;
 
 /**
  * Created by drew on 10/2/15.
@@ -82,48 +77,17 @@ public class NowPlayingActivity extends MusicActivity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onStart() {
+        super.onStart();
         if (mSettings.getBoolean(AppPreferences.NOW_PLAYING_KEEP_SCREEN_ON, false)) {
-//            subscribeChargingState();
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unsubscribeChargingState();
+    protected void onStop() {
+        super.onStop();
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
-    /*
-     * Battery
-     */
-
-    final BroadcastReceiver mChargingReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int status = intent != null ? intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) : 0;
-            Timber.d("received BATTERY_CHANGED plugged=%s", status != 0);
-            if (mSettings.getBoolean(AppPreferences.NOW_PLAYING_KEEP_SCREEN_ON, false) && status != 0) {
-                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-            } else {
-                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-            }
-        }
-    };
-
-    void subscribeChargingState() {
-        IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        registerReceiver(mChargingReceiver, filter);
-    }
-
-    void unsubscribeChargingState() {
-        try {
-            unregisterReceiver(mChargingReceiver);
-        } catch (Exception e) {//i think its illegal state but cant remember (and dont care)
-            //pass
-        }
-    }
 }
