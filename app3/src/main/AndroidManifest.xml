@@ -167,9 +167,11 @@
 
         <!--Android auto-->
         <meta-data android:name="com.google.android.gms.car.application"
+            android:value=""
             android:resource="@xml/android_auto_app_desc"/>
         <meta-data
             android:name="com.google.android.gms.car.application.theme"
+            android:value=""
             android:resource="@style/CarTheme" />
 
     </application>

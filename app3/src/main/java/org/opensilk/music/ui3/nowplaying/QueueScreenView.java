@@ -46,6 +46,8 @@ public class QueueScreenView extends RelativeLayout {
     @InjectView(R.id.queue_toolbar) Toolbar mToolbar;
     @InjectView(R.id.recyclerview) RecyclerView mList;
 
+    boolean mObserverRegistered;
+
     public QueueScreenView(Context context, AttributeSet attrs) {
         super(context, attrs);
         QueueScreenComponent component = DaggerService.getDaggerComponent(getContext());
@@ -79,14 +81,20 @@ public class QueueScreenView extends RelativeLayout {
     @DebugLog
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mAdapter.registerAdapterDataObserver(mObserver);
+        if (!mObserverRegistered) {
+            mObserverRegistered = true;
+            mAdapter.registerAdapterDataObserver(mObserver);
+        }
     }
 
     @Override
     @DebugLog
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mAdapter.unregisterAdapterDataObserver(mObserver);
+        if (mObserverRegistered) {
+            mObserverRegistered = false;
+            mAdapter.unregisterAdapterDataObserver(mObserver);
+        }
         mPresenter.dropView(this);
     }
 

@@ -40,9 +40,7 @@ import rx.functions.Func1;
         modules = {
                 AppContextModule.class,
                 PlaybackModule.class,
-                IndexClientModule.class,
                 CastModule.class,
-                OkHttpModule.class
         }
 )
 public interface ServiceComponent extends PlaybackComponent, CastComponent {

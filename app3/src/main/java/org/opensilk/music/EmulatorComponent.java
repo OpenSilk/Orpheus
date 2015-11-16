@@ -23,8 +23,10 @@ import org.opensilk.music.index.IndexModule;
 import org.opensilk.music.index.IndexProviderAuthorityModule;
 import org.opensilk.music.index.client.IndexClientModule;
 import org.opensilk.music.library.mediastore.MediaStoreLibraryAuthorityModule;
+import org.opensilk.music.okhttp.OkHttpComponent;
 import org.opensilk.music.playback.PlaybackComponent;
 import org.opensilk.music.playback.PlaybackModule;
+import org.opensilk.music.renderer.googlecast.CastModule;
 
 import javax.inject.Singleton;
 
@@ -38,11 +40,10 @@ import rx.functions.Func1;
 @Component(
         modules = {
                 AppModule.class,
-                ArtworkRequestorModule.class,
-                MediaStoreLibraryAuthorityModule.class,
-                IndexProviderAuthorityModule.class,
-                IndexClientModule.class,
+                //Service
                 PlaybackModule.class,
+                CastModule.class,
+                //provider
                 ArtworkModule.class,
                 IndexModule.class,
         }

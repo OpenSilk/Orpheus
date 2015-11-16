@@ -19,6 +19,11 @@ package org.opensilk.music;
 import android.content.Context;
 
 import org.opensilk.common.core.dagger2.ForApplication;
+import org.opensilk.music.artwork.requestor.ArtworkRequestorModule;
+import org.opensilk.music.index.client.IndexClientModule;
+import org.opensilk.music.library.mediastore.MediaStoreLibraryAuthorityModule;
+import org.opensilk.music.playback.control.PlaybackController;
+import org.opensilk.music.playback.control.PlaybackControllerModule;
 
 import javax.inject.Singleton;
 
@@ -28,7 +33,13 @@ import dagger.Provides;
 /**
  * Created by drew on 6/16/14.
  */
-@Module
+@Module(
+        includes = {
+                ArtworkRequestorModule.class,
+                IndexClientModule.class,
+                PlaybackControllerModule.class
+        }
+)
 public class AppModule {
 
     private final App app;

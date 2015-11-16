@@ -44,25 +44,12 @@ public class App extends BaseApp {
     public void onCreate() {
         super.onCreate();
 
-        setupTimber(DEBUG, new Action1<Throwable>() {
-            @Override
-            public void call(Throwable throwable) {
-                //TODO
-            }
-        });
+        setupTimber(DEBUG, null);
 
         if (isUiProcess()) {
-            DaggerService.<AppComponent>getDaggerComponent(this).inject(this);
             registerComponentCallbacks(mUiComponentCallbacks);
         } else if (isProviderProcess()) {
-            // STOPSHIP: 9/19/15
-            File db = getDatabasePath("music.db");
-            Timber.e("Database path = %s", db);
-            try {
-                FileUtils.copyFile(db, new File(Environment.getExternalStorageDirectory(), "orpheus.db"));
-            } catch (Exception e) {
 
-            }
         } else if (isServiceProcess()) {
 
         } else {

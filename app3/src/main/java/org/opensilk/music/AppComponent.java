@@ -37,13 +37,7 @@ import rx.functions.Func1;
  */
 @Singleton
 @Component(
-        modules = {
-                AppModule.class,
-                ArtworkRequestorModule.class,
-                MediaStoreLibraryAuthorityModule.class,
-                IndexProviderAuthorityModule.class,
-                IndexClientModule.class,
-        }
+        modules = AppModule.class
 )
 public interface AppComponent extends AppContextComponent, ArtworkRequestorComponent, IndexClientComponent {
     Func1<App, AppComponent> FACTORY = new Func1<App, AppComponent>() {
