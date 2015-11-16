@@ -219,37 +219,45 @@ public class PlaybackServiceL extends MediaBrowserService implements PlaybackSer
                         Artist a = (Artist) bundleable;
                         return new MediaBrowser.MediaItem(
                                 new MediaDescription.Builder()
-                                        .setMediaId(a.getTracksUri().toString())
+                                        .setMediaId(PlaybackConstants.MEDIA_ID_CONTAINER + ":" + a.getUri())
                                         .setTitle(a.getName())
-                                        .setExtras(BundleHelper.b().putString(TrackSortOrder.ALBUM).get())
+                                        .setExtras(BundleHelper.b()
+                                                .putUri(a.getTracksUri())
+                                                .putString(TrackSortOrder.ALBUM).get())
                                         .build(),
                                 MediaBrowser.MediaItem.FLAG_PLAYABLE);
                     } else if (bundleable instanceof Album) {
                         Album a = (Album) bundleable;
                         return new MediaBrowser.MediaItem(
                                 new MediaDescription.Builder()
-                                        .setMediaId(a.getTracksUri().toString())
+                                        .setMediaId(PlaybackConstants.MEDIA_ID_CONTAINER + ":" + a.getUri())
                                         .setTitle(a.getName())
                                         .setSubtitle(a.getArtistName())
-                                        .setExtras(BundleHelper.b().putString(TrackSortOrder.PLAYORDER).get())
+                                        .setExtras(BundleHelper.b()
+                                                .putUri(a.getTracksUri())
+                                                .putString(TrackSortOrder.PLAYORDER).get())
                                         .build(),
                                 MediaBrowser.MediaItem.FLAG_PLAYABLE);
                     } else if (bundleable instanceof Genre) {
                         Genre g = (Genre) bundleable;
                         return new MediaBrowser.MediaItem(
                                 new MediaDescription.Builder()
-                                        .setMediaId(g.getTracksUri().toString())
+                                        .setMediaId(PlaybackConstants.MEDIA_ID_CONTAINER + ":" + g.getUri())
                                         .setTitle(g.getName())
-                                        .setExtras(BundleHelper.b().putString(TrackSortOrder.ALBUM).get())
+                                        .setExtras(BundleHelper.b()
+                                                .putUri(g.getTracksUri())
+                                                .putString(TrackSortOrder.ALBUM).get())
                                         .build(),
                                 MediaBrowser.MediaItem.FLAG_PLAYABLE);
                     } else if (bundleable instanceof Playlist) {
                         Playlist p = (Playlist) bundleable;
                         return new MediaBrowser.MediaItem(
                                 new MediaDescription.Builder()
-                                        .setMediaId(p.getTracksUri().toString())
+                                        .setMediaId(PlaybackConstants.MEDIA_ID_CONTAINER + ":" + p.getUri())
                                         .setTitle(p.getName())
-                                        .setExtras(BundleHelper.b().putString(TrackSortOrder.PLAYORDER).get())
+                                        .setExtras(BundleHelper.b()
+                                                .putUri(p.getTracksUri())
+                                                .putString(TrackSortOrder.PLAYORDER).get())
                                         .build(),
                                 MediaBrowser.MediaItem.FLAG_PLAYABLE);
                     } else {

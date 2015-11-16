@@ -45,6 +45,7 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.KeyEvent;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.rx.RxUtils;
 import org.opensilk.common.core.util.BundleHelper;
@@ -798,29 +799,36 @@ public class PlaybackService {
         @DebugLog
         public void onPlayFromMediaId(String mediaId, Bundle extras) {
             onPause();
-            RxUtils.unsubscribe(mPlayFromMediaIdSubscription);
-            mPlayFromMediaIdSubscription = TypedBundleableLoader.<Track>create(mContext)
-                    .setUri(Uri.parse(mediaId))
-                    .setSortOrder(BundleHelper.getString(extras))
-                    .createObservable()
-                    .map(new Func1<List<Track>, List<Uri>>() {
-                        @Override
-                        public List<Uri> call(List<Track> tracks) {
-                            List<Uri> uris = new ArrayList<Uri>(tracks.size());
-                            for (Track t : tracks) {
-                                uris.add(t.getUri());
+            if (StringUtils.equals(PlaybackConstants.MEDIA_ID_RAW_URI, mediaId)) {
+                //TODO
+            } else if (StringUtils.startsWith(mediaId, PlaybackConstants.MEDIA_ID_CONTAINER)
+                    && BundleHelper.getUri(extras) != null) {
+                RxUtils.unsubscribe(mPlayFromMediaIdSubscription);
+                mPlayFromMediaIdSubscription = TypedBundleableLoader.<Track>create(mContext)
+                        .setUri(BundleHelper.getUri(extras))
+                        .setSortOrder(BundleHelper.getString(extras))
+                        .createObservable()
+                        .map(new Func1<List<Track>, List<Uri>>() {
+                            @Override
+                            public List<Uri> call(List<Track> tracks) {
+                                List<Uri> uris = new ArrayList<Uri>(tracks.size());
+                                for (Track t : tracks) {
+                                    uris.add(t.getUri());
+                                }
+                                return uris;
                             }
-                            return uris;
-                        }
-                    })
-                    .observeOn(getScheduler())
-                    .subscribe(new Action1<List<Uri>>() {
-                        @Override
-                        public void call(List<Uri> uris) {
-                            mPlayWhenReady = true;
-                            mQueue.replace(uris);
-                        }
-                    });
+                        })
+                        .observeOn(getScheduler())
+                        .subscribe(new Action1<List<Uri>>() {
+                            @Override
+                            public void call(List<Uri> uris) {
+                                mPlayWhenReady = true;
+                                mQueue.replace(uris);
+                            }
+                        });
+            } else {
+                //TODO
+            }
         }
 
         @Override

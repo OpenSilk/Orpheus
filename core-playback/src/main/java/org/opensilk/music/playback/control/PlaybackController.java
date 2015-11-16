@@ -401,6 +401,10 @@ public class PlaybackController {
         mImpl.disconnect();
     }
 
+    public boolean isConnected() {
+        return mImpl.isConnected();
+    }
+
     /*
      *
      */

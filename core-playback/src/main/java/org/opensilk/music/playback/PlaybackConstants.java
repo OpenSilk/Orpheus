@@ -156,7 +156,19 @@ public interface PlaybackConstants {
      */
     long REWIND_INSTEAD_PREVIOUS_THRESHOLD = 3000;
 
-    String AUTO_ROOT = "__ROOT__";
+    /*
+     * MediaBrowser
+     */
+
+    String AUTO_ROOT = "auto_root";
+    //has uri extra and string extra
+    String MEDIA_ID_CONTAINER = "container";
+    //has uri extra
+    String MEDIA_ID_RAW_URI = "raw_uri";
+
+    /*
+     * end mediabrowser
+     */
 
     interface ACTION {
         String CYCLE_REPEAT = "cmd.cyclerepeat";
