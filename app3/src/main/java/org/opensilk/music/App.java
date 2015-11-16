@@ -93,8 +93,7 @@ public class App extends BaseApp {
     }
 
     boolean isUiProcess() {
-        final String pkg = getPackageName();
-        return StringUtils.endsWith(getProcName(), pkg.substring(pkg.length() - 8));
+        return StringUtils.endsWith(getProcName(), ":ui");
     }
 
     boolean isProviderProcess() {
@@ -103,6 +102,7 @@ public class App extends BaseApp {
 
     private String mProcName;
 
+    @DebugLog
     String getProcName() {
         if (mProcName == null) {
             try {

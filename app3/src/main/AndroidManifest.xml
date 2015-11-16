@@ -41,8 +41,9 @@
 
         <activity android:name=".ui3.LauncherActivity"
             android:theme="@style/Theme.Dark"
-            android:launchMode="singleTop"
-            android:windowSoftInputMode="adjustPan"/>
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustPan"
+            android:process=":ui"/>
 
         <!-- The God Activity -->
         <activity-alias
@@ -69,7 +70,8 @@
 
         <activity
             android:name=".ui3.NowPlayingActivity"
-            android:theme="@style/Theme.Dark">
+            android:theme="@style/Theme.Dark"
+            android:process=":ui">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
             <!--
@@ -113,28 +115,32 @@
 
         <activity
             android:name=".ui3.ProfileActivity"
-            android:theme="@style/Theme.Dark">
+            android:theme="@style/Theme.Dark"
+            android:process=":ui">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
         </activity>
 
         <activity
             android:name=".ui3.PlaylistManageActivity"
-            android:theme="@style/Theme.Dark">
+            android:theme="@style/Theme.Dark"
+            android:process=":ui">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
         </activity>
 
         <activity
             android:name=".settings.SettingsActivity"
-            android:theme="@style/Theme.Settings.Dark">
+            android:theme="@style/Theme.Settings.Dark"
+            android:process=":ui">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
         </activity>
 
         <activity
             android:name=".settings.themepicker.ThemePickerActivity"
-            android:theme="@style/Theme.Settings.Dark">
+            android:theme="@style/Theme.Settings.Dark"
+            android:process=":ui">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value=".settings.SettingsActivity"/>
         </activity>

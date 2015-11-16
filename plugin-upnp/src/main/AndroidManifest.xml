@@ -29,7 +29,8 @@
         android:allowBackup="true">
 
         <activity android:name="org.opensilk.music.library.upnp.ui.SettingsActivity"
-            android:exported="true"/>
+            android:exported="true"
+            tools:remove="process"/>
 
         <!--Upnp provider-->
         <provider android:name="org.opensilk.music.library.upnp.provider.UpnpCDProvider"

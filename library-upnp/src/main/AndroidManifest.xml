@@ -27,7 +27,8 @@
     <application>
 
         <activity android:name=".ui.SettingsActivity"
-            android:theme="@style/UpnpDarkTheme"/>
+            android:theme="@style/UpnpDarkTheme"
+            android:process=":ui"/>
 
         <provider
             android:authorities="override_me"
