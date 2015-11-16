@@ -27,12 +27,10 @@
     <application>
 
         <activity android:name=".ui.ChooserActivity"
-            android:theme="@style/DriveThemeTranslucentDark"
-            android:process=":ui"/>
+            android:theme="@style/DriveThemeTranslucentDark"/>
 
         <activity android:name=".ui.SettingsActivity"
-            android:theme="@style/DriveDarkTheme"
-            android:process=":ui"/>
+            android:theme="@style/DriveDarkTheme"/>
 
         <provider
             android:name="org.opensilk.music.library.drive.provider.DriveLibraryProvider"

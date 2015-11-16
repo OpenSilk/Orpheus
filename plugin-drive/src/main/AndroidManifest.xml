@@ -28,12 +28,10 @@
         android:allowBackup="true">
 
         <activity android:name="org.opensilk.music.library.drive.ui.ChooserActivity"
-            android:exported="true"
-            tools:remove="process"/>
+            android:exported="true"/>
 
         <activity android:name="org.opensilk.music.library.drive.ui.SettingsActivity"
-            android:exported="true"
-            tools:remove="process"/>
+            android:exported="true"/>
 
         <!--Google drive provider-->
         <provider android:name="org.opensilk.music.library.drive.provider.DriveLibraryProvider"
