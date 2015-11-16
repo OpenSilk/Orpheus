@@ -34,17 +34,17 @@ import timber.log.Timber;
  * Created by drew on 10/18/15.
  */
 @TargetApi(21)
-class PlaybackControllerL implements IPlaybackController {
+class PlaybackControllerL implements PlaybackControllerImpl.IMPL {
 
     final Context mAppContext;
-    final PlaybackController mController;
+    final PlaybackControllerImpl mController;
     final MediaBrowser mMediaBrowser;
 
     boolean mWaitingForService = false;
     IMediaControllerProxy mMediaController;
     IMediaControllerProxy.TransportControlsProxy mTransportControls;
 
-    public PlaybackControllerL(Context mAppContext, PlaybackController controller) {
+    public PlaybackControllerL(Context mAppContext, PlaybackControllerImpl controller) {
         this.mAppContext = mAppContext;
         this.mController = controller;
         this.mMediaBrowser = new MediaBrowser(

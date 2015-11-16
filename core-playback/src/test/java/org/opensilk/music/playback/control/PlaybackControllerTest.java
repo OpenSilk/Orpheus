@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.opensilk.music.playback.control.PlaybackController.*;
+import static org.opensilk.music.playback.control.PlaybackControllerImpl.*;
 
 /**
  * Created by drew on 10/23/15.

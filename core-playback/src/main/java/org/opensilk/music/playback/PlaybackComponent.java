@@ -37,8 +37,7 @@ import rx.functions.Func1;
 @Component(
         modules = {
                 AppContextModule.class,
-                PlaybackModule.class,
-                IndexClientModule.class
+                PlaybackModule.class
         }
 )
 public interface PlaybackComponent {

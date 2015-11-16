@@ -19,6 +19,7 @@ package org.opensilk.music.playback;
 
 import org.opensilk.common.core.dagger2.SystemServicesModule;
 import org.opensilk.music.artwork.service.ArtworkProviderHelperModule;
+import org.opensilk.music.index.client.IndexClientModule;
 
 import dagger.Module;
 
@@ -29,6 +30,7 @@ import dagger.Module;
         includes = {
                 ArtworkProviderHelperModule.class,
                 SystemServicesModule.class,
+                IndexClientModule.class
         }
 )
 public class PlaybackModule {

@@ -33,17 +33,17 @@ import timber.log.Timber;
 /**
  * Created by drew on 10/18/15.
  */
-class PlaybackControllerK implements IPlaybackController {
+class PlaybackControllerK implements PlaybackControllerImpl.IMPL {
 
     final Context mAppContext;
-    final PlaybackController mController;
+    final PlaybackControllerImpl mController;
     final MediaBrowserCompat mMediaBrowser;
 
     boolean mWaitingForService = false;
     IMediaControllerProxy mMediaController;
     IMediaControllerProxy.TransportControlsProxy mTransportControls;
 
-    public PlaybackControllerK(Context mAppContext, PlaybackController mController) {
+    public PlaybackControllerK(Context mAppContext, PlaybackControllerImpl mController) {
         this.mAppContext = mAppContext;
         this.mController = mController;
         this.mMediaBrowser = new MediaBrowserCompat(

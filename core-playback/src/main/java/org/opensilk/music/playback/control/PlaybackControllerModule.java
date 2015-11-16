@@ -17,16 +17,18 @@
 
 package org.opensilk.music.playback.control;
 
-import org.opensilk.music.playback.session.IMediaControllerProxy;
+import javax.inject.Singleton;
+
+import dagger.Module;
+import dagger.Provides;
 
 /**
- * Created by drew on 10/18/15.
+ * Created by drew on 11/16/15.
  */
-interface IPlaybackController {
-    void connect();
-    void disconnect();
-    boolean isConnected();
-    IMediaControllerProxy.TransportControlsProxy getTransportControls();
-    IMediaControllerProxy getMediaController();
-    PlaybackInfoCompat getPlaybackInfo(Object info);
+@Module
+public class PlaybackControllerModule {
+    @Provides @Singleton
+    public PlaybackController providePlaybackController(PlaybackControllerImpl impl) {
+        return impl;
+    }
 }
