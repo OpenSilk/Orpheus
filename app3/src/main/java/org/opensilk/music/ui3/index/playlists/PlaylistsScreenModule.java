@@ -112,7 +112,7 @@ public class PlaylistsScreenModule {
                         setNewSortOrder(presenter, PlaylistSortOrder.Z_A);
                         return true;
                     case R.id.menu_sort_by_date_added:
-                        setNewSortOrder(presenter, PlaylistSortOrder.DATE_ADDED);
+                        setNewSortOrder(presenter, PlaylistSortOrder.LAST_ADDED);
                         return true;
                     case R.id.menu_view_as_simple:
                         updateLayout(presenter, AppPreferences.SIMPLE);
@@ -128,6 +128,9 @@ public class PlaylistsScreenModule {
             @Override
             public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,
+                        R.menu.add_to_queue,
+                        R.menu.play_all,
+                        R.menu.play_next,
                         R.menu.delete
                 );
                 return true;
@@ -135,13 +138,30 @@ public class PlaylistsScreenModule {
 
             @Override
             public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
+                List<Bundleable> list = presenter.getSelectedItems();
+                List<Uri> uris = new ArrayList<>(list.size());
+                for (Bundleable b : list) {
+                    uris.add(((Playlist)b).getTracksUri());
+                }
                 switch (menuItem.getItemId()) {
+                    case R.id.add_to_queue: {
+                        addToQueueFromTracksUris(context, presenter, uris);
+                        return true;
+                    }
+                    case R.id.play_all: {
+                        playFromTracksUris(context, presenter, uris);
+                        return true;
+                    }
+                    case R.id.play_next: {
+                        playNextFromTracksUris(context, presenter, uris);
+                        return true;
+                    }
                     case R.id.delete: {
-                        List<Uri> uris = new ArrayList<>(presenter.getSelectedItems().size());
+                        List<Uri> plsts = new ArrayList<>(presenter.getSelectedItems().size());
                         for (Bundleable m : presenter.getSelectedItems()) {
-                            uris.add(((Playlist) m).getUri());
+                            plsts.add(((Playlist) m).getUri());
                         }
-                        presenter.getIndexClient().removePlaylists(uris);
+                        presenter.getIndexClient().removePlaylists(plsts);
                         return true;
                     }
                     default:

@@ -234,7 +234,7 @@ public class PlaylistChooseScreenModule {
                         setNewSortOrder(presenter, PlaylistSortOrder.Z_A);
                         return true;
                     case R.id.menu_sort_by_date_added:
-                        setNewSortOrder(presenter, PlaylistSortOrder.DATE_ADDED);
+                        setNewSortOrder(presenter, PlaylistSortOrder.LAST_ADDED);
                         return true;
                     default:
                         return false;

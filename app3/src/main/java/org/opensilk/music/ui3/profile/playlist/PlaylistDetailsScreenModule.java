@@ -111,12 +111,23 @@ public class PlaylistDetailsScreenModule {
         return new MenuHandlerImpl(loaderUri, activityResultsController) {
             @Override
             public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
-                return false;
+                inflateMenu(R.menu.add_to_queue, menuInflater, menu);
+                inflateMenu(R.menu.play_next, menuInflater, menu);
+                return true;
             }
 
             @Override
             public boolean onMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
-                return false;
+                switch (menuItem.getItemId()) {
+                    case R.id.add_to_queue:
+                        addItemsToQueue(presenter);
+                        return true;
+                    case R.id.play_next:
+                        playItemsNext(presenter);
+                        return true;
+                    default:
+                        return false;
+                }
             }
 
             @Override

@@ -56,6 +56,8 @@ import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
+import rx.functions.Action1;
+import rx.functions.Action2;
 
 /**
  * Created by drew on 5/5/15.
@@ -111,6 +113,19 @@ public class ArtistDetailsScreenModule {
                 .setItemClickListener(itemClickListener)
                 .setAllowLongPressSelection(false)
                 .setMenuConfig(menuConfig)
+                .setFabClickAction(new Action2<Context, BundleablePresenter>() {
+                    @Override
+                    public void call(Context context, final BundleablePresenter presenter) {
+                        UtilsCommon.addTracksToQueue(context,
+                                Collections.singletonList(screen.artist.getTracksUri()),
+                                new Action1<List<Uri>>() {
+                                    @Override
+                                    public void call(List<Uri> uris) {
+                                        presenter.getPlaybackController().playAll(uris, 0);
+                                    }
+                                });
+                    }
+                })
                 .build();
     }
 
@@ -140,8 +155,6 @@ public class ArtistDetailsScreenModule {
                 inflateMenus(menuInflater, menu,
                         R.menu.artist_album_sort_by,
                         R.menu.view_as
-//                        ,R.menu.popup_play_next,
-//                        R.menu.popup_add_to_queue
                 );
                 return true;
             }
@@ -155,24 +168,14 @@ public class ArtistDetailsScreenModule {
                     case R.id.menu_sort_by_za:
                         setNewSortOrder(presenter, AlbumSortOrder.Z_A);
                         return true;
-                    case R.id.menu_sort_by_year:
-                        setNewSortOrder(presenter, AlbumSortOrder.NEWEST);
-                        return true;
                     case R.id.menu_sort_by_number_of_songs:
-                        Toast.makeText(context, R.string.err_unimplemented, Toast.LENGTH_LONG).show();
-                        //TODO
+                        setNewSortOrder(presenter, AlbumSortOrder.MOST_TRACKS);
                         return true;
                     case R.id.menu_view_as_simple:
                         updateLayout(presenter, AppPreferences.SIMPLE);
                         return true;
                     case R.id.menu_view_as_grid:
                         updateLayout(presenter, AppPreferences.GRID);
-                        return true;
-                    case R.id.play_next:
-                        playItemsNext(presenter);
-                        return true;
-                    case R.id.add_to_queue:
-                        addItemsToQueue(presenter);
                         return true;
                     default:
                         return false;

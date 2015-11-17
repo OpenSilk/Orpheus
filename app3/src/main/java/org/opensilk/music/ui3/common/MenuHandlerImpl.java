@@ -26,11 +26,20 @@ import org.apache.commons.lang3.StringUtils;
 import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.AppPreferences;
+import org.opensilk.music.library.client.TypedBundleableLoader;
 import org.opensilk.music.model.Track;
+import org.opensilk.music.model.sort.TrackSortOrder;
+import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.PlaylistManageActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Action2;
+import rx.functions.Func0;
 
 /**
  * Created by drew on 9/24/15.
@@ -115,6 +124,36 @@ public abstract class MenuHandlerImpl implements MenuHandler {
         activityResultsController.startActivityForResult(
                 PlaylistManageActivity.makeAddIntent2(context, uris),
                 ActivityRequestCodes.PLAYLIST_ADD, null);
+    }
+
+    public void addToQueueFromTracksUris(Context context, BundleablePresenter presenter, List<Uri> uris) {
+        final PlaybackController playbackController = presenter.getPlaybackController();
+        UtilsCommon.addTracksToQueue(context, uris, new Action1<List<Uri>>() {
+            @Override
+            public void call(List<Uri> uris) {
+                playbackController.enqueueAllEnd(uris);
+            }
+        });
+    }
+
+    public void playFromTracksUris(Context context, BundleablePresenter presenter, List<Uri> uris) {
+        final PlaybackController playbackController = presenter.getPlaybackController();
+        UtilsCommon.addTracksToQueue(context, uris, new Action1<List<Uri>>() {
+            @Override
+            public void call(List<Uri> uris) {
+                playbackController.playAll(uris, 0);
+            }
+        });
+    }
+
+    public void playNextFromTracksUris(Context context, BundleablePresenter presenter, List<Uri> uris) {
+        final PlaybackController playbackController = presenter.getPlaybackController();
+        UtilsCommon.addTracksToQueue(context, uris, new Action1<List<Uri>>() {
+            @Override
+            public void call(List<Uri> uris) {
+                playbackController.enqueueAllNext(uris);
+            }
+        });
     }
 
 }

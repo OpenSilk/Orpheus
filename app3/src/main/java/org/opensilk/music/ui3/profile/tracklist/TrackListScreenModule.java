@@ -107,7 +107,8 @@ public class TrackListScreenModule {
             public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,
                         R.menu.song_sort_by,
-                        R.menu.add_to_queue
+                        R.menu.add_to_queue,
+                        R.menu.play_next
                 );
                 return false;
             }
@@ -127,24 +128,17 @@ public class TrackListScreenModule {
                     case R.id.menu_sort_by_album:
                         setNewSortOrder(presenter, TrackSortOrder.ALBUM);
                         return true;
-                    case R.id.menu_sort_by_year:
-                        Toast.makeText(context, R.string.err_unimplemented, Toast.LENGTH_LONG).show();
-                        //TODO
-                        return true;
                     case R.id.menu_sort_by_duration:
                         setNewSortOrder(presenter, TrackSortOrder.LONGEST);
                         return true;
-                    case R.id.menu_sort_by_filename:
-                        Toast.makeText(context, R.string.err_unimplemented, Toast.LENGTH_LONG).show();
-                        //TODO
-                        return true;
                     case R.id.menu_sort_by_date_added:
-                        Toast.makeText(context, R.string.err_unimplemented, Toast.LENGTH_LONG).show();
-                        //TODO
+                        setNewSortOrder(presenter, TrackSortOrder.LAST_ADDED);
                         return true;
                     case R.id.add_to_queue:
                         addItemsToQueue(presenter);
                         return true;
+                    case R.id.play_next:
+                        playItemsNext(presenter);
                     default:
                         return false;
                 }

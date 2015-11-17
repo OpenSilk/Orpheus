@@ -30,6 +30,12 @@
             <item
                 android:id="@+id/menu_sort_by_za"
                 android:title="@string/sort_order_entry_za"/>
+            <item
+                android:id="@+id/menu_sort_by_number_of_albums"
+                android:title="@string/sort_order_entry_number_of_albums"/>
+            <item
+                android:id="@+id/menu_sort_by_number_of_songs"
+                android:title="@string/sort_order_entry_number_of_songs"/>
         </menu>
     </item>
 

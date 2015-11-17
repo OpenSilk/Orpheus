@@ -22,6 +22,6 @@ package org.opensilk.music.model.sort;
  * Created by drew on 5/4/15.
  */
 public interface PlaylistSortOrder extends BaseSortOrder {
-    String DATE_ADDED = "date_added";
-    String DATE_MODIFIED = "date_modified";
+    String LAST_ADDED = "date_added DESC";
+    String LAST_MODIFIED = "date_modified DESC";
 }

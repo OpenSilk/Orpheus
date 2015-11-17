@@ -22,5 +22,6 @@ package org.opensilk.music.model.sort;
  * Created by drew on 5/3/15.
  */
 public interface GenreSortOrder extends BaseSortOrder {
-
+    String MOST_TRACKS = "number_of_tracks DESC";
+    String MOST_ALBUMS =  "number_of_albums DESC";
 }

@@ -45,12 +45,15 @@ import org.opensilk.music.ui3.profile.ProfileScreen;
 import org.opensilk.music.ui3.profile.album.AlbumDetailsScreen;
 import org.opensilk.music.ui3.profile.tracklist.TrackListScreen;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
+import rx.functions.Action1;
+import rx.functions.Action2;
 
 /**
  * Created by drew on 5/5/15.
@@ -99,6 +102,19 @@ public class GenreDetailsScreenModule {
                 .setAllowLongPressSelection(false)
                 .setItemClickListener(itemClickListener)
                 .setMenuConfig(menuConfig)
+                .setFabClickAction(new Action2<Context, BundleablePresenter>() {
+                    @Override
+                    public void call(Context context, final BundleablePresenter presenter) {
+                        UtilsCommon.addTracksToQueue(context,
+                                Collections.singletonList(screen.genre.getTracksUri()),
+                                new Action1<List<Uri>>() {
+                                    @Override
+                                    public void call(List<Uri> uris) {
+                                        presenter.getPlaybackController().playAll(uris, 0);
+                                    }
+                                });
+                    }
+                })
                 .build();
     }
 
@@ -138,9 +154,6 @@ public class GenreDetailsScreenModule {
                         return true;
                     case R.id.menu_sort_by_za:
                         setNewSortOrder(presenter, AlbumSortOrder.Z_A);
-                        return true;
-                    case R.id.menu_sort_by_year:
-                        setNewSortOrder(presenter, AlbumSortOrder.NEWEST);
                         return true;
                     case R.id.menu_sort_by_number_of_songs:
                         setNewSortOrder(presenter, AlbumSortOrder.MOST_TRACKS);

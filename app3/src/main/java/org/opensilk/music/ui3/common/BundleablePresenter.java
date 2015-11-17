@@ -310,11 +310,15 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView>
     }
 
     public void onFabClicked(View view) {
-        List<Uri> toPlay = UtilsCommon.filterTracks(getItems());
-        if (toPlay.isEmpty()) {
-            return; //TODO toast?
+        if (presenterConfig.fabClickAction != null) {
+            presenterConfig.fabClickAction.call(view.getContext(), this);
+        } else {
+            List<Uri> toPlay = UtilsCommon.filterTracks(getItems());
+            if (toPlay.isEmpty()) {
+                return; //TODO toast?
+            }
+            getPlaybackController().playAll(toPlay, 0);
         }
-        getPlaybackController().playAll(toPlay, 0);
     }
 
     private ActionMode actionMode;

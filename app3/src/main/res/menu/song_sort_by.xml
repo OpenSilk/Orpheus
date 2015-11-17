@@ -28,9 +28,9 @@
             <item
                 android:id="@+id/menu_sort_by_za"
                 android:title="@string/sort_order_entry_za"/>
-            <item
-                android:id="@+id/menu_sort_by_year"
-                android:title="@string/sort_order_entry_year"/>
+            <!--<item-->
+                <!--android:id="@+id/menu_sort_by_year"-->
+                <!--android:title="@string/sort_order_entry_year"/>-->
             <item
                 android:id="@+id/menu_sort_by_artist"
                 android:title="@string/sort_order_entry_artist"/>
@@ -40,9 +40,9 @@
             <item
                 android:id="@+id/menu_sort_by_duration"
                 android:title="@string/sort_order_entry_duration"/>
-            <item
-                android:id="@+id/menu_sort_by_filename"
-                android:title="@string/sort_order_entry_filename"/>
+            <!--<item-->
+                <!--android:id="@+id/menu_sort_by_filename"-->
+                <!--android:title="@string/sort_order_entry_filename"/>-->
             <item
                 android:id="@+id/menu_sort_by_date_added"
                 android:title="@string/sort_order_entry_date_added"/>

@@ -36,12 +36,20 @@ import org.opensilk.bundleable.Bundleable;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.UtilsArt;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
+import org.opensilk.music.library.client.TypedBundleableLoader;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.Track;
+import org.opensilk.music.model.sort.TrackSortOrder;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Action2;
+import rx.functions.Func0;
 
 /**
  * Created by drew on 5/2/15.
@@ -153,5 +161,35 @@ public class UtilsCommon {
             }
         }
         return toPlay;
+    }
+
+    public static void addTracksToQueue(Context context, List<Uri> trackUris, final Action1<List<Uri>> addFunc) {
+        List<Observable<List<Track>>> loaders = new ArrayList<>(trackUris.size());
+        for (Uri uri : trackUris) {
+            loaders.add(TypedBundleableLoader.<Track>create(context)
+                    .setUri(uri).setSortOrder(TrackSortOrder.ALBUM)
+                    .createObservable().retry(1));
+        }
+        Observable.mergeDelayError(Observable.from(loaders))
+                .collect(new Func0<List<Uri>>() {
+                    @Override
+                    public List<Uri> call() {
+                        return new ArrayList<Uri>();
+                    }
+                }, new Action2<List<Uri>, List<Track>>() {
+                    @Override
+                    public void call(List<Uri> uris, List<Track> tracks) {
+                        for (Track track : tracks) {
+                            uris.add(track.getUri());
+                        }
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(addFunc, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        //todo
+                    }
+                });
     }
 }

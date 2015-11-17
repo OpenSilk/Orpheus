@@ -98,20 +98,11 @@ public class TracksScreenModule {
                     case R.id.menu_sort_by_album:
                         setNewSortOrder(presenter, TrackSortOrder.ALBUM);
                         return true;
-                    case R.id.menu_sort_by_year:
-                        Toast.makeText(context, R.string.err_unimplemented, Toast.LENGTH_LONG).show();
-                        //TODO
-                        return true;
                     case R.id.menu_sort_by_duration:
                         setNewSortOrder(presenter, TrackSortOrder.LONGEST);
                         return true;
-                    case R.id.menu_sort_by_filename:
-                        Toast.makeText(context, R.string.err_unimplemented, Toast.LENGTH_LONG).show();
-                        //TODO
-                        return true;
                     case R.id.menu_sort_by_date_added:
-                        Toast.makeText(context, R.string.err_unimplemented, Toast.LENGTH_LONG).show();
-                        //TODO
+                        setNewSortOrder(presenter, TrackSortOrder.LAST_ADDED);
                         return true;
                     default:
                         return false;

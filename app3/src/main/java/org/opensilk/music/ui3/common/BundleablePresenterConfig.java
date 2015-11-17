@@ -17,12 +17,16 @@
 
 package org.opensilk.music.ui3.common;
 
+import android.content.Context;
+
 import org.opensilk.bundleable.Bundleable;
 import org.opensilk.music.model.sort.BaseSortOrder;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import rx.functions.Action2;
 
 /**
  * Created by drew on 5/6/15.
@@ -36,25 +40,20 @@ public class BundleablePresenterConfig {
     public final String defaultSortOrder;
     public final boolean allowLongPressSelection;
     public final String toolbarTitle;
+    public final Action2<Context, BundleablePresenter> fabClickAction;
 
     public BundleablePresenterConfig(
-            boolean wantsGrid,
-            boolean wantsNumberedTracks,
-            ItemClickListener itemClickListener,
-            MenuHandler menuConfig,
-            List<Bundleable> loaderSeed,
-            String defaultSortOrder,
-            boolean allowLongPressSelection,
-            String toolbarTitle
+            Builder builder
     ) {
-        this.wantsGrid = wantsGrid;
-        this.wantsNumberedTracks = wantsNumberedTracks;
-        this.itemClickListener = itemClickListener;
-        this.menuConfig = menuConfig;
-        this.loaderSeed = loaderSeed;
-        this.defaultSortOrder = defaultSortOrder;
-        this.allowLongPressSelection = allowLongPressSelection;
-        this.toolbarTitle = toolbarTitle;
+        this.wantsGrid = builder.wantsGrid;
+        this.wantsNumberedTracks = builder.wantsNumberedTracks;
+        this.itemClickListener = builder.itemClickListener;
+        this.menuConfig = builder.menuConfig;
+        this.loaderSeed = builder.loaderSeed;
+        this.defaultSortOrder = builder.preferedSortOrder;
+        this.allowLongPressSelection = builder.allowLongPressSelection;
+        this.toolbarTitle = builder.toolbarTitle;
+        this.fabClickAction = builder.fabClickAction;
     }
 
     public static Builder builder() {
@@ -70,6 +69,7 @@ public class BundleablePresenterConfig {
         String preferedSortOrder = BaseSortOrder.A_Z;
         boolean allowLongPressSelection = true;
         String toolbarTitle = "";
+        Action2<Context, BundleablePresenter> fabClickAction;
 
         public Builder setWantsGrid(boolean wantsGrid) {
             this.wantsGrid = wantsGrid;
@@ -122,13 +122,13 @@ public class BundleablePresenterConfig {
             return this;
         }
 
+        public Builder setFabClickAction(Action2<Context, BundleablePresenter> action) {
+            this.fabClickAction = action;
+            return this;
+        }
+
         public BundleablePresenterConfig build() {
-            return new BundleablePresenterConfig(
-                    wantsGrid, wantsNumberedTracks,
-                    itemClickListener, menuConfig,
-                    loaderSeed, preferedSortOrder,
-                    allowLongPressSelection, toolbarTitle
-            );
+            return new BundleablePresenterConfig(this);
         }
     }
 }

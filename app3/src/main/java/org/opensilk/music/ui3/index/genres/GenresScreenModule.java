@@ -106,6 +106,11 @@ public class GenresScreenModule {
                     case R.id.menu_sort_by_za:
                         setNewSortOrder(presenter, GenreSortOrder.Z_A);
                         return true;
+                    case R.id.menu_sort_by_number_of_songs:
+                        setNewSortOrder(presenter, GenreSortOrder.MOST_TRACKS);
+                        return true;
+                    case R.id.menu_sort_by_number_of_albums:
+                        setNewSortOrder(presenter, GenreSortOrder.MOST_ALBUMS);
                     case R.id.menu_view_as_simple:
                         updateLayout(presenter, AppPreferences.SIMPLE);
                         return true;
@@ -120,6 +125,9 @@ public class GenresScreenModule {
             @Override
             public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,
+                        R.menu.add_to_queue,
+                        R.menu.play_all,
+                        R.menu.play_next,
                         R.menu.add_to_playlist
                 );
                 return true;
@@ -127,13 +135,25 @@ public class GenresScreenModule {
 
             @Override
             public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
+                List<Bundleable> list = presenter.getSelectedItems();
+                List<Uri> uris = new ArrayList<>(list.size());
+                for (Bundleable b : list) {
+                    uris.add(((Genre)b).getTracksUri());
+                }
                 switch (menuItem.getItemId()) {
+                    case R.id.add_to_queue: {
+                        addToQueueFromTracksUris(context, presenter, uris);
+                        return true;
+                    }
+                    case R.id.play_all: {
+                        playFromTracksUris(context, presenter, uris);
+                        return true;
+                    }
+                    case R.id.play_next: {
+                        playNextFromTracksUris(context, presenter, uris);
+                        return true;
+                    }
                     case R.id.add_to_playlist: {
-                        List<Bundleable> list = presenter.getSelectedItems();
-                        List<Uri> uris = new ArrayList<>(list.size());
-                        for (Bundleable b : list) {
-                            uris.add(((Genre)b).getTracksUri());
-                        }
                         addToPlaylistFromTracksUris(context, uris);
                         return true;
                     }

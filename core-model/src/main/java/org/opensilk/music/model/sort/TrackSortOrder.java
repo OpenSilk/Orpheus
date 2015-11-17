@@ -26,4 +26,5 @@ public interface TrackSortOrder extends BaseSortOrder {
     String ALBUM = "album, track";
     String LONGEST = "duration DESC";
     String PLAYORDER = "track";
+    String LAST_ADDED = "date_added DESC";
 }
