@@ -160,7 +160,7 @@
     <!--scanner-->
     <string name="scan_running">Scan running…</string>
     <string name="scan_finished">Scan finished</string>
-    <string name="scan_progress">Processed %s/%s tracks, %s errors</string>
+    <string name="scan_progress">Processed %1$d/%2$d tracks, %3$d errors</string>
 
     <!-- misc -->
     <string name="opensilk_org_url" translatable="false">http://opensilk.org/</string>
