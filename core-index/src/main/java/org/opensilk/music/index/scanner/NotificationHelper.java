@@ -78,8 +78,9 @@ public class NotificationHelper {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
         builder.setSmallIcon(R.drawable.ic_sync_white_24dp);
-        builder.setContentTitle(status == Status.COMPLETED ? "Scan Completed" : "Scan running");
-        builder.setContentText(String.format("Processed %d files with %d errors out of %d", completed, error, total));
+        int title = status == Status.COMPLETED ? R.string.scan_finished : R.string.scan_running;
+        builder.setContentTitle(appContext.getString(title));
+        builder.setContentText(appContext.getString(R.string.scan_progress, completed, total, error));
         notification = builder.build();
 
         if (service != null) {

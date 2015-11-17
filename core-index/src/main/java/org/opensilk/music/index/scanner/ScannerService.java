@@ -319,7 +319,7 @@ public class ScannerService extends MortarIntentService {
                 }
             }
             if (!found) {
-                Timber.d("Removing stale container %s");
+                Timber.d("Removing stale container %s", currentNode.self);
                 mIndexDatabase.removeContainer(currentNode.self);
             }
         }

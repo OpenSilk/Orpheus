@@ -136,7 +136,7 @@
     <string name="msg_fetching_song_list">Fetching song list…</string>
     <string name="msg_newer_plugin_needed">Update required</string>
     <string name="msg_newer_plugin_message">Orpheus requires a newer version of %s.</string>
-    <string name="msg_title_playback_error">Orpheus encountered a playback error</string>
+    <string name="msg_title_playback_error">Orpheus: playback error</string>
 
     <!--Now playing menu options-->
     <string name="now_playing_visualizer">Visualizer</string>
@@ -156,6 +156,11 @@
 
     <!--reenderer screen-->
     <string name="set_renderer_volume">Set renderer volume</string>
+
+    <!--scanner-->
+    <string name="scan_running">Scan running…</string>
+    <string name="scan_finished">Scan finished</string>
+    <string name="scan_progress">Processed %s/%s tracks, %s errors</string>
 
     <!-- misc -->
     <string name="opensilk_org_url" translatable="false">http://opensilk.org/</string>
