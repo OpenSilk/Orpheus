@@ -453,6 +453,8 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         @InjectView(R.id.tile_title) TextView title;
         @InjectView(R.id.tile_subtitle) TextView subtitle;
         private int descColor;
+        private int descTitleColor;
+        private int descSubTitleColor;
 
         public GridArtworkVH(View itemView) {
             super(itemView);
@@ -464,6 +466,8 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
                 descColor = ThemeUtils.getThemeAttrColor(itemView.getContext(),
                         android.R.attr.colorBackground);
             }
+            descTitleColor = descriptionContainer.getTitle().getCurrentTextColor();
+            descSubTitleColor = descriptionContainer.getSubTitle().getCurrentTextColor();
         }
 
         public void reset() {
@@ -472,7 +476,11 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
             if (artwork2 != null) artwork2.setImageBitmap(null);
             if (artwork3 != null) artwork3.setImageBitmap(null);
             if (artwork4 != null) artwork4.setImageBitmap(null);
-            if (descriptionContainer != null) descriptionContainer.setBackgroundColor(descColor);
+            if (descriptionContainer != null) {
+                descriptionContainer.setBackgroundColor(descColor);
+                descriptionContainer.getTitle().setTextColor(descTitleColor);
+                descriptionContainer.getSubTitle().setTextColor(descSubTitleColor);
+            }
         }
 
         @Override
