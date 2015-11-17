@@ -15,16 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.common.ui;
+package org.opensilk.music.index.scanner;
 
-import android.app.Application;
-import android.test.ApplicationTestCase;
+import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.music.index.IndexComponent;
+
+import mortar.MortarScope;
 
 /**
- * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
+ * Created by drew on 11/16/15.
  */
-public class ApplicationTest extends ApplicationTestCase<Application> {
-    public ApplicationTest() {
-        super(Application.class);
+public class TestService extends ScannerService {
+    @Override
+    protected void onBuildScope(MortarScope.Builder builder) {
+        IndexComponent acc = DaggerService.getDaggerComponent(getApplicationContext());
+        builder.withService(DaggerService.DAGGER_SERVICE,
+                DaggerScannerServiceTest_TestComponent.builder()
+                        .indexComponent(acc)
+                        .build());
     }
 }

@@ -34,7 +34,6 @@ import org.opensilk.music.library.client.BundleableLoader;
 import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Metadata;
-import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Track;
 import org.opensilk.bundleable.Bundleable;
 import org.opensilk.music.index.scanner.NotificationHelper.Status;
@@ -49,7 +48,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
@@ -74,7 +72,6 @@ public class ScannerService extends MortarIntentService {
     @Inject IndexDatabase mIndexDatabase;
     @Inject NotificationHelper mNotifHelper;
     @Inject MetaExtractor mMetaExtractor;
-    @Inject Provider<BundleableLoader> mBundlelableLoaderProvider;
 
     final AtomicInteger numTotal = new AtomicInteger(0);
     final AtomicInteger numError = new AtomicInteger(0);
@@ -179,83 +176,6 @@ public class ScannerService extends MortarIntentService {
         notifSubject.onNext(Status.COMPLETED);
         notifSubject.onCompleted();
 //        mIndexDatabase.removeContainersInError(authority);
-    }
-
-    void scan2(final Uri uri, final Uri parentUri) {
-        Timber.i("scan2(%s)", uri);
-        BundleableLoader loader = mBundlelableLoaderProvider.get().setUri(uri);
-        List<Bundleable> bundleables;
-        try {
-            bundleables = loader.createObservable().toBlocking().first();
-        } catch (RuntimeException e) {
-            //TODO first we should check if this is a transient failure
-            mIndexDatabase.markContainerInError(uri);
-            notifyError(uri);
-            return;
-        }
-        mIndexDatabase.insertContainer(uri, parentUri);
-        //first extract metadata from all tracks in container
-        List<Pair<Track,Metadata>> trackMeta = new ArrayList<>(bundleables.size());
-        for (Bundleable b : bundleables) {
-            if (b instanceof Track) {
-                numTotal.incrementAndGet();
-                final Track item = (Track) b;
-                if (mIndexDatabase.trackNeedsScan(item)) {
-                    Track.Res res = item.getResources().get(0);
-                    final Metadata meta = mMetaExtractor.extractMetadata(res);
-                    trackMeta.add(Pair.create(item, meta));
-                } else {
-                    notifySkipped(item.getUri());
-                }
-            }
-        }
-        //Second fixup any descrepancies with albumartist/trackartist
-        Set<String> albumArtists = new HashSet<>();
-        Set<String> artists = new HashSet<>();
-        for (Pair<Track,Metadata> pair : trackMeta) {
-            String albumArtist = pair.second.getString(KEY_ALBUM_ARTIST_NAME);
-            if (!StringUtils.isEmpty(albumArtist)) {
-                albumArtists.add(albumArtist);
-            }
-            String artist = pair.second.getString(KEY_ARTIST_NAME);
-            if (!StringUtils.isEmpty(artist)) {
-                //strip of any featured artists
-                artists.add(LastFMHelper.resolveAlbumArtistFromTrackArtist(artist));
-            }
-        }
-        //not all the tracks had album artist set,
-        //but we only have one artist, so use that as album artist for everyone
-        if (albumArtists.size() != trackMeta.size() && artists.size() == 1) {
-            final String artist = artists.toArray(new String[1])[0]; //FIXME ugly
-            final List<Pair<Track,Metadata>> oldTrackMeta = new ArrayList<>();
-            oldTrackMeta.addAll(trackMeta);
-            trackMeta.clear();
-            for (Pair<Track,Metadata> pair : oldTrackMeta) {
-                Metadata m = pair.second.buildUpon()
-                        .putString(KEY_ALBUM_ARTIST_NAME, artist)
-                        .build();
-                trackMeta.add(Pair.create(pair.first, m));
-            }
-        }
-        //add everyone to the db
-        for (Pair<Track,Metadata> pair : trackMeta) {
-            final Track track = pair.first;
-            final Metadata meta = pair.second;
-            final boolean success =
-                    mIndexDatabase.insertTrack(track, meta) > 0;
-            if (success) {
-                notifySuccess(track.getUri());
-            } else {
-                notifyError(track.getUri());
-            }
-        }
-        //continue walking the tree
-        for (Bundleable b : bundleables) {
-            if (b instanceof Container) {
-                Container c = (Container) b;
-                scan2(c.getUri(), c.getParentUri());
-            }
-        }
     }
 
     void scan(Uri uri, Uri parentUri) {

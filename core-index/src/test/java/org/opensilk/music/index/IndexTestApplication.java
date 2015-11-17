@@ -17,6 +17,9 @@
 
 package org.opensilk.music.index;
 
+import android.content.ContentResolver;
+
+import org.mockito.Mockito;
 import org.opensilk.common.core.app.BaseApp;
 import org.robolectric.shadows.ShadowLog;
 
@@ -41,5 +44,13 @@ public class IndexTestApplication extends BaseApp {
     @Override
     protected Object getRootComponent() {
         return IndexTestComponent.FACTORY.call(this);
+    }
+
+    ContentResolver resolver = Mockito.mock(ContentResolver.class);
+
+    @Override
+    public ContentResolver getContentResolver() {
+        Timber.e("getContentResolver");
+        return resolver;
     }
 }
