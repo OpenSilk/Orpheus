@@ -33,7 +33,7 @@ public interface PlaybackConstants {
     /**
      * Indicates the meta data has changed in some way, like a track change
      */
-    String MUSIC_META_CHANGED = MUSIC_PACKAGE_NAME+".metachanged";
+    String MUSIC_META_CHANGED = "com.android.music.metachanged";
 
     /**
      * Called to indicate a general service commmand. Used in

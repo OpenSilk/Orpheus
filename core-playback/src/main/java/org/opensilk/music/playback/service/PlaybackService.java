@@ -434,6 +434,7 @@ public class PlaybackService {
                     });
         }
         if (mIndexClient.broadcastMeta()) {
+            Timber.d("Broadcasting meta %s", MediaMetadataHelper.getDisplayName(meta));
             //For SimpleLastFmScrobbler
             final Intent musicIntent = new Intent(PlaybackConstants.MUSIC_META_CHANGED);
             musicIntent.putExtra("artist", MediaMetadataHelper.getArtistName(meta));
@@ -443,7 +444,10 @@ public class PlaybackService {
             musicIntent.putExtra("package", mContext.getPackageName());
             try {
                 mContext.sendStickyBroadcast(musicIntent);
-            } catch (SecurityException ignored) {}
+            } catch (SecurityException ignored) {
+                Timber.e("Unable to broadcast sticky, disabling meta broadcasting");
+                mIndexClient.setBroadcastMeta(false);
+            }
         }
     }
 
