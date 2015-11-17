@@ -98,7 +98,7 @@ public class LauncherActivity extends MusicActivity {
         mNavigation.setNavigationItemSelectedListener(mNavigaitonClickListener);
         if (savedInstanceState == null) {
             mNavigaitonClickListener.onNavigationItemSelected(
-                    mNavigation.getMenu().getItem(mSettings.getInt(AppPreferences.LAST_NAVIGATION_ITEM, 0)));
+                    mNavigation.getMenu().getItem(mSettings.getInt(AppPreferences.LAST_NAVIGATION_ITEM, 1)));
         }
         if (mSettings.shouldShowIntro()) {
             showIntroDialog();
