@@ -17,27 +17,44 @@
 
 package org.opensilk.music.index.scanner;
 
+import android.support.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
+import org.opensilk.music.model.Metadata;
+import org.opensilk.music.model.Track;
+
 import dagger.Module;
 import dagger.Provides;
 
 /**
- * Created by drew on 9/20/15.
+ * Created by drew on 11/17/15.
  */
 @Module
-public class ScannerModule {
-    final ScannerService service;
+public class TestModule {
 
-    public ScannerModule(ScannerService service) {
+    final TestService service;
+
+    public TestModule(TestService service) {
         this.service = service;
     }
 
     @Provides
-    MetaExtractor provideMetaExtractor(MetaExtractorImpl impl) {
-        return impl;
+    @ScannerScope
+    public MetaExtractor provideMetaExtractor() {
+        return new MetaExtractor() {
+            @Nullable @Override
+            public Metadata extractMetadata(Track.Res res) {
+                if (StringUtils.contains(res.getUri().toString(), "folder1")) {
+                    return TestData.TRACK_META_FOLDER1.get(res.getUri());
+                } else {
+                    throw new IllegalArgumentException("Unknown uri" + res.getUri());
+                }
+            }
+        };
     }
 
     @Provides
-    ScannerService provideService() {
+    public ScannerService provideService() {
         return service;
     }
 }

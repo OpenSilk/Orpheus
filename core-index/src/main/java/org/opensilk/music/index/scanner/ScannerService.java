@@ -23,20 +23,20 @@ import android.os.Bundle;
 import android.util.Pair;
 
 import org.apache.commons.lang3.StringUtils;
+import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.core.mortar.MortarIntentService;
 import org.opensilk.music.index.IndexComponent;
 import org.opensilk.music.index.database.IndexDatabase;
 import org.opensilk.music.index.database.TreeNode;
 import org.opensilk.music.index.provider.LastFMHelper;
-import org.opensilk.music.library.provider.LibraryExtras;
+import org.opensilk.music.index.scanner.NotificationHelper.Status;
 import org.opensilk.music.library.client.BundleableLoader;
+import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Metadata;
 import org.opensilk.music.model.Track;
-import org.opensilk.bundleable.Bundleable;
-import org.opensilk.music.index.scanner.NotificationHelper.Status;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,19 +46,21 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
+import rx.Observable;
 import rx.Subscriber;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.subjects.PublishSubject;
-import rx.subjects.Subject;
 import timber.log.Timber;
 
-import static org.opensilk.music.model.Metadata.*;
+import static org.opensilk.music.model.Metadata.KEY_ALBUM_ARTIST_NAME;
+import static org.opensilk.music.model.Metadata.KEY_ARTIST_NAME;
 
 /**
  * Created by drew on 8/25/15.
@@ -76,8 +78,7 @@ public class ScannerService extends MortarIntentService {
     final AtomicInteger numTotal = new AtomicInteger(0);
     final AtomicInteger numError = new AtomicInteger(0);
     final AtomicInteger numProcessed = new AtomicInteger(0);
-
-    Subject<Status, Status> notifSubject;//DO NOT ACCESS FROM MAIN THREAD
+    final AtomicReference<Status> status = new AtomicReference<>();
 
     public ScannerService() {
         super(ScannerService.class.getSimpleName());
@@ -86,7 +87,7 @@ public class ScannerService extends MortarIntentService {
     @Override
     protected void onBuildScope(MortarScope.Builder builder) {
         IndexComponent acc = DaggerService.getDaggerComponent(getApplicationContext());
-        builder.withService(DaggerService.DAGGER_SERVICE, ScannerComponent.FACTORY.call(acc));
+        builder.withService(DaggerService.DAGGER_SERVICE, ScannerComponent.FACTORY.call(acc, this));
     }
 
     @Override
@@ -94,58 +95,19 @@ public class ScannerService extends MortarIntentService {
         super.onCreate();
         ScannerComponent acc = DaggerService.getDaggerComponent(this);
         acc.inject(this);
-
-        mNotifHelper.attachService(this);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mNotifHelper.detachService(this);
-    }
-
-    void notifySuccess(Uri uri) {
-        Timber.v("Indexed %s", uri);
-        numProcessed.incrementAndGet();
-        notifSubject.onNext(Status.SCANNING);
-    }
-
-    void notifySkipped(Uri uri) {
-        Timber.d("Skipping item already in db %s", uri);
-        numProcessed.incrementAndGet();
-        notifSubject.onNext(Status.SCANNING);
-    }
-
-    void notifyError(Uri uri) {
-        Timber.w("An error occured while proccessing %s", uri);
-        numError.incrementAndGet();
-        notifSubject.onNext(Status.SCANNING);
-    }
-
-    void updateNotification(Status status) {
-        mNotifHelper.updateNotification(status, numProcessed.get(), numError.get(), numTotal.get());
     }
 
     @Override
     @DebugLog
     protected void onHandleIntent(Intent intent) {
-        notifSubject = PublishSubject.create();
-        notifSubject.asObservable().debounce(1, TimeUnit.SECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Status>() {
+        status.set(Status.SCANNING);
+        final Subscription notifSubs = Observable.interval(5, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Long>() {
                     @Override
-                    @DebugLog
-                    public void call(Status status) {
-                        updateNotification(status);
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    @DebugLog
-                    public void call(Throwable throwable) {
-                        updateNotification(Status.COMPLETED);
+                    public void call(Long aLong) {
+                        mNotifHelper.updateNotification(true);
                     }
                 });
-        notifSubject.onNext(Status.SCANNING);
         if (ACTION_RESCAN.equals(intent.getAction())) {
             if (intent.hasExtra(EXTRA_LIBRARY_EXTRAS)) {
                 Bundleable b = LibraryExtras.getBundleable(intent.getBundleExtra(EXTRA_LIBRARY_EXTRAS));
@@ -162,20 +124,35 @@ public class ScannerService extends MortarIntentService {
             }
         } else {
             Bundle extras = intent.getBundleExtra(EXTRA_LIBRARY_EXTRAS);
-            if (extras == null) {
+            if (extras != null) {
+                Container container = LibraryExtras.getBundleable(extras);
+                if (container != null) {
+                    scan(container.getUri(), container.getParentUri());
+                } else {
+                    Timber.e("No container in extras");
+                }
+            } else {
                 Timber.e("No extras in intent");
-                return;
             }
-            Container container = LibraryExtras.getBundleable(extras);
-            if (container == null) {
-                Timber.e("No container in extras");
-                return;
-            }
-            scan(container.getUri(), container.getParentUri());
         }
-        notifSubject.onNext(Status.COMPLETED);
-        notifSubject.onCompleted();
-//        mIndexDatabase.removeContainersInError(authority);
+        notifSubs.unsubscribe();
+        status.set(Status.COMPLETED);
+        mNotifHelper.updateNotification(false);
+    }
+
+    void notifySuccess(Uri uri) {
+        Timber.v("Indexed %s", uri);
+        numProcessed.incrementAndGet();
+    }
+
+    void notifySkipped(Uri uri) {
+        Timber.d("Skipping item already in db %s", uri);
+        numProcessed.incrementAndGet();
+    }
+
+    void notifyError(Uri uri) {
+        Timber.w("An error occured while proccessing %s", uri);
+        numError.incrementAndGet();
     }
 
     void scan(Uri uri, Uri parentUri) {
@@ -184,10 +161,27 @@ public class ScannerService extends MortarIntentService {
         final TreeNode newTree = scanChildren(uri, parentUri);
         indexTree(newTree);
         removeDifference(currentTree, newTree);
+        mIndexDatabase.notifyObservers();
     }
 
     private TreeNode scanChildren(Uri uri, Uri parentUri) {
         Timber.d("scanChildren(%s)", uri);
+        List<Bundleable> bundleableList = getChildren(uri);
+        TreeNode node = new TreeNode(uri, parentUri);
+        for (Bundleable b : bundleableList) {
+            if (b instanceof Track) {
+                node.tracks.add((Track)b);
+            } else if (b instanceof Container) {
+                Container c = (Container)b;
+                node.children.add(scanChildren(c.getUri(), c.getParentUri()));
+            } else {
+                Timber.w("Passed an unsupported bundle to scanner class=%s", b.getClass());
+            }
+        }
+        return node;
+    }
+
+    protected List<Bundleable> getChildren(Uri uri) {
         final List<Bundleable> bundleableList =
                 Collections.synchronizedList(new ArrayList<Bundleable>());
         final CountDownLatch latch = new CountDownLatch(1);
@@ -211,18 +205,7 @@ public class ScannerService extends MortarIntentService {
                 latch.await(); break;
             } catch (InterruptedException ignored) {}
         }
-        TreeNode node = new TreeNode(uri, parentUri);
-        for (Bundleable b : bundleableList) {
-            if (b instanceof Track) {
-                node.tracks.add((Track)b);
-            } else if (b instanceof Container) {
-                Container c = (Container)b;
-                node.children.add(scanChildren(c.getUri(), c.getParentUri()));
-            } else {
-                Timber.w("Passed an unsupported bundle to scanner class=%s", b.getClass());
-            }
-        }
-        return node;
+        return bundleableList;
     }
 
     private void indexTree(TreeNode tree) {
@@ -235,7 +218,11 @@ public class ScannerService extends MortarIntentService {
             if (mIndexDatabase.trackNeedsScan(item)) {
                 Track.Res res = item.getResources().get(0);
                 final Metadata meta = mMetaExtractor.extractMetadata(res);
-                trackMeta.add(Pair.create(item, meta));
+                if (meta != null) {
+                    trackMeta.add(Pair.create(item, meta));
+                } else {
+                    notifyError(item.getUri());
+                }
             } else {
                 notifySkipped(item.getUri());
             }

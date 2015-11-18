@@ -24,6 +24,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
@@ -37,7 +38,6 @@ import org.opensilk.music.index.BuildConfig;
 import org.opensilk.music.index.IndexComponent;
 import org.opensilk.music.index.IndexTestApplication;
 import org.opensilk.music.index.database.IndexDatabase;
-import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.library.internal.BundleableSubscriber;
 import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryMethods;
@@ -57,7 +57,6 @@ import java.util.List;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
-import mortar.MortarScope;
 import timber.log.Timber;
 
 /**
@@ -71,71 +70,22 @@ import timber.log.Timber;
 )
 public class ScannerServiceTest {
 
-    @ScannerScope
-    @Component(
-            dependencies = IndexComponent.class,
-            modules = TestModule.class
-    )
-    public interface TestComponent extends ScannerComponent {
-
-    }
-
-    @Module
-    public static class TestModule {
-        @Provides @ScannerScope
-        public MetaExtractor provideMetaExtractor() {
-            return new MetaExtractor() {
-                @NonNull
-                @Override
-                public Metadata extractMetadata(Track.Res res) {
-                    return Metadata.builder().build();
-                }
-            };
-        }
-    }
-
     TestService scannerService;
     ContentResolver contentResolver;
     IndexDatabase indexDatabase;
 
     @Before
     public void setup() {
-        scannerService = Robolectric.buildService(TestService.class).create().get();
+        scannerService = Robolectric.buildService(TestService.class).attach().create().get();
         contentResolver = RuntimeEnvironment.application.getContentResolver();
         IndexComponent cmp = DaggerService.getDaggerComponent(RuntimeEnvironment.application);
         indexDatabase = cmp.indexDatabase();
     }
 
-    @Test //TODO fix this
+    @Test
     public void testScanContainer() throws Exception {
-        ContentProviderClient client = Mockito.mock(ContentProviderClient.class);
-        Mockito.when(client.call(Mockito.eq(LibraryMethods.SCAN), Mockito.anyString(), Mockito.any(Bundle.class))).thenAnswer(
-                new Answer<Bundle>() {
-                    @Override
-                    public Bundle answer(InvocationOnMock invocation) throws Throwable {
-                        Timber.d("Answering");
-                        Bundle extras = invocation.getArgumentAt(3, Bundle.class);
-                        BundleableSubscriber<Track> subscriber =
-                                new BundleableSubscriber<Track>(LibraryExtras.getBundleableObserverBinder(extras));
-                        List<Track> tracks = new ArrayList<Track>(5);
-                        for (int ii = 0; ii < 5; ii++) {
-                            tracks.add(Track.builder()
-                                    .setName("track" + ii)
-                                    .setUri(Uri.parse("content://foo/folder1/track" + ii))
-                                    .setParentUri(Uri.parse("content://foo/folder1"))
-                                    .addRes(Track.Res.builder()
-                                            .setUri(Uri.parse("content://foo/track" + ii + "/res")).build()).build());
-                        }
-                        subscriber.onNext(tracks);
-                        subscriber.onCompleted();
-                        return LibraryExtras.b().putOk(true).get();
-                    }
-                }
-        );
-        Mockito.when(contentResolver.acquireUnstableContentProviderClient(LibraryUris.call("foo")))
-                .thenReturn(client);
         Container c = Folder.builder()
-                .setUri(Uri.parse("content://foo/folder1"))
+                .setUri(TestData.URI_FOLDER1)
                 .setParentUri(Uri.parse("content://foo/root"))
                 .setName("folder1")
                 .build();
@@ -145,8 +95,13 @@ public class ScannerServiceTest {
 
         Assertions.assertThat(indexDatabase.findTopLevelContainers(null).size()).isEqualTo(1);
 
+        Assertions.assertThat(scannerService.numTotal.get()).isEqualTo(5);
+        Assertions.assertThat(scannerService.numProcessed.get()).isEqualTo(5);
+        Assertions.assertThat(scannerService.numError.get()).isEqualTo(0);
+
+
         List<Track> insertedTracks = indexDatabase.getTracks(null);
-//        Assertions.assertThat(insertedTracks.size()).isEqualTo(5);
+        Assertions.assertThat(insertedTracks.size()).isEqualTo(5);
     }
 
 }

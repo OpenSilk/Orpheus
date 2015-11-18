@@ -46,45 +46,35 @@ public class NotificationHelper {
         COMPLETED
     }
 
+    final ScannerService service;
     final Context appContext;
     final NotificationManagerCompat notificationManager;
 
-    ScannerService service;
-    Notification notification;
-
     @Inject
     public NotificationHelper(
-            @ForApplication Context appContext
+            ScannerService service
     ) {
-        this.appContext = appContext;
-        notificationManager = NotificationManagerCompat.from(appContext);
-    }
-
-    void attachService(ScannerService service) {
         this.service = service;
+        this.appContext = service;
+        this.notificationManager = NotificationManagerCompat.from(service);
     }
 
     @DebugLog
-    void detachService(ScannerService service) {
-        this.service = null;
-        service.stopForeground(false);
-        if (notification != null) {
-            notificationManager.notify(NOTIF_ID, notification);
-        }
-    }
-
-    @DebugLog
-    void updateNotification(Status status, int completed, int error, int total) {
+    void updateNotification(boolean running) {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
         builder.setSmallIcon(R.drawable.ic_sync_white_24dp);
-        int title = status == Status.COMPLETED ? R.string.scan_finished : R.string.scan_running;
+        int title = service.status.get() == Status.COMPLETED ? R.string.scan_finished : R.string.scan_running;
         builder.setContentTitle(appContext.getString(title));
-        builder.setContentText(appContext.getString(R.string.scan_progress, completed, total, error));
-        notification = builder.build();
+        builder.setContentText(appContext.getString(R.string.scan_progress,
+                service.numProcessed.get(), service.numTotal.get(), service.numError.get()));
+        Notification notification = builder.build();
 
-        if (service != null) {
+        if (running) {
             service.startForeground(NOTIF_ID, notification);
+        } else {
+            service.stopForeground(false);
+            notificationManager.notify(NOTIF_ID, notification);
         }
     }
 

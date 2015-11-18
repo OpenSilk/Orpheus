@@ -20,12 +20,10 @@ package org.opensilk.music.index.scanner;
 import android.content.Context;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
-import android.os.ParcelFileDescriptor;
-import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.music.index.BuildConfig;
 import org.opensilk.music.model.Metadata;
 import org.opensilk.music.model.Track;
 
@@ -44,16 +42,12 @@ import static org.opensilk.music.model.Metadata.*;
 @ScannerScope
 public class MetaExtractorImpl implements MetaExtractor {
 
-    static boolean DUMP_META = BuildConfig.DEBUG;
+    private static final boolean DUMP_META = false;
     final Context appContext;
 
     @Inject
     public MetaExtractorImpl(@ForApplication Context appContext) {
         this.appContext = appContext;
-    }
-
-    MediaMetadataRetriever newMediaMetadataRetriever() {
-        return new MediaMetadataRetriever();
     }
 
     static int parseTrackNum(String track_num) throws NumberFormatException {
@@ -73,14 +67,13 @@ public class MetaExtractorImpl implements MetaExtractor {
     }
 
     @Override
-    public @NonNull Metadata extractMetadata(Track.Res res) {
+    public @Nullable Metadata extractMetadata(Track.Res res) {
 
         final Uri uri = res.getUri();
         final Map<String, String> headers = res.getHeaders();
 
-        Metadata.Builder bob = Metadata.builder();
+        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
 
-        MediaMetadataRetriever mmr = newMediaMetadataRetriever();
         try {
             if (StringUtils.startsWith(uri.getScheme(), "http")) {
                 mmr.setDataSource(uri.toString(), headers);
@@ -91,6 +84,8 @@ public class MetaExtractorImpl implements MetaExtractor {
             } else {
                 throw new IllegalArgumentException("Unknown scheme " + uri.getScheme());
             }
+
+            Metadata.Builder bob = Metadata.builder();
 
             bob.putString(KEY_ALBUM_NAME, mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM));
             bob.putString(KEY_ALBUM_ARTIST_NAME, mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST));
@@ -150,12 +145,14 @@ public class MetaExtractorImpl implements MetaExtractor {
                 }
                 Timber.i(sb.toString());
             }
+
+            return bob.build();
         } catch (Exception e) { //setDataSource throws runtimeException
             Timber.e(e, "extractMeta");
         } finally {
             mmr.release();
         }
-        return bob.build();
+        return null;
     }
 
 }

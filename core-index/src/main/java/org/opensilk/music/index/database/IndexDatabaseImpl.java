@@ -51,6 +51,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -1125,7 +1126,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
         }
         if (recursive) {
             for (String child : children) {
-                ArrayUtils.addAll(containers, findChildrenUnder(Uri.parse(child), true));
+                containers = ArrayUtils.addAll(containers, findChildrenUnder(Uri.parse(child), true));
             }
         }
         return containers;
@@ -1133,13 +1134,23 @@ public class IndexDatabaseImpl implements IndexDatabase {
 
     public boolean trackNeedsScan(Track track) {
         Track t = getTrack(track.getUri());
-        //TODO compare meta
-        if (t != null) {
-            //always update with new info
-            insertTrack(track);
-            return false;
+        if (t == null) {
+            return true;
         }
-        return true;
+        Iterator<Track.Res> ri1 = track.getResources().iterator();
+        Iterator<Track.Res> ri2 = t.getResources().iterator();
+        while (ri1.hasNext() && ri2.hasNext()) {
+            if (ri1.next().getLastMod() != ri2.next().getLastMod()) {
+                return true;
+            }
+        }
+        if (ri1.hasNext() || ri2.hasNext()) {
+            return true;
+        }
+        //TODO compare meta
+        //always update with new info incase resuri changed
+        insertTrack(track);
+        return false;
     }
 
     static final String[] buildTreeContainerCols = new String[] {
@@ -1293,9 +1304,9 @@ public class IndexDatabaseImpl implements IndexDatabase {
 
         Timber.v("Inserting track metadata %s", cv.toString());
         long id = insert(IndexSchema.Meta.Track.TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
-        if (id > 0) {
-            mAppContext.getContentResolver().notifyChange(IndexUris.tracks(indexAuthority), null);
-        }
+//        if (id > 0) {
+//            mAppContext.getContentResolver().notifyChange(IndexUris.tracks(indexAuthority), null);
+//        }
         return id;
     }
 
@@ -1452,9 +1463,9 @@ public class IndexDatabaseImpl implements IndexDatabase {
         }
         Timber.v("Inserting album %s", cv.toString());
         long id = insert(IndexSchema.Meta.Album.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
-        if (id > 0) {
-            mAppContext.getContentResolver().notifyChange(IndexUris.albums(indexAuthority), null);
-        }
+//        if (id > 0) {
+//            mAppContext.getContentResolver().notifyChange(IndexUris.albums(indexAuthority), null);
+//        }
         return id;
     }
 
@@ -1526,10 +1537,10 @@ public class IndexDatabaseImpl implements IndexDatabase {
         }
         Timber.d("Inserting Artist %s", cv.toString());
         long id = insert(IndexSchema.Meta.Artist.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
-        if (id > 0) {
-            mAppContext.getContentResolver().notifyChange(IndexUris.artists(indexAuthority), null);
-            mAppContext.getContentResolver().notifyChange(IndexUris.albumArtists(indexAuthority), null);
-        }
+//        if (id > 0) {
+//            mAppContext.getContentResolver().notifyChange(IndexUris.artists(indexAuthority), null);
+//            mAppContext.getContentResolver().notifyChange(IndexUris.albumArtists(indexAuthority), null);
+//        }
         return id;
     }
 
@@ -1580,9 +1591,9 @@ public class IndexDatabaseImpl implements IndexDatabase {
         cv.put(IndexSchema.Meta.Genre.GENRE_KEY, keyFor(name));
         Timber.d("Inserting Genre %s", cv.toString());
         long id = insert(IndexSchema.Meta.Genre.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
-        if (id > 0) {
-            mAppContext.getContentResolver().notifyChange(IndexUris.genres(indexAuthority), null);
-        }
+//        if (id > 0) {
+//            mAppContext.getContentResolver().notifyChange(IndexUris.genres(indexAuthority), null);
+//        }
         return id;
     }
 
@@ -1592,10 +1603,15 @@ public class IndexDatabaseImpl implements IndexDatabase {
         cv.put(IndexSchema.Meta.Playlist.DATE_ADDED, System.currentTimeMillis());
         cv.put(IndexSchema.Meta.Playlist.DATE_MODIFIED, System.currentTimeMillis());
         long id = insert(IndexSchema.Meta.Playlist.TABLE, null, cv, SQLiteDatabase.CONFLICT_NONE);
-        if (id > 0) {
-            mAppContext.getContentResolver().notifyChange(IndexUris.playlists(indexAuthority), null);
-        }
+//        if (id > 0) {
+//            mAppContext.getContentResolver().notifyChange(IndexUris.playlists(indexAuthority), null);
+//        }
         return id;
+    }
+
+    @Override
+    public void notifyObservers() {
+        mAppContext.getContentResolver().notifyChange(IndexUris.call(indexAuthority), null);
     }
 
     static final String[] highestPlaylistPlayPosCols = new String[] {

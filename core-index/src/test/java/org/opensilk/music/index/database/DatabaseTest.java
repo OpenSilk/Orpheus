@@ -92,6 +92,19 @@ public class DatabaseTest {
     }
 
     @Test
+    public void testRecusiveContainerRemoval() {
+        Uri uri = Uri.parse("content://foo/1");
+        Uri uri2 = Uri.parse("content://foo/2");
+        Uri uri3 = Uri.parse("content://foo/3");
+        Uri uri4 = Uri.parse("content://foo/4");
+        mDb.insertContainer(uri2, uri);
+        mDb.insertContainer(uri3, uri2);
+        mDb.insertContainer(uri4, uri3);
+        int cnt = mDb.removeContainer(uri2);
+        Assertions.assertThat(cnt).isEqualTo(3);
+    }
+
+    @Test
     public void testCleanupMetaTriggers() {
         Uri containerUri = Uri.parse("content://sample/foo/bar");
         Uri containerParentUri = Uri.parse("content://sample/foo");

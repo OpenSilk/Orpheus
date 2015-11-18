@@ -17,8 +17,15 @@
 
 package org.opensilk.music.index.scanner;
 
+import android.net.Uri;
+
+import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.index.IndexComponent;
+import org.opensilk.music.model.Track;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import mortar.MortarScope;
 
@@ -30,8 +37,18 @@ public class TestService extends ScannerService {
     protected void onBuildScope(MortarScope.Builder builder) {
         IndexComponent acc = DaggerService.getDaggerComponent(getApplicationContext());
         builder.withService(DaggerService.DAGGER_SERVICE,
-                DaggerScannerServiceTest_TestComponent.builder()
+                DaggerTestComponent.builder()
                         .indexComponent(acc)
+                        .testModule(new TestModule(this))
                         .build());
+    }
+
+    @Override
+    protected List<Bundleable> getChildren(Uri uri) {
+        if (TestData.URI_FOLDER1.equals(uri)) {
+            return TestData.TRACKS_FOLDER1;
+        } else {
+            throw new IllegalArgumentException("unknown uri " + uri);
+        }
     }
 }

@@ -85,6 +85,7 @@ public interface IndexDatabase {
     boolean trackNeedsScan(Track track);
     TreeNode buildTree(Uri uri, Uri parentUri);
     boolean removeTrack(Uri uri, Uri parentUri);
+    void notifyObservers();
 
     List<Uri> getLastQueue();
     void saveQueue(List<Uri> queue);

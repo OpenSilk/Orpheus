@@ -17,17 +17,14 @@
 
 package org.opensilk.music.index.scanner;
 
-import android.net.Uri;
-import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import org.opensilk.music.model.Metadata;
 import org.opensilk.music.model.Track;
-
-import java.util.Map;
 
 /**
  * Created by drew on 9/20/15.
  */
 public interface MetaExtractor {
-    @NonNull Metadata extractMetadata(Track.Res res);
+    @Nullable Metadata extractMetadata(Track.Res res);
 }

@@ -45,12 +45,4 @@ public class IndexTestApplication extends BaseApp {
     protected Object getRootComponent() {
         return IndexTestComponent.FACTORY.call(this);
     }
-
-    ContentResolver resolver = Mockito.mock(ContentResolver.class);
-
-    @Override
-    public ContentResolver getContentResolver() {
-        Timber.e("getContentResolver");
-        return resolver;
-    }
 }
