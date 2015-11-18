@@ -153,6 +153,10 @@ public class LauncherActivity extends MusicActivity {
         @Override
         public boolean onNavigationItemSelected(MenuItem menuItem) {
             mDrawerOwnerDelegate.closeDrawer(GravityCompat.START);
+            if (getCurrentNavItem() == menuItem.getItemId()) {
+                Timber.i("Ignoring double click on nav item");
+                return true;
+            }
             switch (menuItem.getItemId()) {
                 case R.id.nav_my_library: {
                     mFm.killBackStack();
@@ -188,6 +192,17 @@ public class LauncherActivity extends MusicActivity {
         }
 
     };
+
+    int getCurrentNavItem() {
+        int size = mNavigation.getMenu().size();
+        for (int ii=0; ii<size; ii++){
+            MenuItem item = mNavigation.getMenu().getItem(ii);
+            if (item.isChecked()) {
+                return item.getItemId();
+            }
+        }
+        return 0;
+    }
 
     void showIntroDialog() {
         final WebView webView = new WebView(this);
