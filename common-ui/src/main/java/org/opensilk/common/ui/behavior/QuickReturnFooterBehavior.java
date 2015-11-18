@@ -3,6 +3,7 @@ package org.opensilk.common.ui.behavior;
 import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.view.ViewCompat;
+import android.support.v4.view.ViewPropertyAnimatorCompat;
 import android.support.v4.view.ViewPropertyAnimatorListener;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.util.AttributeSet;
@@ -24,6 +25,10 @@ public class QuickReturnFooterBehavior extends CoordinatorLayout.Behavior<View> 
     private static final Interpolator INTERPOLATOR = new FastOutSlowInInterpolator();
 
     private int mDySinceDirectionChange;
+    private boolean hideRunning;
+    private boolean showRunning;
+    private ViewPropertyAnimatorCompat hideAnimator;
+    private ViewPropertyAnimatorCompat showAnimator;
 
     public QuickReturnFooterBehavior(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -36,27 +41,22 @@ public class QuickReturnFooterBehavior extends CoordinatorLayout.Behavior<View> 
 
     @Override
     public void onNestedPreScroll(CoordinatorLayout coordinatorLayout, View child, View target, int dx, int dy, int[] consumed) {
-        if (dy > 0 && mDySinceDirectionChange < 0
-                || dy < 0 && mDySinceDirectionChange > 0) {
+        if (dy > 0 && mDySinceDirectionChange < 0 || dy < 0 && mDySinceDirectionChange > 0) {
             // We detected a direction change- cancel existing animations and reset our cumulative delta Y
-            child.animate().cancel();
+            if (hideRunning && hideAnimator != null) {
+                hideAnimator.cancel();
+            } else if (showRunning && showAnimator != null) {
+                showAnimator.cancel();
+            }
             mDySinceDirectionChange = 0;
         }
 
         mDySinceDirectionChange += dy;
 
-        if (mDySinceDirectionChange > child.getHeight() && child.getVisibility() == View.VISIBLE) {
-            if (VersionUtils.hasLollipop()) {
-                hide(child);
-            } else {
-                child.setVisibility(View.GONE);
-            }
-        } else if (mDySinceDirectionChange < 0 && child.getVisibility() == View.GONE) {
-            if (VersionUtils.hasLollipop()) {
-                show(child);
-            } else {
-                child.setVisibility(View.VISIBLE);
-            }
+        if (mDySinceDirectionChange > child.getHeight() && !hideRunning) {
+            hide(child);
+        } else if (mDySinceDirectionChange < 0 && !showRunning) {
+            show(child);
         }
     }
 
@@ -69,7 +69,10 @@ public class QuickReturnFooterBehavior extends CoordinatorLayout.Behavior<View> 
      * @param view The quick return view
      */
     private void hide(final View view) {
-        ViewCompat.animate(view)
+        if (showRunning && showAnimator != null) {
+            showAnimator.cancel();
+        }
+        ViewPropertyAnimatorCompat anim = ViewCompat.animate(view)
                 .translationY(view.getHeight())
                 .setInterpolator(INTERPOLATOR)
                 .setDuration(200)
@@ -82,15 +85,17 @@ public class QuickReturnFooterBehavior extends CoordinatorLayout.Behavior<View> 
                     @Override
                     public void onAnimationEnd(View view) {
                         view.setVisibility(View.GONE);
+                        hideRunning = false;
                     }
 
                     @Override
                     public void onAnimationCancel(View view) {
-                        // Canceling a hide should show the view
-                        show(view);
+                        hideRunning = false;
                     }
-                })
-                .start();
+                });
+        anim.start();
+        hideRunning = true;
+        hideAnimator = anim;
     }
 
     /**
@@ -102,7 +107,10 @@ public class QuickReturnFooterBehavior extends CoordinatorLayout.Behavior<View> 
      * @param view The quick return view
      */
     private void show(final View view) {
-        ViewCompat.animate(view)
+        if (hideRunning && hideAnimator != null) {
+            hideAnimator.cancel();
+        }
+        ViewPropertyAnimatorCompat anim = ViewCompat.animate(view)
                 .translationY(0)
                 .setInterpolator(INTERPOLATOR)
                 .setDuration(200)
@@ -114,15 +122,16 @@ public class QuickReturnFooterBehavior extends CoordinatorLayout.Behavior<View> 
 
                     @Override
                     public void onAnimationEnd(View view) {
-
+                        showRunning = false;
                     }
 
                     @Override
                     public void onAnimationCancel(View view) {
-                        // Canceling a show should hide the view
-                        hide(view);
+                        showRunning = false;
                     }
-                })
-                .start();
+                });
+        anim.start();
+        showRunning = true;
+        showAnimator = anim;
     }
 }
