@@ -85,11 +85,6 @@ public class ProfileActivity extends MusicActivity {
      */
 
     @Override
-    public void onToolbarAttached(Toolbar toolbar) {
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-    }
-
-    @Override
     protected boolean hasLeftDrawer() {
         return false;
     }

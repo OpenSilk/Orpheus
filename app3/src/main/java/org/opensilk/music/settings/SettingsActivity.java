@@ -110,8 +110,4 @@ public class SettingsActivity extends MusicActivity {
         return true;
     }
 
-    @Override
-    public void onToolbarAttached(Toolbar toolbar) {
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-    }
 }

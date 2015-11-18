@@ -231,7 +231,9 @@ public abstract class MusicActivity extends MortarFragmentActivity
 
     @Override
     public void onToolbarAttached(Toolbar toolbar) {
-
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
     }
 
     @Override
