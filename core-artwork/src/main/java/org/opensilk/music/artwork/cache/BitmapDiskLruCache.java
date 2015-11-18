@@ -40,6 +40,7 @@ public class BitmapDiskLruCache implements BitmapDiskCache {
     public static final Object sDecodeLock = new Object();
 
     private BitmapDiskLruCache(File diskCacheDir, int diskCacheSize, ByteArrayPool bytePool) {
+        Timber.d("new BitmapDiskLruCache path=%s size=%d", diskCacheDir.getAbsolutePath(), diskCacheSize);
         mDiskCacheDir = diskCacheDir;
         mDiskCacheSize = diskCacheSize;
         mBytePool = bytePool;

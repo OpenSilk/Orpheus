@@ -702,6 +702,7 @@ public class PlaybackService {
 
     class MediaSessionCallback implements IMediaSessionProxy.Callback {
         @Override
+        @DebugLog
         public void onCommand(String command, Bundle args, ResultReceiver cb) {
             switch (command) {
                 case CMD.REQUEST_REPEATMODE_UPDATE: {
@@ -836,6 +837,7 @@ public class PlaybackService {
         }
 
         @Override
+        @DebugLog
         public void onSkipToQueueItem(long id) {
             int pos = mQueue.getPosOfId(id);
             if (pos >= 0) {

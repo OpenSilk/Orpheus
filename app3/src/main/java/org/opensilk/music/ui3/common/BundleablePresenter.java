@@ -57,6 +57,7 @@ import mortar.Presenter;
 import mortar.bundler.BundleService;
 import rx.Subscriber;
 import rx.Subscription;
+import timber.log.Timber;
 
 /**
  * Created by drew on 5/2/15.
@@ -165,8 +166,8 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView>
         isLoading = true;
         subscription = loader.getListObservable().subscribe(new Subscriber<List<Bundleable>>() {
             @Override
-            @DebugLog
             public void onNext(List<Bundleable> bundleables) {
+                Timber.d("onNext items=%d", bundleables.size());
                 addAll(bundleables);
             }
 

@@ -42,7 +42,7 @@ import java.util.List;
 public class BundleableListSlice<T extends Bundleable> implements Parcelable {
     private static String TAG = "BundleableListSlice";
     private static boolean DEBUG = BuildConfig.DEBUG;
-    private static boolean LOGVV = BuildConfig.DEBUG;
+    private static boolean LOGVV = false;//BuildConfig.DEBUG;
 
     /*
      * TODO get this number from somewhere else. For now set it to a quarter of

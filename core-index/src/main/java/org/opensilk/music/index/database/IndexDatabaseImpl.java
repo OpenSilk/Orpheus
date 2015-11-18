@@ -960,7 +960,6 @@ public class IndexDatabaseImpl implements IndexDatabase {
     }
 
     @Override
-    @DebugLog
     public long hasContainer(Uri uri) {
         synchronized (mConainerIdsCache) {
             if (mConainerIdsCache.containsKey(uri)) {

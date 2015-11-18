@@ -28,6 +28,7 @@ import org.opensilk.common.core.rx.RxUtils;
 import org.opensilk.common.ui.mortar.Lifecycle;
 import org.opensilk.common.ui.mortar.LifecycleService;
 import org.opensilk.music.AppPreferences;
+import org.opensilk.music.playback.PlaybackStateHelper;
 import org.opensilk.music.playback.control.PlaybackController;
 
 import java.util.ArrayList;
@@ -128,6 +129,7 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> {
         mProgressUpdater.unsubscribeProgress();
     }
 
+    @DebugLog
     void skipToQueueItem(int pos) {
         if (pos > 0  && pos < screens.size()) {
             long id = screens.get(pos).queueItem.getQueueId();
@@ -137,6 +139,7 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> {
         }
     }
 
+    @DebugLog
     void updatePagerWithCurrentItem(long id) {
         if (hasView()) {
             for (FooterPageScreen s : screens) {
@@ -161,8 +164,8 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> {
         final Subscription s1 = playbackController.subscribePlayStateChanges(
                 new Action1<PlaybackStateCompat>() {
                     @Override
-                    @DebugLog
                     public void call(PlaybackStateCompat playbackState) {
+                        Timber.d("New PlaybackState %s", PlaybackStateHelper.stringifyState(playbackState.getState()));
                         mProgressUpdater.subscribeProgress(playbackState);
                         if (!selfChange) {
                             lastPlayingId = playbackState.getActiveQueueItemId();
@@ -174,8 +177,8 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> {
         Subscription s2 = playbackController.subscribeQueueChanges(
                 new Action1<List<MediaSessionCompat.QueueItem>>() {
                     @Override
-                    @DebugLog
                     public void call(List<MediaSessionCompat.QueueItem> queueItems) {
+                        Timber.d("New queue size=%d", queueItems.size());
                         screens.clear();
                         for (MediaSessionCompat.QueueItem item : queueItems) {
                             screens.add(new FooterPageScreen(item));

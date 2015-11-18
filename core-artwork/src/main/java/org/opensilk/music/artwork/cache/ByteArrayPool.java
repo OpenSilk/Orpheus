@@ -54,6 +54,7 @@ import timber.log.Timber;
  * least-recently-used buffers are disposed.
  */
 public class ByteArrayPool {
+    private final boolean DEBUG = false;
     /** The buffer pool, arranged both by last use and by buffer size */
     private List<byte[]> mBuffersByLastUse = new LinkedList<byte[]>();
     private List<byte[]> mBuffersBySize = new ArrayList<byte[]>(64);
@@ -97,11 +98,11 @@ public class ByteArrayPool {
                 mCurrentSize -= buf.length;
                 mBuffersBySize.remove(i);
                 mBuffersByLastUse.remove(buf);
-                Timber.d("getBuf cached buf size=%.03fKib requested %.03fKib", ((float)buf.length/1024), ((float)len)/1024);
+                if (DEBUG) Timber.d("getBuf reusing buffer size=%.03fKib requested %.03fKib", ((float)buf.length/1024), ((float)len)/1024);
                 return buf;
             }
         }
-        Timber.d("getBuf new buffer size=%.06fKib", ((float)len)/1024);
+        if (DEBUG) Timber.d("getBuf allocating new buffer size=%.06fKib", ((float)len)/1024);
         return new byte[len];
     }
 
@@ -113,7 +114,7 @@ public class ByteArrayPool {
      */
     public synchronized void returnBuf(byte[] buf) {
         if (buf == null || buf.length > mSizeLimit) {
-            Timber.d("returnBuf discarding buffer size=%.03fKib", buf != null ? (((float)buf.length)/1024) : 0);
+            if (DEBUG) Timber.d("returnBuf discarding buffer size=%.03fKib", buf != null ? (((float)buf.length)/1024) : 0);
             return;
         }
         mBuffersByLastUse.add(buf);
@@ -124,7 +125,7 @@ public class ByteArrayPool {
         mBuffersBySize.add(pos, buf);
         mCurrentSize += buf.length;
         trim();
-        Timber.d("returnBuf after trim %.03fKib", ((float) mCurrentSize) / 1024);
+        if (DEBUG) Timber.d("returnBuf after trim currentSize=%.03fKib", ((float) mCurrentSize) / 1024);
     }
 
     /**

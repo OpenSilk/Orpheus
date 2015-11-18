@@ -40,7 +40,7 @@ import timber.log.Timber;
  * Created by drew on 3/16/15.
  */
 public abstract class MortarDialogFragment extends AppCompatDialogFragment {
-    private static final boolean DEBUG_LIFECYCLE = true;
+    private static final boolean DEBUG_LIFECYCLE = false;
 
     private MortarScope mScope;
     private Screen mScreen;

@@ -47,7 +47,7 @@ import timber.log.Timber;
  * Created by drew on 3/10/15.
  */
 public abstract class MortarFragment extends Fragment implements HasScope {
-    private static final boolean DEBUG_LIFECYCLE = true;
+    private static final boolean DEBUG_LIFECYCLE = false;
 
     private MortarScope mScope;
     private Screen mScreen;

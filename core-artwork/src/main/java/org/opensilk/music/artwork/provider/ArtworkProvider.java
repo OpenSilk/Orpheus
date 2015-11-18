@@ -29,7 +29,6 @@ import org.apache.commons.io.IOUtils;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.artwork.ArtworkUris;
 import org.opensilk.music.artwork.cache.BitmapDiskCache;
-import org.opensilk.music.artwork.cache.ByteArrayPool;
 import org.opensilk.music.artwork.fetcher.ArtworkFetcher;
 import org.opensilk.music.artwork.fetcher.ArtworkFetcherService;
 import org.opensilk.music.artwork.fetcher.CompletionListener;
@@ -47,7 +46,6 @@ import javax.inject.Named;
 import hugo.weaving.DebugLog;
 import rx.Scheduler;
 import rx.functions.Action0;
-import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 /**

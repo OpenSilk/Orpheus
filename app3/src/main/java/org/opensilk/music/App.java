@@ -18,45 +18,26 @@
 package org.opensilk.music;
 
 import android.content.ComponentCallbacks2;
-import android.content.Context;
-import android.os.Environment;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.app.BaseApp;
 import org.opensilk.common.core.app.SimpleComponentCallbacks;
-import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.music.playback.PlaybackComponent;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import hugo.weaving.DebugLog;
-import rx.functions.Action1;
 import timber.log.Timber;
 
 public class App extends BaseApp {
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
     @Override
-    @DebugLog
     public void onCreate() {
         super.onCreate();
-
         setupTimber(DEBUG, null);
-
-        if (isUiProcess()) {
-            registerComponentCallbacks(mUiComponentCallbacks);
-        } else if (isProviderProcess()) {
-
-        } else if (isServiceProcess()) {
-
-        } else {
-            Timber.e("Unable to determine our process");
-        }
-
-        // Enable strict mode logging (we do this after reading the process to avoid a warning)
+        registerComponentCallbacks(mComponentCallbacks);
         enableStrictMode();
     }
 
@@ -67,7 +48,6 @@ public class App extends BaseApp {
         } else if (isProviderProcess()) {
             return ProviderComponent.FACTORY.call(this);
         } else if (isServiceProcess()) {
-            //return PlaybackComponent.FACTORY.call(this);
             return ServiceComponent.FACTORY.call(this);
         } else {
             Timber.e("Unable to determine our process");
@@ -89,7 +69,6 @@ public class App extends BaseApp {
 
     private String mProcName;
 
-    @DebugLog
     String getProcName() {
         if (mProcName == null) {
             try {
@@ -109,14 +88,10 @@ public class App extends BaseApp {
         return mProcName;
     }
 
-    final ComponentCallbacks2 mUiComponentCallbacks = new SimpleComponentCallbacks() {
+    final ComponentCallbacks2 mComponentCallbacks = new SimpleComponentCallbacks() {
         @Override
-        @DebugLog
         public void onTrimMemory(int level) {
-            Timber.d("Trim memory for process %s", getProcName());
-            if (level >= TRIM_MEMORY_UI_HIDDEN) {
-
-            }
+            Timber.i("Trim memory level=%s for process %s", level, getProcName());
         }
     };
 
