@@ -26,6 +26,7 @@ import org.opensilk.music.library.mediastore.MediaStoreLibraryAuthorityModule;
 import org.opensilk.music.okhttp.OkHttpComponent;
 import org.opensilk.music.playback.PlaybackComponent;
 import org.opensilk.music.playback.PlaybackModule;
+import org.opensilk.music.renderer.googlecast.CastComponent;
 import org.opensilk.music.renderer.googlecast.CastModule;
 
 import javax.inject.Singleton;
@@ -48,7 +49,7 @@ import rx.functions.Func1;
                 IndexModule.class,
         }
 )
-public interface EmulatorComponent extends AppComponent, ProviderComponent, PlaybackComponent {
+public interface EmulatorComponent extends AppComponent, ProviderComponent, PlaybackComponent, CastComponent {
     Func1<App, EmulatorComponent> FACTORY = new Func1<App, EmulatorComponent>() {
         @Override
         public EmulatorComponent call(App app) {
