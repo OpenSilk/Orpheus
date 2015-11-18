@@ -179,7 +179,7 @@ public class PlaybackServiceL extends MediaBrowserService implements PlaybackSer
         }
         Subscription s = mLoadChildrenSubscriptions.remove(parentId);
         RxUtils.unsubscribe(s);
-        s = o.first().observeOn(AndroidSchedulers.mainThread())
+        s = o.single().observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<List<MediaBrowser.MediaItem>>() {
                     @Override
                     public void call(List<MediaBrowser.MediaItem> mediaItems) {
