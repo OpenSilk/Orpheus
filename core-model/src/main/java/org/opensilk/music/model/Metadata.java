@@ -214,7 +214,11 @@ public class Metadata implements Parcelable {
     }
 
     public long getLong(String key) {
-        return meta.getLong(key, -1);
+        return getLong(key, -1);
+    }
+
+    public long getLong(String key, long def) {
+        return meta.getLong(key, def);
     }
 
     public Uri getUri(String key) {

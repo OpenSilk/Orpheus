@@ -113,6 +113,11 @@ public class Folder extends Container {
             return this;
         }
 
+        public Builder setFlags(long flags) {
+            bob.putLong(Metadata.KEY_FLAGS, flags);
+            return this;
+        }
+
         public Folder build() {
             if (uri == null || parentUri == null || name == null) {
                 throw new NullPointerException("uri and name are required");

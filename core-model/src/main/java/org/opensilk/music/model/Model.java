@@ -30,4 +30,5 @@ public interface Model extends Bundleable {
     @NonNull Uri getParentUri();
     @NonNull String getName();
     @NonNull String getSortName();
+    long getFlags();
 }

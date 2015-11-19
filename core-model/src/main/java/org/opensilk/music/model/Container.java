@@ -60,6 +60,10 @@ public abstract class Container implements Model {
         return parentUri;
     }
 
+    public long getFlags() {
+        return metadata.getLong(Metadata.KEY_FLAGS, 0);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

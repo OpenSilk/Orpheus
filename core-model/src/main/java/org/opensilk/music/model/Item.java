@@ -60,7 +60,7 @@ public abstract class Item implements Model {
     }
 
     public long getFlags() {
-        return metadata.getLong(Metadata.KEY_FLAGS);
+        return metadata.getLong(Metadata.KEY_FLAGS, 0);
     }
 
     @Override
