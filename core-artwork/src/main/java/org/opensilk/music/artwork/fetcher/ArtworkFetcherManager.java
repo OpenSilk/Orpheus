@@ -24,6 +24,7 @@ import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.text.TextUtils;
 
 import com.squareup.okhttp.CacheControl;
@@ -447,7 +448,8 @@ public class ArtworkFetcherManager {
             state = activeNetwork.isConnectedOrConnecting();
         }
         if (state) {
-            if (activeNetwork.getType() == ConnectivityManager.TYPE_ETHERNET) {
+            if (StringUtils.contains(Build.FINGERPRINT, "sdk") ||
+                    activeNetwork.getType() == ConnectivityManager.TYPE_ETHERNET) {
                 //ethernet in always true
                 return true;
             } else if (wifiOnly) {
