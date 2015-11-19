@@ -145,6 +145,7 @@ public class FilesHelper {
                 .setName(dir.getName())
                 .setChildCount(children != null ? children.length : 0)
                 .setDateModified(formatDate(dir.lastModified()))
+                .setFlags(dir.canWrite() ? (LibraryConfig.FLAG_SUPPORTS_DELETE | LibraryConfig.FLAG_SUPPORTS_RENAME) : 0)
                 .build();
     }
 
@@ -192,37 +193,11 @@ public class FilesHelper {
     public static boolean deleteDirectory(Context context, File dir) {
         boolean success = false;
         if (dir.exists() && dir.isDirectory() && dir.canWrite()) {
-            Cursor c = null;
-            try {
-                 c = context.getContentResolver().query(
-                        Uris.EXTERNAL_MEDIASTORE_FILES,
-                        Projections.ID_DATA,
-                        MediaStore.Files.FileColumns.DATA + " GLOB ?",
-                        new String[]{dir.getAbsolutePath()+"*"},
-                        null
-                );
-                if (c != null && c.moveToFirst()) {
-                    StringBuilder selection = new StringBuilder(100);
-                    selection.append(BaseColumns._ID + " IN (");
-                    while (true) {
-                        selection.append(c.getLong(0));
-                        Timber.d("Adding %s", c.getString(1));
-                        if (!c.moveToNext()) {
-                            break;
-                        }
-                        selection.append(",");
-                    }
-                    selection.append(")");
-                    Timber.d("Removing %s", selection.toString());
-                    //remove from mediastore
-                    //TODO just delete on the glob
-                    context.getContentResolver().delete(
-                            Uris.EXTERNAL_MEDIASTORE_FILES,
-                            selection.toString(), null);
-                }
-            } finally {
-                closeQuietly(c);
-            }
+            int num = context.getContentResolver().delete(
+                    Uris.EXTERNAL_MEDIASTORE_FILES,
+                    MediaStore.Files.FileColumns.DATA + " GLOB ?",
+                    new String[]{dir.getAbsolutePath()+ "*"});
+            Timber.d("Removed %d entries for %s", num, dir.getAbsolutePath());
             try {
                 Timber.d("Deleting dir %s", dir.getPath());
                 FileUtils.deleteDirectory(dir);

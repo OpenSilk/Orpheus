@@ -44,6 +44,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import rx.Observable;
 import rx.Subscriber;
 import timber.log.Timber;
 
