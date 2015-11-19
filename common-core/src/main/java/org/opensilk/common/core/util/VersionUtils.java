@@ -95,4 +95,8 @@ public class VersionUtils {
     public static boolean hasApi23() {
         return hasMarshmallow();
     }
+
+    public static boolean isEmulator() {
+        return Build.FINGERPRINT.contains("sdk");
+    }
 }
