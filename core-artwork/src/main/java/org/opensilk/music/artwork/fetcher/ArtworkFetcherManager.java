@@ -35,6 +35,8 @@ import com.squareup.okhttp.Response;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
+import org.opensilk.common.core.util.ConnectionUtils;
+import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.artwork.cache.BitmapDiskCache;
 import org.opensilk.music.artwork.coverartarchive.CoverArtArchive;
 import org.opensilk.music.artwork.coverartarchive.Metadata;
@@ -442,21 +444,11 @@ public class ArtworkFetcherManager {
     }
 
     private boolean isOnline(boolean wifiOnly) {
-        boolean state = false;
-        final NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
-        if (activeNetwork != null) {
-            state = activeNetwork.isConnectedOrConnecting();
+        if (wifiOnly && !VersionUtils.isEmulator()) {
+            return ConnectionUtils.hasWifiOrEthernetConnection(mConnectivityManager);
+        } else {
+            return ConnectionUtils.hasInternetConnection(mConnectivityManager);
         }
-        if (state) {
-            if (StringUtils.contains(Build.FINGERPRINT, "sdk") ||
-                    activeNetwork.getType() == ConnectivityManager.TYPE_ETHERNET) {
-                //ethernet in always true
-                return true;
-            } else if (wifiOnly) {
-                return activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
-            }
-        }
-        return state;
     }
 
 }

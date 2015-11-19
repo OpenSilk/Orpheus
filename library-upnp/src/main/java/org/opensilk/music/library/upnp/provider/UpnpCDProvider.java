@@ -56,6 +56,8 @@ import org.fourthline.cling.support.model.item.AudioItem;
 import org.fourthline.cling.support.model.item.Item;
 import org.fourthline.cling.support.model.item.MusicTrack;
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.core.util.ConnectionUtils;
+import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.internal.BundleableSubscriber;
 import org.opensilk.music.library.provider.LibraryProvider;
@@ -143,11 +145,7 @@ public class UpnpCDProvider extends LibraryProvider {
     @Override
     protected boolean isAvailable() {
         //TODO setting to specify which wifi networks
-        NetworkInfo networkInfo = mConnectivityManager.getActiveNetworkInfo();
-        return StringUtils.contains(Build.FINGERPRINT, "sdk") ||
-                (networkInfo.isConnectedOrConnecting() &&
-                (networkInfo.getType() == ConnectivityManager.TYPE_WIFI
-                        || networkInfo.getType() == ConnectivityManager.TYPE_ETHERNET));
+        return ConnectionUtils.hasWifiOrEthernetConnection(mConnectivityManager) || VersionUtils.isEmulator();
     }
 
     @Override

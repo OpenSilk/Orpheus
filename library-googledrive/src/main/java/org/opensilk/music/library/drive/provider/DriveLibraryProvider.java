@@ -29,6 +29,7 @@ import android.os.Bundle;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.core.util.BundleHelper;
+import org.opensilk.common.core.util.ConnectionUtils;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.drive.DriveLibraryComponent;
 import org.opensilk.music.library.drive.R;
@@ -105,8 +106,7 @@ public class DriveLibraryProvider extends LibraryProvider {
 
     @Override
     protected boolean isAvailable() {
-        NetworkInfo networkInfo = mConnectivityManager.getActiveNetworkInfo();
-        return networkInfo.isConnectedOrConnecting();
+        return ConnectionUtils.hasInternetConnection(mConnectivityManager);
     }
 
     @Override
