@@ -21,6 +21,7 @@ import android.content.Context;
 
 import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.common.core.dagger2.AppContextModule;
+import org.opensilk.common.core.dagger2.SystemServicesComponent;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -38,7 +39,7 @@ import rx.functions.Func1;
                 UpnpLibraryModule.class,
         }
 )
-public interface UpnpLibraryComponent extends AppContextComponent {
+public interface UpnpLibraryComponent extends AppContextComponent, SystemServicesComponent {
     Func1<Context, UpnpLibraryComponent> FACTORY = new Func1<Context, UpnpLibraryComponent>() {
         @Override
         public UpnpLibraryComponent call(Context context) {

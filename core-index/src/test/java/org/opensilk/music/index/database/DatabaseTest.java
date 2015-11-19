@@ -130,18 +130,18 @@ public class DatabaseTest {
         }
 
         //make sure we have the number of items we expect
-        Assertions.assertThat(mDb.getArtists(null).size()).isEqualTo(2);
-        Assertions.assertThat(mDb.getAlbums(null).size()).isEqualTo(2);
-        Assertions.assertThat(mDb.getTracks(null).size()).isEqualTo(10);
+        Assertions.assertThat(mDb.getArtists(null, null).size()).isEqualTo(2);
+        Assertions.assertThat(mDb.getAlbums(null, null).size()).isEqualTo(2);
+        Assertions.assertThat(mDb.getTracks(null, null).size()).isEqualTo(10);
 
         //removee the container
         long numremoved = mDb.removeContainer(containerUri);
         Assertions.assertThat(numremoved).isEqualTo(1);
 
         //check that triggers cleared out tables
-        Assertions.assertThat(mDb.getArtists(null).size()).isEqualTo(0);
-        Assertions.assertThat(mDb.getAlbums(null).size()).isEqualTo(0);
-        Assertions.assertThat(mDb.getTracks(null).size()).isEqualTo(0);
+        Assertions.assertThat(mDb.getArtists(null, null).size()).isEqualTo(0);
+        Assertions.assertThat(mDb.getAlbums(null, null).size()).isEqualTo(0);
+        Assertions.assertThat(mDb.getTracks(null, null).size()).isEqualTo(0);
     }
 
     @Test
@@ -188,7 +188,7 @@ public class DatabaseTest {
             Assertions.assertThat(uii.next()).isEqualTo(tii.next().getUri());
         }
 
-        mDb.getTracks(null);
+        mDb.getTracks(null, null);
 
         List<Uri> list2 = new ArrayList<>(4);
         for (int ii= 7; ii< 10; ii++) {

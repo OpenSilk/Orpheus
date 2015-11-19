@@ -100,7 +100,7 @@ public class ScannerServiceTest {
         Assertions.assertThat(scannerService.numError.get()).isEqualTo(0);
 
 
-        List<Track> insertedTracks = indexDatabase.getTracks(null);
+        List<Track> insertedTracks = indexDatabase.getTracks(null, null);
         Assertions.assertThat(insertedTracks.size()).isEqualTo(5);
     }
 

@@ -17,13 +17,18 @@
 
 package org.opensilk.music.library.upnp;
 
+import org.opensilk.common.core.dagger2.SystemServicesModule;
+
 import dagger.Module;
 
 /**
  * Created by drew on 9/21/15.
  */
 @Module(
-        includes = UpnpLibraryAuthorityModule.class
+        includes = {
+                UpnpLibraryAuthorityModule.class,
+                SystemServicesModule.class
+        }
 )
 public class UpnpLibraryModule {
 

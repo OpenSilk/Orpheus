@@ -178,4 +178,8 @@ public class LibraryRootScreenView extends FrameLayout {
         errorMsg.setText(msg);
         errorMsg.setVisibility(VISIBLE);
     }
+
+    void setUnavailable() {
+        setError(getContext().getString(R.string.err_library_unavailable));
+    }
 }

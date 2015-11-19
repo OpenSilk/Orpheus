@@ -33,6 +33,9 @@ import org.opensilk.music.index.model.BioContent;
 import org.opensilk.music.index.model.SimilarArtist;
 import org.opensilk.music.index.scanner.ScannerService;
 import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.library.LibraryProviderInfo;
+import org.opensilk.music.library.client.LibraryClient;
+import org.opensilk.music.library.client.LibraryProviderInfoLoader;
 import org.opensilk.music.library.client.TypedBundleableLoader;
 import org.opensilk.music.library.internal.BundleableListTransformer;
 import org.opensilk.music.library.internal.BundleableSubscriber;
@@ -40,6 +43,7 @@ import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.library.provider.LibraryProvider;
+import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Container;
@@ -59,9 +63,12 @@ import javax.inject.Named;
 
 import de.umass.lastfm.ImageSize;
 import de.umass.lastfm.LastFM;
+import de.umass.lastfm.Library;
 import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Subscriber;
+import rx.Subscription;
+import rx.functions.Action1;
 import rx.functions.Action2;
 import rx.functions.Func0;
 import rx.functions.Func1;
@@ -99,6 +106,7 @@ public class IndexProvider extends LibraryProvider {
     @Inject @Named("IndexProviderAuthority") String mAuthority;
     @Inject IndexDatabase mDataBase;
     @Inject LastFMHelper mLastFmH;
+    @Inject LibraryProviderInfoLoader mLibraryLoader;
 
     private UriMatcher mUriMatcher;
 
@@ -326,16 +334,60 @@ public class IndexProvider extends LibraryProvider {
         }
     }
 
+    Observable<String[]> availableLibrariesObservable() {
+        return mLibraryLoader.makeObservable()
+                .flatMap(new Func1<LibraryProviderInfo, Observable<String>>() {
+                    @Override
+                    public Observable<String> call(final LibraryProviderInfo libraryProviderInfo) {
+                        return Observable.using(
+                                new Func0<LibraryClient>() {
+                                    @Override
+                                    public LibraryClient call() {
+                                        return LibraryClient.create(getContext(), LibraryUris.call(libraryProviderInfo.getAuthority()));
+                                    }
+                                },
+                                new Func1<LibraryClient, Observable<String>>() {
+                                    @Override
+                                    public Observable<String> call(LibraryClient libraryClient) {
+                                        Bundle reply = libraryClient.makeCall(LibraryMethods.CHECK_AVAILABILITY, null);
+                                        if (LibraryExtras.getOk(reply)) {
+                                            return Observable.just(libraryProviderInfo.getAuthority());
+                                        } else {
+                                            return Observable.empty();
+                                        }
+                                    }
+                                },
+                                new Action1<LibraryClient>() {
+                                    @Override
+                                    public void call(LibraryClient libraryClient) {
+                                        libraryClient.release();
+                                    }
+                                },
+                                true //release on terminate
+                        );
+                    }
+                })
+                .toList()
+                .map(new Func1<List<String>, String[]>() {
+                    @Override
+                    public String[] call(List<String> strings) {
+                        return strings.toArray(new String[strings.size()]);
+                    }
+        });
+    }
+
     @Override
-    protected void listObjsInternal(Uri uri, final IBinder binder, Bundle args) {
+    protected void listObjsInternal(Uri uri, final IBinder binder, final Bundle args) {
         switch (mUriMatcher.match(uri)) {
             case M_ALBUMS: {
                 final BundleableSubscriber<Album> subscriber = new BundleableSubscriber<>(binder);
-                final List<Album> lst = mDataBase.getAlbums(LibraryExtras.getSortOrder(args));
-                if (!subscriber.isUnsubscribed()) {
-                    subscriber.onNext(lst);
-                    subscriber.onCompleted();
-                }
+                Subscription s = availableLibrariesObservable()
+                        .map(new Func1<String[], List<Album>>() {
+                            @Override
+                            public List<Album> call(String[] strings) {
+                                return mDataBase.getAlbums(LibraryExtras.getSortOrder(args), strings);
+                            }
+                        }).subscribe(subscriber);
                 break;
             }
             case M_ALBUM_TRACKS: {
@@ -362,20 +414,24 @@ public class IndexProvider extends LibraryProvider {
             }
             case M_ARTISTS: {
                 final BundleableSubscriber<Artist> subscriber = new BundleableSubscriber<>(binder);
-                final List<Artist> lst = mDataBase.getArtists(LibraryExtras.getSortOrder(args));
-                if (!subscriber.isUnsubscribed()) {
-                    subscriber.onNext(lst);
-                    subscriber.onCompleted();
-                }
+                Subscription s = availableLibrariesObservable()
+                        .map(new Func1<String[], List<Artist>>() {
+                            @Override
+                            public List<Artist> call(String[] strings) {
+                                return mDataBase.getArtists(LibraryExtras.getSortOrder(args), strings);
+                            }
+                        }).subscribe(subscriber);
                 break;
             }
             case M_ALBUM_ARTISTS: {
                 final BundleableSubscriber<Artist> subscriber = new BundleableSubscriber<>(binder);
-                final List<Artist> lst = mDataBase.getAlbumArtists(LibraryExtras.getSortOrder(args));
-                if (!subscriber.isUnsubscribed()) {
-                    subscriber.onNext(lst);
-                    subscriber.onCompleted();
-                }
+                Subscription s = availableLibrariesObservable()
+                        .map(new Func1<String[], List<Artist>>() {
+                            @Override
+                            public List<Artist> call(String[] strings) {
+                                return mDataBase.getAlbumArtists(LibraryExtras.getSortOrder(args), strings);
+                            }
+                        }).subscribe(subscriber);
                 break;
             }
             case M_ARTIST_ALBUMS: {
@@ -413,20 +469,24 @@ public class IndexProvider extends LibraryProvider {
             }
             case M_TRACKS: {
                 final BundleableSubscriber<Track> subscriber = new BundleableSubscriber<>(binder);
-                final List<Track> lst = mDataBase.getTracks(LibraryExtras.getSortOrder(args), false);
-                if (!subscriber.isUnsubscribed()) {
-                    subscriber.onNext(lst);
-                    subscriber.onCompleted();
-                }
+                Subscription s = availableLibrariesObservable()
+                        .map(new Func1<String[], List<Track>>() {
+                            @Override
+                            public List<Track> call(String[] strings) {
+                                return mDataBase.getTracks(LibraryExtras.getSortOrder(args), strings);
+                            }
+                        }).subscribe(subscriber);
                 break;
             }
             case M_GENRES: {
                 final BundleableSubscriber<Genre> subscriber = new BundleableSubscriber<>(binder);
-                final List<Genre> lst = mDataBase.getGenres(LibraryExtras.getSortOrder(args));
-                if (!subscriber.isUnsubscribed()) {
-                    subscriber.onNext(lst);
-                    subscriber.onCompleted();
-                }
+                Subscription s = availableLibrariesObservable()
+                        .map(new Func1<String[], List<Genre>>() {
+                            @Override
+                            public List<Genre> call(String[] strings) {
+                                return mDataBase.getGenres(LibraryExtras.getSortOrder(args), strings);
+                            }
+                        }).subscribe(subscriber);
                 break;
             }
             case M_GENRE_DETAILS: {

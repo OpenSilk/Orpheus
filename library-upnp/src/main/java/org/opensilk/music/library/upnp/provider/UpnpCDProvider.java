@@ -23,7 +23,10 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.UriMatcher;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
@@ -99,6 +102,7 @@ import timber.log.Timber;
 public class UpnpCDProvider extends LibraryProvider {
 
     @Inject @Named("UpnpLibraryAuthority") String mAuthority;
+    @Inject ConnectivityManager mConnectivityManager;
 
     UriMatcher mMatcher;
 
@@ -134,6 +138,16 @@ public class UpnpCDProvider extends LibraryProvider {
     @Override
     protected String getAuthority() {
         return mAuthority;
+    }
+
+    @Override
+    protected boolean isAvailable() {
+        //TODO setting to specify which wifi networks
+        NetworkInfo networkInfo = mConnectivityManager.getActiveNetworkInfo();
+        return StringUtils.contains(Build.FINGERPRINT, "sdk") ||
+                (networkInfo.isConnectedOrConnecting() &&
+                (networkInfo.getType() == ConnectivityManager.TYPE_WIFI
+                        || networkInfo.getType() == ConnectivityManager.TYPE_ETHERNET));
     }
 
     @Override

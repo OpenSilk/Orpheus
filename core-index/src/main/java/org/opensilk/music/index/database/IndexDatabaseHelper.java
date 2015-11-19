@@ -45,7 +45,7 @@ import timber.log.Timber;
 @Singleton
 public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
-    public static final int DB_VERSION = 37;
+    public static final int DB_VERSION = 38;
     public static final String DB_NAME = "music.db";
 
     @Inject
@@ -69,9 +69,14 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
         // STOPSHIP: 9/19/15 remove before release
         //cleanup mistakes prior to 3.0 release
-        if (oldVersion < 32) {
+        if (oldVersion < 37) {
 
-            db.execSQL("DROP TRIGGER IF EXISTS tracks_cleanup;");
+            db.execSQL("DROP INDEX IF EXISTS playback_settings_key_idx;");
+            db.execSQL("DROP TABLE IF EXISTS scanner_settings;");
+            db.execSQL("DROP TABLE IF EXISTS playback_settings;");
+
+        } else if (oldVersion < 38) {
+
             db.execSQL("DROP TRIGGER IF EXISTS albums_cleanup;");
             db.execSQL("DROP TRIGGER IF EXISTS artists_cleanup;");
             db.execSQL("DROP TRIGGER IF EXISTS genres_cleanup;");
@@ -85,47 +90,31 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP VIEW IF EXISTS track_parent_map;");
             db.execSQL("DROP VIEW IF EXISTS genre_album_map;");
             db.execSQL("DROP VIEW IF EXISTS artist_album_map;");
+            db.execSQL("DROP VIEW IF EXISTS album_artist_info;");
 
             db.execSQL("DROP INDEX IF EXISTS artist_key_idx;");
             db.execSQL("DROP INDEX IF EXISTS album_key_idx;");
-            db.execSQL("DROP INDEX IF EXISTS track_key_idx;");
             db.execSQL("DROP INDEX IF EXISTS genre_key_idx;");
             db.execSQL("DROP INDEX IF EXISTS artist_id_idx;");
             db.execSQL("DROP INDEX IF EXISTS album_id_idx;");
             db.execSQL("DROP INDEX IF EXISTS track_id_idx;");
+            db.execSQL("DROP INDEX IF EXISTS tracks_id_idx;");
             db.execSQL("DROP INDEX IF EXISTS track_res_id_idx;");
             db.execSQL("DROP INDEX IF EXISTS containers_uri_idx;");
-            db.execSQL("DROP INDEX IF EXISTS playback_settings_key_idx;");
 
-            db.execSQL("DROP TABLE IF EXISTS extracted_meta;");
-            db.execSQL("DROP TABLE IF EXISTS track_resources;");
             db.execSQL("DROP TABLE IF EXISTS track_meta;");
             db.execSQL("DROP TABLE IF EXISTS album_meta;");
             db.execSQL("DROP TABLE IF EXISTS artist_meta;");
             db.execSQL("DROP TABLE IF EXISTS genre_meta;");
-            db.execSQL("DROP TABLE IF EXISTS tracks_playlists_map;");
-            db.execSQL("DROP TABLE IF EXISTS playlists;");
             db.execSQL("DROP TABLE IF EXISTS containers;");
             db.execSQL("DROP TABLE IF EXISTS tracks;");
-            db.execSQL("DROP TABLE IF EXISTS scanner_meta;");
-            db.execSQL("DROP TABLE IF EXISTS scanner_settings;");
-            db.execSQL("DROP TABLE IF EXISTS playback_settings;");
 
-        }
-        if (oldVersion < 33) {
-            db.execSQL("DROP VIEW IF EXISTS album_artist_info;");
-        }
-        if (oldVersion < 36) {
             db.execSQL("DROP VIEW IF EXISTS playlist_album_map;");
             db.execSQL("DROP VIEW IF EXISTS playlist_info;");
             db.execSQL("DROP VIEW IF EXISTS playlist_track_info;");
             db.execSQL("DROP TABLE IF EXISTS playlist_track;");
             db.execSQL("DROP TABLE IF EXISTS playlist_meta;");
             db.execSQL("DROP TABLE IF EXISTS playlist_track_meta;");
-        }
-        if (oldVersion < 37) {
-            db.execSQL("DROP VIEW IF EXISTS genre_album_map;");
-            db.execSQL("DROP VIEW IF EXISTS artist_album_map;");
         }
         //end mistakes cleanup
 
@@ -149,7 +138,8 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "artist_bio_summary TEXT, " +
                     "artist_bio_date_modified INTEGER, " +
                     "artist_mbid TEXT COLLATE NOCASE, " +
-                    "UNIQUE(artist_key,artist_mbid)" +
+                    "authority TEXT NOT NULL, " +
+                    "UNIQUE(artist_key,artist_mbid,authority)" +
                     ");");
             //Album metadata
             db.execSQL("CREATE TABLE IF NOT EXISTS album_meta (" +
@@ -159,14 +149,17 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "album_bio_summary TEXT, " +
                     "album_bio_date_modified INTEGER, " +
                     "album_mbid TEXT COLLATE NOCASE, " +
+                    "authority TEXT NOT NULL, " +
                     "album_artist_id INTEGER REFERENCES artist_meta(_id) ON DELETE CASCADE ON UPDATE CASCADE, " +
-                    "UNIQUE(album_key,album_mbid)" +
+                    "UNIQUE(album_key,album_mbid,authority)" +
                     ");");
             //
             db.execSQL("CREATE TABLE IF NOT EXISTS genre_meta (" +
                     "_id INTEGER PRIMARY KEY, " +
                     "genre_name TEXT NOT NULL, " +
-                    "genre_key TEXT NOT NULL UNIQUE " +
+                    "genre_key TEXT NOT NULL, " +
+                    "authority TEXT NOT NULL, " +
+                    "UNIQUE(genre_key,authority)" +
                     ");");
             //Containers
             db.execSQL("CREATE TABLE IF NOT EXISTS containers (" +
@@ -242,7 +235,8 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "COUNT(DISTINCT a2._id) AS number_of_albums, " +
                     "COUNT(DISTINCT t1._id) AS number_of_tracks, "+
                     "artist_bio_summary as summary, " +
-                    "artist_mbid as mbid " +
+                    "artist_mbid as mbid, " +
+                    "a1.authority " +
                     "FROM artist_meta a1 " +
                     "LEFT OUTER JOIN album_meta a2 ON a2.album_artist_id = a1._id " +
                     "LEFT OUTER JOIN track_meta t1 ON t1.artist_id = a1._id " +
@@ -256,7 +250,8 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "a1.number_of_albums, " +
                     "a1.number_of_tracks, "+
                     "a1.summary, " +
-                    "a1.mbid " +
+                    "a1.mbid, " +
+                    "a1.authority " +
                     "FROM artist_info a1 " +
                     "JOIN album_meta a2 ON a2.album_artist_id = a1._id " +
                     "GROUP BY a1._id" +
@@ -271,7 +266,8 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "a2.artist_key, " +
                     "COUNT(DISTINCT t1._id) as track_count, " +
                     "album_bio_summary as summary, " +
-                    "album_mbid as mbid " +
+                    "album_mbid as mbid, " +
+                    "a1.authority " +
                     "FROM album_meta a1 " +
                     "LEFT OUTER JOIN artist_meta a2 on a1.album_artist_id = a2._id " +
                     "LEFT OUTER JOIN track_meta t1 on a1._id = t1.album_id " +
@@ -284,7 +280,8 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "g1.genre_key, " +
                     "COUNT(t1._id) as number_of_tracks, " +
                     "COUNT(DISTINCT t1.album_id) as number_of_albums, " +
-                    "COUNT(DISTINCT t1.artist_id) as number_of_artists " +
+                    "COUNT(DISTINCT t1.artist_id) as number_of_artists, " +
+                    "g1.authority " +
                     "FROM genre_meta g1 " +
                     "LEFT OUTER JOIN track_meta t1 ON g1._id = t1.genre_id " +
                     "GROUP BY g1._id" +
@@ -315,6 +312,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("CREATE VIEW IF NOT EXISTS track_info as SELECT " +
                     "t2.uri, " +
                     "tpm.uri as parent_uri, " +
+                    "t2.authority, " +
                     "t1._id," +
                     "coalesce(t1.track_name, t2.track_name) as name, " +
                     "coalesce(t1.track_key, t2.track_key) as track_key, " +

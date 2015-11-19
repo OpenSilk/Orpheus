@@ -58,4 +58,6 @@ public interface LibraryMethods {
      */
     String CONFIG = "config";
 
+    String CHECK_AVAILABILITY = "check_availability";
+
 }

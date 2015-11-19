@@ -73,6 +73,13 @@ public abstract class LibraryProvider extends ContentProvider {
      */
     protected abstract LibraryConfig getLibraryConfig();
 
+    /**
+     * @return true if library is currently reachable
+     */
+    protected boolean isAvailable() {
+        return true;
+    }
+
     protected void setScheduler(Scheduler scheduler) {
         if (scheduler == null) throw new NullPointerException("Scheduler cannot be null");
         this.scheduler = scheduler;
@@ -165,6 +172,9 @@ public abstract class LibraryProvider extends ContentProvider {
             }
             case LibraryMethods.CONFIG: {
                 return getLibraryConfig().dematerialize();
+            }
+            case LibraryMethods.CHECK_AVAILABILITY: {
+                return ok.putOk(isAvailable()).get();
             }
             default: {
                 return callCustom(method, arg, extras);

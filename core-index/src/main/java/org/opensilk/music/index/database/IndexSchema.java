@@ -44,6 +44,7 @@ public class IndexSchema {
             String NUMBER_OF_TRACKS = "number_of_tracks";
             String SUMMARY = "summary";
             String MBID = "mbid";
+            String AUTHORITY = "authority";
         }
 
         interface Album extends BaseColumns {
@@ -56,6 +57,7 @@ public class IndexSchema {
             String TRACK_COUNT = "track_count";
             String SUMMARY = "summary";
             String MBID = "mbid";
+            String AUTHORITY = "authority";
         }
 
         interface Genre extends BaseColumns {
@@ -65,12 +67,14 @@ public class IndexSchema {
             String NUMBER_OF_ARTISTS = "number_of_artists";
             String NUMBER_OF_ALBUMS = "number_of_albums";
             String NUMBER_OF_TRACKS = "number_of_tracks";
+            String AUTHORITY = "authority";
         }
 
         interface Track extends BaseColumns {
             String TABLE = "track_info";
             String URI = "uri";
             String PARENT_URI = "parent_uri";
+            String AUTHORITY = "authority";
             String TITLE = "name";
             String TRACK_KEY = "track_key";
             String ARTIST = "artist";
@@ -121,6 +125,7 @@ public class IndexSchema {
             String ARTIST_BIO_SUMMARY = "artist_bio_summary";
             String ARTIST_BIO_DATE_MOD = "artist_bio_date_modified";
             String ARTIST_MBID = "artist_mbid";
+            String AUTHORITY = "authority";
         }
 
         interface Album extends BaseColumns {
@@ -130,6 +135,7 @@ public class IndexSchema {
             String ALBUM_BIO_SUMMARY = "album_bio_summary";
             String ALBUM_BIO_DATE_MOD = "album_bio_date_modified";
             String ALBUM_MBID = "album_mbid";
+            String AUTHORITY = "authority";
             String ALBUM_ARTIST_ID = "album_artist_id";
         }
 
@@ -137,6 +143,7 @@ public class IndexSchema {
             String TABLE = "genre_meta";
             String GENRE_NAME = "genre_name";
             String GENRE_KEY = "genre_key";
+            String AUTHORITY = "authority";
         }
 
         interface Track extends BaseColumns {

@@ -163,11 +163,22 @@ public class IndexDatabaseImpl implements IndexDatabase {
     }
 
     @Override
-    public List<Artist> getArtists(String sortOrder) {
+    public List<Artist> getArtists(String sortOrder, String[] authorities) {
         List<Artist> lst = new ArrayList<>();
         Cursor c = null;
         try {
-            c = query(IndexSchema.Info.Artist.TABLE, artists_cols, null, null, null, null, sortOrder);
+            String sel = null;
+            String[] selArgs = null;
+            if (authorities != null && authorities.length > 0) {
+                StringBuilder sb = new StringBuilder("authority IN (").append("?");
+                for (int ii=1; ii<authorities.length; ii++) {
+                    sb.append(",?");
+                }
+                sb.append(")");
+                sel = sb.toString();
+                selArgs = authorities;
+            }
+            c = query(IndexSchema.Info.Artist.TABLE, artists_cols, sel, selArgs, null, null, sortOrder);
             if (c != null && c.moveToFirst()) {
                 final Uri parentUri = IndexUris.artists(indexAuthority);
                 do {
@@ -181,11 +192,22 @@ public class IndexDatabaseImpl implements IndexDatabase {
     }
 
     @Override
-    public List<Artist> getAlbumArtists(String sortOrder) {
+    public List<Artist> getAlbumArtists(String sortOrder, String[] authorities) {
         List<Artist> lst = new ArrayList<>();
         Cursor c = null;
         try {
-            c = query(IndexSchema.Info.Artist.ALBUM_ARSTIST_TABLE, artists_cols, null, null, null, null, sortOrder);
+            String sel = null;
+            String[] selArgs = null;
+            if (authorities != null && authorities.length > 0) {
+                StringBuilder sb = new StringBuilder("authority IN (").append("?");
+                for (int ii=1; ii<authorities.length; ii++) {
+                    sb.append(",?");
+                }
+                sb.append(")");
+                sel = sb.toString();
+                selArgs = authorities;
+            }
+            c = query(IndexSchema.Info.Artist.ALBUM_ARSTIST_TABLE, artists_cols, sel, selArgs, null, null, sortOrder);
             if (c != null && c.moveToFirst()) {
                 final Uri parentUri = IndexUris.albumArtists(indexAuthority);
                 do {
@@ -362,11 +384,22 @@ public class IndexDatabaseImpl implements IndexDatabase {
     }
 
     @Override
-    public List<Album> getAlbums(String sortOrder) {
+    public List<Album> getAlbums(String sortOrder, String[] authorities) {
         List<Album> lst = new ArrayList<>();
         Cursor c = null;
         try {
-            c = query(IndexSchema.Info.Album.TABLE, albums_cols, null, null, null, null, sortOrder);
+            String sel = null;
+            String[] selArgs = null;
+            if (authorities != null && authorities.length > 0) {
+                StringBuilder sb = new StringBuilder("authority IN (").append("?");
+                for (int ii=1; ii<authorities.length; ii++) {
+                    sb.append(",?");
+                }
+                sb.append(")");
+                sel = sb.toString();
+                selArgs = authorities;
+            }
+            c = query(IndexSchema.Info.Album.TABLE, albums_cols, sel, selArgs, null, null, sortOrder);
             if (c != null && c.moveToFirst()) {
                 final Uri parentUri = IndexUris.albums(indexAuthority);
                 do {
@@ -520,12 +553,23 @@ public class IndexDatabaseImpl implements IndexDatabase {
     };
 
     @Override
-    public List<Genre> getGenres(String sortOrder) {
+    public List<Genre> getGenres(String sortOrder, String[] authorities) {
         List<Genre> lst = new ArrayList<>();
         Cursor c = null;
         Cursor c2 = null;
         try {
-            c = query(IndexSchema.Info.Genre.TABLE, genres_cols, null, null, null, null, sortOrder);
+            String sel = null;
+            String[] selArgs = null;
+            if (authorities != null && authorities.length > 0) {
+                StringBuilder sb = new StringBuilder("authority IN (").append("?");
+                for (int ii=1; ii<authorities.length; ii++) {
+                    sb.append(",?");
+                }
+                sb.append(")");
+                sel = sb.toString();
+                selArgs = authorities;
+            }
+            c = query(IndexSchema.Info.Genre.TABLE, genres_cols, sel, selArgs, null, null, sortOrder);
             c2 = query(IndexSchema.Misc.GenreAlbumMap.TABLE, album_map_cols, null, null, null, null, null);
             if (c != null && c.moveToFirst()) {
                 final Uri parentUri = IndexUris.genres(indexAuthority);
@@ -871,16 +915,22 @@ public class IndexDatabaseImpl implements IndexDatabase {
     }
 
     @Override
-    public List<Track> getTracks(String sortOrder) {
-        return getTracks(sortOrder, false);
-    }
-
-    @Override
-    public List<Track> getTracks(String sortOrder, boolean excludeOrphaned) {
+    public List<Track> getTracks(String sortOrder, String[] authorities) {
         List<Track> lst = new ArrayList<>();
         Cursor c = null;
         try {
-            c = query(IndexSchema.Info.Track.TABLE, tracks_cols, null, null, null, null, sortOrder);
+            String sel = null;
+            String[] selArgs = null;
+            if (authorities != null && authorities.length > 0) {
+                StringBuilder sb = new StringBuilder("authority IN (").append("?");
+                for (int ii=1; ii<authorities.length; ii++) {
+                    sb.append(",?");
+                }
+                sb.append(")");
+                sel = sb.toString();
+                selArgs = authorities;
+            }
+            c = query(IndexSchema.Info.Track.TABLE, tracks_cols, sel, selArgs, null, null, sortOrder);
             if (c != null && c.moveToFirst()) {
                 do {
                     lst.add(buildTrack(c));
@@ -1240,6 +1290,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
         return -1;
     }
 
+    //TODO this is ridiculously inefficient and soooo slow
     @Override
     public long insertTrack(Track track, Metadata metadata) {
         ContentValues cv = new ContentValues(10);
@@ -1251,23 +1302,28 @@ public class IndexDatabaseImpl implements IndexDatabase {
         }
         cv.put(IndexSchema.Meta.Track.TRACK_ID, trackId);
 
-        long artistId = getArtistIdForName(metadata.getString(Metadata.KEY_ARTIST_NAME));
+        final String authority = track.getUri().getAuthority();
+
+        long artistId = getArtistIdForName(
+                coalesce(metadata.getString(Metadata.KEY_ARTIST_NAME), track.getArtistName()), authority);
         if (artistId > 0) {
             cv.put(IndexSchema.Meta.Track.ARTIST_ID, artistId);
         }
 
-        long albumId = getAlbumIdForName(metadata.getString(Metadata.KEY_ALBUM_ARTIST_NAME),
-                metadata.getString(Metadata.KEY_ALBUM_NAME));
+        long albumId = getAlbumIdForName(
+                coalesce(metadata.getString(Metadata.KEY_ALBUM_ARTIST_NAME), track.getAlbumArtistName()),
+                coalesce(metadata.getString(Metadata.KEY_ALBUM_NAME), track.getAlbumName()), authority);
         if (albumId > 0) {
             cv.put(IndexSchema.Meta.Track.ALBUM_ID, albumId);
         }
 
-        long genreId = getGenreIdForName(metadata.getString(Metadata.KEY_GENRE_NAME));
+        long genreId = getGenreIdForName(
+                coalesce(metadata.getString(Metadata.KEY_GENRE_NAME), track.getGenre()), authority);
         if (genreId > 0) {
             cv.put(IndexSchema.Meta.Track.GENRE_ID, genreId);
         }
 
-        String trackName = metadata.getString(Metadata.KEY_TRACK_NAME);
+        String trackName = coalesce(metadata.getString(Metadata.KEY_TRACK_NAME), track.getName());
         if (!StringUtils.isEmpty(trackName)) {
             cv.put(IndexSchema.Meta.Track.TRACK_NAME, trackName);
             cv.put(IndexSchema.Meta.Track.TRACK_KEY, keyFor(trackName));
@@ -1400,15 +1456,17 @@ public class IndexDatabaseImpl implements IndexDatabase {
     }
 
     static final String checkAlbumSel = IndexSchema.Info.Album.ALBUM_KEY
-            + "=? AND " + IndexSchema.Info.Album.ARTIST_KEY + "=?";
+            + "=? AND " + IndexSchema.Info.Album.ARTIST_KEY + "=? AND " +
+            IndexSchema.Info.Album.AUTHORITY + "=?";
 
-    public long getAlbumIdForName(String albumArtist, String album) {
+    long getAlbumIdForName(String albumArtist, String album, String authority) {
         if (StringUtils.isEmpty(albumArtist) || StringUtils.isEmpty(album)) {
             return -1;
         }
         synchronized (mAlbumIdsCache) {
-            if (mAlbumIdsCache.containsKey(albumArtist+album)) {
-                return mAlbumIdsCache.get(albumArtist+album);
+            String key = albumArtist+album+authority;
+            if (mAlbumIdsCache.containsKey(key)) {
+                return mAlbumIdsCache.get(key);
             }
         }
         albumArtist = StringUtils.trim(albumArtist);
@@ -1416,12 +1474,12 @@ public class IndexDatabaseImpl implements IndexDatabase {
         long id = -1;
         Cursor c = null;
         try {
-            final String[] selArgs = new String[]{keyFor(album), keyFor(albumArtist)};
+            final String[] selArgs = new String[]{keyFor(album), keyFor(albumArtist), authority};
             c = query(IndexSchema.Info.Album.TABLE, idCols, checkAlbumSel, selArgs, null, null, null);
             if (c != null && c.moveToFirst()) {
                 id = c.getLong(0);
             } else {
-                long artistId = getArtistIdForName(albumArtist);
+                long artistId = getArtistIdForName(albumArtist, authority);
                 //try to populate from lastfm info
                 Metadata albumMeta = mLastFM.lookupAlbumInfo(albumArtist, album);
                 if (albumMeta == null) {
@@ -1431,11 +1489,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
                             .putString(Metadata.KEY_ARTIST_NAME, albumArtist)
                             .build();
                 }
-                id = insertAlbum(albumMeta, artistId);
-                if (id > 0) {
-                    mAppContext.getContentResolver().notifyChange(
-                            IndexUris.album(indexAuthority, String.valueOf(id)), null);
-                }
+                id = insertAlbum(albumMeta, artistId, authority);
             }
             if (id > 0) {
                 synchronized (mAlbumIdsCache) {
@@ -1448,30 +1502,29 @@ public class IndexDatabaseImpl implements IndexDatabase {
         }
     }
 
-    long insertAlbum(Metadata meta, long albumArtistId) {
+    long insertAlbum(Metadata meta, long albumArtistId, String authority) {
         ContentValues cv = new ContentValues(10);
         cv.put(IndexSchema.Meta.Album.ALBUM_NAME, meta.getString(Metadata.KEY_ALBUM_NAME));
         cv.put(IndexSchema.Meta.Album.ALBUM_KEY, keyFor(meta.getString(Metadata.KEY_ALBUM_NAME)));
         cv.put(IndexSchema.Meta.Album.ALBUM_MBID, meta.getString(Metadata.KEY_ALBUM_MBID));
         cv.put(IndexSchema.Meta.Album.ALBUM_ARTIST_ID, albumArtistId);
         String bioSummary = meta.getString(Metadata.KEY_ALBUM_SUMMARY);
-        String bioContent = meta.getString(Metadata.KEY_ALBUM_BIO);
+//        String bioContent = meta.getString(Metadata.KEY_ALBUM_BIO);
         long lastMod = meta.getLong(Metadata.KEY_LAST_MODIFIED);
         if (!StringUtils.isEmpty(bioSummary)) {
             cv.put(IndexSchema.Meta.Album.ALBUM_BIO_SUMMARY, bioSummary);
             cv.put(IndexSchema.Meta.Album.ALBUM_BIO_DATE_MOD, lastMod > 0 ? lastMod : System.currentTimeMillis());
         }
+        cv.put(IndexSchema.Meta.Album.AUTHORITY, authority);
         Timber.v("Inserting album %s", cv.toString());
         long id = insert(IndexSchema.Meta.Album.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
-//        if (id > 0) {
-//            mAppContext.getContentResolver().notifyChange(IndexUris.albums(indexAuthority), null);
-//        }
         return id;
     }
 
-    static final String checkArtistSel = IndexSchema.Info.Artist.ARTIST_KEY + "=?";
+    static final String checkArtistSel = IndexSchema.Info.Artist.ARTIST_KEY + "=? AND " +
+            IndexSchema.Info.Artist.AUTHORITY + "=?";
 
-    public long getArtistIdForName(String artist) {
+    long getArtistIdForName(String artist, String authority) {
         if (StringUtils.isEmpty(artist)) {
             return -1;
         }
@@ -1484,7 +1537,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
         long id = -1;
         Cursor c = null;
         try {
-            final String[] selArgs = new String[]{keyFor(artist)};
+            final String[] selArgs = new String[]{keyFor(artist), authority};
             c = query(IndexSchema.Info.Artist.TABLE, idCols, checkArtistSel, selArgs, null, null, null);
             if (c != null && c.moveToFirst()) {
                 id = c.getLong(0);
@@ -1506,11 +1559,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
                                 .build();
                     }
                 }
-                id = insertArtist(artistMeta);
-                if (id > 0) {
-                    mAppContext.getContentResolver().notifyChange(
-                            IndexUris.artist(indexAuthority, String.valueOf(id)), null);
-                }
+                id = insertArtist(artistMeta, authority);
             }
             if (id > 0) {
                 synchronized (mArtistIdsCache) {
@@ -1523,30 +1572,28 @@ public class IndexDatabaseImpl implements IndexDatabase {
         }
     }
 
-    long insertArtist(Metadata meta) {
+    long insertArtist(Metadata meta, String authority) {
         ContentValues cv = new ContentValues(10);
         cv.put(IndexSchema.Meta.Artist.ARTIST_NAME, meta.getString(Metadata.KEY_ARTIST_NAME));
         cv.put(IndexSchema.Meta.Artist.ARTIST_KEY, keyFor(meta.getString(Metadata.KEY_ARTIST_NAME)));
         cv.put(IndexSchema.Meta.Artist.ARTIST_MBID, meta.getString(Metadata.KEY_ARTIST_MBID));
         String bioSummary = meta.getString(Metadata.KEY_ARTIST_SUMMARY);
-        String bioContent = meta.getString(Metadata.KEY_ARTIST_BIO);
+//        String bioContent = meta.getString(Metadata.KEY_ARTIST_BIO);
         long lastMod = meta.getLong(Metadata.KEY_LAST_MODIFIED);
         if (!StringUtils.isEmpty(bioSummary)) {
             cv.put(IndexSchema.Meta.Artist.ARTIST_BIO_SUMMARY, bioSummary);
             cv.put(IndexSchema.Meta.Artist.ARTIST_BIO_DATE_MOD, lastMod > 0 ? lastMod : System.currentTimeMillis());
         }
+        cv.put(IndexSchema.Meta.Artist.AUTHORITY, authority);
         Timber.d("Inserting Artist %s", cv.toString());
         long id = insert(IndexSchema.Meta.Artist.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
-//        if (id > 0) {
-//            mAppContext.getContentResolver().notifyChange(IndexUris.artists(indexAuthority), null);
-//            mAppContext.getContentResolver().notifyChange(IndexUris.albumArtists(indexAuthority), null);
-//        }
         return id;
     }
 
-    static final String checkGenreSel = IndexSchema.Info.Genre.GENRE_KEY + "=?";
+    static final String checkGenreSel = IndexSchema.Info.Genre.GENRE_KEY + "=? AND " +
+            IndexSchema.Info.Genre.AUTHORITY + "=?";
 
-    public long getGenreIdForName(String genre) {
+    public long getGenreIdForName(String genre, String authority) {
         if (StringUtils.isEmpty(genre)) {
             return -1;
         }
@@ -1558,7 +1605,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
         long id = -1;
         Cursor c = null;
         try {
-            final String[] selArgs = new String[]{keyFor(genre)};
+            final String[] selArgs = new String[]{keyFor(genre), authority};
             c = query(IndexSchema.Info.Genre.TABLE, idCols, checkGenreSel, selArgs, null, null, null);
             if (c != null && c.moveToFirst()) {
                 id = c.getLong(0);
@@ -1567,7 +1614,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
                 Metadata genreMeta = Metadata.builder()
                         .putString(Metadata.KEY_GENRE_NAME, genre)
                         .build();
-                id = insertGenre(genreMeta);
+                id = insertGenre(genreMeta, authority);
                 if (id > 0) {
                     mAppContext.getContentResolver().notifyChange(
                             IndexUris.genre(indexAuthority, String.valueOf(id)), null);
@@ -1584,16 +1631,14 @@ public class IndexDatabaseImpl implements IndexDatabase {
         }
     }
 
-    long insertGenre(Metadata meta) {
+    long insertGenre(Metadata meta, String authority) {
         ContentValues cv = new ContentValues(2);
         String name = meta.getString(Metadata.KEY_GENRE_NAME);
         cv.put(IndexSchema.Meta.Genre.GENRE_NAME, name);
         cv.put(IndexSchema.Meta.Genre.GENRE_KEY, keyFor(name));
+        cv.put(IndexSchema.Meta.Genre.AUTHORITY, authority);
         Timber.d("Inserting Genre %s", cv.toString());
         long id = insert(IndexSchema.Meta.Genre.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
-//        if (id > 0) {
-//            mAppContext.getContentResolver().notifyChange(IndexUris.genres(indexAuthority), null);
-//        }
         return id;
     }
 
@@ -1603,9 +1648,9 @@ public class IndexDatabaseImpl implements IndexDatabase {
         cv.put(IndexSchema.Meta.Playlist.DATE_ADDED, System.currentTimeMillis());
         cv.put(IndexSchema.Meta.Playlist.DATE_MODIFIED, System.currentTimeMillis());
         long id = insert(IndexSchema.Meta.Playlist.TABLE, null, cv, SQLiteDatabase.CONFLICT_NONE);
-//        if (id > 0) {
-//            mAppContext.getContentResolver().notifyChange(IndexUris.playlists(indexAuthority), null);
-//        }
+        if (id > 0) {
+            mAppContext.getContentResolver().notifyChange(IndexUris.playlists(indexAuthority), null);
+        }
         return id;
     }
 
@@ -2086,6 +2131,10 @@ public class IndexDatabaseImpl implements IndexDatabase {
         cv.put(IndexSchema.PlaybackSettings.KEY, IndexSchema.PlaybackSettings.BROADCAST_META);
         cv.put(IndexSchema.PlaybackSettings.INT_VALUE, broadcast ? 1 : 0);
         insert(IndexSchema.PlaybackSettings.TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
+    }
+
+    static String coalesce(String string1, String string2) {
+        return !StringUtils.isEmpty(string1) ? string1 : string2;
     }
 
     public static String getStringOrNull(Cursor c, int idx) {

@@ -22,6 +22,8 @@ import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -70,6 +72,7 @@ public class DriveLibraryProvider extends LibraryProvider {
 
     @Inject @Named("driveLibraryAuthority") String mAuthority;
     @Inject DriveLibraryDB mDB;
+    @Inject ConnectivityManager mConnectivityManager;
 
     DriveLibraryProviderComponent mComponent;
     UriMatcher mUriMatcher;
@@ -98,6 +101,12 @@ public class DriveLibraryProvider extends LibraryProvider {
     @Override
     protected String getAuthority() {
         return mAuthority;
+    }
+
+    @Override
+    protected boolean isAvailable() {
+        NetworkInfo networkInfo = mConnectivityManager.getActiveNetworkInfo();
+        return networkInfo.isConnectedOrConnecting();
     }
 
     @Override

@@ -26,13 +26,16 @@ import android.support.v7.widget.PopupMenu;
 import android.view.MenuItem;
 
 import org.opensilk.bundleable.Bundleable;
+import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.SubScreenScope;
 import org.opensilk.common.core.rx.RxLoader;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryProviderInfo;
 import org.opensilk.music.library.client.BundleableLoader;
+import org.opensilk.music.library.client.LibraryClient;
 import org.opensilk.music.library.internal.LibraryException;
+import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.model.Container;
@@ -60,6 +63,7 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
     final LibraryScreenPresenter parentPresenter;
     final BundleableLoader loader;
     final Uri rootUri;
+    final Context appContext;
 
     final CompositeSubscription subscriptions = new CompositeSubscription();
     final ArrayList<Container> rootsList = new ArrayList<>();
@@ -71,12 +75,14 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
     public LibraryRootScreenPresenter(
             LibraryProviderInfo providerInfo,
             LibraryScreenPresenter parentPresenter,
-            BundleableLoader loader
+            BundleableLoader loader,
+            @ForApplication Context appContext
     ) {
         this.providerInfo = providerInfo;
         this.parentPresenter = parentPresenter;
         this.loader = loader;
         this.rootUri = LibraryUris.rootUri(providerInfo.getAuthority());
+        this.appContext = appContext;
     }
 
     @Override
@@ -107,8 +113,8 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
             getView().addRoots(rootsList, clearAdapterOnload);
             clearAdapterOnload = false;
         } else if (!isLoading) {
-            subscribeRoots();
             getView().setloading();
+            subscribeRoots();
         }//else isLoading
     }
 
@@ -157,6 +163,16 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
     }
 
     void subscribeRoots() {
+        LibraryClient libraryClient = LibraryClient.create(appContext, rootUri);
+        Bundle reply = libraryClient.makeCall(LibraryMethods.CHECK_AVAILABILITY, null);
+        if (!LibraryExtras.getOk(reply)) {
+            rootsList.clear();
+            isLoading = false;
+            if (hasView()) {
+                getView().setUnavailable();
+            }
+            return;
+        }
         isLoading = true;
         subscriptions.add(loader.getListObservable()
                 .map(new Func1<List<Bundleable>, List<Container>>() {
