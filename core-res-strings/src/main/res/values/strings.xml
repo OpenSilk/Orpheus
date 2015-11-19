@@ -102,6 +102,8 @@
     <string name="menu_manage_playlists">Manage playlists</string>
     <string name="menu_open_folder">Open folder</string>
     <string name="menu_rescan_folder">Rescan</string>
+    <string name="menu_add_to_index">Add to index</string>
+    <string name="menu_remove_from_index">Remove from index</string>
 
     <!-- Content descriptions -->
     <string name="accessibility_play">Play</string>
