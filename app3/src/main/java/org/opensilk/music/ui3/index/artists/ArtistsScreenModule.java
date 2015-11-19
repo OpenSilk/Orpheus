@@ -136,9 +136,9 @@ public class ArtistsScreenModule {
 
             @Override
             public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
-                List<Bundleable> list = presenter.getSelectedItems();
+                List<Model> list = presenter.getSelectedItems();
                 List<Uri> uris = new ArrayList<>(list.size());
-                for (Bundleable b : list) {
+                for (Model b : list) {
                     uris.add(((Artist)b).getTracksUri());
                 }
                 switch (menuItem.getItemId()) {

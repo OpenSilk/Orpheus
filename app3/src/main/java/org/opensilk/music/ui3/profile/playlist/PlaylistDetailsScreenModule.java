@@ -24,14 +24,13 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.R;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.model.ArtInfo;
-import org.opensilk.music.model.Track;
+import org.opensilk.music.model.Model;
 import org.opensilk.music.model.sort.TrackSortOrder;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
@@ -142,10 +141,10 @@ public class PlaylistDetailsScreenModule {
             public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.playlist_save: {
-                        List<Bundleable> tracks = presenter.getItems();
+                        List<Model> tracks = presenter.getItems();
                         List<Uri> list = new ArrayList<>(tracks.size());
-                        for (Bundleable b : tracks) {
-                            list.add(((Track)b).getUri());
+                        for (Model b : tracks) {
+                            list.add(b.getUri());
                         }
                         presenter.getIndexClient().updatePlaylist(screen.playlist.getUri(), list);
                         return true;

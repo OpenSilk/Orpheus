@@ -232,22 +232,31 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView>
         }
     }
 
-    public List<Bundleable> getItems() {
+    public List<Model> getItems() {
         if (hasView()) {
-            return getView().getAdapter().getItems();
+            List<Bundleable> bundleables = getView().getAdapter().getItems();
+            List<Model> models = new ArrayList<>(bundleables.size());
+            for (Bundleable b : bundleables) {
+                models.add((Model)b);
+            }
+            return models;
         }
         return Collections.emptyList();
     }
 
-    public List<Bundleable> getSelectedItems() {
+    public List<Model> getSelectedItems() {
         if (hasView()) {
-            return getView().getAdapter().getSelectedItems();
+            List<Bundleable> bundleables = getView().getAdapter().getSelectedItems();
+            List<Model> models = new ArrayList<>(bundleables.size());
+            for (Bundleable b : bundleables) {
+                models.add((Model) b);
+            }
+            return models;
         }
         return Collections.emptyList();
     }
 
     public void setWantsGrid(boolean yes) {
-
         wantGrid = yes;
     }
 

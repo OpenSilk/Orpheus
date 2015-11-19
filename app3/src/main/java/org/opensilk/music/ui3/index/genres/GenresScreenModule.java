@@ -23,7 +23,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.AppPreferences;
@@ -135,9 +134,9 @@ public class GenresScreenModule {
 
             @Override
             public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
-                List<Bundleable> list = presenter.getSelectedItems();
+                List<Model> list = presenter.getSelectedItems();
                 List<Uri> uris = new ArrayList<>(list.size());
-                for (Bundleable b : list) {
+                for (Model b : list) {
                     uris.add(((Genre)b).getTracksUri());
                 }
                 switch (menuItem.getItemId()) {

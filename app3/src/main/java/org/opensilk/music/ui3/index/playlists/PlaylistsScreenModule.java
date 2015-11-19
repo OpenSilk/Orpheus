@@ -23,7 +23,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
@@ -138,9 +137,9 @@ public class PlaylistsScreenModule {
 
             @Override
             public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
-                List<Bundleable> list = presenter.getSelectedItems();
+                List<Model> list = presenter.getSelectedItems();
                 List<Uri> uris = new ArrayList<>(list.size());
-                for (Bundleable b : list) {
+                for (Model b : list) {
                     uris.add(((Playlist)b).getTracksUri());
                 }
                 switch (menuItem.getItemId()) {
@@ -158,8 +157,8 @@ public class PlaylistsScreenModule {
                     }
                     case R.id.delete: {
                         List<Uri> plsts = new ArrayList<>(presenter.getSelectedItems().size());
-                        for (Bundleable m : presenter.getSelectedItems()) {
-                            plsts.add(((Playlist) m).getUri());
+                        for (Model m : presenter.getSelectedItems()) {
+                            plsts.add(m.getUri());
                         }
                         presenter.getIndexClient().removePlaylists(plsts);
                         return true;

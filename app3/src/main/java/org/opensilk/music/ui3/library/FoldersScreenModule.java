@@ -23,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.R;
@@ -37,6 +38,8 @@ import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
 import org.opensilk.music.ui3.common.PlayAllItemClickListener;
+
+import java.util.List;
 
 import javax.inject.Named;
 
@@ -122,12 +125,23 @@ public class FoldersScreenModule {
 
             @Override
             public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
-                return false;
+                for (Model b : presenter.getSelectedItems()) {
+                }
+                inflateMenus(menuInflater, menu,
+                        R.menu.delete
+                        );
+                return true;
             }
 
             @Override
             public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
-                return false;
+                switch (menuItem.getItemId()) {
+                    case R.id.delete:
+                        return true;
+                    default:
+                        return false;
+
+                }
             }
         };
     }

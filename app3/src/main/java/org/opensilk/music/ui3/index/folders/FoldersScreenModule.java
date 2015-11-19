@@ -36,6 +36,7 @@ import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.client.LibraryClient;
 import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryMethods;
+import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Model;
@@ -89,7 +90,7 @@ public class FoldersScreenModule {
         return new ItemClickListener() {
             @Override
             public void onItemClicked(BundleablePresenter presenter, Context context, Model item) {
-                LibraryClient client = LibraryClient.create(context, IndexUris.call(item.getUri().getAuthority()));
+                LibraryClient client = LibraryClient.create(context, LibraryUris.call(item.getUri().getAuthority()));
                 Bundle reply = client.makeCall(LibraryMethods.CONFIG, null);
                 if (reply != null) {
                     FoldersScreenFragment f = FoldersScreenFragment.ni(context,
@@ -136,7 +137,7 @@ public class FoldersScreenModule {
             public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.rescan_folder: {
-                        for (Bundleable b : presenter.getSelectedItems()) {
+                        for (Model b : presenter.getSelectedItems()) {
                             context.startService(new Intent(context, ScannerService.class)
                                     .setAction(ScannerService.ACTION_RESCAN)
                                     .putExtra(ScannerService.EXTRA_LIBRARY_EXTRAS,

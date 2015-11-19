@@ -18,26 +18,18 @@
 package org.opensilk.music.ui3.common;
 
 import android.app.Activity;
-import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.ContextWrapper;
-import android.database.Cursor;
 import android.net.Uri;
-import android.provider.BaseColumns;
-import android.provider.MediaStore;
-import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
-import android.widget.Toast;
 
-import org.opensilk.bundleable.Bundleable;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.UtilsArt;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.library.client.TypedBundleableLoader;
 import org.opensilk.music.model.ArtInfo;
+import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.sort.TrackSortOrder;
 
@@ -149,13 +141,13 @@ public class UtilsCommon {
         }
     }
 
-    public static List<Uri> filterTracks(List<Bundleable> adapterItems) {
+    public static List<Uri> filterTracks(List<Model> adapterItems) {
         if (adapterItems == null || adapterItems.isEmpty()) {
             return Collections.emptyList();
         }
 
         List<Uri> toPlay = new ArrayList<>(adapterItems.size());
-        for (Bundleable b : adapterItems) {
+        for (Model b : adapterItems) {
             if (b instanceof Track) {
                 toPlay.add(((Track) b).getUri());
             }

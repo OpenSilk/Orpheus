@@ -23,23 +23,17 @@ import android.view.Menu;
 import android.view.MenuInflater;
 
 import org.apache.commons.lang3.StringUtils;
-import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.AppPreferences;
-import org.opensilk.music.library.client.TypedBundleableLoader;
+import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Track;
-import org.opensilk.music.model.sort.TrackSortOrder;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.PlaylistManageActivity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.functions.Action2;
-import rx.functions.Func0;
 
 /**
  * Created by drew on 9/24/15.
@@ -116,9 +110,9 @@ public abstract class MenuHandlerImpl implements MenuHandler {
                 ActivityRequestCodes.PLAYLIST_ADD, null);
     }
 
-    public void addToPlaylistFromTracks(Context context, List<Bundleable> tracks) {
+    public void addToPlaylistFromTracks(Context context, List<Model> tracks) {
         List<Uri> uris = new ArrayList<>(tracks.size());
-        for (Bundleable track: tracks) {
+        for (Model track: tracks) {
             uris.add(((Track)track).getUri());
         }
         activityResultsController.startActivityForResult(
