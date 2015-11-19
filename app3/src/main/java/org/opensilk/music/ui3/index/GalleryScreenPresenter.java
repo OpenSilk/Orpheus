@@ -29,11 +29,13 @@ import org.opensilk.common.ui.mortar.ActionBarMenuHandler;
 import org.opensilk.common.ui.mortar.ActionModePresenter;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
+import org.opensilk.music.index.provider.IndexUris;
 
 import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import mortar.ViewPresenter;
 
@@ -46,6 +48,7 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
     final AppPreferences preferences;
     final GalleryScreen screen;
     final ActionModePresenter actionModePresenter;
+    final String indexAuthority;
 
     DelegateActionHandler delegateActionHandler;
 
@@ -53,11 +56,13 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
     public GalleryScreenPresenter(
             AppPreferences preferences,
             GalleryScreen screen,
-            ActionModePresenter actionModePresenter
+            ActionModePresenter actionModePresenter,
+            @Named("IndexProviderAuthority") String indexAuthority
     ) {
         this.preferences = preferences;
         this.screen = screen;
         this.actionModePresenter = actionModePresenter;
+        this.indexAuthority = indexAuthority;
     }
 
     @Override
@@ -111,12 +116,22 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
 
         @Override
         public boolean onBuildMenu(MenuInflater menuInflater, Menu menu) {
-            return wrapped != null && wrapped.onBuildMenu(menuInflater, menu);
+            menuInflater.inflate(R.menu.refresh, menu);
+            if (wrapped != null) {
+                wrapped.onBuildMenu(menuInflater, menu);
+            }
+            return true;
         }
 
         @Override
         public boolean onMenuItemClicked(Context context, MenuItem menuItem) {
-            return wrapped != null && wrapped.onMenuItemClicked(context, menuItem);
+            switch (menuItem.getItemId()) {
+                case R.id.refresh:
+                    context.getContentResolver().notifyChange(IndexUris.call(indexAuthority), null);
+                    return true;
+                default:
+                    return wrapped != null && wrapped.onMenuItemClicked(context, menuItem);
+            }
         }
     }
 
