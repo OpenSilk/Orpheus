@@ -68,6 +68,11 @@ public class BioContent implements Model {
         return name;
     }
 
+    @Override
+    public long getFlags() {
+        return 0;
+    }
+
     public String getContent() {
         return content;
     }

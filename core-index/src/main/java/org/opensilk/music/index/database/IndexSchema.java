@@ -95,6 +95,7 @@ public class IndexSchema {
             String RES_MIME_TYPE = "res_mime_type";
             String RES_BITRATE = "res_bitrate";
             String RES_DURATION = "res_duration";
+            String RES_LAST_MOD = "res_last_modified";
             String DATE_ADDED = "date_added";
         }
 

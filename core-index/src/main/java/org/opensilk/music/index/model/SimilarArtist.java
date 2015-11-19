@@ -66,6 +66,11 @@ public class SimilarArtist implements Model {
         return name;
     }
 
+    @Override
+    public long getFlags() {
+        return 0;
+    }
+
     public String getImageUrl() {
         return imageUrl;
     }

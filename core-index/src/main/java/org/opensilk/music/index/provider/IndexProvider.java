@@ -74,6 +74,7 @@ import rx.functions.Func0;
 import rx.functions.Func1;
 import rx.functions.Func2;
 import rx.schedulers.Schedulers;
+import timber.log.Timber;
 
 import static org.opensilk.music.index.provider.IndexUris.M_ALBUMS;
 import static org.opensilk.music.index.provider.IndexUris.M_ALBUM_ARTISTS;
@@ -349,10 +350,15 @@ public class IndexProvider extends LibraryProvider {
                                 new Func1<LibraryClient, Observable<String>>() {
                                     @Override
                                     public Observable<String> call(LibraryClient libraryClient) {
-                                        Bundle reply = libraryClient.makeCall(LibraryMethods.CHECK_AVAILABILITY, null);
-                                        if (LibraryExtras.getOk(reply)) {
-                                            return Observable.just(libraryProviderInfo.getAuthority());
-                                        } else {
+                                        try {
+                                            Bundle reply = libraryClient.makeCall(LibraryMethods.CHECK_AVAILABILITY, null);
+                                            if (LibraryExtras.getOk(reply)) {
+                                                return Observable.just(libraryProviderInfo.getAuthority());
+                                            } else {
+                                                return Observable.empty();
+                                            }
+                                        } catch (Exception e) {
+                                            Timber.e(e, "checkAvailability %s", libraryProviderInfo.getAuthority());
                                             return Observable.empty();
                                         }
                                     }

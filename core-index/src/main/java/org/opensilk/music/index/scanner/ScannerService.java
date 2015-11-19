@@ -274,14 +274,22 @@ public class ScannerService extends MortarIntentService {
     }
 
     void removeDifference(TreeNode currentTree, TreeNode newTree) {
+        if (!currentTree.self.equals(newTree.self)) {
+            Timber.e("Mismatched trees not continuing %s != %s", currentTree.self, newTree.self);
+            return;
+        }
         //first remove all the tracks not in the current
         for (Track currentTrack : currentTree.tracks) {
             if (currentTrack == null) {
-                Timber.e("Null track in collection");
+                Timber.e("Null track in currentTree");
                 continue;
             }
             boolean found = false;
             for (Track newTrack : newTree.tracks) {
+                if (newTrack == null) {
+                    Timber.e("Null track in newTree");
+                    continue;
+                }
                 if (currentTrack.getUri().equals(newTrack.getUri())
                         && currentTrack.getParentUri().equals(newTrack.getParentUri())) {
                     found = true;

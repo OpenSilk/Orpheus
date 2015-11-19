@@ -823,7 +823,8 @@ public class IndexDatabaseImpl implements IndexDatabase {
             IndexSchema.Info.Track.RES_MIME_TYPE,
             IndexSchema.Info.Track.RES_BITRATE,
             IndexSchema.Info.Track.RES_DURATION, //20
-            IndexSchema.Info.Track.ARTWORK_URI
+            IndexSchema.Info.Track.ARTWORK_URI,
+            IndexSchema.Info.Track.RES_LAST_MOD,
     };
     static final String[] playlistTrackCols = Arrays.copyOf(tracks_cols, tracks_cols.length);
     static {
@@ -906,11 +907,15 @@ public class IndexDatabaseImpl implements IndexDatabase {
         if (dur > 0) {
             rob.setDuration(dur);
         }
-        bob.addRes(rob.build());
         String artUri = getStringOrNull(c, 21);
         if (artUri != null) {
             bob.setArtworkUri(Uri.parse(artUri));
         }
+        long lastMod = getLongOrNeg(c, 22);
+        if (lastMod > 0) {
+            rob.setLastMod(lastMod);
+        }
+        bob.addRes(rob.build());
         return bob.build();
     }
 
@@ -1207,7 +1212,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
             IndexSchema.Containers.URI,
             IndexSchema.Containers.PARENT_URI,
     };
-
+    
     @Override
     public TreeNode buildTree(Uri uri, Uri parentUri) {
         final TreeNode tree = new TreeNode(uri, parentUri);
@@ -1219,23 +1224,29 @@ public class IndexDatabaseImpl implements IndexDatabase {
         addTracksUnderContainer(String.valueOf(containerId), tree);
         //find our direct decendents
         String[] containers = findChildrenUnder(uri, false);
-        if (containers == null) {
+        if (containers == null || containers.length == 0) {
             return tree;
         }
+        StringBuilder sb = new StringBuilder(BaseColumns._ID).append(" IN (?");
+        for (int ii=1; ii<containers.length; ii++) {
+            sb.append(",?");
+        }
+        String sel = sb.append(")").toString();
+        List<Uri> childrenUris = new ArrayList<>(containers.length);
         Cursor c = null;
-        final String[] selArgs = new String[1];
-        for (String id : containers) {
-            selArgs[0] = id;
+        try {
             c = query(IndexSchema.Containers.TABLE, buildTreeContainerCols,
-                    idSelection, selArgs, null, null, null);
+                    sel, containers, null, null, null);
             if (c != null && c.moveToFirst()) {
-                TreeNode childTree = new TreeNode(
-                        Uri.parse(c.getString(0)),
-                        Uri.parse(c.getString(1)));
-                addTracksUnderContainer(id, childTree);
-                tree.children.add(childTree);
+                do {
+                    childrenUris.add(Uri.parse(c.getString(0)));
+                } while (c.moveToNext());
             }
+        } finally {
             closeCursor(c);
+        }
+        for (Uri childUri : childrenUris) {
+            tree.children.add(buildTree(childUri, uri));
         }
         return tree;
     }
