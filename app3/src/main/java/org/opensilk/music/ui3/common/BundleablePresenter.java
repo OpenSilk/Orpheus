@@ -352,7 +352,11 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView>
     }
 
     public void onStartSelectionMode(BundleableRecyclerAdapter.OnSelectionModeEnded callback) {
-        actionMode = actionModePresenter.startActionMode(new ActionModeCallback(callback));
+        if (menuConfig.supportsActionMode()) {
+            actionMode = actionModePresenter.startActionMode(new ActionModeCallback(callback));
+        } else {
+            callback.onEndSelectionMode();
+        }
     }
 
     class ActionModeCallback implements ActionMode.Callback {
@@ -365,19 +369,15 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView>
         @Override
         @DebugLog
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            mode.setTitleOptionalHint(true);
-            boolean started = menuConfig.onBuildActionMenu(BundleablePresenter.this,
+            return menuConfig.onBuildActionMenu(BundleablePresenter.this,
                     mode.getMenuInflater(), menu);
-            if (!started) {
-                mode.finish();
-            }
-            return started;
         }
 
         @Override
         @DebugLog
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            return false;
+            return menuConfig.onRefreshActionMenu(BundleablePresenter.this,
+                    mode.getMenuInflater(), menu);
         }
 
         @Override

@@ -27,7 +27,9 @@ import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.R;
+import org.opensilk.music.index.client.IndexClient;
 import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Track;
@@ -125,18 +127,115 @@ public class FoldersScreenModule {
 
             @Override
             public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
-                for (Model b : presenter.getSelectedItems()) {
+                List<Model> models = presenter.getSelectedItems();
+                if (models.size() == 1) {
+                    Model model = models.get(0);
+                    if (model instanceof Container) {
+                        if (presenter.getIndexClient().isIndexed((Container)model)) {
+                            inflateMenu(R.menu.remove_from_index, menuInflater, menu);
+                        } else {
+                            inflateMenu(R.menu.add_to_index, menuInflater, menu);
+                        }
+                    }
+                    if ((model.getFlags() & LibraryConfig.FLAG_SUPPORTS_DELETE) != 0) {
+                        inflateMenu(R.menu.delete, menuInflater, menu);
+                    }
+                    return true;
+                } else {
+                    return onRefreshActionMenu(presenter, menuInflater, menu);
                 }
-                inflateMenus(menuInflater, menu,
-                        R.menu.delete
-                        );
-                return true;
+            }
+
+            @Override
+            public boolean onRefreshActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
+                List<Model> models = presenter.getSelectedItems();
+                IndexClient indexClient = presenter.getIndexClient();
+                boolean changed = false;
+                MenuItem item = null;
+
+                boolean canAdd = true;
+                for (Model b : models) {
+                    if (b instanceof Container) {
+                        if (indexClient.isIndexed((Container)b)) {
+                            canAdd = false;
+                            break;
+                        }
+                    } else {
+                        canAdd = false;
+                        break;
+                    }
+                }
+                item = menu.findItem(R.id.add_to_index);
+                if (item == null && canAdd) {
+                    inflateMenu(R.menu.add_to_index, menuInflater, menu);
+                    changed = true;
+                } else if (item != null && !canAdd) {
+                    menu.removeItem(R.id.add_to_index);
+                    changed = true;
+                }
+
+                if (!canAdd) {
+                    boolean canRemove = true;
+                    for (Model b : models) {
+                        if (b instanceof Container) {
+                            if (!indexClient.isIndexed((Container)b)) {
+                                canRemove = false;
+                                break;
+                            }
+                        } else {
+                            canRemove = false;
+                            break;
+                        }
+                    }
+                    item = menu.findItem(R.id.remove_from_index);
+                    if (item == null && canRemove) {
+                        inflateMenu(R.menu.remove_from_index, menuInflater, menu);
+                        changed = true;
+                    } else if (item != null && !canRemove) {
+                        menu.removeItem(R.id.remove_from_index);
+                        changed = true;
+                    }
+                }
+
+                boolean candelete = true;
+                for (Model b : models) {
+                    if ((b.getFlags() & LibraryConfig.FLAG_SUPPORTS_DELETE) == 0) {
+                        candelete = false;
+                        break;
+                    }
+                }
+                item = menu.findItem(R.id.delete);
+                if (item == null && candelete) {
+                    inflateMenu(R.menu.delete, menuInflater, menu);
+                    changed = true;
+                } else if (item != null && !candelete) {
+                    menu.removeItem(R.id.delete);
+                    changed = true;
+                }
+
+                return changed;
             }
 
             @Override
             public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
+                IndexClient indexClient = presenter.getIndexClient();
                 switch (menuItem.getItemId()) {
+                    case R.id.add_to_index:
+                        for (Model b : presenter.getSelectedItems()) {
+                            if (b instanceof Container) {
+                                indexClient.add((Container) b);
+                            }
+                        }
+                        return true;
+                    case R.id.remove_from_index:
+                        for (Model b : presenter.getSelectedItems()) {
+                            if (b instanceof Container) {
+                                indexClient.remove((Container) b);
+                            }
+                        }
+                        return true;
                     case R.id.delete:
+                        //todo
                         return true;
                     default:
                         return false;

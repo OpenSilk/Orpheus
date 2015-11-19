@@ -38,7 +38,7 @@ import rx.functions.Action1;
 /**
  * Created by drew on 9/24/15.
  */
-public abstract class MenuHandlerImpl implements MenuHandler {
+public abstract class MenuHandlerImpl extends MenuHandler {
 
     final Uri loaderUri;
     protected final ActivityResultsController activityResultsController;

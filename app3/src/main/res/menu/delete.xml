@@ -21,6 +21,6 @@
     <item
         android:id="@+id/delete"
         android:title="@string/menu_delete"
-        android:orderInCategory="50"
+        android:orderInCategory="99"
         app:showAsAction="never"/>
 </menu>

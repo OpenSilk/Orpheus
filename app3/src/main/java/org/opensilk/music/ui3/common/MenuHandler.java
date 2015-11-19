@@ -25,9 +25,15 @@ import android.view.MenuItem;
 /**
  * Created by drew on 10/7/15.
  */
-public interface MenuHandler {
-    boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu);
-    boolean onMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem);
-    boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu);
-    boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem);
+public abstract class MenuHandler {
+    public abstract boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu);
+    public abstract boolean onMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem);
+    public boolean supportsActionMode() {
+        return true;
+    }
+    public abstract boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu);
+    public boolean onRefreshActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
+        return false;
+    }
+    public abstract boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem);
 }
