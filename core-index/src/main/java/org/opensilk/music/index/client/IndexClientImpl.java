@@ -131,6 +131,18 @@ public class IndexClientImpl implements IndexClient {
     }
 
     @Override
+    public void rescan(List<Model> models) {
+        for (Model b : models) {
+            if (b instanceof Container) {
+                appContext.startService(new Intent(appContext, ScannerService.class)
+                        .setAction(ScannerService.ACTION_RESCAN)
+                        .putExtra(ScannerService.EXTRA_LIBRARY_EXTRAS,
+                                LibraryExtras.b().putBundleable(b).get()));
+            }
+        }
+    }
+
+    @Override
     public boolean deleteItems(List<Model> items, final Uri notifyUri) {
         if (items.isEmpty()) {
             return true;

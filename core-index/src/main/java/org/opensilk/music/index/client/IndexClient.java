@@ -43,6 +43,7 @@ public interface IndexClient {
     boolean add(Container container);
     boolean remove(Container container);
     void rescan();
+    void rescan(List<Model> models);
     boolean deleteItems(List<Model> items, Uri notifyUri);
 
     /*
