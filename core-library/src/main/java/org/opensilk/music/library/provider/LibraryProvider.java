@@ -150,19 +150,19 @@ public abstract class LibraryProvider extends ContentProvider {
             case LibraryMethods.DELETE: {
                 extras.setClassLoader(getClass().getClassLoader());
 
-                final ResultReceiver resultReceiver = LibraryExtras.getResultReciever(extras);
+                final ResultReceiver resultReceiver = LibraryExtras.getResultReceiver(extras);
                 if (resultReceiver == null) {
                     ok.putOk(false).putCause(new LibraryException(BAD_BINDER, null));
                     return ok.get();
                 }
 
-                final Uri uri = LibraryExtras.getUri(extras);
+                final List<Uri> uris = LibraryExtras.getUriList(extras);
                 final DeleteSubscriber subscriber = new DeleteSubscriber(resultReceiver);
                 final Bundle args = LibraryExtras.b()
                         .putNotifyUri(LibraryExtras.getNotifyUri(extras))
                         .get();
 
-                deleteObjInternal(uri, subscriber, args);
+                deleteObjsInternal(uris, subscriber, args);
 
                 return ok.get();
             }
@@ -330,8 +330,8 @@ public abstract class LibraryProvider extends ContentProvider {
      * Start internal delete methods
      */
 
-    protected void deleteObjInternal(final Uri uri, final Subscriber<List<Uri>> subscriber, final Bundle args) {
-        getDeleteObjObservable(uri, args)
+    protected void deleteObjsInternal(final List<Uri> uris, final Subscriber<List<Uri>> subscriber, final Bundle args) {
+        getDeleteObjsObservable(uris, args)
                 .subscribeOn(scheduler)
                 .doOnCompleted(new Action0() {
                     @Override
@@ -342,7 +342,6 @@ public abstract class LibraryProvider extends ContentProvider {
                         }
                     }
                 })
-                .toList()
                 .subscribe(subscriber);
     }
 
@@ -359,15 +358,15 @@ public abstract class LibraryProvider extends ContentProvider {
      * children of object)
      */
     @Deprecated
-    protected void deleteObj(final Uri uri, final Subscriber<? super Uri> subscriber, final Bundle args) {
+    protected void deleteObjs(final List<Uri> uris, final Subscriber<? super List<Uri>> subscriber, final Bundle args) {
         throw new UnsupportedOperationException();
     }
 
-    protected Observable<Uri> getDeleteObjObservable(final Uri uri, final Bundle args) {
-        return Observable.create(new Observable.OnSubscribe<Uri>() {
+    protected Observable<List<Uri>> getDeleteObjsObservable(final List<Uri> uris, final Bundle args) {
+        return Observable.create(new Observable.OnSubscribe<List<Uri>>() {
             @Override
-            public void call(Subscriber<? super Uri> subscriber) {
-                deleteObj(uri, subscriber, args);
+            public void call(Subscriber<? super List<Uri>> subscriber) {
+                deleteObjs(uris, subscriber, args);
             }
         });
     }

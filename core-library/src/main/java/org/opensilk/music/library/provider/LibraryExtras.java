@@ -26,6 +26,7 @@ import android.os.ResultReceiver;
 
 import org.opensilk.music.library.internal.IBundleableObserver;
 import org.opensilk.music.library.internal.LibraryException;
+import org.opensilk.music.library.internal.ResultReceiverWrapper;
 import org.opensilk.music.model.sort.BaseSortOrder;
 import org.opensilk.bundleable.BadBundleableException;
 import org.opensilk.bundleable.Bundleable;
@@ -78,9 +79,6 @@ public class LibraryExtras {
      * Internel use:
      */
     public static final String RESULT_RECEIVER_CALLBACK = "result_receiver_cb";
-
-    public static final String LIBRARY_INFO = "libraryinfo";
-    private static final String WRAPPED_LIBRARY_INFO = "wrappedlibraryinfo";
     /**
      * A bundleable object
      */
@@ -152,14 +150,19 @@ public class LibraryExtras {
         }
     }
 
-    public static ResultReceiver getResultReciever(Bundle extras) {
-        extras.setClassLoader(ResultReceiver.class.getClassLoader());
-        return extras.<ResultReceiver>getParcelable(RESULT_RECEIVER_CALLBACK);
+    public static ResultReceiver getResultReceiver(Bundle extras) {
+        if (Build.VERSION.SDK_INT >= 21) {
+            extras.setClassLoader(ResultReceiver.class.getClassLoader());
+            return extras.<ResultReceiver>getParcelable(RESULT_RECEIVER_CALLBACK);
+        } else {
+            extras.setClassLoader(ResultReceiverWrapper.class.getClassLoader());
+            ResultReceiverWrapper wrapper = extras.getParcelable(RESULT_RECEIVER_CALLBACK);
+            return wrapper != null ? wrapper.get() : null;
+        }
     }
 
     public static Bundle getExtrasBundle(Bundle extras) {
-        Bundle b = extras.getBundle(EXTRAS_BUNDLE);
-        return b;
+        return extras.getBundle(EXTRAS_BUNDLE);
     }
 
     public static Bundle sanitize(Bundle extras) {
@@ -173,8 +176,8 @@ public class LibraryExtras {
             Bundle b = extras.getBundle(BUNDLEABLE);
             b.setClassLoader(LibraryExtras.class.getClassLoader());
             return BundleableUtil.materializeBundle(b);
-        } catch (BadBundleableException ignored) {
-            return null;
+        } catch (BadBundleableException e) {
+            throw new IllegalArgumentException(e);
         }
     }
 
@@ -230,7 +233,11 @@ public class LibraryExtras {
         }
 
         public Builder putResultReceiver(ResultReceiver r) {
-            b.putParcelable(RESULT_RECEIVER_CALLBACK, r);
+            if (Build.VERSION.SDK_INT >= 21) {
+                b.putParcelable(RESULT_RECEIVER_CALLBACK, r);
+            } else {
+                b.putParcelable(RESULT_RECEIVER_CALLBACK, new ResultReceiverWrapper(r));
+            }
             return this;
         }
 
