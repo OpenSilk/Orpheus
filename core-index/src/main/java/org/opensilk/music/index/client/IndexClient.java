@@ -22,6 +22,7 @@ import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 
 import org.opensilk.music.model.Container;
+import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
 
@@ -42,7 +43,7 @@ public interface IndexClient {
     boolean add(Container container);
     boolean remove(Container container);
     void rescan();
-
+    boolean deleteItems(List<Model> items, Uri notifyUri);
 
     /*
      * Android auto entry points

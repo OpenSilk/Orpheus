@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 
@@ -39,12 +40,15 @@ import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.index.provider.Methods;
 import org.opensilk.music.index.scanner.ScannerService;
 import org.opensilk.music.library.client.BundleableObserver;
+import org.opensilk.music.library.client.LibraryClient;
 import org.opensilk.music.library.client.TypedBundleableLoader;
+import org.opensilk.music.library.internal.DeleteSubscriber;
 import org.opensilk.music.library.internal.IBundleableObserver;
 import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.Container;
+import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
 
@@ -59,6 +63,8 @@ import javax.inject.Singleton;
 import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Subscriber;
+import rx.Subscription;
+import rx.functions.Action1;
 import rx.functions.Action2;
 import rx.functions.Func0;
 import rx.functions.Func1;
@@ -122,6 +128,78 @@ public class IndexClientImpl implements IndexClient {
         Intent intent = new Intent(appContext, ScannerService.class)
                 .setAction(ScannerService.ACTION_RESCAN);
         appContext.startService(intent);
+    }
+
+    @Override
+    public boolean deleteItems(List<Model> items, final Uri notifyUri) {
+        if (items.isEmpty()) {
+            return true;
+        }
+        //items will all be from same authority
+        final List<Uri> uris = new ArrayList<>(items.size());
+        for (Model item: items) {
+            uris.add(item.getUri());
+        }
+        Subscription s = Observable.using(
+                new Func0<LibraryClient>() {
+                    @Override
+                    public LibraryClient call() {
+                        return LibraryClient.create(appContext, uris.get(0));
+                    }
+                },
+                new Func1<LibraryClient, Observable<List<Uri>>>() {
+                    @Override
+                    public Observable<List<Uri>> call(final LibraryClient libraryClient) {
+                        return Observable.create(new Observable.OnSubscribe<List<Uri>>() {
+                            @Override
+                            public void call(final Subscriber<? super List<Uri>> subscriber) {
+                                final ResultReceiver resultReceiver = new ResultReceiver(null) {
+                                    @Override
+                                    protected void onReceiveResult(int resultCode, Bundle resultData) {
+                                        switch (resultCode) {
+                                            case DeleteSubscriber.RESULT:
+                                                subscriber.onNext(LibraryExtras.getUriList(resultData));
+                                                break;
+                                            case DeleteSubscriber.COMPLETE:
+                                                subscriber.onCompleted();
+                                                break;
+                                            case DeleteSubscriber.ERROR:
+                                                subscriber.onError(LibraryExtras.getCause(resultData));
+                                                break;
+                                        }
+                                    }
+                                };
+                                Bundle reply = libraryClient.makeCall(LibraryMethods.DELETE,
+                                        LibraryExtras.b().putUriList(uris)
+                                                .putResultReceiver(resultReceiver)
+                                                .putNotifyUri(notifyUri)
+                                                .get());
+                                if (!LibraryExtras.getOk(reply)) {
+                                    subscriber.onError(LibraryExtras.getCause(reply));
+                                }
+                            }
+                        });
+                    }
+                },
+                new Action1<LibraryClient>() {
+                    @Override
+                    public void call(LibraryClient libraryClient) {
+                        libraryClient.release();
+                    }
+                },
+                true//release eagerly
+        ).last().subscribe(new Action1<List<Uri>>() {
+            @Override
+            public void call(List<Uri> uris) {
+                rescan();//TODO handle better;
+            }
+        }, new Action1<Throwable>() {
+            @Override
+            public void call(Throwable throwable) {
+                //todo handle;
+            }
+        });
+        return true;
     }
 
     @Override
