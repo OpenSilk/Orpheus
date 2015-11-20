@@ -137,12 +137,7 @@ public class FoldersScreenModule {
             public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.rescan_folder: {
-                        for (Model b : presenter.getSelectedItems()) {
-                            context.startService(new Intent(context, ScannerService.class)
-                                    .setAction(ScannerService.ACTION_RESCAN)
-                                    .putExtra(ScannerService.EXTRA_LIBRARY_EXTRAS,
-                                            LibraryExtras.b().putBundleable(b).get()));
-                        }
+                        presenter.getIndexClient().rescan(presenter.getSelectedItems());
                         return true;
                     }
                     default:

@@ -19,21 +19,38 @@ package org.opensilk.music.ui3.common;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.AppPreferences;
+import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.library.client.LibraryClient;
+import org.opensilk.music.library.client.TypedBundleableLoader;
+import org.opensilk.music.library.provider.LibraryMethods;
+import org.opensilk.music.model.Container;
+import org.opensilk.music.model.Item;
 import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.PlaylistManageActivity;
+import org.opensilk.music.ui3.library.FoldersScreenFragment;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import rx.Observable;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.functions.Func2;
+import timber.log.Timber;
 
 /**
  * Created by drew on 9/24/15.
@@ -75,6 +92,7 @@ public abstract class MenuHandlerImpl extends MenuHandler {
     public void addItemsToQueue(BundleablePresenter presenter) {
         List<Uri> toPlay = UtilsCommon.filterTracks(presenter.getItems());
         if (toPlay.isEmpty()) {
+            Timber.e("No tracks in list");
             return; //TODO toast?
         }
         presenter.getPlaybackController().enqueueAllEnd(toPlay);
@@ -83,6 +101,7 @@ public abstract class MenuHandlerImpl extends MenuHandler {
     public void addSelectedItemsToQueue(BundleablePresenter presenter) {
         List<Uri> toPlay = UtilsCommon.filterTracks(presenter.getSelectedItems());
         if (toPlay.isEmpty()) {
+            Timber.e("No tracks in list");
             return; //TODO toast?
         }
         presenter.getPlaybackController().enqueueAllEnd(toPlay);
@@ -91,6 +110,7 @@ public abstract class MenuHandlerImpl extends MenuHandler {
     public void playItemsNext(BundleablePresenter presenter) {
         List<Uri> toPlay = UtilsCommon.filterTracks(presenter.getItems());
         if (toPlay.isEmpty()) {
+            Timber.e("No tracks in list");
             return; //TODO toast?
         }
         presenter.getPlaybackController().enqueueAllNext(toPlay);
@@ -99,6 +119,7 @@ public abstract class MenuHandlerImpl extends MenuHandler {
     public void playSelectedItemsNext(BundleablePresenter presenter) {
         List<Uri> toPlay = UtilsCommon.filterTracks(presenter.getSelectedItems());
         if (toPlay.isEmpty()) {
+            Timber.e("No tracks in list");
             return; //TODO toast?
         }
         presenter.getPlaybackController().enqueueAllNext(toPlay);
@@ -146,6 +167,62 @@ public abstract class MenuHandlerImpl extends MenuHandler {
             @Override
             public void call(List<Uri> uris) {
                 playbackController.enqueueAllNext(uris);
+            }
+        });
+    }
+
+    public void openFolder(BundleablePresenter presenter, Context context, Container container) {
+        LibraryClient client = LibraryClient.create(context, container.getUri());
+        Bundle config = client.makeCall(LibraryMethods.CONFIG, null);
+        client.release();
+        if (config != null) {
+            presenter.getFm().replaceMainContent(FoldersScreenFragment.ni(context,
+                    LibraryConfig.materialize(config), container), true);
+        }
+    }
+
+    public void openParentFolder(final BundleablePresenter presenter, Context context, final Item item) {
+        final Context appcontext = context.getApplicationContext();
+        Observable<Container> containerObservable = TypedBundleableLoader.<Container>create(appcontext)
+                .setUri(item.getParentUri())
+                .setMethod(LibraryMethods.GET)
+                .createObservable()
+                .flatMap(new Func1<List<Container>, Observable<Container>>() {
+                    @Override
+                    public Observable<Container> call(List<Container> containers) {
+                        return Observable.from(containers);
+                    }
+                })
+                .first();
+        Observable<LibraryConfig> configObservable = Observable.create(new Observable.OnSubscribe<LibraryConfig>() {
+            @Override
+            public void call(Subscriber<? super LibraryConfig> subscriber) {
+                LibraryClient client = LibraryClient.create(appcontext, item.getUri());
+                Bundle config = client.makeCall(LibraryMethods.CONFIG, null);
+                client.release();
+                if (config != null) {
+                    subscriber.onNext(LibraryConfig.materialize(config));
+                    subscriber.onCompleted();
+                } else {
+                    subscriber.onError(new NullPointerException("Null config"));
+                }
+            }
+        });
+        Subscription s = Observable.zip(containerObservable, configObservable, new Func2<Container, LibraryConfig, FoldersScreenFragment>() {
+            @Override
+            public FoldersScreenFragment call(Container container, LibraryConfig libraryConfig) {
+                return FoldersScreenFragment.ni(appcontext, libraryConfig, container);
+            }
+        }).subscribeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<FoldersScreenFragment>() {
+            @Override
+            public void call(FoldersScreenFragment foldersScreenFragment) {
+                presenter.getFm().replaceMainContent(foldersScreenFragment, true);
+            }
+        }, new Action1<Throwable>() {
+            @Override
+            public void call(Throwable throwable) {
+                Timber.e(throwable, "openParent %s", item);
+                //TODO notify
             }
         });
     }

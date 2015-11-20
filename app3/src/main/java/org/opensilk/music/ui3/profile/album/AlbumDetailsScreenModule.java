@@ -123,9 +123,11 @@ public class AlbumDetailsScreenModule {
         return new MenuHandlerImpl(loaderUri, activityResultsController) {
             @Override
             public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
-                inflateMenu(R.menu.album_song_sort_by, menuInflater, menu);
-                inflateMenu(R.menu.add_to_queue, menuInflater, menu);
-                inflateMenu(R.menu.play_next, menuInflater, menu);
+                inflateMenus(menuInflater, menu,
+                        R.menu.album_song_sort_by,
+                        R.menu.add_to_queue,
+                        R.menu.play_next
+                        );
                 return true;
             }
 
