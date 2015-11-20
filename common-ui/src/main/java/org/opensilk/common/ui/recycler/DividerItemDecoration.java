@@ -25,18 +25,27 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration {
     public DividerItemDecoration(Drawable divider) { mDivider = divider; }
 
     @Override
-    public void getItemOffsets (Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+    public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
         super.getItemOffsets(outRect, view, parent, state);
-        if (mDivider == null) return;
-        if (!shouldDecorate(view)) return;
 
-        if (getOrientation(parent) == LinearLayoutManager.VERTICAL) outRect.bottom = mDivider.getIntrinsicHeight();
-        else outRect.right = mDivider.getIntrinsicWidth();
+        if (mDivider == null || !shouldDecorate(view)) {
+            return;
+        }
+
+        if (getOrientation(parent) == LinearLayoutManager.VERTICAL) {
+            outRect.bottom = mDivider.getIntrinsicHeight();
+        } else {
+            outRect.right = mDivider.getIntrinsicWidth();
+        }
     }
 
     @Override
-    public void onDrawOver(Canvas c, RecyclerView parent) {
-        if (mDivider == null) { super.onDrawOver(c, parent); return; }
+    public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) {
+
+        if (mDivider == null) {
+            super.onDrawOver(c, parent, state);
+            return;
+        }
 
         if (getOrientation(parent) == LinearLayoutManager.VERTICAL) {
             final int left = parent.getPaddingLeft();
@@ -77,11 +86,13 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration {
         if (parent.getLayoutManager() instanceof LinearLayoutManager) {
             LinearLayoutManager layoutManager = (LinearLayoutManager) parent.getLayoutManager();
             return layoutManager.getOrientation();
-        } else throw new IllegalStateException("DividerItemDecoration can only be used with a LinearLayoutManager.");
+        } else {
+            throw new IllegalStateException("DividerItemDecoration can only be used with a LinearLayoutManager.");
+        }
     }
 
     boolean shouldDecorate(View child) {
-        return !(child instanceof NoDecorate);
+        return !child.getClass().isAnnotationPresent(NoDecorate.class);
     }
 
 }

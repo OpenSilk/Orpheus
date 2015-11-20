@@ -17,8 +17,15 @@
 
 package org.opensilk.common.ui.recycler;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 /**
  * Created by drew on 3/13/15.
  */
-public interface NoDecorate {
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface NoDecorate {
 }
