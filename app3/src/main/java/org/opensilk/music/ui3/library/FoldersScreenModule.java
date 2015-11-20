@@ -17,8 +17,11 @@
 
 package org.opensilk.music.ui3.library;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.net.Uri;
+import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -26,6 +29,7 @@ import android.view.MenuItem;
 import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
+import org.opensilk.common.ui.mortar.DialogFactory;
 import org.opensilk.music.R;
 import org.opensilk.music.index.client.IndexClient;
 import org.opensilk.music.library.LibraryConfig;
@@ -47,6 +51,7 @@ import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
+import hugo.weaving.DebugLog;
 
 /**
  * Created by drew on 5/2/15.
@@ -217,8 +222,8 @@ public class FoldersScreenModule {
             }
 
             @Override
-            public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
-                IndexClient indexClient = presenter.getIndexClient();
+            public boolean onActionMenuItemClicked(final BundleablePresenter presenter, Context context, MenuItem menuItem) {
+                final IndexClient indexClient = presenter.getIndexClient();
                 switch (menuItem.getItemId()) {
                     case R.id.add_to_index:
                         for (Model b : presenter.getSelectedItems()) {
@@ -234,9 +239,33 @@ public class FoldersScreenModule {
                             }
                         }
                         return true;
-                    case R.id.delete:
-                        //todo
+                    case R.id.delete: {
+                        final List<Model> models = presenter.getSelectedItems();
+                        if (models.size() == 0) {
+                            return true; //never happen
+                        }
+                        StringBuilder names = new StringBuilder(models.get(0).getName());
+                        for (int ii=1; ii<models.size(); ii++) {
+                            names.append(",").append(models.get(ii).getName());
+                        }
+                        final String title = names.toString();
+                        presenter.getDialogPresenter().showDialog(new DialogFactory() {
+                            @Override
+                            public Dialog call(Context context) {
+                                return new AlertDialog.Builder(context)
+                                        .setTitle(context.getString(R.string.delete_dialog_title, title))
+                                        .setMessage(R.string.cannot_be_undone)
+                                        .setNegativeButton(android.R.string.cancel, null)
+                                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                indexClient.deleteItems(models, screen.container.getUri());
+                                            }
+                                        }).create();
+                            }
+                        });
                         return true;
+                    }
                     default:
                         return false;
 

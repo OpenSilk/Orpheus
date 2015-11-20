@@ -33,6 +33,7 @@ import org.opensilk.common.core.rx.RxLoader;
 import org.opensilk.common.core.rx.RxUtils;
 import org.opensilk.common.ui.mortar.ActionBarMenuHandler;
 import org.opensilk.common.ui.mortar.ActionModePresenter;
+import org.opensilk.common.ui.mortar.DialogPresenter;
 import org.opensilk.common.ui.mortar.HasOptionsMenu;
 import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.AppPreferences;
@@ -77,6 +78,7 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView>
     protected final PlaybackController playbackController;
     protected final IndexClient indexClient;
     protected final BundleablePresenterConfig presenterConfig;
+    protected final DialogPresenter dialogPresenter;
 
     protected boolean wantGrid;
     protected Subscription subscription;
@@ -93,7 +95,8 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView>
             @Named("loader_uri") Uri uri,
             ActionModePresenter actionModePresenter,
             PlaybackController playbackController,
-            IndexClient indexClient
+            IndexClient indexClient,
+            DialogPresenter dialogPresenter
     ) {
         this.preferences = preferences;
         this.requestor = requestor;
@@ -107,6 +110,7 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView>
         this.playbackController = playbackController;
         this.indexClient = indexClient;
         this.presenterConfig = config;
+        this.dialogPresenter = dialogPresenter;
     }
 
     @Override
@@ -317,6 +321,10 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView>
 
     public String getToolbarTitle() {
         return presenterConfig.toolbarTitle;
+    }
+
+    public DialogPresenter getDialogPresenter() {
+        return dialogPresenter;
     }
 
     public void onFabClicked(View view) {
