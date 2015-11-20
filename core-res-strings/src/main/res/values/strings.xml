@@ -140,6 +140,7 @@
     <string name="msg_newer_plugin_message">Orpheus requires a newer version of %s.</string>
     <string name="msg_title_playback_error">Orpheus: playback error</string>
     <string name="err_library_unavailable">Library unavailable, check network</string>
+    <string name="msg_deleted">Delete successful</string>
 
     <!--Now playing menu options-->
     <string name="now_playing_visualizer">Visualizer</string>
