@@ -21,6 +21,7 @@ import android.content.UriMatcher;
 import android.net.Uri;
 import android.os.Bundle;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.common.core.mortar.DaggerService;
@@ -38,8 +39,11 @@ import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Track;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -277,59 +281,78 @@ public class FoldersLibraryProvider extends LibraryProvider {
     }
 
     @Override
-    protected void deleteObj(Uri uri, Subscriber<? super Uri> subscriber, Bundle args) {
-        final File base;
-        try {
-            base = mStorageLookup.getStorageFile(uri.getPathSegments().get(0));
-            if (!base.exists() || !base.isDirectory() || !base.canRead()) {
-                Timber.e("Can't access path %s", base.getPath());
-                throw new IllegalArgumentException("Can't access path " + base.getPath());
+    protected Observable<List<Uri>> getDeleteObjsObservable(final List<Uri> uris, final Bundle args) {
+        return Observable.create(new Observable.OnSubscribe<List<Uri>>() {
+            @Override
+            public void call(Subscriber<? super List<Uri>> subscriber) {
+                List<Uri> tracks = new ArrayList<Uri>(uris.size());
+                List<Uri> folders = new ArrayList<Uri>(uris.size());
+                for (Uri uri : uris) {
+                    switch (mUriMatcher.match(uri)) {
+                        case FoldersUris.M_FOLDER:
+                            folders.add(uri);
+                            break;
+                        case FoldersUris.M_TRACK_MS:
+                        case FoldersUris.M_TRACK_PTH:
+                            tracks.add(uri);
+                            break;
+                    }
+                }
+                List<Uri> deleted = new ArrayList<Uri>(uris.size());
+                deleted.addAll(deleteTracks(tracks));
+                deleted.addAll(deleteFolders(folders));
+                subscriber.onNext(deleted);
+                subscriber.onCompleted();
             }
-        } catch (IllegalArgumentException e) {
-            subscriber.onError(e);
-            return;
-        }
-//        boolean success = FilesHelper.deleteDirectory(getContext(), new File(base, identity));
-//        if (!subscriber.isUnsubscribed()) {
-//            subscriber.onNext(success);
-//            subscriber.onCompleted();
-//        }
-        subscriber.onError(new UnsupportedOperationException());
+        });
     }
 
-    protected void deleteTracks(String library, Subscriber<? super Boolean> subscriber, Bundle args) {
-        List<Uri> uris = LibraryExtras.getUriList(args);
-        List<Long> ids = new ArrayList<>(uris.size());
-        List<String> names = new ArrayList<>(uris.size());
-        for (Uri uri : uris) {
+    protected List<Uri> deleteTracks(List<Uri> tracks) {
+        List<Uri> deleted = new ArrayList<>(tracks.size());
+        for (Uri uri : tracks) {
             String id = uri.getLastPathSegment();
             if (StringUtils.isNumeric(id)) {
-                ids.add(Long.parseLong(id));
+                int rem = FilesHelper.deleteTrack(getContext(), id);
+                if (rem > 0) {
+                    deleted.add(uri);
+                }
             } else {
-                names.add(id);
+                String library = uri.getPathSegments().get(0);
+                try {
+                    File base = mStorageLookup.getStorageFile(library);
+                    if (!base.exists() || !base.isDirectory() || !base.canRead()) {
+                        Timber.e("Can't access path %s", base.getPath());
+                        throw new IllegalArgumentException("Can't access path " + base.getPath());
+                    }
+                    if (FilesHelper.deleteFile(base, id)) {
+                        deleted.add(uri);
+                    }
+                } catch (IllegalArgumentException e) {
+                    Timber.e(e, "deleteTracks %s/%s", library, id);
+                }
             }
         }
-        int numremoved = 0;
-        if (!ids.isEmpty()) {
-            numremoved += CursorHelpers.deleteTracks(getContext(), ids);
-        }
-        if (!names.isEmpty()) {
-            final File base;
+        return deleted;
+    }
+
+    protected List<Uri> deleteFolders(List<Uri> folders) {
+        List<Uri> deleted = new ArrayList<>(folders.size());
+        for (Uri uri : folders) {
+            String library = uri.getPathSegments().get(0);
+            String id = uri.getLastPathSegment();
             try {
-                base = mStorageLookup.getStorageFile(library);
+                File base = mStorageLookup.getStorageFile(library);
                 if (!base.exists() || !base.isDirectory() || !base.canRead()) {
                     Timber.e("Can't access path %s", base.getPath());
                     throw new IllegalArgumentException("Can't access path " + base.getPath());
                 }
+                if (FilesHelper.deleteDirectory(getContext(), new File(base, id))) {
+                    deleted.add(uri);
+                }
             } catch (IllegalArgumentException e) {
-                subscriber.onError(e);
-                return;
+                Timber.e(e, "deleteFolders %s/%s", library, id);
             }
-            numremoved += FilesHelper.deleteFiles(base, names);
         }
-        if (!subscriber.isUnsubscribed()) {
-            subscriber.onNext(numremoved == uris.size());
-            subscriber.onCompleted();
-        }
+        return deleted;
     }
 }

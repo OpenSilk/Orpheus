@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -172,22 +173,54 @@ public class FilesHelper {
                 : 0;
     }
 
-    public static int deleteFiles(File base, List<String> relPaths) {
-        int numdeleted = 0;
-        for (String name : relPaths) {
-            try {
-                final File f = new File(base, name);
-                if (f.exists() && f.isFile() && f.canWrite()) {
-                    if (!f.delete()) {
-                        Timber.w("Unable to delete file %s", f.getName());
-                    } else {
-                        numdeleted++;
+    public static boolean deleteFile(File base, String relPath) {
+        final File f = new File(base, relPath);
+        try {
+            FileUtils.forceDelete(f);
+            Timber.d("Deleted %s", f.getPath());
+            return true;
+        } catch (IOException| SecurityException e) {
+            Timber.e(e, "deleteFile %s", f.getPath());
+            return false;
+        }
+    }
+
+    public static int deleteTrack(final Context context, final String id) {
+        int numremoved = 0;
+        Cursor c = null;
+        try {
+            c = context.getContentResolver().query(
+                    Uris.EXTERNAL_MEDIASTORE_MEDIA,
+                    Projections.ID_DATA,
+                    BaseColumns._ID + "=?",
+                    new String[]{id}, null);
+            if (c != null && c.moveToFirst()) {
+                // Remove selected tracks from the database
+                int del = context.getContentResolver().delete(
+                        Uris.EXTERNAL_MEDIASTORE_MEDIA,
+                        BaseColumns._ID + "=?", new String[]{id});
+                if (del > 0) {
+                    // Remove files from card
+                    final String name = c.getString(1);
+                    final File f = new File(name);
+                    try { // File.delete can throw a security exception
+                        FileUtils.forceDelete(f);
+                        Timber.d("Deleted track %s", f.getPath());
+                        numremoved++;
+                    } catch (IOException|SecurityException ex) {
+                        Timber.e(ex, "deleteTrack %s", f.getPath());
                     }
                 }
-            } catch (SecurityException e) {
+            } else {
+                return 0;
             }
+        } finally {
+            if (c != null) c.close();
         }
-        return numdeleted;
+        // We deleted a number of tracks, which could affect any number of things
+        // in the media content domain, so update everything.
+        context.getContentResolver().notifyChange(Uri.parse("content://media"), null);
+        return numremoved;
     }
 
     public static boolean deleteDirectory(Context context, File dir) {
