@@ -442,10 +442,8 @@ public class NowPlayingScreenView extends RelativeLayout {
                         .into(getView())
                         .using(PaletteSwatchType.VIBRANT_DARK)
                         .build().onResourceReady(palette, backgroundTransition);
-                ViewBackgroundDrawableTarget.builder()
-                        .into(card)
-                        .using(PaletteSwatchType.VIBRANT)
-                        .build().onResourceReady(palette, backgroundTransition);
+                //cant transition this pre L so just dont even try
+                getView().card.setCardBackgroundColor(s2.getRgb());
                 getView().title.setTextColor(s2.getTitleTextColor());
                 getView().subTitle.setTextColor(s2.getBodyTextColor());
                 ThemeUtils.themeProgressBar2(getView().progress, s1.getRgb());
@@ -461,7 +459,7 @@ public class NowPlayingScreenView extends RelativeLayout {
                 getView().setBackgroundColor(background);
                 int cardBackground = ThemeUtils.getThemeAttrColor(getView().getContext(),
                         R.attr.nowPlayingCardBackground);
-                getView().card.setBackgroundColor(cardBackground);
+                getView().card.setCardBackgroundColor(cardBackground);
                 int titleText = ThemeUtils.getThemeAttrColor(getView().getContext(),
                         android.R.attr.textColorPrimary);
                 getView().title.setTextColor(titleText);
