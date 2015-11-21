@@ -25,18 +25,17 @@ import android.os.Parcelable;
 import android.os.ResultReceiver;
 import android.support.annotation.Nullable;
 
+import org.opensilk.bundleable.BadBundleableException;
+import org.opensilk.bundleable.Bundleable;
+import org.opensilk.bundleable.BundleableUtil;
 import org.opensilk.music.library.internal.IBundleableObserver;
 import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.internal.ResultReceiverWrapper;
 import org.opensilk.music.model.sort.BaseSortOrder;
-import org.opensilk.bundleable.BadBundleableException;
-import org.opensilk.bundleable.Bundleable;
-import org.opensilk.bundleable.BundleableUtil;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
 
 /**
  * Created by drew on 5/14/15.
@@ -157,14 +156,9 @@ public class LibraryExtras {
     }
 
     public static ResultReceiver getResultReceiver(Bundle extras) {
-        if (Build.VERSION.SDK_INT >= 21) {
-            extras.setClassLoader(ResultReceiver.class.getClassLoader());
-            return extras.<ResultReceiver>getParcelable(RESULT_RECEIVER_CALLBACK);
-        } else {
-            extras.setClassLoader(ResultReceiverWrapper.class.getClassLoader());
-            ResultReceiverWrapper wrapper = extras.getParcelable(RESULT_RECEIVER_CALLBACK);
-            return wrapper != null ? wrapper.get() : null;
-        }
+        extras.setClassLoader(ResultReceiverWrapper.class.getClassLoader());
+        ResultReceiverWrapper wrapper = extras.getParcelable(RESULT_RECEIVER_CALLBACK);
+        return wrapper != null ? wrapper.get() : null;
     }
 
     public @Nullable static Bundle getExtrasBundle(Bundle extras) {
@@ -242,11 +236,7 @@ public class LibraryExtras {
         }
 
         public Builder putResultReceiver(ResultReceiver r) {
-            if (Build.VERSION.SDK_INT >= 21) {
-                b.putParcelable(RESULT_RECEIVER_CALLBACK, r);
-            } else {
-                b.putParcelable(RESULT_RECEIVER_CALLBACK, new ResultReceiverWrapper(r));
-            }
+            b.putParcelable(RESULT_RECEIVER_CALLBACK, new ResultReceiverWrapper(r));
             return this;
         }
 
