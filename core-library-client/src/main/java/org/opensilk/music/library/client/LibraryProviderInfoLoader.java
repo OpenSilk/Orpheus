@@ -110,8 +110,9 @@ public class LibraryProviderInfoLoader {
         }).filter(new Func1<ProviderInfo, Boolean>() {
             @Override
             public Boolean call(ProviderInfo providerInfo) {
-                //for api < 19 we use the permission as the tag
-                return StringUtils.equals(providerInfo.readPermission, context.getPackageName() + ".permission.LIBRARY_FULL_ACCESS")
+                return providerInfo != null
+                        //for api < 19 we use the permission as the filter
+                        && StringUtils.equals(providerInfo.readPermission, context.getPackageName() + ".permission.LIBRARY_FULL_ACCESS")
                         //Ignore non exported providers unless they're ours
                         && (StringUtils.equals(providerInfo.packageName, context.getPackageName()) || providerInfo.exported);
             }
@@ -165,10 +166,12 @@ public class LibraryProviderInfoLoader {
         }).filter(new Func1<ResolveInfo, Boolean>() {
             @Override
             public Boolean call(ResolveInfo resolveInfo) {
-                ProviderInfo providerInfo = resolveInfo.providerInfo;
-                return providerInfo != null
+                ProviderInfo providerInfo = resolveInfo != null ? resolveInfo.providerInfo : null;
+                return providerInfo != null &&
+                        //allow permissionless providers or make sure we hold their permission
+                        (StringUtils.isEmpty(providerInfo.readPermission) || context.getPackageManager().checkPermission(providerInfo.readPermission, context.getPackageName()) == PackageManager.PERMISSION_GRANTED) &&
                         //Ignore non exported providers unless they're ours
-                        && (StringUtils.equals(providerInfo.packageName, context.getPackageName()) || providerInfo.exported);
+                        (StringUtils.equals(providerInfo.packageName, context.getPackageName()) || providerInfo.exported);
             }
         }).map(new Func1<ResolveInfo, LibraryProviderInfo>() {
             @Override
