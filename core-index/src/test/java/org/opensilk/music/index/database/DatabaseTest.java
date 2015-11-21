@@ -432,4 +432,12 @@ public class DatabaseTest {
         Assertions.assertThat(mDb.getBroadcastMeta()).isTrue();
     }
 
+    @Test
+    public void testCoalesce() {
+        Assertions.assertThat(IndexDatabaseImpl.coalesce("foo", null)).isEqualTo("foo");
+        Assertions.assertThat(IndexDatabaseImpl.coalesce("", "bar")).isEqualTo("bar");
+        Assertions.assertThat(IndexDatabaseImpl.coalesceOrUnknown("", null)).isEqualTo(IndexDatabaseImpl.unknown);
+        Assertions.assertThat(IndexDatabaseImpl.coalesceOrUnknown(null, "foo")).isEqualTo("foo");
+    }
+
 }

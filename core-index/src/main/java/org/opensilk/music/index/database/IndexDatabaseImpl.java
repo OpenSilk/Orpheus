@@ -1279,14 +1279,14 @@ public class IndexDatabaseImpl implements IndexDatabase {
         final String authority = track.getUri().getAuthority();
 
         long artistId = getArtistIdForName(
-                coalesce(metadata.getString(Metadata.KEY_ARTIST_NAME), track.getArtistName()), authority);
+                coalesceOrUnknown(metadata.getString(Metadata.KEY_ARTIST_NAME), track.getArtistName()), authority);
         if (artistId > 0) {
             cv.put(IndexSchema.Meta.Track.ARTIST_ID, artistId);
         }
 
         long albumId = getAlbumIdForName(
-                coalesce(metadata.getString(Metadata.KEY_ALBUM_ARTIST_NAME), track.getAlbumArtistName()),
-                coalesce(metadata.getString(Metadata.KEY_ALBUM_NAME), track.getAlbumName()), authority);
+                coalesceOrUnknown(metadata.getString(Metadata.KEY_ALBUM_ARTIST_NAME), track.getAlbumArtistName()),
+                coalesceOrUnknown(metadata.getString(Metadata.KEY_ALBUM_NAME), track.getAlbumName()), authority);
         if (albumId > 0) {
             cv.put(IndexSchema.Meta.Track.ALBUM_ID, albumId);
         }
@@ -1332,11 +1332,11 @@ public class IndexDatabaseImpl implements IndexDatabase {
             cv.put(IndexSchema.Meta.Track.DURATION, duration);
         }
 
-        Timber.v("Inserting track metadata %s", cv.toString());
         long id = insert(IndexSchema.Meta.Track.TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
-//        if (id > 0) {
-//            mAppContext.getContentResolver().notifyChange(IndexUris.tracks(indexAuthority), null);
-//        }
+        if (id > 0) {
+            cv.remove(IndexSchema.Meta.Track.TRACK_KEY);
+            Timber.v("Inserted track metadata %s", cv.toString());
+        }
         return id;
     }
 
@@ -1416,15 +1416,28 @@ public class IndexDatabaseImpl implements IndexDatabase {
         cv.put(IndexSchema.Tracks.DATE_ADDED, System.currentTimeMillis());
         long id = getTracksId(track.getUri());
         if (id > 0) {
-            Timber.v("Updating track %s", cv.toString());
             cv.remove(IndexSchema.Tracks.URI);
             int num = update(IndexSchema.Tracks.TABLE, cv, idSelection, new String[]{String.valueOf(id)});
             if (num != 1) {
-                Timber.e("Error updating track");
+                Timber.e("Error updating track %s", track.getUri());
+            } else {
+                cv.remove(IndexSchema.Tracks.ALBUM_KEY);
+                cv.remove(IndexSchema.Tracks.ARTIST_KEY);
+                cv.remove(IndexSchema.Tracks.GENRE_KEY);
+                cv.remove(IndexSchema.Tracks.ALBUM_ARTIST_KEY);
+                cv.remove(IndexSchema.Tracks.TRACK_KEY);
+                Timber.d("Updated track %s", cv.toString());
             }
         } else {
-            Timber.v("Inserting track %s", cv.toString());
             id = insert(IndexSchema.Tracks.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+            if (id > 0) {
+                cv.remove(IndexSchema.Tracks.ALBUM_KEY);
+                cv.remove(IndexSchema.Tracks.ARTIST_KEY);
+                cv.remove(IndexSchema.Tracks.GENRE_KEY);
+                cv.remove(IndexSchema.Tracks.ALBUM_ARTIST_KEY);
+                cv.remove(IndexSchema.Tracks.TRACK_KEY);
+                Timber.d("Inserted track %s", cv.toString());
+            }
         }
         return id;
     }
@@ -1490,8 +1503,11 @@ public class IndexDatabaseImpl implements IndexDatabase {
             cv.put(IndexSchema.Meta.Album.ALBUM_BIO_DATE_MOD, lastMod > 0 ? lastMod : System.currentTimeMillis());
         }
         cv.put(IndexSchema.Meta.Album.AUTHORITY, authority);
-        Timber.v("Inserting album %s", cv.toString());
         long id = insert(IndexSchema.Meta.Album.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+        if (id > 0) {
+            cv.remove(IndexSchema.Meta.Album.ALBUM_KEY);
+            Timber.v("Inserted album %s", cv.toString());
+        }
         return id;
     }
 
@@ -1559,8 +1575,11 @@ public class IndexDatabaseImpl implements IndexDatabase {
             cv.put(IndexSchema.Meta.Artist.ARTIST_BIO_DATE_MOD, lastMod > 0 ? lastMod : System.currentTimeMillis());
         }
         cv.put(IndexSchema.Meta.Artist.AUTHORITY, authority);
-        Timber.d("Inserting Artist %s", cv.toString());
         long id = insert(IndexSchema.Meta.Artist.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+        if (id > 0) {
+            cv.remove(IndexSchema.Meta.Artist.ARTIST_KEY);
+            Timber.d("Inserted Artist %s", cv.toString());
+        }
         return id;
     }
 
@@ -1611,8 +1630,11 @@ public class IndexDatabaseImpl implements IndexDatabase {
         cv.put(IndexSchema.Meta.Genre.GENRE_NAME, name);
         cv.put(IndexSchema.Meta.Genre.GENRE_KEY, keyFor(name));
         cv.put(IndexSchema.Meta.Genre.AUTHORITY, authority);
-        Timber.d("Inserting Genre %s", cv.toString());
         long id = insert(IndexSchema.Meta.Genre.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+        if (id > 0) {
+            cv.remove(IndexSchema.Meta.Genre.GENRE_KEY);
+            Timber.d("Inserted Genre %s", cv.toString());
+        }
         return id;
     }
 
@@ -2109,6 +2131,12 @@ public class IndexDatabaseImpl implements IndexDatabase {
 
     static String coalesce(String string1, String string2) {
         return !StringUtils.isEmpty(string1) ? string1 : string2;
+    }
+
+    static final String unknown = "<unknown>";
+    static String coalesceOrUnknown(String string1, String string2) {
+        String s = null;
+        return !StringUtils.isEmpty(s = coalesce(string1, string2)) ? s : unknown;
     }
 
     public static String getStringOrNull(Cursor c, int idx) {
