@@ -24,7 +24,7 @@ package org.opensilk.music.model.sort;
 public interface TrackSortOrder extends BaseSortOrder {
     String ARTIST = "artist, album, track";
     String ALBUM = "album, track";
-    String LONGEST = "duration DESC";
+    String LONGEST = "res_duration DESC";
     String PLAYORDER = "track";
     String LAST_ADDED = "date_added DESC";
 }
