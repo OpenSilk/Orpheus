@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.ResultReceiver;
+import android.support.annotation.Nullable;
 
 import org.opensilk.music.library.internal.IBundleableObserver;
 import org.opensilk.music.library.internal.LibraryException;
@@ -35,6 +36,7 @@ import org.opensilk.bundleable.BundleableUtil;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
 
 /**
  * Created by drew on 5/14/15.
@@ -106,8 +108,12 @@ public class LibraryExtras {
 
     public static LibraryException getCause(Bundle extras) {
         Bundle b = extras.getBundle(WRAPPEDCAUSE);
-        b.setClassLoader(LibraryException.class.getClassLoader());
-        return b.getParcelable(CAUSE);
+        if (b != null) {
+            b.setClassLoader(LibraryException.class.getClassLoader());
+            return b.getParcelable(CAUSE);
+        } else {
+            return new LibraryException(new NullPointerException("No cause in extras"));
+        }
     }
 
     private static Method _getIBinder = null;
@@ -161,7 +167,7 @@ public class LibraryExtras {
         }
     }
 
-    public static Bundle getExtrasBundle(Bundle extras) {
+    public @Nullable static Bundle getExtrasBundle(Bundle extras) {
         return extras.getBundle(EXTRAS_BUNDLE);
     }
 
@@ -171,14 +177,17 @@ public class LibraryExtras {
         return extras;
     }
 
-    public static <T extends Bundleable> T getBundleable(Bundle extras) {
+    public @Nullable static <T extends Bundleable> T getBundleable(Bundle extras) {
         try {
             Bundle b = extras.getBundle(BUNDLEABLE);
-            b.setClassLoader(LibraryExtras.class.getClassLoader());
-            return BundleableUtil.materializeBundle(b);
+            if (b != null) {
+                b.setClassLoader(LibraryExtras.class.getClassLoader());
+                return BundleableUtil.materializeBundle(b);
+            }
         } catch (BadBundleableException e) {
-            throw new IllegalArgumentException(e);
+            //pass
         }
+        return null;
     }
 
     public static Builder b() {
