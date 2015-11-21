@@ -165,6 +165,7 @@ public class LibraryRootScreenPresenter extends ViewPresenter<LibraryRootScreenV
     void subscribeRoots() {
         LibraryClient libraryClient = LibraryClient.create(appContext, rootUri);
         Bundle reply = libraryClient.makeCall(LibraryMethods.CHECK_AVAILABILITY, null);
+        libraryClient.release();
         if (!LibraryExtras.getOk(reply)) {
             rootsList.clear();
             isLoading = false;
