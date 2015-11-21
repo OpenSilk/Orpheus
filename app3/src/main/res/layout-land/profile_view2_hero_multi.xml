@@ -36,7 +36,8 @@
             android:layout_weight="1"
             android:layout_height="match_parent"
             android:layout_marginRight="1dp"
-            android:fitsSystemWindows="true"/>
+            android:fitsSystemWindows="true"
+            style="@style/Artwork"/>
 
         <ImageView
             android:id="@+id/hero_image2"
@@ -45,7 +46,8 @@
             android:layout_height="match_parent"
             android:layout_marginLeft="1dp"
             android:layout_marginRight="1dp"
-            android:fitsSystemWindows="true"/>
+            android:fitsSystemWindows="true"
+            style="@style/Artwork"/>
 
         <ImageView
             android:id="@+id/hero_image4"
@@ -54,7 +56,8 @@
             android:layout_height="match_parent"
             android:layout_marginLeft="1dp"
             android:layout_marginRight="1dp"
-            android:fitsSystemWindows="true"/>
+            android:fitsSystemWindows="true"
+            style="@style/Artwork"/>
 
         <ImageView
             android:id="@+id/hero_image3"
@@ -62,7 +65,8 @@
             android:layout_weight="1"
             android:layout_height="match_parent"
             android:layout_marginLeft="1dp"
-            android:fitsSystemWindows="true"/>
+            android:fitsSystemWindows="true"
+            style="@style/Artwork"/>
 
     </LinearLayout>
 

@@ -36,7 +36,8 @@
             android:layout_gravity="top|left"
             android:layout_marginBottom="1dp"
             android:layout_marginRight="1dp"
-            android:fitsSystemWindows="true"/>
+            android:fitsSystemWindows="true"
+            style="@style/Artwork"/>
 
         <org.opensilk.common.ui.widget.HalfSizeSquareImageView
             android:id="@+id/hero_image2"
@@ -45,7 +46,8 @@
             android:layout_gravity="top|right"
             android:layout_marginBottom="1dp"
             android:layout_marginLeft="1dp"
-            android:fitsSystemWindows="true"/>
+            android:fitsSystemWindows="true"
+            style="@style/Artwork"/>
 
         <org.opensilk.common.ui.widget.HalfSizeSquareImageView
             android:id="@+id/hero_image3"
@@ -53,7 +55,8 @@
             android:layout_height="match_parent"
             android:layout_gravity="bottom|left"
             android:layout_marginTop="1dp"
-            android:layout_marginRight="1dp"/>
+            android:layout_marginRight="1dp"
+            style="@style/Artwork"/>
 
         <org.opensilk.common.ui.widget.HalfSizeSquareImageView
             android:id="@+id/hero_image4"
@@ -61,7 +64,8 @@
             android:layout_height="match_parent"
             android:layout_gravity="bottom|right"
             android:layout_marginTop="1dp"
-            android:layout_marginLeft="1dp"/>
+            android:layout_marginLeft="1dp"
+            style="@style/Artwork"/>
 
     </org.opensilk.common.ui.widget.SquareFrameLayout>
 

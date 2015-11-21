@@ -54,7 +54,6 @@ import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.TrackList;
-import org.opensilk.music.ui.widget.GridTileDescription;
 
 import java.util.ArrayList;
 import java.util.List;

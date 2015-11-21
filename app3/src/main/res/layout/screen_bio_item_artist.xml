@@ -33,7 +33,8 @@
         android:id="@+id/artwork_thumb"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        tools:src="@drawable/default_artwork"/>
+        tools:src="@drawable/default_artwork"
+        style="@style/Artwork.Thumbnail"/>
 
     <TextView
         android:id="@+id/artist_name"

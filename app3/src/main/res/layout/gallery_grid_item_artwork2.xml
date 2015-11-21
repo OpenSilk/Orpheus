@@ -36,7 +36,7 @@
             android:layout_height="match_parent"
             android:layout_gravity="top|left"
             android:layout_marginRight="1dp"
-            style="@style/Orpheus.Thumbnail"/>
+            style="@style/Artwork.Thumbnail"/>
 
         <org.opensilk.common.ui.widget.SquareImageView
             android:id="@+id/artwork_thumb2"
@@ -44,7 +44,7 @@
             android:layout_height="match_parent"
             android:layout_gravity="top|right"
             android:layout_marginLeft="1dp"
-            style="@style/Orpheus.Thumbnail"/>
+            style="@style/Artwork.Thumbnail"/>
 
     </org.opensilk.common.ui.widget.HalfHeightFrameLayout>
 

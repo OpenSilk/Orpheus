@@ -94,7 +94,7 @@ public abstract class MusicActivity extends MortarFragmentActivity
         boolean hasdrawer = false;
         if (drawerLayout != null) {
             mDrawerOwnerDelegate = new DrawerOwnerDelegate<>(this, mDrawerOwner, drawerLayout,
-                    R.string.app_name, R.string.app_name);
+                    R.string.navigation_drawer_close, R.string.navigation_drawer_open);
             mDrawerOwnerDelegate.onCreate();
             hasdrawer = true;
         }

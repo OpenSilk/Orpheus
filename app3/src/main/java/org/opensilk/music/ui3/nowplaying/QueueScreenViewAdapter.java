@@ -37,7 +37,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.playback.control.PlaybackController;
-import org.opensilk.music.ui.widget.PlayingIndicator;
+import org.opensilk.music.ui3.common.PlayingIndicator;
 
 import java.util.List;
 
@@ -45,7 +45,6 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import hugo.weaving.DebugLog;
 
 /**
  * Created by drew on 5/10/15.

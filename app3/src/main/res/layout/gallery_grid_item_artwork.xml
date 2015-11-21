@@ -30,7 +30,7 @@
         android:id="@+id/artwork_thumb"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="@style/Orpheus.Thumbnail"/>
+        style="@style/Artwork.Thumbnail"/>
 
     <include layout="@layout/gallery_grid_item_description"
         android:layout_width="match_parent"

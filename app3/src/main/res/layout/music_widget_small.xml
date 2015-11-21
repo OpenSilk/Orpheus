@@ -28,6 +28,7 @@
         android:layout_width="@dimen/music_widget_small_min_height"
         android:layout_height="@dimen/music_widget_small_min_height"
         android:scaleType="centerCrop"
+        android:contentDescription="@string/accessibility_artwork"
         tools:src="@drawable/default_artwork"/>
 
     <LinearLayout

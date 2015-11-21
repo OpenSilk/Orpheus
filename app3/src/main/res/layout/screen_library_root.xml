@@ -48,13 +48,13 @@
                 android:id="@+id/btn_retry"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/LibraryRootRefresh"/>
+                style="@style/Refresh"/>
 
             <ImageButton
                 android:id="@+id/tile_overflow"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                style="@style/LibraryRootOverflow"/>
+                style="@style/Overflow"/>
 
         </LinearLayout>
 

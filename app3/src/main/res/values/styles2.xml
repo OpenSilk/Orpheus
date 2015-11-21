@@ -21,10 +21,13 @@
         <!--namespace-->
     </style>
 
-    <style name="Orpheus.Thumbnail">
-        <item name="android:scaleType">centerCrop</item>
-        <item name="android:layout_gravity">center</item>
+    <style name="Artwork">
         <item name="android:gravity">center</item>
+        <item name="android:scaleType">centerCrop</item>
+        <item name="android:contentDescription">@string/accessibility_artwork</item>
+    </style>
+
+    <style name="Artwork.Thumbnail">
     </style>
 
     <style name="SingleLineTextView">
@@ -77,13 +80,14 @@
 
     </style>
 
-    <style name="GalleryBioMore" parent="Widget.AppCompat.ActionButton">
-        <item name="android:src">@drawable/ic_more_grey600_24dp</item>
-        <item name="android:background">?selectableItemBackground</item>
+    <style name="BtnMore" parent="Widget.AppCompat.ActionButton">
+        <item name="android:src">@drawable/more_grey600_24dp</item>
+        <item name="android:contentDescription">@string/accessibility_more</item>
     </style>
 
     <style name="DragHandle" parent="Widget.AppCompat.ActionButton">
-        <item name="android:src">@drawable/ic_drag_vertical_grey600_24dp</item>
+        <item name="android:src">@drawable/drag_vertical_grey600_24dp</item>
+        <item name="android:contentDescription">@string/accessibility_drag</item>
     </style>
 
     <!-- end tiles -->
@@ -250,26 +254,20 @@
 
     <!-- end drawer controls-->
 
-    <style name="TextAppearanceCollapsingToolbar" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
-        <item name="android:textColor">@color/white</item>
-    </style>
-
-    <style name="TextAppearanceCollapsingToolbar.Expanded" parent="TextAppearance.Design.CollapsingToolbar.Expanded">
-        <item name="android:textColor">@color/white</item>
-    </style>
-
     <!--libraries-->
     <style name="FoldersFab" parent="Widget.Design.FloatingActionButton">
         <item name="android:src">@drawable/action_plusminus_box_white_24dp</item>
         <item name="elevation">8dp</item>
     </style>
 
-    <style name="LibraryRootRefresh" parent="Widget.AppCompat.ActionButton">
-        <item name="android:src">@drawable/ic_refresh_grey600_24dp</item>
+    <style name="Refresh" parent="Widget.AppCompat.ActionButton">
+        <item name="android:src">@drawable/refresh_grey600_24dp</item>
+        <item name="android:contentDescription">@string/accessibility_refresh</item>
     </style>
 
-    <style name="LibraryRootOverflow" parent="Widget.AppCompat.ActionButton">
-        <item name="android:src">@drawable/ic_dots_vertical_grey600_24dp</item>
+    <style name="Overflow" parent="Widget.AppCompat.ActionButton">
+        <item name="android:src">@drawable/dots_vertical_grey600_24dp</item>
+        <item name="android:contentDescription">@string/accessibility_more</item>
     </style>
 
     <!--profile-->
@@ -281,8 +279,6 @@
     <style name="ProfileCollapsingToolbar">
         <item name="expandedTitleMarginStart">36dp</item>
         <item name="expandedTitleMarginEnd">64dp</item>
-        <!--<item name="collapsedTitleTextAppearance">@style/TextAppearanceCollapsingToolbar</item>-->
-        <!--<item name="expandedTitleTextAppearance">@style/TextAppearanceCollapsingToolbar.Expanded</item>-->
     </style>
 
     <style name="ProfileRecycler" parent="mtrl.List">

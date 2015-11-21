@@ -77,7 +77,7 @@ public class App extends BaseApp {
     }
 
     boolean isEmulator() {
-        return StringUtils.isEmpty(mProcName);
+        return StringUtils.isEmpty(getProcName());
     }
 
     private String mProcName;
@@ -94,7 +94,7 @@ public class App extends BaseApp {
                     }
                 }
             } catch (IOException e) {
-                Timber.e(e, "isServiceProcess");
+                Timber.e(e, "getProcName");
                 mProcName = "";
             }
         }

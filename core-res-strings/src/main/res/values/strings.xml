@@ -118,6 +118,10 @@
     <string name="accessibility_add">Add</string>
     <string name="accessibility_select">Select</string>
     <string name="accessibility_artwork">Artwork</string>
+    <string name="accessibility_orpheus" translatable="false">Orpheus</string>
+    <string name="accessibility_drag">Drag</string>
+    <string name="accessibility_more">More</string>
+    <string name="accessibility_refresh">Refresh</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
@@ -160,6 +164,7 @@
 
     <!--reenderer screen-->
     <string name="set_renderer_volume">Set renderer volume</string>
+    <string name="active_renderer">Active</string>
 
     <!--scanner-->
     <string name="scan_running">Scan running…</string>
@@ -179,6 +184,7 @@
 
     <!-- Empty list  -->
     <string name="empty_music">To add music to the library browse to a folder and click the add button.</string>
+    <string name="empty_playlists">To create playlists select items in 'My Library' and press 'Add to playlist'</string>
     <string name="error_loading_list">There was an error loading the items.</string>
 
     <!-- Settings -->

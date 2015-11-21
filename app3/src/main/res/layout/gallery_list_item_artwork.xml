@@ -27,13 +27,14 @@
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
     android:foreground="?selectableItemBackground"
-    style="@style/GalleryGridTile">
+    style="@style/GalleryListTile">
 
     <ImageView
         android:id="@+id/artwork_thumb"
         android:layout_width="42dp"
         android:layout_height="42dp"
-        tools:src="@drawable/default_artwork"/>
+        tools:src="@drawable/default_artwork"
+        style="@style/Artwork.Thumbnail"/>
 
     <include layout="@layout/gallery_list_item_common"/>
 

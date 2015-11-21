@@ -37,9 +37,6 @@
             android:layout_height="wrap_content"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
             android:fitsSystemWindows="true"
-            android:textColor="@color/white"
-            app:collapsedTitleTextAppearance="@style/TextAppearanceCollapsingToolbar"
-            app:expandedTitleTextAppearance="@style/TextAppearanceCollapsingToolbar.Expanded"
             app:contentScrim="?colorPrimary"
             app:expandedTitleMarginStart="48dp"
             app:expandedTitleMarginEnd="64dp">

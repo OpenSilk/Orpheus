@@ -23,4 +23,5 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/action_bar_double_height"
     android:scaleType="fitXY"
-    android:src="@drawable/banner"/>
+    android:src="@drawable/banner"
+    android:contentDescription="@string/accessibility_orpheus"/>
