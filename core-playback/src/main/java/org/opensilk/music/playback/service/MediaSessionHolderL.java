@@ -71,7 +71,7 @@ class MediaSessionHolderL implements IMediaSessionProxy {
         mSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS
                 | MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
         mSession.setSessionActivity(PendingIntent.getActivity(
-                context, 2, NavUtils.makeLauncherIntent(context),
+                context, 2, NavUtils.makePlayerIntent(context),
                 PendingIntent.FLAG_UPDATE_CURRENT));
         final ComponentName mediaButtonReceiverComponent
                 = new ComponentName(context, MediaButtonIntentReceiver.class);

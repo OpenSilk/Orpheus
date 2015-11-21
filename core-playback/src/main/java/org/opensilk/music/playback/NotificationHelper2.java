@@ -205,9 +205,9 @@ public class NotificationHelper2 extends BroadcastReceiver {
     }
 
     private PendingIntent createContentIntent() {
-        Intent openUI = NavUtils.makeLauncherIntent(mContext);
+        Intent openUI = NavUtils.makePlayerIntent(mContext);
         return PendingIntent.getActivity(mContext, REQUEST_CODE, openUI,
-                PendingIntent.FLAG_CANCEL_CURRENT);
+                PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     private final IMediaControllerProxy.Callback mCb = new IMediaControllerProxy.Callback() {
@@ -436,10 +436,12 @@ public class NotificationHelper2 extends BroadcastReceiver {
     }
 
     public void showError(String msg) {
+        PendingIntent contentIntent = PendingIntent.getActivity(mContext,
+                4, NavUtils.makeLauncherIntent(mContext), PendingIntent.FLAG_UPDATE_CURRENT);
         Notification notif = new NotificationCompat.Builder(mContext)
                 .setContentTitle(mContext.getString(R.string.msg_title_playback_error))
                 .setContentText(msg)
-                .setContentIntent(createContentIntent())
+                .setContentIntent(contentIntent)
                 .setSmallIcon(R.drawable.alert_white_24dp)
                 .setCategory(NotificationCompat.CATEGORY_ERROR)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)

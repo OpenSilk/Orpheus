@@ -22,13 +22,19 @@ import android.content.Intent;
  */
 public final class NavUtils {
 
+    public static Intent makePlayerIntent(Context context) {
+        return new Intent()
+                .setPackage(context.getPackageName())
+                .setAction("org.opensilk.music.AUDIO_PLAYER")
+                ;
+    }
+
     /**
      * Alias wrapper after renaming home activity
      */
     public static Intent makeLauncherIntent(Context context) {
         return new Intent()
                 .setComponent(new ComponentName(context, "org.opensilk.music.ui.activities.HomeSlidingActivity"))
-                .setAction("org.opensilk.music.AUDIO_PLAYER")
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
