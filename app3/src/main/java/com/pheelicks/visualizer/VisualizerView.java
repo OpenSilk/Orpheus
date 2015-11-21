@@ -104,6 +104,7 @@ public class VisualizerView extends View {
 
   public void link(int sessionId) {
     try {
+      release();
       mVisualizer = new Visualizer(sessionId);
     } catch (RuntimeException e) {
       Toast.makeText(getContext(), R.string.err_no_visualizations_foru, Toast.LENGTH_LONG).show();
