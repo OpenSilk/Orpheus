@@ -184,7 +184,6 @@
 
     <!-- Empty list  -->
     <string name="empty_music">To add music to the library browse to a folder and click the add button.</string>
-    <string name="empty_playlists">To create playlists select items in 'My Library' and press 'Add to playlist'</string>
     <string name="error_loading_list">There was an error loading the items.</string>
 
     <!-- Settings -->
