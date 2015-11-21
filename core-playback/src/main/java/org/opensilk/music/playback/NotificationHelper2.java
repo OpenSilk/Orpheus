@@ -20,6 +20,7 @@ package org.opensilk.music.playback;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,6 +36,7 @@ import android.widget.RemoteViews;
 
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.util.VersionUtils;
+import org.opensilk.music.playback.appwidget.AppWidgetService;
 import org.opensilk.music.playback.service.PlaybackServiceProxy;
 import org.opensilk.music.playback.session.IMediaControllerProxy;
 
@@ -130,6 +132,7 @@ public class NotificationHelper2 extends BroadcastReceiver {
             mContext.registerReceiver(this, filter);
             mStarted = true;
             buildNotification();
+            notifyAppWidgets();
         }
     }
 
@@ -224,6 +227,7 @@ public class NotificationHelper2 extends BroadcastReceiver {
                 } else {
                     buildNotification();
                 }
+                notifyAppWidgets();
             }
         }
 
@@ -232,6 +236,7 @@ public class NotificationHelper2 extends BroadcastReceiver {
             mMetadata = metadata;
             Timber.d("Received new metadata %s", metadata);
             buildNotification();
+            notifyAppWidgets();
         }
 
         @Override
@@ -425,14 +430,11 @@ public class NotificationHelper2 extends BroadcastReceiver {
         }
     }
 
-    private Bitmap scaleBitmap(Bitmap bmp, int maxSize) {
-        float maxSizeF = maxSize;
-        float widthScale = maxSizeF / bmp.getWidth();
-        float heightScale = maxSizeF / bmp.getHeight();
-        float scale = Math.min(widthScale, heightScale);
-        int height = (int) (bmp.getHeight() * scale);
-        int width = (int) (bmp.getWidth() * scale);
-        return Bitmap.createScaledBitmap(bmp, width, height, true);
+    void notifyAppWidgets() {
+        AppWidgetService appWidgetService = AppWidgetService.getService(mContext);
+        appWidgetService.setMeta(mMetadata);
+        appWidgetService.setPlaybackState(mPlaybackState);
+        appWidgetService.notify(mContext);
     }
 
     public void showError(String msg) {
@@ -448,6 +450,16 @@ public class NotificationHelper2 extends BroadcastReceiver {
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .build();
         mNotificationManager.notify(ERROR_NOTIF_ID, notif);
+    }
+
+    private Bitmap scaleBitmap(Bitmap bmp, int maxSize) {
+        float maxSizeF = maxSize;
+        float widthScale = maxSizeF / bmp.getWidth();
+        float heightScale = maxSizeF / bmp.getHeight();
+        float scale = Math.min(widthScale, heightScale);
+        int height = (int) (bmp.getHeight() * scale);
+        int width = (int) (bmp.getWidth() * scale);
+        return Bitmap.createScaledBitmap(bmp, width, height, true);
     }
 
 }

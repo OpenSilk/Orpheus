@@ -23,11 +23,13 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.app.BaseApp;
 import org.opensilk.common.core.app.SimpleComponentCallbacks;
+import org.opensilk.music.playback.appwidget.AppWidgetService;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import mortar.MortarScope;
 import timber.log.Timber;
 
 public class App extends BaseApp {
@@ -39,6 +41,13 @@ public class App extends BaseApp {
         setupTimber(DEBUG, null);
         registerComponentCallbacks(mComponentCallbacks);
         enableStrictMode();
+    }
+
+    @Override
+    protected void onBuildRootScope(MortarScope.Builder builder) {
+        if (isServiceProcess() || isEmulator()) {
+            builder.withService(AppWidgetService.SERVICE_NAME, new AppWidgetService());
+        }
     }
 
     @Override
@@ -65,6 +74,10 @@ public class App extends BaseApp {
 
     boolean isProviderProcess() {
         return StringUtils.endsWith(getProcName(), ":prvdr");
+    }
+
+    boolean isEmulator() {
+        return StringUtils.isEmpty(mProcName);
     }
 
     private String mProcName;

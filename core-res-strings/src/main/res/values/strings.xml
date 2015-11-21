@@ -168,6 +168,11 @@
     <string name="scan_no_connection">No network connection</string>
     <string name="scan_no_connection_msg">Scanner needs a network connection to continue. Please reconnect then restart the scan</string>
 
+    <!--app widgets-->
+    <string name="widget_ultra_mini_label">Orpheus Ultra-Mini</string>
+    <string name="widget_mini_label">Orpheus Mini</string>
+    <string name="widget_small_label">Orpheus Small</string>
+
     <!-- misc -->
     <string name="opensilk_org_url" translatable="false">http://opensilk.org/</string>
     <string name="playstore_package_url" translatable="false">https://play.google.com/store/apps/details?id=%s</string>

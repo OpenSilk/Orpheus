@@ -170,6 +170,12 @@ public interface PlaybackConstants {
      * end mediabrowser
      */
 
+    /*
+     * Widgets
+     */
+
+    String WIDGET_UPDATE_ACTION = "org.opensilk.music.appwidget.update";
+
     interface ACTION {
         String CYCLE_REPEAT = "cmd.cyclerepeat";
         String TOGGLE_SHUFFLE_MODE = "cmd.shufflequeue";

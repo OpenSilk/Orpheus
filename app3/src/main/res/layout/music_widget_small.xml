@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2015 OpenSilk Productions LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:id="@+id/widget_container"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/music_widget_small_min_height"
+    android:orientation="horizontal"
+    android:background="@color/grey_900">
+
+    <ImageView
+        android:id="@+id/widget_album_art"
+        android:layout_width="@dimen/music_widget_small_min_height"
+        android:layout_height="@dimen/music_widget_small_min_height"
+        android:scaleType="centerCrop"
+        tools:src="@drawable/default_artwork"/>
+
+    <LinearLayout
+        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center_vertical"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp">
+
+        <TextView
+            android:id="@+id/widget_song_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:textAppearance="?android:textAppearance"
+            android:textColor="@color/white_text"
+            tools:text="Track title"/>
+
+        <TextView
+            android:id="@+id/widget_artist_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:textAppearance="?android:textAppearanceSmall"
+            android:textColor="@color/white_text_secondary"
+            tools:text="Artist name"/>
+
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/widget_play"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:padding="8dp"
+        android:background="?android:selectableItemBackground"
+        android:focusable="true"
+        android:scaleType="centerInside"
+        android:contentDescription="@string/accessibility_play"
+        tools:src="@drawable/ic_play_white_36dp" />
+
+    <ImageButton
+        android:id="@+id/widget_next"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:padding="8dp"
+        android:background="?android:selectableItemBackground"
+        android:focusable="true"
+        android:scaleType="centerInside"
+        android:contentDescription="@string/accessibility_next"
+        android:src="@drawable/ic_skip_next_white_36dp" />
+
+</LinearLayout>

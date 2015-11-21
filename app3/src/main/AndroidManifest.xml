@@ -145,6 +145,34 @@
                 android:value=".settings.SettingsActivity"/>
         </activity>
 
+        <!-- 1x1 Ultra-mini widget -->
+        <receiver
+            android:name="org.opensilk.music.appwidgets.MusicWidgetUltraMini"
+            android:label="@string/widget_ultra_mini_label"
+            android:process=":service">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="org.opensilk.music.appwidget.update"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/music_widget_ultra_mini" />
+        </receiver>
+
+        <!-- 4x1 Small widget -->
+        <receiver
+            android:name="org.opensilk.music.appwidgets.MusicWidgetSmall"
+            android:label="@string/widget_small_label"
+            android:process=":service">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="org.opensilk.music.appwidget.update"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/music_widget_small" />
+        </receiver>
+
         <!-- Artwork provider -->
         <provider
             android:authorities="${applicationId}.provider.artwork"
