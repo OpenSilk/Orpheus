@@ -74,7 +74,6 @@ public class NotificationHelper {
         if (running) {
             service.startForeground(NOTIF_ID, notification);
         } else {
-            service.stopForeground(false);
             notificationManager.notify(NOTIF_ID, notification);
         }
     }

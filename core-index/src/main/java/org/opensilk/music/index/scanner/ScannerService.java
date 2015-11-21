@@ -101,6 +101,12 @@ public class ScannerService extends MortarIntentService {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mNotifHelper.updateNotification(false);
+    }
+
+    @Override
     @DebugLog
     protected void onHandleIntent(Intent intent) {
         if (!ConnectionUtils.hasInternetConnection(this)) {
@@ -108,7 +114,7 @@ public class ScannerService extends MortarIntentService {
             return;
         }
         status.set(Status.SCANNING);
-        final Subscription notifSubs = Observable.interval(5, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+        final Subscription notifSubs = Observable.interval(1, 5, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Long>() {
                     @Override
                     public void call(Long aLong) {
@@ -144,7 +150,7 @@ public class ScannerService extends MortarIntentService {
         }
         notifSubs.unsubscribe();
         status.set(Status.COMPLETED);
-        mNotifHelper.updateNotification(false);
+        stopForeground(true);
     }
 
     void notifySuccess(Uri uri) {
