@@ -102,19 +102,19 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP INDEX IF EXISTS track_res_id_idx;");
             db.execSQL("DROP INDEX IF EXISTS containers_uri_idx;");
 
-            db.execSQL("DROP TABLE IF EXISTS track_meta;");
-            db.execSQL("DROP TABLE IF EXISTS album_meta;");
-            db.execSQL("DROP TABLE IF EXISTS artist_meta;");
-            db.execSQL("DROP TABLE IF EXISTS genre_meta;");
-            db.execSQL("DROP TABLE IF EXISTS containers;");
-            db.execSQL("DROP TABLE IF EXISTS tracks;");
-
             db.execSQL("DROP VIEW IF EXISTS playlist_album_map;");
             db.execSQL("DROP VIEW IF EXISTS playlist_info;");
             db.execSQL("DROP VIEW IF EXISTS playlist_track_info;");
             db.execSQL("DROP TABLE IF EXISTS playlist_track;");
             db.execSQL("DROP TABLE IF EXISTS playlist_meta;");
             db.execSQL("DROP TABLE IF EXISTS playlist_track_meta;");
+
+            db.execSQL("DROP TABLE IF EXISTS track_meta;");
+            db.execSQL("DROP TABLE IF EXISTS album_meta;");
+            db.execSQL("DROP TABLE IF EXISTS artist_meta;");
+            db.execSQL("DROP TABLE IF EXISTS genre_meta;");
+            db.execSQL("DROP TABLE IF EXISTS containers;");
+            db.execSQL("DROP TABLE IF EXISTS tracks;");
         } else if (oldVersion < 39) {
             db.execSQL("DROP VIEW IF EXISTS track_info;");
         }

@@ -57,6 +57,7 @@ dependencies {
     compile project(':core-lastfm')
     compile project(':core-artwork')
     compile project(':core-res-strings')
+    compile project(':core-res-drawables')
 
     testCompile (group:"junit", name:"junit", version: rootProject.ext.testJunitVersion)
     testCompile (group:"org.assertj", name:"assertj-core", version: rootProject.ext.testAssertJVersion)

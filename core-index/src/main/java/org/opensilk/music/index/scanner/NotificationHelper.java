@@ -19,7 +19,9 @@ package org.opensilk.music.index.scanner;
 
 import android.app.Notification;
 import android.content.Context;
+import android.graphics.drawable.BitmapDrawable;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.NotificationCompat;
 
 import org.opensilk.music.index.R;
@@ -62,7 +64,7 @@ public class NotificationHelper {
         builder.setCategory(NotificationCompat.CATEGORY_MESSAGE);
         builder.setPriority(NotificationCompat.PRIORITY_DEFAULT);
         builder.setAutoCancel(!running);
-        builder.setSmallIcon(R.drawable.ic_sync_white_24dp);
+        builder.setSmallIcon(R.drawable.sync_white_24dp);
         int title = service.status.get() == Status.COMPLETED ? R.string.scan_finished : R.string.scan_running;
         builder.setContentTitle(appContext.getString(title));
         builder.setContentText(appContext.getString(R.string.scan_progress,
@@ -83,7 +85,7 @@ public class NotificationHelper {
         builder.setCategory(NotificationCompat.CATEGORY_ERROR);
         builder.setPriority(NotificationCompat.PRIORITY_DEFAULT);
         builder.setAutoCancel(true);
-        builder.setSmallIcon(R.drawable.ic_sync_white_24dp);//todo different icon
+        builder.setSmallIcon(R.drawable.sync_alert_white_24dp);
         builder.setContentTitle(appContext.getString(R.string.scan_no_connection));
         builder.setContentText(appContext.getString(R.string.scan_no_connection_msg));
         Notification notification = builder.build();
