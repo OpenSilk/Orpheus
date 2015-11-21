@@ -41,6 +41,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import static org.opensilk.music.index.database.TestData.*;
+
 /**
  * Created by drew on 9/20/15.
  */
@@ -67,27 +69,22 @@ public class DatabaseTest {
 
     @Test
     public void testAddRemoveContainers() {
-        Uri uri = Uri.parse("content://sample/foo/bar");
-        Uri parentUri = Uri.parse("content://sample/foo");
-        long insId = mDb.insertContainer(uri, parentUri);
-        long lookId = mDb.hasContainer(uri);
+        long insId = mDb.insertContainer(URI_SFB, URI_SFB_PARENT);
+        long lookId = mDb.hasContainer(URI_SFB);
         Assertions.assertThat(lookId).isEqualTo(insId);
-        for (int ii=0; ii<10; ii++) {
-            Uri child = Uri.parse("content://sample/foo/bar/"+ii);
-            long iid = mDb.insertContainer(child, uri);
+        for (Uri child : URI_SFB_CHILDREN_0_10) {
+            long iid = mDb.insertContainer(child, URI_SFB);
             long lid = mDb.hasContainer(child);
             Assertions.assertThat(iid).isEqualTo(lid);
         }
-        int cnt = mDb.removeContainer(uri);
+        int cnt = mDb.removeContainer(URI_SFB);
         Assertions.assertThat(cnt).isEqualTo(11);
     }
 
     @Test
     public void testDoubleContainerInsert() {
-        Uri uri = Uri.parse("content://sample/foo2/bar");
-        Uri parentUri = Uri.parse("content://sample/foo2");
-        long insId = mDb.insertContainer(uri, parentUri);
-        long insId2 =mDb.insertContainer(uri, parentUri);
+        long insId = mDb.insertContainer(URI_SFB, URI_SFB_PARENT);
+        long insId2 =mDb.insertContainer(URI_SFB, URI_SFB_PARENT);
         Assertions.assertThat(insId).isEqualTo(insId2);
     }
 
@@ -106,36 +103,20 @@ public class DatabaseTest {
 
     @Test
     public void testCleanupMetaTriggers() {
-        Uri containerUri = Uri.parse("content://sample/foo/bar");
-        Uri containerParentUri = Uri.parse("content://sample/foo");
-        long containerId = mDb.insertContainer(containerUri, containerParentUri);
-
+        long containerId = mDb.insertContainer(URI_SFB, URI_SFB_PARENT);
         long[] trackIds = null;
         for (int ii=0; ii<10; ii++) {
-            Track track = Track.builder()
-                    .setUri(Uri.parse("content://sample/track" + ii))
-                    .setName("track" + ii)
-                    .setParentUri(containerUri)
-                    .addRes(Track.Res.builder().setUri(Uri.parse("content://sample/res"+ii)).build())
-                    .build();
-            Metadata meta = Metadata.builder()
-                    .putString(Metadata.KEY_TRACK_NAME, "metatrack"+ii)
-                    .putString(Metadata.KEY_ALBUM_NAME, "album"+ii%2)
-                    .putString(Metadata.KEY_ARTIST_NAME, "artist" + ii % 2)
-                    .putString(Metadata.KEY_ALBUM_ARTIST_NAME, "artist"+ii%2)
-                    .build();
-            long trackId = mDb.insertTrack(track, meta);
+            long trackId = mDb.insertTrack(TRACK_SFB_0_10.get(ii), METADATA_TRACK_SFB_0_10.get(ii));
             Assertions.assertThat(trackId).isGreaterThan(0);
             trackIds = ArrayUtils.add(trackIds, trackId);
         }
-
         //make sure we have the number of items we expect
         Assertions.assertThat(mDb.getArtists(null, null).size()).isEqualTo(2);
         Assertions.assertThat(mDb.getAlbums(null, null).size()).isEqualTo(2);
         Assertions.assertThat(mDb.getTracks(null, null).size()).isEqualTo(10);
 
         //removee the container
-        long numremoved = mDb.removeContainer(containerUri);
+        long numremoved = mDb.removeContainer(URI_SFB);
         Assertions.assertThat(numremoved).isEqualTo(1);
 
         //check that triggers cleared out tables
@@ -412,6 +393,43 @@ public class DatabaseTest {
         pltracks5 = mDb.getPlaylistTracks(String.valueOf(plid), TrackSortOrder.PLAYORDER);
         Assertions.assertThat(pltracks5.size()).isEqualTo(0);
 
+    }
+
+    @Test
+    public void testSaveGetQueue() {
+        mDb.saveQueue(URI_SFB_CHILDREN_0_10);
+        List<Uri> queue = mDb.getLastQueue();
+        Assertions.assertThat(queue).isEqualTo(URI_SFB_CHILDREN_0_10);
+    }
+
+    @Test
+    public void testSaveGetLastQueuePos() {
+        mDb.saveQueuePosition(4);
+        Assertions.assertThat(mDb.getLastQueuePosition()).isEqualTo(4);
+    }
+
+    @Test
+    public void testSaveGetLastQueueShuffleMode() {
+        mDb.saveQueueShuffleMode(2);
+        Assertions.assertThat(mDb.getLastQueueShuffleMode()).isEqualTo(2);
+    }
+
+    @Test
+    public void testSaveGetLastQueueRepeatMode() {
+        mDb.saveQueueRepeatMode(1);
+        Assertions.assertThat(mDb.getLastQueueRepeatMode()).isEqualTo(1);
+    }
+
+    @Test
+    public void testSaveGetlastSeekPos() {
+        mDb.saveLastSeekPosition(300);
+        Assertions.assertThat(mDb.getLastSeekPosition()).isEqualTo(300);
+    }
+
+    @Test
+    public void testSaveGetBroadcastMeta() {
+        mDb.setBroadcastMeta(true);
+        Assertions.assertThat(mDb.getBroadcastMeta()).isTrue();
     }
 
 }

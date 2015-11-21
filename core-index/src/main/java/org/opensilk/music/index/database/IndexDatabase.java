@@ -76,8 +76,6 @@ public interface IndexDatabase {
 
     long hasContainer(Uri uri);
     @NonNull List<Pair<Uri, Uri>> findTopLevelContainers(@Nullable String authority);
-    int removeContainersInError(@Nullable String authority);
-    boolean markContainerInError(Uri uri);
     long insertContainer(Uri uri, Uri parentUri);
     int removeContainer(Uri uri);
     long insertTrack(Track track, Metadata metadata);

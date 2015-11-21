@@ -23,7 +23,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.provider.BaseColumns;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Pair;
@@ -1070,43 +1069,6 @@ public class IndexDatabaseImpl implements IndexDatabase {
         return topLevel;
     }
 
-    static final String[] containerUriCols = new String[] {
-            IndexSchema.Containers.URI,
-    };
-
-    @Override
-    public int removeContainersInError(@Nullable String authority) {
-        Cursor c = null;
-        try {
-            String sel = IndexSchema.Containers.IN_ERROR + "=?";
-            if (authority != null) {
-                sel += " AND " + IndexSchema.Containers.AUTHORITY + "=?";
-            }
-            String[] selArgs = authority != null ?
-                    new String[] {"1", authority} : new String[] {"1"};
-            c = query(IndexSchema.Containers.TABLE, containerUriCols,
-                    sel, selArgs, null, null, null);
-            if (c != null && c.moveToFirst()) {
-                int numRemoved = 0;
-                do {
-                    numRemoved += removeContainer(Uri.parse(c.getString(0)));
-                } while (c.moveToNext());
-                return numRemoved;
-            }
-            return 0;
-        } finally {
-            closeCursor(c);
-        }
-    }
-
-    @Override
-    public boolean markContainerInError(Uri uri) {
-        ContentValues cv = new ContentValues();
-        cv.put(IndexSchema.Containers.IN_ERROR, 1);
-        return update(IndexSchema.Containers.TABLE, cv,
-                containerUriSel, new String[]{uri.toString()}) == 1;
-    }
-
     @Override
     public long insertContainer(Uri uri, Uri parentUri) {
         ContentValues cv = new ContentValues(5);
@@ -1284,6 +1246,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
             //notify everyone
             mAppContext.getContentResolver().notifyChange(IndexUris.call(indexAuthority), null);
         }
+        clearCaches();
         return num > 0;
     }
 
