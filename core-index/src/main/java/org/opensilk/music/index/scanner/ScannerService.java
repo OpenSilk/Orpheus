@@ -18,6 +18,7 @@
 package org.opensilk.music.index.scanner;
 
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Pair;
@@ -26,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.core.mortar.MortarIntentService;
+import org.opensilk.common.core.util.ConnectionUtils;
 import org.opensilk.music.index.IndexComponent;
 import org.opensilk.music.index.database.IndexDatabase;
 import org.opensilk.music.index.database.TreeNode;
@@ -68,6 +70,7 @@ import static org.opensilk.music.model.Metadata.KEY_ARTIST_NAME;
 public class ScannerService extends MortarIntentService {
 
     public static final String ACTION_RESCAN = "rescan";
+    public static final String ACTION_CONNECTION_RESTORED = "connection_restored";
     public static final String EXTRA_AUTHORITY = "authority";
     public static final String EXTRA_LIBRARY_EXTRAS = "libraryextras";
 
@@ -100,6 +103,10 @@ public class ScannerService extends MortarIntentService {
     @Override
     @DebugLog
     protected void onHandleIntent(Intent intent) {
+        if (!ConnectionUtils.hasInternetConnection(this)) {
+            mNotifHelper.showNoConnection();
+            return;
+        }
         status.set(Status.SCANNING);
         final Subscription notifSubs = Observable.interval(5, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Long>() {

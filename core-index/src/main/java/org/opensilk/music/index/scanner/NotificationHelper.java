@@ -18,20 +18,15 @@
 package org.opensilk.music.index.scanner;
 
 import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.NotificationCompat;
 
-import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.index.R;
 
 import javax.inject.Inject;
 
 import hugo.weaving.DebugLog;
-import timber.log.Timber;
 
 /**
  * Created by drew on 9/20/15.
@@ -40,6 +35,7 @@ import timber.log.Timber;
 public class NotificationHelper {
 
     static int NOTIF_ID = 4395;
+    static int NOTIF_NO_CONN = 4396;
 
     public enum Status {
         SCANNING,
@@ -63,6 +59,9 @@ public class NotificationHelper {
     void updateNotification(boolean running) {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
+        builder.setCategory(NotificationCompat.CATEGORY_MESSAGE);
+        builder.setPriority(NotificationCompat.PRIORITY_DEFAULT);
+        builder.setAutoCancel(!running);
         builder.setSmallIcon(R.drawable.ic_sync_white_24dp);
         int title = service.status.get() == Status.COMPLETED ? R.string.scan_finished : R.string.scan_running;
         builder.setContentTitle(appContext.getString(title));
@@ -76,6 +75,20 @@ public class NotificationHelper {
             service.stopForeground(false);
             notificationManager.notify(NOTIF_ID, notification);
         }
+    }
+
+    void showNoConnection() {
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
+        builder.setCategory(NotificationCompat.CATEGORY_ERROR);
+        builder.setPriority(NotificationCompat.PRIORITY_DEFAULT);
+        builder.setAutoCancel(true);
+        builder.setSmallIcon(R.drawable.ic_sync_white_24dp);//todo different icon
+        builder.setContentTitle(appContext.getString(R.string.scan_no_connection));
+        builder.setContentText(appContext.getString(R.string.scan_no_connection_msg));
+        Notification notification = builder.build();
+
+        notificationManager.notify(NOTIF_NO_CONN, notification);
     }
 
 }
