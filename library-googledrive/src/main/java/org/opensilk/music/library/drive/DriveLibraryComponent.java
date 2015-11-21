@@ -21,6 +21,7 @@ import android.content.Context;
 
 import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.common.core.dagger2.AppContextModule;
+import org.opensilk.common.core.dagger2.SystemServicesComponent;
 import org.opensilk.music.okhttp.OkHttpComponent;
 
 import javax.inject.Singleton;
@@ -38,7 +39,7 @@ import rx.functions.Func1;
                 DriveLibraryModule.class
         }
 )
-public interface DriveLibraryComponent extends OkHttpComponent, AppContextComponent {
+public interface DriveLibraryComponent extends OkHttpComponent, AppContextComponent, SystemServicesComponent {
     Func1<Context, DriveLibraryComponent> FACTORY = new Func1<Context, DriveLibraryComponent>() {
         @Override
         public DriveLibraryComponent call(Context context) {
