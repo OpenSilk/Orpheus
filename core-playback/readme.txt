@@ -28,27 +28,13 @@ PlaybackQueue:
     and send them to Playback.
 
 Playback:
-    Its operation may change after writing this as it is brand new
-    at this time (pulled from the MediaBrowser sample then mangled beyond recognition).
-    Simply it manages two instances of IMediaPlayer. The IMediaPlayer is injected
-    via a factory when we call the load* methods. This allows uri specific
-    players (ie drm enabled player) as well as remote players.
-    It also operates asynchronously and is not thread safe, all callbacks and method
-    access must occur on the PlaybackService's handler thread. Which means when
-    MediaPlayers are created they must create a handler using Looper.myLooper()
-    and post callbacks to it.
+    Playback is handled by pluggable renderers see the core-playback-renderer
+    module.
 
-IMediaPlayer:
-    Api may change, depending on needs of playback
-    Currenly only one implementation the DefaultMediaPlayer which is simply
-    a wrapper for Androids MediaPlayer. Further implementations to come
-    including ExoPlayer and Chromecast.
-    This should (and will) become an aidl interface to allow communication
-    with remote players provided by plugins, however Playback will need to be made
-    thread safe at that point.
+MediaSession:
+    Playback was built around the mediasession introduced in android-L. Wrappers
+    and switchers and a whole lot of misdirection was added to support Kitkat and
+    prior. Sorry if this place is now a total cluster f***.
 
 TODOS:
-    remove player/mediaplayer packages
-    remove AudioManagerHelper and find another way to propagate audioSessionIds
-    remove PlaybackPreferences its function is now provided by index
-    test test test This is all brand new code and needs extensive tests written
+    tests

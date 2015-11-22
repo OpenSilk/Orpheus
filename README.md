@@ -1,22 +1,21 @@
-## Orpheus, the offspring of Apollo
+## Orpheus: offspring of Apollo, music player from hell
 
-Orpheus is in the middle of a ground up rewrite for 3.0. If your stumbling upon here you will likely
-want to checkout the latest tag. Though there is still a buildable version 2 in the `app` module.
-With dependencies in `api`, `common`, and `iab*` module. They are there for reference and will be removed
-once all applicable code has been copied.
-Orpheus 3 is in `app3` with dependencies in the `core-*`, `common-*`, `library-*`, and `plugin-*` modules.
-Its also noteworthy that app3 will only work on L+ until the support lib is fixed or I make a custom
-MediaSessionCompat
+There's kinda a lot going on here. The main app is in app3, with libraries in core-*, common-*, library-*,
+plugin-*, there are some other 'dead' modules here as well that will be removed someday.
+
+The primary focus for Orpheus is to build a nice core app that can be extended through
+plugins. External libraries are supported. Pluggable renderers are supported but must be bundled
+with the app, external renderers are still in the works.
 
 ### Building
 
 OpenSilk projects are managed by repo
 
     mkdir OpenSilk
-    repo init -u https://github.com/OpenSilk/Manifest
+    repo init -u https://github.com/OpenSilk/repo-manifest
     repo sync
     cd Orpheus
-    ./gradlew assembleDebug
+    ./gradlew app3:assembleDebug
 
 ### Contributing
 
