@@ -25,10 +25,15 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import org.opensilk.music.playback.PlaybackConstants;
 
 /**
+ * A bridge between the playback service and the appwidgets
+ * the widgets cannot directly access the playbacks service due to scoping
+ * issues, so we store the information they need here.
+ *
  * Created by drew on 11/20/15.
  */
 public class AppWidgetService {
-    public static String SERVICE_NAME = AppWidgetService.class.getName();
+    public static final String SERVICE_NAME = AppWidgetService.class.getName();
+    public static final String WIDGET_UPDATE_ACTION = "org.opensilk.music.appwidget.update";
 
     @SuppressWarnings("ResourceType")
     public static AppWidgetService getService(Context context) {
@@ -55,7 +60,7 @@ public class AppWidgetService {
     }
 
     public void notify(Context context) {
-        Intent intent = new Intent(PlaybackConstants.WIDGET_UPDATE_ACTION)
+        Intent intent = new Intent(WIDGET_UPDATE_ACTION)
                 .setPackage(context.getPackageName());
         context.sendBroadcast(intent);
     }

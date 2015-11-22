@@ -52,7 +52,7 @@ public class MusicWidgetBase extends AppWidgetProvider {
     @Override
     public void onReceive(Context context, Intent intent) {
         mService = AppWidgetService.getService(context);
-        if (PlaybackConstants.WIDGET_UPDATE_ACTION.equals(intent.getAction())) {
+        if (AppWidgetService.WIDGET_UPDATE_ACTION.equals(intent.getAction())) {
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
             int ids[] = appWidgetManager.getAppWidgetIds(
                     new ComponentName(context.getPackageName(), getClass().getName()));
