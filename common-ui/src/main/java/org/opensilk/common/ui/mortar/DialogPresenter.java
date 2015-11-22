@@ -17,7 +17,13 @@
 
 package org.opensilk.common.ui.mortar;
 
+import android.app.Dialog;
+import android.os.Bundle;
+
 import org.opensilk.common.core.dagger2.ActivityScope;
+import org.opensilk.common.core.mortar.MortarActivity;
+
+import java.lang.ref.WeakReference;
 
 import javax.inject.Inject;
 
@@ -32,27 +38,76 @@ import mortar.bundler.BundleService;
  * Created by drew on 10/15/15.
  */
 @ActivityScope
-public class DialogPresenter extends Presenter<DialogPresenterActivity> {
+public class DialogPresenter extends Presenter<MortarActivity> {
+
+    //what we need to restore the dialog on configuration change
+    private WeakReference<DialogFactory> mLastFactory;
+    private WeakReference<Dialog> mDialog;
+    private Bundle mSavedInstance;
+
 
     @Inject
     public DialogPresenter() {
     }
 
     @Override
-    protected BundleService extractBundleService(DialogPresenterActivity view) {
-        return BundleService.getBundleService(view.getScope());
+    protected BundleService extractBundleService(MortarActivity view) {
+        return BundleService.getBundleService(view);
+    }
+
+    @Override
+    protected void onLoad(Bundle savedInstanceState) {
+        super.onLoad(savedInstanceState);
+        if (mSavedInstance != null) {
+            DialogFactory lastFactory = mLastFactory != null ? mLastFactory.get() : null;
+            if (lastFactory != null) {
+                doShowDialog(lastFactory, mSavedInstance);
+            }
+        }
+    }
+
+    @Override
+    public void dropView(MortarActivity view) {
+        super.dropView(view);
+        mSavedInstance = doDismissDialog();
     }
 
     public void showDialog(DialogFactory factory) {
-        if (hasView()) {
-            getView().showDialog(factory);
-        }
+        dismissDialog();
+        mLastFactory = new WeakReference<>(factory);
+        doShowDialog(factory, null);
     }
 
     public void dismissDialog() {
-        if (hasView()) {
-            getView().dismissDialog();
+        doDismissDialog();
+        mSavedInstance = null;
+        if (mLastFactory != null) {
+            mLastFactory.clear();
         }
+    }
+
+    private void doShowDialog(DialogFactory factory, Bundle savedInstance) {
+        if (hasView()) {
+            Dialog dialog = factory.call(getView());
+            if (savedInstance != null) {
+                dialog.onRestoreInstanceState(savedInstance);
+            }
+            dialog.show();
+            mDialog = new WeakReference<Dialog>(dialog);
+        }
+    }
+
+    private Bundle doDismissDialog() {
+        Bundle savedInstance = null;
+        Dialog dialog = mDialog != null ? mDialog.get() : null;
+        if (dialog != null) {
+            if (dialog.isShowing()) {
+                savedInstance = dialog.onSaveInstanceState();
+            }
+            dialog.dismiss();
+            mDialog.clear();
+        }
+        return savedInstance;
     }
 
 }

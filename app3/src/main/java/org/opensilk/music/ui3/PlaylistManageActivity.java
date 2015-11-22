@@ -21,12 +21,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.core.util.BundleHelper;
-import org.opensilk.common.ui.mortar.DialogPresenterActivity;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
@@ -39,7 +37,7 @@ import mortar.MortarScope;
 /**
  * Created by drew on 10/23/15.
  */
-public class PlaylistManageActivity extends MusicActivity implements DialogPresenterActivity {
+public class PlaylistManageActivity extends MusicActivity {
 
     static final String ACTION_ADD = PlaylistManageActivity.class.getName() + ".action.add";
     static final String ACTION_MANAGE = PlaylistManageActivity.class.getName() + ".action.manage";

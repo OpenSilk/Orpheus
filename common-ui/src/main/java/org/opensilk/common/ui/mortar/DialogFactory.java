@@ -20,12 +20,10 @@ package org.opensilk.common.ui.mortar;
 import android.app.Dialog;
 import android.content.Context;
 
-import java.io.Serializable;
-
 import rx.functions.Func1;
 
 /**
  * Created by drew on 10/15/15.
  */
-public interface DialogFactory extends Func1<Context, Dialog>, Serializable {
+public interface DialogFactory extends Func1<Context, Dialog> {
 }

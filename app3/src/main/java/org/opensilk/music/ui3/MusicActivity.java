@@ -33,10 +33,7 @@ import org.opensilk.common.ui.mortar.ActionModeDelegateCallback;
 import org.opensilk.common.ui.mortar.ActionModePresenter;
 import org.opensilk.common.ui.mortar.ActivityResultsActivity;
 import org.opensilk.common.ui.mortar.ActivityResultsOwner;
-import org.opensilk.common.ui.mortar.DialogFactory;
-import org.opensilk.common.ui.mortar.DialogFactoryFragment;
 import org.opensilk.common.ui.mortar.DialogPresenter;
-import org.opensilk.common.ui.mortar.DialogPresenterActivity;
 import org.opensilk.common.ui.mortar.DrawerOwner;
 import org.opensilk.common.ui.mortar.DrawerOwnerDelegate;
 import org.opensilk.common.ui.mortar.ToolbarOwner;
@@ -61,7 +58,7 @@ import mortar.MortarScope;
  */
 public abstract class MusicActivity extends MortarFragmentActivity
         implements ActivityResultsActivity, ToolbarOwnerDelegate.Callback,
-        ActionModeActivity, DialogPresenterActivity {
+        ActionModeActivity {
 
     @Inject protected ActivityResultsOwner mActivityResultsOwner;
     @Inject protected PlaybackController mPlaybackController;
@@ -245,21 +242,4 @@ public abstract class MusicActivity extends MortarFragmentActivity
         return true;
     }
 
-        /*
-     * Dialog
-     */
-
-    @Override
-    public void showDialog(DialogFactory factory) {
-        dismissDialog();
-        DialogFactoryFragment.ni(factory).show(getSupportFragmentManager(), "dialogg");
-    }
-
-    @Override
-    public void dismissDialog() {
-        DialogFragment f = (DialogFragment) getSupportFragmentManager().findFragmentByTag("dialogg");
-        if (f != null) {
-            f.dismiss();
-        }
-    }
 }
