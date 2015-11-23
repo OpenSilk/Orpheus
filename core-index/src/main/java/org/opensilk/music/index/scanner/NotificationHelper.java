@@ -48,6 +48,8 @@ public class NotificationHelper {
     final Context appContext;
     final NotificationManagerCompat notificationManager;
 
+    boolean errorShowing;
+
     @Inject
     public NotificationHelper(
             ScannerService service
@@ -59,6 +61,9 @@ public class NotificationHelper {
 
     @DebugLog
     void updateNotification(boolean running) {
+        if (errorShowing) {
+            return;
+        }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
         builder.setCategory(NotificationCompat.CATEGORY_MESSAGE);
@@ -89,7 +94,10 @@ public class NotificationHelper {
         builder.setContentText(appContext.getString(R.string.scan_no_connection_msg));
         Notification notification = builder.build();
 
+        notificationManager.cancel(NOTIF_ID);
         notificationManager.notify(NOTIF_NO_CONN, notification);
+
+        errorShowing = true;
     }
 
 }
