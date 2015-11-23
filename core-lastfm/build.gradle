@@ -15,34 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-apply plugin: 'com.android.library'
-
-// Versioning
-def versionMajor = 0
-def versionMinor = 1
-def versionPatch = 0
-def versionBuild = 0 // bump for dogfood builds, public betas, etc.
-
-assert(versionMinor < 100) // Double digits
-assert(versionPatch < 100) // Double digits
-assert(versionBuild < 100) // Double digits
+apply from: '../android-library.gradle'
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
-
-    defaultConfig {
-        minSdkVersion 15
-        targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode versionMajor * 1000000 + versionMinor * 10000 + versionPatch * 100 + versionBuild
-        versionName String.format("%d.%d.%d-SNAPSHOT", versionMajor, versionMinor, versionPatch)
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
-    }
-
     if (file('../../KeyStore').exists()) {
         def Properties otherProps = new Properties();
         otherProps.load(new FileInputStream(file('../../KeyStore/orpheus.properties')))
@@ -51,24 +26,15 @@ android {
         println "No KeyStore directory found! (You can ignore this warning if your name is not drew)"
         defaultConfig.buildConfigField "String", "LASTFM_KEY", "null"
     }
-
-    defaultPublishConfig "debug"
-
 }
 
 dependencies {
-    provided(group: 'com.google.dagger', name:'dagger-compiler', version: rootProject.ext.dagger2Version)
-
     compile 'com.squareup.retrofit:retrofit:2.0.0-beta2'
     compile 'com.squareup.retrofit:adapter-rxjava:2.0.0-beta2'
 
     compile project(':common-core')
     compile project(':core-okhttp')
 
-    testCompile (group:"junit", name:"junit", version: rootProject.ext.testJunitVersion)
-    testCompile (group:"org.assertj", name:"assertj-core", version: rootProject.ext.testAssertJVersion)
-    testCompile (group:"org.robolectric", name:"robolectric", version : rootProject.ext.testRobolectricVersion)
-    testCompile (group:"org.mockito", name:"mockito-core", version: rootProject.ext.testMockitoVersion)
     testCompile "commons-io:commons-io:2.4"
     testCompile 'com.squareup.okhttp:mockwebserver:2.5.0'
 }
