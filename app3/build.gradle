@@ -22,16 +22,6 @@ android {
         applicationId "org.opensilk.music"
     }
 
-    dexOptions {
-        javaMaxHeapSize "2g"
-    }
-
-    packagingOptions {
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/NOTICE.txt'
-        exclude 'META-INF/beans.xml'
-    }
-
     if (file('../../KeyStore').exists()) {
         def Properties otherProps = new Properties();
         otherProps.load(new FileInputStream(file('../../KeyStore/orpheus.properties')))
@@ -49,11 +39,6 @@ android {
     }
 
 }
-
-//configurations.all {
-//    // check for updates every build
-//    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-//}
 
 dependencies {
     compile (group: 'com.android.support', name: 'cardview-v7', version: rootProject.ext.supportLibVersion)

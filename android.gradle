@@ -28,6 +28,16 @@ android {
         targetCompatibility JavaVersion.VERSION_1_7
     }
 
+    dexOptions {
+        javaMaxHeapSize "2g"
+    }
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/beans.xml'
+    }
+
 }
 
 dependencies {

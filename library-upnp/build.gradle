@@ -17,14 +17,6 @@
 
 apply from: '../android-library.gradle'
 
-android {
-
-    packagingOptions {
-        exclude 'META-INF/beans.xml'
-    }
-
-}
-
 dependencies {
 
     compile project(':common-core')
