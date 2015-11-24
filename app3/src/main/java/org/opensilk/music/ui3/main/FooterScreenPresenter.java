@@ -133,9 +133,11 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> {
     void skipToQueueItem(int pos) {
         if (pos > 0  && pos < screens.size()) {
             long id = screens.get(pos).queueItem.getQueueId();
-            lastPlayingId = id;
-            selfChange = true;
-            playbackController.skipToQueueItem(id);
+            if (lastPlayingId != id) {
+                lastPlayingId = id;
+                selfChange = true;
+                playbackController.skipToQueueItem(id);
+            }
         }
     }
 
@@ -144,7 +146,8 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> {
         if (hasView()) {
             for (FooterPageScreen s : screens) {
                 if (s.queueItem.getQueueId() == id) {
-                    getView().goTo(screens.indexOf(s));
+                    int idx = screens.indexOf(s);
+                    getView().goTo(idx);
                 }
             }
         }
