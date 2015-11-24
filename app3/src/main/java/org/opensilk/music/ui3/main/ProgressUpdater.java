@@ -32,6 +32,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 
 import static org.opensilk.common.core.rx.RxUtils.isSubscribed;
+import static org.opensilk.common.core.rx.RxUtils.unsubscribe;
 
 /**
  * Created by drew on 9/30/15.
@@ -112,24 +113,20 @@ public class ProgressUpdater {
             } else {
                 doUpdate();
             }
-            return;
-        } else if (isSubscribed(progressSubscription))  {
-            return;
+        } else if (!isSubscribed(progressSubscription))  {
+            final long interval = 250;
+            progressSubscription = Observable.interval(interval, TimeUnit.MILLISECONDS,
+                    AndroidSchedulers.mainThread()).subscribe(new Action1<Long>() {
+                @Override
+                public void call(Long aLong) {
+                    doUpdate();
+                }
+            });
         }
-        final long interval = 250;
-        progressSubscription = Observable.interval(interval, TimeUnit.MILLISECONDS,
-                AndroidSchedulers.mainThread()).subscribe(new Action1<Long>() {
-            @Override
-            public void call(Long aLong) {
-                doUpdate();
-            }
-        });
     }
 
     public void unsubscribeProgress() {
-        if (isSubscribed(progressSubscription)) {
-            progressSubscription.unsubscribe();
-            progressSubscription = null;
-        }
+        unsubscribe(progressSubscription);
+        progressSubscription = null;
     }
 }
