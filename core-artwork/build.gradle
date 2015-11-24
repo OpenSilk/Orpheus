@@ -26,6 +26,5 @@ dependencies {
     compile project(':common-glide')
     compile 'com.jakewharton:disklrucache:2.0.2'
 
-    testCompile "commons-io:commons-io:2.4"
     testCompile 'com.squareup.okhttp:mockwebserver:2.5.0'
 }

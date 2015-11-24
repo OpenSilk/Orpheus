@@ -26,6 +26,7 @@ dependencies {
     compile project(':core-res-strings')
     compile project(':core-res-drawables')
 
-    testCompile "commons-io:commons-io:2.4"
-    testCompile 'com.squareup.okhttp:mockwebserver:2.5.0'
+    testCompile (group: 'commons-io', name: 'commons-io', version: rootProject.ext.commonsIoVersion)
+    testCompile (group: 'com.squareup.okhttp', name: 'mockwebserver', version: rootProject.ext.okHttpVersion)
+
 }

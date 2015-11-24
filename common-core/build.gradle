@@ -21,9 +21,9 @@ dependencies {
     compile (group: 'com.google.dagger', name:'dagger', version: rootProject.ext.dagger2Version)
     compile (group: 'io.reactivex', name: 'rxjava', version: rootProject.ext.rxJavaVersion)
     compile (group: 'io.reactivex', name: 'rxandroid', version: rootProject.ext.rxAndroidVersion)
-    compile (group:'com.jakewharton.timber', name:'timber', version:rootProject.ext.timberVersion)
-    compile 'com.squareup.mortar:mortar:0.19'
-    compile (group: 'com.android.support', name: 'support-v4', version: '23.1.2-SNAPSHOT')
+    compile (group: 'com.jakewharton.timber', name:'timber', version:rootProject.ext.timberVersion)
+    compile (group: 'com.squareup.mortar', name: 'mortar', version: rootProject.ext.mortarVersion)
+    compile (group: 'com.android.support', name: 'support-v4', version: rootProject.ext.supportLibVersionV4)
     compile (group: 'com.android.support', name: 'appcompat-v7', version: rootProject.ext.supportLibVersion)
 
     //not needed as compile but prevents having to add it as provided for all modules

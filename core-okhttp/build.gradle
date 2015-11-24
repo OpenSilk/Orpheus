@@ -19,6 +19,5 @@ apply from: '../android-library.gradle'
 
 dependencies {
     compile (group: 'com.squareup.okhttp', name:'okhttp', version: rootProject.ext.okHttpVersion)
-    compile (group: 'com.squareup.okio', name:'okio', version: rootProject.ext.okIoVersion)
     compile project(':common-core')
 }
