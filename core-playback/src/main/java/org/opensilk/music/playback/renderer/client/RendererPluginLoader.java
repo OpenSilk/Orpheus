@@ -27,7 +27,9 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
+import org.opensilk.music.playback.R;
 import org.opensilk.music.playback.renderer.RendererConstants;
 
 import java.util.ArrayList;
@@ -85,15 +87,30 @@ public class RendererPluginLoader {
         for (final ResolveInfo resolveInfo : resolveInfos) {
             if (resolveInfo == null || resolveInfo.serviceInfo == null)
                 continue;
+            final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
+            //XXX for now we only allow renderers in our own package
+            if (!StringUtils.equals(serviceInfo.packageName, context.getPackageName()))
+                continue;
+            //ignore renderers we cant access
+            final String permission = serviceInfo.permission;
+            if (!StringUtils.isEmpty(permission) && context.getPackageManager().checkPermission(
+                    permission, context.getPackageName()) != PackageManager.PERMISSION_GRANTED)
+                continue;
             final RendererInfo pi = readResolveInfo(pm, resolveInfo);
             if (!wantIcon)
                 pi.setIcon(null);
             pluginInfos.add(pi);
         }
         Collections.sort(pluginInfos);
-        RendererInfo localInfo = new RendererInfo("Default", "The local renderer", null);
-        pluginInfos.add(0, localInfo);
+        //add local renderer as first
+        pluginInfos.add(0, makeDefaultRendererInfo());
         return pluginInfos;
+    }
+
+    private RendererInfo makeDefaultRendererInfo() {
+        String title = context.getString(R.string.renderer_default);
+        String desc = context.getString(R.string.renderer_default_description);
+        return new RendererInfo(title, desc, null);
     }
 
     private RendererInfo readResolveInfo(PackageManager pm, ResolveInfo resolveInfo) {

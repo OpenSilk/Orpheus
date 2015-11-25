@@ -166,6 +166,8 @@
     <!--reenderer screen-->
     <string name="set_renderer_volume">Set renderer volume</string>
     <string name="active_renderer">Active</string>
+    <string name="renderer_default">Default</string>
+    <string name="renderer_default_description">The local renderer</string>
 
     <!--scanner-->
     <string name="scan_running">Scan running…</string>
