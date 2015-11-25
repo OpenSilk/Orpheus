@@ -32,6 +32,7 @@
 
         <service android:name=".CastRendererService"
             android:process=":service"
+            android:exported="false"
             android:icon="@drawable/cast_grey600_36dp"
             android:label="@string/cast_label"
             android:description="@string/cast_description">

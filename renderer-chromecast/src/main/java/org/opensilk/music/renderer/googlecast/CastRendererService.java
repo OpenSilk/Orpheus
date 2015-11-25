@@ -868,9 +868,13 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
             if (Looper.myLooper() == mCallbackHandler.getLooper()) {
                 Timber.d("onVolumeChanged() reached");
                 if (mState != STATE_ERROR) {
-                    double volume = Cast.CastApi.getVolume(mApiClient);
-                    Timber.d("new volume %f", volume);
-                    mVolumeProvider.setCurrentVolume((int) Math.round(volume * 100));
+                    try {
+                        double volume = Cast.CastApi.getVolume(mApiClient);
+                        Timber.d("new volume %f", volume);
+                        mVolumeProvider.setCurrentVolume((int) Math.round(volume * 100));
+                    } catch (IllegalStateException e) {
+                        Timber.e("onVolumeChanged %s", e.getMessage());
+                    }
                 }
             } else {
                 mCallbackHandler.post(new Runnable() {
