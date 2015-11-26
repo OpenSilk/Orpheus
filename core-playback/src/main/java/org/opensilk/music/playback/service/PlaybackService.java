@@ -180,8 +180,6 @@ public class PlaybackService {
     public void onCreate(PlaybackServiceProxy proxy) {
         mProxy = proxy;
 
-        acquireWakeLock();
-
         //fire up thread and init handler
         mHandlerThread = new HandlerThread(PlaybackService.NAME, Process.THREAD_PRIORITY_MORE_FAVORABLE);
         mHandlerThread.start();
@@ -190,7 +188,6 @@ public class PlaybackService {
 
         //tell everyone about ourselves
         mQueue.setListener(new PlaybackQueueQueueChangeListener());
-
         mSessionHolder.setCallback(new MediaSessionCallback(), mHandler);
         proxy.setSessionToken(mSessionHolder.getSessionToken());
 
@@ -249,9 +246,8 @@ public class PlaybackService {
 
     //main thread
     public int onStartCommand(Intent intent, int flags, int startId) {
+        acquireTempWakeLock();
         if (intent != null) {
-            acquireWakeLock();
-
             String action = intent.getAction();
 
             if (intent.hasExtra(NOW_IN_FOREGROUND)) {
@@ -363,6 +359,12 @@ public class PlaybackService {
 
         if (PlaybackStateHelper.isPlayingOrPaused(state)) {
             mNotificationHelper.startNotification();
+        }
+
+        if (PlaybackStateHelper.isLoading(state) || PlaybackStateHelper.isPlaying(state)) {
+            acquireWakeLock();
+        } else {
+            acquireTempWakeLock();
         }
 
         mHandler.removeCallbacks(mProgressCheckRunnable);
@@ -480,9 +482,17 @@ public class PlaybackService {
         mPlayWhenReady = false;
     }
 
+    //we use our own releaser so we dont constantly reacquire the lock
+    void acquireTempWakeLock() {
+        acquireWakeLock();
+        mHandler.postDelayed(mWakeLockReleaser, 60 * 1000);
+    }
+
     void acquireWakeLock() {
-        releaseWakeLock();
-        mWakeLock.acquire(30000);
+        mHandler.removeCallbacks(mWakeLockReleaser);
+        if (!mWakeLock.isHeld()) {
+            mWakeLock.acquire();
+        }
     }
 
     void releaseWakeLock() {
@@ -1182,6 +1192,13 @@ public class PlaybackService {
         @Override
         public void run() {
             updatePlaybackState(null, true);
+        }
+    };
+
+    final Runnable mWakeLockReleaser = new Runnable() {
+        @Override
+        public void run() {
+            releaseWakeLock();
         }
     };
 
