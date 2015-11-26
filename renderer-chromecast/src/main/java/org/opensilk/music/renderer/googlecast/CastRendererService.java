@@ -46,6 +46,7 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.core.util.ConnectionUtils;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.playback.renderer.IMusicRenderer;
 import org.opensilk.music.playback.renderer.PlaybackServiceAccessor;
@@ -203,6 +204,16 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
             stopWithError(e.getMessage());
             return;
         }
+        mCallbackHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                notifyOnAudioSessionId(0);//disable the visualizer
+            }
+        });
+        connectCastDevice(true);
+    }
+
+    private void connectCastDevice(boolean forceRelaunch) {
         Timber.d("acquiring a connection to Google Play services for %s", mSelectedCastDevice);
         Cast.CastOptions.Builder apiOptionsBuilder = Cast.CastOptions.builder(mSelectedCastDevice, new CastListener())
                 .setVerboseLoggingEnabled(true);
@@ -218,7 +229,7 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
         }
         String applicationId = mContext.getString(R.string.cast_id);
         LaunchOptions.Builder launchOptions = new LaunchOptions.Builder()
-                .setRelaunchIfRunning(true);
+                .setRelaunchIfRunning(forceRelaunch);
         Cast.ApplicationConnectionResult castRes;
         int retries = 0;
         do {
@@ -229,16 +240,11 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
         } while (!castRes.getStatus().isSuccess() && retries++ < 3);
         if (!castRes.getStatus().isSuccess()) {
             stopWithError(castRes.getStatus().getStatusMessage());
+            mSessionId = null;
             return;
         }
         mSessionId = castRes.getSessionId();
         attachMediaChannel();
-        mCallbackHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                notifyOnAudioSessionId(0);//disable the visualizer
-            }
-        });
     }
 
     private void reset() {
@@ -254,8 +260,12 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
     public void stop(boolean notifyListeners) {
         reset();
         // Relax all resources
-        if (mApiClient != null && mApiClient.isConnected()) {
-            Cast.CastApi.stopApplication(mApiClient, mSessionId);
+        if (isConnected()) {
+            try {
+                Cast.CastApi.stopApplication(mApiClient, mSessionId);
+            } catch (IllegalStateException e) {
+                Timber.w("stopApplication e=%s", e.getMessage());
+            }
             mApiClient.disconnect();
         }
         mRemoteMediaPlayer = null;
@@ -317,7 +327,7 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
 
     public void prepareForTrack() {
         reset();
-        if (hasCurrent()) {
+        if (isConnected() && hasCurrent()) {
             mRemoteMediaPlayer.stop(mApiClient);
         }
         mState = STATE_CONNECTING;
@@ -370,7 +380,7 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
     }
 
     public void prepareForNextTrack() {
-        if (hasCurrent()) {
+        if (isConnected() && hasCurrent()) {
             MediaStatus status = mRemoteMediaPlayer.getMediaStatus();
             if (status.getQueueItemCount() > 1) {
                 int current = status.getCurrentItemId();
@@ -436,6 +446,10 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
         } //else wait for prepared
     }
 
+    public boolean isConnected() {
+        return mApiClient != null && mApiClient.isConnected();
+    }
+
     public boolean hasCurrent() {
         return mRemoteMediaPlayer != null && mPlayerPrepared
                 && !mLoadingCurrentTrack && mRemoteMediaPlayer.getMediaStatus().getQueueItemCount() > 0;
@@ -487,7 +501,7 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
 
     @DebugLog
     public void seekTo(long position) {
-        if (!hasCurrent()) {
+        if (!isConnected() || !hasCurrent()) {
             // If we do not have a current media player, simply update the current position
             mCurrentPosition = position;
         } else {
@@ -565,17 +579,17 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
             pause();
         } else {  // we have audio focus:
             if (mAudioFocus == AUDIO_NO_FOCUS_CAN_DUCK) {
-                if (hasCurrent()) {
+                if (isConnected() && hasCurrent()) {
                     mRemoteMediaPlayer.setStreamVolume(mApiClient, VOLUME_DUCK); // we'll be relatively quiet
                 }
             } else {
-                if (hasCurrent()) {
+                if (isConnected() && hasCurrent()) {
                     mRemoteMediaPlayer.setStreamVolume(mApiClient, VOLUME_NORMAL); // we can be loud again
                 }
             }
             // If we were playing when we lost focus, we need to resume playing.
             if (mPlayOnFocusGain) {
-                if (hasCurrent()) {
+                if (isConnected() && hasCurrent()) {
                     MediaStatus status = mRemoteMediaPlayer.getMediaStatus();
                     if (status != null && status.getPlayerState() != MediaStatus.PLAYER_STATE_PLAYING) {
                         if (mCurrentPosition == mRemoteMediaPlayer.getApproximateStreamPosition()) {
@@ -629,14 +643,19 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
 
     private void setupVolumeProvider() {
         int volume = 100;
-        if (mApiClient != null) {
-            double castVol = Cast.CastApi.getVolume(mApiClient);
-            volume = (int) Math.min(100, Math.round(castVol * 100));
+        if (isConnected()) {
+            try {
+                double castVol = Cast.CastApi.getVolume(mApiClient);
+                volume = (int) Math.min(100, Math.round(castVol * 100));
+            } catch (IllegalStateException e) {
+                //should never happen
+                Timber.e("setupVolumeProvider e=%s", e.getMessage());
+            }
         }
         mVolumeProvider = new VolumeProviderCompat(VolumeProviderCompat.VOLUME_CONTROL_ABSOLUTE, 100, volume) {
             @Override
             public void onSetVolumeTo(int volume) {
-                if (mApiClient != null) {
+                if (isConnected()) {
                     double castVol = Math.min(1.0, ((double) 100 / (double) volume));
                     try {
                         Cast.CastApi.setVolume(mApiClient, castVol);
@@ -649,7 +668,7 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
 
             @Override
             public void onAdjustVolume(int direction) {
-                if (mApiClient != null) {
+                if (isConnected()) {
                     double castVol = Cast.CastApi.getVolume(mApiClient);
                     if (direction > 0) {
                         castVol = Math.min(1.0, castVol + 0.05);
@@ -672,18 +691,21 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
 
     private void attachMediaChannel() {
         Timber.d("attachMediaChannel()");
-        mRemoteMediaPlayer = new RemoteMediaPlayer();
-        mRemoteMediaPlayerCallbacks = new RemoteMediaPlayerCallbacks();
-        mRemoteMediaPlayer.setOnStatusUpdatedListener(mRemoteMediaPlayerCallbacks);
-        mRemoteMediaPlayer.setOnPreloadStatusUpdatedListener(mRemoteMediaPlayerCallbacks);
-        mRemoteMediaPlayer.setOnMetadataUpdatedListener(mRemoteMediaPlayerCallbacks);
-        mRemoteMediaPlayer.setOnQueueStatusUpdatedListener(mRemoteMediaPlayerCallbacks);
+        if (mRemoteMediaPlayer == null) {
+            mRemoteMediaPlayer = new RemoteMediaPlayer();
+            mRemoteMediaPlayerCallbacks = new RemoteMediaPlayerCallbacks();
+            mRemoteMediaPlayer.setOnStatusUpdatedListener(mRemoteMediaPlayerCallbacks);
+            mRemoteMediaPlayer.setOnPreloadStatusUpdatedListener(mRemoteMediaPlayerCallbacks);
+            mRemoteMediaPlayer.setOnMetadataUpdatedListener(mRemoteMediaPlayerCallbacks);
+            mRemoteMediaPlayer.setOnQueueStatusUpdatedListener(mRemoteMediaPlayerCallbacks);
+        }
         try {
             Timber.d("Registering MediaChannel namespace");
             Cast.CastApi.setMessageReceivedCallbacks(mApiClient,
                     mRemoteMediaPlayer.getNamespace(), mRemoteMediaPlayer);
         } catch (IOException | IllegalStateException e) {
-            Timber.e(e, "attachMediaChannel()");
+            Timber.e("attachMediaChannel() e=%s", e.getMessage());
+            stopWithError(e.getMessage());
         }
     }
 
@@ -834,7 +856,15 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
                     String appStatus = Cast.CastApi.getApplicationStatus(mApiClient);
                     Timber.d("onApplicationStatusChanged() reached: " + appStatus);
                 } catch (IllegalStateException e) {
-                    Timber.d("onApplicationStatusChanged()", e);
+                    Timber.e("onApplicationStatusChanged() e=%s", e.getMessage());
+                    if (ConnectionUtils.hasInternetConnection(mConnectivityManager)) {
+                        //TODO reconnect doesnt work right and is hard to test
+                        stopWithError(e.getMessage());
+//                        if (isConnected()) mApiClient.disconnect();
+//                        connectCastDevice(false);
+                    } else {
+                        stopWithError(e.getMessage());
+                    }
                 }
             } else {
                 mCallbackHandler.post(new Runnable() {
@@ -873,7 +903,7 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
                         Timber.d("new volume %f", volume);
                         mVolumeProvider.setCurrentVolume((int) Math.round(volume * 100));
                     } catch (IllegalStateException e) {
-                        Timber.e("onVolumeChanged %s", e.getMessage());
+                        Timber.e("onVolumeChanged() e=%s", e.getMessage());
                     }
                 }
             } else {

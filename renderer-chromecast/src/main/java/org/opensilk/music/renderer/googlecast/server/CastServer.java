@@ -29,6 +29,8 @@ import org.opensilk.music.renderer.googlecast.CastRendererScope;
 
 import javax.inject.Inject;
 
+import timber.log.Timber;
+
 /**
  * Created by drew on 10/29/15.
  */
@@ -68,18 +70,19 @@ public class CastServer extends Server {
         threadPool.setMaxThreads(16);
         threadPool.setMaxIdleTimeMs(3 * 60000);
         setThreadPool(threadPool);
-        mWifiLock = mWifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "CastServer");
+        mWifiLock = mWifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "CastServer");
     }
-
 
     @Override
     protected void doStart() throws Exception {
+        Timber.d("Starting CastServer");
         super.doStart();
         mWifiLock.acquire();
     }
 
     @Override
     protected void doStop() throws Exception {
+        Timber.d("Stopping CastServr");
         super.doStop();
         mWifiLock.release();
     }
