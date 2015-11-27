@@ -67,7 +67,7 @@ public abstract class BaseApp extends Application {
 
     protected void setupTimber(boolean debug, Action1<Throwable> silentExceptionHandler) {
         if (debug) {
-            Timber.plant(new Timber.DebugTree());
+            Timber.plant(new DebugTreeWithThreadName());
         } else {
             Timber.plant(new ReleaseTree(silentExceptionHandler));
         }
@@ -102,18 +102,32 @@ public abstract class BaseApp extends Application {
         }
     }
 
+    private static class DebugTreeWithThreadName extends Timber.DebugTree {
+        @Override
+        protected void log(int priority, String tag, String message, Throwable t) {
+            super.log(priority, tag, appendThreadName(message), t);
+        }
+
+        protected String appendThreadName(String msg) {
+            String threadName = Thread.currentThread().getName();
+            if ("main".equals(threadName)) {
+                return msg;
+            }
+            return msg + " [" + threadName + "]";
+        }
+    }
+
     /**
      * Stubs out v, d, and i logs, the optional Action1 allows sending execption to crash
      * reporter server or whatever.
      */
-    private static final class ReleaseTree extends Timber.DebugTree {
+    private static final class ReleaseTree extends DebugTreeWithThreadName {
         private final Action1<Throwable> silentExceptionHandler;
 
         public ReleaseTree(Action1<Throwable> exceptionHandler) {
             this.silentExceptionHandler = exceptionHandler;
         }
 
-        //Tree stumps
         @Override public void v(String message, Object... args) {}
         @Override public void v(Throwable t, String message, Object... args) {}
         @Override public void d(String message, Object... args) {}
