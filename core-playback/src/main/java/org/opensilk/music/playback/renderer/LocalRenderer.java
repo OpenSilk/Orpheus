@@ -262,22 +262,17 @@ public class LocalRenderer implements IMusicRenderer,
         if (!hasNext()) {
             notifyOnError("No next player");
         }
-        final Player oldPlayer = mCurrentPlayer;
-        try {
-            mCurrentPosition = 0;
-            mCurrentPlayer = mNextPlayer;
-            mNextPlayer = new Player();
-            mPlayOnFocusGain = true;
-            mState = PlaybackStateCompat.STATE_SKIPPING_TO_NEXT;
-            if (mCurrentPlayer.prepared) {
-                configMediaPlayerState();
-            } //else wait for prepared
-            //todo is there a better place for this?
-            notifyOnAudioSessionId(mCurrentPlayer.sessionId);
-            notifyOnWentToNext();
-        } finally {
-            oldPlayer.reset(true);
+        Player oldCurrent = mCurrentPlayer;
+        oldCurrent.reset(false);
+        if (oldCurrent.hasPlayer()) {
+            oldCurrent.player.reset();
         }
+        mCurrentPlayer = mNextPlayer;
+        mNextPlayer = oldCurrent;
+        mCurrentPosition = 0;
+        mState = PlaybackStateCompat.STATE_SKIPPING_TO_NEXT;
+        play();
+        notifyOnWentToNext();
         return true;
     }
 
@@ -403,6 +398,8 @@ public class LocalRenderer implements IMusicRenderer,
             if (mPlayOnFocusGain) {
                 if (hasCurrent() && !mCurrentPlayer.player.isPlaying()) {
                     if (mCurrentPosition == mCurrentPlayer.player.getCurrentPosition()) {
+                        //todo is there a better place for this?
+                        notifyOnAudioSessionId(mCurrentPlayer.sessionId);
                         mCurrentPlayer.player.start();
                         mState = PlaybackStateCompat.STATE_PLAYING;
                     } else {
@@ -545,8 +542,7 @@ public class LocalRenderer implements IMusicRenderer,
     public void onAudioSessionId(IMediaPlayer mp, int audioSessionId) {
         if (mp == mCurrentPlayer.player) {
             mCurrentPlayer.sessionId = audioSessionId;
-            notifyOnAudioSessionId(audioSessionId);
-        } else {
+        } else if (mp == mNextPlayer.player) {
             mNextPlayer.sessionId = audioSessionId;
         }
     }
