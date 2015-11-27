@@ -145,7 +145,6 @@ public class PlaybackService {
     private volatile int mConnectedClients = 0;
     private boolean mRendererChanged;
     private long mSeekForNewRenderer;
-    private int mInternalState;
 
     Subscription mCurrentTrackSub;
     Subscription mNextTrackSub;
@@ -180,7 +179,7 @@ public class PlaybackService {
         mProxy = proxy;
 
         //fire up thread and init handler
-        mHandlerThread = new HandlerThread(PlaybackService.NAME, Process.THREAD_PRIORITY_MORE_FAVORABLE);
+        mHandlerThread = new HandlerThread("PlaybackServiceHandler", Process.THREAD_PRIORITY_MORE_FAVORABLE);
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
         mHandlerScheduler = HandlerScheduler.from(mHandler);
@@ -876,9 +875,12 @@ public class PlaybackService {
         @Override
         @DebugLog
         public void onSkipToNext() {
+            if (mPlayback.getState() == PlaybackStateCompat.STATE_SKIPPING_TO_NEXT) {
+                Timber.w("Ignoring skipToNext event... skip in progress");
+                return;
+            }
             mHandler.removeCallbacks(mProgressCheckRunnable);
             if (mPlayback.hasNext()) {
-                mInternalState = PlaybackStateCompat.STATE_SKIPPING_TO_NEXT;
                 mPlayback.goToNext();
             } else if (mQueue.notEmpty()) {
                 int next = mQueue.getNextPos();
