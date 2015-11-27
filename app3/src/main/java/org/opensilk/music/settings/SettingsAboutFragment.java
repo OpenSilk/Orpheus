@@ -51,8 +51,6 @@ public class SettingsAboutFragment extends SettingsFragment implements Preferenc
 
         mVersion = mPrefSet.findPreference(PREF_VERSION);
         mVersion.setSummary(BuildConfig.VERSION_NAME);
-        mVersion.setOnPreferenceClickListener(this);
-
 
         mThanks = mPrefSet.findPreference(PREF_THANKS);
         mThanks.setOnPreferenceClickListener(this);
@@ -60,14 +58,8 @@ public class SettingsAboutFragment extends SettingsFragment implements Preferenc
 
     @Override
     public boolean onPreferenceClick(Preference preference) {
-
         if (preference == mLicenses) {
             createOpenSourceDialog().show();
-            return true;
-        } else if (preference == mVersion) {
-            //createChangesDialog().show();
-            //TODO
-            Toast.makeText(getActivity(), R.string.err_unimplemented, Toast.LENGTH_SHORT).show();
             return true;
         } else if (preference == mThanks) {
             new ThanksDialogFragment().show(getActivity().getFragmentManager(), "thanksdialog");
@@ -86,14 +78,4 @@ public class SettingsAboutFragment extends SettingsFragment implements Preferenc
                 .create();
     }
 
-    AlertDialog createChangesDialog() {
-//        LayoutInflater inflater = getActivity().getLayoutInflater();
-//        View v = inflater.inflate(R.layout.changes_dialog, null);
-//        return new AlertDialog.Builder(getActivity())
-//                .setTitle(R.string.settings_changes_dialog_title)
-//                .setView(v)
-//                .setPositiveButton(android.R.string.ok, null)
-//                .create();
-        return null;
-    }
 }

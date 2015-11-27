@@ -31,36 +31,27 @@ import org.opensilk.music.settings.SettingsInterfaceFragment;
 public enum SettingsMainItem {
 
     UI(SettingsInterfaceFragment.class.getName(),
-        R.string.settings_ui_category,
-        R.drawable.ic_phone_android_grey600_36dp),
+        R.string.settings_ui_category),
     DATA(SettingsDataFragment.class.getName(),
-        R.string.settings_data_category,
-        R.drawable.ic_data_usage_grey600_36dp),
+        R.string.settings_data_category),
     AUDIO(SettingsAudioFragment.class.getName(),
-        R.string.settings_audio_category,
-        R.drawable.ic_tune_grey600_36dp),
-    // XXX add new items above this one.
-    DONATE("donate", //XXX hack
-        R.string.settings_donate_category,
-        R.drawable.ic_attach_money_grey600_36dp),
+        R.string.settings_audio_category),
+    HELP("help", //XXX hack
+        R.string.settings_help_category),
     ABOUT(SettingsAboutFragment.class.getName(),
-        R.string.settings_about_category,
-        R.drawable.ic_info_outline_grey600_36dp);
+        R.string.settings_about_category);
 
     String className;
     int title;
-    int iconRes;
 
-    SettingsMainItem(String className, int title, int iconRes) {
+    SettingsMainItem(String className, int title) {
         this.className = className;
         this.title = title;
-        this.iconRes = iconRes;
     }
 
     Bundle getArguments() {
         Bundle b = new Bundle();
         b.putInt("title", title);
-        b.putInt("icon", iconRes);
         return b;
     }
 }

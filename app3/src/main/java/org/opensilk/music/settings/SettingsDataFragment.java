@@ -17,7 +17,6 @@
 
 package org.opensilk.music.settings;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -34,7 +33,8 @@ import org.opensilk.music.artwork.shared.ArtworkPreferences;
 import java.util.Locale;
 
 import static org.opensilk.music.artwork.Constants.DISK_CACHE_DIRECTORY;
-import static org.opensilk.music.artwork.fetcher.ArtworkFetcherService.*;
+import static org.opensilk.music.artwork.fetcher.ArtworkFetcherService.clearCache;
+import static org.opensilk.music.artwork.fetcher.ArtworkFetcherService.reloadPrefs;
 
 /**
  * Created by andrew on 3/1/14.
@@ -42,13 +42,6 @@ import static org.opensilk.music.artwork.fetcher.ArtworkFetcherService.*;
 public class SettingsDataFragment extends SettingsFragment {
 
     ListPreference mCacheSize;
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-//        SettingsActivityComponent component = DaggerService.getDaggerComponent(activity);
-//        component.inject(this);
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -80,7 +73,7 @@ public class SettingsDataFragment extends SettingsFragment {
 
     int getCacheSize() {
         return Integer.decode(getPreferenceManager().getSharedPreferences()
-                .getString(ArtworkPreferences.IMAGE_DISK_CACHE_SIZE, "60"));
+                .getString(ArtworkPreferences.IMAGE_DISK_CACHE_SIZE, ArtworkPreferences.IMAGE_DISK_CACHE_DEFAULT));
     }
 
     void setCacheSizeSummary(int size) {

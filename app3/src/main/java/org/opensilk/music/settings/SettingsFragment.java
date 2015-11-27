@@ -17,7 +17,6 @@
 
 package org.opensilk.music.settings;
 
-
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;

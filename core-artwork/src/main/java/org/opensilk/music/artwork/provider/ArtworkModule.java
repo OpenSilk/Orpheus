@@ -38,6 +38,8 @@ import rx.Scheduler;
 import rx.schedulers.Schedulers;
 
 import static org.opensilk.music.artwork.Constants.DISK_CACHE_DIRECTORY;
+import static org.opensilk.music.artwork.shared.ArtworkPreferences.IMAGE_DISK_CACHE_DEFAULT;
+import static org.opensilk.music.artwork.shared.ArtworkPreferences.IMAGE_DISK_CACHE_SIZE;
 
 /**
  * Created by drew on 6/21/14.
@@ -55,7 +57,12 @@ public class ArtworkModule {
     @Provides @Singleton //TODO when/how to close this?
     public BitmapDiskCache provideBitmapDiskLruCache(
             @ForApplication Context context, ArtworkPreferences preferences, ByteArrayPool byteArrayPool) {
-        final int size = Integer.decode(preferences.getString(ArtworkPreferences.IMAGE_DISK_CACHE_SIZE, "60")) * 1024 * 1024;
+        int size = Integer.decode(preferences.getString(IMAGE_DISK_CACHE_SIZE,IMAGE_DISK_CACHE_DEFAULT)) * 1024 * 1024;
+        if (size < Integer.decode(IMAGE_DISK_CACHE_DEFAULT)) {
+            //upgrade users from Orpheus 2.x to the new minimum cache size
+            preferences.putString(IMAGE_DISK_CACHE_SIZE, IMAGE_DISK_CACHE_DEFAULT);
+            size = Integer.decode(IMAGE_DISK_CACHE_DEFAULT);
+        }
         return BitmapDiskLruCache.open(CacheUtil.getCacheDir(context, DISK_CACHE_DIRECTORY), size, byteArrayPool);
     }
 

@@ -36,6 +36,7 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.settings.SettingsActivity;
+import org.opensilk.music.settings.WhatsNewDialogHelper;
 import org.opensilk.music.ui.theme.OrpheusTheme;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
 import org.opensilk.music.ui3.common.ActivityResultCodes;
@@ -205,10 +206,7 @@ public class LauncherActivity extends MusicActivity {
     }
 
     void showIntroDialog() {
-        final WebView webView = new WebView(this);
-        webView.loadUrl("file:///android_asset/whatsnew.html");
-        new AlertDialog.Builder(this)
-                .setView(webView)
+        WhatsNewDialogHelper.builder(this)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

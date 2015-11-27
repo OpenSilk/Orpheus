@@ -29,6 +29,7 @@ import android.view.ViewGroup;
 
 import org.opensilk.common.ui.recycler.ItemClickSupport;
 import org.opensilk.music.R;
+import org.opensilk.music.settings.WhatsNewDialogHelper;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -73,8 +74,10 @@ public class SettingsMainFragment extends Fragment implements ItemClickSupport.O
     @Override
     public void onItemClicked(RecyclerView recyclerView, int position, View v) {
         SettingsMainItem item = mAdapter.getItem(position);
-        if ("donate".equals(item.className)) {
-//            mDonateManager.launchDonateActivity(getActivity());
+        if (item == SettingsMainItem.HELP) {
+            WhatsNewDialogHelper.builder(getActivity())
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show();
         } else {
             Fragment frag = Fragment.instantiate(getActivity(), item.className, item.getArguments());
             getFragmentManager().beginTransaction()

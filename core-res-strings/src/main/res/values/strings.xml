@@ -77,6 +77,7 @@
     <string name="error">Error</string>
     <string name="retry">Retry</string>
     <string name="dash"> - </string>
+    <string name="go">Go</string>
 
     <!-- Context menu items -->
     <string name="menu_play_selection">Play</string>
@@ -200,6 +201,9 @@
     <string name="settings_feedback">Send feedback</string>
     <string name="settings_feedback_url" translatable="false">mailto:market.opensilk@gmail.com</string>
     <string name="settings_feedback_email_subject" translatable="false">Feedback: Orpheus Music Player</string>
+    <string name="settings_donate">Donate</string>
+    <string name="settings_donate_message">Click to donate via our website</string>
+    <string name="settings_about_reporting">Reporting</string>
     <string name="settings_send_crash_reports">Send crash reports</string>
     <string name="settings_send_crash_reports_summary">Crash reports are anonymous and secure</string>
     <string name="settings_version_title">Version number</string>
@@ -248,10 +252,11 @@
     <string name="settings_delete_warning">This will permanently delete the cached image entries</string>
     <string name="settings_msg_cache_cleared">Cache cleared</string>
     <string name="settings_cache_size">Set image cache limit</string>
-    <string name="settings_cache_size_20" translatable="false">20MB</string>
-    <string name="settings_cache_size_40" translatable="false">40MB</string>
-    <string name="settings_cache_size_60" translatable="false">60MB</string>
-    <string name="settings_cache_size_80" translatable="false">80MB</string>
+    <string name="settings_cache_size_100" translatable="false">100MB</string>
+    <string name="settings_cache_size_130" translatable="false">130MB</string>
+    <string name="settings_cache_size_150" translatable="false">150MB</string>
+    <string name="settings_cache_size_180" translatable="false">180MB</string>
+    <string name="settings_cache_size_200" translatable="false">200MB</string>
     <!-- audio -->
     <string name="settings_audio_category">Audio</string>
     <string name="settings_equalizer_summary">Fine tune audio settings</string>
@@ -260,7 +265,8 @@
     <string name="settings_broadcast_meta">Broadcast track metadata</string>
     <string name="settings_broadcast_meta_summary">Enable to use external scrobblers</string>
 
-    <!-- donate -->
-    <string name="settings_donate_category">Donate</string>
+
+    <string name="settings_help_category">Help</string>
+
 
 </resources>

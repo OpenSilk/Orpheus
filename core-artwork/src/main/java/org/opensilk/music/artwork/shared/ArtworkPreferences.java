@@ -44,6 +44,8 @@ public class ArtworkPreferences extends PreferencesWrapper {
     public static final String IMAGE_DISK_CACHE_SIZE = "image_cache_size";
     public static final String WANT_LOW_RESOLUTION_ART = "want_low_resolution";
 
+    public static final String IMAGE_DISK_CACHE_DEFAULT = "100";
+
     final Context appcontext;
     private final Object sPrefLock = new Object();
     private volatile boolean needReload;

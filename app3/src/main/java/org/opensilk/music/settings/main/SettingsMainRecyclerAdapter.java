@@ -54,7 +54,7 @@ public class SettingsMainRecyclerAdapter extends RecyclerListAdapter<SettingsMai
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new ViewHolder(inflate(parent, R.layout.mtrl_list_item_oneline_icontext));
+        return new ViewHolder(inflate(parent, R.layout.mtrl_list_item_oneline_text));
     }
 
     @Override
@@ -62,7 +62,6 @@ public class SettingsMainRecyclerAdapter extends RecyclerListAdapter<SettingsMai
         final SettingsMainItem item = getItem(position);
         TextView tv = (TextView) holder.itemView;
         tv.setText(item.title);
-        tv.setCompoundDrawablesWithIntrinsicBounds(item.iconRes, 0, 0, 0);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

@@ -37,7 +37,7 @@
             android:title="@string/settings_cache_size"
             android:entries="@array/cache_size"
             android:entryValues="@array/cache_size_values"
-            android:defaultValue="60" />
+            android:defaultValue="100" />
 
         <Preference
             android:key="pref_delete_cache"
