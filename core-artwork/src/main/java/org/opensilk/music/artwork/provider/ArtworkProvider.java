@@ -115,7 +115,7 @@ public class ArtworkProvider extends ContentProvider {
     /**
      * Pulls bitmap from diskcache
      */
-    private @Nullable ParcelFileDescriptor createPipe(ArtInfo artInfo) {
+    private @Nullable ParcelFileDescriptor createPipe(final ArtInfo artInfo) {
         final byte[] bytes = mL2Cache.getBytes(artInfo.cacheKey());
         if (bytes == null) {
             return null;
@@ -131,7 +131,7 @@ public class ArtworkProvider extends ContentProvider {
                     try {
                         IOUtils.write(bytes, out);
                     } catch (IOException e) {
-                        Timber.e(e, "ParcelFileDescriptorPipe");
+                        Timber.w("createPipe(e=%s) for %s", e.getMessage(), artInfo);
                     } finally {
                         IOUtils.closeQuietly(out);
                         worker.unsubscribe();
@@ -140,7 +140,7 @@ public class ArtworkProvider extends ContentProvider {
             });
             return in;
         } catch (IOException e) {
-            Timber.w(e, "createPipe(%s)", artInfo);
+            Timber.e(e, "createPipe() for %s", artInfo);
             return null;
         }
     }
@@ -167,7 +167,7 @@ public class ArtworkProvider extends ContentProvider {
                         final CompletionListener listener =
                                 new CompletionListener() {
                                     @Override public void onError(Throwable e) {
-                                        Timber.w("onError(%s) for %s", e.getMessage(), artInfo.toString());
+                                        Timber.w("onError(%s) for %s", e.getMessage(), artInfo);
                                         queue.offer(new OptionalBitmap(null));
                                     }
                                     @Override public void onNext(Bitmap o) {
@@ -182,7 +182,7 @@ public class ArtworkProvider extends ContentProvider {
                             IOUtils.write(bytes, out);
                         }
                     } catch (InterruptedException|IOException e) {
-                        Timber.w(e, "createPipe2(%s)", artInfo);
+                        Timber.w("createPipe2(e=%s) for %s", e.getMessage(), artInfo);
                     } finally {
                         if (bitmap != null) bitmap.recycle();
                         IOUtils.closeQuietly(out);
@@ -192,7 +192,7 @@ public class ArtworkProvider extends ContentProvider {
             });
             return in;
         } catch (IOException e) {
-            Timber.w(e, "createPipe2(%s)", artInfo);
+            Timber.e(e, "createPipe2() for %s", artInfo);
             return null;
         }
     }
