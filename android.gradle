@@ -40,6 +40,11 @@ android {
 
 }
 
+configurations.all {
+    // check for updates every build (to avoid this use offline mode)
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
 dependencies {
     provided(group: 'com.google.dagger', name:'dagger-compiler', version: rootProject.ext.dagger2Version)
 
