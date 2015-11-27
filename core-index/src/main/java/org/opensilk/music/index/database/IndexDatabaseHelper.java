@@ -67,8 +67,8 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP TABLE IF EXISTS recent;");
         }
 
-        // STOPSHIP: 9/19/15 remove before release
         //cleanup mistakes prior to 3.0 release
+        /*
         if (oldVersion < 37) {
 
             db.execSQL("DROP INDEX IF EXISTS playback_settings_key_idx;");
@@ -118,6 +118,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
         } else if (oldVersion < 39) {
             db.execSQL("DROP VIEW IF EXISTS track_info;");
         }
+        */
         //end mistakes cleanup
 
         if (oldVersion < DB_VERSION) {
