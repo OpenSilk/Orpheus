@@ -44,12 +44,7 @@ public class BundleableListSlice<T extends Bundleable> implements Parcelable {
     private static boolean DEBUG = BuildConfig.DEBUG;
     private static boolean LOGVV = false;//BuildConfig.DEBUG;
 
-    /*
-     * TODO get this number from somewhere else. For now set it to a quarter of
-     * the 1MB limit.
-     */
-    private static final int MAX_IPC_SIZE = 256 * 1024;
-    private static final int MAX_FIRST_IPC_SIZE = MAX_IPC_SIZE / 2;
+    private static final int MAX_IPC_SIZE = 64 * 1024;
 
     private final List<T> mList;
 
@@ -140,7 +135,7 @@ public class BundleableListSlice<T extends Bundleable> implements Parcelable {
         if (DEBUG) Log.d(TAG, "Writing " + N + " items");
         if (N > 0) {
             int i = 0;
-            while (i < N && dest.dataSize() < MAX_FIRST_IPC_SIZE) {
+            while (i < N && dest.dataSize() < MAX_IPC_SIZE) {
                 dest.writeInt(1);
 
                 final T bundleable = mList.get(i);
