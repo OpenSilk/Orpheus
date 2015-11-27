@@ -185,8 +185,10 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
                     @Override
                     public void call(Integer integer) {
                         Timber.d("New Session id %d", integer);
-                        sessionId = integer;
-                        updateVisualizer();
+                        if (sessionId == 0 || sessionId != integer) {
+                            sessionId = integer;
+                            updateVisualizer();
+                        }
                     }
                 }
         );
