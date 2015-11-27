@@ -60,7 +60,7 @@ class MediaSessionHolderL implements IMediaSessionProxy {
 
     @Inject
     public MediaSessionHolderL(Context context) {
-        mSession = new MediaSession(context, PlaybackService.NAME);
+        mSession = new MediaSession(context, context.getPackageName() + "/" + PlaybackService.NAME);
         configureSession(context);
         mControllerProxy = new MediaControllerProxyImplL(mSession.getController());
         mTransportControlsProxy = new TransportControlsProxyImplL(

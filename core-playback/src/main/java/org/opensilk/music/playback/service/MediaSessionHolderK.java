@@ -58,7 +58,7 @@ class MediaSessionHolderK implements IMediaSessionProxy {
                 context, 0, mediaButtonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         this.mSession = new MediaSessionCompat(
                 context,
-                PlaybackService.NAME,
+                context.getPackageName() + "/" + PlaybackService.NAME,
                 mediaButtonReceiverComponent,
                 mediaButtonReceiverIntent
         );
