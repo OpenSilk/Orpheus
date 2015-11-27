@@ -237,7 +237,7 @@
     <string name="settings_theme_picker_help">Swipe to change</string>
     <string name="settings_msg_restart_app">Orpheus will now restart to apply changes</string>
     <!-- data res/-->
-    <string name="settings_data_category">Data</string>
+    <string name="settings_data_category">Artwork</string>
     <!-- data download -->
     <string name="settings_download_category">Download</string>
     <string name="settings_download_only_on_wifi_title">Download via Wi-Fi only</string>
