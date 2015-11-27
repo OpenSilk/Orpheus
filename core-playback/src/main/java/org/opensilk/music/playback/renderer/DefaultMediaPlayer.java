@@ -36,7 +36,7 @@ import javax.inject.Inject;
 public class DefaultMediaPlayer implements IMediaPlayer, MediaPlayer.OnCompletionListener,
         MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnSeekCompleteListener {
 
-    private MediaPlayer mMediaPlayer;
+    private final MediaPlayer mMediaPlayer;
     private Callback mCallback;
 
     @PlaybackServiceScope
@@ -47,23 +47,18 @@ public class DefaultMediaPlayer implements IMediaPlayer, MediaPlayer.OnCompletio
 
         @Override
         public IMediaPlayer create(Context context) {
-            return new DefaultMediaPlayer();
+            return new DefaultMediaPlayer(context);
         }
     }
 
-    void ensurePlayer() {
-        if (mMediaPlayer != null) {
-            reset();
-            release();
-        }
+    public DefaultMediaPlayer(Context context) {
         mMediaPlayer = new MediaPlayer();
         mMediaPlayer.setOnPreparedListener(this);
         mMediaPlayer.setOnCompletionListener(this);
         mMediaPlayer.setOnErrorListener(this);
         mMediaPlayer.setOnSeekCompleteListener(this);
-        if (mCallback != null) {
-            mCallback.onAudioSessionId(this, mMediaPlayer.getAudioSessionId());
-        }
+        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        mMediaPlayer.setWakeMode(context, PowerManager.PARTIAL_WAKE_LOCK);
     }
 
     @Override
@@ -78,10 +73,11 @@ public class DefaultMediaPlayer implements IMediaPlayer, MediaPlayer.OnCompletio
 
     @Override
     public void setDataSource(Context context, Uri uri, Map<String, String> headers) throws IOException {
-        ensurePlayer();
-        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        mMediaPlayer.setWakeMode(context, PowerManager.PARTIAL_WAKE_LOCK);
         mMediaPlayer.setDataSource(context, uri, headers);
+        //TODO this really isnt the right place for this
+        if (mCallback != null) {
+            mCallback.onAudioSessionId(this, mMediaPlayer.getAudioSessionId());
+        }
     }
 
     @Override
@@ -96,7 +92,7 @@ public class DefaultMediaPlayer implements IMediaPlayer, MediaPlayer.OnCompletio
 
     @Override
     public void seekTo(long pos) {
-        mMediaPlayer.seekTo((int)pos);
+        mMediaPlayer.seekTo((int) pos);
     }
 
     @Override
@@ -122,7 +118,6 @@ public class DefaultMediaPlayer implements IMediaPlayer, MediaPlayer.OnCompletio
     @Override
     public void release() {
         mMediaPlayer.release();
-        mMediaPlayer = null;
     }
 
     @Override

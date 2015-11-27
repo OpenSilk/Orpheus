@@ -27,7 +27,6 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.playback.PlaybackConstants;
-import org.opensilk.music.playback.PlaybackStateHelper;
 import org.opensilk.music.playback.service.IntentHelper;
 import org.opensilk.music.playback.service.PlaybackServiceScope;
 
@@ -64,15 +63,33 @@ public class LocalRenderer implements IMusicRenderer,
     private boolean mPlayOnFocusGain;
     private Callback mCallback;
     private boolean mAudioNoisyReceiverRegistered;
-    private long mCurrentPosition = PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN;
+    private long mCurrentPosition = 0;
     // Type of audio focus we have:
     private int mAudioFocus = AUDIO_NO_FOCUS_NO_DUCK;
-    private IMediaPlayer mMediaPlayer;
-    private IMediaPlayer mNextMediaPlayer;
-    private boolean mPlayerPrepared;
-    private boolean mNextPlayerPrepared;
-    private int mNextAudioSessionId;
     private IMediaPlayer.Factory mDefaultMediaPlayerFactory;
+
+    private static class Player {
+        IMediaPlayer player;
+        boolean hasPlayer() {
+            return player != null;
+        }
+        boolean prepared;
+        boolean hasTrack;
+        int sessionId;
+        void reset(boolean release) {
+            prepared = false;
+            hasTrack = false;
+            sessionId = 0;
+            if (release && hasPlayer()) {
+                player.reset();
+                player.release();
+                player = null;
+            }
+        }
+    }
+
+    private Player mCurrentPlayer = new Player();
+    private Player mNextPlayer = new Player();
 
     private final IntentFilter mAudioNoisyIntentFilter =
             new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
@@ -107,15 +124,7 @@ public class LocalRenderer implements IMusicRenderer,
     }
 
     public void stop(boolean notifyListeners) {
-        if (hasCurrent()) {
-            mCurrentPosition = getCurrentStreamPosition();
-        }
-        // Give up Audio focus
-        giveUpAudioFocus();
-        unregisterAudioNoisyReceiver();
-        // Relax all resources
-        releaseMediaPlayer(true);
-        mPlayOnFocusGain = false;
+        resetHard();
         mState = PlaybackStateCompat.STATE_STOPPED;
         if (notifyListeners) {
             notifyOnPlaybackStatusChanged(mState);
@@ -131,23 +140,24 @@ public class LocalRenderer implements IMusicRenderer,
     }
 
     public boolean isPlaying() {
-        return mPlayOnFocusGain || (hasCurrent() && mMediaPlayer.isPlaying());
+        return mPlayOnFocusGain || (hasCurrent() && mCurrentPlayer.player.isPlaying());
     }
 
     public long getCurrentStreamPosition() {
         //we don't actually seek to the saved position until playback starts
         //so we only ask the player where it is if we are playing
-        return (hasCurrent() && PlaybackStateHelper.isPlaying(mState)) ?
-                mMediaPlayer.getCurrentPosition() : mCurrentPosition;
+        return (hasCurrent() && mCurrentPlayer.player.isPlaying()) ?
+                mCurrentPlayer.player.getCurrentPosition() : mCurrentPosition;
     }
 
     public long getDuration() {
-        return (hasCurrent() && mPlayerPrepared) ?
-                mMediaPlayer.getDuration() : PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN;
+        return (hasCurrent() && mCurrentPlayer.prepared) ?
+                mCurrentPlayer.player.getDuration() : PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN;
     }
 
     public void prepareForTrack() {
-        stop(false);
+        resetSoft();
+        mCurrentPlayer.reset(false);
         mCurrentPosition = 0;
         mState = PlaybackStateCompat.STATE_CONNECTING;
         notifyOnPlaybackStatusChanged(mState);
@@ -155,24 +165,28 @@ public class LocalRenderer implements IMusicRenderer,
 
     @DebugLog
     public boolean loadTrack(Bundle trackBundle) {
-        if (mState != PlaybackStateCompat.STATE_CONNECTING) {
-            throw  new IllegalStateException("Must call prepareForTrack() first");
+        if (hasCurrent()) {
+            prepareForTrack();
         }
         try {
             Track track = Track.BUNDLE_CREATOR.fromBundle(trackBundle);
             Track.Res item = track.getResources().get(0);
 
-            mMediaPlayer = mDefaultMediaPlayerFactory.create(mContext);
-            mMediaPlayer.setCallback(this);
+            if (!mCurrentPlayer.hasPlayer()) {
+                mCurrentPlayer.player = mDefaultMediaPlayerFactory.create(mContext);
+                mCurrentPlayer.player.setCallback(this);
+            }
 
-            mMediaPlayer.setDataSource(mContext, item.getUri(), item.getHeaders());
+            mCurrentPlayer.player.reset();
+            mCurrentPlayer.player.setDataSource(mContext, item.getUri(), item.getHeaders());
+            mCurrentPlayer.hasTrack = true;
 
             // Starts preparing the media player in the background. When
             // it's done, it will call our OnPreparedListener (that is,
             // the onPrepared() method on this class, since we set the
             // listener to 'this'). Until the media player is prepared,
             // we *cannot* call start() on it!
-            mMediaPlayer.prepareAsync();
+            mCurrentPlayer.player.prepareAsync();
 
             mState = PlaybackStateCompat.STATE_BUFFERING;
             notifyOnPlaybackStatusChanged(mState);
@@ -185,32 +199,37 @@ public class LocalRenderer implements IMusicRenderer,
     }
 
     public void prepareForNextTrack() {
-        releaseNextMediaPlayer();
+        mNextPlayer.reset(false);
     }
 
     @DebugLog
     public boolean loadNextTrack(Bundle trackBundle) {
         if (!hasCurrent()) {
-            throw new IllegalStateException("called loadNextTrack with no current track");
+            resetWithError("called loadNextTrack with no current track");
+            return false;
         }
         if (hasNext()) {
-            throw new IllegalStateException("Must call prepareForNextTrack() first");
+            prepareForNextTrack();
         }
         try {
             Track track = Track.BUNDLE_CREATOR.fromBundle(trackBundle);
             Track.Res item = track.getResources().get(0);
 
-            mNextMediaPlayer = mDefaultMediaPlayerFactory.create(mContext);
-            mNextMediaPlayer.setCallback(this);
+            if (!mNextPlayer.hasPlayer()) {
+                mNextPlayer.player = mDefaultMediaPlayerFactory.create(mContext);
+                mNextPlayer.player.setCallback(this);
+            }
 
-            mNextMediaPlayer.setDataSource(mContext, item.getUri(), item.getHeaders());
+            mNextPlayer.player.reset();
+            mNextPlayer.player.setDataSource(mContext, item.getUri(), item.getHeaders());
+            mNextPlayer.hasTrack = true;
 
             // Starts preparing the media player in the background. When
             // it's done, it will call our OnPreparedListener (that is,
             // the onPrepared() method on this class, since we set the
             // listener to 'this'). Until the media player is prepared,
             // we *cannot* call start() on it!
-            mNextMediaPlayer.prepareAsync();
+            mNextPlayer.player.prepareAsync();
 
             return true;
         } catch (IOException ex) {
@@ -224,69 +243,58 @@ public class LocalRenderer implements IMusicRenderer,
         mPlayOnFocusGain = true;
         tryToGetAudioFocus();
         registerAudioNoisyReceiver();
-        if (mState == PlaybackStateCompat.STATE_PAUSED && hasCurrent() && mPlayerPrepared) {
+        if (hasCurrent() && mCurrentPlayer.prepared) {
             configMediaPlayerState();
+        } else if (!hasCurrent()) {
+            resetWithError("play called without a current track");
         } //else wait for prepared
     }
 
     public boolean hasCurrent() {
-        return mMediaPlayer != null;
+        return mCurrentPlayer.hasPlayer() && mCurrentPlayer.hasTrack;
     }
 
     public boolean hasNext() {
-        return mNextMediaPlayer != null;
+        return mNextPlayer.hasPlayer() && mNextPlayer.hasTrack;
     }
 
     public boolean goToNext() {
         if (!hasNext()) {
-            throw  new IllegalStateException("Next player not initialized");
+            notifyOnError("No next player");
         }
-        releaseMediaPlayer(false);
-        mCurrentPosition = 0;
-        mMediaPlayer = mNextMediaPlayer;
-        mNextMediaPlayer = null;
-        mPlayerPrepared = mNextPlayerPrepared;
-        mNextPlayerPrepared = false;
-        mPlayOnFocusGain = true;
-        if (mPlayerPrepared) {
-            configMediaPlayerState();
-        } else {
-            mState = PlaybackStateCompat.STATE_BUFFERING;
-            //and wait for prepared
+        final Player oldPlayer = mCurrentPlayer;
+        try {
+            mCurrentPosition = 0;
+            mCurrentPlayer = mNextPlayer;
+            mNextPlayer = new Player();
+            mPlayOnFocusGain = true;
+            mState = PlaybackStateCompat.STATE_SKIPPING_TO_NEXT;
+            if (mCurrentPlayer.prepared) {
+                configMediaPlayerState();
+            } //else wait for prepared
+            //todo is there a better place for this?
+            notifyOnAudioSessionId(mCurrentPlayer.sessionId);
+            notifyOnWentToNext();
+        } finally {
+            oldPlayer.reset(true);
         }
-        final int sessionId = mNextAudioSessionId;
-        mNextAudioSessionId = 0;
-        notifyOnAudioSessionId(sessionId);
-        notifyOnWentToNext();
         return true;
     }
 
     public void pause() {
-        if (mState == PlaybackStateCompat.STATE_PLAYING) {
-            // Pause media player and cancel the 'foreground service' state.
-            if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
-                mMediaPlayer.pause();
-                mCurrentPosition = mMediaPlayer.getCurrentPosition();
-            }
-        }
-        // while paused, retain the MediaPlayer but give up audio focus
-        giveUpAudioFocus();
-        mPlayOnFocusGain = false;
-        unregisterAudioNoisyReceiver();
+        resetSoft();
         mState = PlaybackStateCompat.STATE_PAUSED;
         notifyOnPlaybackStatusChanged(mState);
     }
 
     @DebugLog
     public void seekTo(long position) {
-        if (!hasCurrent() || !mPlayerPrepared) {
+        if (!hasCurrent() || !mCurrentPlayer.prepared) {
             // If we do not have a current media player, simply update the current position
             mCurrentPosition = position;
-        } else {
-            if (mMediaPlayer.isPlaying()) {
-                mState = PlaybackStateCompat.STATE_BUFFERING;
-            }
-            mMediaPlayer.seekTo(position);
+        } else if (hasCurrent()) {
+            mCurrentPlayer.player.seekTo(position);
+            mState = PlaybackStateCompat.STATE_BUFFERING;
             notifyOnPlaybackStatusChanged(mState);
         }
     }
@@ -308,6 +316,35 @@ public class LocalRenderer implements IMusicRenderer,
     @Override
     public void setAccessor(PlaybackServiceAccessor accessor) {
         //pass
+    }
+
+    //resets our state but does not release mediaplayers
+    private void resetSoft() {
+        if (hasCurrent()) {
+            if (mCurrentPlayer.player.isPlaying()) {
+                mCurrentPlayer.player.pause();
+            }
+            mCurrentPosition = mCurrentPlayer.player.getCurrentPosition();
+        }
+        // Give up Audio focus
+        giveUpAudioFocus();
+        unregisterAudioNoisyReceiver();
+        mPlayOnFocusGain = false;
+        //TODO this isnt really a proper state since we still hold the players and must be released
+        mState = PlaybackStateCompat.STATE_NONE;
+    }
+
+    private void resetHard() {
+        resetSoft();
+        mCurrentPlayer.reset(true);
+        mNextPlayer.reset(true);
+    }
+
+    private void resetWithError(String error) {
+        resetHard();
+        mCurrentPosition = 0;
+        mState = PlaybackStateCompat.STATE_ERROR;
+        notifyOnError(error);
     }
 
     /**
@@ -355,24 +392,26 @@ public class LocalRenderer implements IMusicRenderer,
         } else {  // we have audio focus:
             if (mAudioFocus == AUDIO_NO_FOCUS_CAN_DUCK) {
                 if (hasCurrent()) {
-                    mMediaPlayer.setVolume(VOLUME_DUCK, VOLUME_DUCK); // we'll be relatively quiet
+                    mCurrentPlayer.player.setVolume(VOLUME_DUCK, VOLUME_DUCK); // we'll be relatively quiet
                 }
             } else {
                 if (hasCurrent()) {
-                    mMediaPlayer.setVolume(VOLUME_NORMAL, VOLUME_NORMAL); // we can be loud again
-                } // else do something for remote client.
+                    mCurrentPlayer.player.setVolume(VOLUME_NORMAL, VOLUME_NORMAL); // we can be loud again
+                }
             }
             // If we were playing when we lost focus, we need to resume playing.
             if (mPlayOnFocusGain) {
-                if (hasCurrent() && !mMediaPlayer.isPlaying()) {
-                    if (mCurrentPosition == mMediaPlayer.getCurrentPosition()) {
-                        mMediaPlayer.start();
+                if (hasCurrent() && !mCurrentPlayer.player.isPlaying()) {
+                    if (mCurrentPosition == mCurrentPlayer.player.getCurrentPosition()) {
+                        mCurrentPlayer.player.start();
                         mState = PlaybackStateCompat.STATE_PLAYING;
                     } else {
                         Timber.d("configMediaPlayerState startMediaPlayer. " +
-                                        "seeking to %s", mCurrentPosition);
-                        mMediaPlayer.seekTo(mCurrentPosition);
-                        mState = PlaybackStateCompat.STATE_BUFFERING;
+                                "seeking to %s", mCurrentPosition);
+                        mCurrentPlayer.player.seekTo(mCurrentPosition);
+                        if (mState != PlaybackStateCompat.STATE_SKIPPING_TO_NEXT) {
+                            mState = PlaybackStateCompat.STATE_BUFFERING;
+                        }
                     }
                 }
                 mPlayOnFocusGain = false;
@@ -421,11 +460,17 @@ public class LocalRenderer implements IMusicRenderer,
     @Override
     @DebugLog
     public void onSeekComplete(IMediaPlayer player) {
-        if (player == mMediaPlayer) {
+        if (player == mCurrentPlayer.player) {
             mCurrentPosition = player.getCurrentPosition();
-            if (mState == PlaybackStateCompat.STATE_BUFFERING) {
-                mMediaPlayer.start();
-                mState = PlaybackStateCompat.STATE_PLAYING;
+            switch (mState) {
+                case PlaybackStateCompat.STATE_BUFFERING:
+                case PlaybackStateCompat.STATE_SKIPPING_TO_NEXT:
+                    player.start();
+                    mState = PlaybackStateCompat.STATE_PLAYING;
+                    break;
+                default:
+                    mState = PlaybackStateCompat.STATE_PAUSED;
+                    break;
             }
             notifyOnPlaybackStatusChanged(mState);
         }
@@ -439,15 +484,19 @@ public class LocalRenderer implements IMusicRenderer,
     @Override
     @DebugLog
     public void onCompletion(IMediaPlayer player) {
-        if (player == mMediaPlayer) {
+        if (player == mCurrentPlayer.player) {
             if (hasNext()) {
                 goToNext();
             } else {
                 // The media player finished playing the current song
-                stop(false);
+                resetHard();
                 mCurrentPosition = 0;
                 notifyOnCompletion();
             }
+        } else {
+            Timber.e("Received onCompletion for media player that is not the current [isnext=%s]",
+                    mNextPlayer.player == player);
+            resetWithError("Received out of order onCompletion event");
         }
     }
 
@@ -459,8 +508,8 @@ public class LocalRenderer implements IMusicRenderer,
     @Override
     @DebugLog
     public void onPrepared(IMediaPlayer player) {
-        if (player == mMediaPlayer) {
-            mPlayerPrepared = true;
+        if (player == mCurrentPlayer.player) {
+            mCurrentPlayer.prepared = true;
             // The media player is done preparing. That means we can start playing if we
             // have audio focus.
             if (mPlayOnFocusGain) {
@@ -469,8 +518,8 @@ public class LocalRenderer implements IMusicRenderer,
                 mState = PlaybackStateCompat.STATE_PAUSED;
                 notifyOnPlaybackStatusChanged(mState);
             }
-        } else if (player == mNextMediaPlayer) {
-            mNextPlayerPrepared = true;
+        } else if (player == mNextPlayer.player) {
+            mNextPlayer.prepared = true;
         }
     }
 
@@ -485,7 +534,7 @@ public class LocalRenderer implements IMusicRenderer,
     @DebugLog
     public boolean onError(IMediaPlayer mp, int what, int extra) {
         Timber.d("Media player error: what=" + what + ", extra=" + extra);
-        stop(false);
+        resetHard();
         mCurrentPosition = 0;
         notifyOnError("MediaPlayer error " + what + " (" + extra + ")");
         return true; // true indicates we handled the error
@@ -494,36 +543,11 @@ public class LocalRenderer implements IMusicRenderer,
     @Override
     @DebugLog
     public void onAudioSessionId(IMediaPlayer mp, int audioSessionId) {
-        if (mp == mMediaPlayer) {
+        if (mp == mCurrentPlayer.player) {
+            mCurrentPlayer.sessionId = audioSessionId;
             notifyOnAudioSessionId(audioSessionId);
         } else {
-            mNextAudioSessionId = audioSessionId;
-        }
-    }
-
-    /**
-     * Releases resources used by the service for playback.
-     */
-    private void releaseMediaPlayer(boolean andNext) {
-        // stop and release the Media Player, if it's available
-        if (mMediaPlayer != null) {
-            mMediaPlayer.reset();
-            mMediaPlayer.release();
-            mMediaPlayer = null;
-            mPlayerPrepared = false;
-        }
-        if (andNext) {
-            releaseNextMediaPlayer();
-        }
-    }
-
-    private void releaseNextMediaPlayer() {
-        if (mNextMediaPlayer != null) {
-            mNextMediaPlayer.reset();
-            mNextMediaPlayer.release();
-            mNextMediaPlayer = null;
-            mNextPlayerPrepared = false;
-            mNextAudioSessionId = 0;
+            mNextPlayer.sessionId = audioSessionId;
         }
     }
 
