@@ -167,6 +167,7 @@ public class ArtworkProvider extends ContentProvider {
                         final CompletionListener listener =
                                 new CompletionListener() {
                                     @Override public void onError(Throwable e) {
+                                        Timber.w("onError(%s) for %s", e.getMessage(), artInfo.toString());
                                         queue.offer(new OptionalBitmap(null));
                                     }
                                     @Override public void onNext(Bitmap o) {

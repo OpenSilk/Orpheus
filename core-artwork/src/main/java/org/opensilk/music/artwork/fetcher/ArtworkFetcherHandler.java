@@ -25,6 +25,7 @@ import org.opensilk.music.artwork.shared.ArtworkPreferences;
 import org.opensilk.music.model.ArtInfo;
 
 import java.lang.ref.WeakReference;
+import java.util.WeakHashMap;
 
 import javax.inject.Inject;
 
@@ -49,7 +50,7 @@ public class ArtworkFetcherHandler extends Handler {
     final WeakReference<ArtworkFetcherService> mService;
     final ArtworkFetcherManager mFetcherManager;
     final ArtworkPreferences mArtworkPrefs;
-    final CompositeSubscription mSubscriptions = new CompositeSubscription();
+    final WeakHashMap<String, Subscription> mActiveSubscriptions = new WeakHashMap<>();
 
     @Inject
     public ArtworkFetcherHandler(
@@ -71,7 +72,7 @@ public class ArtworkFetcherHandler extends Handler {
                 Task task = (Task) msg.obj;
                 Subscription s = mFetcherManager.fetch(task.artInfo, task.listener);
                 if (msg.arg1 == 1) {
-                    mSubscriptions.add(s);
+                    mActiveSubscriptions.put(task.artInfo.cacheKey(), s);
                 }
                 break;
             } case MSG.CLEAR_CACHES: {
@@ -83,7 +84,12 @@ public class ArtworkFetcherHandler extends Handler {
                 stopService(startId);
                 break;
             }case MSG.ON_LOW_MEM: {
-                mSubscriptions.clear();
+                for (Subscription s : mActiveSubscriptions.values()) {
+                    if (s != null) {
+                        s.unsubscribe();
+                    }
+                }
+                mActiveSubscriptions.clear();
                 break;
             }
         }
@@ -100,14 +106,15 @@ public class ArtworkFetcherHandler extends Handler {
                 final ArtInfo artInfo = intent.getParcelableExtra(ArtworkFetcherService.EXTRA.ARTINFO);
                 CompletionListener listener = new CompletionListener() {
                     @Override public void onError(Throwable e) {
+                        Timber.w("onError(%s) for %s", e.getMessage(), artInfo.toString());
                         onDone();
                     }
                     @Override public void onCompleted() {
                         onDone();
                     }
                     void onDone() {
-                        mSubscriptions.remove(this);
-                        Timber.d("Has subscriptions=%d", mSubscriptions.hasSubscriptions());
+                        mActiveSubscriptions.remove(artInfo.cacheKey());
+                        Timber.d("Has subscriptions=%d", mActiveSubscriptions.size());
                         stopService(startId);
                     }
                 };

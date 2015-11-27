@@ -318,6 +318,9 @@ public class ArtworkFetcherManager {
         return Observable.create(new Observable.OnSubscribe<Bitmap>() {
             @Override
             public void call(Subscriber<? super Bitmap> subscriber) {
+                if (subscriber.isUnsubscribed()) {
+                    return;
+                }
                 InputStream is = null;
                 try {
                     //We don't want okhttp clogging its cache with these images
@@ -364,6 +367,9 @@ public class ArtworkFetcherManager {
         return Observable.create(new Observable.OnSubscribe<Bitmap>() {
             @Override
             public void call(Subscriber<? super Bitmap> subscriber) {
+                if (subscriber.isUnsubscribed()) {
+                    return;
+                }
                 InputStream in = null;
                 try {
                     final Uri uri = artInfo.artworkUri;
