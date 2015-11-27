@@ -33,6 +33,7 @@ import org.opensilk.music.playback.control.PlaybackController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -41,6 +42,7 @@ import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Observable;
 import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
@@ -71,6 +73,10 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> {
             setProgress(integer);
         }
     });
+
+    Subscription skipSubscription;
+    final Observable<Long> skipToItemObservable = Observable.timer(700, TimeUnit.MILLISECONDS,
+            AndroidSchedulers.mainThread());
 
     @Inject
     public FooterScreenPresenter(
@@ -127,16 +133,25 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> {
     void teardown() {
         unsubscribeBroadcasts();
         mProgressUpdater.unsubscribeProgress();
+        RxUtils.unsubscribe(skipSubscription);
     }
 
     @DebugLog
     void skipToQueueItem(int pos) {
-        if (pos > 0  && pos < screens.size()) {
-            long id = screens.get(pos).queueItem.getQueueId();
+        if (pos >= 0  && pos < screens.size()) {
+            final long id = screens.get(pos).queueItem.getQueueId();
             if (lastPlayingId != id) {
                 lastPlayingId = id;
-                selfChange = true;
-                playbackController.skipToQueueItem(id);
+                RxUtils.unsubscribe(skipSubscription);
+                //post on delay to allow skipping over multiple items
+                skipSubscription = skipToItemObservable.subscribe(new Action1<Long>() {
+                    @Override
+                    public void call(Long aLong) {
+                        Timber.d("skippingToQueueItem %d", id);
+                        selfChange = true;
+                        playbackController.skipToQueueItem(id);
+                    }
+                });
             }
         }
     }
