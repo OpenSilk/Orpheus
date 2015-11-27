@@ -56,6 +56,7 @@ public class PlaybackQueue {
     private QueueChangeListener mListener;
     protected final AtomicLong mIdGenerator = new AtomicLong(1);
     private Subscription mLookupSub;
+    private boolean mReady;
 
     @Inject
     public PlaybackQueue(
@@ -66,8 +67,13 @@ public class PlaybackQueue {
         this.mService = mService;
     }
 
+    public boolean isReady() {
+        return mReady;
+    }
+
     @DebugLog
     public void load() {
+        mReady = false;
         mQueue.clear();
         mQueue.addAll(mIndexClient.getLastQueue());
         int pos = mIndexClient.getLastQueuePosition();
@@ -516,6 +522,7 @@ public class PlaybackQueue {
     }
 
     private void updateDescriptions(final Action0 callbackaction) {
+        mReady = true;
         if (mLookupSub != null) {
             mLookupSub.unsubscribe();
         }
@@ -545,6 +552,7 @@ public class PlaybackQueue {
             updateQueueMeta(Collections.<MediaDescriptionCompat>emptyList());
             callbackaction.call();
         } else {
+            mReady = false;
             mLookupSub = mIndexClient.getDescriptions(urisToFetch)
                     .first()
                     .observeOn(mService.getScheduler())
@@ -558,6 +566,7 @@ public class PlaybackQueue {
                         }
                         @Override public void onNext(List<MediaDescriptionCompat> mediaDescriptions) {
                             updateQueueMeta(mediaDescriptions);
+                            mReady = true;
                             callbackaction.call();
                             mLookupSub = null;
                         }

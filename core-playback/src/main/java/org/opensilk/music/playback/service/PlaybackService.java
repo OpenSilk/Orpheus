@@ -140,7 +140,6 @@ public class PlaybackService {
     private boolean mPlayWhenReady;
     //
     private boolean mQueueReloaded;
-    private boolean mQueueReady;
     //
     private boolean mServiceStarted = false;
     private volatile int mConnectedClients = 0;
@@ -753,7 +752,7 @@ public class PlaybackService {
                     }
                     if (!PlaybackStateHelper.isError(mPlayback.getState())) {
                         mPlayWhenReady = cn != null || wasPlaying;//dont auto start localrenderer
-                        if (mQueueReady) {
+                        if (mQueue.isReady()) {
                             if (mQueue.notEmpty()) {
                                 mRendererChanged = true;
                                 mSeekForNewRenderer = getCurrentSeekPosition();
@@ -789,7 +788,7 @@ public class PlaybackService {
                 mProxy.startSelf();
                 mServiceStarted = true;
             }
-            if (mQueueReady) {
+            if (mQueue.isReady()) {
                 mSessionHolder.setActive(true);
                 if (mQueue.notEmpty()) {
                     if (PlaybackStateHelper.isConnecting(mPlayback.getState())) {
@@ -1051,13 +1050,8 @@ public class PlaybackService {
             if (mQueue.notEmpty()) {
                 mSessionHolder.setQueue(mQueue.getQueueItems());
                 if (mQueueReloaded) {
-                    mQueueReady = true;
+                    //update available actions
                     updatePlaybackState(null);
-                }
-                if (mQueue.getCurrentPos() < 0) {
-                    Timber.e(new IllegalStateException("Current pos is " + mQueue.getCurrentPos()),
-                            "This should not happen while queue has items");
-                    return;
                 }
                 setTrack();
             } else {
