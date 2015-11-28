@@ -66,6 +66,12 @@ public class MetaExtractorImpl implements MetaExtractor {
         }
     }
 
+    //TODO how to handle this properly???
+    static String fixLatin1(String string) {
+        string = StringUtils.replace(string, "â€™", "’");
+        return string;
+    }
+
     @Override
     public @Nullable Metadata extractMetadata(Track.Res res) {
 
@@ -87,11 +93,11 @@ public class MetaExtractorImpl implements MetaExtractor {
 
             Metadata.Builder bob = Metadata.builder();
 
-            bob.putString(KEY_ALBUM_NAME, mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM));
-            bob.putString(KEY_ALBUM_ARTIST_NAME, mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST));
-            bob.putString(KEY_ARTIST_NAME, mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST));
-            bob.putString(KEY_GENRE_NAME, mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE));
-            bob.putString(KEY_TRACK_NAME, mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE));
+            bob.putString(KEY_ALBUM_NAME, fixLatin1(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)));
+            bob.putString(KEY_ALBUM_ARTIST_NAME, fixLatin1(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST)));
+            bob.putString(KEY_ARTIST_NAME, fixLatin1(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)));
+            bob.putString(KEY_GENRE_NAME, fixLatin1(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE)));
+            bob.putString(KEY_TRACK_NAME, fixLatin1(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)));
             bob.putString(KEY_MIME_TYPE, mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE));
 
             final String bitrate = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE);
