@@ -25,6 +25,8 @@ import com.bumptech.glide.Registry;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.DiskLruCacheWrapper;
 
+import org.opensilk.music.artwork.cache.CacheUtil;
+
 import java.io.File;
 
 /**
@@ -39,14 +41,7 @@ public class ArtworkGlideModule implements com.bumptech.glide.module.GlideModule
         builder.setDiskCache(new DiskCache.Factory() {
             @Override
             public DiskCache build() {
-                File dir = context.getExternalCacheDir();
-                if (dir == null || !dir.canWrite()) {
-                    dir = context.getCacheDir();
-                }
-                dir = new File(dir, "glide/1");
-                if (!dir.exists()) {
-                    dir.mkdirs();
-                }
+                File dir = CacheUtil.getCacheDir(context, "glide/1");
                 return DiskLruCacheWrapper.get(dir, 50 * 1024 * 1024);
             }
         });

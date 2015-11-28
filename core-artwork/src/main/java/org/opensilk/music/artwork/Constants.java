@@ -17,9 +17,6 @@
 
 package org.opensilk.music.artwork;
 
-import rx.Scheduler;
-import rx.schedulers.Schedulers;
-
 /**
  * Created by drew on 4/30/15.
  */
