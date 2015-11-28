@@ -45,8 +45,7 @@ dependencies {
     compile (group: 'commons-io', name: 'commons-io', version: rootProject.ext.commonsIoVersion)
 //    compile(group: 'com.google.android.exoplayer', name: 'exoplayer', version: 'r1.2.4', ext: 'aar')
     compile 'com.ogaclejapan.arclayout:library:1.0.1@aar'
-    compile 'ch.acra:acra:4.7.1-RC.2-SNAPSHOT@aar'
-    compile 'net.iharder:base64:2.3.8'
+    compile 'ch.acra:acra:4.7.0-RC.4-SNAPSHOT@aar'
 
     compile project(':core-model')
     compile project(':core-library')
