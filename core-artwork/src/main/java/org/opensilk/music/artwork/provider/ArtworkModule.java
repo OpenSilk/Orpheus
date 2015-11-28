@@ -57,13 +57,13 @@ public class ArtworkModule {
     @Provides @Singleton //TODO when/how to close this?
     public BitmapDiskCache provideBitmapDiskLruCache(
             @ForApplication Context context, ArtworkPreferences preferences, ByteArrayPool byteArrayPool) {
-        int size = Integer.decode(preferences.getString(IMAGE_DISK_CACHE_SIZE,IMAGE_DISK_CACHE_DEFAULT)) * 1024 * 1024;
-        if (size < Integer.decode(IMAGE_DISK_CACHE_DEFAULT)) {
+        int sizeMB = Integer.decode(preferences.getString(IMAGE_DISK_CACHE_SIZE,IMAGE_DISK_CACHE_DEFAULT));
+        if (sizeMB < Integer.decode(IMAGE_DISK_CACHE_DEFAULT)) {
             //upgrade users from Orpheus 2.x to the new minimum cache size
             preferences.putString(IMAGE_DISK_CACHE_SIZE, IMAGE_DISK_CACHE_DEFAULT);
-            size = Integer.decode(IMAGE_DISK_CACHE_DEFAULT);
+            sizeMB = Integer.decode(IMAGE_DISK_CACHE_DEFAULT);
         }
-        return BitmapDiskLruCache.open(CacheUtil.getCacheDir(context, DISK_CACHE_DIRECTORY), size, byteArrayPool);
+        return BitmapDiskLruCache.open(CacheUtil.getCacheDir(context, DISK_CACHE_DIRECTORY), sizeMB * 1024 * 1024, byteArrayPool);
     }
 
     @Provides @Singleton @Named("artworkscheduler")
