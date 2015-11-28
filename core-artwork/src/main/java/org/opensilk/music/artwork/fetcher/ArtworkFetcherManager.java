@@ -142,6 +142,9 @@ public class ArtworkFetcherManager {
         return Observable.create(new Observable.OnSubscribe<Boolean>() {
             @Override
             public void call(Subscriber<? super Boolean> subscriber) {
+                if (subscriber.isUnsubscribed()) {
+                    return;
+                }
                 //in case a request just finished
                 subscriber.onNext(mL2Cache.containsKey(artInfo.cacheKey()));
                 subscriber.onCompleted();
@@ -408,12 +411,16 @@ public class ArtworkFetcherManager {
                     sb.append("Center cropping: ");
                     //center crop
                     bitmap = Bitmap.createBitmap(tempBitmap2, w / 2 - h / 2, 0, h, h);
-                    tempBitmap2.recycle();
+                    if (bitmap != tempBitmap2) {
+                        tempBitmap2.recycle();
+                    }
                 } else if (h > w) {
                     sb.append("Top cropping: ");
                     // top crop
                     bitmap = Bitmap.createBitmap(tempBitmap2, 0, 0, w, w);
-                    tempBitmap2.recycle();
+                    if (bitmap != tempBitmap2) {
+                        tempBitmap2.recycle();
+                    }
                 } else {
                     sb.append("Not cropping: ");
                     bitmap = tempBitmap2;

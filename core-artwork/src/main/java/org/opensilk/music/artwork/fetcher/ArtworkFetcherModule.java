@@ -17,10 +17,7 @@
 
 package org.opensilk.music.artwork.fetcher;
 
-import android.content.UriMatcher;
 import android.os.Handler;
-
-import org.opensilk.music.artwork.ArtworkUris;
 
 import javax.inject.Named;
 

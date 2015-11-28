@@ -24,7 +24,7 @@ import rx.Subscriber;
 /**
  * Created by drew on 10/7/15.
  */
-public abstract class CompletionListener extends Subscriber<Bitmap> {
+public class CompletionListener extends Subscriber<Bitmap> {
     @Override
     public void onError(Throwable e) {
     }
@@ -35,5 +35,10 @@ public abstract class CompletionListener extends Subscriber<Bitmap> {
     @Override
     public void onNext(Bitmap o) {
         o.recycle();
+    }
+
+    @Override
+    public void onCompleted() {
+
     }
 }

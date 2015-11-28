@@ -23,5 +23,6 @@ import org.opensilk.music.model.ArtInfo;
  * Created by drew on 10/7/15.
  */
 public interface ArtworkFetcher {
-    void newRequest(ArtInfo artInfo, CompletionListener listener);
+    boolean newRequest(ArtInfo artInfo, CompletionListener listener);
+    boolean cancelRequest(ArtInfo artInfo);
 }

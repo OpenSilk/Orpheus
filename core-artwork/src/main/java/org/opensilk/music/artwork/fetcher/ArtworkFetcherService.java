@@ -35,6 +35,7 @@ import java.io.Closeable;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
@@ -52,16 +53,16 @@ public class ArtworkFetcherService extends MortarService {
         String NEWTASK = "newtask";
         String CLEARCACHE = "clearcache";
         String RELOADPREFS = "reloadprefs";
+        String START = "start";
     }
 
     public interface EXTRA {
         String ARTINFO = "artinfo";
     }
 
-    public static void newTask(Context context, Uri uri, ArtInfo artInfo) {
+    public static void newTask(Context context, ArtInfo artInfo) {
         Intent i = new Intent(context, ArtworkFetcherService.class)
                 .setAction(ArtworkFetcherService.ACTION.NEWTASK)
-                .setData(uri)
                 .putExtra(ArtworkFetcherService.EXTRA.ARTINFO, artInfo)
                 ;
         context.startService(i);
@@ -82,16 +83,15 @@ public class ArtworkFetcherService extends MortarService {
     private HandlerThread mHandlerThread;
     @Inject ArtworkFetcherHandler mHandler;
 
-    private final AtomicInteger mTimesStarted = new AtomicInteger(0);
+    private final AtomicBoolean mStarted = new AtomicBoolean();
+    private final AtomicInteger mBoundClients = new AtomicInteger(0);
     private final Runnable mStopSelfTask = new StopSelfTask(this);
-    private final Binder mBinder = new Binder();
+    private final Binder mBinder = new Binder(this);
 
     @Override
     protected void onBuildScope(MortarScope.Builder builder) {
-        builder.withService(DaggerService.DAGGER_SERVICE,
-                ArtworkFetcherComponent.FACTORY.call(
-                        DaggerService.<ArtworkComponent>getDaggerComponent(getApplicationContext()),
-                        this));
+        ArtworkComponent parent = DaggerService.getDaggerComponent(getApplicationContext());
+        builder.withService(DaggerService.DAGGER_SERVICE, ArtworkFetcherComponent.FACTORY.call(parent, this));
     }
 
     @Override
@@ -99,11 +99,11 @@ public class ArtworkFetcherService extends MortarService {
         super.onCreate();
         mHandlerThread = new HandlerThread("ArtworkFetcher");
         mHandlerThread.start();
-        DaggerService.<ArtworkFetcherComponent>getDaggerComponent(this).inject(this);
+        ArtworkFetcherComponent cmp = DaggerService.getDaggerComponent(this);
+        cmp.inject(this);
     }
 
     @Override
-    @DebugLog
     public void onDestroy() {
         super.onDestroy();
         mHandler.onDestroy();
@@ -112,26 +112,32 @@ public class ArtworkFetcherService extends MortarService {
 
     @Override
     public IBinder onBind(Intent intent) {
+        mBoundClients.incrementAndGet();
         return mBinder;
     }
 
     @Override
-    @DebugLog
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        mTimesStarted.incrementAndGet();
-        mHandler.removeCallbacks(mStopSelfTask);
-        mHandler.processIntent(intent, startId);
-        return START_REDELIVER_INTENT;
+    public boolean onUnbind(Intent intent) {
+        mBoundClients.decrementAndGet();
+        return super.onUnbind(intent);
     }
 
     @Override
-    @DebugLog
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        mStarted.set(true);
+        mHandler.removeCallbacks(mStopSelfTask);
+        if (intent != null && ACTION.START.equals(intent.getAction())) {
+            return START_NOT_STICKY;
+        } else {
+            mHandler.processIntent(intent);
+            return START_REDELIVER_INTENT;
+        }
+    }
+
+    @Override
     public void onTrimMemory(int level) {
-        if (level >= TRIM_MEMORY_COMPLETE) {
-            // System will kill us very soon anyway maybe the provider
-            // can keep living if we commit suicide;
-            stopSelf();
-        } else if (level >= 15 /*TRIM_MEMORY_RUNNING_CRITICAL*/) {
+        Timber.w("onTrimMemory %d", level);
+        if (level >= TRIM_MEMORY_COMPLETE || level == 15 /*TRIM_MEMORY_RUNNING_CRITICAL*/) {
             mHandler.sendEmptyMessage(ArtworkFetcherHandler.MSG.ON_LOW_MEM);
         }
     }
@@ -140,10 +146,10 @@ public class ArtworkFetcherService extends MortarService {
         return mHandlerThread;
     }
 
-    void maybeStopSelf(int startId) {
-        int remaining = mTimesStarted.decrementAndGet();
-        Timber.v("finished %d: %d tasks remain", startId, remaining);
-        if (remaining == 0) {
+    void maybeStopSelf() {
+        if (mBoundClients.get() == 0 && mStarted.get()) {
+            Timber.d("Scheduling shutdown");
+            mStarted.set(false);
             mHandler.postDelayed(mStopSelfTask, 60 * 1000);
         }
     }
@@ -158,15 +164,40 @@ public class ArtworkFetcherService extends MortarService {
         @Override
         public void run() {
             ArtworkFetcherService s = service.get();
-            if (s != null) {
+            if (s != null && !s.mStarted.get()) {
                 s.stopSelf();
             }
         }
     }
 
-    class Binder extends android.os.Binder implements ArtworkFetcher {
-        public void newRequest(ArtInfo artInfo, CompletionListener listener) {
-            mHandler.newTask(artInfo, listener);
+    static class Binder extends android.os.Binder implements ArtworkFetcher {
+        final WeakReference<ArtworkFetcherService> mService;
+
+        public Binder(ArtworkFetcherService mService) {
+            this.mService = new WeakReference<ArtworkFetcherService>(mService);
+        }
+
+        @Override
+        public boolean newRequest(ArtInfo artInfo, CompletionListener listener) {
+            ArtworkFetcherService s = mService.get();
+            if (s != null) {
+                s.mHandler.newTask(artInfo, listener);
+                if (!s.mStarted.get()) {
+                    s.startService(new Intent(s, ArtworkFetcherService.class).setAction(ACTION.START));
+                }
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public boolean cancelRequest(ArtInfo artInfo) {
+            ArtworkFetcherService s = mService.get();
+            if (s != null) {
+                s.mHandler.cancelTask(artInfo);
+                return true;
+            }
+            return false;
         }
     }
 

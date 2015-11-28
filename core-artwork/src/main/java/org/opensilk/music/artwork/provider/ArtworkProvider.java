@@ -130,6 +130,7 @@ public class ArtworkProvider extends ContentProvider {
                 public void call() {
                     try {
                         IOUtils.write(bytes, out);
+                        out.flush();
                     } catch (IOException e) {
                         Timber.w("createPipe(e=%s) for %s", e.getMessage(), artInfo);
                     } finally {
@@ -160,9 +161,10 @@ public class ArtworkProvider extends ContentProvider {
                 @Override
                 public void call() {
                     OptionalBitmap bitmap = null;
+                    ArtworkFetcherService.Connection binder = null;
                     try {
                         //make a new request and wait for it to come in.
-                        final ArtworkFetcher binder = getArtworkFetcher();
+                        binder = ArtworkFetcherService.bindService(getContext());
                         final BlockingQueue<OptionalBitmap> queue = new LinkedBlockingQueue<>(1);
                         final CompletionListener listener =
                                 new CompletionListener() {
@@ -173,18 +175,24 @@ public class ArtworkProvider extends ContentProvider {
                                     @Override public void onNext(Bitmap o) {
                                         queue.offer(new OptionalBitmap(o));
                                     }
-                                    @Override public void onCompleted() { }
                                 };
-                        binder.newRequest(artInfo, listener);
+                        if (!binder.getService().newRequest(artInfo, listener)) {
+                            throw new InterruptedException("Enqueue failed");
+                        }
                         bitmap = queue.take();
                         if (bitmap.hasBitmap()) {
                             byte[] bytes = mL2Cache.bitmapToBytes(bitmap.getBitmap());
                             IOUtils.write(bytes, out);
+                            out.flush();
                         }
                     } catch (InterruptedException|IOException e) {
                         Timber.w("createPipe2(e=%s) for %s", e.getMessage(), artInfo);
+                        if (binder != null) {
+                            binder.getService().cancelRequest(artInfo);
+                        }
                     } finally {
                         if (bitmap != null) bitmap.recycle();
+                        IOUtils.closeQuietly(binder);
                         IOUtils.closeQuietly(out);
                         worker.unsubscribe();
                     }
@@ -195,13 +203,6 @@ public class ArtworkProvider extends ContentProvider {
             Timber.e(e, "createPipe2() for %s", artInfo);
             return null;
         }
-    }
-
-    //allow tests to override
-    protected ArtworkFetcher getArtworkFetcher() throws InterruptedException {
-        final ArtworkFetcherService.Connection serviceConnection =
-                ArtworkFetcherService.bindService(getContext());
-        return serviceConnection.getService();
     }
 
     /** Wrapper so we can notify error */
