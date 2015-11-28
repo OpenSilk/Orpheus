@@ -2134,10 +2134,9 @@ public class IndexDatabaseImpl implements IndexDatabase {
         return !StringUtils.isEmpty(string1) ? string1 : string2;
     }
 
-    static final String unknown = "<unknown>";
     static String coalesceOrUnknown(String string1, String string2) {
-        String s = null;
-        return !StringUtils.isEmpty(s = coalesce(string1, string2)) ? s : unknown;
+        String s = coalesce(string1, string2);
+        return !StringUtils.isEmpty(s) ? s : IndexSchema.UNKNOWN_STRING;
     }
 
     public static String getStringOrNull(Cursor c, int idx) {
