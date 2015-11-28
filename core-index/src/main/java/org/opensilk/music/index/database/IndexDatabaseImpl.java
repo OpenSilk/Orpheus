@@ -1450,8 +1450,8 @@ public class IndexDatabaseImpl implements IndexDatabase {
         if (StringUtils.isEmpty(albumArtist) || StringUtils.isEmpty(album)) {
             return -1;
         }
+        final String key = albumArtist+album+authority;
         synchronized (mAlbumIdsCache) {
-            String key = albumArtist+album+authority;
             if (mAlbumIdsCache.containsKey(key)) {
                 return mAlbumIdsCache.get(key);
             }
@@ -1480,7 +1480,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
             }
             if (id > 0) {
                 synchronized (mAlbumIdsCache) {
-                    mAlbumIdsCache.put(albumArtist + album, id);
+                    mAlbumIdsCache.put(key, id);
                 }
             }
             return id;
@@ -1518,10 +1518,10 @@ public class IndexDatabaseImpl implements IndexDatabase {
         if (StringUtils.isEmpty(artist)) {
             return -1;
         }
-        artist = StringUtils.trim(artist);
+        final String key = artist+authority;
         synchronized (mArtistIdsCache) {
-            if (mArtistIdsCache.containsKey(artist)) {
-                return mArtistIdsCache.get(artist);
+            if (mArtistIdsCache.containsKey(key)) {
+                return mArtistIdsCache.get(key);
             }
         }
         long id = -1;
@@ -1553,7 +1553,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
             }
             if (id > 0) {
                 synchronized (mArtistIdsCache) {
-                    mArtistIdsCache.put(artist, id);
+                    mArtistIdsCache.put(key, id);
                 }
             }
             return id;
@@ -1590,9 +1590,10 @@ public class IndexDatabaseImpl implements IndexDatabase {
         if (StringUtils.isEmpty(genre)) {
             return -1;
         }
+        final String key = genre+authority;
         synchronized (mGenreIdsCache) {
-            if(mGenreIdsCache.containsKey(genre)) {
-                return mGenreIdsCache.get(genre);
+            if(mGenreIdsCache.containsKey(key)) {
+                return mGenreIdsCache.get(key);
             }
         }
         long id = -1;
@@ -1615,7 +1616,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
             }
             if (id > 0) {
                 synchronized (mGenreIdsCache) {
-                    mGenreIdsCache.put(genre, id);
+                    mGenreIdsCache.put(key, id);
                 }
             }
             return id;
