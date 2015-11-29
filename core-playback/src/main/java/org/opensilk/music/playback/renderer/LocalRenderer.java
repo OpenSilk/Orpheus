@@ -159,7 +159,13 @@ public class LocalRenderer implements IMusicRenderer,
         resetSoft();
         mCurrentPlayer.reset(false);
         mCurrentPosition = 0;
-        mState = PlaybackStateCompat.STATE_CONNECTING;
+        // Although this is technically the correct state the conversion to RCC internally
+        // transmutes it into the error state. The horror!! Resulting in some bluetooth players
+        // swapping inputs, effectively disconnecting us and stopping playback.
+        // This was probably the most horrible bug ive had to track down in Orpheus.
+        // This note is a reminder to *NOT* change it back.
+        //mState = PlaybackStateCompat.STATE_CONNECTING;
+        mState = PlaybackStateCompat.STATE_BUFFERING;
         notifyOnPlaybackStatusChanged(mState);
     }
 

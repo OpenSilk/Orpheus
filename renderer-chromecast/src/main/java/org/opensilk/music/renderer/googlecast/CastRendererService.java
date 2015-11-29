@@ -330,7 +330,8 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
         if (isConnected() && hasCurrent()) {
             mRemoteMediaPlayer.stop(mApiClient);
         }
-        mState = STATE_CONNECTING;
+        //See note in LocalRenderer for why we dont use STATE_CONNECTING
+        mState = STATE_BUFFERING;
         notifyOnPlaybackStatusChanged(mState);
     }
 
