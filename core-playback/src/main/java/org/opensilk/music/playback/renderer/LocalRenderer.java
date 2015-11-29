@@ -156,7 +156,7 @@ public class LocalRenderer implements IMusicRenderer,
     }
 
     public void prepareForTrack() {
-        resetSoft(false);
+        resetSoft();
         mCurrentPlayer.reset(false);
         mCurrentPosition = 0;
         mState = PlaybackStateCompat.STATE_CONNECTING;
@@ -313,22 +313,17 @@ public class LocalRenderer implements IMusicRenderer,
         //pass
     }
 
-    private void resetSoft() {
-        resetSoft(true);
-    }
-
     //resets our state but does not release mediaplayers
-    private void resetSoft(boolean abandonfocus) {
+    private void resetSoft() {
         if (hasCurrent()) {
             if (mCurrentPlayer.player.isPlaying()) {
                 mCurrentPlayer.player.pause();
             }
             mCurrentPosition = mCurrentPlayer.player.getCurrentPosition();
         }
-        if (abandonfocus) {
-            giveUpAudioFocus();
-            unregisterAudioNoisyReceiver();
-        }
+        // Give up Audio focus
+        giveUpAudioFocus();
+        unregisterAudioNoisyReceiver();
         mPlayOnFocusGain = false;
         //TODO this isnt really a proper state since we still hold the players and must be released
         mState = PlaybackStateCompat.STATE_NONE;
