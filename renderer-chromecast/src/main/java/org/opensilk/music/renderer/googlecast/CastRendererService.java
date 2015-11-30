@@ -471,6 +471,8 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
                 return false;
             }
         }
+        mState = STATE_SKIPPING_TO_NEXT;
+        notifyOnPlaybackStatusChanged(mState);
         RemoteMediaPlayer.MediaChannelResult result = mRemoteMediaPlayer.queueNext(mApiClient, null).await();
         if (result.getStatus().isSuccess()) {
             mSkippedToNext = true;
