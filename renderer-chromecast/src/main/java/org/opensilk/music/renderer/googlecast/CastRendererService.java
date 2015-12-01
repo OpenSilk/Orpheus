@@ -17,7 +17,6 @@
 
 package org.opensilk.music.renderer.googlecast;
 
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
@@ -46,6 +45,7 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.core.mortar.MortarService;
 import org.opensilk.common.core.util.ConnectionUtils;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.playback.renderer.IMusicRenderer;
@@ -64,6 +64,7 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import hugo.weaving.DebugLog;
+import mortar.MortarScope;
 import timber.log.Timber;
 
 import static android.support.v4.media.session.PlaybackStateCompat.*;
@@ -71,7 +72,7 @@ import static android.support.v4.media.session.PlaybackStateCompat.*;
 /**
  * Created by drew on 10/27/15.
  */
-public class CastRendererService extends Service implements IMusicRenderer, AudioManager.OnAudioFocusChangeListener {
+public class CastRendererService extends MortarService implements IMusicRenderer, AudioManager.OnAudioFocusChangeListener {
 
     // The volume we set the media player to when we lose audio focus, but are
     // allowed to reduce the volume instead of stopping playback.
@@ -95,7 +96,7 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
     @Inject ConnectivityManager mConnectivityManager;
     @Inject WifiManager mWifiManager;
     @Inject TrackResCache mTrackResCache;
-    private CastRendererComponent mComponent;
+    @Inject CastDeviceHolder mCastDeviceHolder;
     private GoogleApiClient mApiClient;
     private RemoteMediaPlayer mRemoteMediaPlayer;
     private RemoteMediaPlayerCallbacks mRemoteMediaPlayerCallbacks;
@@ -109,17 +110,21 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
     private boolean mPlayerPrepared;
     private String mSessionId;
     private VolumeProviderCompat mVolumeProvider;
-    private CastDevice mSelectedCastDevice;
     private volatile Handler mCallbackHandler;
     private boolean mLoadingCurrentTrack;
     private boolean mSkippedToNext;
 
     @Override
+    protected void onBuildScope(MortarScope.Builder builder) {
+        CastComponent parent = DaggerService.getDaggerComponent(getApplicationContext());
+        builder.withService(DaggerService.DAGGER_SERVICE, CastRendererComponent.FACTORY.call(parent, this));
+    }
+
+    @Override
     public void onCreate() {
         super.onCreate();
-        CastComponent parent = DaggerService.getDaggerComponent(getApplicationContext());
-        mComponent = CastRendererComponent.FACTORY.call(parent, this);
-        mComponent.inject(this);
+        CastRendererComponent cmp = DaggerService.getDaggerComponent(this);
+        cmp.inject(this);
 
         mContext = this;
         mBinder = new CastRendererServiceBinder(this);
@@ -129,17 +134,8 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mComponent = null;
         mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null && "route_selected".equals(intent.getAction())) {
-            MediaRouter.RouteInfo route = mMediaRouter.getSelectedRoute();
-            mSelectedCastDevice = CastDevice.getFromBundle(route.getExtras());
-        }
-        return START_NOT_STICKY;
+        mCastDeviceHolder.setCastDevice(null);
     }
 
     @Nullable @Override
@@ -158,22 +154,23 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
             stopWithError("Google services unavailable");
             return;
         }
-        if (mSelectedCastDevice == null) {
+        final CastDevice selectedDevice = mCastDeviceHolder.getCastDevice();
+        if (selectedDevice == null) {
             stopWithError("No route selected");
             return;
         }
-        if (!mSelectedCastDevice.isOnLocalNetwork()) {
+        if (!selectedDevice.isOnLocalNetwork()) {
             stopWithError("Cast device must be on local network");
             return;
         }
-        Timber.d("Selected device %s {%s}", mSelectedCastDevice.getFriendlyName(),
-                mSelectedCastDevice.getIpAddress().toString());
+        Timber.d("Selected device %s {%s}", selectedDevice.getFriendlyName(),
+                selectedDevice.getIpAddress().toString());
         InetAddress bindAddr = null;
         try {
             List<NetworkInterface> networkInterfaces = NetworkUtil.discoverNetworkInterfaces();
             List<InetAddress> bindAddresses = NetworkUtil.discoverBindAddresses(networkInterfaces);
             bindAddr = NetworkUtil.getBindAddressInSubnetOf(
-                    networkInterfaces, bindAddresses, mSelectedCastDevice.getIpAddress());
+                    networkInterfaces, bindAddresses, selectedDevice.getIpAddress());
         } catch (IllegalArgumentException e) {
             Timber.e(e, "lookup network");
             bindAddr = null;
@@ -214,8 +211,9 @@ public class CastRendererService extends Service implements IMusicRenderer, Audi
     }
 
     private void connectCastDevice(boolean forceRelaunch) {
-        Timber.d("acquiring a connection to Google Play services for %s", mSelectedCastDevice);
-        Cast.CastOptions.Builder apiOptionsBuilder = Cast.CastOptions.builder(mSelectedCastDevice, new CastListener())
+        final CastDevice selectedDevice = mCastDeviceHolder.getCastDevice();
+        Timber.d("acquiring a connection to Google Play services for %s", selectedDevice);
+        Cast.CastOptions.Builder apiOptionsBuilder = Cast.CastOptions.builder(selectedDevice, new CastListener())
                 .setVerboseLoggingEnabled(true);
         mApiClient = new GoogleApiClient.Builder(mContext)
                 .addApi(Cast.API, apiOptionsBuilder.build())

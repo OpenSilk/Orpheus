@@ -53,4 +53,5 @@ public interface CastComponent extends OkHttpComponent, AppContextComponent, Sys
         }
     };
     MediaRouter mediaRouter();
+    CastDeviceHolder castDeviceHolder();
 }

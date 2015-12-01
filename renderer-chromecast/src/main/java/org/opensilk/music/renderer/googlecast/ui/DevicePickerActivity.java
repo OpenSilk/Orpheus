@@ -37,6 +37,7 @@ import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.okhttp.OkHttpComponent;
 import org.opensilk.music.playback.renderer.RendererConstants;
 import org.opensilk.music.renderer.googlecast.CastComponent;
+import org.opensilk.music.renderer.googlecast.CastDeviceHolder;
 import org.opensilk.music.renderer.googlecast.CastRendererService;
 import org.opensilk.music.renderer.googlecast.R;
 
@@ -52,6 +53,7 @@ public class DevicePickerActivity extends AppCompatActivity implements Dialog.On
     @Inject MediaRouter mMediaRouter;
     @Inject ConnectivityManager mConnectivityManager;
     @Inject WifiManager mWifiManager;
+    @Inject CastDeviceHolder mCastDeviceHolder;
 
     MediaRouteChooserDialog mDialog;
     MediaRouterCallback mCallback;
@@ -105,7 +107,7 @@ public class DevicePickerActivity extends AppCompatActivity implements Dialog.On
             mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
             setResult(RESULT_CANCELED, new Intent());
         } else {
-            startService(new Intent(DevicePickerActivity.this, CastRendererService.class).setAction("route_selected"));
+            mCastDeviceHolder.setCastDevice(device);
             setResult(RESULT_OK, new Intent()
                     .setComponent(new ComponentName(DevicePickerActivity.this, CastRendererService.class)));
         }
