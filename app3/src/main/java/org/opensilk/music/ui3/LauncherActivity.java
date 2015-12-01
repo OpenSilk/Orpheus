@@ -19,6 +19,7 @@ package org.opensilk.music.ui3;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.TimePickerDialog;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -28,6 +29,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AlertDialog;
 import android.view.MenuItem;
 import android.webkit.WebView;
+import android.widget.TimePicker;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
@@ -38,6 +40,7 @@ import org.opensilk.music.model.Playlist;
 import org.opensilk.music.settings.SettingsActivity;
 import org.opensilk.music.settings.WhatsNewDialogHelper;
 import org.opensilk.music.ui.theme.OrpheusTheme;
+import org.opensilk.music.ui.widget.timer.TimerDialog;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
 import org.opensilk.music.ui3.common.ActivityResultCodes;
 import org.opensilk.music.ui3.index.GalleryScreenFragment;
@@ -45,6 +48,8 @@ import org.opensilk.music.ui3.index.playlists.PlaylistsScreenFragment;
 import org.opensilk.music.ui3.library.LibraryScreenFragment;
 import org.opensilk.music.ui3.profile.playlist.PlaylistDetailsScreen;
 import org.opensilk.music.ui3.renderer.RendererScreenFragment;
+
+import java.util.Calendar;
 
 import javax.inject.Inject;
 
@@ -179,6 +184,11 @@ public class LauncherActivity extends MusicActivity {
                 }
                 case R.id.nav_renderers: {
                     mFm.showDialog(RendererScreenFragment.ni());
+                    break;
+                }
+                case R.id.sleep_timer: {
+                    //todo use mFm
+                    new TimerDialog().show(getSupportFragmentManager(), "sleeptimer");
                     break;
                 }
                 case R.id.nav_settings: {

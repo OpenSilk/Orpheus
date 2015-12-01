@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2015 OpenSilk Productions LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" android:orientation="vertical"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:gravity="center_horizontal">
+
+    <TextView
+        android:id="@+id/timer_display"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="120"/>
+
+    <org.opensilk.common.ui.widget.SquareFrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="16dp">
+
+        <org.opensilk.music.ui.widget.timer.CircularSeekBar
+            android:id="@+id/seekbar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:start_angle="110"
+            app:end_angle="430"
+            app:use_custom_radii="false"
+            app:circle_stroke_width="3dp"
+            app:max="120"
+            app:progress="30"
+            app:maintain_equal_circle="true"
+            app:ignore_view_bounds="false"
+            app:circle_color="?colorPrimary"
+            app:circle_progress_color="?colorAccent"
+            app:pointer_color="?colorAccent"
+            app:pointer_halo_color="@android:color/transparent"
+            app:pointer_halo_color_ontouch="?colorAccent"
+            />
+
+    </org.opensilk.common.ui.widget.SquareFrameLayout>
+
+</LinearLayout>

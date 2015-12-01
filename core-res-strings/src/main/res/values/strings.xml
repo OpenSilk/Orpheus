@@ -73,7 +73,7 @@
     <string name="overwrite">Overwrite</string>
     <string name="delete_dialog_title">Delete <xliff:g id="item" example="album">%s</xliff:g>?</string>
     <string name="cannot_be_undone">This cannot be undone</string>
-    <string name="btn_cancel_current_timer">Cancel current timer</string>
+    <string name="cancel_current">Cancel current</string>
     <string name="error">Error</string>
     <string name="retry">Retry</string>
     <string name="dash"> - </string>
@@ -139,10 +139,11 @@
     <string name="err_offline">You are offline</string>
     <string name="err_unsupported_for_library">Operation only supported with local songs</string>
     <string name="err_no_visualizations_foru">Unable to create visualizer</string>
-    <string name="msg_sleep_timer_set">Sleep timer set for %d minutes</string>
+    <string name="msg_sleep_timer_set">Sleep timer set for %1$d minutes</string>
+    <string name="msg_sleep_timer_canceled">Sleep timer canceled</string>
     <string name="msg_fetching_song_list">Fetching song list…</string>
     <string name="msg_newer_plugin_needed">Update required</string>
-    <string name="msg_newer_plugin_message">Orpheus requires a newer version of %s.</string>
+    <string name="msg_newer_plugin_message">Orpheus requires a newer version of %$s.</string>
     <string name="msg_title_playback_error">Orpheus: playback error</string>
     <string name="err_library_unavailable">Library unavailable, check network</string>
     <string name="msg_deleted">Delete successful</string>

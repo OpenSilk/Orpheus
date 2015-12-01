@@ -35,6 +35,11 @@
         android:title="@string/title_renderers"/>
 
     <item
+        android:id="@+id/sleep_timer"
+        android:icon="@drawable/av_timer_grey600_36dp"
+        android:title="@string/menu_sleep_timer"/>
+
+    <item
         android:id="@+id/nav_settings"
         android:icon="@drawable/settings_box_grey600_36dp"
         android:title="@string/settings_title"/>
