@@ -74,6 +74,7 @@ import static org.acra.ReportField.*;
                 ENVIRONMENT,
                 MEDIA_CODEC_LIST,
                 THREAD_DETAILS,
+                LOGCAT,
         }
 )
 public class App extends BaseApp {
