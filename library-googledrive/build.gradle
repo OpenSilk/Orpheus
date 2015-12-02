@@ -24,22 +24,19 @@ dependencies {
     compile project(':core-okhttp')
 
     //https://github.com/google/google-api-java-client/releases
-    compile ('com.google.api-client:google-api-client-android:1.20.0') {
+    compile ('com.google.api-client:google-api-client-android:1.21.0') {
         exclude module: 'httpclient'
         exclude group: 'com.google.guava'
     }
-//    compile ('com.google.api-client:google-api-client-gson:1.20.0') {
-//        exclude module: 'httpclient'
-//    }
     //https://developers.google.com/api-client-library/java/apis/drive/v2
-    compile ('com.google.apis:google-api-services-drive:v2-rev168-1.20.0') {
+    compile ('com.google.apis:google-api-services-drive:v2-rev194-1.21.0') {
         exclude module: 'httpclient'
         exclude group: 'com.google.guava'
     }
-    compile 'com.google.android.gms:play-services-identity:8.1.0'
     //workaround for build fail similar to https://github.com/groovy/groovy-android-gradle-plugin/issues/32
-    //default is 13 which borks dagger
-    compile 'com.google.guava:guava-jdk5:17.0'
+    //compile 'com.google.guava:guava:18.0'
+
+    compile 'com.google.android.gms:play-services-identity:8.1.0'
 
     testCompile (group:"junit", name:"junit", version: rootProject.ext.testJunitVersion)
     testCompile (group:"org.assertj", name:"assertj-core", version: rootProject.ext.testAssertJVersion)
