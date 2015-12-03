@@ -67,6 +67,7 @@
         <activity
             android:name=".ui3.NowPlayingActivity"
             android:theme="@style/Theme.Dark"
+            android:launchMode="singleTop"
             android:process=":ui">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
