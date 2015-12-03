@@ -26,18 +26,18 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.common.ui.mortar.DialogFactory;
 import org.opensilk.music.R;
 import org.opensilk.music.index.client.IndexClient;
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.sort.FolderTrackSortOrder;
+import org.opensilk.music.playback.PlaybackConstants;
+import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
@@ -45,13 +45,13 @@ import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
 import org.opensilk.music.ui3.common.PlayAllItemClickListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
-import hugo.weaving.DebugLog;
 
 /**
  * Created by drew on 5/2/15.
@@ -142,6 +142,10 @@ public class FoldersScreenModule {
                             inflateMenu(R.menu.add_to_index, menuInflater, menu);
                         }
                     }
+                    if (model instanceof Track) {
+                        inflateMenu(R.menu.add_to_queue, menuInflater, menu);
+                        inflateMenu(R.menu.play_next, menuInflater, menu);
+                    }
                     if ((model.getFlags() & LibraryConfig.FLAG_SUPPORTS_DELETE) != 0) {
                         inflateMenu(R.menu.delete, menuInflater, menu);
                     }
@@ -202,6 +206,30 @@ public class FoldersScreenModule {
                     }
                 }
 
+                boolean canEnqueue = true;
+                for (Model b : models) {
+                    if (!(b instanceof Track)) {
+                        canEnqueue = false;
+                        break;
+                    }
+                }
+                item = menu.findItem(R.id.add_to_queue);
+                if (item == null && canEnqueue) {
+                    inflateMenu(R.menu.add_to_queue, menuInflater, menu);
+                    changed = true;
+                } else if (item != null && !canEnqueue) {
+                    menu.removeItem(R.id.add_to_queue);
+                    changed = true;
+                }
+                item = menu.findItem(R.id.play_next);
+                if (item == null && canEnqueue) {
+                    inflateMenu(R.menu.play_next, menuInflater, menu);
+                    changed = true;
+                } else if (item != null && !canEnqueue) {
+                    menu.removeItem(R.id.play_next);
+                    changed = true;
+                }
+
                 boolean candelete = true;
                 for (Model b : models) {
                     if ((b.getFlags() & LibraryConfig.FLAG_SUPPORTS_DELETE) == 0) {
@@ -239,6 +267,14 @@ public class FoldersScreenModule {
                             }
                         }
                         return true;
+                    case R.id.add_to_queue: {
+                        enqueueSel(presenter.getPlaybackController(), presenter.getSelectedItems(), PlaybackConstants.ENQUEUE_LAST);
+                        return true;
+                    }
+                    case R.id.play_next: {
+                        enqueueSel(presenter.getPlaybackController(), presenter.getSelectedItems(), PlaybackConstants.ENQUEUE_NEXT);
+                        return true;
+                    }
                     case R.id.delete: {
                         final List<Model> models = presenter.getSelectedItems();
                         if (models.size() == 0) {
@@ -270,6 +306,15 @@ public class FoldersScreenModule {
                         return false;
 
                 }
+
+            }
+
+            private void enqueueSel(PlaybackController playbackController, List<Model> selectedItems, int where) {
+                List<Uri> uris = new ArrayList<>(selectedItems.size());
+                for (Model b : selectedItems) {
+                    uris.add(b.getUri());
+                }
+                playbackController.enqueueAll(uris, where);
             }
         };
     }
