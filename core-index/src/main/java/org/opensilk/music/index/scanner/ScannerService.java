@@ -272,8 +272,12 @@ public class ScannerService extends MortarIntentService {
         for (Pair<Track,Metadata> pair : trackMeta) {
             final Track track = pair.first;
             final Metadata meta = pair.second;
-            final boolean success =
-                    mIndexDatabase.insertTrack(track, meta) > 0;
+            boolean success = false;
+            try {
+                success = mIndexDatabase.insertTrack(track, meta) > 0;
+            } catch (Exception e) {
+                Timber.e(e, "Failed inserting track %s", track);
+            }
             if (success) {
                 notifySuccess(track.getUri());
             } else {
