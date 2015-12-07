@@ -22,6 +22,7 @@ import android.net.Uri;
 import org.opensilk.music.model.Metadata;
 import org.opensilk.music.model.Track;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +44,19 @@ public class TestData {
         for (int ii=0; ii<125; ii++) {
             URI_SFB_CHILDREN_0_125.add(Uri.parse("content://sample/foo/bar/" + ii));
         }
+    }
+    static final List<Uri> URI_SFB_CHILDREN_0_52 = new ArrayList<>();
+    static {
+        for (int ii=0; ii<53; ii++) {
+            URI_SFB_CHILDREN_0_52.add(Uri.parse("content://sample/foo/bar/" + ii));
+        }
+    }
+    static List<Uri> URI_SFB_GRANDCHILDREN_0_51(Uri parent) {
+        ArrayList<Uri> lst = new ArrayList<>();
+        for (int ii=0; ii<51; ii++) {
+            lst.add(Uri.parse(parent.toString() + "/" + ii));
+        }
+        return lst;
     }
     static final List<Track> TRACK_SFB_0_10 = new ArrayList<>();
     static final List<Metadata> METADATA_TRACK_SFB_0_10 = new ArrayList<>();

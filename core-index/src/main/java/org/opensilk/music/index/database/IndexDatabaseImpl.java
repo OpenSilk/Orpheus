@@ -1107,16 +1107,25 @@ public class IndexDatabaseImpl implements IndexDatabase {
         int num = 0;
 
         String[][] chunks = chunkArray(containers, 50);
-        for (String[] chunk : chunks) {
-            StringBuilder where = new StringBuilder();
-            where.append(IndexSchema.Containers._ID).append(" IN (");
-            where.append("?");
-            for (int ii=1; ii<chunk.length; ii++) {
-                where.append(",?");
-            }
-            where.append(")");
+        mLock.writeLock().lock();
+        SQLiteDatabase _db = helper.getWritableDatabase();
+        _db.beginTransaction();
+        try {
+            for (String[] chunk : chunks) {
+                StringBuilder where = new StringBuilder();
+                where.append(IndexSchema.Containers._ID).append(" IN (");
+                where.append("?");
+                for (int ii=1; ii<chunk.length; ii++) {
+                    where.append(",?");
+                }
+                where.append(")");
 
-            num += delete(IndexSchema.Containers.TABLE, where.toString(), chunk);
+                num += _db.delete(IndexSchema.Containers.TABLE, where.toString(), chunk);
+            }
+            _db.setTransactionSuccessful();
+        } finally {
+            _db.endTransaction();
+            mLock.writeLock().unlock();
         }
 
         if (num > 0) {
@@ -1548,6 +1557,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
     static final String checkArtistSel = IndexSchema.Info.Artist.ARTIST_KEY + "=? AND " +
             IndexSchema.Info.Artist.AUTHORITY + "=?";
 
+    @DebugLog
     long getArtistIdForName(String artist, String authority) {
         if (StringUtils.isEmpty(artist)) {
             return -1;
