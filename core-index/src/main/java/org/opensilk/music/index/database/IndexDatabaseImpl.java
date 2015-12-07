@@ -1295,33 +1295,39 @@ public class IndexDatabaseImpl implements IndexDatabase {
     public long insertTrack(Track track, Metadata metadata) {
         ContentValues cv = new ContentValues(10);
 
-        long trackId = insertTrack(track);
+        final long trackId = insertTrack(track);
         if (trackId < 0) {
-            Timber.d("No track id for track %s", track);
+            Timber.e("Unable to insert raw track %s", track);
             return -1;
         }
         cv.put(IndexSchema.Meta.Track.TRACK_ID, trackId);
 
         final String authority = track.getUri().getAuthority();
 
-        long artistId = getArtistIdForName(
-                coalesceOrUnknown(metadata.getString(Metadata.KEY_ARTIST_NAME), track.getArtistName()), authority);
-        if (artistId > 0) {
-            cv.put(IndexSchema.Meta.Track.ARTIST_ID, artistId);
+        final String artistName = coalesceOrUnknown(metadata.getString(Metadata.KEY_ARTIST_NAME), track.getArtistName());
+        final long artistId = getArtistIdForName(artistName, authority);
+        if (artistId < 0) {
+            Timber.e("Unable to insert artist %s", artistName);
+            return -1;
         }
+        cv.put(IndexSchema.Meta.Track.ARTIST_ID, artistId);
 
-        long albumId = getAlbumIdForName(
-                coalesceOrUnknown(metadata.getString(Metadata.KEY_ALBUM_ARTIST_NAME), track.getAlbumArtistName()),
-                coalesceOrUnknown(metadata.getString(Metadata.KEY_ALBUM_NAME), track.getAlbumName()), authority);
-        if (albumId > 0) {
-            cv.put(IndexSchema.Meta.Track.ALBUM_ID, albumId);
+        final String albumArtistName = coalesceOrUnknown(metadata.getString(Metadata.KEY_ALBUM_ARTIST_NAME), track.getAlbumArtistName());
+        final String albumName = coalesceOrUnknown(metadata.getString(Metadata.KEY_ALBUM_NAME), track.getAlbumName());
+        final long albumId = getAlbumIdForName(albumArtistName, albumName, authority);
+        if (albumId < 0) {
+            Timber.e("Unable to insert album %s by %s", albumName, albumArtistName);
+            return -1;
         }
+        cv.put(IndexSchema.Meta.Track.ALBUM_ID, albumId);
 
-        long genreId = getGenreIdForName(
-                coalesce(metadata.getString(Metadata.KEY_GENRE_NAME), track.getGenre()), authority);
-        if (genreId > 0) {
-            cv.put(IndexSchema.Meta.Track.GENRE_ID, genreId);
+        final String genreName = coalesceOrUnknown(metadata.getString(Metadata.KEY_GENRE_NAME), track.getGenre());
+        final long genreId = getGenreIdForName(genreName, authority);
+        if (genreId < 0) {
+            Timber.e("Unable to insert genre %s", genreName);
+            return -1;
         }
+        cv.put(IndexSchema.Meta.Track.GENRE_ID, genreId);
 
         String trackName = coalesce(metadata.getString(Metadata.KEY_TRACK_NAME), track.getName());
         if (!StringUtils.isEmpty(trackName)) {
@@ -1493,6 +1499,10 @@ public class IndexDatabaseImpl implements IndexDatabase {
                 id = c.getLong(0);
             } else {
                 long artistId = getArtistIdForName(albumArtist, authority);
+                if (artistId < 0) {
+                    Timber.e("Unable to insert albumArtist %s", albumArtist);
+                    return -1;
+                }
                 //try to populate from lastfm info
                 Metadata albumMeta = mLastFM.lookupAlbumInfo(albumArtist, album);
                 if (albumMeta == null) {
@@ -1630,15 +1640,10 @@ public class IndexDatabaseImpl implements IndexDatabase {
             if (c != null && c.moveToFirst()) {
                 id = c.getLong(0);
             } else {
-                //try to populate from lastfm info
                 Metadata genreMeta = Metadata.builder()
                         .putString(Metadata.KEY_GENRE_NAME, genre)
                         .build();
                 id = insertGenre(genreMeta, authority);
-                if (id > 0) {
-                    mAppContext.getContentResolver().notifyChange(
-                            IndexUris.genre(indexAuthority, String.valueOf(id)), null);
-                }
             }
             if (id > 0) {
                 synchronized (mGenreIdsCache) {
