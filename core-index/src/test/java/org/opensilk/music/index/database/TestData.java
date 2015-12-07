@@ -38,6 +38,12 @@ public class TestData {
             URI_SFB_CHILDREN_0_10.add(Uri.parse("content://sample/foo/bar/" + ii));
         }
     }
+    static final List<Uri> URI_SFB_CHILDREN_0_125 = new ArrayList<>();
+    static {
+        for (int ii=0; ii<125; ii++) {
+            URI_SFB_CHILDREN_0_125.add(Uri.parse("content://sample/foo/bar/" + ii));
+        }
+    }
     static final List<Track> TRACK_SFB_0_10 = new ArrayList<>();
     static final List<Metadata> METADATA_TRACK_SFB_0_10 = new ArrayList<>();
     static {
@@ -56,6 +62,25 @@ public class TestData {
                     .putString(Metadata.KEY_ALBUM_ARTIST_NAME, "artist"+ii%2)
                     .build();
             METADATA_TRACK_SFB_0_10.add(meta);
+        }
+    }
+    static final List<Metadata> METADATA_TRACK_SFB_0_113 = new ArrayList<>();
+    static {
+        for (int ii=0; ii<113; ii++) {
+            Track track = Track.builder()
+                    .setUri(Uri.parse("content://sample/foo/bar/track" + ii))
+                    .setName("track" + ii)
+                    .setParentUri(URI_SFB)
+                    .addRes(Track.Res.builder().setUri(Uri.parse("content://sample/foo/bar/res"+ii)).build())
+                    .build();
+            TRACK_SFB_0_10.add(track);
+            Metadata meta = Metadata.builder()
+                    .putString(Metadata.KEY_TRACK_NAME, "metatrack"+ii)
+                    .putString(Metadata.KEY_ALBUM_NAME, "album"+ii%2)
+                    .putString(Metadata.KEY_ARTIST_NAME, "artist" + ii % 2)
+                    .putString(Metadata.KEY_ALBUM_ARTIST_NAME, "artist"+ii%2)
+                    .build();
+            METADATA_TRACK_SFB_0_113.add(meta);
         }
     }
 }

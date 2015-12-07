@@ -82,6 +82,20 @@ public class DatabaseTest {
     }
 
     @Test
+    public void testAddRemoveContainersMoreThan50Deletions() {
+        long insId = mDb.insertContainer(URI_SFB, URI_SFB_PARENT);
+        long lookId = mDb.hasContainer(URI_SFB);
+        Assertions.assertThat(lookId).isEqualTo(insId);
+        for (Uri child : URI_SFB_CHILDREN_0_125) {
+            long iid = mDb.insertContainer(child, URI_SFB);
+            long lid = mDb.hasContainer(child);
+            Assertions.assertThat(iid).isEqualTo(lid);
+        }
+        int cnt = mDb.removeContainer(URI_SFB);
+        Assertions.assertThat(cnt).isEqualTo(126);
+    }
+
+    @Test
     public void testDoubleContainerInsert() {
         long insId = mDb.insertContainer(URI_SFB, URI_SFB_PARENT);
         long insId2 =mDb.insertContainer(URI_SFB, URI_SFB_PARENT);

@@ -1099,22 +1099,48 @@ public class IndexDatabaseImpl implements IndexDatabase {
 
         containers = ArrayUtils.addAll(containers, findChildrenUnder(uri, true));
 
-        StringBuilder where = new StringBuilder();
-        where.append(IndexSchema.Containers._ID).append(" IN (");
-        where.append("?");
-        for (int ii=1; ii<containers.length; ii++) {
-            where.append(",?");
+        if (containers == null || containers.length == 0) {
+            return 0;
         }
-        where.append(")");
 
         Timber.d("Removing containers %s", Arrays.toString(containers));
-        int num = delete(IndexSchema.Containers.TABLE, where.toString(), containers);
+        int num = 0;
+
+        String[][] chunks = chunkArray(containers, 50);
+        for (String[] chunk : chunks) {
+            StringBuilder where = new StringBuilder();
+            where.append(IndexSchema.Containers._ID).append(" IN (");
+            where.append("?");
+            for (int ii=1; ii<chunk.length; ii++) {
+                where.append(",?");
+            }
+            where.append(")");
+
+            num += delete(IndexSchema.Containers.TABLE, where.toString(), chunk);
+        }
+
         if (num > 0) {
             //notify everyone
             mAppContext.getContentResolver().notifyChange(IndexUris.call(indexAuthority), null);
             clearCaches();
         }
         return num;
+    }
+
+    static String[][] chunkArray(String[] array, int chunkSize) {
+        int numOfChunks = (int)Math.ceil((double)array.length / chunkSize);
+        String[][] output = new String[numOfChunks][];
+
+        for(int i = 0; i < numOfChunks; ++i) {
+            int start = i * chunkSize;
+            int length = Math.min(array.length - start, chunkSize);
+
+            String[] temp = new String[length];
+            System.arraycopy(array, start, temp, 0, length);
+            output[i] = temp;
+        }
+
+        return output;
     }
 
     static final String[] findChildrenUnderCols = new String[] {
