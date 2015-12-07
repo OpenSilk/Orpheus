@@ -1488,8 +1488,6 @@ public class IndexDatabaseImpl implements IndexDatabase {
                 return mAlbumIdsCache.get(key);
             }
         }
-        albumArtist = StringUtils.trim(albumArtist);
-        album = StringUtils.trim(album);
         long id = -1;
         Cursor c = null;
         try {
