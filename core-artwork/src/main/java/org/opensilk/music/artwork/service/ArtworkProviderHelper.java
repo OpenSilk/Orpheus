@@ -27,7 +27,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 
 import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.artwork.R;
 import org.opensilk.music.artwork.cache.BitmapLruCache;
 
@@ -143,17 +142,6 @@ public class ArtworkProviderHelper {
         Bitmap bitmap = null;
         if (uri != null) {
             bitmap = mL1Cache.getBitmap(uri.toString());
-            if (!VersionUtils.hasLollipop() && bitmap != null) {
-                // RemoteControlClient wants to recycle the bitmaps thrown at it, so we need
-                // to make sure not to hand out our cache copy
-                Bitmap.Config config = bitmap.getConfig();
-                if (config == null) {
-                    config = Bitmap.Config.ARGB_8888;
-                }
-                synchronized (sDecodeLock) {
-                    bitmap = bitmap.copy(config, false);
-                }
-            }
         }
         if (bitmap == null) {
             fromCache = false;
