@@ -41,6 +41,7 @@ public class BundleHelper {
     public static final String LONG_ARG2 = "longarg2";
     public static final String LIST_ART = "listarg";
     public static final String PARCELABLE_ARG = "parcelablearg";
+    public static final String BOOL_ARG = "boolarg";
 
     public static int getInt(Bundle b) {
         return b.getInt(INT_ARG);
@@ -84,6 +85,10 @@ public class BundleHelper {
     public static <T extends Parcelable> T getParcelable(Bundle b) {
         b.setClassLoader(BundleHelper.class.getClassLoader());
         return b.<T>getParcelable(PARCELABLE_ARG);
+    }
+
+    public static boolean getBool(Bundle b) {
+        return b.getBoolean(BOOL_ARG);
     }
 
     public static Builder b() {
@@ -156,6 +161,11 @@ public class BundleHelper {
 
         public Builder putParcleable(Parcelable p) {
             b.putParcelable(PARCELABLE_ARG, p);
+            return this;
+        }
+
+        public Builder putBool(boolean val) {
+            b.putBoolean(BOOL_ARG, val);
             return this;
         }
 
