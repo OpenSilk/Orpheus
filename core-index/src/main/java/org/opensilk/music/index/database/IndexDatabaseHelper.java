@@ -33,19 +33,12 @@ import javax.inject.Singleton;
 import timber.log.Timber;
 
 /**
- * Note to the uninitiated (including you) invalid or 'bad' foreign keys
- * in *any* table will throw an exception no matter what table you access
- * (including unrelated ones) this can be very confusing and frustrating.
- * Just remember. everything in here is working as expected.
- * It is YOUR changes that fucked it up. If you don't believe me just
- * stash your changes and rerun the tests to confirm
- *
  * Created by drew on 8/25/15.
  */
 @Singleton
 public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
-    public static final int DB_VERSION = 39;
+    public static final int DB_VERSION = 40;
     public static final String DB_NAME = "music.db";
 
     @Inject
@@ -121,7 +114,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
         */
         //end mistakes cleanup
 
-        if (oldVersion < DB_VERSION) {
+        if (oldVersion < 39) {
 
             //Scanner meta
             db.execSQL("CREATE TABLE IF NOT EXISTS scanner_settings (" +
@@ -386,12 +379,6 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "GROUP BY t1.album_id" +
                     ";");
 
-            // For a given artist_id, provides the album_id for albums on
-            // which the artist appears.
-//            db.execSQL("CREATE VIEW IF NOT EXISTS artists_albums_map AS " +
-//                    "SELECT DISTINCT artist_id, album_id FROM track_meta" +
-//                    ";");
-
             db.execSQL("CREATE INDEX IF NOT EXISTS artist_key_idx on artist_meta(artist_key);");
             db.execSQL("CREATE INDEX IF NOT EXISTS album_key_idx on album_meta(album_key);");
             db.execSQL("CREATE INDEX IF NOT EXISTS genre_key_idx on genre_meta(genre_key);");
@@ -401,7 +388,6 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("CREATE INDEX IF NOT EXISTS tracks_id_idx on tracks(_id);");
             db.execSQL("CREATE INDEX IF NOT EXISTS containers_uri_idx on containers(uri);");
             db.execSQL("CREATE INDEX IF NOT EXISTS playback_settings_key_idx on playback_settings(key);");
-
 
             //Cleanup albums when tracks are deleted
             db.execSQL("CREATE TRIGGER IF NOT EXISTS albums_cleanup AFTER DELETE ON track_meta " +
@@ -426,76 +412,47 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "END");
         }
 
+        if (oldVersion < 40) {
+            //Cleanup albums when albums artist deleted;
+            db.execSQL("CREATE TRIGGER albums_cleanup_artist_delete AFTER DELETE ON artist_meta " +
+                    "FOR EACH ROW " +
+                    "BEGIN " +
+                    "DELETE FROM album_meta WHERE album_artist_id=OLD._id; " +
+                    "END");
+            //Cleanup tracks when container deleted
+            db.execSQL("CREATE TRIGGER tracks_cleanup_container_delete AFTER DELETE ON containers " +
+                    "FOR EACH ROW " +
+                    "BEGIN " +
+                    "DELETE FROM tracks WHERE container_id=OLD._id; " +
+                    "END");
+            //Cleanup track_meta when linked entries deleted
+            db.execSQL("CREATE TRIGGER track_meta_cleanup_track_delete AFTER DELETE ON tracks " +
+                    "FOR EACH ROW " +
+                    "BEGIN " +
+                    "DELETE FROM track_meta WHERE track_id=OLD._id; " +
+                    "END");
+            db.execSQL("CREATE TRIGGER track_meta_cleanup_artist_delete AFTER DELETE ON artist_meta " +
+                    "FOR EACH ROW " +
+                    "BEGIN " +
+                    "DELETE FROM track_meta WHERE artist_id=OLD._id; " +
+                    "END");
+            db.execSQL("CREATE TRIGGER track_meta_cleanup_album_delete AFTER DELETE ON album_meta " +
+                    "FOR EACH ROW " +
+                    "BEGIN " +
+                    "DELETE FROM track_meta WHERE album_id=OLD._id; " +
+                    "END");
+            db.execSQL("CREATE TRIGGER track_meta_cleanup_genre_delete AFTER DELETE ON genre_meta " +
+                    "FOR EACH ROW " +
+                    "BEGIN " +
+                    "DELETE FROM track_meta WHERE genre_id=OLD._id; " +
+                    "END");
+        }
+
         /*
-        db.execSQL("CREATE TABLE IF NOT EXISTS artist_images (" +
-                "artist_id INTEGER PRIMARY KEY, " +
-                "_data TEXT UNIQUE, " +
-                "date_modified INTEGER" +
-                ");");
-
-        db.execSQL("CREATE TABLE IF NOT EXISTS artist_thumbs (" +
-                "artist_id INTEGER PRIMARY KEY, " +
-                "_data TEXT UNIQUE, " +
-                "date_modified INTEGER" +
-                ");");
-
-        db.execSQL("CREATE TABLE IF NOT EXISTS album_images (" +
-                "album_id INTEGER PRIMARY KEY, " +
-                "_data TEXT UNIQUE, " +
-                "date_modified INTEGER" +
-                ");");
-
-        db.execSQL("CREATE TABLE IF NOT EXISTS album_thumbs (" +
-                "album_id INTEGER PRIMARY KEY, " +
-                "_data TEXT UNIQUE, " +
-                "date_modified INTEGER" +
-                ");");
-
-        db.execSQL("CREATE VIEW IF NOT EXISTS tracks_genres_map AS " +
-                ";");
-
-        // Cleans up when an audio file is deleted
-        db.execSQL("CREATE TRIGGER IF NOT EXISTS audio_meta_cleanup DELETE ON audio_meta " +
-                "BEGIN " +
-                "DELETE FROM audio_genres_map WHERE audio_id = old._id;" +
-                "DELETE FROM audio_playlists_map WHERE audio_id = old._id;" +
-                "END");
-
-        // Contains audio genre definitions
-        db.execSQL("CREATE TABLE IF NOT EXISTS audio_genres (" +
-                "_id INTEGER PRIMARY KEY," +
-                "name TEXT NOT NULL" +
-                ");");
-
-        // Contains mappings between audio genres and audio files
-        db.execSQL("CREATE TABLE IF NOT EXISTS audio_genres_map (" +
-                "_id INTEGER PRIMARY KEY," +
-                "audio_id INTEGER NOT NULL," +
-                "genre_id INTEGER NOT NULL" +
-                ");");
-
-        // Cleans up when an audio genre is delete
-        db.execSQL("CREATE TRIGGER IF NOT EXISTS audio_genres_cleanup DELETE ON audio_genres " +
-                "BEGIN " +
-                "DELETE FROM audio_genres_map WHERE genre_id = old._id;" +
-                "END");
-
         // Cleans up when an audio playlist is deleted
         db.execSQL("CREATE TRIGGER IF NOT EXISTS audio_playlists_cleanup DELETE ON audio_playlists " +
                 "BEGIN " +
                 "DELETE FROM audio_playlists_map WHERE playlist_id = old._id;" +
-                "SELECT _DELETE_FILE(old._data);" +
-                "END");
-
-        // Cleans up album_art table entry when an album is deleted
-        db.execSQL("CREATE TRIGGER IF NOT EXISTS albumart_cleanup1 DELETE ON albums " +
-                "BEGIN " +
-                "DELETE FROM album_art WHERE album_id = old.album_id;" +
-                "END");
-
-        // Cleans up album_art when an album is deleted
-        db.execSQL("CREATE TRIGGER IF NOT EXISTS albumart_cleanup2 DELETE ON album_art " +
-                "BEGIN " +
                 "SELECT _DELETE_FILE(old._data);" +
                 "END");
         */
@@ -504,7 +461,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onConfigure(SQLiteDatabase db) {
         super.onConfigure(db);
-        db.execSQL("PRAGMA foreign_keys = ON;");
+        db.execSQL("PRAGMA foreign_keys = OFF;");
         db.execSQL("PRAGMA encoding = 'UTF-8';");
     }
 
