@@ -1331,13 +1331,14 @@ public class IndexDatabaseImpl implements IndexDatabase {
         }
         cv.put(IndexSchema.Meta.Track.ALBUM_ID, albumId);
 
-        final String genreName = coalesceOrUnknown(metadata.getString(Metadata.KEY_GENRE_NAME), track.getGenre());
+        final String genreName = coalesce(metadata.getString(Metadata.KEY_GENRE_NAME), track.getGenre());
         final long genreId = getGenreIdForName(genreName, authority);
         if (genreId < 0) {
-            Timber.e("Unable to insert genre %s", genreName);
-            return -1;
+            Timber.w("No genre for %s by %s", track, artistName);
+            cv.remove(IndexSchema.Meta.Track.GENRE_ID);
+        } else {
+            cv.put(IndexSchema.Meta.Track.GENRE_ID, genreId);
         }
-        cv.put(IndexSchema.Meta.Track.GENRE_ID, genreId);
 
         String trackName = coalesce(metadata.getString(Metadata.KEY_TRACK_NAME), track.getName());
         if (!StringUtils.isEmpty(trackName)) {
