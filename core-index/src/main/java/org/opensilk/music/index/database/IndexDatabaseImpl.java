@@ -30,6 +30,7 @@ import android.util.Pair;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
+import org.opensilk.music.index.BuildConfig;
 import org.opensilk.music.index.model.BioSummary;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.index.provider.LastFMHelper;
@@ -1606,6 +1607,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
         }
     }
 
+    @DebugLog
     long insertArtist(Metadata meta, String authority) {
         ContentValues cv = new ContentValues(10);
         cv.put(IndexSchema.Meta.Artist.ARTIST_NAME, meta.getString(Metadata.KEY_ARTIST_NAME));
@@ -1619,6 +1621,11 @@ public class IndexDatabaseImpl implements IndexDatabase {
             cv.put(IndexSchema.Meta.Artist.ARTIST_BIO_DATE_MOD, lastMod > 0 ? lastMod : System.currentTimeMillis());
         }
         cv.put(IndexSchema.Meta.Artist.AUTHORITY, authority);
+        if (BuildConfig.LOGV) {
+            ContentValues logCv = new ContentValues(cv);
+            logCv.remove(IndexSchema.Meta.Artist.ARTIST_KEY);
+            Timber.v("Inserting Artist %s", logCv);
+        }
         long id = insert(IndexSchema.Meta.Artist.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
         if (id > 0) {
             cv.remove(IndexSchema.Meta.Artist.ARTIST_KEY);
