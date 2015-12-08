@@ -78,6 +78,7 @@
     <string name="retry">Retry</string>
     <string name="dash"> - </string>
     <string name="go">Go</string>
+    <string name="processing">Processing</string>
 
     <!-- Context menu items -->
     <string name="menu_play_selection">Play</string>
@@ -148,6 +149,7 @@
     <string name="err_library_unavailable">Library unavailable, check network</string>
     <string name="msg_deleted">Delete successful</string>
     <string name="msg_crash_report_sent">Sending crash report…</string>
+    <string name="msg_success">Success</string>
 
     <!--Now playing menu options-->
     <string name="now_playing_visualizer">Visualizer</string>

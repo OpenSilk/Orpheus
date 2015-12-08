@@ -200,6 +200,7 @@ public class PlaylistChooseScreenModule {
                     public Dialog call(Context context) {
                         ProgressDialog pd = new ProgressDialog(context);
                         pd.setIndeterminate(true);
+                        pd.setMessage(context.getString(R.string.processing));
                         pd.setOnCancelListener(new DialogInterface.OnCancelListener() {
                             @Override
                             public void onCancel(DialogInterface dialog) {
