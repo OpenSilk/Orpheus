@@ -649,7 +649,11 @@ public class IndexClientImpl implements IndexClient {
 
         @Override
         public void release() {
-            client.release();
+            try {
+                client.release();
+            } catch (IllegalStateException e) {
+                Timber.e("Client released twice!");
+            } catch (Exception ignored) {}
         }
 
         @Override
