@@ -37,13 +37,13 @@ import dagger.Provides;
 @Module
 public class OkHttpModule {
 
-    static final int _8MB = 8*1024*1024;
+    static final int _24MB = 24*1024*1024;
 
     @Provides @Singleton
     public OkHttpClient provideOkClient(@ForApplication Context context) {
         final File cacheDir = new File(context.getCacheDir(), "okhttp/1");
         final OkHttpClient client = new OkHttpClient();
-        client.setCache(new Cache(cacheDir, _8MB));
+        client.setCache(new Cache(cacheDir, _24MB));
         return client;
     }
 }
