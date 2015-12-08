@@ -639,7 +639,14 @@ public class CastRendererService extends MortarService implements IMusicRenderer
         } else {
             Timber.d("onAudioFocusChange: Ignoring unsupported focusChange: %d", focusChange);
         }
-        configMediaPlayerState();
+        if (mCallbackHandler != null) {
+            mCallbackHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    configMediaPlayerState();
+                }
+            });
+        }
     }
 
     private void setupVolumeProvider() {
