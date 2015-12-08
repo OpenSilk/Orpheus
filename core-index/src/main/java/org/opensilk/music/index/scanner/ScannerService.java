@@ -159,7 +159,7 @@ public class ScannerService extends MortarIntentService {
     }
 
     void notifySkipped(Uri uri) {
-        Timber.d("Skipping item already in db %s", uri);
+        Timber.v("Skipping item already in db %s", uri);
         numProcessed.incrementAndGet();
     }
 
@@ -223,7 +223,6 @@ public class ScannerService extends MortarIntentService {
 
     private void indexTree(TreeNode tree) {
         Timber.i("indexTree(%s)", tree.self);
-        mIndexDatabase.insertContainer(tree.self, tree.parent);
         //first extract metadata from all tracks in container
         List<Pair<Track,Metadata>> trackMeta = new ArrayList<>(tree.tracks.size());
         for (Track item : tree.tracks) {
@@ -241,35 +240,40 @@ public class ScannerService extends MortarIntentService {
             }
         }
         //Second fixup any descrepancies with albumartist/trackartist
-        Set<String> albumArtists = new HashSet<>();
-        Set<String> artists = new HashSet<>();
+        int numTracksWithAlbumArtists = 0;
+        int numTrackArtists = 0;
+        String lastTrackArtist = null;
         for (Pair<Track,Metadata> pair : trackMeta) {
             String albumArtist = pair.second.getString(KEY_ALBUM_ARTIST_NAME);
             if (!StringUtils.isEmpty(albumArtist)) {
-                albumArtists.add(albumArtist);
+                numTracksWithAlbumArtists++;
             }
             String artist = pair.second.getString(KEY_ARTIST_NAME);
             if (!StringUtils.isEmpty(artist)) {
                 //strip of any featured artists
-                artists.add(LastFMHelper.resolveAlbumArtistFromTrackArtist(artist));
+                String realArtist = LastFMHelper.resolveAlbumArtistFromTrackArtist(artist);
+                if (!StringUtils.equals(realArtist, lastTrackArtist)) {
+                    numTrackArtists++;
+                    lastTrackArtist = realArtist;
+                }
             }
         }
         //not all the tracks had album artist set,
         //but we only have one artist, so use that as album artist for everyone
-        if (albumArtists.size() != trackMeta.size() && artists.size() == 1) {
-            final String artist = artists.toArray(new String[1])[0]; //FIXME ugly
+        if (numTracksWithAlbumArtists != trackMeta.size() && numTrackArtists == 1) {
             final List<Pair<Track,Metadata>> oldTrackMeta = new ArrayList<>();
             oldTrackMeta.addAll(trackMeta);
             trackMeta.clear();
             for (Pair<Track,Metadata> pair : oldTrackMeta) {
                 Metadata m = pair.second.buildUpon()
-                        .putString(KEY_ALBUM_ARTIST_NAME, artist)
+                        .putString(KEY_ALBUM_ARTIST_NAME, lastTrackArtist)
                         .build();
                 trackMeta.add(Pair.create(pair.first, m));
             }
         }
         //add everyone to the db
-        for (Pair<Track,Metadata> pair : trackMeta) {
+        mIndexDatabase.insertContainer(tree.self, tree.parent);
+        for (Pair<Track, Metadata> pair : trackMeta) {
             final Track track = pair.first;
             final Metadata meta = pair.second;
             final boolean success =
