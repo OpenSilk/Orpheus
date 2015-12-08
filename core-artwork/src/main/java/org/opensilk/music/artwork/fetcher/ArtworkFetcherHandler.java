@@ -25,6 +25,7 @@ import org.opensilk.music.artwork.shared.ArtworkPreferences;
 import org.opensilk.music.model.ArtInfo;
 
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
 import java.util.WeakHashMap;
 
 import javax.inject.Inject;
@@ -90,7 +91,9 @@ public class ArtworkFetcherHandler extends Handler {
                 stopService();
                 break;
             }case MSG.ON_LOW_MEM: {
-                for (Subscription s : mActiveSubscriptions.values()) {
+                //copy map here since subscriptions remove themselves from map above
+                HashMap<String, Subscription> subs = new HashMap<>(mActiveSubscriptions);
+                for (Subscription s : subs.values()) {
                     if (s != null) {
                         s.unsubscribe();
                     }
