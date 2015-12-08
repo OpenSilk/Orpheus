@@ -31,7 +31,7 @@ public class IndexSchema {
      *
      * from MediaStore.java
      */
-    public static final String UNKNOWN_STRING = "<unknown>";
+    public static final String UNKNOWN_STRING = "[unknown]";
 
     public interface Info {
 
