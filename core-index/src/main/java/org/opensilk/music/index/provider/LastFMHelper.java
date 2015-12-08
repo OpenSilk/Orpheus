@@ -64,7 +64,7 @@ public class LastFMHelper {
         Response<Album> response;
         try {
             response = call.execute();
-        } catch (IOException e) {
+        } catch (IOException|IllegalArgumentException e) {
             return null;
         }
         Album album = response.body();
@@ -92,7 +92,7 @@ public class LastFMHelper {
         Response<Artist> response;
         try {
             response = call.execute();
-        } catch (IOException e) {
+        } catch (IOException|IllegalArgumentException e) {
             return null;
         }
         Artist artist = response.body();
@@ -125,7 +125,7 @@ public class LastFMHelper {
                         subscriber.onNext(album);
                         subscriber.onCompleted();
                     }
-                } catch (IOException e) {
+                } catch (IOException|IllegalArgumentException e) {
                     if (!subscriber.isUnsubscribed()) {
                         subscriber.onError(e);
                     }
@@ -145,7 +145,7 @@ public class LastFMHelper {
                         subscriber.onNext(artist);
                         subscriber.onCompleted();
                     }
-                } catch (IOException e) {
+                } catch (IOException|IllegalArgumentException e) {
                     if (!subscriber.isUnsubscribed()) {
                         subscriber.onError(e);
                     }
