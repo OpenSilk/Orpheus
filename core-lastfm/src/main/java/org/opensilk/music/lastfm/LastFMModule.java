@@ -91,7 +91,7 @@ public class LastFMModule {
                     HttpUrl newUrl = ogReq.httpUrl().newBuilder()
                             .addQueryParameter("api_key", apiKey)
                             .addQueryParameter("lang", Locale.getDefault().getLanguage())
-                            .addQueryParameter("autocorrect", "1")
+//                            .addQueryParameter("autocorrect", "1")
                             .build();
                     //update request with new url
                     newReq = ogReq.newBuilder()
