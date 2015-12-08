@@ -111,28 +111,35 @@ public class VisualizerView extends View {
       return;
     }
 
-    mVisualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
+    try {
+      mVisualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
 
-    // Pass through Visualizer data to VisualizerView
-    Visualizer.OnDataCaptureListener captureListener = new Visualizer.OnDataCaptureListener()
-    {
-      @Override
-      public void onWaveFormDataCapture(Visualizer visualizer, byte[] bytes,
-                                        int samplingRate)
+      // Pass through Visualizer data to VisualizerView
+      Visualizer.OnDataCaptureListener captureListener = new Visualizer.OnDataCaptureListener()
       {
-        updateVisualizer(bytes);
-      }
+        @Override
+        public void onWaveFormDataCapture(Visualizer visualizer, byte[] bytes,
+                                          int samplingRate)
+        {
+          updateVisualizer(bytes);
+        }
 
-      @Override
-      public void onFftDataCapture(Visualizer visualizer, byte[] bytes,
-                                   int samplingRate)
-      {
-        updateVisualizerFFT(bytes);
-      }
-    };
+        @Override
+        public void onFftDataCapture(Visualizer visualizer, byte[] bytes,
+                                     int samplingRate)
+        {
+          updateVisualizerFFT(bytes);
+        }
+      };
 
-    mVisualizer.setDataCaptureListener(captureListener,
-            Visualizer.getMaxCaptureRate() / 2, true, true);
+      mVisualizer.setDataCaptureListener(captureListener,
+              Visualizer.getMaxCaptureRate() / 2, true, true);
+    } catch (IllegalStateException e) {
+      //This is uncommon but has happened
+      Toast.makeText(getContext(), R.string.err_no_visualizations_foru, Toast.LENGTH_LONG).show();
+      release();
+    }
+
   }
 
   public boolean isLinked() {
