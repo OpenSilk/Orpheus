@@ -74,12 +74,16 @@ public class ArtworkFetcherHandler extends Handler {
                     @Override
                     public void call() {
                         Timber.d("Removing task %s", task.artInfo.cacheKey());
-                        mActiveSubscriptions.remove(task.artInfo.cacheKey());
+                        synchronized (mActiveSubscriptions) {
+                            mActiveSubscriptions.remove(task.artInfo.cacheKey());
+                        }
                         stopService();
                     }
                 }));
                 Subscription s = mFetcherManager.fetch(task.artInfo, task.listener);
-                mActiveSubscriptions.put(task.artInfo.cacheKey(), s);
+                synchronized (mActiveSubscriptions) {
+                    mActiveSubscriptions.put(task.artInfo.cacheKey(), s);
+                }
                 break;
             } case MSG.CLEAR_CACHES: {
                 mFetcherManager.clearCaches();
@@ -90,16 +94,21 @@ public class ArtworkFetcherHandler extends Handler {
                 stopService();
                 break;
             }case MSG.ON_LOW_MEM: {
-                for (Subscription s : mActiveSubscriptions.values()) {
-                    if (s != null) {
-                        s.unsubscribe();
+                synchronized (mActiveSubscriptions) {
+                    for (Subscription s : mActiveSubscriptions.values()) {
+                        if (s != null) {
+                            s.unsubscribe();
+                        }
                     }
+                    mActiveSubscriptions.clear();
                 }
-                mActiveSubscriptions.clear();
                 break;
             }case MSG.CANCEL_TASK: {
                 ArtInfo artInfo = (ArtInfo) msg.obj;
-                Subscription s = mActiveSubscriptions.remove(artInfo.cacheKey());
+                Subscription s = null;
+                synchronized (mActiveSubscriptions) {
+                    s = mActiveSubscriptions.remove(artInfo.cacheKey());
+                }
                 if (s != null) {
                     s.unsubscribe();
                 }
@@ -148,9 +157,11 @@ public class ArtworkFetcherHandler extends Handler {
     }
 
     private void stopService() {
-        if (mActiveSubscriptions.isEmpty()) {
-            ArtworkFetcherService s = mService != null ? mService.get() : null;
-            if (s != null) s.maybeStopSelf();
+        synchronized (mActiveSubscriptions) {
+            if (mActiveSubscriptions.isEmpty()) {
+                ArtworkFetcherService s = mService != null ? mService.get() : null;
+                if (s != null) s.maybeStopSelf();
+            }
         }
     }
 
