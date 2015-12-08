@@ -38,7 +38,7 @@ import timber.log.Timber;
 @Singleton
 public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
-    public static final int DB_VERSION = 40;
+    public static final int DB_VERSION = 41;
     public static final String DB_NAME = "music.db";
 
     @Inject
@@ -220,7 +220,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
             db.execSQL("CREATE TABLE IF NOT EXISTS playlist_track_meta (" +
                     "playlist_id INTEGER REFERENCES playlist_meta(_id) ON DELETE CASCADE ON UPDATE CASCADE, " +
-                    "track_id INTEGER REFERENCES track_meta(_id), " +//this has a trigger to reorder
+                    "track_id INTEGER REFERENCES track_meta(_id), " +
                     "play_order INTEGER " +
                     ");");
 
@@ -445,6 +445,20 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "FOR EACH ROW " +
                     "BEGIN " +
                     "DELETE FROM track_meta WHERE genre_id=OLD._id; " +
+                    "END");
+        }
+
+        if (oldVersion < 41) {
+            //playlist cleanup
+            db.execSQL("CREATE TRIGGER playlist_track_cleanup_playlist_delete AFTER DELETE ON playlist_meta " +
+                    "FOR EACH ROW " +
+                    "BEGIN " +
+                    "DELETE FROM playlist_track_meta WHERE playlist_id=OLD._id; " +
+                    "END");
+            db.execSQL("CREATE TRIGGER playlist_track_cleanup_track_delete AFTER DELETE ON track_meta " +
+                    "FOR EACH ROW " +
+                    "BEGIN " +
+                    "DELETE FROM playlist_track_meta WHERE track_id=OLD._id; " +
                     "END");
         }
 
