@@ -28,10 +28,12 @@ public class IndexSchema {
      * The string that is used when a media attribute is not known. For example,
      * if an audio file does not have any meta data, the artist and album columns
      * will be set to this value.
-     *
-     * from MediaStore.java
      */
     public static final String UNKNOWN_STRING = "[unknown]";
+    /**
+     * The string that is used when there is no genre associated with the track
+     */
+    public static final String UNSPECIFIED = "Unspecified";
 
     public interface Info {
 
