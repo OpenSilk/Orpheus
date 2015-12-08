@@ -18,8 +18,11 @@
 package org.opensilk.music.library.mediastore.provider;
 
 import android.content.UriMatcher;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.BaseColumns;
+import android.provider.MediaStore;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -30,12 +33,16 @@ import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.mediastore.R;
 import org.opensilk.music.library.mediastore.util.CursorHelpers;
 import org.opensilk.music.library.mediastore.util.FilesHelper;
+import org.opensilk.music.library.mediastore.util.Projections;
 import org.opensilk.music.library.mediastore.util.StorageLookup;
+import org.opensilk.music.library.mediastore.util.Uris;
 import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryProvider;
+import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Model;
+import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
 
 import java.io.File;
@@ -51,6 +58,12 @@ import javax.inject.Named;
 import rx.Observable;
 import rx.Subscriber;
 import timber.log.Timber;
+
+import static org.opensilk.music.library.mediastore.util.CursorHelpers.generateArtworkUri;
+import static org.opensilk.music.library.mediastore.util.CursorHelpers.generateDataUri;
+import static org.opensilk.music.library.mediastore.util.CursorHelpers.getIntOrZero;
+import static org.opensilk.music.library.mediastore.util.CursorHelpers.getLongOrZero;
+import static org.opensilk.music.library.mediastore.util.CursorHelpers.getStringOrNull;
 
 /**
  * Created by drew on 5/17/15.
@@ -95,6 +108,14 @@ public class FoldersLibraryProvider extends LibraryProvider {
                 browseFolders(uri.getPathSegments().get(0), uri.getLastPathSegment(), subscriber, args);
                 break;
             }
+            case FoldersUris.M_PLAYLISTS: {
+                listPlaylists(subscriber, args);
+                break;
+            }
+            case FoldersUris.M_PLAYLIST: {
+                listPlaylist(uri.getLastPathSegment(), subscriber, args);
+                break;
+            }
             default:
                 Timber.w("Unmatched uri %s", uri);
                 subscriber.onError(new LibraryException(LibraryException.Kind.ILLEGAL_URI,
@@ -116,6 +137,10 @@ public class FoldersLibraryProvider extends LibraryProvider {
             case FoldersUris.M_TRACK_MS:
             case FoldersUris.M_TRACK_PTH: {
                 getTrack(uri.getPathSegments().get(0), uri.getLastPathSegment(), subscriber, args);
+                break;
+            }
+            case FoldersUris.M_PLAYLIST: {
+                getPlaylist(uri.getLastPathSegment(), subscriber, args);
                 break;
             }
             default: {
@@ -141,7 +166,16 @@ public class FoldersLibraryProvider extends LibraryProvider {
                 }
                 subscriber.onNext(f);
             }
-            subscriber.onCompleted();
+            if (!subscriber.isUnsubscribed()) {
+                subscriber.onNext(Folder.builder()
+                        .setName(getContext().getString(R.string.folders_playlists))
+                        .setParentUri(LibraryUris.rootUri(mAuthority))
+                        .setUri(FoldersUris.playlists(mAuthority))
+                        .build());
+            }
+            if (!subscriber.isUnsubscribed()) {
+                subscriber.onCompleted();
+            }
         }
     }
 
@@ -277,6 +311,108 @@ public class FoldersLibraryProvider extends LibraryProvider {
                     subscriber.onCompleted();
                 }
             }
+        }
+    }
+
+    void listPlaylists(Subscriber<? super Model> subscriber, Bundle args) {
+        Cursor c = getContext().getContentResolver().query(Uris.EXTERNAL_MEDIASTORE_PLAYLISTS,
+                Projections.PLAYLIST, null, null, null);
+        try {
+            if (c == null || !c.moveToFirst()) {
+                subscriber.onError(new NullPointerException("Unable to obtain cursor"));
+                return;
+            }
+            do {
+                if (subscriber.isUnsubscribed()) break;
+                String id = c.getString(0);
+                String name = c.getString(1);
+                subscriber.onNext(Playlist.builder()
+                        .setUri(FoldersUris.playlist(mAuthority, id))
+                        .setParentUri(FoldersUris.playlists(mAuthority))
+                        .setName(name)
+                        .build());
+            } while (c.moveToNext());
+            if (!subscriber.isUnsubscribed()) {
+                subscriber.onCompleted();
+            }
+        } finally {
+            if (c != null) c.close();
+        }
+    }
+
+    void listPlaylist(String id, Subscriber<? super Model> subscriber, Bundle args) {
+        Cursor c = getContext().getContentResolver().query(Uris.PLAYLIST_MEMBERS(id),
+                Projections.PLAYLIST_SONGS, null, null, MediaStore.Audio.Playlists.Members.PLAY_ORDER);
+        try {
+            if (c == null || !c.moveToFirst()) {
+                subscriber.onError(new NullPointerException("Unable to obtain cursor"));
+                return;
+            }
+            List<StorageLookup.StorageVolume> volumes = mStorageLookup.getStorageVolumes();
+            do {
+                if (subscriber.isUnsubscribed()) break;
+                Track.Builder tb = Track.builder()
+                        .setUri(FoldersUris.track(mAuthority, getTrackVolume(volumes,
+                                c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DATA))),
+                                c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID))))
+                        .setParentUri(FoldersUris.playlist(mAuthority, id))
+                        .setSortName(getStringOrNull(c, MediaStore.Audio.AudioColumns.DISPLAY_NAME))
+                        .setName(getStringOrNull(c, MediaStore.Audio.AudioColumns.TITLE))
+                        .setArtistName(getStringOrNull(c, MediaStore.Audio.AudioColumns.ARTIST))
+                        .setAlbumName(getStringOrNull(c, MediaStore.Audio.AudioColumns.ALBUM))
+                        .setTrackNumber(getIntOrZero(c, MediaStore.Audio.Media.TRACK))
+                        .setArtworkUri(generateArtworkUri(
+                                c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))))
+//                        .setFlags(getFlags(f))
+                        .addRes(Track.Res.builder()
+                                        .setUri(generateDataUri(c.getString(c.getColumnIndexOrThrow(BaseColumns._ID))))
+                                        .setMimeType(getStringOrNull(c, MediaStore.Audio.AudioColumns.MIME_TYPE))
+                                        .setDuration(getLongOrZero(c, MediaStore.Audio.AudioColumns.DURATION))
+                                        .setLastMod(getLongOrZero(c, MediaStore.Audio.AudioColumns.DATE_MODIFIED))
+                                        .setSize(getLongOrZero(c, MediaStore.Audio.AudioColumns.SIZE))
+                                        .build()
+                        )
+                        ;
+                subscriber.onNext(tb.build());
+            } while (c.moveToNext());
+            if (!subscriber.isUnsubscribed()) {
+                subscriber.onCompleted();
+            }
+        } finally {
+            if (c != null) c.close();
+        }
+    }
+
+    static int getTrackVolume(List<StorageLookup.StorageVolume> volumes, String path) {
+        if (volumes != null && volumes.size() != 0) {
+            for (StorageLookup.StorageVolume v : volumes) {
+                if (StringUtils.startsWith(path, v.path)) {
+                    return v.id;
+                }
+            }
+        }
+        return 0;
+    }
+
+    void getPlaylist(String id, Subscriber<? super Model> subscriber, Bundle args) {
+        Cursor c = getContext().getContentResolver().query(Uris.EXTERNAL_MEDIASTORE_PLAYLISTS,
+                Projections.PLAYLIST, BaseColumns._ID + "=?", new String[]{id}, null);
+        try {
+            if (c == null || !c.moveToFirst()) {
+                subscriber.onError(new NullPointerException("Unable to obtain cursor"));
+                return;
+            }
+            if (!subscriber.isUnsubscribed()) {
+                String name = c.getString(1);
+                subscriber.onNext(Playlist.builder()
+                        .setUri(FoldersUris.playlist(mAuthority, id))
+                        .setParentUri(FoldersUris.playlists(mAuthority))
+                        .setName(name)
+                        .build());
+                subscriber.onCompleted();
+            }
+        } finally {
+            if (c != null) c.close();
         }
     }
 

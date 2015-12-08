@@ -35,6 +35,8 @@ public class FoldersUris {
     static final String folder = "folder";
     static final String tracks = "tracks";
     static final String track = "track";
+    static final String playlists = "playlists";
+    static final String playlist = "playlist";
 
     private static Uri.Builder baseUriBuilder(String authority, String library) {
         return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library);
@@ -66,12 +68,22 @@ public class FoldersUris {
         return track(authority, String.valueOf(volumeId), String.valueOf(trackId));
     }
 
+    public static Uri playlists(String authority) {
+        return baseUriBuilder(authority, "0").appendPath(playlists).build();
+    }
+
+    public static Uri playlist(String authority, String id) {
+        return baseUriBuilder(authority, "0").appendPath(playlist).appendPath(id).build();
+    }
+
     public static final int M_FOLDERS = 5;
     public static final int M_FOLDER = 6;
 
     public static final int M_TRACKS = 11;
     public static final int M_TRACK_PTH = 12;
     public static final int M_TRACK_MS = 13;
+    public static final int M_PLAYLISTS = 14;
+    public static final int M_PLAYLIST = 15;
 
     private static final String slash_wild = "/*";
     private static final String slash_num = "/#";
@@ -87,6 +99,9 @@ public class FoldersUris {
         uriMatcher.addURI(authority, base_match + tracks, M_TRACKS);
         uriMatcher.addURI(authority, base_match + track + slash_wild, M_TRACK_PTH);
         uriMatcher.addURI(authority, base_match + track + slash_num, M_TRACK_MS);
+
+        uriMatcher.addURI(authority, base_match + playlists, M_PLAYLISTS);
+        uriMatcher.addURI(authority, base_match + playlist + slash_num, M_PLAYLIST);
 
         return uriMatcher;
     }

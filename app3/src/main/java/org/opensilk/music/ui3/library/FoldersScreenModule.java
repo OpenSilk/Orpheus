@@ -37,6 +37,7 @@ import org.opensilk.music.index.client.IndexClientImpl;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Model;
+import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.sort.FolderTrackSortOrder;
 import org.opensilk.music.playback.PlaybackConstants;
@@ -267,7 +268,9 @@ public class FoldersScreenModule {
                 switch (menuItem.getItemId()) {
                     case R.id.add_to_index:
                         for (Model b : presenter.getSelectedItems()) {
-                            if (b instanceof Container) {
+                            if (b instanceof Playlist) {
+                                Toast.makeText(context, R.string.msg_playlist_import_not_implemented, Toast.LENGTH_LONG).show();
+                            } else if (b instanceof Container) {
                                 indexClient.add((Container) b);
                             }
                         }
@@ -276,7 +279,7 @@ public class FoldersScreenModule {
                         List<Container> containers = new ArrayList<>();
                         for (Model b : presenter.getSelectedItems()) {
                             if (b instanceof Container) {
-                                containers.add((Container)b);
+                                containers.add((Container) b);
                             }
                         }
                         handleContainerRemoval(presenter, containers);

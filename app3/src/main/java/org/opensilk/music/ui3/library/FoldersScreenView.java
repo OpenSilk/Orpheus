@@ -31,6 +31,7 @@ import org.opensilk.common.ui.mortar.DialogFactory;
 import org.opensilk.common.ui.widget.FloatingActionButtonCheckable;
 import org.opensilk.music.R;
 import org.opensilk.music.model.Container;
+import org.opensilk.music.model.Playlist;
 import org.opensilk.music.ui3.common.BundleableRecyclerCoordinator;
 
 import java.util.concurrent.TimeUnit;
@@ -98,14 +99,22 @@ public class FoldersScreenView extends BundleableRecyclerCoordinator {
                     @Override
                     public void call(ViewClickEvent onClickEvent) {
                         if (!mPresenter.getIndexClient().isIndexed(mThisContainer)) {
-                            mPresenter.getIndexClient().add(mThisContainer);
-                            mFab.setChecked(true);
+                            handlAddContainer();
                         } else {
                             handleContainerRemoval();
                         }
                     }
                 }
         ));
+    }
+
+    void handlAddContainer() {
+        if (mThisContainer instanceof Playlist) {
+            Toast.makeText(getContext(), R.string.msg_playlist_import_not_implemented, Toast.LENGTH_LONG).show();
+            return;
+        }
+        mPresenter.getIndexClient().add(mThisContainer);
+        mFab.setChecked(true);
     }
 
     void handleContainerRemoval() {

@@ -150,6 +150,7 @@
     <string name="msg_deleted">Delete successful</string>
     <string name="msg_crash_report_sent">Sending crash report…</string>
     <string name="msg_success">Success</string>
+    <string name="msg_playlist_import_not_implemented">Error: playlist import not yet implemented</string>
 
     <!--Now playing menu options-->
     <string name="now_playing_visualizer">Visualizer</string>

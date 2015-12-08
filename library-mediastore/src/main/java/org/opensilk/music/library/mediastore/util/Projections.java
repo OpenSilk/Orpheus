@@ -89,13 +89,19 @@ public interface Projections {
     String[] PLAYLIST_SONGS = new String[] {
             MediaStore.Audio.Playlists.Members.AUDIO_ID + " AS " + BaseColumns._ID,
             MediaStore.Audio.AudioColumns.TITLE,
+            MediaStore.Audio.AudioColumns.DISPLAY_NAME,
             MediaStore.Audio.AudioColumns.ARTIST,
             MediaStore.Audio.AudioColumns.ALBUM,
             MediaStore.Audio.AudioColumns.ALBUM_ID,
+            MediaStore.Audio.Playlists.Members.PLAY_ORDER + " AS " + MediaStore.Audio.AudioColumns.TRACK,
             "album_artist",
+
             MediaStore.Audio.AudioColumns.DURATION,
             MediaStore.Audio.AudioColumns.MIME_TYPE,
-            MediaStore.Audio.Playlists.Members.PLAY_ORDER + " AS " + MediaStore.Audio.AudioColumns.TRACK,
+            MediaStore.Audio.AudioColumns.SIZE,
+            MediaStore.Audio.AudioColumns.DATE_MODIFIED,
+
+            MediaStore.Audio.AudioColumns.DATA,
         };
     String[] GENRE_SONGS = new String[] {
             MediaStore.Audio.Genres.Members.AUDIO_ID + " AS " + BaseColumns._ID,
