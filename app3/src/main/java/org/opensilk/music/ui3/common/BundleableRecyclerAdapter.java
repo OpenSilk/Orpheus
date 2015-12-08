@@ -218,7 +218,11 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
     void bindPlaylist(ViewHolder holder, Playlist playlist) {
         holder.setTitle(playlist.getName());
         Context context = holder.itemView.getContext();
-        holder.setSubTitle(UtilsCommon.makeLabel(context, R.plurals.Nsongs, playlist.getTracksCount()));
+        if (playlist.getTracksCount() >= 0) {
+            holder.setSubTitle(UtilsCommon.makeLabel(context, R.plurals.Nsongs, playlist.getTracksCount()));
+        } else {
+            holder.setSubTitle("");
+        }
         if (gridStyle && (playlist.getArtInfos().size() > 0)) {
             loadMultiArtwork((GridArtworkVH) holder, playlist.getArtInfos());
         } else {
