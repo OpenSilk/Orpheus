@@ -20,7 +20,7 @@
     <string name="mediastore_library_label">My library</string>
     <string name="mediastore_library_description">Browse music stored on sdcard</string>
 
-    <string name="folders_library_label">Android folders</string>
+    <string name="folders_library_label">Android storage</string>
     <string name="folders_library_description">Browse folders on device storage</string>
 
     <string name="folders_picker_title">Select storage</string>
