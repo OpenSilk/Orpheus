@@ -357,6 +357,8 @@ public class PlaybackService {
 
         if (PlaybackStateHelper.isPlayingOrPaused(state)) {
             mNotificationHelper.startNotification();
+            //we only notify of changing
+            sendMetaBroadcast();
         }
 
         if (PlaybackStateHelper.isLoading(state) || PlaybackStateHelper.isPlaying(state)) {
@@ -410,6 +412,7 @@ public class PlaybackService {
 
     //handler thread
     void updateMeta() {
+        if (mCurrentTrack == null) return;
         RxUtils.unsubscribe(mArtworkSubscription);
         final MediaMetadataCompat meta = mIndexClient.convertToMediaMetadata(mCurrentTrack);
         final Uri artUri = MediaMetadataHelper.getIconUri(meta);
@@ -433,13 +436,21 @@ public class PlaybackService {
                         }
                     });
         }
+    }
+
+    void sendMetaBroadcast() {
         if (mIndexClient.broadcastMeta()) {
+            final MediaMetadataCompat meta = mSessionHolder.getMetadata();
+            if (meta == null) return;
+            final PlaybackStateCompat state = mSessionHolder.getPlaybackState();
             Timber.d("Broadcasting meta %s", MediaMetadataHelper.getDisplayName(meta));
-            //For SimpleLastFmScrobbler
             final Intent musicIntent = new Intent(PlaybackConstants.MUSIC_META_CHANGED);
             musicIntent.putExtra("artist", MediaMetadataHelper.getArtistName(meta));
             musicIntent.putExtra("album", MediaMetadataHelper.getAlbumName(meta));
             musicIntent.putExtra("track", MediaMetadataHelper.getDisplayName(meta));
+            musicIntent.putExtra("playing", state != null && PlaybackStateHelper.isPlaying(state));
+            musicIntent.putExtra("duration", MediaMetadataHelper.getDuration(meta));
+            musicIntent.putExtra("id", "-1");//we're not from mediastore
             musicIntent.putExtra("player", mContext.getString(R.string.app_name));
             musicIntent.putExtra("package", mContext.getPackageName());
             try {
