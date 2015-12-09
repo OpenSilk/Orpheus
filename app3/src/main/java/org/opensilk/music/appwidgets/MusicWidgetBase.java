@@ -97,6 +97,18 @@ public class MusicWidgetBase extends AppWidgetProvider {
         views.setOnClickPendingIntent(R.id.widget_next, buildPendingIntent(context, PlaybackConstants.NEXT_ACTION));
     }
 
+    protected void setupPreviousBtnIntent(Context context, RemoteViews views) {
+        views.setOnClickPendingIntent(R.id.widget_previous, buildPendingIntent(context, PlaybackConstants.PREVIOUS_ACTION));
+    }
+
+    protected void setupShuffleBtnIntent(Context context, RemoteViews views) {
+        views.setOnClickPendingIntent(R.id.widget_shuffle, buildPendingIntent(context, PlaybackConstants.SHUFFLE_ACTION));
+    }
+
+    protected void setupRepeatBtnIntent(Context context, RemoteViews views) {
+        views.setOnClickPendingIntent(R.id.widget_repeat, buildPendingIntent(context, PlaybackConstants.REPEAT_ACTION));
+    }
+
     protected void setupTrackTitle(Context context, RemoteViews views) {
         if (mService.getMeta() != null) {
             views.setTextViewText(R.id.widget_song_title, MediaMetadataHelper.getDisplayName(mService.getMeta()));
@@ -106,6 +118,15 @@ public class MusicWidgetBase extends AppWidgetProvider {
     protected void setupArtistName(Context context, RemoteViews views) {
         if (mService.getMeta() != null) {
             views.setTextViewText(R.id.widget_artist_name, MediaMetadataHelper.getArtistName(mService.getMeta()));
+        }
+    }
+
+    protected void setupArtistPlusAlbumName(Context context, RemoteViews views) {
+        if (mService.getMeta() != null) {
+            String text = context.getString(R.string.something_circle_something,
+                    MediaMetadataHelper.getArtistName(mService.getMeta()),
+                    MediaMetadataHelper.getAlbumName(mService.getMeta()));
+            views.setTextViewText(R.id.widget_artist_and_album_names, text);
         }
     }
 

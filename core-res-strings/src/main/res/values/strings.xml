@@ -74,11 +74,15 @@
     <string name="delete_dialog_title">Delete <xliff:g id="item" example="album">%s</xliff:g>?</string>
     <string name="cannot_be_undone">This cannot be undone</string>
     <string name="cancel_current">Cancel current</string>
+
+    <!-- misc -->
     <string name="error">Error</string>
     <string name="retry">Retry</string>
     <string name="dash"> - </string>
     <string name="go">Go</string>
     <string name="processing">Processing</string>
+    <string name="circle_character">\u25CF</string> <!-- ● -->
+    <string name="something_circle_something">%1$s \u25CF %2$s</string>
 
     <!-- Context menu items -->
     <string name="menu_play_selection">Play</string>
@@ -185,6 +189,7 @@
     <string name="widget_ultra_mini_label">Orpheus Ultra-Mini</string>
     <string name="widget_mini_label">Orpheus Mini</string>
     <string name="widget_small_label">Orpheus Small</string>
+    <string name="widget_large_label">Orpheus Large</string>
 
     <!-- misc -->
     <string name="opensilk_org_url" translatable="false">http://opensilk.org/</string>
