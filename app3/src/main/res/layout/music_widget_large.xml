@@ -16,69 +16,26 @@
  * limitations under the License.
  */
 -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/grey_900">
 
-    <LinearLayout
-        android:id="@+id/buttons"
-        android:layout_height="wrap_content"
+    <ImageView
+        android:id="@+id/widget_album_art"
         android:layout_width="match_parent"
-        android:layout_alignParentBottom="true"
-        android:gravity="center">
-        
-        <ImageButton
-            android:id="@+id/widget_shuffle"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?android:selectableItemBackground"
-            android:contentDescription="@string/accessibility_shuffle"
-            android:src="@drawable/ic_shuffle_white_36dp" />
-        
-        <ImageButton
-            android:id="@+id/widget_previous"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?android:selectableItemBackground"
-            android:contentDescription="@string/accessibility_prev"
-            android:src="@drawable/ic_skip_previous_white_36dp" />
-
-        <ImageButton
-            android:id="@+id/widget_play"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?android:selectableItemBackground"
-            android:contentDescription="@string/accessibility_play"
-            android:src="@drawable/ic_play_white_36dp" />
-
-        <ImageButton
-            android:id="@+id/widget_next"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?android:selectableItemBackground"
-            android:contentDescription="@string/accessibility_next"
-            android:src="@drawable/ic_skip_next_white_36dp" />
-        
-        <ImageButton
-            android:id="@+id/widget_repeat"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?android:selectableItemBackground"
-            android:contentDescription="@string/accessibility_repeat"
-            android:src="@drawable/ic_repeat_white_36dp" />
-        
-    </LinearLayout>
-
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        tools:src="@drawable/default_artwork"/>
 
     <LinearLayout
-        android:id="@+id/titles"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_alignParentTop="true"
-        android:gravity="center">
+        android:layout_gravity="bottom"
+        android:gravity="center"
+        android:background="@drawable/gradient_up">
 
         <TextView
             android:id="@+id/widget_song_title"
@@ -97,18 +54,57 @@
             android:singleLine="true"
             android:ellipsize="marquee"
             android:textAppearance="?android:textAppearanceMedium"
-            android:textColor="@color/white_text_secondary"
+            android:textColor="@color/white_text"
             tools:text="artist name"/>
+
+        <LinearLayout
+            android:id="@+id/buttons"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:gravity="center">
+
+            <ImageButton
+                android:id="@+id/widget_shuffle"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="?android:selectableItemBackground"
+                android:contentDescription="@string/accessibility_shuffle"
+                android:src="@drawable/ic_shuffle_white_48dp" />
+
+            <ImageButton
+                android:id="@+id/widget_previous"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="?android:selectableItemBackground"
+                android:contentDescription="@string/accessibility_prev"
+                android:src="@drawable/ic_skip_previous_white_48dp" />
+
+            <ImageButton
+                android:id="@+id/widget_play"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="?android:selectableItemBackground"
+                android:contentDescription="@string/accessibility_play"
+                android:src="@drawable/ic_play_white_48dp" />
+
+            <ImageButton
+                android:id="@+id/widget_next"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="?android:selectableItemBackground"
+                android:contentDescription="@string/accessibility_next"
+                android:src="@drawable/ic_skip_next_white_48dp" />
+
+            <ImageButton
+                android:id="@+id/widget_repeat"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="?android:selectableItemBackground"
+                android:contentDescription="@string/accessibility_repeat"
+                android:src="@drawable/ic_repeat_white_48dp" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/widget_album_art"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:layout_above="@id/buttons"
-        android:layout_below="@id/titles"
-        tools:src="@drawable/default_artwork"/>
-
-</RelativeLayout>
+</FrameLayout>
