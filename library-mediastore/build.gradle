@@ -20,5 +20,6 @@ apply from: '../android-library.gradle'
 dependencies {
     compile project(':common-core')
     compile project(':core-library')
+    compile project(':core-library-playlist')
     compile (group: 'commons-io', name: 'commons-io', version: rootProject.ext.commonsIoVersion)
 }

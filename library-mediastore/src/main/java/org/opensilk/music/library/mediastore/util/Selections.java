@@ -61,6 +61,7 @@ public class Selections {
     public static final String PLAYLIST_SONGS;
     public static final String GENRE_SONGS;
     public static final String LOCAL_SONG_PATH;
+    public static final String ID;
 
     static {
         LOCAL_SONG = MediaStore.Audio.AudioColumns.IS_MUSIC + "=? AND " + MediaStore.Audio.AudioColumns.TITLE + "!=?";
@@ -76,5 +77,6 @@ public class Selections {
         PLAYLIST_SONGS = MediaStore.Audio.Playlists.Members.IS_MUSIC + "=? AND " + MediaStore.Audio.Playlists.Members.TITLE + "!=?";
         GENRE_SONGS = MediaStore.Audio.Genres.Members.IS_MUSIC + "=? AND " + MediaStore.Audio.Genres.Members.TITLE + "!=?";
         LOCAL_SONG_PATH = LOCAL_SONG + " AND " + MediaStore.Audio.AudioColumns.DATA + " GLOB ?";
+        ID = BaseColumns._ID + "=?";
     }
 }
