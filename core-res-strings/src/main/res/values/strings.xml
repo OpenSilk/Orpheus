@@ -35,6 +35,7 @@
     <string name="title_my_library">My Library</string>
     <string name="title_folders">Folders</string>
     <string name="title_renderers">Set renderer</string>
+    <string name="orpheus_playlists">Orpheus</string>
 
     <!-- Option menu items -->
     <string name="menu_settings">Settings</string>
@@ -68,6 +69,7 @@
 
     <!-- AlertDialog items -->
     <string name="new_playlist">New playlist</string>
+    <string name="select_playlist_provider">Select playlist provider</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     <string name="overwrite">Overwrite</string>

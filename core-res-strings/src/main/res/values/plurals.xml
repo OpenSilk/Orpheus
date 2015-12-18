@@ -58,6 +58,11 @@
         <item quantity="other">%d items</item>
     </plurals>
 
+    <plurals name="NNNitemsdeleted">
+        <item quantity="one"><xliff:g id="items_to_delete" example="1">%d</xliff:g> item was deleted.</item>
+        <item quantity="other"><xliff:g id="items_to_delete">%d</xliff:g> items were deleted.</item>
+    </plurals>
+
     <plurals name="Nminutes">
         <item quantity="one">%d minute</item>
         <item quantity="other">%d minutes</item>
