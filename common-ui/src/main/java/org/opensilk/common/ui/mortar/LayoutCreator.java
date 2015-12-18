@@ -32,6 +32,12 @@ public class LayoutCreator {
         throw new IllegalArgumentException(String.format("No LayoutCreator service in scope %s", scope.getName()));
     }
 
+    public boolean hasLayout(Object screen) {
+        Class<Object> pathType = ObjectUtils.getClass(screen);
+        Layout layout = pathType.getAnnotation(Layout.class);
+        return layout != null;
+    }
+
     public int getLayout(Object screen) {
         Class<Object> pathType = ObjectUtils.getClass(screen);
         Integer layoutResId = layoutCache.get(pathType);

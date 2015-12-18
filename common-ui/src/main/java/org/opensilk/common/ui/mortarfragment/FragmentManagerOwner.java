@@ -19,6 +19,7 @@ package org.opensilk.common.ui.mortarfragment;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.os.Build;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -50,14 +51,6 @@ public class FragmentManagerOwner extends Presenter<FragmentManagerOwnerActivity
     @Override
     protected BundleService extractBundleService(FragmentManagerOwnerActivity view) {
         return BundleService.getBundleService(view.getScope());
-    }
-
-    @SuppressLint("CommitTransaction")
-    public FragmentTransaction newTrasaction() {
-        if (hasView()) {
-            return getView().getSupportFragmentManager().beginTransaction();
-        }
-        throw new IllegalStateException("No view");
     }
 
     public void showDialog(MortarDialogFragment f) {

@@ -30,10 +30,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.opensilk.common.ui.mortar.LayoutCreator;
+import org.opensilk.common.ui.mortar.Lifecycle;
+import org.opensilk.common.ui.mortar.LifecycleService;
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortar.ScreenScoper;
 
 import mortar.MortarScope;
+import rx.subjects.BehaviorSubject;
 import timber.log.Timber;
 
 /**
@@ -44,6 +47,7 @@ public abstract class MortarDialogFragment extends AppCompatDialogFragment {
 
     private MortarScope mScope;
     private Screen mScreen;
+    private final BehaviorSubject<Lifecycle> lifecycleSubject = BehaviorSubject.create();
 
     protected abstract Screen newScreen();
 
@@ -62,14 +66,18 @@ public abstract class MortarDialogFragment extends AppCompatDialogFragment {
 
     @NonNull @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        return new AppCompatDialog(mScope.createContext(getActivity()), getTheme());
+        return new AppCompatDialog(createDialogContext(), getTheme());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         LayoutCreator layoutCreator = LayoutCreator.getService(getActivity());
-        //Watch out, inflater here is assumed to be from the dialogs context
-        return inflater.inflate(layoutCreator.getLayout(getScreen()), container, false);
+        if (layoutCreator.hasLayout(getScreen())) {
+            //Watch out, inflater here is assumed to be from the dialogs context
+            return inflater.inflate(layoutCreator.getLayout(getScreen()), container, false);
+        } else {
+            return super.onCreateView(inflater, container, savedInstanceState);
+        }
     }
 
     @Override
@@ -99,17 +107,59 @@ public abstract class MortarDialogFragment extends AppCompatDialogFragment {
         if (DEBUG_LIFECYCLE) Timber.v("<-onDestroy %s", getScopeName());
     }
 
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        lifecycleSubject.onNext(Lifecycle.START);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        lifecycleSubject.onNext(Lifecycle.RESUME);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        lifecycleSubject.onNext(Lifecycle.PAUSE);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        lifecycleSubject.onNext(Lifecycle.STOP);
+    }
+
     private MortarScope findOrMakeScope() {
         MortarScope scope = MortarScope.findChild(getActivity(), getScopeName());
         if (scope != null) {
             Timber.d("Reusing fragment scope %s", getScopeName());
         }
         if (scope == null) {
-            ScreenScoper scoper = ScreenScoper.getService(getActivity());
-            scope = scoper.getScreenScope(getActivity(), getScreen());
+            final ScreenScoper scoper = ScreenScoper.getService(getActivity());
+            final Object[] otherServices = getAdditionalServices();
+            final Object[] services;
+            if (otherServices == null || otherServices.length == 0) {
+                services = new Object[] {
+                        LifecycleService.LIFECYCLE_SERVICE,
+                        lifecycleSubject.asObservable()
+                };
+            } else {
+                services = new Object[otherServices.length + 2];
+                System.arraycopy(otherServices, 0, services, 0, otherServices.length);
+                services[services.length-2] = LifecycleService.LIFECYCLE_SERVICE;
+                services[services.length-1] = lifecycleSubject.asObservable();
+            }
+            scope = scoper.getScreenScope(getActivity(), getScreen(), services);
             Timber.d("Created new fragment scope %s", getScopeName());
         }
         return scope;
+    }
+
+    protected Context createDialogContext() {
+        return mScope.createContext(getActivity());
     }
 
     //Enforce using screen name as scope name, this is also used to tag the fragment
@@ -131,6 +181,14 @@ public abstract class MortarDialogFragment extends AppCompatDialogFragment {
             mScreen = newScreen();
         }
         return mScreen;
+    }
+
+    /**
+     * Override to add additional services to this scope
+     * @return Name(string), Object(service)
+     */
+    protected Object[] getAdditionalServices() {
+        return null;
     }
 
     public static <T extends MortarDialogFragment> T factory(Context context, String name, Bundle args) {
