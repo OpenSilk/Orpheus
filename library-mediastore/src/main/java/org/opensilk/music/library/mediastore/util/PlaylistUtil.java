@@ -110,11 +110,13 @@ public class PlaylistUtil {
         return null;
     }
 
-    public static void clearPlaylist(final Context context, final String playlistId) {
+    public static void clearPlaylist(final Context context, final String playlistId, boolean notify) {
         final Uri uri = Uris.PLAYLIST_MEMBERS(playlistId);
         ContentResolver resolver = context.getContentResolver();
         int num = resolver.delete(uri, null, null);
-        resolver.notifyChange(Uris.EXTERNAL_MEDIASTORE_PLAYLISTS, null);
+        if (notify) {
+            resolver.notifyChange(Uris.EXTERNAL_MEDIASTORE_PLAYLISTS, null);
+        }
     }
 
     static ContentValues[] makeInsertItems(final String[] ids, final int offset, int len, final int base) {
@@ -126,7 +128,7 @@ public class PlaylistUtil {
         for (int i = 0; i < len; i++) {
             contentValues[i] = new ContentValues();
             contentValues[i].put(MediaStore.Audio.Playlists.Members.PLAY_ORDER, base + offset + i);
-            contentValues[i].put(MediaStore.Audio.Playlists.Members.AUDIO_ID, ids[offset + i]);
+            contentValues[i].put(MediaStore.Audio.Playlists.Members.AUDIO_ID, Long.valueOf(ids[offset + i]));
         }
         return contentValues;
     }
@@ -144,7 +146,6 @@ public class PlaylistUtil {
             base = cursor.getInt(0);
         }
         if (cursor != null) cursor.close();
-        cursor = null;
         int numinserted = 0;
         for (int offSet = 0; offSet < size; offSet += 1000) {
             ContentValues[] values = makeInsertItems(ids, offSet, 1000, base);

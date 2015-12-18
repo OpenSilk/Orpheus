@@ -50,6 +50,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Subscriber;
 import timber.log.Timber;
@@ -93,6 +94,7 @@ public class FoldersLibraryProvider extends PlaylistLibraryProvider {
     }
 
     @Override
+    @DebugLog
     protected Observable<Model> getListObjsObservable(final Uri uri, final Bundle args) {
         return Observable.create(new Observable.OnSubscribe<Model>() {
             @Override
@@ -118,8 +120,9 @@ public class FoldersLibraryProvider extends PlaylistLibraryProvider {
                         }
                         break;
                     }
-                    case FoldersUris.M_PLAYLIST: {
-                        listPlaylist(uri.getLastPathSegment(), subscriber, args);
+                    case FoldersUris.M_PLAYLIST_TRACKS: {
+                        List<String> segs = uri.getPathSegments();
+                        listPlaylist(segs.get(segs.size() - 2), subscriber, args);
                         break;
                     }
                     default:
@@ -167,7 +170,7 @@ public class FoldersLibraryProvider extends PlaylistLibraryProvider {
                     case FoldersUris.M_FOLDER: {
                         final String library = uri.getPathSegments().get(0);
                         final StorageLookup.StorageVolume volume = getStorageVolume(library);
-                        if (library == null) {
+                        if (volume == null) {
                             subscriber.onError(new IllegalArgumentException("Can't access volume " + library));
                             return;
                         }
@@ -458,6 +461,7 @@ public class FoldersLibraryProvider extends PlaylistLibraryProvider {
         Uri uri = PlaylistUtil.createPlaylist(getContext(), name);
         if (uri != null) {
             resultListener.onSuccess(uri);
+            getContext().getContentResolver().notifyChange(FoldersUris.playlists(mAuthority), null);
         } else {
             resultListener.onError("Create failed");
         }
@@ -494,10 +498,11 @@ public class FoldersLibraryProvider extends PlaylistLibraryProvider {
     protected void updatePlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras) {
         String[] ids = extractIds(tracks);
         String plist = playlist.getLastPathSegment();
-        PlaylistUtil.clearPlaylist(getContext(), plist);
+        PlaylistUtil.clearPlaylist(getContext(), plist, false);
         int num = PlaylistUtil.addToPlaylist(getContext(), ids, plist);
         if (num > 0) {
             resultListener.onSuccess(PlaylistUtil.getPlaylist(getContext(), mAuthority, plist));
+            getContext().getContentResolver().notifyChange(playlist, null);
         } else {
             resultListener.onError("Update failed");
         }
@@ -508,10 +513,12 @@ public class FoldersLibraryProvider extends PlaylistLibraryProvider {
         ContentResolver resolver = getContext().getContentResolver();
         int num = 0;
         for (Uri uri : playlists) {
-            num += resolver.delete(uri, null, null);
+            Uri msUri = Uris.PLAYLIST(uri.getLastPathSegment());
+            num += resolver.delete(msUri, null, null);
         }
         if (num == playlists.size()) {
             resultListener.onSuccess(num);
+            resolver.notifyChange(FoldersUris.playlists(mAuthority), null);
         } else {
             resultListener.onError("Delete failed");
         }

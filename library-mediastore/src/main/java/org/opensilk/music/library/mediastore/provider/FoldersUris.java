@@ -95,7 +95,7 @@ public class FoldersUris {
     private static final String slash_num = "/#";
     private static final String base_match = "#/";
     private static final String external_slash = external + "/";
-    private static final String slash_num_slash = "/*/";
+    private static final String slash_num_slash = "/#/";
 
     public static UriMatcher makeMatcher(String authority) {
         Timber.i("Creating matcher for authority=%s", authority);
