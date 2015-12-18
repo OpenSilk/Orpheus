@@ -49,6 +49,10 @@ public abstract class PlaylistLibraryProvider extends LibraryProvider {
         final PlaylistExtras.Builder ok = PlaylistExtras.b();
         ok.putOk(true);
 
+        if (extras != null) {
+            extras.setClassLoader(getClass().getClassLoader());
+        }
+
         if (method == null) method = "_";
         switch (method) {
             case PlaylistMethods.CREATE: {

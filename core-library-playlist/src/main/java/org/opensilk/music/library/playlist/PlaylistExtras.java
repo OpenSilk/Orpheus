@@ -75,7 +75,6 @@ public class PlaylistExtras {
     }
 
     public static ResultReceiver getResultReceiver(Bundle extras) {
-        extras.setClassLoader(PlaylistExtras.class.getClassLoader());
         ResultReceiverWrapper rrw = extras.getParcelable(ARG_RESULT_RECEIVER);
         if (rrw == null) throw new NullPointerException("No resultReceiver in bundle");
         return rrw.get();
