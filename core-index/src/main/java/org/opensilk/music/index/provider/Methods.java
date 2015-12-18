@@ -38,11 +38,4 @@ public interface Methods {
     String SAVE_BROADCAST_META = "idx.save.broadcastmeta";
     String GET_TRACK = "idx.get.track";
     String GET_TRACK_LIST = "idx.get.track.list";
-    String CREATE_PLAYLIST = "idx.create.playlist";
-    String ADD_TO_PLAYLIST = "idx.add.to.playlist";
-    String REMOVE_FROM_PLAYLIST = "idx.remove.from.playlist";
-    String MOVE_PLAYLIST_MEMBER = "idx.move.playlist.member";
-    String UPDATE_PLAYLIST = "idx.update.playlist";
-    String REMOVE_PLAYLISTS = "idx.remove.playlists";
-    String GET_PLAYLIST = "idx.getplaylist";
 }

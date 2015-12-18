@@ -81,18 +81,6 @@ public interface IndexClient {
     MediaMetadataCompat convertToMediaMetadata(Track track);
 
     /*
-     * Playlist helpers
-     */
-
-    Uri createPlaylist(String name);
-    int addToPlaylist(Uri playlist, List<Uri> tracks);
-    int movePlaylistEntry(Uri playlist, int from, int to);
-    int removeFromPlaylist(Uri playlist, int position);
-    int updatePlaylist(Uri playlist, List<Uri> uris);
-    boolean removePlaylists(List<Uri> playlists);
-    Playlist getPlaylist(Uri playlist);
-
-    /*
      * setup/destroy
      */
 

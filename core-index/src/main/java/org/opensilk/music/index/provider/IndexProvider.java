@@ -40,6 +40,8 @@ import org.opensilk.music.library.client.TypedBundleableLoader;
 import org.opensilk.music.library.internal.BundleableListTransformer;
 import org.opensilk.music.library.internal.BundleableSubscriber;
 import org.opensilk.music.library.internal.LibraryException;
+import org.opensilk.music.library.playlist.PlaylistOperationListener;
+import org.opensilk.music.library.playlist.provider.PlaylistLibraryProvider;
 import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.library.provider.LibraryProvider;
@@ -102,7 +104,7 @@ import static org.opensilk.music.index.provider.IndexUris.playlist;
 /**
  * Created by drew on 7/11/15.
  */
-public class IndexProvider extends LibraryProvider {
+public class IndexProvider extends PlaylistLibraryProvider {
 
     @Inject @Named("IndexProviderAuthority") String mAuthority;
     @Inject IndexDatabase mDataBase;
@@ -244,90 +246,6 @@ public class IndexProvider extends LibraryProvider {
                 getTracksInList(LibraryExtras.getUriList(extras),
                         binder, LibraryExtras.sanitize(extras));
                 return reply.putOk(true).get();
-            }
-            case Methods.CREATE_PLAYLIST: {
-                String name = BundleHelper.getString(extras);
-                if (!StringUtils.isEmpty(name)) {
-                    long id = mDataBase.insertPlaylist(name);
-                    return reply.putOk(id > 0).putExtrasBundle(BundleHelper.b().putUri(
-                            IndexUris.playlist(mAuthority, String.valueOf(id))).get()).get();
-                } else {
-                    return reply.putOk(false).get();
-                }
-            }
-            case Methods.ADD_TO_PLAYLIST: {
-                Uri plist = BundleHelper.getUri(extras);
-                List<Uri> list = BundleHelper.getList(extras);
-                if (plist != null && list != null && !list.isEmpty()) {
-                    String id = plist.getLastPathSegment();
-                    int count = mDataBase.addToPlaylist(id, list);
-                    return reply.putOk(count > 0).putExtrasBundle(
-                            BundleHelper.b().putInt(count).get()).get();
-                } else {
-                    return reply.putOk(false).get();
-                }
-            }
-            case Methods.REMOVE_FROM_PLAYLIST: {
-                Uri plist = BundleHelper.getUri(extras);
-                int pos = BundleHelper.getInt(extras);
-                if (plist != null) {
-                    String id = plist.getLastPathSegment();
-                    int count = mDataBase.removeFromPlaylist(id, pos);
-                    return reply.putOk(count > 0).putExtrasBundle(
-                            BundleHelper.b().putInt(count).get()).get();
-                } else {
-                    return reply.putOk(false).get();
-                }
-            }
-            case Methods.MOVE_PLAYLIST_MEMBER: {
-                Uri plist = BundleHelper.getUri(extras);
-                int from = BundleHelper.getInt(extras);
-                int to = BundleHelper.getInt2(extras);
-                if (plist != null && from != to) {
-                    String id = plist.getLastPathSegment();
-                    int count = mDataBase.movePlaylistEntry(id, from, to);
-                    return reply.putOk(count > 0).putExtrasBundle(
-                            BundleHelper.b().putInt(count).get()).get();
-                } else {
-                    return reply.putOk(false).get();
-                }
-            }
-            case Methods.UPDATE_PLAYLIST: {
-                Uri plist = BundleHelper.getUri(extras);
-                List<Uri> list = BundleHelper.getList(extras);
-                if (plist != null && list != null) {
-                    String id = plist.getLastPathSegment();
-                    int count = mDataBase.updatePlaylist(id, list);
-                    return reply.putOk(count > 0).putExtrasBundle(
-                            BundleHelper.b().putInt(count).get()).get();
-                } else {
-                    return reply.putOk(false).get();
-                }
-            }
-            case Methods.REMOVE_PLAYLISTS: {
-                List<Uri> plists = BundleHelper.getList(extras);
-                if (plists != null) {
-                    String[] ids = new String[plists.size()];
-                    for (int ii=0; ii<plists.size(); ii++) {
-                        ids[ii] = plists.get(ii).getLastPathSegment();
-                    }
-                    int count = mDataBase.removePlaylists(ids);
-                    return reply.putOk(count > 0).putExtrasBundle(
-                            BundleHelper.b().putInt(count).get()).get();
-                } else {
-                    return reply.putOk(false).get();
-                }
-            }
-            case Methods.GET_PLAYLIST: {
-                Uri plist = BundleHelper.getUri(extras);
-                if (plist != null) {
-                    String id = plist.getLastPathSegment();
-                    Playlist playlist = mDataBase.getPlaylist(id);
-                    if (playlist != null) {
-                        return reply.putOk(true).putBundleable(playlist).get();
-                    }
-                }
-                return reply.putOk(false).get();
             }
             default: {
                 return super.callCustom(method, arg, extras);
@@ -717,5 +635,65 @@ public class IndexProvider extends LibraryProvider {
                 }
             }
         }).subscribeOn(Schedulers.computation()).subscribe(subscriber);
+    }
+
+    @Override
+    protected void createPlaylist(String name, PlaylistOperationListener<Uri> resultListener, Bundle extras) {
+        long id = mDataBase.insertPlaylist(name);
+        if (id > 0) {
+            resultListener.onSuccess(IndexUris.playlist(mAuthority, String.valueOf(id)));
+        } else {
+            resultListener.onError("Insert failed");
+        }
+    }
+
+    @Override
+    protected void addToPlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras) {
+        String id = playlist.getLastPathSegment();
+        int count = mDataBase.addToPlaylist(id, tracks);
+        if (count > 0) {
+            resultListener.onSuccess(mDataBase.getPlaylist(id));
+        } else {
+            resultListener.onError("Insert failed");
+        }
+    }
+
+    @Override
+    protected void removeFromPlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras) {
+        String id = playlist.getLastPathSegment();
+        int count = 0;
+        for (Uri uri : tracks) {
+            count += mDataBase.removeFromPlaylist(id, uri);
+        }
+        if (count > 0) {
+            resultListener.onSuccess(mDataBase.getPlaylist(id));
+        } else {
+            resultListener.onError("Remove failed");
+        }
+    }
+
+    @Override
+    protected void updatePlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras) {
+        String id = playlist.getLastPathSegment();
+        int count = mDataBase.updatePlaylist(id, tracks);
+        if (count > 0) {
+            resultListener.onSuccess(mDataBase.getPlaylist(id));
+        } else {
+            resultListener.onError("Update failed");
+        }
+    }
+
+    @Override
+    protected void deletePlaylists(List<Uri> playlists, PlaylistOperationListener<Integer> resultListener, Bundle extras) {
+        String[] ids = new String[playlists.size()];
+        for (int ii=0; ii<playlists.size(); ii++) {
+            ids[ii] = playlists.get(ii).getLastPathSegment();
+        }
+        int count = mDataBase.removePlaylists(ids);
+        if (count > 0) {
+            resultListener.onSuccess(count);
+        } else {
+            resultListener.onError("Delete failed");
+        }
     }
 }
