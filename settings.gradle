@@ -4,12 +4,13 @@
 
 include ':app3'
 include ':common-core', ':common-ui', ':common-bundleable', 'common-glide'
-include ':core-model', ':core-library', ':core-artwork', ':core-res-drawables'
-include ':core-playback', ':core-translations', ':core-index', ':core-lastfm', ':core-okhttp'
-include ':core-library-client', ':core-res-strings', ':core-playback-renderer'
+include ':core-model', ':core-library', ':core-artwork', ':core-res-drawables',
+        ':core-playback', ':core-translations', ':core-index', ':core-lastfm',
+        ':core-okhttp', ':core-library-client', ':core-res-strings', ':core-playback-renderer',
+        ':core-library-playlist'
 include ':library-mediastore'
 include ':renderer-chromecast'
-include ':plugin-drive',':library-googledrive'
+include ':plugin-drive', ':library-googledrive'
 include ':plugin-upnp', ':library-upnp'
 //include ':testing-mediastore'
 //include ':../OrpheusPlugins:folders'
