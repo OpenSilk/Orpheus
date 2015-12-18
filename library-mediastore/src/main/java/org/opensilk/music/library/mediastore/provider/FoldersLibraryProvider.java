@@ -25,24 +25,18 @@ import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.mediastore.R;
-import org.opensilk.music.library.mediastore.util.CursorHelpers;
 import org.opensilk.music.library.mediastore.util.FilesHelper;
 import org.opensilk.music.library.mediastore.util.PlaylistUtil;
 import org.opensilk.music.library.mediastore.util.Projections;
-import org.opensilk.music.library.mediastore.util.StorageLookup;
 import org.opensilk.music.library.mediastore.util.Uris;
 import org.opensilk.music.library.playlist.PlaylistOperationListener;
 import org.opensilk.music.library.playlist.provider.PlaylistLibraryProvider;
-import org.opensilk.music.library.provider.LibraryExtras;
-import org.opensilk.music.library.provider.LibraryProvider;
-import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Model;
@@ -50,11 +44,8 @@ import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -473,19 +464,19 @@ public class FoldersLibraryProvider extends PlaylistLibraryProvider {
     }
 
     @Override
-    protected void addToPlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Integer> resultListener, Bundle extras) {
+    protected void addToPlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras) {
         String[] ids = extractIds(tracks);
         String plist = playlist.getLastPathSegment();
         int num = PlaylistUtil.addToPlaylist(getContext(), ids, plist);
         if (num > 0) {
-            resultListener.onSuccess(num);
+            resultListener.onSuccess(PlaylistUtil.getPlaylist(getContext(), mAuthority, plist));
         } else {
             resultListener.onError("Insert failed");
         }
     }
 
     @Override
-    protected void removeFromPlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Integer> resultListener, Bundle extras) {
+    protected void removeFromPlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras) {
         String[] ids = extractIds(tracks);
         String plist = playlist.getLastPathSegment();
         int num = 0;
@@ -493,20 +484,20 @@ public class FoldersLibraryProvider extends PlaylistLibraryProvider {
             num += PlaylistUtil.removeFromPlaylist(getContext(), id, plist);
         }
         if (num > 0) {
-            resultListener.onSuccess(num);
+            resultListener.onSuccess(PlaylistUtil.getPlaylist(getContext(), mAuthority, plist));
         } else {
             resultListener.onError("Remove failed");
         }
     }
 
     @Override
-    protected void updatePlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Integer> resultListener, Bundle extras) {
+    protected void updatePlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras) {
         String[] ids = extractIds(tracks);
         String plist = playlist.getLastPathSegment();
         PlaylistUtil.clearPlaylist(getContext(), plist);
         int num = PlaylistUtil.addToPlaylist(getContext(), ids, plist);
         if (num > 0) {
-            resultListener.onSuccess(num);
+            resultListener.onSuccess(PlaylistUtil.getPlaylist(getContext(), mAuthority, plist));
         } else {
             resultListener.onError("Update failed");
         }

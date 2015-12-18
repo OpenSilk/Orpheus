@@ -30,7 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.mediastore.BuildConfig;
 import org.opensilk.music.library.mediastore.provider.FoldersUris;
-import org.opensilk.music.library.mediastore.util.StorageLookup.StorageVolume;
+import org.opensilk.music.library.mediastore.provider.StorageLookup.StorageVolume;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Track;
@@ -43,7 +43,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 

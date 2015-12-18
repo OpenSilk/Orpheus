@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.library.mediastore.util;
+package org.opensilk.music.library.mediastore.provider;
 
 import android.content.Context;
 import android.os.Build;
