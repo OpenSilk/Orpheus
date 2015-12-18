@@ -28,31 +28,39 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class LibraryConfig {
 
+    private static final long FLAG_START = 1L;
+
     /**
      * Library has a settings activity
      * Scope: Global
      */
-    public static final long FLAG_HAS_SETTINGS   = 1 << 1;
+    public static final long FLAG_HAS_SETTINGS = FLAG_START << 1;
     /**
      * Library requires authentication
      * Scope: Global
      */
-    public static final long FLAG_REQUIRES_AUTH = 1 << 2;
+    public static final long FLAG_REQUIRES_AUTH = FLAG_START << 2;
     /**
      * Library supports {@link org.opensilk.music.library.provider.LibraryMethods#MULTI_GET}
      * Scope: Global
      */
-    public static final long FLAG_MULTI_GET_SUPPORT = 1 << 3;
+    public static final long FLAG_MULTI_GET_SUPPORT = FLAG_START << 3;
+    /**
+     * Library has playlist management
+     * Scope: global
+     * This should not be used by third party plugins.
+     */
+    public static final long FLAG_MANAGES_PLAYLISTS = FLAG_START << 4;
     /**
      * Object supports deletion
      * Scope: Container, Item
      */
-    public static final long FLAG_SUPPORTS_DELETE = 1 << 11;
+    public static final long FLAG_SUPPORTS_DELETE = FLAG_START << 11;
     /**
      * Object supports renaming / changing title
      * Scope: Container, Item
      */
-    public static final long FLAG_SUPPORTS_RENAME = 1 << 12;
+    public static final long FLAG_SUPPORTS_RENAME = FLAG_START << 12;
 
     private final int apiVersion;
     private final long flags;
