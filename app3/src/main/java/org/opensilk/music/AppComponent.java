@@ -52,4 +52,5 @@ public interface AppComponent extends AppContextComponent, ArtworkRequestorCompo
     AppPreferences appPreferences();
     PlaybackController playbackController();
     @Named("IndexProviderAuthority") String indexProviderAuthority();
+    @Named("foldersLibraryAuthority") String foldersProviderAuthority();
 }

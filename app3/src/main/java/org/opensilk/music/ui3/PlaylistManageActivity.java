@@ -28,6 +28,7 @@ import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
+import org.opensilk.music.ui3.playlist.PlaylistChooseScreen;
 import org.opensilk.music.ui3.playlist.PlaylistChooseScreenFragment;
 
 import java.util.List;
@@ -42,15 +43,21 @@ public class PlaylistManageActivity extends MusicActivity {
     static final String ACTION_ADD = PlaylistManageActivity.class.getName() + ".action.add";
     static final String ACTION_MANAGE = PlaylistManageActivity.class.getName() + ".action.manage";
 
-    public static Intent makeAddIntent(Context context, List<Uri> tracksUris) {
+    public static Intent makeAddIntent(Context context, Uri loaderUri, List<Uri> tracksUris) {
         Intent i = new Intent(context, PlaylistManageActivity.class).setAction(ACTION_ADD);
-        i.putExtra("b", BundleHelper.b().putInt(1).putList(tracksUris).get());
+        i.putExtra("b", BundleHelper.b().putUri(loaderUri)
+                .putInt(PlaylistChooseScreen.ListKind.POINTER)
+                .putList(tracksUris)
+                .get());
         return i;
     }
 
-    public static Intent makeAddIntent2(Context context, List<Uri> tracks) {
+    public static Intent makeAddIntent2(Context context, Uri loaderUri, List<Uri> tracks) {
         Intent i = new Intent(context, PlaylistManageActivity.class).setAction(ACTION_ADD);
-        i.putExtra("b", BundleHelper.b().putInt(2).putList(tracks).get());
+        i.putExtra("b", BundleHelper.b().putUri(loaderUri)
+                .putInt(PlaylistChooseScreen.ListKind.REAL)
+                .putList(tracks)
+                .get());
         return i;
     }
 
@@ -95,10 +102,10 @@ public class PlaylistManageActivity extends MusicActivity {
         if (savedInstanceState == null) {
             if (StringUtils.equals(ACTION_ADD, getIntent().getAction())) {
                 Bundle args = getIntent().getBundleExtra("b");
-                mFragmentManagerOwner.replaceMainContent(
-                        PlaylistChooseScreenFragment.ni(this, args), false);
+                mFragmentManagerOwner.replaceMainContent(PlaylistChooseScreenFragment.ni(this, args), false);
             } else {
-
+                //TODO
+                finish();
             }
         }
     }

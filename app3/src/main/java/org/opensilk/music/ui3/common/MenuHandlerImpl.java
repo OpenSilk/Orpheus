@@ -24,23 +24,20 @@ import android.view.Menu;
 import android.view.MenuInflater;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.AppPreferences;
+import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.client.LibraryClient;
 import org.opensilk.music.library.client.TypedBundleableLoader;
 import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Item;
-import org.opensilk.music.model.Model;
-import org.opensilk.music.model.Track;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.PlaylistManageActivity;
 import org.opensilk.music.ui3.library.FoldersScreenFragment;
+import org.opensilk.music.ui3.playlist.PlaylistProviderSelectScreenFragment;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import rx.Observable;
@@ -125,20 +122,23 @@ public abstract class MenuHandlerImpl extends MenuHandler {
         presenter.getPlaybackController().enqueueAllNext(toPlay);
     }
 
+    //TODO somehow check authorites and allow adding to android playlists
     public void addToPlaylistFromTracksUris(Context context, List<Uri> tracksUriList) {
+        if (tracksUriList == null || tracksUriList.isEmpty()) {
+            return;
+        }
+        String firstauthority = tracksUriList.get(0).getAuthority();
         activityResultsController.startActivityForResult(
-                PlaylistManageActivity.makeAddIntent(context, tracksUriList),
+                PlaylistManageActivity.makeAddIntent(context, IndexUris.playlists(firstauthority), tracksUriList),
                 ActivityRequestCodes.PLAYLIST_ADD, null);
     }
 
-    public void addToPlaylistFromTracks(Context context, List<Model> tracks) {
-        List<Uri> uris = new ArrayList<>(tracks.size());
-        for (Model track: tracks) {
-            uris.add(((Track)track).getUri());
+    public void addToPlaylistFromTracks(Context context, BundleablePresenter presenter) {
+        List<Uri> tracks = UtilsCommon.filterTracks(presenter.getSelectedItems());
+        if (tracks == null || tracks.isEmpty()) {
+            return;
         }
-        activityResultsController.startActivityForResult(
-                PlaylistManageActivity.makeAddIntent2(context, uris),
-                ActivityRequestCodes.PLAYLIST_ADD, null);
+        presenter.getFm().showDialog(PlaylistProviderSelectScreenFragment.ni(context, tracks));
     }
 
     public void addToQueueFromTracksUris(Context context, BundleablePresenter presenter, List<Uri> uris) {

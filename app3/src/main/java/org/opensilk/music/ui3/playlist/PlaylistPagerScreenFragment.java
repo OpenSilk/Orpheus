@@ -17,32 +17,20 @@
 
 package org.opensilk.music.ui3.playlist;
 
-import android.content.Context;
-import android.net.Uri;
-import android.os.Bundle;
-
-import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortarfragment.MortarFragment;
 
-import java.util.List;
-
 /**
- * Created by drew on 10/25/15.
+ * Created by drew on 12/11/15.
  */
-public class PlaylistChooseScreenFragment extends MortarFragment {
-    public static final String NAME = PlaylistChooseScreenFragment.class.getName();
+public class PlaylistPagerScreenFragment extends MortarFragment {
 
-    public static PlaylistChooseScreenFragment ni(Context context, Bundle args) {
-        return factory(context, NAME, args);
+    public static PlaylistPagerScreenFragment ni() {
+        return new PlaylistPagerScreenFragment();
     }
 
     @Override
     protected Screen newScreen() {
-        Bundle args = getArguments();
-        Uri loaderUri = BundleHelper.getUri(args);
-        int listKind = BundleHelper.getInt(args);
-        List<Uri> uris = BundleHelper.getList(args);
-        return new PlaylistChooseScreen(loaderUri, listKind, uris);
+        return new PlaylistPagerScreen();
     }
 }

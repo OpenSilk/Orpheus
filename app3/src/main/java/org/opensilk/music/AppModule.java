@@ -37,7 +37,8 @@ import dagger.Provides;
         includes = {
                 ArtworkRequestorModule.class,
                 IndexClientModule.class,
-                PlaybackControllerModule.class
+                PlaybackControllerModule.class,
+                MediaStoreLibraryAuthorityModule.class,
         }
 )
 public class AppModule {

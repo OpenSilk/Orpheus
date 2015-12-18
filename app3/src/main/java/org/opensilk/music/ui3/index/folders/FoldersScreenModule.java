@@ -90,7 +90,7 @@ public class FoldersScreenModule {
         return new ItemClickListener() {
             @Override
             public void onItemClicked(BundleablePresenter presenter, Context context, Model item) {
-                LibraryClient client = LibraryClient.create(context, LibraryUris.call(item.getUri().getAuthority()));
+                LibraryClient client = LibraryClient.create(context, item.getUri());
                 Bundle reply = client.makeCall(LibraryMethods.CONFIG, null);
                 if (reply != null) {
                     FoldersScreenFragment f = FoldersScreenFragment.ni(context,

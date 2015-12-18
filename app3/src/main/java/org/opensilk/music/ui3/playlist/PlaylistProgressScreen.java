@@ -18,47 +18,42 @@
 package org.opensilk.music.ui3.playlist;
 
 import android.content.res.Resources;
-import android.net.Uri;
+import android.os.Bundle;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ComponentFactory;
-import org.opensilk.common.ui.mortar.Layout;
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortar.WithComponentFactory;
-import org.opensilk.music.R;
 import org.opensilk.music.ui3.MusicActivityComponent;
-
-import java.util.List;
 
 import mortar.MortarScope;
 
 /**
- * Created by drew on 10/24/15.
+ * Created by drew on 12/17/15.
  */
-@Layout(R.layout.screen_playlistchoose)
-@WithComponentFactory(PlaylistChooseScreen.Factory.class)
-public class PlaylistChooseScreen extends Screen {
+@WithComponentFactory(PlaylistProgressScreen.Factory.class)
+public class PlaylistProgressScreen extends Screen {
 
-    final Uri loaderUri;
-    final int listKind;
-    final List<Uri> uris;
-
-    public interface ListKind {
-        int POINTER = 1; //List is tracks uris *must query to get real list*
-        int REAL = 2; //List is uris of tracks
+    public enum Operation {
+        CREATE,
+        ADDTO,
+        DELETE,
+        UPDATE,
     }
 
-    public PlaylistChooseScreen(Uri loaderUri, int listKind, List<Uri> uris) {
-        this.loaderUri = loaderUri;
-        this.listKind = listKind;
-        this.uris = uris;
+    final Operation operation;
+    final Bundle extras;
+
+    public PlaylistProgressScreen(Operation operation, Bundle extras) {
+        this.operation = operation;
+        this.extras = extras;
     }
 
-    public static class Factory extends ComponentFactory<PlaylistChooseScreen> {
+    public static class Factory extends ComponentFactory<PlaylistProgressScreen> {
         @Override
-        protected Object createDaggerComponent(Resources resources, MortarScope parentScope, PlaylistChooseScreen screen) {
-            MusicActivityComponent parent = DaggerService.getDaggerComponent(parentScope);
-            return PlaylistChooseScreenComponent.FACTORY.call(parent, new PlaylistChooseScreenModule(screen));
+        protected Object createDaggerComponent(Resources resources, MortarScope parentScope, PlaylistProgressScreen screen) {
+            MusicActivityComponent cmp = DaggerService.getDaggerComponent(parentScope);
+            return PlaylistProgressScreenComponent.FACTORY.call(cmp, screen);
         }
     }
 }

@@ -15,20 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.index.playlists;
+package org.opensilk.music.ui3.playlist;
 
 import android.content.Context;
 import android.net.Uri;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
-import org.opensilk.common.core.dagger2.ForApplication;
+import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.index.provider.IndexUris;
+import org.opensilk.music.library.playlist.PlaylistManager;
 import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.sort.PlaylistSortOrder;
@@ -41,6 +42,7 @@ import org.opensilk.music.ui3.common.OpenProfileItemClickListener;
 import org.opensilk.music.ui3.profile.ProfileScreen;
 import org.opensilk.music.ui3.profile.playlist.PlaylistDetailsScreen;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +50,8 @@ import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
+import rx.Subscriber;
+import rx.Subscription;
 
 /**
  * Created by drew on 5/5/15.
@@ -61,21 +65,19 @@ public class PlaylistsScreenModule {
     }
 
     @Provides @Named("loader_uri")
-    public Uri provideLoaderUri(@Named("IndexProviderAuthority") String authority) {
-        return IndexUris.playlists(authority);
+    public Uri provideLoaderUri() {
+        return screen.loaderUri;
     }
 
     @Provides @ScreenScope
     public BundleablePresenterConfig providePresenterConfig(
             ItemClickListener itemClickListener,
-            MenuHandler menuConfig,
-            @ForApplication Context context
+            MenuHandler menuConfig
     ) {
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(true)
                 .setItemClickListener(itemClickListener)
                 .setMenuConfig(menuConfig)
-                .setToolbarTitle(context.getString(R.string.title_playlists))
                 .build();
     }
 
@@ -156,11 +158,21 @@ public class PlaylistsScreenModule {
                         return true;
                     }
                     case R.id.delete: {
-                        List<Uri> plsts = new ArrayList<>(presenter.getSelectedItems().size());
-                        for (Model m : presenter.getSelectedItems()) {
+                        List<Uri> plsts = new ArrayList<>(list.size());
+                        String authority = null;
+                        int numAuthorities = 0;
+                        for (Model m : list) {
                             plsts.add(m.getUri());
+                            if (!StringUtils.equals(authority, m.getUri().getAuthority())) {
+                                authority = m.getUri().getAuthority();
+                                numAuthorities++;
+                            }
                         }
-                        presenter.getIndexClient().removePlaylists(plsts);
+                        if (numAuthorities != 1 || StringUtils.isEmpty(authority)) {
+                            Toast.makeText(context, R.string.err_generic, Toast.LENGTH_SHORT).show();
+                            return true;
+                        }
+                        presenter.getFm().showDialog(PlaylistProgressScreenFragment.delete(plsts, authority));
                         return true;
                     }
                     default:

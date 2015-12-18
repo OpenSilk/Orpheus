@@ -30,6 +30,7 @@ import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.common.ui.mortar.ActivityResultsOwner;
 import org.opensilk.common.ui.mortar.Lifecycle;
 import org.opensilk.common.ui.mortar.LifecycleService;
+import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.index.client.IndexClient;
@@ -38,6 +39,8 @@ import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.PlaylistManageActivity;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
 import org.opensilk.music.ui3.playlist.PlaylistChooseScreen;
+import org.opensilk.music.ui3.playlist.PlaylistProviderSelectScreen;
+import org.opensilk.music.ui3.playlist.PlaylistProviderSelectScreenFragment;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -66,6 +69,7 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView> {
     final ArtworkRequestManager requestor;
     final IndexClient indexClient;
     final ActivityResultsController activityResultsController;
+    final FragmentManagerOwner fm;
 
     Observable<Lifecycle> lifecycle;
     CompositeSubscription broadcastSubscriptions;
@@ -81,12 +85,14 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView> {
             PlaybackController playbackController,
             ArtworkRequestManager requestor,
             IndexClient indexClient,
-            ActivityResultsController activityResultsController
+            ActivityResultsController activityResultsController,
+            FragmentManagerOwner fm
     ) {
         this.playbackController = playbackController;
         this.requestor = requestor;
         this.indexClient = indexClient;
         this.activityResultsController = activityResultsController;
+        this.fm = fm;
     }
 
     @Override
@@ -151,11 +157,8 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView> {
                     for (QueueItem i : items) {
                         uris.add(Uri.parse(i.getDescription().getMediaId()));
                     }
-                    if (!uris.isEmpty()) {
-                        Intent i = PlaylistManageActivity.makeAddIntent2(
-                                getView().getContext(), uris);
-                        activityResultsController.startActivityForResult(i,
-                                ActivityRequestCodes.PLAYLIST_ADD, null);
+                    if (!uris.isEmpty() && hasView()) {
+                        fm.showDialog(PlaylistProviderSelectScreenFragment.ni(getView().getContext(), uris));
                     }
                 }
                 return true;

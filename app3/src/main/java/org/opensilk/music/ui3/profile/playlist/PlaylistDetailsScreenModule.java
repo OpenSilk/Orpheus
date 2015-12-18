@@ -19,7 +19,6 @@ package org.opensilk.music.ui3.profile.playlist;
 
 import android.content.Context;
 import android.net.Uri;
-import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -28,7 +27,6 @@ import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.R;
-import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.Model;
 import org.opensilk.music.model.sort.TrackSortOrder;
@@ -39,6 +37,7 @@ import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
 import org.opensilk.music.ui3.common.PlayAllItemClickListener;
 import org.opensilk.music.ui3.common.UtilsCommon;
+import org.opensilk.music.ui3.playlist.PlaylistProgressScreenFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +46,6 @@ import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
-import timber.log.Timber;
 
 /**
  * Created by drew on 5/5/15.
@@ -61,8 +59,8 @@ public class PlaylistDetailsScreenModule {
     }
 
     @Provides @Named("loader_uri")
-    public Uri provideLoaderUri(@Named("IndexProviderAuthority") String authority) {
-        return IndexUris.playlistTracks(screen.playlist);
+    public Uri provideLoaderUri() {
+        return screen.playlist.getTracksUri();
     }
 
     @Provides @Named("profile_heros")
@@ -106,7 +104,8 @@ public class PlaylistDetailsScreenModule {
     }
 
     @Provides @ScreenScope
-    public MenuHandler provideMenuHandler(@Named("loader_uri") Uri loaderUri, final ActivityResultsController activityResultsController) {
+    public MenuHandler provideMenuHandler(@Named("loader_uri") Uri loaderUri,
+                                          final ActivityResultsController activityResultsController) {
         return new MenuHandlerImpl(loaderUri, activityResultsController) {
             @Override
             public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
@@ -138,7 +137,7 @@ public class PlaylistDetailsScreenModule {
             }
 
             @Override
-            public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
+            public boolean onActionMenuItemClicked(final BundleablePresenter presenter, Context context, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.playlist_save: {
                         List<Model> tracks = presenter.getItems();
@@ -146,34 +145,12 @@ public class PlaylistDetailsScreenModule {
                         for (Model b : tracks) {
                             list.add(b.getUri());
                         }
-                        presenter.getIndexClient().updatePlaylist(screen.playlist.getUri(), list);
+                        presenter.getFm().showDialog(PlaylistProgressScreenFragment.update(
+                                screen.playlist.getUri(), list));
                         return true;
                     }
                     default:
                         return false;
-                }
-            }
-        };
-    }
-
-    @Provides
-    public RecyclerView.AdapterDataObserver provideObserver(final BundleablePresenter presenter) {
-        return new RecyclerView.AdapterDataObserver() {
-            @Override
-            public void onItemRangeRemoved(int positionStart, int itemCount) {
-                if (itemCount == 1) {
-                    presenter.getIndexClient().removeFromPlaylist(screen.playlist.getUri(), positionStart);
-                } else {
-                    Timber.e("Removing multiple items unsupported");
-                }
-            }
-
-            @Override
-            public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-                if (itemCount == 1) {
-                    presenter.getIndexClient().movePlaylistEntry(screen.playlist.getUri(), fromPosition, toPosition);
-                } else {
-                    Timber.e("Moving multiple items unsupported");
                 }
             }
         };

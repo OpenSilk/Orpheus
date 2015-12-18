@@ -52,4 +52,5 @@ public interface MusicActivityComponent extends MortarFragmentActivityComponent 
     ActionModePresenter actionModePresenter();
     @Named("artworkauthority") String artworkAuthority();
     DialogPresenter dialogPresenter();
+    @Named("foldersLibraryAuthority") String foldersProviderAuthority();
 }

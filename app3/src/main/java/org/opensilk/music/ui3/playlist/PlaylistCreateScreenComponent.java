@@ -15,33 +15,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.index.playlists;
+package org.opensilk.music.ui3.playlist;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.ui3.MusicActivityComponent;
-import org.opensilk.music.ui3.common.BundleableComponent;
-import org.opensilk.music.ui3.main.FooterScreenComponent;
 
 import dagger.Component;
 import rx.functions.Func2;
 
 /**
- * Created by drew on 5/5/15.
+ * Created by drew on 12/17/15.
  */
 @ScreenScope
 @Component(
         dependencies = MusicActivityComponent.class,
-        modules = PlaylistsScreenModule.class
+        modules = PlaylistCreateScreenModule.class
 )
-public interface PlaylistsScreenComponent extends BundleableComponent, FooterScreenComponent {
-    Func2<MusicActivityComponent, PlaylistsScreen, PlaylistsScreenComponent> FACTORY =
-            new Func2<MusicActivityComponent, PlaylistsScreen, PlaylistsScreenComponent>() {
+public interface PlaylistCreateScreenComponent {
+    Func2<MusicActivityComponent, PlaylistCreateScreen, PlaylistCreateScreenComponent> FACTORY =
+            new Func2<MusicActivityComponent, PlaylistCreateScreen, PlaylistCreateScreenComponent>() {
                 @Override
-                public PlaylistsScreenComponent call(MusicActivityComponent musicActivityComponent, PlaylistsScreen screen) {
-                    return DaggerPlaylistsScreenComponent.builder()
+                public PlaylistCreateScreenComponent call(MusicActivityComponent musicActivityComponent, PlaylistCreateScreen playlistCreateScreen) {
+                    return DaggerPlaylistCreateScreenComponent.builder()
                             .musicActivityComponent(musicActivityComponent)
-                            .playlistsScreenModule(new PlaylistsScreenModule(screen))
+                            .playlistCreateScreenModule(new PlaylistCreateScreenModule(playlistCreateScreen))
                             .build();
                 }
             };
+    void inject(PlaylistCreateScreenFragment fragment);
 }

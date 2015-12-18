@@ -164,7 +164,7 @@ public class TrackListScreenModule {
                         playSelectedItemsNext(presenter);
                         return true;
                     case R.id.add_to_playlist:
-                        addToPlaylistFromTracks(context, presenter.getSelectedItems());
+                        addToPlaylistFromTracks(context, presenter);
                         return true;
                     default:
                         return false;

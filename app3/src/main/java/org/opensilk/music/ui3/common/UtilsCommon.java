@@ -42,6 +42,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Action2;
 import rx.functions.Func0;
+import timber.log.Timber;
 
 /**
  * Created by drew on 5/2/15.
@@ -180,7 +181,7 @@ public class UtilsCommon {
                 .subscribe(addFunc, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        //todo
+                        Timber.w(throwable, "addTracksToQueue");
                     }
                 });
     }

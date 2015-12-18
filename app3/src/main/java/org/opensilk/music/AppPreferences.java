@@ -64,6 +64,10 @@ public class AppPreferences extends PreferencesWrapper {
     public static final int DEFAULT_PAGE = 2;
     public static final String GALLERY_START_PAGE = "gallery.start_page";
 
+    //Playlistpages
+    public static final int DEFAULT_PLAYLISTS_PAGE = 0;
+    public static final String PLAYLISTS_START_PAGE = "playlists.start_page";
+
     //Now playing
     public static final String NOW_PLAYING_KEEP_SCREEN_ON = "now_playing.keep_screen_on";
     public static final String NOW_PLAYING_VIEW = "now_playing.view";

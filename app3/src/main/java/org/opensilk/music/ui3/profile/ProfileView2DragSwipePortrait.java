@@ -72,6 +72,7 @@ public class ProfileView2DragSwipePortrait extends ProfileView2Portrait {
                 @Override
                 public void onEndSelectionMode() {
                     inSelectionMode = false;
+                    //TODO find way to only call when actionmode canceled
                     mPresenter.reload();
                 }
     };

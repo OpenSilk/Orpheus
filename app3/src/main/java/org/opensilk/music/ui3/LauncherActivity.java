@@ -19,24 +19,19 @@ package org.opensilk.music.ui3;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.app.TimePickerDialog;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
-import android.support.v7.app.AlertDialog;
 import android.view.MenuItem;
-import android.webkit.WebView;
-import android.widget.TimePicker;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.model.Playlist;
 import org.opensilk.music.settings.SettingsActivity;
 import org.opensilk.music.settings.WhatsNewDialogHelper;
 import org.opensilk.music.ui.theme.OrpheusTheme;
@@ -44,12 +39,9 @@ import org.opensilk.music.ui.widget.timer.TimerDialog;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
 import org.opensilk.music.ui3.common.ActivityResultCodes;
 import org.opensilk.music.ui3.index.GalleryScreenFragment;
-import org.opensilk.music.ui3.index.playlists.PlaylistsScreenFragment;
+import org.opensilk.music.ui3.playlist.PlaylistPagerScreenFragment;
 import org.opensilk.music.ui3.library.LibraryScreenFragment;
-import org.opensilk.music.ui3.profile.playlist.PlaylistDetailsScreen;
 import org.opensilk.music.ui3.renderer.RendererScreenFragment;
-
-import java.util.Calendar;
 
 import javax.inject.Inject;
 
@@ -178,7 +170,7 @@ public class LauncherActivity extends MusicActivity {
                 }
                 case R.id.nav_playlists: {
                     mFm.killBackStack();
-                    mFm.replaceMainContent(PlaylistsScreenFragment.ni(), false);
+                    mFm.replaceMainContent(PlaylistPagerScreenFragment.ni(), false);
                     menuItem.setChecked(true);
                     break;
                 }

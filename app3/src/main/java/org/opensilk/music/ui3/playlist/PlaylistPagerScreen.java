@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.index.playlists;
+package org.opensilk.music.ui3.playlist;
 
 import android.content.res.Resources;
 
@@ -30,16 +30,16 @@ import org.opensilk.music.ui3.MusicActivityComponent;
 import mortar.MortarScope;
 
 /**
- * Created by drew on 5/5/15.
+ * Created by drew on 12/11/15.
  */
-@Layout(R.layout.bundleable_recycler_coordinator)
-@WithComponentFactory(PlaylistsScreen.Factory.class)
-public class PlaylistsScreen extends Screen {
-    public static class Factory extends ComponentFactory<PlaylistsScreen> {
+@Layout(R.layout.screen_playlistpager)
+@WithComponentFactory(PlaylistPagerScreen.Factory.class)
+public class PlaylistPagerScreen extends Screen {
+    public static class Factory extends ComponentFactory<PlaylistPagerScreen> {
         @Override
-        protected Object createDaggerComponent(Resources resources, MortarScope parentScope, PlaylistsScreen screen) {
-            MusicActivityComponent activityComponent = DaggerService.getDaggerComponent(parentScope);
-            return PlaylistsScreenComponent.FACTORY.call(activityComponent, screen);
+        protected Object createDaggerComponent(Resources resources, MortarScope parentScope, PlaylistPagerScreen screen) {
+            MusicActivityComponent cmp = DaggerService.getDaggerComponent(parentScope);
+            return PlaylistPagerScreenComponent.FACTORY.call(cmp, screen);
         }
     }
 }
