@@ -24,15 +24,10 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.support.v4.util.ArrayMap;
 
-import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.util.Preconditions;
 import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.library.provider.LibraryUris;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  * Created by drew on 10/22/15.
@@ -43,18 +38,13 @@ public class LibraryClient {
     String authority;
     ClientCompat client;
 
-    @Inject
-    public LibraryClient(@ForApplication Context context) {
+    public LibraryClient(Context context, String authority) {
         this.appContext = context;
+        this.authority = authority;
     }
 
     public static LibraryClient create(Context context, Uri uri) {
-        return new LibraryClient(context.getApplicationContext()).setAuthority(uri.getAuthority());
-    }
-
-    public LibraryClient setAuthority(String authority) {
-        this.authority = authority;
-        return this;
+        return new LibraryClient(context.getApplicationContext(), uri.getAuthority());
     }
 
     public Bundle makeCall(String method, Bundle args) {
