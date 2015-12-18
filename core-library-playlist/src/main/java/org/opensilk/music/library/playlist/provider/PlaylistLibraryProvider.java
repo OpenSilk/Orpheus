@@ -25,8 +25,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.opensilk.music.library.playlist.PlaylistExtras;
 import org.opensilk.music.library.playlist.PlaylistOperationListener;
 import org.opensilk.music.library.playlist.internal.PlaylistIntegerResult;
+import org.opensilk.music.library.playlist.internal.PlaylistPlaylistResult;
 import org.opensilk.music.library.playlist.internal.PlaylistUriResult;
 import org.opensilk.music.library.provider.LibraryProvider;
+import org.opensilk.music.model.Playlist;
 
 import java.util.List;
 
@@ -74,7 +76,7 @@ public abstract class PlaylistLibraryProvider extends LibraryProvider {
                     return ok.putOk(false).putError("No playlist uri or uri list").get();
                 }
                 final ResultReceiver resultReceiver = PlaylistExtras.getResultReceiver(extras);
-                final PlaylistIntegerResult resultHandler = new PlaylistIntegerResult(resultReceiver);
+                final PlaylistPlaylistResult resultHandler = new PlaylistPlaylistResult(resultReceiver);
                 final Bundle sanitizedExtras = PlaylistExtras.sanitize(extras);
                 final Scheduler.Worker worker = playlistScheduler.createWorker();
                 worker.schedule(new Action0() {
@@ -93,7 +95,7 @@ public abstract class PlaylistLibraryProvider extends LibraryProvider {
                     return ok.putOk(false).putError("No playlist uri or uri list").get();
                 }
                 final ResultReceiver resultReceiver = PlaylistExtras.getResultReceiver(extras);
-                final PlaylistIntegerResult resultHandler = new PlaylistIntegerResult(resultReceiver);
+                final PlaylistPlaylistResult resultHandler = new PlaylistPlaylistResult(resultReceiver);
                 final Bundle sanitizedExtras = PlaylistExtras.sanitize(extras);
                 final Scheduler.Worker worker = playlistScheduler.createWorker();
                 worker.schedule(new Action0() {
@@ -112,7 +114,7 @@ public abstract class PlaylistLibraryProvider extends LibraryProvider {
                     return ok.putOk(false).putError("No playlist uri or uri list").get();
                 }
                 final ResultReceiver resultReceiver = PlaylistExtras.getResultReceiver(extras);
-                final PlaylistIntegerResult resultHandler = new PlaylistIntegerResult(resultReceiver);
+                final PlaylistPlaylistResult resultHandler = new PlaylistPlaylistResult(resultReceiver);
                 final Bundle sanitizedExtras = PlaylistExtras.sanitize(extras);
                 final Scheduler.Worker worker = playlistScheduler.createWorker();
                 worker.schedule(new Action0() {
@@ -148,9 +150,9 @@ public abstract class PlaylistLibraryProvider extends LibraryProvider {
     }
 
     protected abstract void createPlaylist(String name, PlaylistOperationListener<Uri> resultListener, Bundle extras);
-    protected abstract void addToPlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Integer> resultListener, Bundle extras);
-    protected abstract void removeFromPlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Integer> resultListener, Bundle extras);
-    protected abstract void updatePlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Integer> resultListener, Bundle extras);
-    protected abstract void deletePlaylists(List<Uri> tracks, PlaylistOperationListener<Integer> resultListener, Bundle extras);
+    protected abstract void addToPlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras);
+    protected abstract void removeFromPlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras);
+    protected abstract void updatePlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras);
+    protected abstract void deletePlaylists(List<Uri> playlists, PlaylistOperationListener<Integer> resultListener, Bundle extras);
 
 }

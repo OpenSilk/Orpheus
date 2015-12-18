@@ -21,7 +21,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 
+import org.opensilk.bundleable.BadBundleableException;
+import org.opensilk.bundleable.BundleableUtil;
 import org.opensilk.music.library.internal.ResultReceiverWrapper;
+import org.opensilk.music.model.Playlist;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +44,7 @@ public class PlaylistExtras {
     static final String ARG_URI_LIST = "argurilist";
     static final String ARG_INT = "argint";
     static final String ARG_RESULT_RECEIVER = "argresultreceiver";
+    static final String ARG_PLAYLIST = "argplaylist";
 
     public static boolean getOk(Bundle extras) {
         return extras.getBoolean(ARG_OK);
@@ -64,6 +68,10 @@ public class PlaylistExtras {
 
     public static int getInt(Bundle extras) {
         return extras.getInt(ARG_INT);
+    }
+
+    public static Playlist getPlaylist(Bundle extras) {
+        return Playlist.BUNDLE_CREATOR.fromBundle(extras.getBundle(ARG_PLAYLIST));
     }
 
     public static ResultReceiver getResultReceiver(Bundle extras) {
@@ -113,6 +121,11 @@ public class PlaylistExtras {
 
         public Builder putInt(int num) {
             bundle.putInt(ARG_INT, num);
+            return this;
+        }
+
+        public Builder putPlaylist(Playlist playlist) {
+            bundle.putBundle(ARG_PLAYLIST, playlist.toBundle());
             return this;
         }
 

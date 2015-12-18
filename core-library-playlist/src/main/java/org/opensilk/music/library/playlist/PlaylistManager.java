@@ -26,6 +26,7 @@ import android.os.ResultReceiver;
 
 import org.opensilk.music.library.client.LibraryClient;
 import org.opensilk.music.library.playlist.provider.PlaylistMethods;
+import org.opensilk.music.model.Playlist;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -94,13 +95,13 @@ public class PlaylistManager {
         });
     }
 
-    public Observable<Integer> addTo(final Uri playlist, final List<Uri> tracks) {
-        return wrapObservable(new Func1<LibraryClient, Observable<? extends Integer>>() {
+    public Observable<Playlist> addTo(final Uri playlist, final List<Uri> tracks) {
+        return wrapObservable(new Func1<LibraryClient, Observable<? extends Playlist>>() {
             @Override
-            public Observable<? extends Integer> call(final LibraryClient libraryClient) {
-                return Observable.create(new Observable.OnSubscribe<Integer>() {
+            public Observable<? extends Playlist> call(final LibraryClient libraryClient) {
+                return Observable.create(new Observable.OnSubscribe<Playlist>() {
                     @Override
-                    public void call(final Subscriber<? super Integer> subscriber) {
+                    public void call(final Subscriber<? super Playlist> subscriber) {
                         final ResultReceiver resultReceiver = new ResultReceiver(mCallbackHandler) {
                             final AtomicBoolean resultReceived = new AtomicBoolean(false);
 
@@ -111,7 +112,7 @@ public class PlaylistManager {
                                 }
                                 switch (resultCode) {
                                     case RESULT_SUCCESS:
-                                        subscriber.onNext(PlaylistExtras.getInt(resultData));
+                                        subscriber.onNext(PlaylistExtras.getPlaylist(resultData));
                                         subscriber.onCompleted();
                                         break;
                                     case RESULT_ERROR:
@@ -135,13 +136,13 @@ public class PlaylistManager {
         });
     }
 
-    public Observable<Integer> removeFrom(final Uri playlist, final List<Uri> tracks) {
-        return wrapObservable(new Func1<LibraryClient, Observable<? extends Integer>>() {
+    public Observable<Playlist> removeFrom(final Uri playlist, final List<Uri> tracks) {
+        return wrapObservable(new Func1<LibraryClient, Observable<? extends Playlist>>() {
             @Override
-            public Observable<? extends Integer> call(final LibraryClient libraryClient) {
-                return Observable.create(new Observable.OnSubscribe<Integer>() {
+            public Observable<? extends Playlist> call(final LibraryClient libraryClient) {
+                return Observable.create(new Observable.OnSubscribe<Playlist>() {
                     @Override
-                    public void call(final Subscriber<? super Integer> subscriber) {
+                    public void call(final Subscriber<? super Playlist> subscriber) {
                         final ResultReceiver resultReceiver = new ResultReceiver(mCallbackHandler) {
                             final AtomicBoolean resultReceived = new AtomicBoolean(false);
 
@@ -152,7 +153,7 @@ public class PlaylistManager {
                                 }
                                 switch (resultCode) {
                                     case RESULT_SUCCESS:
-                                        subscriber.onNext(PlaylistExtras.getInt(resultData));
+                                        subscriber.onNext(PlaylistExtras.getPlaylist(resultData));
                                         subscriber.onCompleted();
                                         break;
                                     case RESULT_ERROR:
@@ -175,13 +176,13 @@ public class PlaylistManager {
         });
     }
 
-    public Observable<Integer> update(final Uri playlist, final List<Uri> tracks) {
-        return wrapObservable(new Func1<LibraryClient, Observable<? extends Integer>>() {
+    public Observable<Playlist> update(final Uri playlist, final List<Uri> tracks) {
+        return wrapObservable(new Func1<LibraryClient, Observable<? extends Playlist>>() {
             @Override
-            public Observable<? extends Integer> call(final LibraryClient libraryClient) {
-                return Observable.create(new Observable.OnSubscribe<Integer>() {
+            public Observable<? extends Playlist> call(final LibraryClient libraryClient) {
+                return Observable.create(new Observable.OnSubscribe<Playlist>() {
                     @Override
-                    public void call(final Subscriber<? super Integer> subscriber) {
+                    public void call(final Subscriber<? super Playlist> subscriber) {
                         final ResultReceiver resultReceiver = new ResultReceiver(mCallbackHandler) {
                             final AtomicBoolean resultReceived = new AtomicBoolean(false);
 
@@ -192,7 +193,7 @@ public class PlaylistManager {
                                 }
                                 switch (resultCode) {
                                     case RESULT_SUCCESS:
-                                        subscriber.onNext(PlaylistExtras.getInt(resultData));
+                                        subscriber.onNext(PlaylistExtras.getPlaylist(resultData));
                                         subscriber.onCompleted();
                                         break;
                                     case RESULT_ERROR:
