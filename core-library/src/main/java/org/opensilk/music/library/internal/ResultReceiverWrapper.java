@@ -25,7 +25,7 @@ import android.os.ResultReceiver;
  * Created by drew on 11/20/15.
  */
 public class ResultReceiverWrapper implements Parcelable {
-    public final ResultReceiver mWrapped;
+    private final ResultReceiver mWrapped;
 
     public ResultReceiverWrapper(ResultReceiver mWrapped) {
         this.mWrapped = mWrapped;

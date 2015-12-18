@@ -158,7 +158,8 @@ public class LibraryExtras {
     public static ResultReceiver getResultReceiver(Bundle extras) {
         extras.setClassLoader(ResultReceiverWrapper.class.getClassLoader());
         ResultReceiverWrapper wrapper = extras.getParcelable(RESULT_RECEIVER_CALLBACK);
-        return wrapper != null ? wrapper.get() : null;
+        if (wrapper == null) throw new NullPointerException("No resultReceiver in bundle");
+        return wrapper.get();
     }
 
     public @Nullable static Bundle getExtrasBundle(Bundle extras) {
