@@ -39,6 +39,11 @@ public class PlaylistCreateScreen extends Screen {
         this.authority = authority;
     }
 
+    @Override
+    public String getName() {
+        return super.getName() + "-" + authority;
+    }
+
     public static class Factory extends ComponentFactory<PlaylistCreateScreen> {
         @Override
         protected Object createDaggerComponent(Resources resources, MortarScope parentScope, PlaylistCreateScreen screen) {

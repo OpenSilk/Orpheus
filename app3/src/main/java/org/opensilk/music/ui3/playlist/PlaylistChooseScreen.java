@@ -54,6 +54,11 @@ public class PlaylistChooseScreen extends Screen {
         this.uris = uris;
     }
 
+    @Override
+    public String getName() {
+        return super.getName() + "-" + loaderUri;
+    }
+
     public static class Factory extends ComponentFactory<PlaylistChooseScreen> {
         @Override
         protected Object createDaggerComponent(Resources resources, MortarScope parentScope, PlaylistChooseScreen screen) {

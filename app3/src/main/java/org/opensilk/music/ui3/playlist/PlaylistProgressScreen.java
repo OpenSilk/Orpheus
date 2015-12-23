@@ -49,6 +49,11 @@ public class PlaylistProgressScreen extends Screen {
         this.extras = extras;
     }
 
+    @Override
+    public String getName() {
+        return super.getName() + "-" + operation.name();
+    }
+
     public static class Factory extends ComponentFactory<PlaylistProgressScreen> {
         @Override
         protected Object createDaggerComponent(Resources resources, MortarScope parentScope, PlaylistProgressScreen screen) {
