@@ -26,8 +26,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Icon;
-import android.media.session.MediaSession;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.media.MediaMetadataCompat;
@@ -275,14 +273,8 @@ public class NotificationHelper2 extends BroadcastReceiver {
 
     private void notifyNotification(Notification notification) {
         if (notification != null) {
-            boolean isPlaying = PlaybackStateHelper.isPlaying(mPlaybackState);
-            if (isPlaying) {
-                mService.startForeground(NOTIFICATION_ID, notification);
-            } else {
-                mService.stopForeground(false);
-                //Seems to remove regardless so renotify
-                mNotificationManager.notify(NOTIFICATION_ID, notification);
-            }
+            mService.startForeground(NOTIFICATION_ID, notification);
+//            mNotificationManager.notify(NOTIFICATION_ID, notification);
         }
     }
 
@@ -316,67 +308,43 @@ public class NotificationHelper2 extends BroadcastReceiver {
 
         final boolean isPlaying = PlaybackStateHelper.shouldShowPauseButton(mPlaybackState);
 
-        Notification notification;
+        // Default notfication layout
+        RemoteViews mNotificationTemplate = new RemoteViews(mContext.getPackageName(),
+                    R.layout.notification_template_base);
+
+        // Set up the content view
+        initCollapsedLayout(mNotificationTemplate, MediaMetadataHelper.getDisplayName(mMetadata),
+                MediaMetadataHelper.getArtistName(mMetadata), icon);
+        initPlaybackActions(mNotificationTemplate, isPlaying);
+
+        Bundle extras = new Bundle();
         if (VersionUtils.hasLollipop()) {
-            Notification.Builder builder = new Notification.Builder(mContext)
-                    .setSmallIcon(R.drawable.stat_notify_music)
-                    .setLargeIcon(icon)
-                    .setContentIntent(createContentIntent())
-                    .setContentTitle(MediaMetadataHelper.getDisplayName(mMetadata))
-                    .setContentText(mContext.getString(R.string.something_circle_something,
-                            MediaMetadataHelper.getArtistName(mMetadata),
-                            MediaMetadataHelper.getAlbumName(mMetadata)))
-                    .setShowWhen(false)
-                    .setStyle(new Notification.MediaStyle()
-                            .setMediaSession((MediaSession.Token) mSessionToken)
-                            .setShowActionsInCompactView(1))
-                    .addAction(new Notification.Action.Builder(
-                            R.drawable.ic_skip_previous_black_36dp,
-                            mContext.getString(R.string.accessibility_prev),
-                            mPreviousIntent
-                    ).build())
-                    .addAction(new Notification.Action.Builder(
-                            isPlaying ? R.drawable.ic_play_black_36dp : R.drawable.ic_pause_black_36dp,
-                            mContext.getString(isPlaying ? R.string.accessibility_pause : R.string.accessibility_play),
-                            isPlaying ? mPauseIntent : mPlayIntent
-                    ).build())
-                    .addAction(new Notification.Action.Builder(
-                            R.drawable.ic_skip_next_black_36dp,
-                            mContext.getString(R.string.accessibility_next),
-                            mNextIntent
-                    ).build())
-                    ;
-            notification = builder.build();
-        } else {
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
-            builder.setSmallIcon(R.drawable.stat_notify_music)
-                    .setLargeIcon(icon)
-                    .setContentIntent(createContentIntent())
-                    .setContentTitle(MediaMetadataHelper.getDisplayName(mMetadata))
-                    .setContentText(mContext.getString(R.string.something_circle_something,
-                            MediaMetadataHelper.getArtistName(mMetadata),
-                            MediaMetadataHelper.getAlbumName(mMetadata)))
-                    .setShowWhen(false)
-                    .setStyle(new NotificationCompat.MediaStyle()
-                            .setCancelButtonIntent(mStopIntent)
-                            .setMediaSession((MediaSessionCompat.Token) mSessionToken)
-                            .setShowActionsInCompactView(1))
-                    .addAction(new android.support.v4.app.NotificationCompat.Action(
-                            R.drawable.ic_skip_previous_black_36dp,
-                            mContext.getString(R.string.accessibility_prev),
-                            mPreviousIntent
-                    ))
-                    .addAction(new android.support.v4.app.NotificationCompat.Action(
-                            isPlaying ? R.drawable.ic_play_black_36dp : R.drawable.ic_pause_black_36dp,
-                            mContext.getString(isPlaying ? R.string.accessibility_pause : R.string.accessibility_play),
-                            isPlaying ? mPauseIntent : mPlayIntent
-                    ))
-                    .addAction(new android.support.v4.app.NotificationCompat.Action(
-                            R.drawable.ic_skip_next_black_36dp,
-                            mContext.getString(R.string.accessibility_next),
-                            mNextIntent
-                    ));
-            notification = builder.build();
+            NotificationHelperL.applySessionExtra(extras, mSessionToken);
+        }
+
+        // Notification Builder
+        Notification notification = new NotificationCompat.Builder(mContext)
+                .setSmallIcon(R.drawable.stat_notify_music)
+                .setContentIntent(createContentIntent())
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setCategory(NotificationCompat.CATEGORY_TRANSPORT)
+                .setOngoing(true)
+                .setContent(mNotificationTemplate)
+                .setExtras(extras)
+                .build();
+
+        if (VersionUtils.hasJellyBean()) {
+            // Expanded notifiction style
+            RemoteViews mExpandedView = new RemoteViews(mContext.getPackageName(),
+                        R.layout.notification_template_expanded_base);
+            notification.bigContentView = mExpandedView;
+            // Set up the expanded content view
+            initExpandedLayout(mExpandedView, MediaMetadataHelper.getDisplayName(mMetadata),
+                    MediaMetadataHelper.getAlbumName(mMetadata),
+                    MediaMetadataHelper.getArtistName(mMetadata), icon);
+            // Control playback from the notification
+            initExpandedPlaybackActions(mExpandedView, isPlaying);
         }
 
         notifyNotification(notification);
