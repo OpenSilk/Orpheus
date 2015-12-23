@@ -283,11 +283,7 @@ public class LocalRenderer implements IMusicRenderer,
     }
 
     public void pause() {
-        pause(false);
-    }
-
-    private void pause(boolean lostFocus) {
-        resetSoft(!lostFocus);
+        resetSoft();
         mState = PlaybackStateCompat.STATE_PAUSED;
         notifyOnPlaybackStatusChanged(mState);
     }
@@ -325,10 +321,6 @@ public class LocalRenderer implements IMusicRenderer,
 
     //resets our state but does not release mediaplayers
     private void resetSoft() {
-        resetSoft(true);
-    }
-
-    private void resetSoft(boolean unregister) {
         if (hasCurrent()) {
             if (mCurrentPlayer.player.isPlaying()) {
                 mCurrentPlayer.player.pause();
@@ -336,11 +328,11 @@ public class LocalRenderer implements IMusicRenderer,
             mCurrentPosition = mCurrentPlayer.player.getCurrentPosition();
         }
         // Give up Audio focus
-        if (unregister) {
-            giveUpAudioFocus();
-            unregisterAudioNoisyReceiver();
-            mPlayOnFocusGain = false;
-        }
+        giveUpAudioFocus();
+        unregisterAudioNoisyReceiver();
+        mPlayOnFocusGain = false;
+        //TODO this isnt really a proper state since we still hold the players and must be released
+        mState = PlaybackStateCompat.STATE_NONE;
     }
 
     private void resetHard() {
@@ -397,7 +389,7 @@ public class LocalRenderer implements IMusicRenderer,
         Timber.d("configMediaPlayerState. mAudioFocus=%d", mAudioFocus);
         if (mAudioFocus == AUDIO_NO_FOCUS_NO_DUCK) {
             // If we don't have audio focus and can't duck, we have to pause,
-            pause(true);
+            pause();
         } else {  // we have audio focus:
             if (mAudioFocus == AUDIO_NO_FOCUS_CAN_DUCK) {
                 if (hasCurrent()) {
@@ -501,7 +493,6 @@ public class LocalRenderer implements IMusicRenderer,
             } else {
                 // The media player finished playing the current song
                 resetHard();
-                mState = PlaybackStateCompat.STATE_NONE;
                 mCurrentPosition = 0;
                 notifyOnCompletion();
             }
@@ -546,7 +537,9 @@ public class LocalRenderer implements IMusicRenderer,
     @DebugLog
     public boolean onError(IMediaPlayer mp, int what, int extra) {
         Timber.d("Media player error: what=" + what + ", extra=" + extra);
-        resetWithError("MediaPlayer error " + what + " (" + extra + ")");
+        resetHard();
+        mCurrentPosition = 0;
+        notifyOnError("MediaPlayer error " + what + " (" + extra + ")");
         return true; // true indicates we handled the error
     }
 
