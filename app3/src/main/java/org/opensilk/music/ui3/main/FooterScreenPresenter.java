@@ -64,7 +64,7 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> {
     Subscription lifecycleSub;
     CompositeSubscription broadcastSubscriptions;
     final ArrayList<FooterPageScreen> screens = new ArrayList<>();
-    long lastPlayingId;
+    long lastPlayingId = MediaSessionCompat.QueueItem.UNKNOWN_ID;
     boolean selfChange;
 
     final ProgressUpdater mProgressUpdater = new ProgressUpdater(new Action1<Integer>() {
@@ -158,7 +158,7 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> {
 
     @DebugLog
     void updatePagerWithCurrentItem(long id) {
-        if (hasView()) {
+        if (hasView() && id != MediaSessionCompat.QueueItem.UNKNOWN_ID) {
             for (FooterPageScreen s : screens) {
                 if (s.queueItem.getQueueId() == id) {
                     int idx = screens.indexOf(s);
