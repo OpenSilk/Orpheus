@@ -138,7 +138,7 @@ public class PlaylistProgressScreenPresenter extends Presenter<PlaylistProgressS
     void doCreate() {
         final String name = BundleHelper.getString2(extras);
         subscription = manager.create(name)
-                .delay(1000, TimeUnit.MILLISECONDS)
+                .delay(700, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Uri>() {
                     @Override
@@ -207,7 +207,7 @@ public class PlaylistProgressScreenPresenter extends Presenter<PlaylistProgressS
                     .subscribeOn(Schedulers.computation());
         }
         subscription = o
-                .delay(1000, TimeUnit.MILLISECONDS)
+                .delay(700, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Playlist>() {
                     @Override
@@ -233,7 +233,7 @@ public class PlaylistProgressScreenPresenter extends Presenter<PlaylistProgressS
     void doDelete() {
         List<Uri> playlists = BundleHelper.getList(extras);
         subscription = manager.delete(playlists)
-                .delay(1000, TimeUnit.MILLISECONDS)
+                .delay(700, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Integer>() {
                     @Override
@@ -260,8 +260,7 @@ public class PlaylistProgressScreenPresenter extends Presenter<PlaylistProgressS
         Uri playlist = BundleHelper.getUri(extras);
         List<Uri> uris = BundleHelper.getList(extras);
         subscription = manager.update(playlist, uris)
-
-                .delay(1000, TimeUnit.MILLISECONDS)
+                .delay(700, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Playlist>() {
                     @Override
