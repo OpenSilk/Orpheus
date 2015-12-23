@@ -93,8 +93,6 @@ public interface Projections {
             MediaStore.Audio.AudioColumns.ARTIST,
             MediaStore.Audio.AudioColumns.ALBUM,
             MediaStore.Audio.AudioColumns.ALBUM_ID,
-            MediaStore.Audio.Playlists.Members.PLAY_ORDER + " AS " + MediaStore.Audio.AudioColumns.TRACK,
-            "album_artist",
 
             MediaStore.Audio.AudioColumns.DURATION,
             MediaStore.Audio.AudioColumns.MIME_TYPE,
@@ -102,7 +100,9 @@ public interface Projections {
             MediaStore.Audio.AudioColumns.DATE_MODIFIED,
 
             MediaStore.Audio.AudioColumns.DATA,
-        };
+
+            MediaStore.Audio.Playlists.Members.PLAY_ORDER + " AS " + MediaStore.Audio.AudioColumns.TRACK,
+    };
     String[] GENRE_SONGS = new String[] {
             MediaStore.Audio.Genres.Members.AUDIO_ID + " AS " + BaseColumns._ID,
             MediaStore.Audio.AudioColumns.TITLE,

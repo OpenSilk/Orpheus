@@ -22,18 +22,18 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Bundle;
-import android.provider.BaseColumns;
 import android.provider.MediaStore;
 
 import org.opensilk.music.library.mediastore.provider.FoldersUris;
-import org.opensilk.music.model.Model;
+import org.opensilk.music.library.mediastore.provider.StorageLookup;
 import org.opensilk.music.model.Playlist;
+import org.opensilk.music.model.Track;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import rx.Subscriber;
+import timber.log.Timber;
 
 /**
  * Created by drew on 12/15/15.
@@ -78,6 +78,33 @@ public class PlaylistUtil {
                     .setTracksUri(FoldersUris.playlistTracks(authority, playlistId))
                     .setName(name)
                     .build();
+        } finally {
+            if (c != null) c.close();
+        }
+    }
+
+    public static List<Track> getPlaylistMembers(final Context context, String playlistId,
+                                                 final String authority, List<StorageLookup.StorageVolume> volumes) {
+        Cursor c = context.getContentResolver().query(Uris.PLAYLIST_MEMBERS(playlistId),
+                Projections.PLAYLIST_SONGS, null, null, MediaStore.Audio.Playlists.Members.PLAY_ORDER);
+        try {
+            if (c != null && c.moveToFirst()) {
+                final List<Track> tracks = new ArrayList<>(c.getCount());
+                do {
+                    String path = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DATA));
+                    File f = new File(path);
+                    StorageLookup.StorageVolume volume = FilesHelper.guessStorageVolume(volumes, path);
+                    if (volume == null) {
+                        Timber.e("Unable to locate volume for %s", path);
+                        continue;
+                    }
+                    Track.Builder tb = FilesHelper.makeTrackFromCursor(authority, volume, f, c);
+                    tb.setTrackNumber(c.getInt(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TRACK)));
+                    tracks.add(tb.build());
+                } while (c.moveToNext());
+                return tracks;
+            }
+            return null;
         } finally {
             if (c != null) c.close();
         }

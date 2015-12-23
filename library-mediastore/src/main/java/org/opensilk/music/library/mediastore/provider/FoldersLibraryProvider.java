@@ -19,11 +19,8 @@ package org.opensilk.music.library.mediastore.provider;
 
 import android.content.ContentResolver;
 import android.content.UriMatcher;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.BaseColumns;
-import android.provider.MediaStore;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.AppContextComponent;
@@ -33,7 +30,6 @@ import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.mediastore.R;
 import org.opensilk.music.library.mediastore.util.FilesHelper;
 import org.opensilk.music.library.mediastore.util.PlaylistUtil;
-import org.opensilk.music.library.mediastore.util.Projections;
 import org.opensilk.music.library.mediastore.util.Uris;
 import org.opensilk.music.library.playlist.PlaylistOperationListener;
 import org.opensilk.music.library.playlist.provider.PlaylistLibraryProvider;
@@ -54,12 +50,6 @@ import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Subscriber;
 import timber.log.Timber;
-
-import static org.opensilk.music.library.mediastore.util.CursorHelpers.generateArtworkUri;
-import static org.opensilk.music.library.mediastore.util.CursorHelpers.generateDataUri;
-import static org.opensilk.music.library.mediastore.util.CursorHelpers.getIntOrZero;
-import static org.opensilk.music.library.mediastore.util.CursorHelpers.getLongOrZero;
-import static org.opensilk.music.library.mediastore.util.CursorHelpers.getStringOrNull;
 
 /**
  * Created by drew on 5/17/15.
@@ -102,28 +92,44 @@ public class FoldersLibraryProvider extends PlaylistLibraryProvider {
                 switch (mUriMatcher.match(uri)) {
                     case FoldersUris.M_FOLDERS: {
                         browseFolders(uri.getPathSegments().get(0), null, subscriber, args);
-                        break;
+                        return;
                     }
                     case FoldersUris.M_FOLDER: {
                         browseFolders(uri.getPathSegments().get(0), uri.getLastPathSegment(), subscriber, args);
-                        break;
+                        return;
                     }
                     case FoldersUris.M_PLAYLISTS: {
-                        List<Playlist> playlists = PlaylistUtil.getPlaylists(getContext(), mAuthority);
+                        final List<Playlist> playlists = PlaylistUtil.getPlaylists(getContext(), mAuthority);
+                        if (subscriber.isUnsubscribed()) {
+                            return;
+                        }
                         if (playlists == null) {
                             subscriber.onError(new NullPointerException("Unable to obtain cursor"));
-                        } else if (!subscriber.isUnsubscribed()) {
-                            for (Playlist p : playlists) {
-                                subscriber.onNext(p);
-                            }
-                            subscriber.onCompleted();
+                            return;
                         }
-                        break;
+                        for (Playlist p : playlists) {
+                            subscriber.onNext(p);
+                        }
+                        subscriber.onCompleted();
+                        return;
                     }
                     case FoldersUris.M_PLAYLIST_TRACKS: {
-                        List<String> segs = uri.getPathSegments();
-                        listPlaylist(segs.get(segs.size() - 2), subscriber, args);
-                        break;
+                        final List<String> segs = uri.getPathSegments();
+                        final String plst = segs.get(segs.size() - 2);
+                        final List<StorageLookup.StorageVolume> volumes = mStorageLookup.getStorageVolumes();
+                        final List<Track> tracks = PlaylistUtil.getPlaylistMembers(getContext(), plst, mAuthority, volumes);
+                        if (subscriber.isUnsubscribed()) {
+                            return;
+                        }
+                        if (tracks == null) {
+                            subscriber.onError(new NullPointerException("Unable to query playlist"));
+                            return;
+                        }
+                        for (Track t : tracks) {
+                            subscriber.onNext(t);
+                        }
+                        subscriber.onCompleted();
+                        return;
                     }
                     default:
                         Timber.w("Unmatched uri %s", uri);
@@ -132,20 +138,6 @@ public class FoldersLibraryProvider extends PlaylistLibraryProvider {
                 }
             }
         });
-    }
-
-    StorageLookup.StorageVolume getStorageVolume(String library) {
-        StorageLookup.StorageVolume volume = null;
-        try {
-            volume = mStorageLookup.getStorageVolume(library);
-            final File rootDir = new File(volume.path);
-            if (!rootDir.exists() || !rootDir.isDirectory() || !rootDir.canRead()) {
-                Timber.e("Can't access path %s", rootDir.getPath());
-            }
-        } catch (IllegalArgumentException e) {
-
-        }
-        return volume;
     }
 
     @Override
@@ -161,10 +153,11 @@ public class FoldersLibraryProvider extends PlaylistLibraryProvider {
                             subscriber.onError(new IllegalArgumentException("Can't access volume " + library));
                             return;
                         }
-                        if (!subscriber.isUnsubscribed()) {
-                            subscriber.onNext(FilesHelper.makeRoot(mAuthority, volume));
-                            subscriber.onCompleted();
+                        if (subscriber.isUnsubscribed()) {
+                            return;
                         }
+                        subscriber.onNext(FilesHelper.makeRoot(mAuthority, volume));
+                        subscriber.onCompleted();
                         return;
                     }
                     case FoldersUris.M_FOLDER: {
@@ -177,32 +170,33 @@ public class FoldersLibraryProvider extends PlaylistLibraryProvider {
                         final String identity = uri.getLastPathSegment();
                         final File rootDir = new File(volume.path, identity);
                         if (!rootDir.exists() || !rootDir.isDirectory() || !rootDir.canRead()) {
-                            Timber.e("Can't access path %s", rootDir.getPath());
                             subscriber.onError(new IllegalArgumentException("Can't access path " + rootDir.getPath()));
                             return;
                         }
-                        if (!subscriber.isUnsubscribed()) {
-                            subscriber.onNext(FilesHelper.makeFolder(mAuthority, volume, rootDir));
-                            subscriber.onCompleted();
+                        if (subscriber.isUnsubscribed()) {
+                            return;
                         }
+                        subscriber.onNext(FilesHelper.makeFolder(mAuthority, volume, rootDir));
+                        subscriber.onCompleted();
                         return;
                     }
                     case FoldersUris.M_TRACK_MS:
                     case FoldersUris.M_TRACK_PTH: {
                         getTrack(uri.getPathSegments().get(0), uri.getLastPathSegment(), subscriber, args);
-                        break;
+                        return;
                     }
                     case FoldersUris.M_PLAYLIST: {
-                        Playlist playlist = PlaylistUtil.getPlaylist(getContext(), mAuthority, uri.getLastPathSegment());
-                        if (!subscriber.isUnsubscribed()) {
-                            if (playlist != null) {
-                                subscriber.onNext(playlist);
-                                subscriber.onCompleted();
-                            } else {
-                                subscriber.onError(new NullPointerException("Unable to obtain cursor"));
-                            }
+                        final Playlist playlist = PlaylistUtil.getPlaylist(getContext(), mAuthority, uri.getLastPathSegment());
+                        if (subscriber.isUnsubscribed()) {
+                            return;
                         }
-                        break;
+                        if (playlist == null) {
+                            subscriber.onError(new NullPointerException("Unable to obtain cursor"));
+                            return;
+                        }
+                        subscriber.onNext(playlist);
+                        subscriber.onCompleted();
+                        return;
                     }
                     default: {
                         Timber.w("Unmatched uri %s", uri);
@@ -235,33 +229,40 @@ public class FoldersLibraryProvider extends PlaylistLibraryProvider {
         });
     }
 
-    void browseFolders(String library, String identity, Subscriber<? super Model> subscriber, Bundle args) {
-        final StorageLookup.StorageVolume volume;
-        final File rootDir;
+    StorageLookup.StorageVolume getStorageVolume(String library) {
+        StorageLookup.StorageVolume volume = null;
         try {
             volume = mStorageLookup.getStorageVolume(library);
-            final File base = new File(volume.path);
-            rootDir = StringUtils.isEmpty(identity) ? base : new File(base, identity);
+            final File rootDir = new File(volume.path);
             if (!rootDir.exists() || !rootDir.isDirectory() || !rootDir.canRead()) {
                 Timber.e("Can't access path %s", rootDir.getPath());
-                throw new IllegalArgumentException("Can't access path " + rootDir.getPath());
             }
         } catch (IllegalArgumentException e) {
-            if (!subscriber.isUnsubscribed()) {
-                subscriber.onError(e);
-            }
+            Timber.e(e, "getStorageVolume(%s)", library);
+        }
+        return volume;
+    }
+
+    void browseFolders(String library, String identity, Subscriber<? super Model> subscriber, Bundle args) {
+        final StorageLookup.StorageVolume volume = getStorageVolume(library);
+        if (volume == null) {
+            subscriber.onError(new IllegalArgumentException("Unknown volume " + library));
+            return;
+        }
+        final File base = new File(volume.path);
+        final File rootDir = StringUtils.isEmpty(identity) ? base : new File(base, identity);
+        if (!rootDir.exists() || !rootDir.isDirectory() || !rootDir.canRead()) {
+            subscriber.onError(new IllegalArgumentException("Can't access path " + rootDir.getPath()));
             return;
         }
 
-        final boolean isScan = args.getBoolean("fldr.isscan", false);
-
-        File[] dirList = rootDir.listFiles();
-        List<File> files = new ArrayList<>(dirList.length);
+        final File[] dirList = rootDir.listFiles();
+        final List<File> files = new ArrayList<>(dirList.length);
         for (File f : dirList) {
             if (!f.canRead()) {
                 continue;
             }
-            if (f.getName().startsWith(".")) {
+            if (StringUtils.startsWith(f.getName(), ".")) {
                 continue;
             }
             if (f.isDirectory()) {
@@ -275,9 +276,8 @@ public class FoldersLibraryProvider extends PlaylistLibraryProvider {
             return;
         }
         // convert raw file list into something useful
-        List<File> audioFiles = FilesHelper.filterAudioFiles(getContext(), files);
-        List<Track> tracks;
-        tracks = FilesHelper.convertAudioFilesToTracks(getContext(),
+        final List<File> audioFiles = FilesHelper.filterAudioFiles(getContext(), files);
+        final List<Track> tracks = FilesHelper.convertAudioFilesToTracks(getContext(),
                     mAuthority, volume, audioFiles);
         if (subscriber.isUnsubscribed()) {
             return;
@@ -289,20 +289,17 @@ public class FoldersLibraryProvider extends PlaylistLibraryProvider {
     }
 
     protected void getTrack(String library, String identity, Subscriber<? super Track> subscriber, Bundle args) {
-        final StorageLookup.StorageVolume volume;
-        try {
-            volume = mStorageLookup.getStorageVolume(library);
-            final File rootDir = new File(volume.path);
-            if (!rootDir.exists() || !rootDir.isDirectory() || !rootDir.canRead()) {
-                Timber.e("Can't access path %s", rootDir.getPath());
-                throw new IllegalArgumentException("Can't access path " + rootDir.getPath());
-            }
-        } catch (IllegalArgumentException e) {
-            if (!subscriber.isUnsubscribed()) {
-                subscriber.onError(e);
-            }
+        final StorageLookup.StorageVolume volume = getStorageVolume(library);
+        if (volume == null) {
+            subscriber.onError(new IllegalArgumentException("Unknown volume " + library));
             return;
         }
+        final File rootDir = new File(volume.path);
+        if (!rootDir.exists() || !rootDir.isDirectory() || !rootDir.canRead()) {
+            subscriber.onError(new IllegalArgumentException("Can't access path " + rootDir.getPath()));
+            return;
+        }
+
         if (StringUtils.isNumeric(identity)) {
             Track track = FilesHelper.findTrack(getContext(), mAuthority, volume, identity);
             if (!subscriber.isUnsubscribed()) {
@@ -324,60 +321,6 @@ public class FoldersLibraryProvider extends PlaylistLibraryProvider {
                 }
             }
         }
-    }
-
-    void listPlaylist(String id, Subscriber<? super Model> subscriber, Bundle args) {
-        Cursor c = getContext().getContentResolver().query(Uris.PLAYLIST_MEMBERS(id),
-                Projections.PLAYLIST_SONGS, null, null, MediaStore.Audio.Playlists.Members.PLAY_ORDER);
-        try {
-            if (c == null || !c.moveToFirst()) {
-                subscriber.onError(new NullPointerException("Unable to obtain cursor"));
-                return;
-            }
-            List<StorageLookup.StorageVolume> volumes = mStorageLookup.getStorageVolumes();
-            do {
-                if (subscriber.isUnsubscribed()) break;
-                Track.Builder tb = Track.builder()
-                        .setUri(FoldersUris.track(mAuthority, getTrackVolume(volumes,
-                                c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DATA))),
-                                c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID))))
-                        .setParentUri(FoldersUris.playlist(mAuthority, id))
-                        .setSortName(getStringOrNull(c, MediaStore.Audio.AudioColumns.DISPLAY_NAME))
-                        .setName(getStringOrNull(c, MediaStore.Audio.AudioColumns.TITLE))
-                        .setArtistName(getStringOrNull(c, MediaStore.Audio.AudioColumns.ARTIST))
-                        .setAlbumName(getStringOrNull(c, MediaStore.Audio.AudioColumns.ALBUM))
-                        .setTrackNumber(getIntOrZero(c, MediaStore.Audio.Media.TRACK))
-                        .setArtworkUri(generateArtworkUri(
-                                c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))))
-//                        .setFlags(getFlags(f))
-                        .addRes(Track.Res.builder()
-                                        .setUri(generateDataUri(c.getString(c.getColumnIndexOrThrow(BaseColumns._ID))))
-                                        .setMimeType(getStringOrNull(c, MediaStore.Audio.AudioColumns.MIME_TYPE))
-                                        .setDuration(getLongOrZero(c, MediaStore.Audio.AudioColumns.DURATION))
-                                        .setLastMod(getLongOrZero(c, MediaStore.Audio.AudioColumns.DATE_MODIFIED))
-                                        .setSize(getLongOrZero(c, MediaStore.Audio.AudioColumns.SIZE))
-                                        .build()
-                        )
-                        ;
-                subscriber.onNext(tb.build());
-            } while (c.moveToNext());
-            if (!subscriber.isUnsubscribed()) {
-                subscriber.onCompleted();
-            }
-        } finally {
-            if (c != null) c.close();
-        }
-    }
-
-    static int getTrackVolume(List<StorageLookup.StorageVolume> volumes, String path) {
-        if (volumes != null && volumes.size() != 0) {
-            for (StorageLookup.StorageVolume v : volumes) {
-                if (StringUtils.startsWith(path, v.path)) {
-                    return v.id;
-                }
-            }
-        }
-        return 0;
     }
 
     @Override
@@ -525,10 +468,13 @@ public class FoldersLibraryProvider extends PlaylistLibraryProvider {
     }
 
     static String[] extractIds(List<Uri> tracks) {
-        String[] ids = new String[tracks.size()];
-        for (int ii=0; ii<tracks.size(); ii++) {
-            ids[ii] = tracks.get(ii).getLastPathSegment();
+        List<String> ids = new ArrayList<>(tracks.size());
+        for (Uri uri : tracks) {
+            String id = uri.getLastPathSegment();
+            if (StringUtils.isNumeric(id)) {
+                ids.add(id);
+            }
         }
-        return ids;
+        return ids.toArray(new String[ids.size()]);
     }
 }

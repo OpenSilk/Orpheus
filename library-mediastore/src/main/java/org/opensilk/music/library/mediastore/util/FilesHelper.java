@@ -19,6 +19,7 @@ package org.opensilk.music.library.mediastore.util;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
@@ -30,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.mediastore.BuildConfig;
 import org.opensilk.music.library.mediastore.provider.FoldersUris;
+import org.opensilk.music.library.mediastore.provider.StorageLookup;
 import org.opensilk.music.library.mediastore.provider.StorageLookup.StorageVolume;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.model.Folder;
@@ -244,7 +246,7 @@ public class FilesHelper {
     }
 
     public static @NonNull List<File> filterAudioFiles(Context context, List<File> files) {
-        if (files.size() == 0) {
+        if (files == null || files.isEmpty()) {
             return Collections.emptyList();
         }
         //Map for cursor
@@ -289,12 +291,22 @@ public class FilesHelper {
             //either the query failed or the cursor didn't contain all the files we asked for.
             if (!pathMap.isEmpty()) {
                 Timber.w("%d files weren't found in mediastore. Best guessing mime type", pathMap.size());
-                //TODO add files to mediastore
+                final List<File> unindexed = new ArrayList<>(pathMap.size());
                 for (File f : pathMap.values()) {
                     final String mime = guessMimeType(f);
                     if (StringUtils.contains(mime, "audio") || "application/ogg".equals(mime)) {
+                        unindexed.add(f);
                         audioFiles.add(f);
                     }
+                }
+                if (!unindexed.isEmpty()) {
+                    String[] unindexedPaths = new String[unindexed.size()];
+                    for (int ii=0; ii<unindexed.size(); ii++) {
+                        unindexedPaths[ii] = unindexed.get(ii).getAbsolutePath();
+                    }
+                    //add unindexed files now,
+                    // TODO this will cause our next query to have different uris
+                    MediaScannerConnection.scanFile(context, unindexedPaths, null, null);
                 }
             }
         } catch (Exception e) {
@@ -307,7 +319,7 @@ public class FilesHelper {
 
     public static @NonNull List<Track> convertAudioFilesToTracks(
             Context context, String authority, StorageVolume volume, List<File> audioFiles) {
-        if (audioFiles.size() == 0) {
+        if (audioFiles == null || audioFiles.isEmpty()) {
             return Collections.emptyList();
         }
 
@@ -406,6 +418,17 @@ public class FilesHelper {
                 .setFlags(getFlags(f))
                 ;
         return tb;
+    }
+
+    public static StorageVolume guessStorageVolume(List<StorageLookup.StorageVolume> volumes, String path) {
+        if (volumes != null && volumes.size() != 0) {
+            for (StorageLookup.StorageVolume v : volumes) {
+                if (StringUtils.startsWith(path, v.path)) {
+                    return v;
+                }
+            }
+        }
+        return null;
     }
 
     public static void closeQuietly(Cursor c) {
