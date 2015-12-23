@@ -25,8 +25,8 @@ public class MusicWidgetLarge extends MusicWidgetBase {
         setupPreviousBtnIntent(context, views);
         setupNextBtnIntent(context, views);
         //TODO setup repeat/shuffle icons
-        setupShuffleBtnIntent(context, views);
-        setupRepeatBtnIntent(context, views);
+//        setupShuffleBtnIntent(context, views);
+//        setupRepeatBtnIntent(context, views);
 
         postUpdate(appWidgetManager, appWidgetIds, views);
     }

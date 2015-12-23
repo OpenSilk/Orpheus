@@ -63,6 +63,7 @@
             android:layout_width="match_parent"
             android:gravity="center">
 
+            <!--
             <ImageButton
                 android:id="@+id/widget_shuffle"
                 android:layout_width="56dp"
@@ -70,6 +71,7 @@
                 android:background="?android:selectableItemBackground"
                 android:contentDescription="@string/accessibility_shuffle"
                 android:src="@drawable/ic_shuffle_white_48dp" />
+                -->
 
             <ImageButton
                 android:id="@+id/widget_previous"
@@ -95,6 +97,7 @@
                 android:contentDescription="@string/accessibility_next"
                 android:src="@drawable/ic_skip_next_white_48dp" />
 
+            <!--
             <ImageButton
                 android:id="@+id/widget_repeat"
                 android:layout_width="56dp"
@@ -102,6 +105,7 @@
                 android:background="?android:selectableItemBackground"
                 android:contentDescription="@string/accessibility_repeat"
                 android:src="@drawable/ic_repeat_white_48dp" />
+                -->
 
         </LinearLayout>
 

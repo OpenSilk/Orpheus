@@ -101,13 +101,13 @@ public class MusicWidgetBase extends AppWidgetProvider {
         views.setOnClickPendingIntent(R.id.widget_previous, buildPendingIntent(context, PlaybackConstants.PREVIOUS_ACTION));
     }
 
-    protected void setupShuffleBtnIntent(Context context, RemoteViews views) {
-        views.setOnClickPendingIntent(R.id.widget_shuffle, buildPendingIntent(context, PlaybackConstants.SHUFFLE_ACTION));
-    }
-
-    protected void setupRepeatBtnIntent(Context context, RemoteViews views) {
-        views.setOnClickPendingIntent(R.id.widget_repeat, buildPendingIntent(context, PlaybackConstants.REPEAT_ACTION));
-    }
+//    protected void setupShuffleBtnIntent(Context context, RemoteViews views) {
+//        views.setOnClickPendingIntent(R.id.widget_shuffle, buildPendingIntent(context, PlaybackConstants.SHUFFLE_ACTION));
+//    }
+//
+//    protected void setupRepeatBtnIntent(Context context, RemoteViews views) {
+//        views.setOnClickPendingIntent(R.id.widget_repeat, buildPendingIntent(context, PlaybackConstants.REPEAT_ACTION));
+//    }
 
     protected void setupTrackTitle(Context context, RemoteViews views) {
         if (mService.getMeta() != null) {
