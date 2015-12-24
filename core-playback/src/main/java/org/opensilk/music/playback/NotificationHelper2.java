@@ -272,10 +272,14 @@ public class NotificationHelper2 extends BroadcastReceiver {
     };
 
     private void notifyNotification(Notification notification) {
-        if (notification != null) {
-            mService.startForeground(NOTIFICATION_ID, notification);
-//            mNotificationManager.notify(NOTIFICATION_ID, notification);
-        }
+            boolean isPlaying = PlaybackStateHelper.isPlaying(mPlaybackState);
+            if (isPlaying) {
+                mService.startForeground(NOTIFICATION_ID, notification);
+            } else {
+                mService.stopForeground(false);
+                //Seems to remove regardless so renotify
+                mNotificationManager.notify(NOTIFICATION_ID, notification);
+            }
     }
 
     /**
