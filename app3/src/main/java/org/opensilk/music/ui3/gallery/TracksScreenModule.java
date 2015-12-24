@@ -52,8 +52,8 @@ public class TracksScreenModule {
     }
 
     @Provides @Named("loader_uri")
-    public Uri provideLoaderUri(@Named("IndexProviderAuthority") String authority) {
-        return IndexUris.tracks(authority);
+    public Uri provideLoaderUri() {
+        return screen.loaderUri;
     }
 
     @Provides @ScreenScope

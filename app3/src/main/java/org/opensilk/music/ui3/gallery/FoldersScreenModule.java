@@ -59,8 +59,8 @@ public class FoldersScreenModule {
     }
 
     @Provides @Named("loader_uri")
-    public Uri provideLoaderUri(@Named("IndexProviderAuthority") String authority) {
-        return IndexUris.folders(authority);
+    public Uri provideLoaderUri() {
+        return screen.loaderUri;
     }
 
     @Provides @ScreenScope

@@ -103,10 +103,11 @@ public class GalleryScreenView extends CoordinatorLayout {
         super.onRestoreInstanceState(state);
     }
 
-    public void setup(List<GalleryPage> pages, int startPage) {
+    public void setup(List<GalleryPageScreen> pages, int startPage) {
         GalleryScreenViewAdapter adapter = new GalleryScreenViewAdapter(
                 //pages expect to descend from the activity context
-                UtilsCommon.findActivity(getContext()), mPresenter, pages);
+                UtilsCommon.findActivity(getContext()),
+                mPresenter, pages);
         mViewPager.setAdapter(adapter);
         mTabBar.setTabMode(TabLayout.MODE_SCROLLABLE);
         mTabBar.setTabTextColors(ContextCompat.getColor(getContext(), R.color.white),

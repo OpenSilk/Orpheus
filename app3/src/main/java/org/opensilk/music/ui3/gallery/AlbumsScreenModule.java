@@ -60,8 +60,8 @@ public class AlbumsScreenModule {
     }
 
     @Provides @Named("loader_uri")
-    public Uri provideLoaderUri(@Named("IndexProviderAuthority") String authority) {
-        return IndexUris.albums(authority);
+    public Uri provideLoaderUri() {
+        return screen.loaderUri;
     }
 
     @Provides @ScreenScope

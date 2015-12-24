@@ -18,6 +18,7 @@
 package org.opensilk.music.ui3.gallery;
 
 import android.content.res.Resources;
+import android.net.Uri;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ComponentFactory;
@@ -34,7 +35,12 @@ import mortar.MortarScope;
  */
 @Layout(R.layout.bundleable_recycler_list)
 @WithComponentFactory(FoldersScreen.Factory.class)
-public class FoldersScreen extends Screen {
+public class FoldersScreen extends GalleryPageScreen {
+
+    public FoldersScreen(Uri loaderUri) {
+        super(R.string.title_folders, loaderUri);
+    }
+
     public static class Factory extends ComponentFactory<FoldersScreen> {
         @Override
         protected Object createDaggerComponent(Resources resources, MortarScope parentScope, FoldersScreen screen) {

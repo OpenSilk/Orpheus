@@ -17,52 +17,52 @@
 
 package org.opensilk.music.ui3.gallery;
 
+import android.net.Uri;
+
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.music.R;
 
 import rx.functions.Func0;
+import rx.functions.Func1;
 
 /**
  * Created by drew on 10/3/14.
  */
 public enum GalleryPage {
-    ARTIST(R.string.title_artists, new Func0<Screen>() {
+    ARTIST(new Func1<Uri, GalleryPageScreen>() {
         @Override
-        public Screen call() {
-            return new ArtistsScreen();
+        public GalleryPageScreen call(Uri uri) {
+            return new ArtistsScreen(uri);
         }
     }),
-    ALBUM(R.string.title_albums, new Func0<Screen>() {
+    ALBUM(new Func1<Uri, GalleryPageScreen>() {
         @Override
-        public Screen call() {
-            return new AlbumsScreen();
+        public GalleryPageScreen call(Uri uri) {
+            return new AlbumsScreen(uri);
         }
     }),
-    GENRE(R.string.title_genres, new Func0<Screen>() {
+    GENRE(new Func1<Uri, GalleryPageScreen>() {
         @Override
-        public Screen call() {
-            return new GenresScreen();
+        public GalleryPageScreen call(Uri uri) {
+            return new GenresScreen(uri);
         }
     }),
-    SONG(R.string.title_songs, new Func0<Screen>() {
+    SONG(new Func1<Uri, GalleryPageScreen>() {
         @Override
-        public Screen call() {
-            return new TracksScreen();
+        public GalleryPageScreen call(Uri uri) {
+            return new TracksScreen(uri);
         }
     }),
-    FOLDER(R.string.title_folders, new Func0<Screen>() {
+    FOLDER(new Func1<Uri, GalleryPageScreen>() {
         @Override
-        public Screen call() {
-            return new FoldersScreen();
+        public GalleryPageScreen call(Uri uri) {
+            return new FoldersScreen(uri);
         }
     });
 
+    public final Func1<Uri, GalleryPageScreen> FACTORY;
 
-    public final int titleRes;
-    public final Func0<Screen> FACTORY;
-
-    GalleryPage(int titleRes, Func0<Screen> FACTORY) {
-        this.titleRes = titleRes;
+    GalleryPage(Func1<Uri, GalleryPageScreen> FACTORY) {
         this.FACTORY = FACTORY;
     }
 

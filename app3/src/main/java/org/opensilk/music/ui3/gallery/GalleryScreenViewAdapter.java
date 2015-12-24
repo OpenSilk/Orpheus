@@ -33,15 +33,13 @@ import java.util.Locale;
 /**
  * Created by drew on 4/20/15.
  */
-class GalleryScreenViewAdapter extends MortarPagerAdapter<Screen, BundleableRecyclerList> {
+class GalleryScreenViewAdapter extends MortarPagerAdapter<GalleryPageScreen, BundleableRecyclerList> {
     private Object mCurrentPrimaryItem;
     private GalleryScreenPresenter presenter;
-    private List<GalleryPage> pages;
 
-    GalleryScreenViewAdapter(Context context, GalleryScreenPresenter presenter, List<GalleryPage> pages) {
-        super(context, extractScreens(pages));
+    GalleryScreenViewAdapter(Context context, GalleryScreenPresenter presenter, List<GalleryPageScreen> screens) {
+        super(context, screens);
         this.presenter = presenter;
-        this.pages = pages;
     }
 
     @Override @SuppressWarnings("unchecked")
@@ -60,14 +58,6 @@ class GalleryScreenViewAdapter extends MortarPagerAdapter<Screen, BundleableRecy
 
     @Override
     public CharSequence getPageTitle(int position) {
-        return context.getString(pages.get(position).titleRes).toUpperCase(Locale.getDefault());
-    }
-
-    static List<Screen> extractScreens(List<GalleryPage> pages) {
-        List<Screen> screens = new ArrayList<>(pages.size());
-        for (GalleryPage p : pages) {
-            screens.add(p.FACTORY.call());
-        }
-        return screens;
+        return context.getString(screens.get(position).titleResource).toUpperCase(Locale.getDefault());
     }
 }

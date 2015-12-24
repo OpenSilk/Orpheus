@@ -31,6 +31,7 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.index.provider.IndexUris;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -71,8 +72,28 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
         // init pager
 //        List<GalleryPage> galleryPages = preferences.getGalleryPages();
         List<GalleryPage> galleryPages = Arrays.asList(GalleryPage.values());
+        List<GalleryPageScreen> screens = new ArrayList<>(galleryPages.size());
+        for (GalleryPage page : galleryPages) {
+            switch (page) {
+                case ALBUM:
+                    screens.add(page.FACTORY.call(IndexUris.albums(indexAuthority)));
+                    break;
+                case ARTIST:
+                    screens.add(page.FACTORY.call(IndexUris.albumArtists(indexAuthority)));
+                    break;
+                case GENRE:
+                    screens.add(page.FACTORY.call(IndexUris.genres(indexAuthority)));
+                    break;
+                case SONG:
+                    screens.add(page.FACTORY.call(IndexUris.tracks(indexAuthority)));
+                    break;
+                case FOLDER:
+                    screens.add(page.FACTORY.call(IndexUris.folders(indexAuthority)));
+                    break;
+            }
+        }
         int startPage = preferences.getInt(AppPreferences.GALLERY_START_PAGE, AppPreferences.DEFAULT_PAGE);
-        getView().setup(galleryPages, startPage);
+        getView().setup(screens, startPage);
     }
 
     @Override
