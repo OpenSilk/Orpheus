@@ -23,7 +23,10 @@ import android.support.annotation.Nullable;
 import android.support.v7.graphics.Palette;
 import android.widget.ImageView;
 
+import com.bumptech.glide.request.target.Target;
+
 import org.opensilk.common.glide.Paletteable;
+import org.opensilk.common.glide.PalettizedBitmapDrawable;
 import org.opensilk.music.model.ArtInfo;
 
 /**
@@ -31,12 +34,14 @@ import org.opensilk.music.model.ArtInfo;
  */
 public interface ArtworkRequestManager {
 
-    void newRequest(ArtInfo artInfo, ImageView imageView, @Nullable Bundle extras);
-    void newRequest(Uri uri, ImageView imageView, @Nullable Bundle extras);
+    Target<PalettizedBitmapDrawable> newRequest(ArtInfo artInfo, ImageView imageView, @Nullable Bundle extras);
+    Target<PalettizedBitmapDrawable> newRequest(Uri uri, ImageView imageView, @Nullable Bundle extras);
 
-    void newRequest(Uri uri, ImageView imageView, @Nullable Paletteable paletteable, @Nullable Bundle extras);
-    void newRequest(ArtInfo artInfo, ImageView imageView, @Nullable Paletteable paletteable, @Nullable Bundle extras);
+    Target<PalettizedBitmapDrawable> newRequest(Uri uri, ImageView imageView, @Nullable Paletteable paletteable, @Nullable Bundle extras);
+    Target<PalettizedBitmapDrawable> newRequest(ArtInfo artInfo, ImageView imageView, @Nullable Paletteable paletteable, @Nullable Bundle extras);
 
-    void newRequest(ArtInfo artInfo, ImageView imageView, Palette.PaletteAsyncListener listener, @Nullable Bundle extras);
-    void newRequest(Uri uri, ImageView imageView, Palette.PaletteAsyncListener listener, @Nullable Bundle extras);
+    Target<PalettizedBitmapDrawable> newRequest(ArtInfo artInfo, ImageView imageView, Palette.PaletteAsyncListener listener, @Nullable Bundle extras);
+    Target<PalettizedBitmapDrawable> newRequest(Uri uri, ImageView imageView, Palette.PaletteAsyncListener listener, @Nullable Bundle extras);
+
+    void cancelRequest(ImageView imageView, Target<?> target);
 }

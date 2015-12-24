@@ -28,6 +28,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
 
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.util.BundleHelper;
@@ -60,19 +61,19 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         this.mAuthority = authority;
     }
 
-    public void newRequest(ArtInfo artInfo, ImageView imageView, @Nullable Bundle extras) {
-        newRequest(artInfo.asContentUri(mAuthority), imageView, extras);
+    public Target<PalettizedBitmapDrawable> newRequest(ArtInfo artInfo, ImageView imageView, @Nullable Bundle extras) {
+        return newRequest(artInfo.asContentUri(mAuthority), imageView, extras);
     }
 
-    public void newRequest(Uri uri, ImageView imageView, @Nullable Bundle extras) {
-        newRequest(uri, imageView, (Paletteable) null, extras);
+    public Target<PalettizedBitmapDrawable> newRequest(Uri uri, ImageView imageView, @Nullable Bundle extras) {
+        return newRequest(uri, imageView, (Paletteable) null, extras);
     }
 
-    public void newRequest(ArtInfo artInfo, ImageView imageView, @Nullable Paletteable paletteable, @Nullable Bundle extras) {
-        newRequest(artInfo.asContentUri(mAuthority), imageView, paletteable, extras);
+    public Target<PalettizedBitmapDrawable> newRequest(ArtInfo artInfo, ImageView imageView, @Nullable Paletteable paletteable, @Nullable Bundle extras) {
+        return newRequest(artInfo.asContentUri(mAuthority), imageView, paletteable, extras);
     }
 
-    public void newRequest(Uri uri, ImageView imageView, @Nullable Paletteable paletteable, @Nullable Bundle extras) {
+    public Target<PalettizedBitmapDrawable> newRequest(Uri uri, ImageView imageView, @Nullable Paletteable paletteable, @Nullable Bundle extras) {
         PalettableImageViewTarget.Builder bob = PalettableImageViewTarget.builder().into(imageView);
         if (paletteable != null && extras != null) {
             PaletteSwatchType type = PaletteSwatchType.valueOf(BundleHelper.getString(extras));
@@ -90,7 +91,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         } else {
             options.centerCrop(imageView.getContext());
         }
-        Glide.with(imageView.getContext())
+        return Glide.with(imageView.getContext())
                 .as(PalettizedBitmapDrawable.class)
                 .apply(options)
                 .transition(DrawableTransitionOptions.withCrossFade())
@@ -98,11 +99,11 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                 .into(bob.build());
     }
 
-    public void newRequest(ArtInfo artInfo, ImageView imageView, Palette.PaletteAsyncListener listener, @Nullable Bundle extras) {
-        newRequest(artInfo.asContentUri(mAuthority), imageView, listener, extras);
+    public Target<PalettizedBitmapDrawable> newRequest(ArtInfo artInfo, ImageView imageView, Palette.PaletteAsyncListener listener, @Nullable Bundle extras) {
+        return newRequest(artInfo.asContentUri(mAuthority), imageView, listener, extras);
     }
 
-    public void newRequest(Uri uri, ImageView imageView, Palette.PaletteAsyncListener listener, @Nullable Bundle extras) {
+    public Target<PalettizedBitmapDrawable> newRequest(Uri uri, ImageView imageView, Palette.PaletteAsyncListener listener, @Nullable Bundle extras) {
         PalettableImageViewTarget.Builder bob = PalettableImageViewTarget.builder()
                 .into(imageView)
                 .withCallback(listener)
@@ -118,12 +119,19 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         } else {
             options.centerCrop(imageView.getContext());
         }
-        Glide.with(imageView.getContext())
+        return Glide.with(imageView.getContext())
                 .as(PalettizedBitmapDrawable.class)
                 .apply(options)
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .load(uri)
                 .into(bob.build());
+    }
+
+    public void cancelRequest(ImageView imageView, Target<?> target) {
+        if (imageView == null || target == null) {
+            return;
+        }
+        Glide.with(imageView.getContext()).clear(target);
     }
 
 }

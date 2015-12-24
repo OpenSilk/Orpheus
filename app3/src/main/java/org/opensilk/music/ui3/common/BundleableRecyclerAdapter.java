@@ -32,7 +32,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.apache.commons.lang3.StringUtils;
+import com.bumptech.glide.request.target.Target;
+
 import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.common.core.util.VersionUtils;
@@ -76,7 +77,6 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
     }
 
     final BundleablePresenter presenter;
-    //todo clear when dataset changes
     final SparseBooleanArray selectedItems = new SparseBooleanArray();
     private boolean inSelectionMode;
     private final OnSelectionModeEnded selectionEndedListener = new OnSelectionModeEnded() {
@@ -164,7 +164,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         if (artInfo == ArtInfo.NULLINSTANCE) {
             setLetterTileDrawable(holder, album.getName());
         } else {
-            loadArtwork(artInfo, holder);
+            holder.loadArtwork(artInfo);
         }
     }
 
@@ -184,7 +184,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         if (artInfo == ArtInfo.NULLINSTANCE) {
             setLetterTileDrawable(holder, artist.getName());
         } else {
-            loadArtwork(artInfo, holder);
+            holder.loadArtwork(artInfo);
         }
     }
 
@@ -196,9 +196,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         } else {
             holder.setSubTitle(" ");
         }
-        if (holder instanceof HasExtraInfo) {
-            ((HasExtraInfo) holder).setExtraInfo(folder.getDateModified());
-        }
+        holder.setExtraInfo(folder.getDateModified());
         setLetterTileDrawable(holder, folder.getName());
     }
 
@@ -209,7 +207,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
                 + ", " + UtilsCommon.makeLabel(context, R.plurals.Nsongs, genre.getTracksCount());
         holder.setSubTitle(l2);
         if (gridStyle && genre.getArtInfos().size() > 0) {
-            loadMultiArtwork((GridArtworkVH) holder, genre.getArtInfos());
+            holder.loadArtwork(genre.getArtInfos());
         } else {
             setLetterTileDrawable(holder, genre.getName());
         }
@@ -224,7 +222,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
             holder.setSubTitle("");
         }
         if (gridStyle && (playlist.getArtInfos().size() > 0)) {
-            loadMultiArtwork((GridArtworkVH) holder, playlist.getArtInfos());
+            holder.loadArtwork(playlist.getArtInfos());
         } else {
             setLetterTileDrawable(holder, playlist.getName());
         }
@@ -235,16 +233,16 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
                 track.getAlbumName(), track.getArtworkUri());
         holder.setTitle(track.getName());
         holder.setSubTitle(track.getArtistName());
-        if ((holder instanceof HasExtraInfo) && track.getResources().get(0).getDurationS() > 0) {
-            ((HasExtraInfo) holder).setExtraInfo(UtilsCommon.makeTimeString(holder.itemView.getContext(),
-                    track.getResources().get(0).getDurationS()));
+        int durS = track.getResources().get(0).getDurationS();
+        if (durS > 0) {
+            holder.setExtraInfo(UtilsCommon.makeTimeString(holder.itemView.getContext(),durS));
         }
-        if (numberTracks) {
+        if (numberTracks && track.getTrackNumber() >= 0) {
             setLetterTileDrawable(holder, String.valueOf(track.getTrackNumber()));
         } else if (artInfo == ArtInfo.NULLINSTANCE) {
             setLetterTileDrawable(holder, track.getName());
         } else {
-            loadArtwork(artInfo, holder);
+            holder.loadArtwork(artInfo);
         }
     }
 
@@ -261,7 +259,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         }
         holder.setSubTitle(subtitle);
         if (gridStyle && collection.getArtInfos().size() > 0) {
-            loadMultiArtwork((GridArtworkVH) holder, collection.getArtInfos());
+            holder.loadArtwork(collection.getArtInfos());
         } else {
             setLetterTileDrawable(holder, collection.getName());
         }
@@ -310,41 +308,10 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
     }
 
     void setLetterTileDrawable(ViewHolder holder, String text) {
-        if (holder instanceof HasArtwork) {
-            ImageView artwork = ((HasArtwork) holder).getArtwork();
-            Resources resources = artwork.getResources();
-            LetterTileDrawable drawable = LetterTileDrawable.fromText(resources, text);
-            drawable.setIsCircular(!gridStyle);
-            artwork.setImageDrawable(drawable);
-        }
-    }
-
-    void loadArtwork(ArtInfo artInfo, ViewHolder holder) {
-        if (holder instanceof HasArtwork) {
-            boolean isgridartwork = holder instanceof GridArtworkVH;
-            Bundle extras = BundleHelper.b()
-                    .putString(String.valueOf(lightTheme ?
-                            PaletteSwatchType.VIBRANT_LIGHT : PaletteSwatchType.VIBRANT_DARK))
-                    .putString2(PaletteSwatchType.VIBRANT.toString())
-                    .putInt(isgridartwork ? 0 : 1) //crop circles for lists
-                    .get();
-            ImageView artwork = ((HasArtwork) holder).getArtwork();
-            if (isgridartwork) {
-                presenter.getRequestor().newRequest(artInfo, artwork,
-                        ((GridArtworkVH)holder).descriptionContainer, extras);
-            } else {
-                presenter.getRequestor().newRequest(artInfo, artwork, extras);
-            }
-        }
-    }
-
-    void loadMultiArtwork(GridArtworkVH holder, List<ArtInfo> artInfos) {
-        ArtworkRequestManager requestor = presenter.getRequestor();
-        ImageView artwork = holder.artwork;
-        ImageView artwork2 = holder.artwork2;
-        ImageView artwork3 = holder.artwork3;
-        ImageView artwork4 = holder.artwork4;
-        UtilsCommon.loadMultiArtwork(requestor, artwork, artwork2, artwork3, artwork4, artInfos);
+        Resources resources = holder.itemView.getResources();
+        LetterTileDrawable drawable = LetterTileDrawable.fromText(resources, text);
+        drawable.setIsCircular(!gridStyle);
+        holder.setArtwork(drawable);
     }
 
     @Override
@@ -418,11 +385,11 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         switch (id) {
             case R.layout.gallery_grid_item_artwork:
             case R.layout.gallery_grid_item_artwork4:
-                return new GridArtworkVH(itemView);
+                return new GridArtworkVH(itemView, lightTheme, presenter.getRequestor());
             case R.layout.gallery_list_item_artwork:
-                return new ListArtworkVH(itemView);
+                return new ListArtworkVH(itemView, lightTheme, presenter.getRequestor());
             case R.layout.gallery_list_item_dragsort:
-                return new ListArtworkDragVH(itemView);
+                return new ListArtworkDragVH(itemView, lightTheme, presenter.getRequestor());
             case R.layout.gallery_list_item_bio_summary:
                 return new BioVH(itemView);
             default:
@@ -447,7 +414,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         }
     }
 
-    public static class GridArtworkVH extends ViewHolder implements HasArtwork, SelectableItemViewHolder {
+    public static class GridArtworkVH extends ViewHolder implements SelectableItemViewHolder {
         @InjectView(R.id.artwork_thumb) ImageView artwork;
         @InjectView(R.id.artwork_thumb2) @Optional public ImageView artwork2;
         @InjectView(R.id.artwork_thumb3) @Optional public ImageView artwork3;
@@ -458,9 +425,14 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         private int descColor;
         private int descTitleColor;
         private int descSubTitleColor;
+        private final ArtworkRequestManager requestor;
+        private final boolean lightTheme;
+        private List<Target<?>> artworkTargets;
 
-        public GridArtworkVH(View itemView) {
+        public GridArtworkVH(View itemView, boolean lightTheme, ArtworkRequestManager requestor) {
             super(itemView);
+            this.lightTheme = lightTheme;
+            this.requestor = requestor;
             ButterKnife.inject(this, itemView);
             Drawable descBackground = descriptionContainer.getBackground();
             if (descBackground instanceof ColorDrawable) {
@@ -484,6 +456,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
                 descriptionContainer.getTitle().setTextColor(descTitleColor);
                 descriptionContainer.getSubTitle().setTextColor(descSubTitleColor);
             }
+            clearArtworkRequests();
         }
 
         @Override
@@ -498,11 +471,6 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         }
 
         @Override
-        public ImageView getArtwork() {
-            return artwork;
-        }
-
-        @Override
         public void setTitle(CharSequence text) {
             title.setText(text);
         }
@@ -511,29 +479,72 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         public void setSubTitle(CharSequence tetx) {
             subtitle.setText(tetx);
         }
+
+        @Override
+        public void loadArtwork(ArtInfo artInfo) {
+            Bundle extras = BundleHelper.b()
+                    .putString(lightTheme ? PaletteSwatchType.VIBRANT_LIGHT.toString()
+                            : PaletteSwatchType.VIBRANT_DARK.toString())
+                    .putString2(PaletteSwatchType.VIBRANT.toString())
+                    .get();
+            clearArtworkRequests();
+            Target<?> target = requestor.newRequest(artInfo, artwork, descriptionContainer, extras);
+            artworkTargets = new ArrayList<>(1);
+            artworkTargets.add(target);
+        }
+
+        @Override
+        public void loadArtwork(List<ArtInfo> artInfos) {
+            if (artInfos.size() == 1) {
+                loadArtwork(artInfos.get(0));
+            } else {
+                clearArtworkRequests();
+                artworkTargets = UtilsCommon.loadMultiArtwork(
+                        requestor, artwork, artwork2, artwork3, artwork4, artInfos);
+            }
+        }
+
+        private void clearArtworkRequests() {
+            if (artworkTargets != null) {
+                for (Target<?> target : artworkTargets) {
+                    //just use the first artwork as they should all have the same context
+                    requestor.cancelRequest(artwork, target);
+                }
+                artworkTargets = null;
+            }
+        }
+
     }
 
-    public static class ListArtworkVH extends ViewHolder implements HasArtwork, HasExtraInfo, SelectableItemViewHolder {
+    public static class ListArtworkVH extends ViewHolder implements SelectableItemViewHolder {
         @InjectView(R.id.artwork_thumb) ImageView artwork;
         @InjectView(R.id.tile_title) TextView title;
         @InjectView(R.id.tile_subtitle) TextView subtitle;
         @InjectView(R.id.tile_info) @Optional TextView extraInfo;
+        private final ArtworkRequestManager requestor;
+        private final boolean lightTheme;
+        private Target<?> artworkTarget;
 
-        public ListArtworkVH(View itemView) {
+        public ListArtworkVH(View itemView, boolean lightTheme, ArtworkRequestManager requestor) {
             super(itemView);
+            this.lightTheme = lightTheme;
+            this.requestor = requestor;
             ButterKnife.inject(this, itemView);
         }
 
         @Override
         public void reset() {
             super.reset();
-            if (extraInfo != null && extraInfo.getVisibility() != View.GONE) extraInfo.setVisibility(View.GONE);
+            if (extraInfo != null) {
+                extraInfo.setVisibility(View.GONE);
+            }
             if (VersionUtils.hasJellyBean()) {
                 clearItemBackground16();
             } else {
                 //noinspection deprecation
                 itemView.setBackgroundDrawable(null);
             }
+            clearArtworkRequest();
         }
 
         @Override
@@ -553,11 +564,6 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         }
 
         @Override
-        public ImageView getArtwork() {
-            return artwork;
-        }
-
-        @Override
         public void setTitle(CharSequence text) {
             title.setText(text);
         }
@@ -569,23 +575,47 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
 
         @Override
         public void setExtraInfo(CharSequence text) {
-            if (extraInfo != null && !StringUtils.isEmpty(text)) {
+            if (extraInfo != null) {
                 extraInfo.setText(text);
                 extraInfo.setVisibility(View.VISIBLE);
             }
+        }
+
+        @Override
+        public void loadArtwork(ArtInfo artInfo) {
+            Bundle extras = BundleHelper.b()
+                    .putString(lightTheme ? PaletteSwatchType.VIBRANT_LIGHT.toString()
+                            : PaletteSwatchType.VIBRANT_DARK.toString())
+                    .putString2(PaletteSwatchType.VIBRANT.toString())
+                    .putInt(1) //crop circles for lists
+                    .get();
+            clearArtworkRequest();
+            artworkTarget = requestor.newRequest(artInfo, artwork, extras);
+        }
+
+        @Override
+        public void setArtwork(Drawable drawable) {
+            artwork.setImageDrawable(drawable);
         }
 
         @TargetApi(16)
         private void clearItemBackground16() {
             itemView.setBackground(null);
         }
+
+        private void clearArtworkRequest() {
+            if (artworkTarget != null) {
+                requestor.cancelRequest(artwork, artworkTarget);
+                artworkTarget = null;
+            }
+        }
     }
 
     public static class ListArtworkDragVH extends ListArtworkVH implements DragSwipeViewHolder {
         @InjectView(R.id.drag_handle) View dragHandle;
 
-        public ListArtworkDragVH(View itemView) {
-            super(itemView);
+        public ListArtworkDragVH(View itemView, boolean lightTheme, ArtworkRequestManager requestor) {
+            super(itemView, lightTheme, requestor);
             ButterKnife.inject(this, itemView);
         }
 
@@ -605,14 +635,10 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         }
         public void setTitle(CharSequence text) { }
         public void setSubTitle(CharSequence tetx) { }
-    }
-
-    interface HasArtwork {
-        ImageView getArtwork();
-    }
-
-    interface HasExtraInfo {
-        void setExtraInfo(CharSequence text);
+        public void setExtraInfo(CharSequence text) { }
+        public void loadArtwork(ArtInfo artInfo) { }
+        public void loadArtwork(List<ArtInfo> artInfos) { }
+        public void setArtwork(Drawable drawable) { }
     }
 
 }
