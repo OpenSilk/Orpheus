@@ -15,24 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.index;
+package org.opensilk.music.ui3.gallery;
 
-import org.opensilk.common.ui.mortar.Screen;
-import org.opensilk.common.ui.mortarfragment.MortarFragment;
+import dagger.Module;
+import dagger.Provides;
 
 /**
- * Created by drew on 5/5/15.
+ * Created by drew on 4/20/15.
  */
-public class GalleryScreenFragment extends MortarFragment {
-    public static final String NAME = GalleryScreenFragment.class.getName();
+@Module
+public class GalleryScreenModule {
+        final GalleryScreen screen;
 
-    public static GalleryScreenFragment ni() {
-        return new GalleryScreenFragment();
-    }
+        public GalleryScreenModule(GalleryScreen screen) {
+                this.screen = screen;
+        }
 
-    @Override
-    protected Screen newScreen() {
-        return new GalleryScreen();
-    }
-
+        @Provides
+        public GalleryScreen provideScreen() {
+                return screen;
+        }
 }

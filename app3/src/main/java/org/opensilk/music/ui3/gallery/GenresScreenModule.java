@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.index.genres;
+package org.opensilk.music.ui3.gallery;
 
 import android.content.Context;
 import android.net.Uri;

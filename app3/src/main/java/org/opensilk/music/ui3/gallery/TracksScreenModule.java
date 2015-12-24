@@ -15,41 +15,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.index.folders;
+package org.opensilk.music.ui3.gallery;
 
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
-import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
-import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.R;
 import org.opensilk.music.index.provider.IndexUris;
-import org.opensilk.music.index.scanner.ScannerService;
-import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.client.LibraryClient;
-import org.opensilk.music.library.provider.LibraryExtras;
-import org.opensilk.music.library.provider.LibraryMethods;
-import org.opensilk.music.library.provider.LibraryUris;
-import org.opensilk.music.model.Artist;
-import org.opensilk.music.model.Container;
-import org.opensilk.music.model.Model;
-import org.opensilk.music.model.sort.ArtistSortOrder;
+import org.opensilk.music.model.sort.TrackSortOrder;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
-import org.opensilk.music.ui3.library.FoldersScreenFragment;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.opensilk.music.ui3.common.PlayAllItemClickListener;
 
 import javax.inject.Named;
 
@@ -57,19 +41,19 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * Created by drew on 11/1/15.
+ * Created by drew on 5/5/15.
  */
 @Module
-public class FoldersScreenModule {
-    final FoldersScreen screen;
+public class TracksScreenModule {
+    final TracksScreen screen;
 
-    public FoldersScreenModule(FoldersScreen screen) {
+    public TracksScreenModule(TracksScreen screen) {
         this.screen = screen;
     }
 
     @Provides @Named("loader_uri")
     public Uri provideLoaderUri(@Named("IndexProviderAuthority") String authority) {
-        return IndexUris.folders(authority);
+        return IndexUris.tracks(authority);
     }
 
     @Provides @ScreenScope
@@ -85,21 +69,8 @@ public class FoldersScreenModule {
     }
 
     @Provides @ScreenScope
-    public ItemClickListener provideItemClickListener(
-            final FragmentManagerOwner fm) {
-        return new ItemClickListener() {
-            @Override
-            public void onItemClicked(BundleablePresenter presenter, Context context, Model item) {
-                LibraryClient client = LibraryClient.create(context, item.getUri());
-                Bundle reply = client.makeCall(LibraryMethods.CONFIG, null);
-                if (reply != null) {
-                    FoldersScreenFragment f = FoldersScreenFragment.ni(context,
-                            LibraryConfig.materialize(reply), (Container) item);
-                    fm.replaceMainContent(f, true);
-                }
-                client.release();
-            }
-        };
+    public ItemClickListener provideItemClickListener() {
+        return new PlayAllItemClickListener();
     }
 
     @Provides @ScreenScope
@@ -107,7 +78,7 @@ public class FoldersScreenModule {
         return new MenuHandlerImpl(loaderUri, activityResultsController) {
             @Override
             public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
-                inflateMenu(R.menu.folder_sort_by, menuInflater, menu);
+                inflateMenu(R.menu.song_sort_by, menuInflater, menu);
                 return true;
             }
 
@@ -115,10 +86,22 @@ public class FoldersScreenModule {
             public boolean onMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.menu_sort_by_az:
-                        setNewSortOrder(presenter, ArtistSortOrder.A_Z);
+                        setNewSortOrder(presenter, TrackSortOrder.A_Z);
                         return true;
                     case R.id.menu_sort_by_za:
-                        setNewSortOrder(presenter, ArtistSortOrder.Z_A);
+                        setNewSortOrder(presenter, TrackSortOrder.Z_A);
+                        return true;
+                    case R.id.menu_sort_by_artist:
+                        setNewSortOrder(presenter, TrackSortOrder.ARTIST);
+                        return true;
+                    case R.id.menu_sort_by_album:
+                        setNewSortOrder(presenter, TrackSortOrder.ALBUM);
+                        return true;
+                    case R.id.menu_sort_by_duration:
+                        setNewSortOrder(presenter, TrackSortOrder.LONGEST);
+                        return true;
+                    case R.id.menu_sort_by_date_added:
+                        setNewSortOrder(presenter, TrackSortOrder.LAST_ADDED);
                         return true;
                     default:
                         return false;
@@ -128,7 +111,9 @@ public class FoldersScreenModule {
             @Override
             public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,
-                        R.menu.rescan_folder
+                        R.menu.add_to_queue,
+                        R.menu.play_next,
+                        R.menu.add_to_playlist
                 );
                 return true;
             }
@@ -136,14 +121,20 @@ public class FoldersScreenModule {
             @Override
             public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
-                    case R.id.rescan_folder: {
-                        presenter.getIndexClient().rescan(presenter.getSelectedItems());
+                    case R.id.add_to_queue:
+                        addSelectedItemsToQueue(presenter);
                         return true;
-                    }
+                    case R.id.play_next:
+                        playSelectedItemsNext(presenter);
+                        return true;
+                    case R.id.add_to_playlist:
+                        addToPlaylistFromTracks(context, presenter);
+                        return true;
                     default:
                         return false;
                 }
             }
         };
     }
+
 }

@@ -15,11 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.index;
+package org.opensilk.music.ui3.gallery;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.ui3.MusicActivityComponent;
-import org.opensilk.music.ui3.main.FooterScreenComponent;
+import org.opensilk.music.ui3.common.BundleableComponent;
 
 import dagger.Component;
 import rx.functions.Func2;
@@ -30,18 +30,17 @@ import rx.functions.Func2;
 @ScreenScope
 @Component(
         dependencies = MusicActivityComponent.class,
-        modules = GalleryScreenModule.class
+        modules = GenresScreenModule.class
 )
-public interface GalleryScreenComponent extends MusicActivityComponent, FooterScreenComponent {
-    Func2<MusicActivityComponent, GalleryScreen, GalleryScreenComponent> FACTORY =
-            new Func2<MusicActivityComponent, GalleryScreen, GalleryScreenComponent>() {
+public interface GenresScreenComponent extends BundleableComponent {
+    Func2<MusicActivityComponent,GenresScreen, GenresScreenComponent> FACTORY =
+            new Func2<MusicActivityComponent, GenresScreen, GenresScreenComponent>() {
                 @Override
-                public GalleryScreenComponent call(MusicActivityComponent musicActivityComponent, GalleryScreen galleryScreen) {
-                    return DaggerGalleryScreenComponent.builder()
+                public GenresScreenComponent call(MusicActivityComponent musicActivityComponent, GenresScreen screen) {
+                    return DaggerGenresScreenComponent.builder()
                             .musicActivityComponent(musicActivityComponent)
-                            .galleryScreenModule(new GalleryScreenModule(galleryScreen))
+                            .genresScreenModule(new GenresScreenModule(screen))
                             .build();
                 }
             };
-    void inject(GalleryScreenView view);
 }

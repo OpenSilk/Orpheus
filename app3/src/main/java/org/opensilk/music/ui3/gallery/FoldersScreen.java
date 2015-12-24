@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 OpenSilk Productions LLC
+ * Copyright (c) 2015 OpenSilk Productions LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.index;
+package org.opensilk.music.ui3.gallery;
 
 import android.content.res.Resources;
 
@@ -30,16 +30,16 @@ import org.opensilk.music.ui3.MusicActivityComponent;
 import mortar.MortarScope;
 
 /**
- * Created by drew on 10/3/14.
+ * Created by drew on 11/1/15.
  */
-@Layout(R.layout.screen_gallery)
-@WithComponentFactory(GalleryScreen.Factory.class)
-public class GalleryScreen extends Screen {
-    public static class Factory extends ComponentFactory<GalleryScreen> {
+@Layout(R.layout.bundleable_recycler_list)
+@WithComponentFactory(FoldersScreen.Factory.class)
+public class FoldersScreen extends Screen {
+    public static class Factory extends ComponentFactory<FoldersScreen> {
         @Override
-        protected Object createDaggerComponent(Resources resources, MortarScope parentScope, GalleryScreen screen) {
+        protected Object createDaggerComponent(Resources resources, MortarScope parentScope, FoldersScreen screen) {
             MusicActivityComponent activityComponent = DaggerService.getDaggerComponent(parentScope);
-            return GalleryScreenComponent.FACTORY.call(activityComponent, screen);
+            return FoldersScreenComponent.FACTORY.call(activityComponent, screen);
         }
     }
 }

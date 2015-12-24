@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.index.albums;
+package org.opensilk.music.ui3.gallery;
 
 import android.content.res.Resources;
 
@@ -33,13 +33,13 @@ import mortar.MortarScope;
  * Created by drew on 5/5/15.
  */
 @Layout(R.layout.bundleable_recycler_list)
-@WithComponentFactory(AlbumsScreen.Factory.class)
-public class AlbumsScreen extends Screen {
-    public static class Factory extends ComponentFactory<AlbumsScreen> {
+@WithComponentFactory(TracksScreen.Factory.class)
+public class TracksScreen extends Screen {
+    public static class Factory extends ComponentFactory<TracksScreen> {
         @Override
-        protected Object createDaggerComponent(Resources resources, MortarScope parentScope, AlbumsScreen screen) {
+        protected Object createDaggerComponent(Resources resources, MortarScope parentScope, TracksScreen screen) {
             MusicActivityComponent activityComponent = DaggerService.getDaggerComponent(parentScope);
-            return AlbumsScreenComponent.FACTORY.call(activityComponent, screen);
+            return TracksScreenComponent.FACTORY.call(activityComponent, screen);
         }
     }
 }

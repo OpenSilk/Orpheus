@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.index.tracks;
+package org.opensilk.music.ui3.gallery;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.ui3.MusicActivityComponent;
@@ -30,16 +30,16 @@ import rx.functions.Func2;
 @ScreenScope
 @Component(
         dependencies = MusicActivityComponent.class,
-        modules = TracksScreenModule.class
+        modules = ArtistsScreenModule.class
 )
-public interface TracksScreenComponent extends BundleableComponent {
-    Func2<MusicActivityComponent, TracksScreen, TracksScreenComponent> FACTORY =
-            new Func2<MusicActivityComponent, TracksScreen, TracksScreenComponent>() {
+public interface ArtistsScreenComponent extends BundleableComponent {
+    Func2<MusicActivityComponent, ArtistsScreen, ArtistsScreenComponent> FACTORY =
+            new Func2<MusicActivityComponent, ArtistsScreen, ArtistsScreenComponent>() {
                 @Override
-                public TracksScreenComponent call(MusicActivityComponent musicActivityComponent, TracksScreen screen) {
-                    return DaggerTracksScreenComponent.builder()
+                public ArtistsScreenComponent call(MusicActivityComponent musicActivityComponent, ArtistsScreen artistsScreen) {
+                    return DaggerArtistsScreenComponent.builder()
                             .musicActivityComponent(musicActivityComponent)
-                            .tracksScreenModule(new TracksScreenModule(screen))
+                            .artistsScreenModule(new ArtistsScreenModule(artistsScreen))
                             .build();
                 }
             };

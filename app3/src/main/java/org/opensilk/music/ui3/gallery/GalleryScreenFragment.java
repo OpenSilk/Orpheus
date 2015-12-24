@@ -15,9 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.index.genres;
-
-import android.content.Context;
+package org.opensilk.music.ui3.gallery;
 
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortarfragment.MortarFragment;
@@ -25,15 +23,16 @@ import org.opensilk.common.ui.mortarfragment.MortarFragment;
 /**
  * Created by drew on 5/5/15.
  */
-public class GenresScreenFragment extends MortarFragment {
-    public static final String NAME = GenresScreenFragment.class.getName();
+public class GalleryScreenFragment extends MortarFragment {
+    public static final String NAME = GalleryScreenFragment.class.getName();
 
-    public static GenresScreenFragment ni(Context context) {
-        return factory(context, NAME, null);
+    public static GalleryScreenFragment ni() {
+        return new GalleryScreenFragment();
     }
 
     @Override
     protected Screen newScreen() {
-        return new GenresScreen();
+        return new GalleryScreen();
     }
+
 }

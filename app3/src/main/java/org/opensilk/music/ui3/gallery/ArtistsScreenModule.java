@@ -15,26 +15,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.index.tracks;
+package org.opensilk.music.ui3.gallery;
 
 import android.content.Context;
 import android.net.Uri;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.index.provider.IndexUris;
-import org.opensilk.music.model.sort.TrackSortOrder;
+import org.opensilk.music.model.Artist;
+import org.opensilk.music.model.Model;
+import org.opensilk.music.model.sort.ArtistSortOrder;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
-import org.opensilk.music.ui3.common.PlayAllItemClickListener;
+import org.opensilk.music.ui3.common.OpenProfileItemClickListener;
+import org.opensilk.music.ui3.profile.ProfileScreen;
+import org.opensilk.music.ui3.profile.artist.ArtistDetailsScreen;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Named;
 
@@ -45,16 +52,16 @@ import dagger.Provides;
  * Created by drew on 5/5/15.
  */
 @Module
-public class TracksScreenModule {
-    final TracksScreen screen;
+public class ArtistsScreenModule {
+    final ArtistsScreen screen;
 
-    public TracksScreenModule(TracksScreen screen) {
+    public ArtistsScreenModule(ArtistsScreen screen) {
         this.screen = screen;
     }
 
     @Provides @Named("loader_uri")
     public Uri provideLoaderUri(@Named("IndexProviderAuthority") String authority) {
-        return IndexUris.tracks(authority);
+        return IndexUris.albumArtists(authority);
     }
 
     @Provides @ScreenScope
@@ -63,15 +70,20 @@ public class TracksScreenModule {
             MenuHandler menuConfig
     ) {
         return BundleablePresenterConfig.builder()
-                .setWantsGrid(false)
+                .setWantsGrid(true)
                 .setItemClickListener(itemClickListener)
                 .setMenuConfig(menuConfig)
                 .build();
     }
 
     @Provides @ScreenScope
-    public ItemClickListener provideItemClickListener() {
-        return new PlayAllItemClickListener();
+    public ItemClickListener provideItemClickListener(ActivityResultsController activityResultsController) {
+        return new OpenProfileItemClickListener(activityResultsController, new OpenProfileItemClickListener.ProfileScreenFactory() {
+            @Override
+            public ProfileScreen call(Model model) {
+                return new ArtistDetailsScreen((Artist)model);
+            }
+        });
     }
 
     @Provides @ScreenScope
@@ -79,7 +91,8 @@ public class TracksScreenModule {
         return new MenuHandlerImpl(loaderUri, activityResultsController) {
             @Override
             public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
-                inflateMenu(R.menu.song_sort_by, menuInflater, menu);
+                inflateMenu(R.menu.artist_sort_by, menuInflater, menu);
+                inflateMenu(R.menu.view_as, menuInflater, menu);
                 return true;
             }
 
@@ -87,22 +100,22 @@ public class TracksScreenModule {
             public boolean onMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.menu_sort_by_az:
-                        setNewSortOrder(presenter, TrackSortOrder.A_Z);
+                        setNewSortOrder(presenter, ArtistSortOrder.A_Z);
                         return true;
                     case R.id.menu_sort_by_za:
-                        setNewSortOrder(presenter, TrackSortOrder.Z_A);
+                        setNewSortOrder(presenter, ArtistSortOrder.Z_A);
                         return true;
-                    case R.id.menu_sort_by_artist:
-                        setNewSortOrder(presenter, TrackSortOrder.ARTIST);
+                    case R.id.menu_sort_by_number_of_songs:
+                        setNewSortOrder(presenter, ArtistSortOrder.MOST_TRACKS);
                         return true;
-                    case R.id.menu_sort_by_album:
-                        setNewSortOrder(presenter, TrackSortOrder.ALBUM);
+                    case R.id.menu_sort_by_number_of_albums:
+                        setNewSortOrder(presenter, ArtistSortOrder.MOST_ALBUMS);
                         return true;
-                    case R.id.menu_sort_by_duration:
-                        setNewSortOrder(presenter, TrackSortOrder.LONGEST);
+                    case R.id.menu_view_as_simple:
+                        updateLayout(presenter, AppPreferences.SIMPLE);
                         return true;
-                    case R.id.menu_sort_by_date_added:
-                        setNewSortOrder(presenter, TrackSortOrder.LAST_ADDED);
+                    case R.id.menu_view_as_grid:
+                        updateLayout(presenter, AppPreferences.GRID);
                         return true;
                     default:
                         return false;
@@ -113,6 +126,7 @@ public class TracksScreenModule {
             public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,
                         R.menu.add_to_queue,
+                        R.menu.play_all,
                         R.menu.play_next,
                         R.menu.add_to_playlist
                 );
@@ -121,21 +135,32 @@ public class TracksScreenModule {
 
             @Override
             public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
+                List<Model> list = presenter.getSelectedItems();
+                List<Uri> uris = new ArrayList<>(list.size());
+                for (Model b : list) {
+                    uris.add(((Artist)b).getTracksUri());
+                }
                 switch (menuItem.getItemId()) {
-                    case R.id.add_to_queue:
-                        addSelectedItemsToQueue(presenter);
+                    case R.id.add_to_queue: {
+                        addToQueueFromTracksUris(context, presenter, uris);
                         return true;
-                    case R.id.play_next:
-                        playSelectedItemsNext(presenter);
+                    }
+                    case R.id.play_all: {
+                        playFromTracksUris(context, presenter, uris);
                         return true;
-                    case R.id.add_to_playlist:
-                        addToPlaylistFromTracks(context, presenter);
+                    }
+                    case R.id.play_next: {
+                        playNextFromTracksUris(context, presenter, uris);
                         return true;
+                    }
+                    case R.id.add_to_playlist: {
+                        addToPlaylistFromTracksUris(context, uris);
+                        return true;
+                    }
                     default:
                         return false;
                 }
             }
         };
     }
-
 }

@@ -15,15 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.index;
+package org.opensilk.music.ui3.gallery;
 
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.music.R;
-import org.opensilk.music.ui3.index.albums.AlbumsScreen;
-import org.opensilk.music.ui3.index.artists.ArtistsScreen;
-import org.opensilk.music.ui3.index.folders.FoldersScreen;
-import org.opensilk.music.ui3.index.genres.GenresScreen;
-import org.opensilk.music.ui3.index.tracks.TracksScreen;
 
 import rx.functions.Func0;
 

@@ -38,7 +38,7 @@ import org.opensilk.music.ui.theme.OrpheusTheme;
 import org.opensilk.music.ui.widget.timer.TimerDialog;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
 import org.opensilk.music.ui3.common.ActivityResultCodes;
-import org.opensilk.music.ui3.index.GalleryScreenFragment;
+import org.opensilk.music.ui3.gallery.GalleryScreenFragment;
 import org.opensilk.music.ui3.playlist.PlaylistPagerScreenFragment;
 import org.opensilk.music.ui3.library.LibraryScreenFragment;
 import org.opensilk.music.ui3.renderer.RendererScreenFragment;

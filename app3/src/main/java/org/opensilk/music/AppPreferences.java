@@ -22,25 +22,14 @@ import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.util.Base64;
 
-import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.app.PreferencesWrapper;
 import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.ui.theme.OrpheusTheme;
-import org.opensilk.music.ui3.index.GalleryPage;
 
-import java.lang.reflect.Type;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import timber.log.Timber;
 
 /**
  * Created by drew on 6/21/14.

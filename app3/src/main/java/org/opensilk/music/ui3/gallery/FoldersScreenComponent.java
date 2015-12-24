@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.index.artists;
+package org.opensilk.music.ui3.gallery;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.ui3.MusicActivityComponent;
@@ -25,21 +25,21 @@ import dagger.Component;
 import rx.functions.Func2;
 
 /**
- * Created by drew on 5/5/15.
+ * Created by drew on 11/1/15.
  */
 @ScreenScope
 @Component(
         dependencies = MusicActivityComponent.class,
-        modules = ArtistsScreenModule.class
+        modules = FoldersScreenModule.class
 )
-public interface ArtistsScreenComponent extends BundleableComponent {
-    Func2<MusicActivityComponent, ArtistsScreen, ArtistsScreenComponent> FACTORY =
-            new Func2<MusicActivityComponent, ArtistsScreen, ArtistsScreenComponent>() {
+public interface FoldersScreenComponent extends BundleableComponent {
+    Func2<MusicActivityComponent, FoldersScreen, FoldersScreenComponent> FACTORY =
+            new Func2<MusicActivityComponent, FoldersScreen, FoldersScreenComponent>() {
                 @Override
-                public ArtistsScreenComponent call(MusicActivityComponent musicActivityComponent, ArtistsScreen artistsScreen) {
-                    return DaggerArtistsScreenComponent.builder()
+                public FoldersScreenComponent call(MusicActivityComponent musicActivityComponent, FoldersScreen screen) {
+                    return DaggerFoldersScreenComponent.builder()
                             .musicActivityComponent(musicActivityComponent)
-                            .artistsScreenModule(new ArtistsScreenModule(artistsScreen))
+                            .foldersScreenModule(new FoldersScreenModule(screen))
                             .build();
                 }
             };
