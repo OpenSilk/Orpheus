@@ -528,7 +528,7 @@ public class PlaybackService {
         // Remove any sound effects
         final Intent audioEffectsIntent = new Intent(
                 AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
-        audioEffectsIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, mAudioSessionId);
+//        audioEffectsIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, mAudioSessionId);
         audioEffectsIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, mContext.getPackageName());
         mContext.sendBroadcast(audioEffectsIntent);
     }
@@ -1171,10 +1171,12 @@ public class PlaybackService {
         @Override
         public void onAudioSessionId(final int audioSessionId) {
             if (Looper.myLooper() == getHandler().getLooper()) {
-                mAudioSessionId = audioSessionId;
-                applyAudioEffects();
-                mSessionHolder.sendSessionEvent(EVENT.NEW_AUDIO_SESSION_ID,
-                        BundleHelper.b().putInt(audioSessionId).get());
+                if (mAudioSessionId != audioSessionId) {
+                    mAudioSessionId = audioSessionId;
+                    applyAudioEffects();
+                    mSessionHolder.sendSessionEvent(EVENT.NEW_AUDIO_SESSION_ID,
+                            BundleHelper.b().putInt(audioSessionId).get());
+                }
             } else {
                 getHandler().post(new Runnable() {
                     @Override

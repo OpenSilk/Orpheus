@@ -23,6 +23,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.PowerManager;
 
+import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.playback.service.PlaybackServiceScope;
 
 import java.io.IOException;
@@ -41,17 +42,36 @@ public class DefaultMediaPlayer implements IMediaPlayer, MediaPlayer.OnCompletio
 
     @PlaybackServiceScope
     public static class Factory implements IMediaPlayer.Factory {
+        int mAudioSessionId = 0;
+
         @Inject
         public Factory() {
         }
 
         @Override
-        public IMediaPlayer create(Context context) {
-            return new DefaultMediaPlayer(context);
+        public synchronized IMediaPlayer create(Context context) {
+            if (mAudioSessionId == 0) {
+                mAudioSessionId = genAudioSessionId(context);
+            }
+            return new DefaultMediaPlayer(context, mAudioSessionId);
+        }
+
+        private int genAudioSessionId(Context context) {
+            if (VersionUtils.hasLollipop()) {
+                AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+                return am.generateAudioSessionId();
+            } else {
+                MediaPlayer mp = new MediaPlayer();
+                try {
+                    return mp.getAudioSessionId();
+                } finally {
+                    mp.release();
+                }
+            }
         }
     }
 
-    public DefaultMediaPlayer(Context context) {
+    public DefaultMediaPlayer(Context context, int audioSessionId) {
         mMediaPlayer = new MediaPlayer();
         mMediaPlayer.setOnPreparedListener(this);
         mMediaPlayer.setOnCompletionListener(this);
@@ -59,6 +79,7 @@ public class DefaultMediaPlayer implements IMediaPlayer, MediaPlayer.OnCompletio
         mMediaPlayer.setOnSeekCompleteListener(this);
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mMediaPlayer.setWakeMode(context, PowerManager.PARTIAL_WAKE_LOCK);
+        mMediaPlayer.setAudioSessionId(audioSessionId);
     }
 
     @Override
