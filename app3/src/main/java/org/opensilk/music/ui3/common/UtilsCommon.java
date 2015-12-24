@@ -163,7 +163,7 @@ public class UtilsCommon {
                     .setUri(uri).setSortOrder(TrackSortOrder.ALBUM)
                     .createObservable().retry(1));
         }
-        Observable.mergeDelayError(Observable.from(loaders))
+        Observable.concatEager(loaders)
                 .collect(new Func0<List<Uri>>() {
                     @Override
                     public List<Uri> call() {
