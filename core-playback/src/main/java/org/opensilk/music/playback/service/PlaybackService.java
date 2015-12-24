@@ -1080,8 +1080,10 @@ public class PlaybackService {
                 mSessionHolder.setQueue(mQueue.getQueueItems());
                 setNextTrack();
             } else {
-                throw new IllegalStateException("Got onQueueChanged with empty queue but " +
-                                "should have got onCurrentPosChanged");
+                //TODO this can happen if fetching mediadescriptions fails
+                Timber.e("Got onQueueChanged with empty queue but " +
+                        "should have got onCurrentPosChanged");
+                onCurrentPosChangedReal();
             }
         }
 

@@ -75,6 +75,7 @@ public class PlaybackQueue {
     public void load() {
         mReady = false;
         mQueue.clear();
+        mIndexClient.startBatch();
         mQueue.addAll(mIndexClient.getLastQueue());
         int pos = mIndexClient.getLastQueuePosition();
         if (pos >= 0) {
@@ -104,6 +105,7 @@ public class PlaybackQueue {
             default:
                 break;
         }
+        mIndexClient.endBatch();
         notifyCurrentPosChanged();
     }
 
