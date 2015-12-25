@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2015 OpenSilk Productions LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<!--http://blog.neteril.org/blog/2014/11/13/transitioning-to-infinity/-->
+<animated-selector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:constantSize="true">
+  <item
+      android:drawable="@drawable/vector_pause_black_36dp"
+      android:state_checked="true"
+      android:id="@+id/pause_state" />
+  <item
+      android:drawable="@drawable/vector_play_black_36dp"
+      android:id="@+id/play_state" />
+  <!-- Added at runtime, seems to not always work
+  <transition android:fromId="@id/play_state" android:toId="@id/pause_state" android:reversible="true">
+      <animated-vector android:drawable="@drawable/ic_play_black_vector_36dp">
+          <target android:name="d" android:animation="@anim/play_pause" />
+      </animated-vector>
+  </transition>
+  -->
+</animated-selector>

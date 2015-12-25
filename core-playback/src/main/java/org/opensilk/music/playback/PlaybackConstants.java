@@ -204,6 +204,8 @@ public interface PlaybackConstants {
         String REPEAT_CHANGED = "event.repeatchanged";
         //reply has int extra
         String NEW_AUDIO_SESSION_ID = "event.newaudiosessionid";
+        //no reply
+        String QUEUE_LOADED = "event.queueloaded";
     }
 
 }

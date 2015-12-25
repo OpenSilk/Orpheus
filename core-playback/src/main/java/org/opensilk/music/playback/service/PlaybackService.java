@@ -396,7 +396,7 @@ public class PlaybackService {
             }
             builder.addCustomAction(
                     ACTION.TOGGLE_SHUFFLE_MODE, mContext.getString(R.string.menu_shuffle),
-                    R.drawable.action_shuffle_black_36dp);
+                    R.drawable.playback_shuffle_black_36dp);
         }
         builder.setActions(actions);
     }
@@ -657,6 +657,7 @@ public class PlaybackService {
                             long seek = 0;
                             if (mQueueReloaded) {
                                 mQueueReloaded = false;
+                                mSessionHolder.sendSessionEvent(EVENT.QUEUE_LOADED, null);
                                 seek = mIndexClient.getLastSeekPosition();
                             } else if (mRendererChanged) {
                                 mRendererChanged = false;

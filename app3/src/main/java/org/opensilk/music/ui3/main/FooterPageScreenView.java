@@ -83,9 +83,9 @@ public class FooterPageScreenView extends LinearLayout {
     void setupDrawables21() {
         AnimatedStateListDrawable drawable = (AnimatedStateListDrawable) mPlayPause.getDrawable();
         drawable.addTransition(R.id.pause_state, R.id.play_state, (AnimatedVectorDrawable)
-                ContextCompat.getDrawable(getContext(), R.drawable.ic_pause_play_black_animated_36dp), false);
+                ContextCompat.getDrawable(getContext(), R.drawable.vector_pause_play_black_36dp), false);
         drawable.addTransition(R.id.play_state, R.id.pause_state, (AnimatedVectorDrawable)
-                ContextCompat.getDrawable(getContext(), R.drawable.ic_play_pause_black_animated_36dp), false);
+                ContextCompat.getDrawable(getContext(), R.drawable.vector_play_pause_black_36dp), false);
     }
 
     @Override

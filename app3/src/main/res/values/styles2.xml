@@ -119,42 +119,42 @@
     </style>
 
     <style name="nowPlayingActionLight.Next">
-        <item name="android:src">@drawable/ic_skip_next_black_48dp</item>
+        <item name="android:src">@drawable/playback_skip_next_black_48dp</item>
         <item name="android:contentDescription">@string/accessibility_next</item>
     </style>
 
     <style name="nowPlayingActionDark.Next">
-        <item name="android:src">@drawable/ic_skip_next_white_48dp</item>
+        <item name="android:src">@drawable/playback_skip_next_white_48dp</item>
         <item name="android:contentDescription">@string/accessibility_next</item>
     </style>
 
     <style name="nowPlayingActionLight.Prev">
-        <item name="android:src">@drawable/ic_skip_previous_black_48dp</item>
+        <item name="android:src">@drawable/playback_skip_previous_black_48dp</item>
         <item name="android:contentDescription">@string/accessibility_prev</item>
     </style>
 
     <style name="nowPlayingActionDark.Prev">
-        <item name="android:src">@drawable/ic_skip_previous_white_48dp</item>
+        <item name="android:src">@drawable/playback_skip_previous_white_48dp</item>
         <item name="android:contentDescription">@string/accessibility_prev</item>
     </style>
 
     <style name="nowPlayingActionLight.Shuffle">
-        <item name="android:src">@drawable/action_shuffle_black_36dp</item>
+        <item name="android:src">@drawable/playback_shuffle_black_48dp</item>
         <item name="android:contentDescription">@string/accessibility_shuffle</item>
     </style>
 
     <style name="nowPlayingActionDark.Shuffle">
-        <item name="android:src">@drawable/action_shuffle_white_36dp</item>
+        <item name="android:src">@drawable/playback_shuffle_white_48dp</item>
         <item name="android:contentDescription">@string/accessibility_shuffle</item>
     </style>
 
     <style name="nowPlayingActionLight.Repeat">
-        <item name="android:src">@drawable/action_repeat_black_36dp</item>
+        <item name="android:src">@drawable/action_repeat_black_48dp</item>
         <item name="android:contentDescription">@string/accessibility_repeat</item>
     </style>
 
     <style name="nowPlayingActionDark.Repeat">
-        <item name="android:src">@drawable/action_repeat_white_36dp</item>
+        <item name="android:src">@drawable/action_repeat_white_48dp</item>
         <item name="android:contentDescription">@string/accessibility_repeat</item>
     </style>
 
@@ -213,32 +213,32 @@
     </style>
 
     <style name="controlsActionLight.Next">
-        <item name="android:src">@drawable/ic_skip_next_white_36dp</item>
+        <item name="android:src">@drawable/playback_skip_next_white_36dp</item>
         <item name="android:contentDescription">@string/accessibility_next</item>
     </style>
 
     <style name="controlsActionDark.Next">
-        <item name="android:src">@drawable/ic_skip_next_white_36dp</item>
+        <item name="android:src">@drawable/playback_skip_next_white_36dp</item>
         <item name="android:contentDescription">@string/accessibility_next</item>
     </style>
 
     <style name="controlsActionLight.Prev">
-        <item name="android:src">@drawable/ic_skip_previous_white_36dp</item>
+        <item name="android:src">@drawable/playback_skip_previous_white_36dp</item>
         <item name="android:contentDescription">@string/accessibility_prev</item>
     </style>
 
     <style name="controlsActionDark.Prev">
-        <item name="android:src">@drawable/ic_skip_previous_white_36dp</item>
+        <item name="android:src">@drawable/playback_skip_previous_white_36dp</item>
         <item name="android:contentDescription">@string/accessibility_prev</item>
     </style>
 
     <style name="controlsActionLight.Shuffle">
-        <item name="android:src">@drawable/action_shuffle_white_36dp</item>
+        <item name="android:src">@drawable/playback_shuffle_white_36dp</item>
         <item name="android:contentDescription">@string/accessibility_shuffle</item>
     </style>
 
     <style name="controlsActionDark.Shuffle">
-        <item name="android:src">@drawable/action_shuffle_white_36dp</item>
+        <item name="android:src">@drawable/playback_shuffle_white_36dp</item>
         <item name="android:contentDescription">@string/accessibility_shuffle</item>
     </style>
 

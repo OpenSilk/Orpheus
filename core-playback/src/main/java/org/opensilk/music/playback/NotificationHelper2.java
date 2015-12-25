@@ -20,7 +20,6 @@ package org.opensilk.music.playback;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -428,7 +427,7 @@ public class NotificationHelper2 extends BroadcastReceiver {
 
     private int getPlayPauseIcon(boolean isPlaying) {
         if (VersionUtils.hasApi21()) {
-            return isPlaying ? R.drawable.ic_pause_black_vector_36dp : R.drawable.ic_play_black_vector_36dp;
+            return isPlaying ? R.drawable.vector_pause_black_36dp : R.drawable.vector_play_black_36dp;
         } else {
             return isPlaying ? R.drawable.ic_pause_white_36dp : R.drawable.ic_play_white_36dp;
         }

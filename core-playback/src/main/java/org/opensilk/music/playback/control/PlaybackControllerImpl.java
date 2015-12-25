@@ -439,10 +439,9 @@ public class PlaybackControllerImpl implements PlaybackController {
             mMetaSubject.onNext(meta);
         }
         final List<MediaSessionCompat.QueueItem> queue = mImpl.getMediaController().getQueue();
-        mQueueSubject.onNext(queue != null ? queue : Collections.<MediaSessionCompat.QueueItem>emptyList());
-        fetchRepeatMode();
-        fetchShuffleMode();
-        fetchAudioSessionId();
+        if (queue != null) {
+            mQueueSubject.onNext(queue);
+        }
     }
 
     final IMediaControllerProxy.Callback mCallback = new IMediaControllerProxy.Callback() {
@@ -480,6 +479,12 @@ public class PlaybackControllerImpl implements PlaybackController {
                         //work around platform bug (extras not delivered)
                         fetchShuffleMode();
                     }
+                    break;
+                }
+                case PlaybackConstants.EVENT.QUEUE_LOADED: {
+                    fetchRepeatMode();
+                    fetchShuffleMode();
+                    fetchAudioSessionId();
                     break;
                 }
             }

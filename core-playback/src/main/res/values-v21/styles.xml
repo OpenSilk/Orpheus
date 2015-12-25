@@ -71,17 +71,17 @@
     </style>
 
     <style name="NotificationAction.Previous" parent="@style/NotificationAction">
-        <item name="android:src">@drawable/ic_skip_previous_black_vector_36dp</item>
+        <item name="android:src">@drawable/playback_skip_previous_black_36dp</item>
         <item name="android:contentDescription">@string/accessibility_prev</item>
     </style>
 
     <style name="NotificationAction.Play" parent="@style/NotificationAction">
-        <item name="android:src">@drawable/ic_play_black_vector_36dp</item>
+        <item name="android:src">@drawable/vector_play_black_36dp</item>
         <item name="android:contentDescription">@string/accessibility_play</item>
     </style>
 
     <style name="NotificationAction.Next" parent="@style/NotificationAction">
-        <item name="android:src">@drawable/ic_skip_next_black_vector_36dp</item>
+        <item name="android:src">@drawable/playback_skip_next_black_36dp</item>
         <item name="android:contentDescription">@string/accessibility_next</item>
     </style>
 

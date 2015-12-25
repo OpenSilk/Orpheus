@@ -137,9 +137,9 @@ public class NowPlayingScreenView extends RelativeLayout {
     void setupDrawables21() {
         AnimatedStateListDrawable drawable = (AnimatedStateListDrawable) playPause.getDrawable();
         drawable.addTransition(R.id.pause_state, R.id.play_state, (AnimatedVectorDrawable)
-                ContextCompat.getDrawable(getContext(), R.drawable.ic_pause_play_white_animated_48dp), false);
+                ContextCompat.getDrawable(getContext(), R.drawable.vector_pause_play_white_48dp), false);
         drawable.addTransition(R.id.play_state, R.id.pause_state, (AnimatedVectorDrawable)
-                ContextCompat.getDrawable(getContext(), R.drawable.ic_play_pause_white_animated_48dp), false);
+                ContextCompat.getDrawable(getContext(), R.drawable.vector_play_pause_white_48dp), false);
     }
 
     @Override

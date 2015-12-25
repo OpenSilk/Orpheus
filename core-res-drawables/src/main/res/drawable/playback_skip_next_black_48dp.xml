@@ -16,7 +16,5 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_checked="true" android:drawable="@drawable/ic_pause_black_36dp"/>
-    <item android:drawable="@drawable/ic_play_black_36dp"/>
-</selector>
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/ic_skip_next_black_48dp"/>

@@ -127,6 +127,7 @@ public class ControlsScreenView extends RelativeLayout {
         repeat.setState(mode);
     }
 
+    @DebugLog
     public void setShuffleLevel(int mode) {
         shuffle.setChecked(mode == PlaybackConstants.SHUFFLE_NORMAL);
     }
@@ -158,19 +159,19 @@ public class ControlsScreenView extends RelativeLayout {
         //add state transitions
         AnimatedStateListDrawable drawable = (AnimatedStateListDrawable) play.getDrawable();
         drawable.addTransition(R.id.pause_state, R.id.play_state, (AnimatedVectorDrawable)
-                ContextCompat.getDrawable(getContext(), R.drawable.ic_pause_play_black_animated_36dp), false);
+                ContextCompat.getDrawable(getContext(), R.drawable.vector_pause_play_black_36dp), false);
         drawable.addTransition(R.id.play_state, R.id.pause_state, (AnimatedVectorDrawable)
-                ContextCompat.getDrawable(getContext(), R.drawable.ic_play_pause_black_animated_36dp), false);
+                ContextCompat.getDrawable(getContext(), R.drawable.vector_play_pause_black_36dp), false);
 
         AnimatedStateListDrawable repeatDrawable = (AnimatedStateListDrawable) repeat.getDrawable();
         repeatDrawable.addTransition(R.id.repeat_off_state, R.id.repeat_on_state, (AnimatedVectorDrawable)
-                ContextCompat.getDrawable(getContext(), R.drawable.ic_repeat_off_on_black_animated_36dp), true);
+                ContextCompat.getDrawable(getContext(), R.drawable.vector_repeat_off_on_black_36dp), true);
         repeatDrawable.addTransition(R.id.repeat_on_state, R.id.repeat_one_state, (AnimatedVectorDrawable)
-                ContextCompat.getDrawable(getContext(), R.drawable.ic_repeat_on_one_black_animated_36dp), true);
+                ContextCompat.getDrawable(getContext(), R.drawable.vector_repeat_on_one_black_36dp), true);
         repeatDrawable.addTransition(R.id.repeat_one_state, R.id.repeat_off_state, (AnimatedVectorDrawable)
-                ContextCompat.getDrawable(getContext(), R.drawable.ic_repeat_one_off_black_animated_36dp), true);
+                ContextCompat.getDrawable(getContext(), R.drawable.vector_repeat_one_off_black_36dp), true);
         repeatDrawable.addTransition(R.id.repeat_off_state, R.id.repeat_one_state, (AnimatedVectorDrawable)
-                ContextCompat.getDrawable(getContext(), R.drawable.ic_repeat_off_one_black_animated_36dp), true);
+                ContextCompat.getDrawable(getContext(), R.drawable.vector_repeat_off_one_black_36dp), true);
     }
 
     void subscribeClicks() {
