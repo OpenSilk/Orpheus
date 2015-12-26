@@ -30,7 +30,6 @@ import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.index.model.BioSummary;
-import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.Model;
@@ -66,8 +65,8 @@ public class ArtistDetailsScreenModule {
     }
 
     @Provides @Named("loader_uri")
-    public Uri provideLoaderUri(@Named("IndexProviderAuthority") String authority) {
-        return IndexUris.artistDetails(screen.artist);
+    public Uri provideLoaderUri() {
+        return screen.artist.getDetailsUri();
     }
 
     @Provides @Named("profile_heros")

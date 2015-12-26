@@ -56,13 +56,13 @@ public class TrackListScreenModule {
     }
 
     @Provides @Named("loader_uri")
-    public Uri provideLoaderUri(@Named("IndexProviderAuthority") String authority) {
+    public Uri provideLoaderUri() {
         return screen.trackList.getUri();
     }
 
     @Provides @Named("profile_heros")
     public Boolean provideWantMultiHeros() {
-        return screen.trackList.getArtInfos().size() > 1;
+        return screen.trackList.getNumArtInfos() > 1;
     }
 
     @Provides @Named("profile_heros")

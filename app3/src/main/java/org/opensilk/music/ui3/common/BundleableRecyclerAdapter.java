@@ -213,7 +213,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
             l2 += UtilsCommon.makeLabel(context, R.plurals.Nsongs, genre.getTracksCount());
         }
         holder.setSubTitle(l2);
-        if (gridStyle && (genre.getArtInfos().size() > 0)) {
+        if (gridStyle && genre.getNumArtInfos() > 0) {
             holder.loadArtwork(genre.getArtInfos());
         } else {
             setLetterTileDrawable(holder, genre.getName());
@@ -228,7 +228,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         } else {
             holder.setSubTitle("");
         }
-        if (gridStyle && (playlist.getArtInfos().size() > 0)) {
+        if (gridStyle && (playlist.getNumArtInfos() > 0)) {
             holder.loadArtwork(playlist.getArtInfos());
         } else {
             setLetterTileDrawable(holder, playlist.getName());
@@ -265,7 +265,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
             subtitle += UtilsCommon.makeLabel(context, R.plurals.Nsongs, collection.getTracksCount());
         }
         holder.setSubTitle(subtitle);
-        if (gridStyle && collection.getArtInfos().size() > 0) {
+        if (gridStyle && collection.getNumArtInfos() > 0) {
             holder.loadArtwork(collection.getArtInfos());
         } else {
             setLetterTileDrawable(holder, collection.getName());
@@ -304,11 +304,11 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
 
     protected boolean wantsMultiArtwork(Bundleable item) {
         if (item instanceof Genre) {
-            return ((Genre) item).getArtInfos().size() > 1;
+            return ((Genre) item).getNumArtInfos() > 1;
         } else if (item instanceof Playlist) {
-            return ((Playlist) item).getArtInfos().size() > 1;
+            return ((Playlist) item).getNumArtInfos() > 1;
         } else if (item instanceof TrackList) {
-            return ((TrackList) item).getArtInfos().size() > 1;
+            return ((TrackList) item).getNumArtInfos() > 1;
         } else {
             return false;
         }
@@ -508,6 +508,22 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
                 clearArtworkRequests();
                 artworkTargets = UtilsCommon.loadMultiArtwork(
                         requestor, artwork, artwork2, artwork3, artwork4, artInfos);
+            }
+        }
+
+        @Override
+        public void setArtwork(Drawable drawable) {
+            if (artwork != null) {
+                artwork.setImageDrawable(drawable);
+            }
+            if (artwork2 != null) {
+                artwork2.setImageDrawable(drawable);
+            }
+            if (artwork3 != null) {
+                artwork2.setImageDrawable(drawable);
+            }
+            if (artwork4 != null) {
+                artwork4.setImageDrawable(drawable);
             }
         }
 

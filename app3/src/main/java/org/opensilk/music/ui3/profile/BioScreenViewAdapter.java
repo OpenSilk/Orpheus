@@ -84,7 +84,10 @@ public class BioScreenViewAdapter extends RecyclerListAdapter<Object, BioScreenV
             url = ((SimilarArtist)m).getUrl();
         }
         if (!StringUtils.isEmpty(url)) {
-            Intent i = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(url));
+            Intent i = new Intent(Intent.ACTION_VIEW)
+                    .setData(Uri.parse(url))
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    ;
             try {
                 recyclerView.getContext().startActivity(i);
             } catch (ActivityNotFoundException e) {

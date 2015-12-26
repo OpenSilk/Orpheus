@@ -64,13 +64,13 @@ public class GenreDetailsScreenModule {
     }
 
     @Provides @Named("loader_uri")
-    public Uri provideLoaderUri(@Named("IndexProviderAuthority") String authority) {
-        return IndexUris.genreDetails(screen.genre);
+    public Uri provideLoaderUri() {
+        return screen.genre.getDetailsUri();
     }
 
     @Provides @Named("profile_heros")
     public Boolean provideWantMultiHeros() {
-        return screen.genre.getArtInfos().size() > 1;
+        return screen.genre.getNumArtInfos() > 1;
     }
 
     @Provides @Named("profile_heros")

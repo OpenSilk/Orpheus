@@ -27,8 +27,11 @@ import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
+import org.opensilk.music.artwork.UtilsArt;
+import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Model;
+import org.opensilk.music.model.TrackList;
 import org.opensilk.music.model.sort.ArtistSortOrder;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
@@ -38,6 +41,7 @@ import org.opensilk.music.ui3.common.MenuHandlerImpl;
 import org.opensilk.music.ui3.common.OpenProfileItemClickListener;
 import org.opensilk.music.ui3.profile.ProfileScreen;
 import org.opensilk.music.ui3.profile.ArtistDetailsScreen;
+import org.opensilk.music.ui3.profile.TrackListScreen;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,7 +84,20 @@ public class ArtistsScreenModule {
         return new OpenProfileItemClickListener(activityResultsController, new OpenProfileItemClickListener.ProfileScreenFactory() {
             @Override
             public ProfileScreen call(Model model) {
-                return new ArtistDetailsScreen((Artist)model);
+                Artist artist = (Artist) model;
+                if (artist.getDetailsUri() != null) {
+                    return new ArtistDetailsScreen(artist);
+                } else {
+                    TrackList tl = TrackList.builder()
+                            .setUri(artist.getTracksUri())
+                            .setParentUri(artist.getUri())
+                            .setTracksUri(artist.getTracksUri())
+                            .setTrackCount(artist.getTrackCount())
+                            .setName(artist.getName())
+                            .addArtInfo(ArtInfo.forArtist(artist.getName(), null))
+                            .build();
+                    return new TrackListScreen(tl);
+                }
             }
         });
     }

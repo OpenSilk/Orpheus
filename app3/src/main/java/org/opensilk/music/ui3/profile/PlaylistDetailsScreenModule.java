@@ -65,7 +65,7 @@ public class PlaylistDetailsScreenModule {
 
     @Provides @Named("profile_heros")
     public Boolean provideWantMultiHeros() {
-        return screen.playlist.getArtInfos().size() > 1;
+        return screen.playlist.getNumArtInfos() > 1;
     }
 
     @Provides @Named("profile_heros")
