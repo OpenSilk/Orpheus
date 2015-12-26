@@ -79,14 +79,7 @@ public class ArtworkProviderHelper {
                     ParcelFileDescriptor pfd = null;
                     try {
                         if (VersionUtils.hasKitkat()) {
-                            final CancellationSignal cancellationSignal = new CancellationSignal();
-                            subscriber.add(Subscriptions.create(new Action0() {
-                                @Override @TargetApi(19)
-                                public void call() {
-                                    cancellationSignal.cancel();
-                                }
-                            }));
-                            pfd = getParcelFileDescriptior(uri, cancellationSignal);
+                            pfd = getParcelFileDescriptiorK(uri, subscriber);
                         } else {
                             pfd = getParcelFileDescriptior(uri);
                         }
@@ -136,9 +129,16 @@ public class ArtworkProviderHelper {
     }
 
     @TargetApi(19)
-    public ParcelFileDescriptor getParcelFileDescriptior(@NonNull Uri artworkUri, CancellationSignal signal) {
+    private ParcelFileDescriptor getParcelFileDescriptiorK(@NonNull Uri artworkUri, Subscriber<? super Bitmap> subscriber) {
+        final CancellationSignal cancellationSignal = new CancellationSignal();
+        subscriber.add(Subscriptions.create(new Action0() {
+            @Override
+            public void call() {
+                cancellationSignal.cancel();
+            }
+        }));
         try {
-            return mContext.getContentResolver().openFileDescriptor(artworkUri, "r", signal);
+            return mContext.getContentResolver().openFileDescriptor(artworkUri, "r", cancellationSignal);
         } catch (FileNotFoundException ignored) {
             Timber.i("queryArtworkProvider(%s) provider miss", artworkUri);
             return null;
