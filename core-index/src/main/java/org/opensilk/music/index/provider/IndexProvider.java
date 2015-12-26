@@ -25,6 +25,7 @@ import android.os.IBinder;
 import android.util.Pair;
 
 import org.apache.commons.lang3.StringUtils;
+import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.music.index.IndexComponent;
@@ -41,7 +42,7 @@ import org.opensilk.music.library.internal.BundleableListTransformer;
 import org.opensilk.music.library.internal.BundleableSubscriber;
 import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.playlist.PlaylistOperationListener;
-import org.opensilk.music.library.playlist.provider.PlaylistLibraryProvider;
+import org.opensilk.music.library.playlist.provider.PlaylistLibraryAddOn;
 import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.library.provider.LibraryProvider;
@@ -53,9 +54,7 @@ import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
-import org.opensilk.bundleable.Bundleable;
 import org.opensilk.music.model.compare.BaseCompare;
-import org.opensilk.music.model.compare.FolderCompare;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,26 +63,22 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import de.umass.lastfm.ImageSize;
-import de.umass.lastfm.LastFM;
-import de.umass.lastfm.Library;
 import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.functions.Action1;
-import rx.functions.Action2;
 import rx.functions.Func0;
 import rx.functions.Func1;
-import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 import static org.opensilk.music.index.provider.IndexUris.M_ALBUMS;
 import static org.opensilk.music.index.provider.IndexUris.M_ALBUM_ARTISTS;
 import static org.opensilk.music.index.provider.IndexUris.M_ALBUM_BIO;
+import static org.opensilk.music.index.provider.IndexUris.M_ALBUM_DETAILS;
 import static org.opensilk.music.index.provider.IndexUris.M_ALBUM_TRACKS;
 import static org.opensilk.music.index.provider.IndexUris.M_ARTISTS;
-import static org.opensilk.music.index.provider.IndexUris.M_ALBUM_DETAILS;
 import static org.opensilk.music.index.provider.IndexUris.M_ARTIST_ALBUMS;
 import static org.opensilk.music.index.provider.IndexUris.M_ARTIST_BIO;
 import static org.opensilk.music.index.provider.IndexUris.M_ARTIST_DETAILS;
@@ -96,15 +91,12 @@ import static org.opensilk.music.index.provider.IndexUris.M_GENRE_TRACKS;
 import static org.opensilk.music.index.provider.IndexUris.M_PLAYLISTS;
 import static org.opensilk.music.index.provider.IndexUris.M_PLAYLIST_TRACKS;
 import static org.opensilk.music.index.provider.IndexUris.M_TRACKS;
-import static org.opensilk.music.index.provider.IndexUris.album;
-import static org.opensilk.music.index.provider.IndexUris.artist;
 import static org.opensilk.music.index.provider.IndexUris.makeMatcher;
-import static org.opensilk.music.index.provider.IndexUris.playlist;
 
 /**
  * Created by drew on 7/11/15.
  */
-public class IndexProvider extends PlaylistLibraryProvider {
+public class IndexProvider extends LibraryProvider implements PlaylistLibraryAddOn.Handler {
 
     @Inject @Named("IndexProviderAuthority") String mAuthority;
     @Inject IndexDatabase mDataBase;
@@ -112,6 +104,7 @@ public class IndexProvider extends PlaylistLibraryProvider {
     @Inject LibraryProviderInfoLoader mLibraryLoader;
 
     private UriMatcher mUriMatcher;
+    private PlaylistLibraryAddOn mPlaylistAddon;
 
     @Override
     @DebugLog
@@ -119,7 +112,9 @@ public class IndexProvider extends PlaylistLibraryProvider {
         final IndexComponent acc = DaggerService.getDaggerComponent(getContext());
         IndexProviderComponent.FACTORY.call(acc).inject(this);
         super.onCreate();
+        setScheduler(Schedulers.immediate());
         mUriMatcher = makeMatcher(mAuthority);
+        mPlaylistAddon = new PlaylistLibraryAddOn(getScheduler(), this);
         return true;
     }
 
@@ -248,6 +243,10 @@ public class IndexProvider extends PlaylistLibraryProvider {
                 return reply.putOk(true).get();
             }
             default: {
+                PlaylistLibraryAddOn.Reply plistReply = mPlaylistAddon.handleCall(method, arg, extras);
+                if (plistReply.isHandled()) {
+                    return plistReply.getReply();
+                }
                 return super.callCustom(method, arg, extras);
             }
         }
@@ -297,7 +296,7 @@ public class IndexProvider extends PlaylistLibraryProvider {
                     public String[] call(List<String> strings) {
                         return strings.toArray(new String[strings.size()]);
                     }
-        });
+                });
     }
 
     @Override
@@ -638,7 +637,7 @@ public class IndexProvider extends PlaylistLibraryProvider {
     }
 
     @Override
-    protected void createPlaylist(String name, PlaylistOperationListener<Uri> resultListener, Bundle extras) {
+    public void createPlaylist(String name, PlaylistOperationListener<Uri> resultListener, Bundle extras) {
         long id = mDataBase.insertPlaylist(name);
         if (id > 0) {
             resultListener.onSuccess(IndexUris.playlist(mAuthority, String.valueOf(id)));
@@ -648,7 +647,7 @@ public class IndexProvider extends PlaylistLibraryProvider {
     }
 
     @Override
-    protected void addToPlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras) {
+    public void addToPlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras) {
         String id = playlist.getLastPathSegment();
         int count = mDataBase.addToPlaylist(id, tracks);
         if (count > 0) {
@@ -659,7 +658,7 @@ public class IndexProvider extends PlaylistLibraryProvider {
     }
 
     @Override
-    protected void removeFromPlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras) {
+    public void removeFromPlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras) {
         String id = playlist.getLastPathSegment();
         int count = 0;
         for (Uri uri : tracks) {
@@ -673,7 +672,7 @@ public class IndexProvider extends PlaylistLibraryProvider {
     }
 
     @Override
-    protected void updatePlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras) {
+    public void updatePlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras) {
         String id = playlist.getLastPathSegment();
         int count = mDataBase.updatePlaylist(id, tracks);
         if (count > 0) {
@@ -684,7 +683,7 @@ public class IndexProvider extends PlaylistLibraryProvider {
     }
 
     @Override
-    protected void deletePlaylists(List<Uri> playlists, PlaylistOperationListener<Integer> resultListener, Bundle extras) {
+    public void deletePlaylists(List<Uri> playlists, PlaylistOperationListener<Integer> resultListener, Bundle extras) {
         String[] ids = new String[playlists.size()];
         for (int ii=0; ii<playlists.size(); ii++) {
             ids[ii] = playlists.get(ii).getLastPathSegment();

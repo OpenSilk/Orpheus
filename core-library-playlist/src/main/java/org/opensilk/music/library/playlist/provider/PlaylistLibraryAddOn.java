@@ -27,6 +27,7 @@ import org.opensilk.music.library.playlist.PlaylistOperationListener;
 import org.opensilk.music.library.playlist.internal.PlaylistIntegerResult;
 import org.opensilk.music.library.playlist.internal.PlaylistPlaylistResult;
 import org.opensilk.music.library.playlist.internal.PlaylistUriResult;
+import org.opensilk.music.library.playlist.provider.PlaylistMethods;
 import org.opensilk.music.library.provider.LibraryProvider;
 import org.opensilk.music.model.Playlist;
 
@@ -39,12 +40,17 @@ import rx.schedulers.Schedulers;
 /**
  * Created by drew on 12/10/15.
  */
-public abstract class PlaylistLibraryProvider extends LibraryProvider {
+public class PlaylistLibraryAddOn {
 
-    final Scheduler playlistScheduler = Schedulers.computation();
+    final Scheduler playlistScheduler;
+    final Handler handler;
 
-    @Override
-    protected Bundle callCustom(String method, String arg, Bundle extras) {
+    public PlaylistLibraryAddOn(Scheduler playlistScheduler, Handler handler) {
+        this.playlistScheduler = playlistScheduler;
+        this.handler = handler;
+    }
+
+    public Reply handleCall(String method, String arg, Bundle extras) {
 
         final PlaylistExtras.Builder ok = PlaylistExtras.b();
         ok.putOk(true);
@@ -58,7 +64,7 @@ public abstract class PlaylistLibraryProvider extends LibraryProvider {
             case PlaylistMethods.CREATE: {
                 final String name = PlaylistExtras.getName(extras);
                 if (StringUtils.isEmpty(name)) {
-                    return ok.putOk(false).putError("No name in extras").get();
+                    return new Reply(ok.putOk(false).putError("No name in extras").get());
                 }
                 final ResultReceiver resultReceiver = PlaylistExtras.getResultReceiver(extras);
                 final PlaylistUriResult resultHandler = new PlaylistUriResult(resultReceiver);
@@ -67,17 +73,17 @@ public abstract class PlaylistLibraryProvider extends LibraryProvider {
                 worker.schedule(new Action0() {
                     @Override
                     public void call() {
-                        createPlaylist(name, resultHandler, sanitizedExtras);
+                        handler.createPlaylist(name, resultHandler, sanitizedExtras);
                         worker.unsubscribe();
                     }
                 });
-                return ok.get();
+                return new Reply(ok.get());
             }
             case PlaylistMethods.ADD_TO: {
                 final Uri plist = PlaylistExtras.getUri(extras);
                 final List<Uri> list = PlaylistExtras.getUriList(extras);
                 if (plist == null || list == null || list.isEmpty()) {
-                    return ok.putOk(false).putError("No playlist uri or uri list").get();
+                    return new Reply(ok.putOk(false).putError("No playlist uri or uri list").get());
                 }
                 final ResultReceiver resultReceiver = PlaylistExtras.getResultReceiver(extras);
                 final PlaylistPlaylistResult resultHandler = new PlaylistPlaylistResult(resultReceiver);
@@ -86,17 +92,17 @@ public abstract class PlaylistLibraryProvider extends LibraryProvider {
                 worker.schedule(new Action0() {
                     @Override
                     public void call() {
-                        addToPlaylist(plist, list, resultHandler, sanitizedExtras);
+                        handler.addToPlaylist(plist, list, resultHandler, sanitizedExtras);
                         worker.unsubscribe();
                     }
                 });
-                return ok.get();
+                return new Reply(ok.get());
             }
             case PlaylistMethods.REMOVE_FROM: {
                 final Uri plist = PlaylistExtras.getUri(extras);
                 final List<Uri> list = PlaylistExtras.getUriList(extras);
                 if (plist == null || list == null || list.isEmpty()) {
-                    return ok.putOk(false).putError("No playlist uri or uri list").get();
+                    ok.putOk(false).putError("No playlist uri or uri list");
                 }
                 final ResultReceiver resultReceiver = PlaylistExtras.getResultReceiver(extras);
                 final PlaylistPlaylistResult resultHandler = new PlaylistPlaylistResult(resultReceiver);
@@ -105,17 +111,17 @@ public abstract class PlaylistLibraryProvider extends LibraryProvider {
                 worker.schedule(new Action0() {
                     @Override
                     public void call() {
-                        removeFromPlaylist(plist, list, resultHandler, sanitizedExtras);
+                        handler.removeFromPlaylist(plist, list, resultHandler, sanitizedExtras);
                         worker.unsubscribe();
                     }
                 });
-                return ok.get();
+                return new Reply(ok.get());
             }
             case PlaylistMethods.UPDATE: {
                 final Uri plist = PlaylistExtras.getUri(extras);
                 final List<Uri> list = PlaylistExtras.getUriList(extras);
                 if (plist == null || list == null || list.isEmpty()) {
-                    return ok.putOk(false).putError("No playlist uri or uri list").get();
+                    return new Reply(ok.putOk(false).putError("No playlist uri or uri list").get());
                 }
                 final ResultReceiver resultReceiver = PlaylistExtras.getResultReceiver(extras);
                 final PlaylistPlaylistResult resultHandler = new PlaylistPlaylistResult(resultReceiver);
@@ -124,16 +130,16 @@ public abstract class PlaylistLibraryProvider extends LibraryProvider {
                 worker.schedule(new Action0() {
                     @Override
                     public void call() {
-                        updatePlaylist(plist, list, resultHandler, sanitizedExtras);
+                        handler.updatePlaylist(plist, list, resultHandler, sanitizedExtras);
                         worker.unsubscribe();
                     }
                 });
-                return ok.get();
+                return new Reply(ok.get());
             }
             case PlaylistMethods.DELETE: {
                 final List<Uri> list = PlaylistExtras.getUriList(extras);
                 if (list == null || list.isEmpty()) {
-                    return ok.putOk(false).putError("No uri list").get();
+                    return new Reply(ok.putOk(false).putError("No uri list").get());
                 }
                 final ResultReceiver resultReceiver = PlaylistExtras.getResultReceiver(extras);
                 final PlaylistIntegerResult resultHandler = new PlaylistIntegerResult(resultReceiver);
@@ -142,21 +148,46 @@ public abstract class PlaylistLibraryProvider extends LibraryProvider {
                 worker.schedule(new Action0() {
                     @Override
                     public void call() {
-                        deletePlaylists(list, resultHandler, sanitizedExtras);
+                        handler.deletePlaylists(list, resultHandler, sanitizedExtras);
                         worker.unsubscribe();
                     }
                 });
-                return ok.get();
+                return new Reply(ok.get());
             }
             default:
-                return super.callCustom(method, arg, extras);
+                return new Reply();
         }
     }
 
-    protected abstract void createPlaylist(String name, PlaylistOperationListener<Uri> resultListener, Bundle extras);
-    protected abstract void addToPlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras);
-    protected abstract void removeFromPlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras);
-    protected abstract void updatePlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras);
-    protected abstract void deletePlaylists(List<Uri> playlists, PlaylistOperationListener<Integer> resultListener, Bundle extras);
+    public interface Handler {
+        void createPlaylist(String name, PlaylistOperationListener<Uri> resultListener, Bundle extras);
+        void addToPlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras);
+        void removeFromPlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras);
+        void updatePlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras);
+        void deletePlaylists(List<Uri> playlists, PlaylistOperationListener<Integer> resultListener, Bundle extras);
+    }
+
+    public static class Reply {
+        private final boolean handled;
+        private final Bundle reply;
+
+        private Reply() {
+            this.handled = false;
+            this.reply = null;
+        }
+
+        private Reply(Bundle reply) {
+            this.handled = true;
+            this.reply = reply;
+        }
+
+        public boolean isHandled() {
+            return handled;
+        }
+
+        public Bundle getReply() {
+            return reply;
+        }
+    }
 
 }

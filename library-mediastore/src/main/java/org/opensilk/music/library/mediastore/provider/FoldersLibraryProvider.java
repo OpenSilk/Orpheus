@@ -32,7 +32,8 @@ import org.opensilk.music.library.mediastore.util.FilesHelper;
 import org.opensilk.music.library.mediastore.util.PlaylistUtil;
 import org.opensilk.music.library.mediastore.util.Uris;
 import org.opensilk.music.library.playlist.PlaylistOperationListener;
-import org.opensilk.music.library.playlist.provider.PlaylistLibraryProvider;
+import org.opensilk.music.library.playlist.provider.PlaylistLibraryAddOn;
+import org.opensilk.music.library.provider.LibraryProvider;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Model;
@@ -49,24 +50,28 @@ import javax.inject.Named;
 import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Subscriber;
+import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 /**
  * Created by drew on 5/17/15.
  */
-public class FoldersLibraryProvider extends PlaylistLibraryProvider {
+public class FoldersLibraryProvider extends LibraryProvider implements PlaylistLibraryAddOn.Handler {
 
     @Inject @Named("foldersLibraryAuthority") String mAuthority;
     @Inject StorageLookup mStorageLookup;
 
-    UriMatcher mUriMatcher;
+    private UriMatcher mUriMatcher;
+    private PlaylistLibraryAddOn mPlaylistAddon;
 
     @Override
     public boolean onCreate() {
         final AppContextComponent acc = DaggerService.getDaggerComponent(getContext());
         FoldersLibraryComponent.FACTORY.call(acc).inject(this);
         super.onCreate();
+        setScheduler(Schedulers.immediate());
         mUriMatcher = FoldersUris.makeMatcher(mAuthority);
+        mPlaylistAddon = new PlaylistLibraryAddOn(getScheduler(), this);
         return true;
     }
 
@@ -81,6 +86,15 @@ public class FoldersLibraryProvider extends PlaylistLibraryProvider {
     @Override
     protected String getAuthority() {
         return mAuthority;
+    }
+
+    @Override
+    protected Bundle callCustom(String method, String arg, Bundle extras) {
+        PlaylistLibraryAddOn.Reply plistReply = mPlaylistAddon.handleCall(method, arg, extras);
+        if (plistReply.isHandled()) {
+            return plistReply.getReply();
+        }
+        return super.callCustom(method, arg, extras);
     }
 
     @Override
@@ -400,7 +414,7 @@ public class FoldersLibraryProvider extends PlaylistLibraryProvider {
     }
 
     @Override
-    protected void createPlaylist(String name, PlaylistOperationListener<Uri> resultListener, Bundle extras) {
+    public void createPlaylist(String name, PlaylistOperationListener<Uri> resultListener, Bundle extras) {
         Uri uri = PlaylistUtil.createPlaylist(getContext(), name);
         if (uri != null) {
             resultListener.onSuccess(uri);
@@ -411,7 +425,7 @@ public class FoldersLibraryProvider extends PlaylistLibraryProvider {
     }
 
     @Override
-    protected void addToPlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras) {
+    public void addToPlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras) {
         String[] ids = extractIds(tracks);
         String plist = playlist.getLastPathSegment();
         int num = PlaylistUtil.addToPlaylist(getContext(), ids, plist);
@@ -423,7 +437,7 @@ public class FoldersLibraryProvider extends PlaylistLibraryProvider {
     }
 
     @Override
-    protected void removeFromPlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras) {
+    public void removeFromPlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras) {
         String[] ids = extractIds(tracks);
         String plist = playlist.getLastPathSegment();
         int num = 0;
@@ -438,7 +452,7 @@ public class FoldersLibraryProvider extends PlaylistLibraryProvider {
     }
 
     @Override
-    protected void updatePlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras) {
+    public void updatePlaylist(Uri playlist, List<Uri> tracks, PlaylistOperationListener<Playlist> resultListener, Bundle extras) {
         String[] ids = extractIds(tracks);
         String plist = playlist.getLastPathSegment();
         PlaylistUtil.clearPlaylist(getContext(), plist, false);
@@ -452,7 +466,7 @@ public class FoldersLibraryProvider extends PlaylistLibraryProvider {
     }
 
     @Override
-    protected void deletePlaylists(List<Uri> playlists, PlaylistOperationListener<Integer> resultListener, Bundle extras) {
+    public void deletePlaylists(List<Uri> playlists, PlaylistOperationListener<Integer> resultListener, Bundle extras) {
         ContentResolver resolver = getContext().getContentResolver();
         int num = 0;
         for (Uri uri : playlists) {
