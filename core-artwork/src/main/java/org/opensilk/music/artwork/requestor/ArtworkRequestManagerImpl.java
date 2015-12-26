@@ -37,6 +37,7 @@ import org.opensilk.common.glide.PaletteSwatchType;
 import org.opensilk.common.glide.Paletteable;
 import org.opensilk.common.glide.PalettizedBitmapDrawable;
 import org.opensilk.music.artwork.R;
+import org.opensilk.music.artwork.glide.ArtInfoRequest;
 import org.opensilk.music.model.ArtInfo;
 
 import javax.inject.Inject;
@@ -62,7 +63,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
     }
 
     public Target<PalettizedBitmapDrawable> newRequest(ArtInfo artInfo, ImageView imageView, @Nullable Bundle extras) {
-        return newRequest(artInfo.asContentUri(mAuthority), imageView, extras);
+        return newRequest(artInfo, imageView, (Paletteable) null, extras);
     }
 
     public Target<PalettizedBitmapDrawable> newRequest(Uri uri, ImageView imageView, @Nullable Bundle extras) {
@@ -70,61 +71,47 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
     }
 
     public Target<PalettizedBitmapDrawable> newRequest(ArtInfo artInfo, ImageView imageView, @Nullable Paletteable paletteable, @Nullable Bundle extras) {
-        return newRequest(artInfo.asContentUri(mAuthority), imageView, paletteable, extras);
+        PalettableImageViewTarget target = makeTarget(imageView, paletteable, extras);
+        RequestOptions options = makeOptions(imageView, extras);
+        return Glide.with(imageView.getContext())
+                .as(PalettizedBitmapDrawable.class)
+                .apply(options)
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .load(new ArtInfoRequest(mAuthority, artInfo))
+                .into(target);
     }
 
     public Target<PalettizedBitmapDrawable> newRequest(Uri uri, ImageView imageView, @Nullable Paletteable paletteable, @Nullable Bundle extras) {
-        PalettableImageViewTarget.Builder bob = PalettableImageViewTarget.builder().into(imageView);
-        if (paletteable != null && extras != null) {
-            PaletteSwatchType type = PaletteSwatchType.valueOf(BundleHelper.getString(extras));
-            PaletteSwatchType fallbackType = PaletteSwatchType.valueOf(BundleHelper.getString2(extras));
-            bob.intoPalettable(type, fallbackType, paletteable);
-        }
-        RequestOptions options = new RequestOptions()
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .placeholder(R.drawable.default_artwork)
-                ;
-        if (extras != null && BundleHelper.getInt(extras) == 1) {
-            options.circleCrop(imageView.getContext());
-        } else if (extras != null && BundleHelper.getInt(extras) == 2) {
-            options.fitCenter(imageView.getContext());
-        } else {
-            options.centerCrop(imageView.getContext());
-        }
+        PalettableImageViewTarget target = makeTarget(imageView, paletteable, extras);
+        RequestOptions options = makeOptions(imageView, extras);
         return Glide.with(imageView.getContext())
                 .as(PalettizedBitmapDrawable.class)
                 .apply(options)
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .load(uri)
-                .into(bob.build());
+                .into(target);
     }
 
     public Target<PalettizedBitmapDrawable> newRequest(ArtInfo artInfo, ImageView imageView, Palette.PaletteAsyncListener listener, @Nullable Bundle extras) {
-        return newRequest(artInfo.asContentUri(mAuthority), imageView, listener, extras);
+        PalettableImageViewTarget target = makeTarget(imageView, listener);
+        RequestOptions options = makeOptions(imageView, extras);
+        return Glide.with(imageView.getContext())
+                .as(PalettizedBitmapDrawable.class)
+                .apply(options)
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .load(new ArtInfoRequest(mAuthority, artInfo))
+                .into(target);
     }
 
     public Target<PalettizedBitmapDrawable> newRequest(Uri uri, ImageView imageView, Palette.PaletteAsyncListener listener, @Nullable Bundle extras) {
-        PalettableImageViewTarget.Builder bob = PalettableImageViewTarget.builder()
-                .into(imageView)
-                .withCallback(listener)
-                ;
-        RequestOptions options = new RequestOptions()
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .placeholder(R.drawable.default_artwork)
-                ;
-        if (extras != null && BundleHelper.getInt(extras) == 1) {
-            options.circleCrop(imageView.getContext());
-        } else if (extras != null && BundleHelper.getInt(extras) == 2) {
-            options.fitCenter(imageView.getContext());
-        } else {
-            options.centerCrop(imageView.getContext());
-        }
+        PalettableImageViewTarget target = makeTarget(imageView, listener);
+        RequestOptions options = makeOptions(imageView, extras);
         return Glide.with(imageView.getContext())
                 .as(PalettizedBitmapDrawable.class)
                 .apply(options)
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .load(uri)
-                .into(bob.build());
+                .into(target);
     }
 
     public void cancelRequest(ImageView imageView, Target<?> target) {
@@ -132,6 +119,39 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             return;
         }
         Glide.with(imageView.getContext()).clear(target);
+    }
+
+    private PalettableImageViewTarget makeTarget(ImageView imageView, Paletteable paletteable, Bundle extras) {
+        PalettableImageViewTarget.Builder bob = PalettableImageViewTarget.builder().into(imageView);
+        if (paletteable != null && extras != null) {
+            PaletteSwatchType type = PaletteSwatchType.valueOf(BundleHelper.getString(extras));
+            PaletteSwatchType fallbackType = PaletteSwatchType.valueOf(BundleHelper.getString2(extras));
+            bob.intoPalettable(type, fallbackType, paletteable);
+        }
+        return bob.build();
+    }
+
+    private PalettableImageViewTarget makeTarget(ImageView imageView, Palette.PaletteAsyncListener listener) {
+        PalettableImageViewTarget.Builder bob = PalettableImageViewTarget.builder()
+                .into(imageView)
+                .withCallback(listener)
+                ;
+        return bob.build();
+    }
+
+    private RequestOptions makeOptions(ImageView imageView, Bundle extras) {
+        RequestOptions options = new RequestOptions()
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .placeholder(R.drawable.default_artwork)
+                ;
+        if (extras != null && BundleHelper.getInt(extras) == 1) {
+            options.circleCrop(imageView.getContext());
+        } else if (extras != null && BundleHelper.getInt(extras) == 2) {
+            options.fitCenter(imageView.getContext());
+        } else {
+            options.centerCrop(imageView.getContext());
+        }
+        return options;
     }
 
 }

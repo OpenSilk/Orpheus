@@ -16,17 +16,20 @@
 
 package org.opensilk.music.artwork.service;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 
 import org.opensilk.common.core.dagger2.ForApplication;
+import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.artwork.R;
 import org.opensilk.music.artwork.cache.BitmapLruCache;
 
@@ -40,6 +43,8 @@ import javax.inject.Singleton;
 import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Subscriber;
+import rx.functions.Action0;
+import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 /**
@@ -68,7 +73,47 @@ public class ArtworkProviderHelper {
         return Observable.create(new Observable.OnSubscribe<Bitmap>() {
             @Override
             public void call(Subscriber<? super Bitmap> subscriber) {
-                Bitmap bitmap = queryArtworkProvider(uri, uri.toString());
+                final String cacheKey = uri.toString();
+                Bitmap bitmap = mL1Cache.getBitmap(cacheKey);
+                if (bitmap == null) {
+                    ParcelFileDescriptor pfd = null;
+                    try {
+                        if (VersionUtils.hasKitkat()) {
+                            final CancellationSignal cancellationSignal = new CancellationSignal();
+                            subscriber.add(Subscriptions.create(new Action0() {
+                                @Override @TargetApi(19)
+                                public void call() {
+                                    cancellationSignal.cancel();
+                                }
+                            }));
+                            pfd = getParcelFileDescriptior(uri, cancellationSignal);
+                        } else {
+                            pfd = getParcelFileDescriptior(uri);
+                        }
+                        if (pfd != null) {
+                            synchronized (sDecodeLock) {
+                                try {
+                                    BitmapFactory.Options options = new BitmapFactory.Options();
+                                    options.inPreferredConfig = Bitmap.Config.RGB_565;
+                                    bitmap = BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor(), null, options);
+                                } catch (OutOfMemoryError e) {
+                                    bitmap = null;
+                                }
+                            }
+                            if (bitmap != null) {
+                                mL1Cache.putBitmap(cacheKey, bitmap);
+                            }
+                        }
+                    } catch (Exception e) {
+                        Timber.w(e, "queryArtworkProvider(%s) error", cacheKey);
+                        bitmap = null;
+                    } finally {
+                        try {
+                            if (pfd != null) pfd.close();
+                        } catch (IOException ignored) {
+                        }
+                    }
+                }
                 if (!subscriber.isUnsubscribed()) {
                     if (bitmap != null) {
                         subscriber.onNext(bitmap);
@@ -81,46 +126,19 @@ public class ArtworkProviderHelper {
         });
     }
 
-    /**
-     * Queries ArtworkProvider for given uri, first checking local cache
-     * @return Decoded bitmap
-     */
-    public @Nullable Bitmap queryArtworkProvider(@NonNull Uri artworkUri, @NonNull String cacheKey) {
-        Bitmap bitmap = mL1Cache.getBitmap(cacheKey);
-        if (bitmap == null) {
-            ParcelFileDescriptor pfd = null;
-            try {
-                pfd = getParcelFileDescriptior(artworkUri);
-                if (pfd != null) {
-                    synchronized (sDecodeLock) {
-                        try {
-                            BitmapFactory.Options options = new BitmapFactory.Options();
-                            options.inPreferredConfig = Bitmap.Config.RGB_565;
-                            bitmap = BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor(), null, options);
-                        } catch (OutOfMemoryError e) {
-                            bitmap = null;
-                        }
-                    }
-                    if (bitmap != null) {
-                        mL1Cache.putBitmap(cacheKey, bitmap);
-                    }
-                }
-            } catch (Exception e) {
-                Timber.w(e, "queryArtworkProvider(%s) error", cacheKey);
-                bitmap = null;
-            } finally {
-                try {
-                    if (pfd != null) pfd.close();
-                } catch (IOException ignored) {
-                }
-            }
-        }
-        return bitmap;
-    }
-
     public ParcelFileDescriptor getParcelFileDescriptior(@NonNull Uri artworkUri) {
         try {
             return mContext.getContentResolver().openFileDescriptor(artworkUri, "r");
+        } catch (FileNotFoundException ignored) {
+            Timber.i("queryArtworkProvider(%s) provider miss", artworkUri);
+            return null;
+        }
+    }
+
+    @TargetApi(19)
+    public ParcelFileDescriptor getParcelFileDescriptior(@NonNull Uri artworkUri, CancellationSignal signal) {
+        try {
+            return mContext.getContentResolver().openFileDescriptor(artworkUri, "r", signal);
         } catch (FileNotFoundException ignored) {
             Timber.i("queryArtworkProvider(%s) provider miss", artworkUri);
             return null;

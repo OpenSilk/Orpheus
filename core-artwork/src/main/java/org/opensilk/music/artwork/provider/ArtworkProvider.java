@@ -16,20 +16,25 @@
 
 package org.opensilk.music.artwork.provider;
 
+import android.annotation.TargetApi;
+import android.content.ClipDescription;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.UriMatcher;
+import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import org.apache.commons.io.IOUtils;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.artwork.ArtworkUris;
 import org.opensilk.music.artwork.cache.BitmapDiskCache;
-import org.opensilk.music.artwork.fetcher.ArtworkFetcher;
 import org.opensilk.music.artwork.fetcher.ArtworkFetcherService;
 import org.opensilk.music.artwork.fetcher.CompletionListener;
 import org.opensilk.music.model.ArtInfo;
@@ -69,7 +74,7 @@ public class ArtworkProvider extends ContentProvider {
     }
 
     @Override
-    public String getType(Uri uri) {
+    public String getType(@NonNull Uri uri) {
         switch (mUriMatcher.match(uri)) {
             case ArtworkUris.MATCH.ARTINFO:
                 return "image/png";
@@ -86,28 +91,73 @@ public class ArtworkProvider extends ContentProvider {
     }
 
     @Override
-    @DebugLog
-    public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
+    public @Nullable ParcelFileDescriptor openFile(@NonNull Uri uri, @NonNull String mode) throws FileNotFoundException {
         if (!"r".equals(mode)) {
             throw new FileNotFoundException("Provider is read only");
         }
+        ParcelFileDescriptor pfd = null;
         switch (mUriMatcher.match(uri)) {
             case ArtworkUris.MATCH.ARTINFO: {
                 final ArtInfo artInfo = ArtInfo.fromUri(uri);
-                final ParcelFileDescriptor pfd = getArtwork(artInfo);
-                if (pfd != null) {
-                    return pfd;
+                pfd = createPipe(artInfo, null);
+                if (pfd == null) {
+                    pfd = createPipe2(artInfo, null);
                 }
                 break;
             }
         }
-        throw new FileNotFoundException("Could not obtain image from cache or network");
+        if (pfd == null) {
+            throw new FileNotFoundException("Could not obtain image from cache or network");
+        }
+        return pfd;
     }
 
-    public @Nullable ParcelFileDescriptor getArtwork(ArtInfo artInfo) {
-        ParcelFileDescriptor pfd = createPipe(artInfo);
+    /**
+     * Copied from super
+     */
+    @Override @TargetApi(19)
+    public @Nullable AssetFileDescriptor openTypedAssetFile(@NonNull Uri uri, @NonNull String mimeTypeFilter, Bundle opts, CancellationSignal signal) throws FileNotFoundException {
+        if ("*/*".equals(mimeTypeFilter)) {
+            // If they can take anything, the untyped open call is good enough.
+            return openAssetFile(uri, "r", signal);
+        }
+        String baseType = getType(uri);
+        if (baseType != null && ClipDescription.compareMimeTypes(baseType, mimeTypeFilter)) {
+            // Use old untyped open call if this provider has a type for this
+            // URI and it matches the request.
+            return openAssetFile(uri, "r", signal);
+        }
+        throw new FileNotFoundException("Can't open " + uri + " as type " + mimeTypeFilter);
+    }
+
+    /**
+     * Copied from super
+     */
+    @Override @TargetApi(19)
+    public @Nullable AssetFileDescriptor openAssetFile(@NonNull Uri uri, @NonNull String mode, CancellationSignal signal) throws FileNotFoundException {
+        ParcelFileDescriptor fd = openFile(uri, mode, signal);
+        return fd != null ? new AssetFileDescriptor(fd, 0, -1) : null;
+    }
+
+    @Override @TargetApi(19)
+    public @Nullable ParcelFileDescriptor openFile(@NonNull Uri uri, @NonNull String mode, CancellationSignal signal) throws FileNotFoundException {
+        if (!"r".equals(mode)) {
+            throw new FileNotFoundException("Provider is read only");
+        }
+        ParcelFileDescriptor pfd = null;
+        switch (mUriMatcher.match(uri)) {
+            case ArtworkUris.MATCH.ARTINFO: {
+                final ArtInfo artInfo = ArtInfo.fromUri(uri);
+                final Cancellation cancellation = new CancellationK(signal);
+                pfd = createPipe(artInfo, cancellation);
+                if (pfd == null && !cancellation.isCanceled()) {
+                    pfd = createPipe2(artInfo, cancellation);
+                }
+                break;
+            }
+        }
         if (pfd == null) {
-            pfd = createPipe2(artInfo);
+            throw new FileNotFoundException("Could not obtain image from cache or network");
         }
         return pfd;
     }
@@ -115,9 +165,13 @@ public class ArtworkProvider extends ContentProvider {
     /**
      * Pulls bitmap from diskcache
      */
-    private @Nullable ParcelFileDescriptor createPipe(final ArtInfo artInfo) {
+    private @Nullable ParcelFileDescriptor createPipe(final ArtInfo artInfo, final @Nullable Cancellation cancellation) {
         final byte[] bytes = mL2Cache.getBytes(artInfo.cacheKey());
         if (bytes == null) {
+            return null;
+        }
+        if (cancellation != null && cancellation.isCanceled()) {
+            Timber.i("createPipe(%s) CANCELED", artInfo);
             return null;
         }
         try {
@@ -132,7 +186,7 @@ public class ArtworkProvider extends ContentProvider {
                         IOUtils.write(bytes, out);
                         out.flush();
                     } catch (IOException e) {
-                        Timber.w("createPipe(e=%s) for %s", e.getMessage(), artInfo);
+                        Timber.w("createPipe(%s) %s", artInfo, e.getMessage());
                     } finally {
                         IOUtils.closeQuietly(out);
                         worker.unsubscribe();
@@ -141,7 +195,7 @@ public class ArtworkProvider extends ContentProvider {
             });
             return in;
         } catch (IOException e) {
-            Timber.e(e, "createPipe() for %s", artInfo);
+            Timber.e(e, "createPipe(%s) %s", artInfo, e.getMessage());
             return null;
         }
     }
@@ -151,7 +205,7 @@ public class ArtworkProvider extends ContentProvider {
      * wait for the fetcher to return the bitmap, simply closing the pipe
      * if no art was found
      */
-    private @Nullable ParcelFileDescriptor createPipe2(final ArtInfo artInfo) {
+    private @Nullable ParcelFileDescriptor _createPipe2(final ArtInfo artInfo, final @Nullable Cancellation cancellation) {
         try {
             final ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
             final OutputStream out = new ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]);
@@ -169,7 +223,7 @@ public class ArtworkProvider extends ContentProvider {
                         final CompletionListener listener =
                                 new CompletionListener() {
                                     @Override public void onError(Throwable e) {
-                                        Timber.w("onError(%s) for %s", e.getMessage(), artInfo);
+                                        Timber.w("onError(%s) %s", artInfo, e.getMessage());
                                         queue.offer(new OptionalBitmap(null));
                                     }
                                     @Override public void onNext(Bitmap o) {
@@ -177,7 +231,18 @@ public class ArtworkProvider extends ContentProvider {
                                     }
                                 };
                         if (!binder.getService().newRequest(artInfo, listener)) {
-                            throw new InterruptedException("Enqueue failed");
+                            return;
+                        }
+                        if (cancellation != null) {
+                            final ArtworkFetcherService.Connection finalBinder = binder;
+                            cancellation.setCancelAction(new Action0() {
+                                @Override
+                                public void call() {
+                                    Timber.d("createPipe2(%s) CANCELED INFLIGHT", artInfo);
+                                    finalBinder.getService().cancelRequest(artInfo);
+                                    queue.offer(new OptionalBitmap(null));
+                                }
+                            });
                         }
                         bitmap = queue.take();
                         if (bitmap.hasBitmap()) {
@@ -186,7 +251,7 @@ public class ArtworkProvider extends ContentProvider {
                             out.flush();
                         }
                     } catch (InterruptedException|IOException e) {
-                        Timber.w("createPipe2(e=%s) for %s", e.getMessage(), artInfo);
+                        Timber.w("createPipe2(%s) %s", artInfo, e.getMessage());
                         if (binder != null) {
                             binder.getService().cancelRequest(artInfo);
                         }
@@ -200,9 +265,86 @@ public class ArtworkProvider extends ContentProvider {
             });
             return in;
         } catch (IOException e) {
-            Timber.e(e, "createPipe2() for %s", artInfo);
+            Timber.e(e, "createPipe2(%s) %s", artInfo, e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * This version of createPipe2 blocks on the binder thread, this is to take advantage of
+     * cancellations propagated to us from {@link org.opensilk.music.artwork.glide.ArtInfoRequestStreamFetcherK},
+     * since glide uses a bounded thread pool we shouldn't be at risk of blocking other binder
+     * transactions too badly. This also prevents spinning up a ton of new threads, as we are likely
+     * to reuse a thread from the network request to do the copy.
+     */
+    private @Nullable ParcelFileDescriptor createPipe2(final ArtInfo artInfo, final @Nullable Cancellation cancellation) {
+        OptionalBitmap bitmap = null;
+        ArtworkFetcherService.Connection binder = null;
+        try {
+            //make a new request and wait for it to come in.
+            binder = ArtworkFetcherService.bindService(getContext());
+            if (cancellation != null && cancellation.isCanceled()) {
+                Timber.d("createPipe2(%s) canceled");
+                return null;
+            }
+            final BlockingQueue<OptionalBitmap> queue = new LinkedBlockingQueue<>(1);
+            final CompletionListener listener =
+                    new CompletionListener() {
+                        @Override public void onError(Throwable e) {
+                            Timber.w("onError(%s) %s", artInfo, e.getMessage());
+                            queue.offer(new OptionalBitmap(null));
+                        }
+                        @Override public void onNext(Bitmap o) {
+                            queue.offer(new OptionalBitmap(o));
+                        }
+                    };
+            if (!binder.getService().newRequest(artInfo, listener)) {
+                return null;
+            }
+            if (cancellation != null) {
+                final ArtworkFetcherService.Connection finalBinder = binder;
+                cancellation.setCancelAction(new Action0() {
+                    @Override
+                    public void call() {
+                        Timber.d("Canceling %s", artInfo);
+                        finalBinder.getService().cancelRequest(artInfo);
+                        queue.offer(new OptionalBitmap(null));
+                    }
+                });
+            }
+            bitmap = queue.take();
+            if (bitmap.hasBitmap()) {
+                final ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
+                final OutputStream out = new ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]);
+                final ParcelFileDescriptor in = pipe[0];
+                final byte[] bytes = mL2Cache.bitmapToBytes(bitmap.getBitmap());
+                final Scheduler.Worker worker = mScheduler.createWorker();
+                worker.schedule(new Action0() {
+                    @Override
+                    public void call() {
+                        try {
+                            IOUtils.write(bytes, out);
+                            out.flush();
+                        } catch (IOException e) {
+                            Timber.w("createPipe2(%s) %s", artInfo, e.getMessage());
+                        } finally {
+                            IOUtils.closeQuietly(out);
+                            worker.unsubscribe();
+                        }
+                    }
+                });
+                return in;
+            }
+        } catch (InterruptedException|IOException e) {
+            Timber.w("createPipe2(%s) %s", artInfo, e.getMessage());
+            if (binder != null) {
+                binder.getService().cancelRequest(artInfo);
+            }
+        } finally {
+            if (bitmap != null) bitmap.recycle();
+            IOUtils.closeQuietly(binder);
+        }
+        return null;
     }
 
     /** Wrapper so we can notify error */
@@ -219,6 +361,38 @@ public class ArtworkProvider extends ContentProvider {
         }
         void recycle() {
             if (hasBitmap()) bitmap.recycle();
+        }
+    }
+
+    /** Wrapper for CancellationSignal backwards compat*/
+    private interface Cancellation {
+        boolean isCanceled();
+        void setCancelAction(Action0 action0);
+    }
+
+    @TargetApi(19)
+    private static class CancellationK implements Cancellation {
+        final CancellationSignal signal;
+
+        public CancellationK(@Nullable CancellationSignal signal) {
+            this.signal = signal;
+        }
+
+        @Override
+        public boolean isCanceled() {
+            return signal != null && signal.isCanceled();
+        }
+
+        @Override
+        public void setCancelAction(final Action0 action0) {
+            if (signal != null) {
+                signal.setOnCancelListener(new CancellationSignal.OnCancelListener() {
+                    @Override
+                    public void onCancel() {
+                        action0.call();
+                    }
+                });
+            }
         }
     }
 

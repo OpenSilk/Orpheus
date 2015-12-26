@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.artwork;
+package org.opensilk.music.artwork.glide;
 
 import android.content.Context;
 import android.util.Log;
@@ -25,9 +25,11 @@ import com.bumptech.glide.Registry;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.DiskLruCacheWrapper;
 
+import org.opensilk.music.artwork.BuildConfig;
 import org.opensilk.music.artwork.cache.CacheUtil;
 
 import java.io.File;
+import java.io.InputStream;
 
 /**
  * Created by drew on 10/6/15.
@@ -59,6 +61,6 @@ public class ArtworkGlideModule implements com.bumptech.glide.module.GlideModule
 
     @Override
     public void registerComponents(Context context, Registry registry) {
-
+        registry.append(ArtInfoRequest.class, InputStream.class, new ArtInfoRequestStreamLoaderFactory());
     }
 }

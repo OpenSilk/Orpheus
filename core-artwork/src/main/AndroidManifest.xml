@@ -29,7 +29,7 @@
             android:name=".fetcher.ArtworkFetcherService"
             android:process=":prvdr"/>
         <meta-data
-            android:name="org.opensilk.music.artwork.ArtworkGlideModule"
+            android:name="org.opensilk.music.artwork.glide.ArtworkGlideModule"
             android:value="GlideModule" />
     </application>
 
