@@ -85,6 +85,10 @@ public abstract class LibraryProvider extends ContentProvider {
         this.scheduler = scheduler;
     }
 
+    protected Scheduler getScheduler() {
+        return scheduler;
+    }
+
     @Override
     public final Bundle call(String method, String arg, Bundle extras) {
 
@@ -255,30 +259,20 @@ public abstract class LibraryProvider extends ContentProvider {
      * You must call subscriber.onComplete after emitting the list
      */
 
-    @Deprecated
-    protected void listObjs(Uri uri, Subscriber<? super Model> subscriber, Bundle args) {
-        subscriber.onError(new UnsupportedOperationException());
-    }
-
     protected Observable<Model> getListObjsObservable(final Uri uri, final Bundle args) {
         return Observable.create(new Observable.OnSubscribe<Model>() {
             @Override
             public void call(Subscriber<? super Model> subscriber) {
-                listObjs(uri, subscriber, args);
+                subscriber.onError(new UnsupportedOperationException());
             }
         });
-    }
-
-    @Deprecated
-    protected void getObj(Uri uri, Subscriber<? super Model> subscriber, Bundle args) {
-        subscriber.onError(new UnsupportedOperationException());
     }
 
     protected Observable<Model> getGetObjObservable(final Uri uri, final Bundle args) {
         return Observable.create(new Observable.OnSubscribe<Model>() {
             @Override
             public void call(Subscriber<? super Model> subscriber) {
-                getObj(uri, subscriber, args);
+                subscriber.onError(new UnsupportedOperationException());
             }
         });
     }
@@ -286,16 +280,11 @@ public abstract class LibraryProvider extends ContentProvider {
     /**
      * Emitted items need not be sorted
      */
-    @Deprecated
-    protected void multiGetObjs(List<Uri> uriList, Subscriber<? super Model> subscriber, Bundle args) {
-        subscriber.onError(new UnsupportedOperationException());
-    }
-
     protected Observable<Model> getMultiGetObjsObservale(final List<Uri> uriList, final Bundle args) {
         return Observable.create(new Observable.OnSubscribe<Model>() {
             @Override
             public void call(Subscriber<? super Model> subscriber) {
-                multiGetObjs(uriList, subscriber, args);
+                subscriber.onError(new UnsupportedOperationException());
             }
         });
     }
@@ -308,16 +297,11 @@ public abstract class LibraryProvider extends ContentProvider {
         return getListObjsObservable(uri, args);
     }
 
-    @Deprecated
-    protected void listRoots(Uri uri, Subscriber<? super Container> subscriber, Bundle args) {
-        subscriber.onError(new UnsupportedOperationException());
-    }
-
     protected Observable<Container> getListRootsObservable(final Uri uri, final Bundle args) {
         return Observable.create(new Observable.OnSubscribe<Container>() {
             @Override
             public void call(Subscriber<? super Container> subscriber) {
-                listRoots(uri, subscriber, args);
+                subscriber.onError(new UnsupportedOperationException());
             }
         });
     }
@@ -357,16 +341,11 @@ public abstract class LibraryProvider extends ContentProvider {
      * Delete the object specified by <code>uri</code>. Emmit all uri's removed by change (ie
      * children of object)
      */
-    @Deprecated
-    protected void deleteObjs(final List<Uri> uris, final Subscriber<? super List<Uri>> subscriber, final Bundle args) {
-        throw new UnsupportedOperationException();
-    }
-
     protected Observable<List<Uri>> getDeleteObjsObservable(final List<Uri> uris, final Bundle args) {
         return Observable.create(new Observable.OnSubscribe<List<Uri>>() {
             @Override
             public void call(Subscriber<? super List<Uri>> subscriber) {
-                deleteObjs(uris, subscriber, args);
+                subscriber.onError(new UnsupportedOperationException());
             }
         });
     }
@@ -380,43 +359,32 @@ public abstract class LibraryProvider extends ContentProvider {
      */
 
     @Override
-    public final Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public final String getType(Uri uri) {
+    public String getType(Uri uri) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public final Uri insert(Uri uri, ContentValues values) {
+    public Uri insert(Uri uri, ContentValues values) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public final int delete(Uri uri, String selection, String[] selectionArgs) {
+    public int delete(Uri uri, String selection, String[] selectionArgs) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public final int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         throw new UnsupportedOperationException();
     }
 
     /*
      * End abstract methods
      */
-
-    //Blocking observable always throws RuntimeExceptions
-    private static Exception unwrapE(Exception e) {
-        if (e instanceof RuntimeException) {
-            Throwable c = e.getCause();
-            if (c instanceof Exception) {
-                return (Exception) c;
-            }
-        }
-        return e;
-    }
 
 }
