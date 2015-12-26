@@ -413,10 +413,12 @@ public class FilesHelper {
                                 .setSize(getLongOrZero(c, MediaStore.Audio.AudioColumns.SIZE))
                                 .build()
                 )
-                .setArtworkUri(generateArtworkUri(
-                        c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))))
-                .setFlags(getFlags(f))
                 ;
+        long albumId = getLongOrZero(c, MediaStore.Audio.Media.ALBUM_ID);
+        if (albumId > 0) {
+            tb.setArtworkUri(generateArtworkUri(albumId));
+        }
+        tb.setFlags(getFlags(f));
         return tb;
     }
 

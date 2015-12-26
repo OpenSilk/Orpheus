@@ -77,8 +77,8 @@ public interface Projections {
                 MediaStore.Audio.AlbumColumns.ALBUM,
                 MediaStore.Audio.AlbumColumns.ARTIST,
                 MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS,
-                MediaStore.Audio.AlbumColumns.FIRST_YEAR,
-                MediaStore.Audio.AlbumColumns.LAST_YEAR,
+//                MediaStore.Audio.AlbumColumns.FIRST_YEAR,
+//                MediaStore.Audio.AlbumColumns.LAST_YEAR,
         };
     String[] LOCAL_ARTIST = new String[] {
                 BaseColumns._ID,
@@ -103,17 +103,21 @@ public interface Projections {
 
             MediaStore.Audio.Playlists.Members.PLAY_ORDER + " AS " + MediaStore.Audio.AudioColumns.TRACK,
     };
-    String[] GENRE_SONGS = new String[] {
+    String[] GENRE_AUDIO_FILE = new String[] {
             MediaStore.Audio.Genres.Members.AUDIO_ID + " AS " + BaseColumns._ID,
             MediaStore.Audio.AudioColumns.TITLE,
+            MediaStore.Audio.AudioColumns.DISPLAY_NAME,
             MediaStore.Audio.AudioColumns.ARTIST,
             MediaStore.Audio.AudioColumns.ALBUM,
             MediaStore.Audio.AudioColumns.ALBUM_ID,
-            "album_artist",
+
             MediaStore.Audio.AudioColumns.DURATION,
             MediaStore.Audio.AudioColumns.MIME_TYPE,
-            MediaStore.Audio.AudioColumns.TRACK,
-        };
+            MediaStore.Audio.AudioColumns.SIZE,
+            MediaStore.Audio.AudioColumns.DATE_MODIFIED,
+
+            MediaStore.Audio.AudioColumns.DATA,
+    };
     String[] GENRE = new String[] {
                 BaseColumns._ID,
                 MediaStore.Audio.Genres.NAME,

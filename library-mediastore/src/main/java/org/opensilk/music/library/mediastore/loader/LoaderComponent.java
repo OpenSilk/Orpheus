@@ -15,12 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-apply from: '../android-library.gradle'
+package org.opensilk.music.library.mediastore.loader;
 
-dependencies {
-    compile project(':common-core')
-    compile project(':core-library')
-    compile project(':core-library-playlist')
-    compile project(':core-library-gallery')
-    compile (group: 'commons-io', name: 'commons-io', version: rootProject.ext.commonsIoVersion)
+import dagger.Subcomponent;
+
+/**
+ * Created by drew on 12/26/15.
+ */
+@LoaderScope
+@Subcomponent(
+
+)
+public interface LoaderComponent {
+    AlbumsLoader albumsLoader();
+    ArtistsLoader artistsLoader();
+    GenresLoader genresLoader();
+    TracksLoader tracksLoader();
 }

@@ -19,6 +19,7 @@ package org.opensilk.music.library.mediastore.provider;
 
 import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.music.library.mediastore.MediaStoreLibraryAuthorityModule;
+import org.opensilk.music.library.mediastore.loader.LoaderComponent;
 
 import dagger.Component;
 import rx.functions.Func1;
@@ -44,4 +45,5 @@ public interface FoldersLibraryComponent extends AppContextComponent {
                 }
             };
     void inject(FoldersLibraryProvider provider);
+    LoaderComponent newLoaderComponent();
 }

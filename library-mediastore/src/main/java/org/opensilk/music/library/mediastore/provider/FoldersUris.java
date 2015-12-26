@@ -38,6 +38,12 @@ public class FoldersUris {
     static final String playlists = "playlists";
     static final String playlist = "playlist";
     static final String external = "external";
+    static final String albums = "albums";
+    static final String album = "album";
+    static final String artists = "artists";
+    static final String artist = "artist";
+    static final String genres = "genres";
+    static final String genre = "genre";
 
     private static Uri.Builder baseUriBuilder(String authority, String library) {
         return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library);
@@ -54,14 +60,11 @@ public class FoldersUris {
         return baseUriBuilder(authority, library).appendPath(folder).appendPath(id).build();
     }
 
-    public static Uri tracks(String authority, String library) {
-        return baseUriBuilder(authority, library).appendPath(tracks).build();
+    public static Uri tracks(String authority) {
+        return baseUriBuilder(authority, external).appendPath(tracks).build();
     }
 
     public static Uri track(String authority, String library, String id) {
-        if (StringUtils.isEmpty(id)) {
-            return tracks(authority, library);
-        }
         return baseUriBuilder(authority, library).appendPath(track).appendPath(id).build();
     }
 
@@ -81,15 +84,59 @@ public class FoldersUris {
         return baseUriBuilder(authority, external).appendPath(playlist).appendPath(id).appendPath(tracks).build();
     }
 
-    public static final int M_FOLDERS = 5;
-    public static final int M_FOLDER = 6;
+    public static Uri albums(String authority) {
+        return baseUriBuilder(authority, external).appendPath(albums).build();
+    }
 
+    public static Uri album(String authority, String id) {
+        return baseUriBuilder(authority, external).appendPath(album).appendPath(id).build();
+    }
+
+    public static Uri albumTracks(String authority, String id) {
+        return baseUriBuilder(authority, external).appendPath(album).appendPath(id).appendPath(tracks).build();
+    }
+
+    public static Uri artists(String authority) {
+        return baseUriBuilder(authority, external).appendPath(artists).build();
+    }
+
+    public static Uri artist(String authority, String id) {
+        return baseUriBuilder(authority, external).appendPath(artist).appendPath(id).build();
+    }
+
+    public static Uri artistTracks(String authority, String id) {
+        return baseUriBuilder(authority, external).appendPath(artist).appendPath(id).appendPath(tracks).build();
+    }
+
+    public static Uri genres(String authority) {
+        return baseUriBuilder(authority, external).appendPath(genres).build();
+    }
+
+    public static Uri genre(String authority, String id) {
+        return baseUriBuilder(authority, external).appendPath(genre).appendPath(id).build();
+    }
+
+    public static Uri genreTracks(String authority, String id) {
+        return baseUriBuilder(authority, external).appendPath(genre).appendPath(id).appendPath(tracks).build();
+    }
+
+    public static final int M_ALBUMS = 1;
+    public static final int M_ALBUM = 2;
+    public static final int M_ARTISTS = 3;
+    public static final int M_ARTIST = 4;
+    public static final int M_GENRES = 5;
+    public static final int M_GENRE = 6;
+    public static final int M_FOLDERS = 7;
+    public static final int M_FOLDER = 8;
+    public static final int M_ALBUM_TRACKS = 9;
+    public static final int M_ARTIST_TRACKS = 10;
     public static final int M_TRACKS = 11;
     public static final int M_TRACK_PTH = 12;
     public static final int M_TRACK_MS = 13;
     public static final int M_PLAYLISTS = 14;
     public static final int M_PLAYLIST = 15;
     public static final int M_PLAYLIST_TRACKS = 16;
+    public static final int M_GENRE_TRACKS = 17;
 
     private static final String slash_wild = "/*";
     private static final String slash_num = "/#";
@@ -101,10 +148,22 @@ public class FoldersUris {
         Timber.i("Creating matcher for authority=%s", authority);
         UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
+        uriMatcher.addURI(authority, external_slash + albums, M_ALBUMS);
+        uriMatcher.addURI(authority, external_slash + album + slash_num, M_ALBUM);
+        uriMatcher.addURI(authority, external_slash + album + slash_num_slash + tracks, M_ALBUM_TRACKS);
+
+        uriMatcher.addURI(authority, external_slash + artists, M_ARTISTS);
+        uriMatcher.addURI(authority, external_slash + artist + slash_num, M_ARTIST);
+        uriMatcher.addURI(authority, external_slash + artist + slash_num_slash + tracks, M_ARTIST_TRACKS);
+
+        uriMatcher.addURI(authority, external_slash + genres, M_GENRES);
+        uriMatcher.addURI(authority, external_slash + genre + slash_num, M_GENRE);
+        uriMatcher.addURI(authority, external_slash + genre + slash_num_slash + tracks, M_GENRE_TRACKS);
+
         uriMatcher.addURI(authority, base_match + folders, M_FOLDERS);
         uriMatcher.addURI(authority, base_match + folder + slash_wild, M_FOLDER);
 
-        uriMatcher.addURI(authority, base_match + tracks, M_TRACKS);
+        uriMatcher.addURI(authority, external_slash + tracks, M_TRACKS);
         uriMatcher.addURI(authority, base_match + track + slash_wild, M_TRACK_PTH);
         uriMatcher.addURI(authority, base_match + track + slash_num, M_TRACK_MS);
 

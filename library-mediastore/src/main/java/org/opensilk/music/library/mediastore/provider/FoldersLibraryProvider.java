@@ -21,24 +21,33 @@ import android.content.ContentResolver;
 import android.content.UriMatcher;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.library.gallery.provider.GalleryLibraryAddOn;
 import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.mediastore.R;
+import org.opensilk.music.library.mediastore.loader.LoaderComponent;
+import org.opensilk.music.library.mediastore.loader.TracksLoader;
 import org.opensilk.music.library.mediastore.util.FilesHelper;
 import org.opensilk.music.library.mediastore.util.PlaylistUtil;
+import org.opensilk.music.library.mediastore.util.Projections;
+import org.opensilk.music.library.mediastore.util.SelectionArgs;
+import org.opensilk.music.library.mediastore.util.Selections;
 import org.opensilk.music.library.mediastore.util.Uris;
 import org.opensilk.music.library.playlist.PlaylistOperationListener;
 import org.opensilk.music.library.playlist.provider.PlaylistLibraryAddOn;
+import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryProvider;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
+import org.opensilk.music.model.sort.TrackSortOrder;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -50,28 +59,33 @@ import javax.inject.Named;
 import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Subscriber;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 /**
  * Created by drew on 5/17/15.
  */
-public class FoldersLibraryProvider extends LibraryProvider implements PlaylistLibraryAddOn.Handler {
+public class FoldersLibraryProvider extends LibraryProvider implements PlaylistLibraryAddOn.Handler, GalleryLibraryAddOn.Handler {
 
     @Inject @Named("foldersLibraryAuthority") String mAuthority;
     @Inject StorageLookup mStorageLookup;
 
+    private FoldersLibraryComponent mComponent;
     private UriMatcher mUriMatcher;
     private PlaylistLibraryAddOn mPlaylistAddon;
+    private GalleryLibraryAddOn mGalleryAddon;
 
     @Override
     public boolean onCreate() {
         final AppContextComponent acc = DaggerService.getDaggerComponent(getContext());
-        FoldersLibraryComponent.FACTORY.call(acc).inject(this);
+        mComponent = FoldersLibraryComponent.FACTORY.call(acc);
+        mComponent.inject(this);
         super.onCreate();
         setScheduler(Schedulers.immediate());
         mUriMatcher = FoldersUris.makeMatcher(mAuthority);
         mPlaylistAddon = new PlaylistLibraryAddOn(getScheduler(), this);
+        mGalleryAddon = new GalleryLibraryAddOn(this);
         return true;
     }
 
@@ -94,6 +108,10 @@ public class FoldersLibraryProvider extends LibraryProvider implements PlaylistL
         if (plistReply.isHandled()) {
             return plistReply.getReply();
         }
+        GalleryLibraryAddOn.Reply galleryReply = mGalleryAddon.handleCall(method, arg, extras);
+        if (galleryReply.isHandled()) {
+            return galleryReply.getReply();
+        }
         return super.callCustom(method, arg, extras);
     }
 
@@ -104,6 +122,83 @@ public class FoldersLibraryProvider extends LibraryProvider implements PlaylistL
             @Override
             public void call(Subscriber<? super Model> subscriber) {
                 switch (mUriMatcher.match(uri)) {
+                    case FoldersUris.M_ALBUMS: {
+                        mComponent.newLoaderComponent().albumsLoader()
+                                .createObservable()
+                                .subscribe(subscriber);
+                        return;
+                    }
+                    case FoldersUris.M_ARTISTS: {
+                        mComponent.newLoaderComponent().artistsLoader()
+                                .createObservable()
+                                .subscribe(subscriber);
+                        return;
+                    }
+                    case FoldersUris.M_GENRES: {
+                        mComponent.newLoaderComponent().genresLoader()
+                                .createObservable()
+                                .subscribe(subscriber);
+                        return;
+                    }
+                    case FoldersUris.M_TRACKS: {
+                        mComponent.newLoaderComponent().tracksLoader()
+                                .createObservable()
+                                .subscribe(subscriber);
+                        return;
+                    }
+                    case FoldersUris.M_ALBUM_TRACKS: {
+                        final List<String> segments = uri.getPathSegments();
+                        final String album = segments.get(segments.size() - 2);
+                        mComponent.newLoaderComponent().tracksLoader()
+                                .setSelection(Selections.LOCAL_ALBUM_SONGS)
+                                .setSelectionArgs(SelectionArgs.LOCAL_ALBUM_SONGS(album))
+                                        //.setSortOrder(LibraryExtras.getSortOrder(args))
+                                .createObservable()
+                                .doOnNext(new Action1<Track>() {
+                                    @Override
+                                    public void call(Track track) {
+                                        Timber.v("Track name=%s artist=%s albumArtist=%s",
+                                                track.getSortName(), track.getArtistName(), track.getAlbumArtistName());
+                                    }
+                                })
+                                .subscribe(subscriber);
+                        return;
+                    }
+                    case FoldersUris.M_ARTIST_TRACKS: {
+                        final List<String> segments = uri.getPathSegments();
+                        final String artist = segments.get(segments.size() - 2);
+                        mComponent.newLoaderComponent().tracksLoader()
+                                .setSelection(Selections.LOCAL_ARTIST_SONGS)
+                                .setSelectionArgs(SelectionArgs.LOCAL_ARTIST_SONGS(artist))
+                                        //.setSortOrder(LibraryExtras.getSortOrder(args))
+                                .createObservable()
+                                .doOnNext(new Action1<Track>() {
+                                    @Override
+                                    public void call(Track track) {
+                                        Timber.v("Track name=%s artist=%s albumArtist=%s",
+                                                track.getSortName(), track.getArtistName(), track.getAlbumArtistName());
+                                    }
+                                })
+                                .subscribe(subscriber);
+                        return;
+                    }
+                    case FoldersUris.M_GENRE_TRACKS: {
+                        final List<String> segments = uri.getPathSegments();
+                        final String genre = segments.get(segments.size() - 2);
+                        mComponent.newLoaderComponent().tracksLoader()
+                                .setUri(Uris.GENRE_MEMBERS(genre))
+                                .setProjection(Projections.GENRE_AUDIO_FILE)
+                                .createObservable()
+                                .doOnNext(new Action1<Track>() {
+                                    @Override
+                                    public void call(Track track) {
+                                        Timber.v("Track name=%s artist=%s albumArtist=%s",
+                                                track.getSortName(), track.getArtistName(), track.getAlbumArtistName());
+                                    }
+                                })
+                                .subscribe(subscriber);
+                        return;
+                    }
                     case FoldersUris.M_FOLDERS: {
                         browseFolders(uri.getPathSegments().get(0), null, subscriber, args);
                         return;
@@ -160,6 +255,18 @@ public class FoldersLibraryProvider extends LibraryProvider implements PlaylistL
             @Override
             public void call(Subscriber<? super Model> subscriber) {
                 switch (mUriMatcher.match(uri)) {
+                    case FoldersUris.M_ALBUM: {
+                        subscriber.onError(new UnsupportedOperationException());
+                        return;
+                    }
+                    case FoldersUris.M_ARTIST: {
+                        subscriber.onError(new UnsupportedOperationException());
+                        return;
+                    }
+                    case FoldersUris.M_GENRE: {
+                        subscriber.onError(new UnsupportedOperationException());
+                        return;
+                    }
                     case FoldersUris.M_FOLDERS: {
                         final String library = uri.getPathSegments().get(0);
                         final StorageLookup.StorageVolume volume = getStorageVolume(library);
@@ -490,5 +597,30 @@ public class FoldersLibraryProvider extends LibraryProvider implements PlaylistL
             }
         }
         return ids.toArray(new String[ids.size()]);
+    }
+
+    @Override
+    public Uri getGalleryArtistsUri() {
+        return FoldersUris.artists(mAuthority);
+    }
+
+    @Override
+    public Uri getGalleryAlbumsUri() {
+        return FoldersUris.albums(mAuthority);
+    }
+
+    @Override
+    public Uri getGalleryGenresUri() {
+        return FoldersUris.genres(mAuthority);
+    }
+
+    @Override
+    public Uri getGalleryTracksUri() {
+        return FoldersUris.tracks(mAuthority);
+    }
+
+    @Override
+    public Uri getGalleryIndexedFolders() {
+        return null;
     }
 }
