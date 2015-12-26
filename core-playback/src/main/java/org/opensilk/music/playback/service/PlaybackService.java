@@ -395,9 +395,6 @@ public class PlaybackService {
             if (mQueue.getNextPos() >= 0) {
                 actions |= PlaybackStateCompat.ACTION_SKIP_TO_NEXT;
             }
-            builder.addCustomAction(
-                    ACTION.TOGGLE_SHUFFLE_MODE, mContext.getString(R.string.menu_shuffle),
-                    R.drawable.playback_shuffle_black_36dp);
         }
         builder.setActions(actions);
     }
