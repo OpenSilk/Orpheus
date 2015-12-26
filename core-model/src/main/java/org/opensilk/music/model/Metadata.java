@@ -24,6 +24,7 @@ import android.os.Parcelable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -130,6 +131,7 @@ public class Metadata implements Parcelable {
      * TODO try and remove this
      */
     public static final String KEY_ARTINFOS = "orpheus.artinfos";
+    public static final String KEY_NUM_ARTINFO = "orpheus.artinfos.count";
     /**
      * Int: value > 0 if part of compilation
      */
@@ -198,6 +200,10 @@ public class Metadata implements Parcelable {
      * Uri: (http) link to last.fm page
      */
     public static final String KEY_ALBUM_URL_URI = "orpheus.album.url.uri";
+    /**
+     * Uri: loader uri to fetch details, queried list contents are implementation specific.
+     */
+    public static final String KEY_DETAILS_URI = "orpheus.details.uri";
 
     private final Bundle meta;
 
@@ -227,7 +233,12 @@ public class Metadata implements Parcelable {
 
     public List<ArtInfo> getArtInfos() {
         meta.setClassLoader(Metadata.class.getClassLoader());
-        return meta.getParcelableArrayList(KEY_ARTINFOS);
+        ArrayList<ArtInfo> lst = meta.getParcelableArrayList(KEY_ARTINFOS);
+        return lst != null ? lst : Collections.<ArtInfo>emptyList();
+    }
+
+    public int getNumArtInfos() {
+        return meta.getInt(KEY_NUM_ARTINFO, 0);
     }
 
     public static Builder builder() {
@@ -295,7 +306,9 @@ public class Metadata implements Parcelable {
         }
 
         public Builder putArtInfos(Collection<ArtInfo> artInfos) {
-            meta.putParcelableArrayList(KEY_ARTINFOS, new ArrayList<Parcelable>(artInfos));
+            ArrayList<ArtInfo> newList = new ArrayList<>(artInfos);
+            meta.putParcelableArrayList(KEY_ARTINFOS, newList);
+            meta.putInt(KEY_NUM_ARTINFO, newList.size());
             return this;
         }
 

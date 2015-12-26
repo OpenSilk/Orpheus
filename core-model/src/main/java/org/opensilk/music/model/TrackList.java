@@ -58,6 +58,10 @@ public class TrackList extends Container {
         return metadata.getArtInfos();
     }
 
+    public int getNumArtInfos() {
+        return metadata.getNumArtInfos();
+    }
+
     @Override
     public Bundle toBundle() {
         Bundle b = new Bundle(4);

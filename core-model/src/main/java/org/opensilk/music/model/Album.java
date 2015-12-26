@@ -54,6 +54,10 @@ public class Album extends Container {
         return metadata.getUri(Metadata.KEY_ALBUM_ART_URI);
     }
 
+    public Uri getDetailsUri() {
+        return metadata.getUri(Metadata.KEY_DETAILS_URI);
+    }
+
     @Override
     public Bundle toBundle() {
         Bundle b = new Bundle(4);
@@ -145,6 +149,11 @@ public class Album extends Container {
 
         public Builder setArtworkUri(Uri artworkUri) {
             bob.putUri(Metadata.KEY_ALBUM_ART_URI, artworkUri);
+            return this;
+        }
+
+        public Builder setDetailsUri(Uri detailsUri) {
+            bob.putUri(Metadata.KEY_DETAILS_URI, detailsUri);
             return this;
         }
 

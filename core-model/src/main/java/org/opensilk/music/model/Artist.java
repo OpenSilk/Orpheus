@@ -43,6 +43,10 @@ public class Artist extends Container {
         return metadata.getUri(Metadata.KEY_CHILD_TRACKS_URI);
     }
 
+    public Uri getDetailsUri() {
+        return metadata.getUri(Metadata.KEY_DETAILS_URI);
+    }
+
     @Override
     public Bundle toBundle() {
         Bundle b = new Bundle(4);
@@ -119,6 +123,11 @@ public class Artist extends Container {
 
         public Builder setTracksUri(Uri uri) {
             bob.putUri(Metadata.KEY_CHILD_TRACKS_URI, uri);
+            return this;
+        }
+
+        public Builder setDetailsUri(Uri detailsUri) {
+            bob.putUri(Metadata.KEY_DETAILS_URI, detailsUri);
             return this;
         }
 

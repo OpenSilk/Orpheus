@@ -56,6 +56,14 @@ public class Genre extends Container {
         return metadata.getArtInfos();
     }
 
+    public int getNumArtInfos() {
+        return metadata.getNumArtInfos();
+    }
+
+    public Uri getDetailsUri() {
+        return metadata.getUri(Metadata.KEY_DETAILS_URI);
+    }
+
     @Override
     public Bundle toBundle() {
         Bundle b = new Bundle(4);
@@ -154,6 +162,11 @@ public class Genre extends Container {
 
         public Builder addArtInfos(Collection<ArtInfo> infos) {
             this.artInfos.addAll(infos);
+            return this;
+        }
+
+        public Builder setDetailsUri(Uri detailsUri) {
+            bob.putUri(Metadata.KEY_DETAILS_URI, detailsUri);
             return this;
         }
 
