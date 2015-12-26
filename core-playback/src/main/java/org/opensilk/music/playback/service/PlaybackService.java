@@ -85,6 +85,7 @@ import rx.Subscription;
 import rx.android.schedulers.HandlerScheduler;
 import rx.functions.Action1;
 import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 import static org.opensilk.music.playback.PlaybackConstants.CMDNAME;
@@ -423,6 +424,7 @@ public class PlaybackService {
         if (!bitmap.fromCache() && artUri != null) {
             //Then go for artwork, since it could take a while
             mArtworkSubscription = mArtworkHelper.getArtwork(artUri)
+                    .subscribeOn(Schedulers.io())
                     .observeOn(getScheduler())
                     .subscribe(new Subscriber<Bitmap>() {
                         @Override public void onCompleted() {
