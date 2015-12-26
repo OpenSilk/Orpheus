@@ -38,7 +38,7 @@ import javax.inject.Singleton;
 public class AppPreferences extends PreferencesWrapper {
 
     private static final String VERSION = "__version__";
-    private static final int MY_VERSION = 302;
+    private static final int MY_VERSION = 303;
 
     //Theme
     public static final String WANT_DARK_THEME = "pref_dark_theme";
@@ -50,8 +50,7 @@ public class AppPreferences extends PreferencesWrapper {
     private static final int CHANGES_ORDINAL = 1; //increment when updated
 
     //Gallery pages
-    public static final int DEFAULT_PAGE = 2;
-    public static final String GALLERY_START_PAGE = "gallery.start_page";
+    public static final int DEFAULT_GALLERY_PAGE = 2;
 
     //Playlistpages
     public static final int DEFAULT_PLAYLISTS_PAGE = 0;
@@ -158,6 +157,12 @@ public class AppPreferences extends PreferencesWrapper {
                     .remove("now_playing_view")
                     .apply();
         }
+        if (schema < 303) {
+            prefs.edit()
+                    //prefixed by authority now
+                    .remove("gallery.start_page")
+                    .apply();
+        }
         if (schema < MY_VERSION) {
             putInt(VERSION, MY_VERSION);
         }
@@ -207,6 +212,19 @@ public class AppPreferences extends PreferencesWrapper {
     public String getLayout(Uri uri, boolean defaultGrid) {
         return getString(makePrefKey(encodeString(uri.toString()), ".layout"), defaultGrid ? GRID : SIMPLE);
     }
+
+    /*
+     * gallery
+     */
+
+    public String galleryStartPageKey(String authority) {
+        return makePrefKey(encodeString(authority), ".gallery_start_page");
+    }
+
+    public int getGalleryStartPage(String authority) {
+        return getInt(galleryStartPageKey(authority), DEFAULT_GALLERY_PAGE);
+    }
+
 
     /*
      * Changes dialog

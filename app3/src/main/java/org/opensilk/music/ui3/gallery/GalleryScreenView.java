@@ -65,6 +65,15 @@ public class GalleryScreenView extends CoordinatorLayout {
         super.onFinishInflate();
         if (!isInEditMode()) {
             ButterKnife.inject(this);
+            mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+                @Override
+                public void onPageSelected(int position) {
+                    mPresenter.actionModePresenter.cancelActionMode();
+                }
+            });
+            mTabBar.setTabMode(TabLayout.MODE_SCROLLABLE);
+            mTabBar.setTabTextColors(ContextCompat.getColor(getContext(), R.color.white),
+                    ThemeUtils.getThemeAttrColor(getContext(), R.attr.colorAccent));
             mPresenter.takeView(this);
         }
     }
@@ -85,22 +94,8 @@ public class GalleryScreenView extends CoordinatorLayout {
         Timber.v("onDetachedFromWindow()");
         super.onDetachedFromWindow();
         attacheed = false;
-        if (!isInEditMode()) {
-            mToolbarOwner.detachToolbar(mToolbar);
-            mPresenter.dropView(this);
-        }
-    }
-
-    @Override
-    protected Parcelable onSaveInstanceState() {
-        Timber.v("onSaveInstanceState");
-        return super.onSaveInstanceState();
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Parcelable state) {
-        Timber.v("onRestoreInstanceState");
-        super.onRestoreInstanceState(state);
+        mToolbarOwner.detachToolbar(mToolbar);
+        mPresenter.dropView(this);
     }
 
     public void setup(List<GalleryPageScreen> pages, int startPage) {
@@ -109,17 +104,8 @@ public class GalleryScreenView extends CoordinatorLayout {
                 UtilsCommon.findActivity(getContext()),
                 mPresenter, pages);
         mViewPager.setAdapter(adapter);
-        mTabBar.setTabMode(TabLayout.MODE_SCROLLABLE);
-        mTabBar.setTabTextColors(ContextCompat.getColor(getContext(), R.color.white),
-                ThemeUtils.getThemeAttrColor(getContext(), R.attr.colorAccent));
         mTabBar.setupWithViewPager(mViewPager);
         mViewPager.setCurrentItem(startPage);
-        mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-            @Override
-            public void onPageSelected(int position) {
-                mPresenter.actionModePresenter.cancelActionMode();
-            }
-        });
     }
 
     public void updateToolbar() {

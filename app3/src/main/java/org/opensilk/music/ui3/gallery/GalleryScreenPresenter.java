@@ -18,6 +18,7 @@
 package org.opensilk.music.ui3.gallery;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,13 +31,13 @@ import org.opensilk.common.ui.mortar.ActionModePresenter;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.index.provider.IndexUris;
+import org.opensilk.music.library.gallery.GalleryClient;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import mortar.ViewPresenter;
 
@@ -49,7 +50,6 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
     final AppPreferences preferences;
     final GalleryScreen screen;
     final ActionModePresenter actionModePresenter;
-    final String indexAuthority;
 
     DelegateActionHandler delegateActionHandler;
 
@@ -57,42 +57,19 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
     public GalleryScreenPresenter(
             AppPreferences preferences,
             GalleryScreen screen,
-            ActionModePresenter actionModePresenter,
-            @Named("IndexProviderAuthority") String indexAuthority
+            ActionModePresenter actionModePresenter
     ) {
         this.preferences = preferences;
         this.screen = screen;
         this.actionModePresenter = actionModePresenter;
-        this.indexAuthority = indexAuthority;
     }
 
     @Override
     protected void onLoad(Bundle savedInstanceState) {
         super.onLoad(savedInstanceState);
         // init pager
-//        List<GalleryPage> galleryPages = preferences.getGalleryPages();
-        List<GalleryPage> galleryPages = Arrays.asList(GalleryPage.values());
-        List<GalleryPageScreen> screens = new ArrayList<>(galleryPages.size());
-        for (GalleryPage page : galleryPages) {
-            switch (page) {
-                case ALBUM:
-                    screens.add(page.FACTORY.call(IndexUris.albums(indexAuthority)));
-                    break;
-                case ARTIST:
-                    screens.add(page.FACTORY.call(IndexUris.albumArtists(indexAuthority)));
-                    break;
-                case GENRE:
-                    screens.add(page.FACTORY.call(IndexUris.genres(indexAuthority)));
-                    break;
-                case SONG:
-                    screens.add(page.FACTORY.call(IndexUris.tracks(indexAuthority)));
-                    break;
-                case FOLDER:
-                    screens.add(page.FACTORY.call(IndexUris.folders(indexAuthority)));
-                    break;
-            }
-        }
-        int startPage = preferences.getInt(AppPreferences.GALLERY_START_PAGE, AppPreferences.DEFAULT_PAGE);
+        List<GalleryPageScreen> screens = buildPages();
+        int startPage = preferences.getGalleryStartPage(screen.authority);
         getView().setup(screens, startPage);
     }
 
@@ -101,7 +78,41 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
         super.onSave(outState);
         if (hasView()) {
             int pos = getView().mViewPager.getCurrentItem();
-            preferences.putInt(AppPreferences.GALLERY_START_PAGE, pos);
+            preferences.putInt(preferences.galleryStartPageKey(screen.authority), pos);
+        }
+    }
+
+    List<GalleryPageScreen> buildPages() {
+        GalleryClient client = GalleryClient.acquire(getView().getContext(), screen.authority);
+        try {
+            List<GalleryPage> galleryPages = Arrays.asList(GalleryPage.values());
+            List<GalleryPageScreen> screens = new ArrayList<>(galleryPages.size());
+            for (GalleryPage page : galleryPages) {
+                Uri uri = null;
+                switch (page) {
+                    case ALBUM:
+                        uri = client.getAlbumsUri();
+                        break;
+                    case ARTIST:
+                        uri = client.getArtistsUri();
+                        break;
+                    case GENRE:
+                        uri = client.getGenresUri();
+                        break;
+                    case SONG:
+                        uri = client.getTracksUri();
+                        break;
+                    case FOLDER:
+                        uri = client.getIndexedFoldersUri();
+                        break;
+                }
+                if (uri != null) {
+                    screens.add(page.FACTORY.call(uri));
+                }
+            }
+            return screens;
+        } finally {
+            client.release();
         }
     }
 
@@ -122,7 +133,7 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
             delegateActionHandler = new DelegateActionHandler();
         }
         return ActionBarConfig.builder()
-                .setTitle(R.string.title_my_library)
+                .setTitle(screen.titleResource)
                 .setMenuConfig(delegateActionHandler)
                 .build();
     }
@@ -148,7 +159,7 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
         public boolean onMenuItemClicked(Context context, MenuItem menuItem) {
             switch (menuItem.getItemId()) {
                 case R.id.refresh:
-                    context.getContentResolver().notifyChange(IndexUris.call(indexAuthority), null);
+                    context.getContentResolver().notifyChange(IndexUris.call(screen.authority), null);
                     return true;
                 default:
                     return wrapped != null && wrapped.onMenuItemClicked(context, menuItem);

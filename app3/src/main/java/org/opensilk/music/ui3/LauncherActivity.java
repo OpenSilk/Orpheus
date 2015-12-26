@@ -44,6 +44,7 @@ import org.opensilk.music.ui3.library.LibraryScreenFragment;
 import org.opensilk.music.ui3.renderer.RendererScreenFragment;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -57,6 +58,8 @@ public class LauncherActivity extends MusicActivity {
 
     @Inject AppPreferences mSettings;
     @Inject FragmentManagerOwner mFm;
+    @Inject @Named("IndexProviderAuthority") String mIndexLibraryAuthority;
+    @Inject @Named("foldersLibraryAuthority") String mFoldersLibraryAuthority;
 
     @InjectView(R.id.navigation) NavigationView mNavigation;
 
@@ -158,11 +161,19 @@ public class LauncherActivity extends MusicActivity {
             switch (menuItem.getItemId()) {
                 case R.id.nav_my_library: {
                     mFm.killBackStack();
-                    mFm.replaceMainContent(GalleryScreenFragment.ni(), false);
+                    mFm.replaceMainContent(GalleryScreenFragment.ni(mIndexLibraryAuthority,
+                            R.string.title_my_library), false);
                     menuItem.setChecked(true);
                     break;
                 }
-                case R.id.nav_libraries: {
+                case R.id.nav_android_library: {
+                    mFm.killBackStack();
+                    mFm.replaceMainContent(GalleryScreenFragment.ni(mFoldersLibraryAuthority,
+                            R.string.title_android_library), false);
+                    menuItem.setChecked(true);
+                    break;
+                }
+                case R.id.nav_other_libraries: {
                     mFm.killBackStack();
                     mFm.replaceMainContent(LibraryScreenFragment.ni(), false);
                     menuItem.setChecked(true);

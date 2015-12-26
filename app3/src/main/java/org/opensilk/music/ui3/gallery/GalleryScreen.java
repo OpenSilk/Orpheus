@@ -35,6 +35,20 @@ import mortar.MortarScope;
 @Layout(R.layout.screen_gallery)
 @WithComponentFactory(GalleryScreen.Factory.class)
 public class GalleryScreen extends Screen {
+
+    final String authority;
+    final int titleResource;
+
+    public GalleryScreen(String authority, int titleResource) {
+        this.authority = authority;
+        this.titleResource = titleResource;
+    }
+
+    @Override
+    public String getName() {
+        return super.getName() + "-" + authority;
+    }
+
     public static class Factory extends ComponentFactory<GalleryScreen> {
         @Override
         protected Object createDaggerComponent(Resources resources, MortarScope parentScope, GalleryScreen screen) {

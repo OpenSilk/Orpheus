@@ -17,6 +17,7 @@
 
 package org.opensilk.music.ui3.gallery;
 
+import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortarfragment.MortarFragment;
 
@@ -26,13 +27,17 @@ import org.opensilk.common.ui.mortarfragment.MortarFragment;
 public class GalleryScreenFragment extends MortarFragment {
     public static final String NAME = GalleryScreenFragment.class.getName();
 
-    public static GalleryScreenFragment ni() {
-        return new GalleryScreenFragment();
+    public static GalleryScreenFragment ni(String authority, int titleRes) {
+        GalleryScreenFragment f = new GalleryScreenFragment();
+        f.setArguments(BundleHelper.b().putString(authority).putInt(titleRes).get());
+        return f;
     }
 
     @Override
     protected Screen newScreen() {
-        return new GalleryScreen();
+        String authority = BundleHelper.getString(getArguments());
+        int titlRes = BundleHelper.getInt(getArguments());
+        return new GalleryScreen(authority, titlRes);
     }
 
 }

@@ -22,9 +22,12 @@
         <item android:id="@+id/nav_my_library"
             android:icon="@drawable/library_music_grey600_36dp"
             android:title="@string/title_my_library"/>
-        <item android:id="@+id/nav_libraries"
+        <item android:id="@+id/nav_android_library"
+            android:icon="@drawable/library_music_grey600_36dp"
+            android:title="@string/title_android_library"/>
+        <item android:id="@+id/nav_other_libraries"
             android:icon="@drawable/puzzle_grey600_36dp"
-            android:title="@string/title_libraries"/>
+            android:title="@string/title_other_libraries"/>
         <item android:id="@+id/nav_playlists"
             android:icon="@drawable/playlist_play_grey600_36dp"
             android:title="@string/title_playlists"/>

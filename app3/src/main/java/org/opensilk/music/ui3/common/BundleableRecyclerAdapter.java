@@ -34,6 +34,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.request.target.Target;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.common.core.util.VersionUtils;
@@ -203,10 +204,16 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
     void bindGenre(ViewHolder holder, Genre genre) {
         holder.setTitle(genre.getName());
         Context context = holder.itemView.getContext();
-        String l2 = UtilsCommon.makeLabel(context, R.plurals.Nalbums, genre.getAlbumsCount())
-                + ", " + UtilsCommon.makeLabel(context, R.plurals.Nsongs, genre.getTracksCount());
+        String l2 = "";
+        if (genre.getAlbumsCount() > 0) {
+            l2 += UtilsCommon.makeLabel(context, R.plurals.Nalbums, genre.getAlbumsCount());
+        }
+        if (genre.getTracksCount() > 0) {
+            if (!StringUtils.isEmpty(l2)) l2 += ", ";
+            l2 += UtilsCommon.makeLabel(context, R.plurals.Nsongs, genre.getTracksCount());
+        }
         holder.setSubTitle(l2);
-        if (gridStyle && genre.getArtInfos().size() > 0) {
+        if (gridStyle && (genre.getArtInfos().size() > 0)) {
             holder.loadArtwork(genre.getArtInfos());
         } else {
             setLetterTileDrawable(holder, genre.getName());

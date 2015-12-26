@@ -59,5 +59,7 @@ dependencies {
     compile project(':library-mediastore')
     compile project(':core-index')
     compile project(':renderer-chromecast')
+    compile project(':core-library-gallery')
+    compile project(':core-library-playlist')
 }
 
