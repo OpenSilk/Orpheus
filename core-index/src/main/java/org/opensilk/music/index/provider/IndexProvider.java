@@ -38,6 +38,7 @@ import org.opensilk.music.library.LibraryProviderInfo;
 import org.opensilk.music.library.client.LibraryClient;
 import org.opensilk.music.library.client.LibraryProviderInfoLoader;
 import org.opensilk.music.library.client.TypedBundleableLoader;
+import org.opensilk.music.library.gallery.provider.GalleryLibraryAddOn;
 import org.opensilk.music.library.internal.BundleableListTransformer;
 import org.opensilk.music.library.internal.BundleableSubscriber;
 import org.opensilk.music.library.internal.LibraryException;
@@ -96,7 +97,7 @@ import static org.opensilk.music.index.provider.IndexUris.makeMatcher;
 /**
  * Created by drew on 7/11/15.
  */
-public class IndexProvider extends LibraryProvider implements PlaylistLibraryAddOn.Handler {
+public class IndexProvider extends LibraryProvider implements PlaylistLibraryAddOn.Handler, GalleryLibraryAddOn.Handler {
 
     @Inject @Named("IndexProviderAuthority") String mAuthority;
     @Inject IndexDatabase mDataBase;
@@ -105,6 +106,7 @@ public class IndexProvider extends LibraryProvider implements PlaylistLibraryAdd
 
     private UriMatcher mUriMatcher;
     private PlaylistLibraryAddOn mPlaylistAddon;
+    private GalleryLibraryAddOn mGalleryAddon;
 
     @Override
     @DebugLog
@@ -115,6 +117,7 @@ public class IndexProvider extends LibraryProvider implements PlaylistLibraryAdd
         setScheduler(Schedulers.immediate());
         mUriMatcher = makeMatcher(mAuthority);
         mPlaylistAddon = new PlaylistLibraryAddOn(getScheduler(), this);
+        mGalleryAddon = new GalleryLibraryAddOn(this);
         return true;
     }
 
@@ -246,6 +249,10 @@ public class IndexProvider extends LibraryProvider implements PlaylistLibraryAdd
                 PlaylistLibraryAddOn.Reply plistReply = mPlaylistAddon.handleCall(method, arg, extras);
                 if (plistReply.isHandled()) {
                     return plistReply.getReply();
+                }
+                GalleryLibraryAddOn.Reply galleryReply = mGalleryAddon.handleCall(method, arg, extras);
+                if (galleryReply.isHandled()) {
+                    return galleryReply.getReply();
                 }
                 return super.callCustom(method, arg, extras);
             }
@@ -694,5 +701,30 @@ public class IndexProvider extends LibraryProvider implements PlaylistLibraryAdd
         } else {
             resultListener.onError("Delete failed");
         }
+    }
+
+    @Override
+    public Uri getGalleryArtistsUri() {
+        return IndexUris.albumArtists(mAuthority);
+    }
+
+    @Override
+    public Uri getGalleryAlbumsUri() {
+        return IndexUris.albums(mAuthority);
+    }
+
+    @Override
+    public Uri getGalleryGenresUri() {
+        return IndexUris.genres(mAuthority);
+    }
+
+    @Override
+    public Uri getGalleryTracksUri() {
+        return IndexUris.tracks(mAuthority);
+    }
+
+    @Override
+    public Uri getGalleryIndexedFolders() {
+        return IndexUris.folders(mAuthority);
     }
 }
