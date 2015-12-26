@@ -7,7 +7,7 @@ include ':common-core', ':common-ui', ':common-bundleable', 'common-glide'
 include ':core-model', ':core-library', ':core-artwork', ':core-res-drawables',
         ':core-playback', ':core-translations', ':core-index', ':core-lastfm',
         ':core-okhttp', ':core-library-client', ':core-res-strings', ':core-playback-renderer',
-        ':core-library-playlist'
+        ':core-library-playlist', ':core-library-gallery'
 include ':library-mediastore'
 include ':renderer-chromecast'
 include ':plugin-drive', ':library-googledrive'
