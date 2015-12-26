@@ -30,12 +30,13 @@
     <string name="title_all_songs">All songs</string>
     <string name="title_queue">Queue</string>
     <string name="title_now_playing">Now playing</string>
-    <string name="title_libraries">Libraries</string>
+    <string name="title_other_libraries">Other Libraries</string>
     <string name="title_local_storage">Local Storage</string>
     <string name="title_my_library">My Library</string>
     <string name="title_folders">Folders</string>
     <string name="title_renderers">Set renderer</string>
     <string name="orpheus_playlists">Orpheus</string>
+    <string name="title_android_library">Android Library</string>
 
     <!-- Option menu items -->
     <string name="menu_settings">Settings</string>
