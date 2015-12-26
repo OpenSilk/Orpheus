@@ -33,6 +33,7 @@ import org.opensilk.music.library.mediastore.R;
 import org.opensilk.music.library.mediastore.loader.LoaderComponent;
 import org.opensilk.music.library.mediastore.loader.TracksLoader;
 import org.opensilk.music.library.mediastore.util.FilesHelper;
+import org.opensilk.music.library.mediastore.util.MediaStoreHelper;
 import org.opensilk.music.library.mediastore.util.PlaylistUtil;
 import org.opensilk.music.library.mediastore.util.Projections;
 import org.opensilk.music.library.mediastore.util.SelectionArgs;
@@ -42,11 +43,15 @@ import org.opensilk.music.library.playlist.PlaylistOperationListener;
 import org.opensilk.music.library.playlist.provider.PlaylistLibraryAddOn;
 import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryProvider;
+import org.opensilk.music.model.ArtInfo;
+import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Folder;
+import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
+import org.opensilk.music.model.TrackList;
 import org.opensilk.music.model.sort.TrackSortOrder;
 
 import java.io.File;
@@ -146,7 +151,8 @@ public class FoldersLibraryProvider extends LibraryProvider implements PlaylistL
                                 .subscribe(subscriber);
                         return;
                     }
-                    case FoldersUris.M_ALBUM_TRACKS: {
+                    case FoldersUris.M_ALBUM_TRACKS:
+                    case FoldersUris.M_ALBUM_DETAILS: {
                         final List<String> segments = uri.getPathSegments();
                         final String album = segments.get(segments.size() - 2);
                         mComponent.newLoaderComponent().tracksLoader()
@@ -197,6 +203,34 @@ public class FoldersLibraryProvider extends LibraryProvider implements PlaylistL
                                     }
                                 })
                                 .subscribe(subscriber);
+                        return;
+                    }
+                    case FoldersUris.M_ARTIST_DETAILS: {
+                        final List<String> segments = uri.getPathSegments();
+                        final String artist = segments.get(segments.size() - 2);
+                        final Artist artistM = MediaStoreHelper.getArtist(getContext(), mAuthority, artist);
+                        final TrackList.Builder tlb = TrackList.builder()
+                                .setUri(FoldersUris.artistTracks(mAuthority, artist))
+                                .setParentUri(FoldersUris.artist(mAuthority, artist))
+                                .setTracksUri(FoldersUris.artistTracks(mAuthority, artist));
+                        if (artistM != null) {
+                            tlb.setTrackCount(artistM.getTrackCount())
+                                    .setName(artistM.getName())
+                                    .addArtInfo(ArtInfo.forArtist(artistM.getName(), null))
+                            ;
+                        } else {
+                            tlb.setName("Tracks");
+                        }
+                        mComponent.newLoaderComponent().albumsLoader()
+                                .setUri(Uris.EXTERNAL_MEDIASTORE_ARTISTS_ALBUMS(artist))
+                                .createObservable()
+                                .cast(Model.class)
+                                .startWith(tlb.build())
+                                .subscribe(subscriber);
+                        return;
+                    }
+                    case FoldersUris.M_GENRE_DETAILS: {
+                        subscriber.onError(new UnsupportedOperationException());
                         return;
                     }
                     case FoldersUris.M_FOLDERS: {

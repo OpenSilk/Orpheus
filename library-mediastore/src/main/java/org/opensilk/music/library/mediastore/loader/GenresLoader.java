@@ -60,12 +60,17 @@ public class GenresLoader extends RxCursorLoader<Genre> {
 
     @Override
     protected Genre makeFromCursor(Cursor c) throws Exception {
+        return makeFromCursor(c, authority);
+    }
+
+    public static Genre makeFromCursor(Cursor c, String authority) {
         final String id = c.getString(c.getColumnIndexOrThrow(BaseColumns._ID));
         final String name = getStringOrEmpty(c, MediaStore.Audio.Genres.NAME);
         return Genre.builder()
                 .setUri(FoldersUris.genre(authority, id))
                 .setParentUri(FoldersUris.genres(authority))
                 .setTracksUri(FoldersUris.genreTracks(authority, id))
+//                .setDetailsUri(FoldersUris.genreDetails(authority, id))
                 .setName(name)
                 .build();
     }

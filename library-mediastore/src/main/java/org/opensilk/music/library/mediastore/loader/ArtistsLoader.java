@@ -61,6 +61,10 @@ public class ArtistsLoader extends RxCursorLoader<Artist> {
 
     @Override
     protected Artist makeFromCursor(Cursor c) {
+        return makeFromCursor(c, authority);
+    }
+
+    public static Artist makeFromCursor(Cursor c, String authority) {
         // Copy the artist id
         final String id = c.getString(c.getColumnIndexOrThrow(BaseColumns._ID));
         // Copy the artist name
@@ -74,6 +78,7 @@ public class ArtistsLoader extends RxCursorLoader<Artist> {
                 .setUri(FoldersUris.artist(authority, id))
                 .setParentUri(FoldersUris.artists(authority))
                 .setTracksUri(FoldersUris.artistTracks(authority, id))
+                .setDetailsUri(FoldersUris.artistDetails(authority, id))
                 .setName(artistName)
                 .setAlbumCount(albumCount)
                 .setTrackCount(songCount)

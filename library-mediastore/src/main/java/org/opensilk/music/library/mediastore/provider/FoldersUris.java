@@ -44,6 +44,7 @@ public class FoldersUris {
     static final String artist = "artist";
     static final String genres = "genres";
     static final String genre = "genre";
+    static final String details = "details";
 
     private static Uri.Builder baseUriBuilder(String authority, String library) {
         return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library);
@@ -96,6 +97,10 @@ public class FoldersUris {
         return baseUriBuilder(authority, external).appendPath(album).appendPath(id).appendPath(tracks).build();
     }
 
+    public static Uri albumDetails(String authority, String id) {
+        return baseUriBuilder(authority, external).appendPath(album).appendPath(id).appendPath(details).build();
+    }
+
     public static Uri artists(String authority) {
         return baseUriBuilder(authority, external).appendPath(artists).build();
     }
@@ -108,6 +113,10 @@ public class FoldersUris {
         return baseUriBuilder(authority, external).appendPath(artist).appendPath(id).appendPath(tracks).build();
     }
 
+    public static Uri artistDetails(String authority, String id) {
+        return baseUriBuilder(authority, external).appendPath(artist).appendPath(id).appendPath(details).build();
+    }
+
     public static Uri genres(String authority) {
         return baseUriBuilder(authority, external).appendPath(genres).build();
     }
@@ -118,6 +127,10 @@ public class FoldersUris {
 
     public static Uri genreTracks(String authority, String id) {
         return baseUriBuilder(authority, external).appendPath(genre).appendPath(id).appendPath(tracks).build();
+    }
+
+    public static Uri genreDetails(String authority, String id) {
+        return baseUriBuilder(authority, external).appendPath(genre).appendPath(id).appendPath(details).build();
     }
 
     public static final int M_ALBUMS = 1;
@@ -137,6 +150,9 @@ public class FoldersUris {
     public static final int M_PLAYLIST = 15;
     public static final int M_PLAYLIST_TRACKS = 16;
     public static final int M_GENRE_TRACKS = 17;
+    public static final int M_ALBUM_DETAILS = 18;
+    public static final int M_ARTIST_DETAILS = 19;
+    public static final int M_GENRE_DETAILS = 20;
 
     private static final String slash_wild = "/*";
     private static final String slash_num = "/#";
@@ -151,14 +167,17 @@ public class FoldersUris {
         uriMatcher.addURI(authority, external_slash + albums, M_ALBUMS);
         uriMatcher.addURI(authority, external_slash + album + slash_num, M_ALBUM);
         uriMatcher.addURI(authority, external_slash + album + slash_num_slash + tracks, M_ALBUM_TRACKS);
+        uriMatcher.addURI(authority, external_slash + album + slash_num_slash + details, M_ALBUM_DETAILS);
 
         uriMatcher.addURI(authority, external_slash + artists, M_ARTISTS);
         uriMatcher.addURI(authority, external_slash + artist + slash_num, M_ARTIST);
         uriMatcher.addURI(authority, external_slash + artist + slash_num_slash + tracks, M_ARTIST_TRACKS);
+        uriMatcher.addURI(authority, external_slash + artist + slash_num_slash + details, M_ARTIST_DETAILS);
 
         uriMatcher.addURI(authority, external_slash + genres, M_GENRES);
         uriMatcher.addURI(authority, external_slash + genre + slash_num, M_GENRE);
         uriMatcher.addURI(authority, external_slash + genre + slash_num_slash + tracks, M_GENRE_TRACKS);
+        uriMatcher.addURI(authority, external_slash + genre + slash_num_slash + details, M_GENRE_DETAILS);
 
         uriMatcher.addURI(authority, base_match + folders, M_FOLDERS);
         uriMatcher.addURI(authority, base_match + folder + slash_wild, M_FOLDER);
