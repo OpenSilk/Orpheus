@@ -159,6 +159,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
                 .setAlbumCount(num_albums)
                 .setTrackCount(num_tracks)
                 .setTracksUri(IndexUris.artistTracks(indexAuthority, id))
+                .setDetailsUri(IndexUris.artistDetails(indexAuthority, id))
                 .build();
     }
 
@@ -380,6 +381,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
                 .setArtistUri(IndexUris.artist(indexAuthority, artistId))
                 .setTrackCount(trackNum)
                 .setTracksUri(IndexUris.albumTracks(indexAuthority, id))
+                .setDetailsUri(IndexUris.albumDetails(indexAuthority, id))
                 .build();
     }
 
@@ -527,6 +529,7 @@ public class IndexDatabaseImpl implements IndexDatabase {
                 .setAlbumsUri(IndexUris.genreAlbums(indexAuthority, id))
                 .setTrackCount(trackNum)
                 .setTracksUri(IndexUris.genreTracks(indexAuthority, id))
+                .setDetailsUri(IndexUris.genreDetails(indexAuthority, id))
                 ;
         long gid = Long.valueOf(id);
         if (c2 != null && c2.moveToFirst()) {
