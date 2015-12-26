@@ -15,32 +15,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.profile.playlist;
+package org.opensilk.music.ui3.profile;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.ui3.MusicActivityComponent;
-import org.opensilk.music.ui3.profile.ProfileComponentDragSwipe;
 
 import dagger.Component;
 import rx.functions.Func2;
 
 /**
- * Created by drew on 5/5/15.
+ * Created by drew on 10/18/15.
  */
 @ScreenScope
 @Component(
         dependencies = MusicActivityComponent.class,
-        modules = PlaylistDetailsScreenModule.class
+        modules = BioScreenModule.class
 )
-public interface PlaylistDetailsScreenComponent extends ProfileComponentDragSwipe {
-    Func2<MusicActivityComponent, PlaylistDetailsScreen, PlaylistDetailsScreenComponent> FACTORY =
-            new Func2<MusicActivityComponent, PlaylistDetailsScreen, PlaylistDetailsScreenComponent>() {
+public interface BioScreenComponent extends ProfileHeroComponent {
+    public Func2<MusicActivityComponent, BioScreen, BioScreenComponent> FACTORY =
+            new Func2<MusicActivityComponent, BioScreen, BioScreenComponent>() {
                 @Override
-                public PlaylistDetailsScreenComponent call(MusicActivityComponent musicActivityComponent, PlaylistDetailsScreen screen) {
-                    return DaggerPlaylistDetailsScreenComponent.builder()
+                public BioScreenComponent call(MusicActivityComponent musicActivityComponent, BioScreen bioScreen) {
+                    return DaggerBioScreenComponent.builder()
                             .musicActivityComponent(musicActivityComponent)
-                            .playlistDetailsScreenModule(new PlaylistDetailsScreenModule(screen))
+                            .bioScreenModule(new BioScreenModule(bioScreen))
                             .build();
                 }
             };
+    void inject(BioScreenView view);
 }

@@ -29,7 +29,6 @@ import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.library.playlist.PlaylistManager;
 import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.sort.PlaylistSortOrder;
@@ -40,9 +39,8 @@ import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
 import org.opensilk.music.ui3.common.OpenProfileItemClickListener;
 import org.opensilk.music.ui3.profile.ProfileScreen;
-import org.opensilk.music.ui3.profile.playlist.PlaylistDetailsScreen;
+import org.opensilk.music.ui3.profile.PlaylistDetailsScreen;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,8 +48,6 @@ import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
-import rx.Subscriber;
-import rx.Subscription;
 
 /**
  * Created by drew on 5/5/15.

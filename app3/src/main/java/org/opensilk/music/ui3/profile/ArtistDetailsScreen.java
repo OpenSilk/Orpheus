@@ -15,11 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.profile.tracklist;
+package org.opensilk.music.ui3.profile;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.os.Bundle;
 import android.os.Parcel;
 
 import org.opensilk.common.core.mortar.DaggerService;
@@ -29,33 +28,32 @@ import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortar.WithComponentFactory;
 import org.opensilk.common.ui.mortarfragment.MortarFragment;
 import org.opensilk.music.R;
-import org.opensilk.music.model.TrackList;
+import org.opensilk.music.model.Artist;
 import org.opensilk.music.ui3.MusicActivityComponent;
-import org.opensilk.music.ui3.profile.ProfileScreen;
 
 import mortar.MortarScope;
 
 /**
- * Created by drew on 5/12/15.
+ * Created by drew on 5/5/15.
  */
 @Layout(R.layout.profile_view2)
-@WithComponentFactory(TrackListScreen.Factory.class)
-public class TrackListScreen extends Screen implements ProfileScreen {
+@WithComponentFactory(ArtistDetailsScreen.Factory.class)
+public class ArtistDetailsScreen extends Screen implements ProfileScreen {
 
-    final TrackList trackList;
+    final Artist artist;
 
-    public TrackListScreen(TrackList trackList) {
-        this.trackList = trackList;
+    public ArtistDetailsScreen(Artist artist) {
+        this.artist = artist;
     }
 
     @Override
     public String getName() {
-        return super.getName() + "-" + trackList.getUri();
+        return super.getName() + "-" + artist.getUri();
     }
 
     @Override
     public MortarFragment getFragment(Context context) {
-        return TrackListScreenFragment.ni(context, this);
+        return ArtistDetailsScreenFragment.ni(context, this);
     }
 
     @Override
@@ -65,27 +63,28 @@ public class TrackListScreen extends Screen implements ProfileScreen {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeBundle(trackList.toBundle());
+        dest.writeBundle(artist.toBundle());
     }
 
-    public static final Creator<TrackListScreen> CREATOR = new Creator<TrackListScreen>() {
+    public static final Creator<ArtistDetailsScreen> CREATOR = new Creator<ArtistDetailsScreen>() {
         @Override
-        public TrackListScreen createFromParcel(Parcel source) {
-            Bundle b = source.readBundle(TrackList.class.getClassLoader());
-            return new TrackListScreen(TrackList.BUNDLE_CREATOR.fromBundle(b));
+        public ArtistDetailsScreen createFromParcel(Parcel source) {
+            return new ArtistDetailsScreen(
+                    Artist.BUNDLE_CREATOR.fromBundle(source.readBundle(Artist.class.getClassLoader()))
+            );
         }
 
         @Override
-        public TrackListScreen[] newArray(int size) {
-            return new TrackListScreen[size];
+        public ArtistDetailsScreen[] newArray(int size) {
+            return new ArtistDetailsScreen[size];
         }
     };
 
-    public static class Factory extends ComponentFactory<TrackListScreen> {
+    public static class Factory extends ComponentFactory<ArtistDetailsScreen> {
         @Override
-        protected Object createDaggerComponent(Resources resources, MortarScope parentScope, TrackListScreen screen) {
+        protected Object createDaggerComponent(Resources resources, MortarScope parentScope, ArtistDetailsScreen screen) {
             MusicActivityComponent activityComponent = DaggerService.getDaggerComponent(parentScope);
-            return TrackListScreenComponent.FACTORY.call(activityComponent, screen);
+            return ArtistDetailsScreenComponent.FACTORY.call(activityComponent, screen);
         }
     }
 }

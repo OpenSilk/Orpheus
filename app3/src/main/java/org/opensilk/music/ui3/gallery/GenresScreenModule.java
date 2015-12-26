@@ -27,7 +27,6 @@ import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.Model;
 import org.opensilk.music.model.sort.GenreSortOrder;
@@ -38,7 +37,7 @@ import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
 import org.opensilk.music.ui3.common.OpenProfileItemClickListener;
 import org.opensilk.music.ui3.profile.ProfileScreen;
-import org.opensilk.music.ui3.profile.genre.GenreDetailsScreen;
+import org.opensilk.music.ui3.profile.GenreDetailsScreen;
 
 import java.util.ArrayList;
 import java.util.List;

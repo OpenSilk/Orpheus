@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.profile.bio;
+package org.opensilk.music.ui3.profile;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -31,7 +31,6 @@ import org.opensilk.music.R;
 import org.opensilk.music.index.model.BioSummary;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.ui3.MusicActivityComponent;
-import org.opensilk.music.ui3.profile.ProfileScreen;
 
 import java.util.ArrayList;
 import java.util.List;

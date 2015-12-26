@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.profile.genre;
+package org.opensilk.music.ui3.profile;
 
 import android.content.Context;
 import android.net.Uri;
@@ -23,27 +23,23 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
-import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
+import org.opensilk.music.index.model.BioSummary;
 import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.Model;
-import org.opensilk.music.model.TrackList;
-import org.opensilk.music.model.sort.AlbumSortOrder;
+import org.opensilk.music.model.sort.TrackSortOrder;
+import org.opensilk.music.ui3.ProfileActivity;
+import org.opensilk.music.ui3.common.ActivityRequestCodes;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
-import org.opensilk.music.ui3.common.OpenProfileItemClickListener;
-import org.opensilk.music.ui3.common.UtilsCommon;
-import org.opensilk.music.ui3.profile.ProfileScreen;
-import org.opensilk.music.ui3.profile.album.AlbumDetailsScreen;
-import org.opensilk.music.ui3.profile.tracklist.TrackListScreen;
+import org.opensilk.music.ui3.common.PlayAllItemClickListener;
 
 import java.util.Collections;
 import java.util.List;
@@ -52,44 +48,43 @@ import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
-import rx.functions.Action1;
-import rx.functions.Action2;
 
 /**
  * Created by drew on 5/5/15.
  */
 @Module
-public class GenreDetailsScreenModule {
-    final GenreDetailsScreen screen;
+public class AlbumDetailsScreenModule {
+    final AlbumDetailsScreen screen;
 
-    public GenreDetailsScreenModule(GenreDetailsScreen screen) {
+    public AlbumDetailsScreenModule(AlbumDetailsScreen screen) {
         this.screen = screen;
     }
 
     @Provides @Named("loader_uri")
     public Uri provideLoaderUri(@Named("IndexProviderAuthority") String authority) {
-        return IndexUris.genreDetails(screen.genre);
+        return IndexUris.albumDetails(screen.album);
     }
 
     @Provides @Named("profile_heros")
     public Boolean provideWantMultiHeros() {
-        return screen.genre.getArtInfos().size() > 1;
+        return false;
     }
 
     @Provides @Named("profile_heros")
     public List<ArtInfo> provideHeroArtinfos() {
-        return screen.genre.getArtInfos();
+        final Album album = screen.album;
+        return Collections.singletonList(ArtInfo.forAlbum(album.getArtistName(),
+                album.getName(), album.getArtworkUri()));
     }
 
     @Provides @Named("profile_title")
     public String provideProfileTitle() {
-        return screen.genre.getName();
+        return screen.album.getName();
     }
 
     @Provides @Named("profile_subtitle")
-    public String provideProfileSubTitle(@ForApplication Context context) {
-        return UtilsCommon.makeLabel(context, R.plurals.Nalbums, screen.genre.getAlbumsCount())
-                + ", " + UtilsCommon.makeLabel(context, R.plurals.Nsongs, screen.genre.getTracksCount());
+    public String provideProfileSubTitle() {
+        return screen.album.getArtistName();
     }
 
     @Provides @ScreenScope
@@ -98,40 +93,28 @@ public class GenreDetailsScreenModule {
             MenuHandler menuConfig
     ) {
         return BundleablePresenterConfig.builder()
-                .setWantsGrid(true)
-                .setAllowLongPressSelection(false)
+                .setWantsGrid(false)
+                .setWantsNumberedTracks(true)
                 .setItemClickListener(itemClickListener)
                 .setMenuConfig(menuConfig)
-                .setFabClickAction(new Action2<Context, BundleablePresenter>() {
-                    @Override
-                    public void call(Context context, final BundleablePresenter presenter) {
-                        UtilsCommon.addTracksToQueue(context,
-                                Collections.singletonList(screen.genre.getTracksUri()),
-                                new Action1<List<Uri>>() {
-                                    @Override
-                                    public void call(List<Uri> uris) {
-                                        presenter.getPlaybackController().playAll(uris, 0);
-                                    }
-                                });
-                    }
-                })
+                .setDefaultSortOrder(TrackSortOrder.PLAYORDER)
                 .build();
     }
 
     @Provides @ScreenScope
-    public ItemClickListener provideItemClickListener(ActivityResultsController activityResultsController) {
-        return new OpenProfileItemClickListener(activityResultsController, new OpenProfileItemClickListener.ProfileScreenFactory() {
+    public ItemClickListener provideItemClickListener(final ActivityResultsController activityResultsController) {
+        return new ItemClickListener() {
             @Override
-            public ProfileScreen call(Model item) {
-                if (item instanceof Album) {
-                    return new AlbumDetailsScreen((Album)item);
-                } else if (item instanceof TrackList) {
-                    return new TrackListScreen((TrackList)item);
+            public void onItemClicked(BundleablePresenter presenter, Context context, Model item) {
+                if (item instanceof BioSummary) {
+                    activityResultsController.startActivityForResult(
+                            ProfileActivity.makeIntent(context, new BioScreen(provideHeroArtinfos(), (BioSummary)item)),
+                            ActivityRequestCodes.PROFILE, null);
                 } else {
-                    throw new IllegalArgumentException("Unkown model type " + item.getClass());
+                    new PlayAllItemClickListener().onItemClicked(presenter, context, item);
                 }
             }
-        });
+        };
     }
 
     @Provides @ScreenScope
@@ -140,8 +123,9 @@ public class GenreDetailsScreenModule {
             @Override
             public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,
-                        R.menu.genre_album_sort_by,
-                        R.menu.view_as
+                        R.menu.album_song_sort_by,
+                        R.menu.add_to_queue,
+                        R.menu.play_next
                         );
                 return true;
             }
@@ -149,20 +133,26 @@ public class GenreDetailsScreenModule {
             @Override
             public boolean onMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
+                    case R.id.menu_sort_by_track_list:
+                        setNewSortOrder(presenter, TrackSortOrder.PLAYORDER);
+                        return true;
                     case R.id.menu_sort_by_az:
-                        setNewSortOrder(presenter, AlbumSortOrder.A_Z);
+                        setNewSortOrder(presenter, TrackSortOrder.A_Z);
                         return true;
                     case R.id.menu_sort_by_za:
-                        setNewSortOrder(presenter, AlbumSortOrder.Z_A);
+                        setNewSortOrder(presenter, TrackSortOrder.Z_A);
                         return true;
-                    case R.id.menu_sort_by_number_of_songs:
-                        setNewSortOrder(presenter, AlbumSortOrder.MOST_TRACKS);
+                    case R.id.menu_sort_by_duration:
+                        setNewSortOrder(presenter, TrackSortOrder.LONGEST);
                         return true;
-                    case R.id.menu_view_as_simple:
-                        updateLayout(presenter, AppPreferences.SIMPLE);
+                    case R.id.menu_sort_by_artist:
+                        setNewSortOrder(presenter, TrackSortOrder.ARTIST);
                         return true;
-                    case R.id.menu_view_as_grid:
-                        updateLayout(presenter, AppPreferences.GRID);
+                    case R.id.add_to_queue:
+                        addItemsToQueue(presenter);
+                        return true;
+                    case R.id.play_next:
+                        playItemsNext(presenter);
                         return true;
                     default:
                         return false;
@@ -171,12 +161,29 @@ public class GenreDetailsScreenModule {
 
             @Override
             public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
-                return false;
+                inflateMenus(menuInflater, menu,
+                        R.menu.add_to_queue,
+                        R.menu.play_next,
+                        R.menu.add_to_playlist
+                );
+                return true;
             }
 
             @Override
             public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
-                return false;
+                switch (menuItem.getItemId()) {
+                    case R.id.add_to_queue:
+                        addSelectedItemsToQueue(presenter);
+                        return true;
+                    case R.id.play_next:
+                        playSelectedItemsNext(presenter);
+                        return true;
+                    case R.id.add_to_playlist:
+                        addToPlaylistFromTracks(context, presenter);
+                        return true;
+                    default:
+                        return false;
+                }
             }
         };
     }

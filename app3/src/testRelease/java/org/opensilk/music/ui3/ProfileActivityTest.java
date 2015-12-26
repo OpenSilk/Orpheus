@@ -24,7 +24,7 @@ import org.junit.runner.RunWith;
 import org.opensilk.music.BuildConfig;
 import org.opensilk.music.TestApp;
 import org.opensilk.music.model.Artist;
-import org.opensilk.music.ui3.profile.artist.ArtistDetailsScreen;
+import org.opensilk.music.ui3.profile.ArtistDetailsScreen;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;

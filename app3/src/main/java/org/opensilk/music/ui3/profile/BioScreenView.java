@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.profile.bio;
+package org.opensilk.music.ui3.profile;
 
 import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;

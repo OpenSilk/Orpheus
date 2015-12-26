@@ -15,20 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.profile.tracklist;
+package org.opensilk.music.ui3.profile;
 
 import android.content.Context;
 import android.net.Uri;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.R;
 import org.opensilk.music.model.ArtInfo;
+import org.opensilk.music.model.Model;
 import org.opensilk.music.model.sort.TrackSortOrder;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
@@ -37,7 +37,9 @@ import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
 import org.opensilk.music.ui3.common.PlayAllItemClickListener;
 import org.opensilk.music.ui3.common.UtilsCommon;
+import org.opensilk.music.ui3.playlist.PlaylistProgressScreenFragment;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Named;
@@ -46,40 +48,39 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * Created by drew on 5/12/15.
+ * Created by drew on 5/5/15.
  */
 @Module
-public class TrackListScreenModule {
-    final TrackListScreen screen;
+public class PlaylistDetailsScreenModule {
+    final PlaylistDetailsScreen screen;
 
-    public TrackListScreenModule(TrackListScreen screen) {
+    public PlaylistDetailsScreenModule(PlaylistDetailsScreen screen) {
         this.screen = screen;
     }
 
     @Provides @Named("loader_uri")
-    public Uri provideLoaderUri(@Named("IndexProviderAuthority") String authority) {
-        return screen.trackList.getUri();
+    public Uri provideLoaderUri() {
+        return screen.playlist.getTracksUri();
     }
 
     @Provides @Named("profile_heros")
     public Boolean provideWantMultiHeros() {
-        return screen.trackList.getArtInfos().size() > 1;
+        return screen.playlist.getArtInfos().size() > 1;
     }
 
     @Provides @Named("profile_heros")
     public List<ArtInfo> provideHeroArtinfos() {
-        return screen.trackList.getArtInfos();
+        return screen.playlist.getArtInfos();
     }
 
     @Provides @Named("profile_title")
     public String provideProfileTitle() {
-        return screen.trackList.getName();
+        return screen.playlist.getName();
     }
 
     @Provides @Named("profile_subtitle")
     public String provideProfileSubTitle(@ForApplication Context context) {
-        return UtilsCommon.makeLabel(context, R.plurals.Nalbums, screen.trackList.getAlbumsCount())
-                + ", " + UtilsCommon.makeLabel(context, R.plurals.Nsongs, screen.trackList.getTracksCount());
+        return UtilsCommon.makeLabel(context, R.plurals.Nsongs, screen.playlist.getTracksCount());
     }
 
     @Provides @ScreenScope
@@ -89,9 +90,11 @@ public class TrackListScreenModule {
     ) {
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(false)
+//                .setWantsNumberedTracks(true)
+                .setAllowLongPressSelection(false)
                 .setItemClickListener(itemClickListener)
                 .setMenuConfig(menuConfig)
-                .setDefaultSortOrder(TrackSortOrder.ALBUM)
+                .setDefaultSortOrder(TrackSortOrder.PLAYORDER)
                 .build();
     }
 
@@ -101,44 +104,25 @@ public class TrackListScreenModule {
     }
 
     @Provides @ScreenScope
-    public MenuHandler provideMenuHandler(@Named("loader_uri") final Uri loaderUri, final ActivityResultsController activityResultsController) {
+    public MenuHandler provideMenuHandler(@Named("loader_uri") Uri loaderUri,
+                                          final ActivityResultsController activityResultsController) {
         return new MenuHandlerImpl(loaderUri, activityResultsController) {
             @Override
             public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
-                inflateMenus(menuInflater, menu,
-                        R.menu.song_sort_by,
-                        R.menu.add_to_queue,
-                        R.menu.play_next
-                );
-                return false;
+                inflateMenu(R.menu.add_to_queue, menuInflater, menu);
+                inflateMenu(R.menu.play_next, menuInflater, menu);
+                return true;
             }
 
             @Override
             public boolean onMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
-                    case R.id.menu_sort_by_az:
-                        setNewSortOrder(presenter, TrackSortOrder.A_Z);
-                        return true;
-                    case R.id.menu_sort_by_za:
-                        setNewSortOrder(presenter, TrackSortOrder.Z_A);
-                        return true;
-                    case R.id.menu_sort_by_artist:
-                        setNewSortOrder(presenter, TrackSortOrder.ARTIST);
-                        return true;
-                    case R.id.menu_sort_by_album:
-                        setNewSortOrder(presenter, TrackSortOrder.ALBUM);
-                        return true;
-                    case R.id.menu_sort_by_duration:
-                        setNewSortOrder(presenter, TrackSortOrder.LONGEST);
-                        return true;
-                    case R.id.menu_sort_by_date_added:
-                        setNewSortOrder(presenter, TrackSortOrder.LAST_ADDED);
-                        return true;
                     case R.id.add_to_queue:
                         addItemsToQueue(presenter);
                         return true;
                     case R.id.play_next:
                         playItemsNext(presenter);
+                        return true;
                     default:
                         return false;
                 }
@@ -147,25 +131,24 @@ public class TrackListScreenModule {
             @Override
             public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,
-                        R.menu.add_to_queue,
-                        R.menu.play_next,
-                        R.menu.add_to_playlist
-                );
+                        R.menu.playlist_save
+                        );
                 return true;
             }
 
             @Override
-            public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
+            public boolean onActionMenuItemClicked(final BundleablePresenter presenter, Context context, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
-                    case R.id.add_to_queue:
-                        addSelectedItemsToQueue(presenter);
+                    case R.id.playlist_save: {
+                        List<Model> tracks = presenter.getItems();
+                        List<Uri> list = new ArrayList<>(tracks.size());
+                        for (Model b : tracks) {
+                            list.add(b.getUri());
+                        }
+                        presenter.getFm().showDialog(PlaylistProgressScreenFragment.update(
+                                screen.playlist.getUri(), list));
                         return true;
-                    case R.id.play_next:
-                        playSelectedItemsNext(presenter);
-                        return true;
-                    case R.id.add_to_playlist:
-                        addToPlaylistFromTracks(context, presenter);
-                        return true;
+                    }
                     default:
                         return false;
                 }
