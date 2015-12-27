@@ -26,6 +26,8 @@ import android.os.CancellationSignal;
 
 import com.bumptech.glide.Priority;
 
+import org.opensilk.music.artwork.BuildConfig;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,7 +48,7 @@ public class ArtInfoRequestStreamFetcherK extends ArtInfoRequestStreamFetcher {
 
     @Override
     public void loadData(Priority priority, DataCallback<? super InputStream> callback) {
-        Timber.d("loadData(%s)", artInfo);
+        if (BuildConfig.LOGVV) Timber.d("loadData(%s)", artInfo);
         ContentResolver contentResolver = context.getContentResolver();
         try {
             final Uri uri = artInfo.asContentUri(authority);
@@ -66,7 +68,7 @@ public class ArtInfoRequestStreamFetcherK extends ArtInfoRequestStreamFetcher {
 
     @Override
     public void cancel() {
-        Timber.d("cancel(%s)", artInfo);
+        if (BuildConfig.LOGVV) Timber.d("cancel(%s)", artInfo);
         if (cancellationSignal != null) {
             cancellationSignal.cancel();
         }

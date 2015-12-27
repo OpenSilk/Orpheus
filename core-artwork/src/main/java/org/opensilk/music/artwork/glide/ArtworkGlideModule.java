@@ -54,7 +54,7 @@ public class ArtworkGlideModule implements com.bumptech.glide.module.GlideModule
 //                .placeholder(R.drawable.default_artwork)
 //                ;
 //        builder.setDefaultRequestOptions(options);
-        if (BuildConfig.LOGV) {
+        if (BuildConfig.LOGVV) {
             builder.setLogLevel(Log.DEBUG);
         }
     }

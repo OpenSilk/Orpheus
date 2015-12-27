@@ -21,6 +21,7 @@ android {
 
     defaultConfig {
         buildConfigField "Boolean", "LOGV", "true"
+        buildConfigField "Boolean", "LOGVV", "false"
     }
 
     compileOptions {

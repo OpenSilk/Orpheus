@@ -41,8 +41,8 @@ import java.util.List;
  */
 public class BundleableListSlice<T extends Bundleable> implements Parcelable {
     private static String TAG = "BundleableListSlice";
-    private static boolean DEBUG = BuildConfig.DEBUG;
-    private static boolean LOGVV = false;//BuildConfig.DEBUG;
+    private static boolean DEBUG = BuildConfig.LOGVV;
+    private static boolean LOGVV = false;
 
     private static final int MAX_IPC_SIZE = 64 * 1024;
 
