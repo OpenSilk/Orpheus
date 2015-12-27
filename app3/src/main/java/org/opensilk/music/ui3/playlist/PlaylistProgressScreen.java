@@ -39,6 +39,7 @@ public class PlaylistProgressScreen extends Screen {
         ADDTO,
         DELETE,
         UPDATE,
+        FETCH_TRACKS,
     }
 
     final Operation operation;

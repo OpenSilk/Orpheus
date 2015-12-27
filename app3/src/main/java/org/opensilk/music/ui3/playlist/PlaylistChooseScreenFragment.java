@@ -41,8 +41,7 @@ public class PlaylistChooseScreenFragment extends MortarFragment {
     protected Screen newScreen() {
         Bundle args = getArguments();
         Uri loaderUri = BundleHelper.getUri(args);
-        int listKind = BundleHelper.getInt(args);
         List<Uri> uris = BundleHelper.getList(args);
-        return new PlaylistChooseScreen(loaderUri, listKind, uris);
+        return new PlaylistChooseScreen(loaderUri, uris);
     }
 }

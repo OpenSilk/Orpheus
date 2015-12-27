@@ -43,19 +43,9 @@ public class PlaylistManageActivity extends MusicActivity {
     static final String ACTION_ADD = PlaylistManageActivity.class.getName() + ".action.add";
     static final String ACTION_MANAGE = PlaylistManageActivity.class.getName() + ".action.manage";
 
-    public static Intent makeAddIntent(Context context, Uri loaderUri, List<Uri> tracksUris) {
-        Intent i = new Intent(context, PlaylistManageActivity.class).setAction(ACTION_ADD);
-        i.putExtra("b", BundleHelper.b().putUri(loaderUri)
-                .putInt(PlaylistChooseScreen.ListKind.POINTER)
-                .putList(tracksUris)
-                .get());
-        return i;
-    }
-
     public static Intent makeAddIntent2(Context context, Uri loaderUri, List<Uri> tracks) {
         Intent i = new Intent(context, PlaylistManageActivity.class).setAction(ACTION_ADD);
         i.putExtra("b", BundleHelper.b().putUri(loaderUri)
-                .putInt(PlaylistChooseScreen.ListKind.REAL)
                 .putList(tracks)
                 .get());
         return i;

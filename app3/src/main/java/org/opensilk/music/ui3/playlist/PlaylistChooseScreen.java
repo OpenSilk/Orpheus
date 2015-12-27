@@ -40,17 +40,10 @@ import mortar.MortarScope;
 public class PlaylistChooseScreen extends Screen {
 
     final Uri loaderUri;
-    final int listKind;
     final List<Uri> uris;
 
-    public interface ListKind {
-        int POINTER = 1; //List is tracks uris *must query to get real list*
-        int REAL = 2; //List is uris of tracks
-    }
-
-    public PlaylistChooseScreen(Uri loaderUri, int listKind, List<Uri> uris) {
+    public PlaylistChooseScreen(Uri loaderUri, List<Uri> uris) {
         this.loaderUri = loaderUri;
-        this.listKind = listKind;
         this.uris = uris;
     }
 

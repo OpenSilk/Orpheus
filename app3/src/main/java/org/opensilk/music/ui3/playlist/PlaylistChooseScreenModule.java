@@ -80,8 +80,7 @@ public class PlaylistChooseScreenModule {
         return new ItemClickListener() {
             @Override
             public void onItemClicked(final BundleablePresenter presenter, final Context context, final Model item) {
-                presenter.getFm().showDialog(PlaylistProgressScreenFragment.addTo(
-                        item.getUri(), screen.listKind, screen.uris));
+                presenter.getFm().showDialog(PlaylistProgressScreenFragment.addTo(item.getUri(), screen.uris));
             }
         };
     }

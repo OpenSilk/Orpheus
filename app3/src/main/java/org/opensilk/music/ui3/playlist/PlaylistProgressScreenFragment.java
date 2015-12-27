@@ -43,9 +43,9 @@ public class PlaylistProgressScreenFragment extends MortarDialogFragment {
         return f;
     }
 
-    public static PlaylistProgressScreenFragment addTo(Uri playlist, int kind, List<Uri> uris) {
+    public static PlaylistProgressScreenFragment addTo(Uri playlist, List<Uri> uris) {
         PlaylistProgressScreenFragment f = new PlaylistProgressScreenFragment();
-        f.setArguments(BundleHelper.b().putInt(2).putUri(playlist).putInt2(kind).putList(uris)
+        f.setArguments(BundleHelper.b().putInt(2).putUri(playlist).putList(uris)
                 .putString(playlist.getAuthority()).get());
         return f;
     }
@@ -63,6 +63,12 @@ public class PlaylistProgressScreenFragment extends MortarDialogFragment {
         return f;
     }
 
+    public static PlaylistProgressScreenFragment fetchTracks(List<Uri> tracksUris) {
+        PlaylistProgressScreenFragment f = new PlaylistProgressScreenFragment();
+        f.setArguments(BundleHelper.b().putInt(5).putList(tracksUris).get());
+        return f;
+    }
+
     @Override
     protected Screen newScreen() {
         int kind = BundleHelper.getInt(getArguments());
@@ -75,6 +81,8 @@ public class PlaylistProgressScreenFragment extends MortarDialogFragment {
                 return new PlaylistProgressScreen(PlaylistProgressScreen.Operation.DELETE, getArguments());
             case 4:
                 return new PlaylistProgressScreen(PlaylistProgressScreen.Operation.UPDATE, getArguments());
+            case 5:
+                return new PlaylistProgressScreen(PlaylistProgressScreen.Operation.FETCH_TRACKS, getArguments());
             default:
                 throw new IllegalArgumentException("Unknown playlist operation");
         }

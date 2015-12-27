@@ -36,6 +36,8 @@ import org.opensilk.music.model.Item;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.PlaylistManageActivity;
 import org.opensilk.music.ui3.library.FoldersScreenFragment;
+import org.opensilk.music.ui3.playlist.PlaylistProgressScreen;
+import org.opensilk.music.ui3.playlist.PlaylistProgressScreenFragment;
 import org.opensilk.music.ui3.playlist.PlaylistProviderSelectScreenFragment;
 
 import java.util.List;
@@ -122,15 +124,11 @@ public abstract class MenuHandlerImpl extends MenuHandler {
         presenter.getPlaybackController().enqueueAllNext(toPlay);
     }
 
-    //TODO somehow check authorites and allow adding to android playlists
-    public void addToPlaylistFromTracksUris(Context context, List<Uri> tracksUriList) {
+    public void addToPlaylistFromTracksUris(Context context, BundleablePresenter presenter, List<Uri> tracksUriList) {
         if (tracksUriList == null || tracksUriList.isEmpty()) {
             return;
         }
-        String firstauthority = tracksUriList.get(0).getAuthority();
-        activityResultsController.startActivityForResult(
-                PlaylistManageActivity.makeAddIntent(context, IndexUris.playlists(firstauthority), tracksUriList),
-                ActivityRequestCodes.PLAYLIST_ADD, null);
+        presenter.getFm().showDialog(PlaylistProgressScreenFragment.fetchTracks(tracksUriList));
     }
 
     public void addToPlaylistFromTracks(Context context, BundleablePresenter presenter) {

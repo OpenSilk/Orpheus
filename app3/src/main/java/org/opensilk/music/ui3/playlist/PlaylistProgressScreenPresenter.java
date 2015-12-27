@@ -29,11 +29,14 @@ import org.opensilk.common.core.rx.RxUtils;
 import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.common.core.util.ObjectUtils;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
+import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.R;
 import org.opensilk.music.library.client.TypedBundleableLoader;
 import org.opensilk.music.library.playlist.PlaylistManager;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
+import org.opensilk.music.model.sort.AlbumSortOrder;
+import org.opensilk.music.model.sort.TrackSortOrder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +66,7 @@ public class PlaylistProgressScreenPresenter extends Presenter<PlaylistProgressS
     final PlaylistProgressScreen.Operation operation;
     final Bundle extras;
     final ActivityResultsController activityResultsController;
+    final FragmentManagerOwner fm;
 
     enum State {
         NONE,
@@ -74,20 +78,27 @@ public class PlaylistProgressScreenPresenter extends Presenter<PlaylistProgressS
     State state = State.NONE;
     Subscription subscription = null;
 
+    //TODO instead of stalling at end should ensure this amount has elapsed since start
+    static final long FINISH_DELAY = 700;
+
+    //TODO how to get rid of these
     int numDeleted = 0;
     Playlist moddedPlaylist;
+    List<Uri> trackUris;
 
     @Inject
     public PlaylistProgressScreenPresenter(
             @ForApplication Context context,
             PlaylistProgressScreen screen,
-            ActivityResultsController activityResultsController
+            ActivityResultsController activityResultsController,
+            FragmentManagerOwner fm
     ) {
         this.appContext = context;
         this.manager = new PlaylistManager(context, BundleHelper.getString(screen.extras));
         this.operation = screen.operation;
         this.extras = screen.extras;
         this.activityResultsController = activityResultsController;
+        this.fm = fm;
     }
 
     @Override
@@ -132,13 +143,16 @@ public class PlaylistProgressScreenPresenter extends Presenter<PlaylistProgressS
             case UPDATE:
                 doUpdate();
                 break;
+            case FETCH_TRACKS:
+                doFetchTracks();
+                break;
         }
     }
 
     void doCreate() {
         final String name = BundleHelper.getString2(extras);
         subscription = manager.create(name)
-                .delay(700, TimeUnit.MILLISECONDS)
+                .delay(FINISH_DELAY, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Uri>() {
                     @Override
@@ -163,51 +177,10 @@ public class PlaylistProgressScreenPresenter extends Presenter<PlaylistProgressS
 
     void doAddTo() {
         final Uri playlist = BundleHelper.getUri(extras);
-        int listKind = BundleHelper.getInt2(extras);
         List<Uri> uris = BundleHelper.getList(extras);
-        Observable<Playlist> o = null;
-        if (listKind == PlaylistChooseScreen.ListKind.POINTER) {
-            Observable<Observable<List<Track>>> loaderCreator = Observable.from(uris)
-                    .map(new Func1<Uri, Observable<List<Track>>>() {
-                        @Override
-                        public Observable<List<Track>> call(final Uri uri) {
-                            //Use defer for lazy creation
-                            return Observable.defer(new Func0<Observable<List<Track>>>() {
-                                @Override
-                                public Observable<List<Track>> call() {
-                                    return TypedBundleableLoader.<Track>create(appContext)
-                                            .setUri(uri).createObservable();
-                                }
-                            });
-                        }
-                    });
-            o = Observable.mergeDelayError(loaderCreator, 5)
-                    .subscribeOn(Schedulers.computation())
-                    .collect(new Func0<List<Uri>>() {
-                        @Override
-                        public List<Uri> call() {
-                            return new ArrayList<Uri>();
-                        }
-                    }, new Action2<List<Uri>, List<Track>>() {
-                        @Override
-                        public void call(List<Uri> uris, List<Track> tracks) {
-                            for (Track track : tracks) {
-                                uris.add(track.getUri());
-                            }
-                        }
-                    })
-                    .flatMap(new Func1<List<Uri>, Observable<Playlist>>() {
-                        @Override
-                        public Observable<Playlist> call(List<Uri> uris) {
-                            return manager.addTo(playlist, uris);
-                        }
-                    });
-        } else {
-            o = manager.addTo(playlist, uris)
-                    .subscribeOn(Schedulers.computation());
-        }
-        subscription = o
-                .delay(700, TimeUnit.MILLISECONDS)
+        subscription = manager.addTo(playlist, uris)
+                .subscribeOn(Schedulers.computation())
+                .delay(FINISH_DELAY, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Playlist>() {
                     @Override
@@ -233,7 +206,7 @@ public class PlaylistProgressScreenPresenter extends Presenter<PlaylistProgressS
     void doDelete() {
         List<Uri> playlists = BundleHelper.getList(extras);
         subscription = manager.delete(playlists)
-                .delay(700, TimeUnit.MILLISECONDS)
+                .delay(FINISH_DELAY, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Integer>() {
                     @Override
@@ -260,7 +233,7 @@ public class PlaylistProgressScreenPresenter extends Presenter<PlaylistProgressS
         Uri playlist = BundleHelper.getUri(extras);
         List<Uri> uris = BundleHelper.getList(extras);
         subscription = manager.update(playlist, uris)
-                .delay(700, TimeUnit.MILLISECONDS)
+                .delay(FINISH_DELAY, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Playlist>() {
                     @Override
@@ -283,6 +256,62 @@ public class PlaylistProgressScreenPresenter extends Presenter<PlaylistProgressS
                 });
     }
 
+    void doFetchTracks() {
+        final List<Uri> tracksUris = BundleHelper.getList(extras);
+        Observable<Observable<List<Track>>> loaderCreator = Observable.from(tracksUris)
+                .map(new Func1<Uri, Observable<List<Track>>>() {
+                    @Override
+                    public Observable<List<Track>> call(final Uri uri) {
+                        //Use defer for lazy creation
+                        return Observable.defer(new Func0<Observable<List<Track>>>() {
+                            @Override
+                            public Observable<List<Track>> call() {
+                                return TypedBundleableLoader.<Track>create(appContext)
+                                        .setUri(uri)
+                                        .setSortOrder(TrackSortOrder.ALBUM)
+                                        .createObservable();
+                            }
+                        });
+                    }
+                });
+        subscription = Observable.concat(loaderCreator)
+                .subscribeOn(Schedulers.computation())
+                .collect(new Func0<List<Uri>>() {
+                    @Override
+                    public List<Uri> call() {
+                        return new ArrayList<Uri>();
+                    }
+                }, new Action2<List<Uri>, List<Track>>() {
+                    @Override
+                    public void call(List<Uri> uris, List<Track> tracks) {
+                        for (Track track : tracks) {
+                            uris.add(track.getUri());
+                        }
+                    }
+                })
+                .delay(FINISH_DELAY, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<List<Uri>>() {
+                    @Override
+                    public void onCompleted() {
+                        state = State.COMPLETE;
+                        onDone();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Timber.w(e, "FetchTracks");
+                        state = State.ERROR;
+                        onDone();
+                    }
+
+                    @Override
+                    public void onNext(List<Uri> uriList) {
+                        trackUris = uriList;
+                    }
+                });
+    }
+
     void onDone() {
         if (!hasView()) return;
         switch (state) {
@@ -299,6 +328,13 @@ public class PlaylistProgressScreenPresenter extends Presenter<PlaylistProgressS
                     case DELETE: {
                         String text = getView().getResources().getQuantityString(R.plurals.NNNitemsdeleted, numDeleted, numDeleted);
                         Toast.makeText(getView().getActivity(), text, Toast.LENGTH_SHORT).show();
+                        getView().dismiss();
+                        break;
+                    }
+                    case FETCH_TRACKS: {
+                        if (trackUris != null) {
+                            fm.showDialog(PlaylistProviderSelectScreenFragment.ni(getView().getContext(), trackUris));
+                        }
                         getView().dismiss();
                         break;
                     }

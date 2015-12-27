@@ -170,7 +170,7 @@ public class ArtistsScreenModule {
                         return true;
                     }
                     case R.id.add_to_playlist: {
-                        addToPlaylistFromTracksUris(context, uris);
+                        addToPlaylistFromTracksUris(context, presenter, uris);
                         return true;
                     }
                     default:
