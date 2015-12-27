@@ -71,6 +71,8 @@ public interface Projections {
             MediaStore.Audio.AudioColumns.DATE_MODIFIED,
 
             MediaStore.Audio.AudioColumns.DATA,
+
+            MediaStore.Audio.AudioColumns.TRACK,
     };
     String[] LOCAL_ALBUM = new String[] {
                 BaseColumns._ID,
@@ -117,6 +119,8 @@ public interface Projections {
             MediaStore.Audio.AudioColumns.DATE_MODIFIED,
 
             MediaStore.Audio.AudioColumns.DATA,
+
+            MediaStore.Audio.AudioColumns.TRACK,
     };
     String[] GENRE = new String[] {
                 BaseColumns._ID,

@@ -104,6 +104,15 @@ public class CursorHelpers {
         }
     }
 
+    public static int getIntOrNeg(Cursor c, String col) {
+        try {
+            return c.getInt(c.getColumnIndexOrThrow(col));
+        } catch (IllegalArgumentException|NullPointerException e) {
+            Timber.w(e, "getIntOrNeg("+col+")");
+            return -1;
+        }
+    }
+
     public static long[] getSongIdsForAlbum(Context context, String albumid) {
         Cursor cursor = context.getContentResolver().query(
                 Uris.EXTERNAL_MEDIASTORE_MEDIA,

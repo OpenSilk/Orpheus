@@ -99,7 +99,6 @@ public class PlaylistUtil {
                         continue;
                     }
                     Track.Builder tb = FilesHelper.makeTrackFromCursor(authority, volume, f, c);
-                    tb.setTrackNumber(c.getInt(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TRACK)));
                     tracks.add(tb.build());
                 } while (c.moveToNext());
                 return tracks;

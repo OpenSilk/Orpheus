@@ -52,6 +52,7 @@ import timber.log.Timber;
 
 import static org.opensilk.music.library.mediastore.util.CursorHelpers.generateArtworkUri;
 import static org.opensilk.music.library.mediastore.util.CursorHelpers.generateDataUri;
+import static org.opensilk.music.library.mediastore.util.CursorHelpers.getIntOrNeg;
 import static org.opensilk.music.library.mediastore.util.CursorHelpers.getLongOrZero;
 import static org.opensilk.music.library.mediastore.util.CursorHelpers.getStringOrNull;
 
@@ -414,6 +415,10 @@ public class FilesHelper {
                                 .build()
                 )
                 ;
+        int trackNom = getIntOrNeg(c, MediaStore.Audio.AudioColumns.TRACK);
+        if (trackNom >= 0) {
+            tb.setTrackNumber(trackNom);
+        }
         long albumId = getLongOrZero(c, MediaStore.Audio.Media.ALBUM_ID);
         if (albumId > 0) {
             tb.setArtworkUri(generateArtworkUri(albumId));
