@@ -17,6 +17,7 @@
 
 package org.opensilk.music.playback;
 
+import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -35,6 +36,7 @@ import android.widget.RemoteViews;
 
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.util.VersionUtils;
+import org.opensilk.music.index.client.IndexClient;
 import org.opensilk.music.playback.appwidget.AppWidgetService;
 import org.opensilk.music.playback.service.PlaybackServiceProxy;
 import org.opensilk.music.playback.session.IMediaControllerProxy;
@@ -63,8 +65,8 @@ public class NotificationHelper2 extends BroadcastReceiver {
 
     private final Context mContext;
     private final NotificationManager mNotificationManager;
-
     private final PlaybackServiceProxy mService;
+    private final IndexClient mIndexClient;
     private Object mSessionToken;
     private IMediaControllerProxy mController;
     private IMediaControllerProxy.TransportControlsProxy mTransportControls;
@@ -87,11 +89,13 @@ public class NotificationHelper2 extends BroadcastReceiver {
     public NotificationHelper2(
             @ForApplication Context context,
             NotificationManager notificationManager,
-            PlaybackServiceProxy service
+            PlaybackServiceProxy service,
+            IndexClient indexClient
     ) {
         mContext = context;
         mNotificationManager = notificationManager;
         mService = service;
+        mIndexClient = indexClient;
 
         String pkg = mContext.getPackageName();
         mPauseIntent = PendingIntent.getBroadcast(mContext, REQUEST_CODE,
@@ -301,7 +305,11 @@ public class NotificationHelper2 extends BroadcastReceiver {
         int size = mContext.getResources().getDimensionPixelSize(R.dimen.notification_bitmap_resize);
         Timber.d("Bitmap size = %d", size);
         Bitmap bitmap = scaleBitmap(MediaMetadataHelper.getIcon(mMetadata), size);
-        buildNotificationInternal(bitmap);
+        if (VersionUtils.hasLollipop() && mIndexClient.useMediaStyleNotification()) {
+            buildNotificationInternalMediaStyle(bitmap);
+        } else {
+            buildNotificationInternal(bitmap);
+        }
     }
 
     private void buildNotificationInternal(Bitmap icon) {
@@ -351,6 +359,45 @@ public class NotificationHelper2 extends BroadcastReceiver {
         }
 
         notifyNotification(notification);
+    }
+
+    @TargetApi(21)
+    private void buildNotificationInternalMediaStyle(Bitmap icon) {
+        if (mMetadata == null || mPlaybackState == null) {
+            return;
+        }
+
+        final boolean isPlaying = PlaybackStateHelper.shouldShowPauseButton(mPlaybackState);
+
+        Notification.Builder builder = new Notification.Builder(mContext)
+                    .setSmallIcon(R.drawable.stat_notify_music)
+                    .setLargeIcon(icon)
+                    .setContentIntent(createContentIntent())
+                    .setContentTitle(MediaMetadataHelper.getDisplayName(mMetadata))
+                    .setContentText(mContext.getString(R.string.something_circle_something,
+                            MediaMetadataHelper.getArtistName(mMetadata),
+                            MediaMetadataHelper.getAlbumName(mMetadata)))
+                    .setShowWhen(false)
+                    .setStyle(NotificationHelperL.getMediaStyle(mSessionToken)
+                            .setShowActionsInCompactView(1))
+                    .addAction(new Notification.Action.Builder(
+                            R.drawable.ic_skip_previous_black_36dp,
+                            mContext.getString(R.string.accessibility_prev),
+                            mPreviousIntent
+                    ).build())
+                    .addAction(new Notification.Action.Builder(
+                            isPlaying ? R.drawable.ic_play_black_36dp : R.drawable.ic_pause_black_36dp,
+                            mContext.getString(isPlaying ? R.string.accessibility_pause : R.string.accessibility_play),
+                            isPlaying ? mPauseIntent : mPlayIntent
+                    ).build())
+                    .addAction(new Notification.Action.Builder(
+                            R.drawable.ic_skip_next_black_36dp,
+                            mContext.getString(R.string.accessibility_next),
+                            mNextIntent
+                    ).build())
+                    ;
+
+        notifyNotification(builder.build());
     }
 
     /**

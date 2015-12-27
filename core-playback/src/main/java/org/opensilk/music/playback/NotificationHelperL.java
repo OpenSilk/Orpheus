@@ -31,4 +31,8 @@ public class NotificationHelperL {
     public static void applySessionExtra(Bundle extras, Object token) {
         extras.putParcelable(Notification.EXTRA_MEDIA_SESSION, (MediaSession.Token) token);
     }
+    public static Notification.MediaStyle getMediaStyle(Object token) {
+        return new Notification.MediaStyle()
+                .setMediaSession((MediaSession.Token) token);
+    }
 }

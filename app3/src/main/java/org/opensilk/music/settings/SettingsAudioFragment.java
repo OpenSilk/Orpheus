@@ -31,6 +31,7 @@ import android.preference.Preference;
 import android.widget.Toast;
 
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.R;
 import org.opensilk.music.index.client.IndexClient;
@@ -53,6 +54,7 @@ public class SettingsAudioFragment extends SettingsFragment implements
 
     private Preference mEqualizer;
     private CheckBoxPreference mBroadcastMeta;
+    private CheckBoxPreference mMediaStyleNotif;
 
     @Override
     public void onAttach(Activity activity) {
@@ -74,6 +76,15 @@ public class SettingsAudioFragment extends SettingsFragment implements
         mBroadcastMeta = (CheckBoxPreference) mPrefSet.findPreference("service.broadcastmeta");
         mBroadcastMeta.setChecked(mIndexClient.broadcastMeta());
         mBroadcastMeta.setOnPreferenceChangeListener(this);
+
+        if (VersionUtils.hasLollipop()) {
+            mMediaStyleNotif = (CheckBoxPreference) mPrefSet.findPreference("service.usemediastylenotif");
+            mMediaStyleNotif.setChecked(mIndexClient.useMediaStyleNotification());
+            mMediaStyleNotif.setOnPreferenceChangeListener(this);
+        } else {
+            mPrefSet.removePreference(mPrefSet.findPreference("service.usemediastylenotif"));
+        }
+
     }
 
     @Override
@@ -96,6 +107,9 @@ public class SettingsAudioFragment extends SettingsFragment implements
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         if (preference == mBroadcastMeta) {
             mIndexClient.setBroadcastMeta((Boolean)newValue);
+            return true;
+        } else if (preference == mMediaStyleNotif) {
+            mIndexClient.setUseMediaStyleNotification((Boolean)newValue);
             return true;
         }
         return false;

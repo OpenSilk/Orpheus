@@ -84,8 +84,8 @@
     <string name="dash"> - </string>
     <string name="go">Go</string>
     <string name="processing">Processing</string>
-    <string name="circle_character">\u25CF</string> <!-- ● -->
-    <string name="something_circle_something">%1$s \u25CF %2$s</string>
+    <string name="circle_character">\u26AA</string> <!-- ⚪ -->
+    <string name="something_circle_something">%1$s \u26AA %2$s</string>
 
     <!-- Context menu items -->
     <string name="menu_play_selection">Play</string>
@@ -276,6 +276,8 @@
     <string name="settings_err_no_audio_id">Could not get audio id. Please play a song and try again.</string>
     <string name="settings_broadcast_meta">Broadcast track metadata</string>
     <string name="settings_broadcast_meta_summary">Enable to use external scrobblers</string>
+    <string name="settings_mediastylenotif">Use MediaStyle notification</string>
+    <string name="settings_mediastylenotif_summary">System provided dark style notification</string>
 
 
     <string name="settings_help_category">Help</string>

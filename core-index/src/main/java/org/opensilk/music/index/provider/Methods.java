@@ -36,6 +36,8 @@ public interface Methods {
     String SAVE_SEEK_POSITION = "idx.saveseekposition";
     String GET_BROADCAST_META = "idx.get.broadcastmeta";
     String SAVE_BROADCAST_META = "idx.save.broadcastmeta";
+    String GET_USE_MEDIASTYLE_NOTIF = "idx.get.usemediastylenotif";
+    String SAVE_USE_MEDIASTYLE_NOTIF = "idx.save.usemediastylenotif";
     String GET_TRACK = "idx.get.track";
     String GET_TRACK_LIST = "idx.get.track.list";
 }

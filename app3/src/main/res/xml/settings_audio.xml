@@ -29,4 +29,10 @@
         android:summary="@string/settings_broadcast_meta_summary"
         android:persistent="false"/>
 
+    <CheckBoxPreference
+        android:key="service.usemediastylenotif"
+        android:title="@string/settings_mediastylenotif"
+        android:summary="@string/settings_mediastylenotif_summary"
+        android:persistent="false"/>
+
 </PreferenceScreen>

@@ -2014,7 +2014,9 @@ public class IndexDatabaseImpl implements IndexDatabase {
     static final String[] broadcastMetaKey = new String[] {
             IndexSchema.PlaybackSettings.BROADCAST_META,
     };
-
+    static final String[] useMediaStyleNotif = new String[] {
+            IndexSchema.PlaybackSettings.MEDIASTYLE_NOTIF,
+    };
 
     public List<Uri> getLastQueue() {
         Cursor c = null;
@@ -2179,6 +2181,29 @@ public class IndexDatabaseImpl implements IndexDatabase {
         ContentValues cv = new ContentValues(2);
         cv.put(IndexSchema.PlaybackSettings.KEY, IndexSchema.PlaybackSettings.BROADCAST_META);
         cv.put(IndexSchema.PlaybackSettings.INT_VALUE, broadcast ? 1 : 0);
+        insert(IndexSchema.PlaybackSettings.TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
+    }
+
+    @Override
+    public boolean getUseMediaStyleNotif() {
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.PlaybackSettings.TABLE, intValCols,
+                    playbackSettingsSel, useMediaStyleNotif, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                return getIntOrNeg(c, 0) == 1;
+            }
+        } finally {
+            closeCursor(c);
+        }
+        return false;
+    }
+
+    @Override
+    public void setUseMediaStyleNotif(boolean use) {
+        ContentValues cv = new ContentValues(2);
+        cv.put(IndexSchema.PlaybackSettings.KEY, IndexSchema.PlaybackSettings.MEDIASTYLE_NOTIF);
+        cv.put(IndexSchema.PlaybackSettings.INT_VALUE, use ? 1 : 0);
         insert(IndexSchema.PlaybackSettings.TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
     }
 

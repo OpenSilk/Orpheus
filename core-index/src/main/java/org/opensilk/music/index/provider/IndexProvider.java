@@ -228,6 +228,15 @@ public class IndexProvider extends LibraryProvider implements PlaylistLibraryAdd
                 mDataBase.setBroadcastMeta(BundleHelper.getInt(extras) == 1);
                 return reply.putOk(true).get();
             }
+            case Methods.GET_USE_MEDIASTYLE_NOTIF: {
+                boolean b = mDataBase.getUseMediaStyleNotif();
+                return BundleHelper.from(reply.putOk(true).get())
+                        .putInt(b ? 1 : 0).get();
+            }
+            case Methods.SAVE_USE_MEDIASTYLE_NOTIF: {
+                mDataBase.setUseMediaStyleNotif(BundleHelper.getInt(extras) == 1);
+                return reply.putOk(true).get();
+            }
             case Methods.GET_TRACK: {
                 Track track = mDataBase.getTrack(BundleHelper.getUri(extras));
                 if (track == null) {

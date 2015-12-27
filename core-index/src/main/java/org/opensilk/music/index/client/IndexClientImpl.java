@@ -317,6 +317,20 @@ public class IndexClientImpl implements IndexClient {
     }
 
     @Override
+    public boolean useMediaStyleNotification() {
+        Bundle repl = makeCall(Methods.GET_USE_MEDIASTYLE_NOTIF, null);
+        if (checkCall(repl)) {
+            return BundleHelper.getInt(repl) == 1;
+        }
+        return false;
+    }
+
+    @Override
+    public void setUseMediaStyleNotification(boolean use) {
+        makeCheckedCall(Methods.SAVE_USE_MEDIASTYLE_NOTIF, BundleHelper.b().putInt(use ? 1 : 0).get());
+    }
+
+    @Override
     public Observable<Track> getTrack(Uri uri) {
         Bundle repl = makeCall(Methods.GET_TRACK, BundleHelper.b().putUri(uri).get());
         if (checkCall(repl)) {

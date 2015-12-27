@@ -257,6 +257,8 @@ public class IndexSchema {
         String KEY_LAST_SEEK_POS = "last_seek_pos";
         //INT
         String BROADCAST_META = "broadcast_meta";
+        //INT
+        String MEDIASTYLE_NOTIF = "mediastyle_notif";
     }
 
 }

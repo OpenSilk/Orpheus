@@ -96,5 +96,7 @@ public interface IndexDatabase {
     void saveLastSeekPosition(long pos);
     boolean getBroadcastMeta();
     void setBroadcastMeta(boolean broadcast);
+    boolean getUseMediaStyleNotif();
+    void setUseMediaStyleNotif(boolean use);
 
 }

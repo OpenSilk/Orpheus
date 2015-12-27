@@ -72,6 +72,9 @@ public interface IndexClient {
     boolean broadcastMeta();
     void setBroadcastMeta(boolean broadcastMeta);
 
+    boolean useMediaStyleNotification();
+    void setUseMediaStyleNotification(boolean use);
+
     /*
      * Queue / Playback helper
      */
