@@ -92,6 +92,7 @@ public class GenresScreenModule {
                             .setTrackCount(genre.getTracksCount())
                             .setTracksUri(genre.getTracksUri())
                             .setName(genre.getName())
+                            .addArtInfos(genre.getArtInfos())
                             .build();
                     return new TrackListScreen(tl);
                 }
