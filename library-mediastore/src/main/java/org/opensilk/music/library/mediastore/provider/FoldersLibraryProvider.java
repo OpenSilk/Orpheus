@@ -290,15 +290,21 @@ public class FoldersLibraryProvider extends LibraryProvider implements PlaylistL
             public void call(Subscriber<? super Model> subscriber) {
                 switch (mUriMatcher.match(uri)) {
                     case FoldersUris.M_ALBUM: {
-                        subscriber.onError(new UnsupportedOperationException());
+                        final String id = uri.getLastPathSegment();
+                        subscriber.onNext(MediaStoreHelper.getAlbum(getContext(), mAuthority, id));
+                        subscriber.onCompleted();
                         return;
                     }
                     case FoldersUris.M_ARTIST: {
-                        subscriber.onError(new UnsupportedOperationException());
+                        final String id = uri.getLastPathSegment();
+                        subscriber.onNext(MediaStoreHelper.getArtist(getContext(), mAuthority, id));
+                        subscriber.onCompleted();
                         return;
                     }
                     case FoldersUris.M_GENRE: {
-                        subscriber.onError(new UnsupportedOperationException());
+                        final String id = uri.getLastPathSegment();
+                        subscriber.onNext(MediaStoreHelper.getGenre(getContext(), mAuthority, id));
+                        subscriber.onCompleted();
                         return;
                     }
                     case FoldersUris.M_FOLDERS: {
