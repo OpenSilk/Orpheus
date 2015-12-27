@@ -78,9 +78,14 @@ public class SettingsDataFragment extends SettingsFragment {
 
     void setCacheSizeSummary(int size) {
         if (mCacheSize != null) {
-            mCacheSize.setSummary(String.format(Locale.US, "%.02f/%d MB",
-                    (float) FileUtils.sizeOfDirectory(CacheUtil.getCacheDir(
-                    getActivity(),DISK_CACHE_DIRECTORY)) / 1024 / 1024, size));
+            float used;
+            try {
+                used = (float) FileUtils.sizeOfDirectory(CacheUtil.getCacheDir(
+                        getActivity(),DISK_CACHE_DIRECTORY)) / 1024 / 1024;
+            } catch (IllegalArgumentException e) {
+                used = 0f;
+            }
+            mCacheSize.setSummary(String.format(Locale.US, "%.02f/%d MB", used, size));
         }
     }
 
