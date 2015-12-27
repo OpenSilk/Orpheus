@@ -71,11 +71,11 @@ public class AlbumsLoader extends RxCursorLoader<Album> {
         // Copy the album id
         final String id = c.getString(c.getColumnIndexOrThrow(BaseColumns._ID));
         // Copy the album name
-        final String albumName = getStringOrEmpty(c, MediaStore.Audio.AlbumColumns.ALBUM);
+        final String albumName = getStringOrEmpty(c, "name");
         // Copy the artist name
         final String artist = getStringOrNull(c, MediaStore.Audio.AlbumColumns.ARTIST);
         // Copy the number of songs
-        final int songCount = getIntOrZero(c, MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS);
+        final int songCount = getIntOrZero(c, "track_count");
         // Copy the release year
 //        int year = getIntOrZero(c, MediaStore.Audio.AlbumColumns.FIRST_YEAR);
 //        if (year == 0) {

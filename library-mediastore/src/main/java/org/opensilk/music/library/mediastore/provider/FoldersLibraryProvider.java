@@ -21,13 +21,17 @@ import android.content.ContentResolver;
 import android.content.UriMatcher;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.provider.MediaStore;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.core.util.BundleHelper;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.gallery.provider.GalleryLibraryAddOn;
+import org.opensilk.music.library.internal.BundleableListTransformer;
+import org.opensilk.music.library.internal.BundleableSubscriber;
 import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.mediastore.R;
 import org.opensilk.music.library.mediastore.loader.LoaderComponent;
@@ -43,6 +47,7 @@ import org.opensilk.music.library.playlist.PlaylistOperationListener;
 import org.opensilk.music.library.playlist.provider.PlaylistLibraryAddOn;
 import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryProvider;
+import org.opensilk.music.model.Album;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Container;
@@ -52,6 +57,8 @@ import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.TrackList;
+import org.opensilk.music.model.compare.FolderTrackCompare;
+import org.opensilk.music.model.sort.BaseSortOrder;
 import org.opensilk.music.model.sort.TrackSortOrder;
 
 import java.io.File;
@@ -121,157 +128,189 @@ public class FoldersLibraryProvider extends LibraryProvider implements PlaylistL
     }
 
     @Override
-    @DebugLog
+    protected void listObjsInternal(Uri uri, IBinder binder, Bundle args) {
+        switch (mUriMatcher.match(uri)) {
+            case FoldersUris.M_ALBUMS: {
+                final BundleableSubscriber<Album> subscriber = new BundleableSubscriber<>(binder);
+                mComponent.newLoaderComponent().albumsLoader()
+                        .setSortOrder(LibraryExtras.getSortOrder(args))
+                        .createObservable()
+                        .toList()
+                        .subscribe(subscriber);
+                return;
+            }
+            case FoldersUris.M_ARTISTS: {
+                final BundleableSubscriber<Artist> subscriber = new BundleableSubscriber<>(binder);
+                mComponent.newLoaderComponent().artistsLoader()
+                        .setSortOrder(LibraryExtras.getSortOrder(args))
+                        .createObservable()
+                        .toList()
+                        .subscribe(subscriber);
+                return;
+            }
+            case FoldersUris.M_GENRES: {
+                final BundleableSubscriber<Genre> subscriber = new BundleableSubscriber<>(binder);
+                String sort = LibraryExtras.getSortOrder(args);
+                if (!StringUtils.equals(BaseSortOrder.A_Z, sort) || !StringUtils.equals(BaseSortOrder.Z_A, sort)) {
+                    sort = BaseSortOrder.A_Z;
+                }
+                mComponent.newLoaderComponent().genresLoader()
+                        .setSortOrder(sort)
+                        .createObservable()
+                        .toList()
+                        .subscribe(subscriber);
+                return;
+            }
+            case FoldersUris.M_TRACKS: {
+                final BundleableSubscriber<Track> subscriber = new BundleableSubscriber<>(binder);
+                mComponent.newLoaderComponent().tracksLoader()
+                        .setSortOrder(LibraryExtras.getSortOrder(args))
+                        .createObservable()
+                        .toList()
+                        .subscribe(subscriber);
+                return;
+            }
+            case FoldersUris.M_ALBUM_TRACKS:
+            case FoldersUris.M_ALBUM_DETAILS: {
+                final BundleableSubscriber<Track> subscriber = new BundleableSubscriber<>(binder);
+                final List<String> segments = uri.getPathSegments();
+                final String album = segments.get(segments.size() - 2);
+                mComponent.newLoaderComponent().tracksLoader()
+                        .setSelection(Selections.LOCAL_ALBUM_SONGS)
+                        .setSelectionArgs(SelectionArgs.LOCAL_ALBUM_SONGS(album))
+                        .setSortOrder(LibraryExtras.getSortOrder(args))
+                        .createObservable()
+                        .doOnNext(new Action1<Track>() {
+                            @Override
+                            public void call(Track track) {
+                                Timber.v("Track name=%s artist=%s albumArtist=%s",
+                                        track.getSortName(), track.getArtistName(), track.getAlbumArtistName());
+                            }
+                        })
+                        .toList()
+                        .subscribe(subscriber);
+                return;
+            }
+            case FoldersUris.M_ARTIST_TRACKS: {
+                final BundleableSubscriber<Track> subscriber = new BundleableSubscriber<>(binder);
+                final List<String> segments = uri.getPathSegments();
+                final String artist = segments.get(segments.size() - 2);
+                mComponent.newLoaderComponent().tracksLoader()
+                        .setSelection(Selections.LOCAL_ARTIST_SONGS)
+                        .setSelectionArgs(SelectionArgs.LOCAL_ARTIST_SONGS(artist))
+                        .setSortOrder(LibraryExtras.getSortOrder(args))
+                        .createObservable()
+                        .doOnNext(new Action1<Track>() {
+                            @Override
+                            public void call(Track track) {
+                                Timber.v("Track name=%s artist=%s albumArtist=%s",
+                                        track.getSortName(), track.getArtistName(), track.getAlbumArtistName());
+                            }
+                        })
+                        .toList()
+                        .subscribe(subscriber);
+                return;
+            }
+            case FoldersUris.M_GENRE_TRACKS: {
+                final BundleableSubscriber<Track> subscriber = new BundleableSubscriber<>(binder);
+                final List<String> segments = uri.getPathSegments();
+                final String genre = segments.get(segments.size() - 2);
+                mComponent.newLoaderComponent().tracksLoader()
+                        .setUri(Uris.GENRE_MEMBERS(genre))
+                        .setProjection(Projections.GENRE_AUDIO_FILE)
+                        .setSortOrder(LibraryExtras.getSortOrder(args))
+                        .createObservable()
+                        .doOnNext(new Action1<Track>() {
+                            @Override
+                            public void call(Track track) {
+                                Timber.v("Track name=%s artist=%s albumArtist=%s",
+                                        track.getSortName(), track.getArtistName(), track.getAlbumArtistName());
+                            }
+                        })
+                        .toList()
+                        .subscribe(subscriber);
+                return;
+            }
+            case FoldersUris.M_ARTIST_DETAILS: {
+                final BundleableSubscriber<Model> subscriber = new BundleableSubscriber<>(binder);
+                final List<String> segments = uri.getPathSegments();
+                final String artist = segments.get(segments.size() - 2);
+                final Artist artistM = MediaStoreHelper.getArtist(getContext(), mAuthority, artist);
+                final TrackList.Builder tlb = TrackList.builder()
+                        .setUri(FoldersUris.artistTracks(mAuthority, artist))
+                        .setParentUri(FoldersUris.artist(mAuthority, artist))
+                        .setTracksUri(FoldersUris.artistTracks(mAuthority, artist));
+                if (artistM != null) {
+                    tlb.setTrackCount(artistM.getTrackCount())
+                            .setName(artistM.getName())
+                            .addArtInfo(ArtInfo.forArtist(artistM.getName(), null))
+                    ;
+                } else {
+                    tlb.setName("Tracks");
+                }
+                mComponent.newLoaderComponent().albumsLoader()
+                        .setUri(Uris.EXTERNAL_MEDIASTORE_ARTISTS_ALBUMS(artist))
+                        .setSortOrder(LibraryExtras.getSortOrder(args))
+                        .createObservable()
+                        .cast(Model.class)
+                        .startWith(tlb.build())
+                        .toList()
+                        .subscribe(subscriber);
+                return;
+            }
+            case FoldersUris.M_GENRE_DETAILS: {
+                final BundleableSubscriber<Model> subscriber = new BundleableSubscriber<>(binder);
+                //TODO
+                subscriber.onError(new UnsupportedOperationException());
+                return;
+            }
+            case FoldersUris.M_PLAYLISTS: {
+                final BundleableSubscriber<Playlist> subscriber = new BundleableSubscriber<>(binder);
+                final List<Playlist> playlists = PlaylistUtil.getPlaylists(getContext(), mAuthority);
+                if (playlists == null) {
+                    subscriber.onError(new NullPointerException("Unable to obtain cursor"));
+                    return;
+                }
+                subscriber.onNext(playlists);
+                subscriber.onCompleted();
+                return;
+            }
+            case FoldersUris.M_PLAYLIST_TRACKS: {
+                final BundleableSubscriber<Track> subscriber = new BundleableSubscriber<>(binder);
+                final List<String> segs = uri.getPathSegments();
+                final String plst = segs.get(segs.size() - 2);
+                final List<StorageLookup.StorageVolume> volumes = mStorageLookup.getStorageVolumes();
+                final List<Track> tracks = PlaylistUtil.getPlaylistMembers(getContext(), plst, mAuthority, volumes);
+                if (tracks == null) {
+                    subscriber.onError(new NullPointerException("Unable to query playlist"));
+                    return;
+                }
+                subscriber.onNext(tracks);
+                subscriber.onCompleted();
+                return;
+            }
+            default: {
+                final BundleableSubscriber<Model> subscriber = new BundleableSubscriber<>(binder);
+                getListObjsObservable(uri, args)
+                        .compose(new BundleableListTransformer<Model>(FolderTrackCompare.func(LibraryExtras.getSortOrder(args))))
+                        .subscribe(subscriber);
+                return;
+            }
+        }
+    }
+
+    @Override
     protected Observable<Model> getListObjsObservable(final Uri uri, final Bundle args) {
         return Observable.create(new Observable.OnSubscribe<Model>() {
             @Override
             public void call(Subscriber<? super Model> subscriber) {
                 switch (mUriMatcher.match(uri)) {
-                    case FoldersUris.M_ALBUMS: {
-                        mComponent.newLoaderComponent().albumsLoader()
-                                .createObservable()
-                                .subscribe(subscriber);
-                        return;
-                    }
-                    case FoldersUris.M_ARTISTS: {
-                        mComponent.newLoaderComponent().artistsLoader()
-                                .createObservable()
-                                .subscribe(subscriber);
-                        return;
-                    }
-                    case FoldersUris.M_GENRES: {
-                        mComponent.newLoaderComponent().genresLoader()
-                                .createObservable()
-                                .subscribe(subscriber);
-                        return;
-                    }
-                    case FoldersUris.M_TRACKS: {
-                        mComponent.newLoaderComponent().tracksLoader()
-                                .createObservable()
-                                .subscribe(subscriber);
-                        return;
-                    }
-                    case FoldersUris.M_ALBUM_TRACKS:
-                    case FoldersUris.M_ALBUM_DETAILS: {
-                        final List<String> segments = uri.getPathSegments();
-                        final String album = segments.get(segments.size() - 2);
-                        mComponent.newLoaderComponent().tracksLoader()
-                                .setSelection(Selections.LOCAL_ALBUM_SONGS)
-                                .setSelectionArgs(SelectionArgs.LOCAL_ALBUM_SONGS(album))
-                                        //.setSortOrder(LibraryExtras.getSortOrder(args))
-                                .createObservable()
-                                .doOnNext(new Action1<Track>() {
-                                    @Override
-                                    public void call(Track track) {
-                                        Timber.v("Track name=%s artist=%s albumArtist=%s",
-                                                track.getSortName(), track.getArtistName(), track.getAlbumArtistName());
-                                    }
-                                })
-                                .subscribe(subscriber);
-                        return;
-                    }
-                    case FoldersUris.M_ARTIST_TRACKS: {
-                        final List<String> segments = uri.getPathSegments();
-                        final String artist = segments.get(segments.size() - 2);
-                        mComponent.newLoaderComponent().tracksLoader()
-                                .setSelection(Selections.LOCAL_ARTIST_SONGS)
-                                .setSelectionArgs(SelectionArgs.LOCAL_ARTIST_SONGS(artist))
-                                        //.setSortOrder(LibraryExtras.getSortOrder(args))
-                                .createObservable()
-                                .doOnNext(new Action1<Track>() {
-                                    @Override
-                                    public void call(Track track) {
-                                        Timber.v("Track name=%s artist=%s albumArtist=%s",
-                                                track.getSortName(), track.getArtistName(), track.getAlbumArtistName());
-                                    }
-                                })
-                                .subscribe(subscriber);
-                        return;
-                    }
-                    case FoldersUris.M_GENRE_TRACKS: {
-                        final List<String> segments = uri.getPathSegments();
-                        final String genre = segments.get(segments.size() - 2);
-                        mComponent.newLoaderComponent().tracksLoader()
-                                .setUri(Uris.GENRE_MEMBERS(genre))
-                                .setProjection(Projections.GENRE_AUDIO_FILE)
-                                .createObservable()
-                                .doOnNext(new Action1<Track>() {
-                                    @Override
-                                    public void call(Track track) {
-                                        Timber.v("Track name=%s artist=%s albumArtist=%s",
-                                                track.getSortName(), track.getArtistName(), track.getAlbumArtistName());
-                                    }
-                                })
-                                .subscribe(subscriber);
-                        return;
-                    }
-                    case FoldersUris.M_ARTIST_DETAILS: {
-                        final List<String> segments = uri.getPathSegments();
-                        final String artist = segments.get(segments.size() - 2);
-                        final Artist artistM = MediaStoreHelper.getArtist(getContext(), mAuthority, artist);
-                        final TrackList.Builder tlb = TrackList.builder()
-                                .setUri(FoldersUris.artistTracks(mAuthority, artist))
-                                .setParentUri(FoldersUris.artist(mAuthority, artist))
-                                .setTracksUri(FoldersUris.artistTracks(mAuthority, artist));
-                        if (artistM != null) {
-                            tlb.setTrackCount(artistM.getTrackCount())
-                                    .setName(artistM.getName())
-                                    .addArtInfo(ArtInfo.forArtist(artistM.getName(), null))
-                            ;
-                        } else {
-                            tlb.setName("Tracks");
-                        }
-                        mComponent.newLoaderComponent().albumsLoader()
-                                .setUri(Uris.EXTERNAL_MEDIASTORE_ARTISTS_ALBUMS(artist))
-                                .createObservable()
-                                .cast(Model.class)
-                                .startWith(tlb.build())
-                                .subscribe(subscriber);
-                        return;
-                    }
-                    case FoldersUris.M_GENRE_DETAILS: {
-                        subscriber.onError(new UnsupportedOperationException());
-                        return;
-                    }
                     case FoldersUris.M_FOLDERS: {
                         browseFolders(uri.getPathSegments().get(0), null, subscriber, args);
                         return;
                     }
                     case FoldersUris.M_FOLDER: {
                         browseFolders(uri.getPathSegments().get(0), uri.getLastPathSegment(), subscriber, args);
-                        return;
-                    }
-                    case FoldersUris.M_PLAYLISTS: {
-                        final List<Playlist> playlists = PlaylistUtil.getPlaylists(getContext(), mAuthority);
-                        if (subscriber.isUnsubscribed()) {
-                            return;
-                        }
-                        if (playlists == null) {
-                            subscriber.onError(new NullPointerException("Unable to obtain cursor"));
-                            return;
-                        }
-                        for (Playlist p : playlists) {
-                            subscriber.onNext(p);
-                        }
-                        subscriber.onCompleted();
-                        return;
-                    }
-                    case FoldersUris.M_PLAYLIST_TRACKS: {
-                        final List<String> segs = uri.getPathSegments();
-                        final String plst = segs.get(segs.size() - 2);
-                        final List<StorageLookup.StorageVolume> volumes = mStorageLookup.getStorageVolumes();
-                        final List<Track> tracks = PlaylistUtil.getPlaylistMembers(getContext(), plst, mAuthority, volumes);
-                        if (subscriber.isUnsubscribed()) {
-                            return;
-                        }
-                        if (tracks == null) {
-                            subscriber.onError(new NullPointerException("Unable to query playlist"));
-                            return;
-                        }
-                        for (Track t : tracks) {
-                            subscriber.onNext(t);
-                        }
-                        subscriber.onCompleted();
                         return;
                     }
                     default:
