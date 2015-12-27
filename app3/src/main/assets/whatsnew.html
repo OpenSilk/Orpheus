@@ -19,98 +19,116 @@
 
 </head>
 <body>
-<h2>Welcome to Orpheus 3</h2>
-<p>A lot has changed since Orpheus 2. In fact the entire app has been rewritten from scratch. Here are the highlights.</p>
-<h4>Index</h4>
-<h5>Library starts empty</h5>
+<h2>Welcome to Orpheus 3.1</h2>
+<h3>Changes since 3.0</h3>
+<ul>
+    <li>Local media no longer requires indexing; listed under "Android library"</li>
+    <li>Android playlists can be managed; shows under "Playlists"</li>
+    <li>Added dark notification for Lollipop; in Settings->Audio</li>
+    <li>Faster artwork loading for Kitkat+</li>
+</ul>
+<h3>Changes since 2.2</h3>
+<h4>Index (My library screen)</h4>
 <p>
-    The first thing you will notice is that you have no music! Orpheus now manages its own index of music
-    using an <b>exclusive</b> policy. So the <em>My Library</em> screen will not have any music in it
-    to start with. You will need to browse through the available <em>Libraries</em> and add the folders
-    where your music is stored. By clicking the <b>action button</b> with the <em>+</em> sign. After
-    indexing the folder it can be removed from <em>My Library</em> by browsing back to the folder and
-    clicking the same action button. (which will now have a <em>-</em> sign)
-</p>
-<h5>Why do in this way?</h5>
-<p>
-    The number one request we have received is folder black-listing. This is now
-    implicitly supported. Don't want a folder in <em>My Library</em>? Just don't index it.
+    Orpheus now has its own music index. The first thing you will notice is <em>My Library</em> has
+    no music. You will need to browse through the available <em>Libraries</em> and add the folders
+    where your music is stored.
 </p>
 <p>
-    Before only music stored on the sdcard would show in <em>My Library</em>.
-    Now you can index any folder (from any Library plugin you have installed) and have
-    it show in <em>My Library</em>. This is a major new feature in Orpheus 3.
+    Why? Before only music stored on the sdcard would show in <em>My Library</em>.
+    Now you can index any folder (from any Library plugin you have installed) creating a unified library
+    of local and network (cloud) content. This is a major new feature in Orpheus 3.
 </p>
-<h5>How indexing works</h5>
 <p>
-    When you index a folder, Orpheus will recursively walk the hierarchy and read the ID3 tags for <b>every</b>
+    How? When you index a folder, Orpheus will recursively walk the hierarchy and read the ID3 tags for <b>every</b>
     audio file it finds. If your music does <b>not</b> have proper ID3 tags indexing will produce poor results.
-    Indexing will <b>not</b> pull cover art from the ID3 tags; however, images in the same directory as the
-    file named cover, artwork, or front will be used as cover art for that album.
-    Also be mindful of indexing over metered connection (3G/LTE). Indexing will download somewhere between
-    10-50% the total size of the folder. (Indexing A 100GB folder could download 50GB of data!).
 </p>
-<h5>Manual re-indexing</h5>
-<p>
-    Orpheus cannot automatically detect changes in your folders. You must manually rescan them
-    by going to the <em>Folders</em> tab in <em>My Library</em>, long clicking the folder and
-    pressing <em>Rescan</em> in the action menu. This will sync the <em>My Library</em> with any
-    additions and deletions. This is normally very fast. (Auto rescan is on the todo list).
-</p>
+<h5>Issues</h5>
+<ul>
+    <li>
+        The index currently uses the same extractor as Android's MediaStore which improperly reads Latin1 metadata as UTF8.
+    </li>
+    <li>
+        Indexing will <b>not</b> pull cover art from the ID3 tags; libraries can usually find the artwork
+        if no artwork is found by the library it is downloaded from coverartarchive.
+    </li>
+    <li>
+        Indexing currently requires an active internet connection (even for local content) to download
+        the artist and album descriptions, this will eventually be fixed to allow pulling descriptions after the fact.
+    </li>
+    <li>
+        Be mindful of indexing over metered connection (3G/LTE). Indexing will download somewhere between
+        10-50% the total size of the folder.
+    </li>
+    <li>
+        Orpheus cannot automatically detect changes in your folders. You must manually rescan them
+        by going to the <em>Folders</em> tab in <em>My Library</em>, long clicking the folder and
+        pressing <em>Rescan</em> in the action menu. This will sync the <em>My Library</em> with any
+        additions and deletions. This is normally very fast. (Auto rescan is on the todo list).
+    </li>
+</ul>
 <h4>UI changes</h4>
-<p>
-    The ui has not changed very much since Orpheus 2 but there are some improvements.
-</p>
 <h5>Playback controls</h5>
-<p>
-    The playback controls are now in a <em>right</em> sliding drawer. To access them swipe from the right
-    edge of the screen, or long press on the play button in the footer.
-</p>
+<ul>
+    <li>
+        The playback controls are now in a <em>right</em> sliding drawer. To access them swipe from the right
+        edge of the screen, or long press on the play button in the footer.
+    </li>
+</ul>
 <h5>Footer</h5>
+<ul>
+    <li>
+        You can now swipe left or right on the footer to move through the queue.
+    </li>
+</ul>
 <p>
-    You can now swipe left or right on the footer to move through the queue.
 </p>
 <h5>Now Playing</h5>
-<p>
-    The <em>Queue</em> and <em>Now Playing</em> screens have been merged into a single screen.
-    Click anywhere on the footer to open it. The queue is a sliding drawer accessible by swiping
-    from the <em>left</em> side of the screen or clicking the navigation button in the action bar.
-</p>
-<p>
-    Now playing doubles as a car mode screen as well, you tell it to keep the screen on by selecting
-    <em>Keep screen on</em> in the action bar menu.
-</p>
-<p>
-    The visualizer (when enabled via the action bar menu), will now only show while music is playing
-    and go back to showing artwork when paused. Note: If you are on Android M (6.0) and revoke
-    the <em>Record Audio</em> permission, the visualizer will not work.
-</p>
+<ul>
+    <li>
+        The <em>Queue</em> and <em>Now Playing</em> screens have been merged into a single screen.
+        Click anywhere on the footer to open it. The queue is a sliding drawer accessible by swiping
+        from the <em>left</em> side of the screen or clicking the navigation button in the action bar.
+    </li>
+    <li>
+        Now playing doubles as a car mode screen as well, you tell it to keep the screen on by selecting
+        <em>Keep screen on</em> in the action bar menu.
+    </li>
+    <li>
+        The visualizer (when enabled via the action bar menu), will now only show while music is playing
+        and go back to showing artwork when paused. Note: If you are on Android M (6.0) and revoke
+        the <em>Record Audio</em> permission, the visualizer will not work.
+    </li>
+</ul>
 <h5>Overflow buttons</h5>
-<p>
-    The overflow buttons on the list items are gone in favor of an action mode. To enable
-    long click on the list item. This allows performing operations on multiple items at
-    once.
-</p>
+<ul>
+    <li>
+        The overflow buttons on the list items are gone in favor of an action mode. To enable,
+        long click on the list item. This allows performing operations on multiple items at
+        once.
+    </li>
+</ul>
 <h4>Playlists</h4>
 <p>
-    Orpheus now manages its own playlists of music in the index. Playlists from Orpheus 2 or
-    other music players will not show up in the playlists screen. This was the only way to support
-    playlists including music from multiple libraries. Which was not supported in Orpheus 2.
-    You can still view and play read only copies of the old playlists from the <em>Android playlists</em>
-    item in the folders library. (Better playlist integration is on the todo list)
+    Orpheus now manages its own playlists of music in the index. Locally stored music can also be added
+    to the system playlist (Android playlists). Music stored remotely (cloud) can only be added to Orpheus'
+    playlists.
 </p>
 <h4>Playback</h4>
 <h5>Shuffle</h5>
-<p>
-    The ordinary shuffle mode is gone. Instead what we do is shuffle the queue then play it
-    in order. This means once a queue is shuffled it cannot be 'unshuffled'.
-</p>
-<p>
-    In addition shuffle is now <em>sticky</em>. After enabling shuffle mode, any new music
-    you <em>enqueue</em> will be added, then the queue will be reshuffled. An important exception
-    to this rule is the <em>play next</em> option, which will insert the items after the current
-    position without shuffling them.
-</p>
+<ul>
+    <li>
+        The ordinary shuffle mode is gone. Instead what we do is shuffle the queue then play it
+        in order. This means once a queue is shuffled it cannot be 'unshuffled'.
+    </li>
+    <li>
+        In addition shuffle is now <em>sticky</em>. After enabling shuffle mode, any new music
+        you <em>enqueue</em> will be added, then the queue will be reshuffled. With the exception
+        of the <em>play next</em> option, which will insert the items after the current
+        position without shuffling them.
+    </li>
+</ul>
+
 <h4>Chromecast</h4>
 <p>
     The <em>Cast</em> button in the action bar is gone.
@@ -127,22 +145,18 @@
 </p>
 <h4>Last.FM</h4>
 <p>
-    Artist and album descriptions are now pulled and displayed in the details screens.
+    Artist and album descriptions are now pulled and displayed in the details screens for indexed music.
 </p>
 <p>
-    External scrobblers are disabled by default. To enable the use of external scrobblers
-    go to Settings -> Audio -> Broadcast meta. (This is what the BROADCAST_STICKY permission
-    is used for). Internal scrobbling and loved tracks are on the todo list.
+    Scrobbling support is disabled by default for privacy; any app can spy on what you are listening to.
+    To enable scrobbling support; go to Settings -> Audio -> Broadcast meta.
 </p>
-<h4>Translations</h4>
+<h4>What if I hate the new version?</h4>
 <p>
-    Due to the drastic changes made in Orpheus 3 all translations have been
-    removed. If you would like to translate Orpheus into your language of choice please email
-    us using the <em>Send Feedback</em> option in settings.
-</p>
-<h4>Closing</h4>
-<p>
-    Thanks for reading. We hope you enjoy the new Orpheus. And sorry for the no frills intro.
+    You can install <a href="https://fdroid.org/">Fdroid</a> and add our repository (Orpheus is not in official repositories)
+    <a href="https://ssl.opensilk.org/fdroid/repo/">https://ssl.opensilk.org/fdroid/repo</a> or
+    <a href="https://ssl.opensilk.org/fdroid/archive/">https://ssl.opensilk.org/fdroid/archive</a>
+    to install older versions. (Note: repo is not browser accessible you will get "Forbidden" if clicking the links)
 </p>
 </body>
 </html>
