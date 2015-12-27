@@ -37,6 +37,9 @@
     <string name="title_renderers">Set renderer</string>
     <string name="orpheus_playlists">Orpheus</string>
     <string name="title_android_library">Android Library</string>
+    <string name="title_places">Places</string>
+    <string name="title_actions">Actions</string>
+    <string name="title_misc">Misc</string>
 
     <!-- Option menu items -->
     <string name="menu_settings">Settings</string>

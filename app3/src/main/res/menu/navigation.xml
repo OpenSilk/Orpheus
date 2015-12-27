@@ -33,18 +33,22 @@
             android:title="@string/title_playlists"/>
     </group>
 
-    <item android:id="@+id/nav_renderers"
-        android:icon="@drawable/cast_grey600_36dp"
-        android:title="@string/title_renderers"/>
-
     <item
-        android:id="@+id/sleep_timer"
-        android:icon="@drawable/av_timer_grey600_36dp"
-        android:title="@string/menu_sleep_timer"/>
+        android:title="@string/title_actions">
+        <menu>
+            <item android:id="@+id/nav_renderers"
+                android:icon="@drawable/cast_grey600_36dp"
+                android:title="@string/title_renderers"/>
 
-    <item
-        android:id="@+id/nav_settings"
-        android:icon="@drawable/settings_box_grey600_36dp"
-        android:title="@string/settings_title"/>
+            <item
+                android:id="@+id/sleep_timer"
+                android:icon="@drawable/av_timer_grey600_36dp"
+                android:title="@string/menu_sleep_timer"/>
+            <item
+                android:id="@+id/nav_settings"
+                android:icon="@drawable/settings_box_grey600_36dp"
+                android:title="@string/settings_title"/>
+        </menu>
+    </item>
 
 </menu>
