@@ -340,7 +340,7 @@ public class NotificationHelper2 extends BroadcastReceiver {
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setCategory(NotificationCompat.CATEGORY_TRANSPORT)
-                .setOngoing(true)
+                .setOngoing(PlaybackStateHelper.isPlaying(mPlaybackState))
                 .setContent(mNotificationTemplate)
                 .setExtras(extras)
                 .build();
