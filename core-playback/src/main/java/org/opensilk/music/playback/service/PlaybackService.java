@@ -128,6 +128,8 @@ public class PlaybackService {
     private PlaybackServiceProxy mProxy;
     private RendererServiceConnection mRendererConnection;
     private volatile IMusicRenderer mPlayback;
+    private PlaybackQueue.QueueChangeListener mQueueChangeListener;
+    private IMediaSessionProxy.Callback mSessionCallback;
 
     private int mAudioSessionId;
     private Handler mHandler;
@@ -186,14 +188,15 @@ public class PlaybackService {
         mHandler = new Handler(mHandlerThread.getLooper());
         mHandlerScheduler = HandlerScheduler.from(mHandler);
 
+        mQueueChangeListener = new PlaybackQueueQueueChangeListener();
+        mSessionCallback = new MediaSessionCallback();
+
         //tell everyone about ourselves
-        mQueue.setListener(new PlaybackQueueQueueChangeListener());
-        mSessionHolder.setCallback(new MediaSessionCallback(), mHandler);
+        mQueue.setListener(mQueueChangeListener);
+        mSessionHolder.setCallback(mSessionCallback, mHandler);
         proxy.setSessionToken(mSessionHolder.getSessionToken());
 
         setupLocalRenderer();
-
-        updatePlaybackState(null);
 
         mHandler.post(mLoadQueueRunnable);
     }
@@ -385,7 +388,7 @@ public class PlaybackService {
                 | PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID
                 //| PlaybackState.ACTION_PLAY_FROM_SEARCH
                 ;
-        if (mQueue.notEmpty()) {
+        if (mQueue.isReady() && mQueue.notEmpty()) {
             actions |= PlaybackStateCompat.ACTION_SKIP_TO_QUEUE_ITEM;
             if (mPlayback.isPlaying()) {
                 actions |= PlaybackStateCompat.ACTION_PAUSE;
@@ -559,13 +562,9 @@ public class PlaybackService {
         resetState();
         if (mConnectedClients > 0) {
             //we cant stop so try going to paused
-            if (mQueue.notEmpty()) {
-                mPlayWhenReady = false;
-                setTrack();
-            } else {
-                mPlayback.setState(PlaybackStateCompat.STATE_NONE);
-                updatePlaybackState(null);
-            }
+            if (mQueue.isReady()) {
+                mQueueChangeListener.onCurrentPosChanged();
+            }//else TODO
         } else {
             //we aren't bound by anyone so we can stop
             mProxy.stopSelf();
@@ -767,11 +766,9 @@ public class PlaybackService {
                     if (!PlaybackStateHelper.isError(mPlayback.getState())) {
                         mPlayWhenReady = cn != null || wasPlaying;//dont auto start localrenderer
                         if (mQueue.isReady()) {
-                            if (mQueue.notEmpty()) {
-                                mRendererChanged = true;
-                                mSeekForNewRenderer = getCurrentSeekPosition();
-                                setTrack();
-                            } //else ?? TODO
+                            mRendererChanged = true;
+                            mSeekForNewRenderer = getCurrentSeekPosition();
+                            mQueueChangeListener.onCurrentPosChanged();
                         } //else wait for queue
                     } else {
                         mPlayWhenReady = false;
@@ -950,14 +947,18 @@ public class PlaybackService {
         public void onCustomAction(@NonNull String action, Bundle extras) {
             switch (action) {
                 case ACTION.CYCLE_REPEAT: {
-                    mQueue.toggleRepeat();
+                    if (mQueue.isReady()) {
+                        mQueue.toggleRepeat();
+                    }
                     mSessionHolder.sendSessionEvent(EVENT.REPEAT_CHANGED,
                             BundleHelper.b().putInt(mQueue.getRepeatMode()).get());
                     updatePlaybackState(null);
                     break;
                 }
                 case ACTION.TOGGLE_SHUFFLE_MODE: {
-                    mQueue.toggleShuffle();
+                    if (mQueue.isReady()) {
+                        mQueue.toggleShuffle();
+                    }
                     mSessionHolder.sendSessionEvent(EVENT.QUEUE_SHUFFLED,
                             BundleHelper.b().putInt(mQueue.getShuffleMode()).get());
                     updatePlaybackState(null);
@@ -976,6 +977,10 @@ public class PlaybackService {
                 case ACTION.PLAY_ALL: {
                     List<Uri> list = BundleHelper.getList(extras);
                     int startpos = BundleHelper.getInt(extras);
+                    mPlayback.prepareForTrack();
+                    mPlayWhenReady = true;
+                    mQueue.replace(list, startpos);
+                    /*
                     if (!list.equals(mQueue.get())) {
                         mPlayback.prepareForTrack();
                         mPlayWhenReady = true;
@@ -989,16 +994,21 @@ public class PlaybackService {
                             mQueue.goToItem(startpos);
                         }
                     } //else no change, ignore
+                    */
                     break;
                 }
                 case ACTION.REMOVE_QUEUE_ITEM: {
                     Uri uri = BundleHelper.getUri(extras);
-                    mQueue.remove(uri);
+                    if (mQueue.isReady()) {
+                        mQueue.remove(uri);
+                    }
                     break;
                 }
                 case ACTION.REMOVE_QUEUE_ITEM_AT: {
                     int pos = BundleHelper.getInt(extras);
-                    mQueue.remove(pos);
+                    if (mQueue.isReady()) {
+                        mQueue.remove(pos);
+                    }
                     break;
                 }
                 case ACTION.CLEAR_QUEUE: {
@@ -1008,18 +1018,24 @@ public class PlaybackService {
                 case ACTION.MOVE_QUEUE_ITEM_TO: {
                     Uri uri = BundleHelper.getUri(extras);
                     int pos = BundleHelper.getInt(extras);
-                    mQueue.moveItem(uri, pos);
+                    if (mQueue.isReady()) {
+                        mQueue.moveItem(uri, pos);
+                    }
                     break;
                 }
                 case ACTION.MOVE_QUEUE_ITEM: {
                     int from = BundleHelper.getInt(extras);
                     int to = BundleHelper.getInt2(extras);
-                    mQueue.moveItem(from, to);
+                    if (mQueue.isReady()) {
+                        mQueue.moveItem(from, to);
+                    }
                     break;
                 }
                 case ACTION.MOVE_QUEUE_ITEM_TO_NEXT: {
                     int pos = BundleHelper.getInt(extras);
-                    mQueue.moveItem(pos, mQueue.getNextPos());
+                    if (mQueue.isReady()) {
+                        mQueue.moveItem(pos, mQueue.getNextPos());
+                    }
                     break;
                 }
                 case ACTION.TOGGLE_PLAYBACK: {
