@@ -146,6 +146,7 @@ public class PlaybackService {
     private volatile int mConnectedClients = 0;
     private boolean mRendererChanged;
     private long mSeekForNewRenderer;
+    private boolean mHasPreviouslyBeenPlaying;
 
     Subscription mCurrentTrackSub;
     Subscription mNextTrackSub;
@@ -357,7 +358,9 @@ public class PlaybackService {
         mSessionHolder.setPlaybackState(stateBuilder.build());
 
         if (PlaybackStateHelper.isPlayingOrPaused(state)) {
-            mNotificationHelper.startNotification();
+            if (mHasPreviouslyBeenPlaying) {
+                mNotificationHelper.startNotification();
+            }
             //we only notify of changing
             sendMetaBroadcast();
         }
@@ -488,6 +491,7 @@ public class PlaybackService {
         mCurrentTrack = null;
         mNextTrack = null;
         mPlayWhenReady = false;
+        mHasPreviouslyBeenPlaying = false;
     }
 
     //we use our own releaser so we dont constantly reacquire the lock
@@ -797,6 +801,9 @@ public class PlaybackService {
             if (!mServiceStarted) {
                 mProxy.startSelf();
                 mServiceStarted = true;
+            }
+            if (!mHasPreviouslyBeenPlaying) {
+                mHasPreviouslyBeenPlaying = true;
             }
             if (mQueue.isReady()) {
                 mSessionHolder.setActive(true);
