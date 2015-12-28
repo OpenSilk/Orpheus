@@ -47,7 +47,7 @@ public class AppPreferences extends PreferencesWrapper {
     public static final String LAST_NAVIGATION_ITEM = "last_navigation_item";
     //intro
     public static final String WAS_SHOWN_CHANGES = "was_shown_changes";
-    private static final int CHANGES_ORDINAL = 1; //increment when updated
+    private static final int CHANGES_ORDINAL = 2; //increment when updated
 
     //Gallery pages
     public static final int DEFAULT_GALLERY_PAGE = 2;
