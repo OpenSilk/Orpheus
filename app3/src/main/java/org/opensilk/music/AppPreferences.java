@@ -50,7 +50,7 @@ public class AppPreferences extends PreferencesWrapper {
     private static final int CHANGES_ORDINAL = 2; //increment when updated
 
     //Gallery pages
-    public static final int DEFAULT_GALLERY_PAGE = 2;
+    public static final int DEFAULT_GALLERY_PAGE = 1;
 
     //Playlistpages
     public static final int DEFAULT_PLAYLISTS_PAGE = 0;
