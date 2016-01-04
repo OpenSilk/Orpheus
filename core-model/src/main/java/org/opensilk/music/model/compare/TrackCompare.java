@@ -17,10 +17,13 @@
 
 package org.opensilk.music.model.compare;
 
+import android.os.Build;
+
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.sort.TrackSortOrder;
 
 import java.util.Comparator;
+import java.util.List;
 
 import rx.functions.Func2;
 
@@ -45,9 +48,11 @@ public class TrackCompare {
                     @Override
                     public int compare(Track lhs, Track rhs) {
                         int c = BaseCompare.compareAZ(lhs.getArtistName(), rhs.getArtistName());
-                        //TODO throw albumArtist into the mix?
                         if (c == 0) {
-                            return BaseCompare.compareNameAZ(lhs, rhs);
+                            c = BaseCompare.compareAZ(lhs.getAlbumName(), rhs.getAlbumName());
+                        }
+                        if (c == 0) {
+                            c = compareDiscTrack(lhs, rhs);
                         }
                         return c;
                     }
@@ -58,7 +63,7 @@ public class TrackCompare {
                     public int compare(Track lhs, Track rhs) {
                         int c = BaseCompare.compareAZ(lhs.getAlbumName(), rhs.getAlbumName());
                         if (c == 0) {
-                            return lhs.getTrackNumber() - rhs.getTrackNumber();
+                            return compareDiscTrack(lhs, rhs);
                         }
                         return c;
                     }
@@ -67,23 +72,42 @@ public class TrackCompare {
                 return new Comparator<Track>() {
                     @Override
                     public int compare(Track lhs, Track rhs) {
-                        //reversed
-                        long c = rhs.getDuration() - lhs.getDuration();
-                        if (c == 0) {
-                            return BaseCompare.compareNameAZ(lhs, rhs);
+                        List<Track.Res> lhsR = lhs.getResources();
+                        List<Track.Res> rhsR = rhs.getResources();
+                        if (!lhsR.isEmpty() && !rhsR.isEmpty()) {
+                            //reversed
+                            if (Build.VERSION.SDK_INT >= 19) {
+                                return Long.compare(rhsR.get(0).getDuration(), lhsR.get(0).getDuration());
+                            } else {
+                                return Integer.compare(rhsR.get(0).getDurationS(), lhsR.get(0).getDurationS());
+                            }
                         }
-                        return (int)c;
+                        return 0;
                     }
                 };
             case TrackSortOrder.PLAYORDER:
                 return new Comparator<Track>() {
                     @Override
                     public int compare(Track lhs, Track rhs) {
-                        return lhs.getTrackNumber() - rhs.getTrackNumber();
+                        return compareDiscTrack(lhs, rhs);
                     }
                 };
             default:
                 return BaseCompare.comparator(sort);
+        }
+    }
+
+    private static int compareDiscTrack(Track lhs, Track rhs) {
+        return compareDiscTrack(lhs.getDiscNumber(), lhs.getTrackNumber(),
+                rhs.getDiscNumber(), rhs.getTrackNumber());
+    }
+
+    private static int compareDiscTrack(int disc1, int track1, int disc2, int track2) {
+        if ((disc1 > 0 && disc2 > 0)) {
+            int dc = Integer.compare(disc1, disc2);
+            return dc != 0 ? dc : Integer.compare(track1, track2);
+        } else {
+            return Integer.compare(track1, track2);
         }
     }
 }
