@@ -179,20 +179,7 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> {
         if (isSubscribed(broadcastSubscriptions)) {
             return;
         }
-        final Subscription s1 = playbackController.subscribePlayStateChanges(
-                new Action1<PlaybackStateCompat>() {
-                    @Override
-                    public void call(PlaybackStateCompat playbackState) {
-                        Timber.d("New PlaybackState %s", PlaybackStateHelper.stringifyState(playbackState.getState()));
-                        mProgressUpdater.subscribeProgress(playbackState);
-                        if (!selfChange) {
-                            lastPlayingId = playbackState.getActiveQueueItemId();
-                            updatePagerWithCurrentItem(lastPlayingId);
-                        }
-                    }
-                }
-        );
-        Subscription s2 = playbackController.subscribeQueueChanges(
+        final Subscription s1 = playbackController.subscribeQueueChanges(
                 new Action1<List<MediaSessionCompat.QueueItem>>() {
                     @Override
                     public void call(List<MediaSessionCompat.QueueItem> queueItems) {
@@ -207,6 +194,19 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> {
                         }
                         updatePagerWithCurrentItem(lastPlayingId);
                         selfChange = false;
+                    }
+                }
+        );
+        final Subscription s2 = playbackController.subscribePlayStateChanges(
+                new Action1<PlaybackStateCompat>() {
+                    @Override
+                    public void call(PlaybackStateCompat playbackState) {
+                        Timber.d("New PlaybackState %s", PlaybackStateHelper.stringifyState(playbackState.getState()));
+                        mProgressUpdater.subscribeProgress(playbackState);
+                        if (!selfChange) {
+                            lastPlayingId = playbackState.getActiveQueueItemId();
+                            updatePagerWithCurrentItem(lastPlayingId);
+                        }
                     }
                 }
         );
