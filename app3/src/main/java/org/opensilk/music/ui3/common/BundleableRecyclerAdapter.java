@@ -245,7 +245,12 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
             holder.setExtraInfo(UtilsCommon.makeTimeString(holder.itemView.getContext(),durS));
         }
         if (numberTracks && track.getTrackNumber() >= 0) {
-            setLetterTileDrawable(holder, String.valueOf(track.getTrackNumber()));
+            int tNum = track.getTrackNumber();
+            //see MediaStore.Audio.AudioColumns.TRACK
+            while (tNum > 1000) {
+                tNum -= 1000;
+            }
+            setLetterTileDrawable(holder, String.valueOf(tNum));
         } else if (artInfo == ArtInfo.NULLINSTANCE) {
             setLetterTileDrawable(holder, track.getName());
         } else {
