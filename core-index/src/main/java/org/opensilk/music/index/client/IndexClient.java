@@ -44,7 +44,7 @@ public interface IndexClient {
     boolean remove(Container container);
     void rescan();
     void rescan(List<Model> models);
-    boolean deleteItems(List<Model> items, Uri notifyUri);
+    Observable<List<Uri>> deleteItems(List<Uri> items, Uri notifyUri);
 
     /*
      * Android auto entry points

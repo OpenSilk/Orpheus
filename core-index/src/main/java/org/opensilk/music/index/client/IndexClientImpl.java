@@ -143,20 +143,15 @@ public class IndexClientImpl implements IndexClient {
     }
 
     @Override
-    public boolean deleteItems(List<Model> items, final Uri notifyUri) {
-        if (items.isEmpty()) {
-            return true;
+    public Observable<List<Uri>> deleteItems(final List<Uri> items, final Uri notifyUri) {
+        if (items == null || items.isEmpty()) {
+            return Observable.empty();
         }
-        //items will all be from same authority
-        final List<Uri> uris = new ArrayList<>(items.size());
-        for (Model item: items) {
-            uris.add(item.getUri());
-        }
-        Subscription s = Observable.using(
+        return Observable.using(
                 new Func0<LibraryClient>() {
                     @Override
                     public LibraryClient call() {
-                        return LibraryClient.create(appContext, uris.get(0));
+                        return LibraryClient.create(appContext, items.get(0));
                     }
                 },
                 new Func1<LibraryClient, Observable<List<Uri>>>() {
@@ -182,7 +177,7 @@ public class IndexClientImpl implements IndexClient {
                                     }
                                 };
                                 Bundle reply = libraryClient.makeCall(LibraryMethods.DELETE,
-                                        LibraryExtras.b().putUriList(uris)
+                                        LibraryExtras.b().putUriList(items)
                                                 .putResultReceiver(resultReceiver)
                                                 .putNotifyUri(notifyUri)
                                                 .get());
@@ -200,18 +195,7 @@ public class IndexClientImpl implements IndexClient {
                     }
                 },
                 true//release eagerly
-        ).last().subscribe(new Action1<List<Uri>>() {
-            @Override
-            public void call(List<Uri> uris) {
-                rescan();//TODO handle better;
-            }
-        }, new Action1<Throwable>() {
-            @Override
-            public void call(Throwable throwable) {
-                //todo handle;
-            }
-        });
-        return true;
+        );
     }
 
     @Override

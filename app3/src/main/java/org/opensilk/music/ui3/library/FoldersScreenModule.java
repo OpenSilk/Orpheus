@@ -295,18 +295,19 @@ public class FoldersScreenModule {
                                 containers.add((Container) b);
                             }
                         }
-                        handleContainerRemoval(presenter, containers);
+                        presenter.getFm().showDialog(
+                                LibraryOpScreenFragment.ni(LibraryOpScreen.unIndexOp(containers)));
                         return true;
                     }
                     case R.id.play_all: {
                         playAllTracksUnderSelection(context, presenter);
                     }
                     case R.id.add_to_queue: {
-                        enqueueSel(presenter.getPlaybackController(), presenter.getSelectedItems(), PlaybackConstants.ENQUEUE_LAST);
+                        addSelectedItemsToQueue(presenter);
                         return true;
                     }
                     case R.id.play_next: {
-                        enqueueSel(presenter.getPlaybackController(), presenter.getSelectedItems(), PlaybackConstants.ENQUEUE_NEXT);
+                        playSelectedItemsNext(presenter);
                         return true;
                     }
                     case R.id.delete: {
@@ -319,6 +320,10 @@ public class FoldersScreenModule {
                             names.append(",").append(models.get(ii).getName());
                         }
                         final String title = names.toString();
+                        final List<Uri> uris = new ArrayList<>(models.size());
+                        for (Model m : models) {
+                            uris.add(m.getUri());
+                        }
                         presenter.getDialogPresenter().showDialog(new DialogFactory() {
                             @Override
                             public Dialog call(Context context) {
@@ -329,7 +334,9 @@ public class FoldersScreenModule {
                                         .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {
-                                                indexClient.deleteItems(models, screen.container.getUri());
+                                                presenter.getFm().showDialog(LibraryOpScreenFragment.ni(
+                                                        LibraryOpScreen.deleteOp(uris, provideLoaderUri())
+                                                ));
                                             }
                                         }).create();
                             }
@@ -341,47 +348,6 @@ public class FoldersScreenModule {
 
                 }
 
-            }
-
-            void handleContainerRemoval(final BundleablePresenter presenter, final List<Container> containers) {
-                Observable.create(new Observable.OnSubscribe<Boolean>() {
-                    @Override
-                    public void call(Subscriber<? super Boolean> subscriber) {
-                        boolean allsuccess = true;
-                        for (Container c : containers) {
-                            if (!presenter.getIndexClient().remove(c)){
-                                allsuccess = false;
-                            }
-                        }
-                        subscriber.onNext(allsuccess);
-                        subscriber.onCompleted();
-                    }
-                }).subscribeOn(Schedulers.computation())
-                        .delay(500, TimeUnit.MILLISECONDS)
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action1<Boolean>() {
-                            @Override
-                            public void call(Boolean aBoolean) {
-                                presenter.getDialogPresenter().dismissDialog();
-                            }
-                        });
-                presenter.getDialogPresenter().showDialog(new DialogFactory() {
-                    @Override
-                    public Dialog call(Context context) {
-                        ProgressDialog d = new ProgressDialog(context);
-                        d.setIndeterminate(true);
-                        d.setMessage(context.getString(R.string.processing));
-                        return d;
-                    }
-                });
-            }
-
-            private void enqueueSel(PlaybackController playbackController, List<Model> selectedItems, int where) {
-                List<Uri> uris = new ArrayList<>(selectedItems.size());
-                for (Model b : selectedItems) {
-                    uris.add(b.getUri());
-                }
-                playbackController.enqueueAll(uris, where);
             }
         };
     }
