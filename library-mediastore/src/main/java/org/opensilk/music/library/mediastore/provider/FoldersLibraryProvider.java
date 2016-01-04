@@ -183,8 +183,8 @@ public class FoldersLibraryProvider extends LibraryProvider implements PlaylistL
                         .doOnNext(new Action1<Track>() {
                             @Override
                             public void call(Track track) {
-                                Timber.v("Track name=%s artist=%s albumArtist=%s",
-                                        track.getSortName(), track.getArtistName(), track.getAlbumArtistName());
+                                Timber.v("Track name=%s artist=%s albumArtist=%s track=%d",
+                                        track.getSortName(), track.getArtistName(), track.getAlbumArtistName(), track.getTrackNumber());
                             }
                         })
                         .toList()
@@ -248,9 +248,14 @@ public class FoldersLibraryProvider extends LibraryProvider implements PlaylistL
                 } else {
                     tlb.setName("Tracks");
                 }
+                String sort = LibraryExtras.getSortOrder(args);
+                if (!StringUtils.equals(BaseSortOrder.A_Z, sort) || !StringUtils.equals(BaseSortOrder.Z_A, sort)) {
+                    sort = BaseSortOrder.A_Z;
+                }
                 mComponent.newLoaderComponent().albumsLoader()
                         .setUri(Uris.EXTERNAL_MEDIASTORE_ARTISTS_ALBUMS(artist))
-                        .setSortOrder(LibraryExtras.getSortOrder(args))
+                        .setProjection(Projections.LOCAL_ARTIST_ALBUM)
+                        .setSortOrder(sort)
                         .createObservable()
                         .cast(Model.class)
                         .startWith(tlb.build())

@@ -39,6 +39,14 @@ public interface Projections {
 //                MediaStore.Audio.AlbumColumns.FIRST_YEAR,
 //                MediaStore.Audio.AlbumColumns.LAST_YEAR,
     };
+    String[] LOCAL_ARTIST_ALBUM = new String[] {
+            BaseColumns._ID,
+            MediaStore.Audio.AlbumColumns.ALBUM + " AS name",
+            MediaStore.Audio.AlbumColumns.ARTIST,
+//            MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS + " AS track_count",
+//                MediaStore.Audio.AlbumColumns.FIRST_YEAR,
+//                MediaStore.Audio.AlbumColumns.LAST_YEAR,
+    };
     String[] LOCAL_ARTIST = new String[] {
             BaseColumns._ID,
             MediaStore.Audio.ArtistColumns.ARTIST + " AS name",
