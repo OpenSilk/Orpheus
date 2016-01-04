@@ -24,6 +24,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 
 import org.apache.commons.lang3.StringUtils;
+import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.index.provider.IndexUris;
@@ -32,7 +33,12 @@ import org.opensilk.music.library.client.LibraryClient;
 import org.opensilk.music.library.client.TypedBundleableLoader;
 import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.model.Container;
+import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Item;
+import org.opensilk.music.model.Model;
+import org.opensilk.music.model.Track;
+import org.opensilk.music.model.compare.TrackCompare;
+import org.opensilk.music.model.sort.TrackSortOrder;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.PlaylistManageActivity;
 import org.opensilk.music.ui3.library.FoldersScreenFragment;
@@ -40,6 +46,7 @@ import org.opensilk.music.ui3.playlist.PlaylistProgressScreen;
 import org.opensilk.music.ui3.playlist.PlaylistProgressScreenFragment;
 import org.opensilk.music.ui3.playlist.PlaylistProviderSelectScreenFragment;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import rx.Observable;
@@ -47,6 +54,8 @@ import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Action2;
+import rx.functions.Func0;
 import rx.functions.Func1;
 import rx.functions.Func2;
 import timber.log.Timber;
@@ -167,6 +176,67 @@ public abstract class MenuHandlerImpl extends MenuHandler {
                 playbackController.enqueueAllNext(uris);
             }
         });
+    }
+
+    public void playAllTracksUnderSelection(Context context, BundleablePresenter presenter) {
+        final PlaybackController playbackController = presenter.getPlaybackController();
+        final List<Model> selected = presenter.getSelectedItems();
+        Subscription s = recurseFolders(context, selected)
+                .toSortedList(TrackCompare.func(TrackSortOrder.ALBUM))
+                .map(new Func1<List<Track>, List<Uri>>() {
+                    @Override
+                    public List<Uri> call(List<Track> tracks) {
+                        List<Uri> uris = new ArrayList<Uri>(tracks.size());
+                        for (Track t : tracks) {
+                            uris.add(t.getUri());
+                        }
+                        return uris;
+                    }
+                })
+                .subscribe(new Action1<List<Uri>>() {
+                    @Override
+                    public void call(List<Uri> uris) {
+                        playbackController.playAll(uris, 0);
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Timber.e(throwable, "playAllTracksUnderSelection");
+                        //TODO notify user
+                    }
+                });
+    }
+
+    private Observable<Track> recurseFolders(Context context, List<Model> models) {
+        final Context appContext = context.getApplicationContext();
+        final List<Track> tracks = new ArrayList<>();
+        final List<Folder> folders = new ArrayList<>();
+        for (Model m : models) {
+            if (m instanceof Track) {
+                tracks.add((Track) m);
+            } else if (m instanceof Folder) {
+                folders.add((Folder) m);
+            } else {
+                Timber.w("Skipping %s in recursive add", m.getClass());
+            }
+        }
+        return Observable.from(folders)
+                .flatMap(new Func1<Folder, Observable<Track>>() {
+                    @Override
+                    public Observable<Track> call(Folder folder) {
+                        return TypedBundleableLoader.<Model>create(appContext)
+                                .setUri(folder.getUri())
+                                .createObservable()
+                                .retry(1)
+                                .flatMap(new Func1<List<Model>, Observable<Track>>() {
+                                    @Override
+                                    public Observable<Track> call(List<Model> models1) {
+                                        return recurseFolders(appContext, models1);
+                                    }
+                                });
+                    }
+                })
+                .startWith(tracks);
     }
 
     public void openFolder(BundleablePresenter presenter, Context context, Container container) {

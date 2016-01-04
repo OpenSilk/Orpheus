@@ -42,6 +42,8 @@ import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
 import org.opensilk.music.ui3.library.FoldersScreenFragment;
 
+import java.util.List;
+
 import javax.inject.Named;
 
 import dagger.Module;
@@ -119,7 +121,8 @@ public class FoldersScreenModule {
             @Override
             public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,
-                        R.menu.rescan_folder
+                        R.menu.rescan_folder,
+                        R.menu.play_all
                 );
                 return true;
             }
@@ -129,6 +132,10 @@ public class FoldersScreenModule {
                 switch (menuItem.getItemId()) {
                     case R.id.rescan_folder: {
                         presenter.getIndexClient().rescan(presenter.getSelectedItems());
+                        return true;
+                    }
+                    case R.id.play_all: {
+                        playAllTracksUnderSelection(context, presenter);
                         return true;
                     }
                     default:
