@@ -175,6 +175,8 @@ public class FoldersScreenModule {
                 boolean changed = false;
                 MenuItem item = null;
 
+                //add/remove
+
                 boolean canAdd = true;
                 for (Model b : models) {
                     if (b instanceof Container) {
@@ -219,6 +221,15 @@ public class FoldersScreenModule {
                     }
                 }
 
+                //playall
+
+                item = menu.findItem(R.id.play_all);
+                if (item == null) {
+                    inflateMenu(R.menu.play_all, menuInflater, menu);
+                }
+
+                //enqueue/playnext
+
                 boolean canEnqueue = true;
                 for (Model b : models) {
                     if (!(b instanceof Track)) {
@@ -242,6 +253,8 @@ public class FoldersScreenModule {
                     menu.removeItem(R.id.play_next);
                     changed = true;
                 }
+
+                //delete
 
                 boolean candelete = true;
                 for (Model b : models) {
@@ -284,6 +297,9 @@ public class FoldersScreenModule {
                         }
                         handleContainerRemoval(presenter, containers);
                         return true;
+                    }
+                    case R.id.play_all: {
+                        playAllTracksUnderSelection(context, presenter);
                     }
                     case R.id.add_to_queue: {
                         enqueueSel(presenter.getPlaybackController(), presenter.getSelectedItems(), PlaybackConstants.ENQUEUE_LAST);
