@@ -24,10 +24,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 
 import org.apache.commons.lang3.StringUtils;
-import org.opensilk.bundleable.Bundleable;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.AppPreferences;
-import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.client.LibraryClient;
 import org.opensilk.music.library.client.TypedBundleableLoader;
@@ -40,9 +38,7 @@ import org.opensilk.music.model.Track;
 import org.opensilk.music.model.compare.TrackCompare;
 import org.opensilk.music.model.sort.TrackSortOrder;
 import org.opensilk.music.playback.control.PlaybackController;
-import org.opensilk.music.ui3.PlaylistManageActivity;
 import org.opensilk.music.ui3.library.FoldersScreenFragment;
-import org.opensilk.music.ui3.playlist.PlaylistProgressScreen;
 import org.opensilk.music.ui3.playlist.PlaylistProgressScreenFragment;
 import org.opensilk.music.ui3.playlist.PlaylistProviderSelectScreenFragment;
 
@@ -54,8 +50,6 @@ import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.functions.Action2;
-import rx.functions.Func0;
 import rx.functions.Func1;
 import rx.functions.Func2;
 import timber.log.Timber;
@@ -240,12 +234,10 @@ public abstract class MenuHandlerImpl extends MenuHandler {
     }
 
     public void openFolder(BundleablePresenter presenter, Context context, Container container) {
-        LibraryClient client = LibraryClient.create(context, container.getUri());
-        Bundle config = client.makeCall(LibraryMethods.CONFIG, null);
-        client.release();
+        LibraryConfig config = LibraryClient.create(context, container.getUri()).getConfig();
         if (config != null) {
             presenter.getFm().replaceMainContent(FoldersScreenFragment.ni(context,
-                    LibraryConfig.materialize(config), container), true);
+                    config, container), true);
         }
     }
 

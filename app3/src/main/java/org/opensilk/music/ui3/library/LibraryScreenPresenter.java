@@ -35,9 +35,8 @@ import org.opensilk.common.ui.util.ViewUtils;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryProviderInfo;
+import org.opensilk.music.library.client.LibraryClient;
 import org.opensilk.music.library.client.LibraryProviderInfoLoader;
-import org.opensilk.music.library.provider.LibraryMethods;
-import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
 
@@ -125,10 +124,8 @@ public class LibraryScreenPresenter extends ViewPresenter<LibraryScreenView> {
     }
 
     public LibraryConfig getConfig(String authority) {
-        Bundle reply = appContext.getContentResolver()
-                .call(LibraryUris.call(authority),
-                        LibraryMethods.CONFIG, null, null);
-        return LibraryConfig.materialize(reply);
+        LibraryClient libraryClient = new LibraryClient(appContext, authority);
+        return libraryClient.getConfig();
     }
 
     public void startLoginActivity(LibraryConfig config) {

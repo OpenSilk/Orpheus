@@ -19,7 +19,6 @@ package org.opensilk.music.ui3.gallery;
 
 import android.content.Context;
 import android.net.Uri;
-import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -28,10 +27,8 @@ import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.R;
-import org.opensilk.music.index.provider.IndexUris;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.client.LibraryClient;
-import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Model;
 import org.opensilk.music.model.sort.ArtistSortOrder;
@@ -41,8 +38,6 @@ import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
 import org.opensilk.music.ui3.library.FoldersScreenFragment;
-
-import java.util.List;
 
 import javax.inject.Named;
 
@@ -83,14 +78,12 @@ public class FoldersScreenModule {
         return new ItemClickListener() {
             @Override
             public void onItemClicked(BundleablePresenter presenter, Context context, Model item) {
-                LibraryClient client = LibraryClient.create(context, item.getUri());
-                Bundle reply = client.makeCall(LibraryMethods.CONFIG, null);
-                if (reply != null) {
+                LibraryConfig config = LibraryClient.create(context, item.getUri()).getConfig();
+                if (config != null) {
                     FoldersScreenFragment f = FoldersScreenFragment.ni(context,
-                            LibraryConfig.materialize(reply), (Container) item);
+                            config, (Container) item);
                     fm.replaceMainContent(f, true);
                 }
-                client.release();
             }
         };
     }
