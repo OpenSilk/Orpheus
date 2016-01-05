@@ -19,6 +19,7 @@ package org.opensilk.common.ui.mortarfragment;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.os.Build;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -104,6 +105,13 @@ public class FragmentManagerOwner extends Presenter<FragmentManagerOwnerActivity
         if (hasView() && getView().getSupportFragmentManager().getBackStackEntryCount() > 0) {
             getView().getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
+    }
+
+    public @Nullable FragmentManager getManager() {
+        if (hasView()) {
+            return getView().getSupportFragmentManager();
+        }
+        return null;
     }
 
 }
