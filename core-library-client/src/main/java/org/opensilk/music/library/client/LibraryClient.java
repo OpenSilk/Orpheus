@@ -24,9 +24,12 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.support.annotation.Nullable;
 
 import org.opensilk.common.core.util.Preconditions;
 import org.opensilk.common.core.util.VersionUtils;
+import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.library.provider.LibraryUris;
 
 /**
@@ -45,6 +48,15 @@ public class LibraryClient {
 
     public static LibraryClient create(Context context, Uri uri) {
         return new LibraryClient(context.getApplicationContext(), uri.getAuthority());
+    }
+
+    public @Nullable LibraryConfig getConfig() {
+        Bundle reply = makeCall(LibraryMethods.CONFIG, null);
+        try {
+            return reply != null ? LibraryConfig.materialize(reply) : null;
+        } finally {
+            release();
+        }
     }
 
     public Bundle makeCall(String method, Bundle args) {
