@@ -44,5 +44,4 @@ public interface FoldersScreenComponent extends BundleableComponent, FooterScree
                                         .build();
                         }
                 };
-        void inject(FoldersScreenView view);
 }

@@ -17,17 +17,24 @@
 
 package org.opensilk.music.ui3.library;
 
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Toast;
 
 import org.opensilk.bundleable.BadBundleableException;
 import org.opensilk.bundleable.BundleableUtil;
+import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.rx.RxUtils;
 import org.opensilk.common.core.util.BundleHelper;
+import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.R;
 import org.opensilk.music.index.client.IndexClient;
+import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.library.client.LibraryClient;
+import org.opensilk.music.library.client.TypedBundleableLoader;
+import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.model.Container;
 
 import java.util.List;
@@ -42,6 +49,7 @@ import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.exceptions.Exceptions;
+import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
@@ -58,21 +66,29 @@ public class LibraryOpScreenPresenter extends Presenter<LibraryOpScreenFragment>
         SUCCESS,
     }
 
-    static final long DELAY = 500;
+    static final long DELAY = 400;
 
     final LibraryOpScreen screen;
     final IndexClient indexClient;
+    final Context appContext;
+    final FragmentManagerOwner fm;
 
     State state = State.PENDING;
     Subscription subscription;
 
+    Container fetchedContainer;
+
     @Inject
     public LibraryOpScreenPresenter(
             LibraryOpScreen screen,
-            IndexClient indexClient
+            IndexClient indexClient,
+            @ForApplication Context context,
+            FragmentManagerOwner fm
     ) {
         this.screen = screen;
         this.indexClient = indexClient;
+        this.appContext = context;
+        this.fm = fm;
     }
 
     @Override
@@ -110,6 +126,9 @@ public class LibraryOpScreenPresenter extends Presenter<LibraryOpScreenFragment>
                 break;
             case DELETE:
                 deleteItems();
+                break;
+            case GET_CONTAINER:
+                getContainer();
                 break;
         }
     }
@@ -192,6 +211,36 @@ public class LibraryOpScreenPresenter extends Presenter<LibraryOpScreenFragment>
                 });
     }
 
+    void getContainer() {
+        Uri uri = BundleHelper.getUri(screen.extras);
+        subscription = TypedBundleableLoader.<Container>create(appContext)
+                .setUri(uri)
+                .setMethod(LibraryMethods.GET)
+                .createObservable()
+                .delay(DELAY, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<List<Container>>() {
+                    @Override
+                    public void onCompleted() {
+                        state = fetchedContainer != null ? State.SUCCESS : State.ERROR;
+                        onDone();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        state = State.ERROR;
+                        onDone();
+                    }
+
+                    @Override
+                    public void onNext(List<Container> containers) {
+                        if (containers.size() == 1) {
+                            fetchedContainer = containers.get(0);
+                        }
+                    }
+                });
+    }
+
     void onDone() {
         if (!hasView()) return;
         switch (state) {
@@ -202,7 +251,21 @@ public class LibraryOpScreenPresenter extends Presenter<LibraryOpScreenFragment>
             }
             case SUCCESS:
             default: {
-                getView().dismiss();
+                switch (screen.op) {
+                    case GET_CONTAINER: {
+                        if (fetchedContainer != null) {
+                            LibraryConfig config = LibraryClient.create(appContext, fetchedContainer.getUri()).getConfig();
+                            if (config != null) {
+                                fm.replaceMainContent(FoldersScreenFragment.ni(appContext, config, fetchedContainer), true);
+                            }
+                        }
+                        getView().dismiss();
+                        break;
+                    }
+                    default:
+                        getView().dismiss();
+                        break;
+                }
                 break;
             }
         }

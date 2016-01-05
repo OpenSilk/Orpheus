@@ -18,30 +18,29 @@
 package org.opensilk.music.ui3.library;
 
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.net.Uri;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.common.ui.mortar.DialogFactory;
 import org.opensilk.music.R;
 import org.opensilk.music.index.client.IndexClient;
-import org.opensilk.music.index.client.IndexClientImpl;
 import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.model.Container;
 import org.opensilk.music.model.Model;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.sort.FolderTrackSortOrder;
-import org.opensilk.music.playback.PlaybackConstants;
-import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
@@ -50,21 +49,14 @@ import org.opensilk.music.ui3.common.MenuHandlerImpl;
 import org.opensilk.music.ui3.common.PlayAllItemClickListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
-import mortar.Presenter;
-import rx.Observable;
-import rx.Subscriber;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
+import rx.functions.Action2;
 
 /**
  * Created by drew on 5/2/15.
@@ -95,12 +87,14 @@ public class FoldersScreenModule {
     @Provides @ScreenScope
     public BundleablePresenterConfig providePresenterConfig(
             ItemClickListener itemClickListener,
-            MenuHandler menuConfig
+            MenuHandler menuConfig,
+            @Named("fab_action")Action2<Context, BundleablePresenter> fabAction
     ) {
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(false)
                 .setItemClickListener(itemClickListener)
                 .setToolbarTitle(screen.container.getName())
+                .setFabClickAction(fabAction)
                 .setMenuConfig(menuConfig)
                 .build();
     }
@@ -125,6 +119,10 @@ public class FoldersScreenModule {
         return new MenuHandlerImpl(loaderUri, activityResultsController) {
             @Override
             public boolean onBuildMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
+                if (!LibraryUris.rootUri(screen.libraryConfig.getAuthority()).equals(screen.container.getParentUri())) {
+                    //only show if parent not root
+                    inflateMenu(R.menu.folder_up, menuInflater, menu);
+                }
                 inflateMenu(R.menu.folder_sort_by, menuInflater, menu);
                 return true;
             }
@@ -132,6 +130,28 @@ public class FoldersScreenModule {
             @Override
             public boolean onMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
+                    case R.id.folder_up: {
+                        FragmentManager fm = presenter.getFm().getManager();
+                        if (fm == null) {
+                            return true;
+                        }
+                        int count = fm.getBackStackEntryCount();
+                        if (count > 1) { //last entry is us
+                            FragmentManager.BackStackEntry entry = fm.getBackStackEntryAt(count - 2);
+                            //the entry is our parent just pop to it
+                            if (StringUtils.endsWith(entry.getName(), screen.container.getParentUri().toString())) {
+                                fm.popBackStackImmediate();
+                                return true;
+                            }
+                        }
+                        if (count > 0) { //should always be true
+                            //pop up to the first screen
+                            fm.popBackStackImmediate(fm.getBackStackEntryAt(0).getName(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                        }
+                        presenter.getFm().showDialog(LibraryOpScreenFragment.ni(
+                                LibraryOpScreen.getContainerOp(screen.container.getParentUri())));
+                        return true;
+                    }
                     case R.id.menu_sort_by_az:
                         setNewSortOrder(presenter, FolderTrackSortOrder.A_Z);
                         return true;
@@ -351,4 +371,26 @@ public class FoldersScreenModule {
             }
         };
     }
+
+    @Provides @Named("fab_action")
+    Action2<Context, BundleablePresenter> provideFabAction() {
+        return new Action2<Context, BundleablePresenter>() {
+            @Override
+            public void call(Context context, BundleablePresenter presenter) {
+                boolean indexed = presenter.getIndexClient().isIndexed(screen.container);
+                if (!indexed) {
+                    if (screen.container instanceof Playlist) {
+                        Toast.makeText(context, R.string.msg_playlist_import_not_implemented, Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    presenter.getIndexClient().add(screen.container);
+                } else {
+                    presenter.getFm().showDialog(LibraryOpScreenFragment.ni(
+                            LibraryOpScreen.unIndexOp(Collections.singletonList(screen.container))));
+                }
+
+            }
+        };
+    }
+
 }

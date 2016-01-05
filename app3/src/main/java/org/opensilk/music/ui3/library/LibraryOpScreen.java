@@ -56,9 +56,15 @@ public class LibraryOpScreen extends Screen implements Parcelable {
                 BundleHelper.b().putList(uris).putUri(notifyUri).get());
     }
 
+    public static LibraryOpScreen getContainerOp(Uri containerUri) {
+        return new LibraryOpScreen(Op.GET_CONTAINER,
+                BundleHelper.b().putUri(containerUri).get());
+    }
+
     public enum Op {
         UNINDEX,
         DELETE,
+        GET_CONTAINER,
     }
 
     final Op op;

@@ -34,7 +34,7 @@ import mortar.MortarScope;
 /**
  * Created by drew on 5/2/15.
  */
-@Layout(R.layout.screen_folders)
+@Layout(R.layout.bundleable_recycler_coordinator)
 @WithComponentFactory(FoldersScreen.Factory.class)
 public class FoldersScreen extends Screen {
 

@@ -38,6 +38,11 @@ import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.MenuHandler;
 import org.opensilk.music.ui3.common.MenuHandlerImpl;
 import org.opensilk.music.ui3.library.FoldersScreenFragment;
+import org.opensilk.music.ui3.library.LibraryOpScreen;
+import org.opensilk.music.ui3.library.LibraryOpScreenFragment;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Named;
 
@@ -114,8 +119,9 @@ public class FoldersScreenModule {
             @Override
             public boolean onBuildActionMenu(BundleablePresenter presenter, MenuInflater menuInflater, Menu menu) {
                 inflateMenus(menuInflater, menu,
+                        R.menu.play_all,
                         R.menu.rescan_folder,
-                        R.menu.play_all
+                        R.menu.remove_from_index
                 );
                 return true;
             }
@@ -123,12 +129,26 @@ public class FoldersScreenModule {
             @Override
             public boolean onActionMenuItemClicked(BundleablePresenter presenter, Context context, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
+                    case R.id.play_all: {
+                        playAllTracksUnderSelection(context, presenter);
+                        return true;
+                    }
                     case R.id.rescan_folder: {
                         presenter.getIndexClient().rescan(presenter.getSelectedItems());
                         return true;
                     }
-                    case R.id.play_all: {
-                        playAllTracksUnderSelection(context, presenter);
+                    case R.id.remove_from_index: {
+                        List<Model> selectedItems = presenter.getSelectedItems();
+                        List<Container> containers = new ArrayList<>(selectedItems.size());
+                        for (Model m : selectedItems) {
+                            if (m instanceof Container) {
+                                containers.add((Container) m);
+                            }
+                        }
+                        if (containers.isEmpty()) {
+                            return true;
+                        }
+                        presenter.getFm().showDialog(LibraryOpScreenFragment.ni(LibraryOpScreen.unIndexOp(containers)));
                         return true;
                     }
                     default:

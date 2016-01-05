@@ -17,11 +17,13 @@
 
 package org.opensilk.music.ui3.library;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Bundle;
 
 import org.opensilk.bundleable.BadBundleableException;
 import org.opensilk.bundleable.BundleableUtil;
+import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortarfragment.MortarFragment;
 import org.opensilk.music.library.LibraryConfig;
@@ -37,7 +39,11 @@ public class FoldersScreenFragment extends MortarFragment {
         Bundle args = new Bundle();
         args.putBundle("conf", config.dematerialize());
         args.putBundle("fldr", container.toBundle());
-        return factory(context, NAME, args);
+        FoldersScreenFragment f = factory(context, NAME, args);
+        if (VersionUtils.hasLollipop()) {
+            f.applyTransitions21();
+        }
+        return f;
     }
 
     @Override
@@ -48,6 +54,12 @@ public class FoldersScreenFragment extends MortarFragment {
             container = BundleableUtil.materializeBundle(getArguments().getBundle("fldr"));
         } catch (BadBundleableException ignored) {/*cant recover let it crash from null*/}
         return new FoldersScreen(config, container);
+    }
+
+    @TargetApi(21)
+    void applyTransitions21() {
+        //TODO blowsup onbackpressed (scope destroyed)
+//        setEnterTransition(new Slide());
     }
 
 }
