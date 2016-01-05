@@ -17,6 +17,7 @@
 
 package org.opensilk.music.ui3.common;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -25,6 +26,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.ToolbarOwner;
 import org.opensilk.common.ui.recycler.RecyclerListCoordinator;
@@ -49,11 +51,19 @@ public class BundleableRecyclerCoordinator extends RecyclerListCoordinator imple
     public BundleableRecyclerCoordinator(Context context, AttributeSet attrs) {
         super(context, attrs);
         inject();
+        if (VersionUtils.hasLollipop()) {
+            setTransitionOpts();
+        }
     }
 
     protected void inject() {
         BundleableComponent cmp = DaggerService.getDaggerComponent(getContext());
         cmp.inject(this);
+    }
+
+    @TargetApi(21)
+    protected void setTransitionOpts() {
+        setTransitionGroup(true);
     }
 
     @Override
