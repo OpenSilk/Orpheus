@@ -180,7 +180,7 @@ public class ControlsScreenView extends RelativeLayout {
                 RxView.clickEvents(shuffle).subscribe(new Action1<ViewClickEvent>() {
                     @Override
                     public void call(ViewClickEvent onClickEvent) {
-                        mPresenter.getPlaybackController().shuffleQueue();
+                        mPresenter.getPlaybackController().cycleShuffleMode();
                     }
                 }),
                 RxView.clickEvents(prev).subscribe(new Action1<ViewClickEvent>() {

@@ -172,7 +172,7 @@ public interface PlaybackConstants {
 
     interface ACTION {
         String CYCLE_REPEAT = "cmd.cyclerepeat";
-        String TOGGLE_SHUFFLE_MODE = "cmd.shufflequeue";
+        String CYCLE_SHUFFLE = "cmd.cycleshuffle";
         String ENQUEUE  = "cmd.enqueue";
         String REMOVE_QUEUE_ITEM = "cmd.removequeueitem";
         String REMOVE_QUEUE_ITEM_AT = "cmd.removequeueitemat";
@@ -182,6 +182,7 @@ public interface PlaybackConstants {
         String MOVE_QUEUE_ITEM_TO_NEXT = "cmd.movequeueitemtonext";
         String PLAY_ALL = "cmd.playall";
         String TOGGLE_PLAYBACK = "cmd.toggleplayback";
+        String SHUFFLE_QUEUE = "cmd.shufflequeue";
     }
 
     interface CMD {

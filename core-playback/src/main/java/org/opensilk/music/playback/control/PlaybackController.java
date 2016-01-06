@@ -80,6 +80,8 @@ public interface PlaybackController {
 
     public void cycleRepeateMode();
 
+    public void cycleShuffleMode();
+
     public void shuffleQueue();
 
     public void enqueueAll(List<Uri> queue, int where);

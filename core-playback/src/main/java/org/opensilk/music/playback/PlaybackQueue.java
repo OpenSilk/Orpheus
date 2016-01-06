@@ -357,6 +357,9 @@ public class PlaybackQueue {
     }
 
     public void shuffle() {
+        if (mQueue.isEmpty()) {
+            return;
+        }
         Uri current = null;
         if (isInQueueBounds(mCurrentPos)) {
             current = mQueue.get(mCurrentPos);

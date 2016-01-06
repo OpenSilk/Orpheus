@@ -293,7 +293,7 @@ public class PlaybackService {
         } else if (REPEAT_ACTION.equals(action)) {
             controls.sendCustomAction(ACTION.CYCLE_REPEAT, null);
         } else if (SHUFFLE_ACTION.equals(action)) {
-            controls.sendCustomAction(ACTION.TOGGLE_SHUFFLE_MODE, null);
+            controls.sendCustomAction(ACTION.CYCLE_SHUFFLE, null);
         }
     }
 
@@ -959,13 +959,19 @@ public class PlaybackService {
                     updatePlaybackState(null);
                     break;
                 }
-                case ACTION.TOGGLE_SHUFFLE_MODE: {
+                case ACTION.CYCLE_SHUFFLE: {
                     if (mQueue.isReady()) {
                         mQueue.toggleShuffle();
                     }
                     mSessionHolder.sendSessionEvent(EVENT.QUEUE_SHUFFLED,
                             BundleHelper.b().putInt(mQueue.getShuffleMode()).get());
                     updatePlaybackState(null);
+                    break;
+                }
+                case ACTION.SHUFFLE_QUEUE: {
+                    if (mQueue.isReady()) {
+                        mQueue.shuffle();
+                    }
                     break;
                 }
                 case ACTION.ENQUEUE: {

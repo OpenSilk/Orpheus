@@ -202,8 +202,13 @@ public class PlaybackControllerImpl implements PlaybackController {
         sendCustomAction(PlaybackConstants.ACTION.CYCLE_REPEAT, null);
     }
 
+    @Override
+    public void cycleShuffleMode() {
+        sendCustomAction(PlaybackConstants.ACTION.CYCLE_SHUFFLE, null);
+    }
+
     public void shuffleQueue() {
-        sendCustomAction(PlaybackConstants.ACTION.TOGGLE_SHUFFLE_MODE, null);
+        sendCustomAction(PlaybackConstants.ACTION.SHUFFLE_QUEUE, null);
     }
 
     public void enqueueAll(List<Uri> queue, int where) {
