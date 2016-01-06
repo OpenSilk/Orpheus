@@ -294,6 +294,7 @@ public class LocalRenderer implements IMusicRenderer,
             // If we do not have a current media player, simply update the current position
             mCurrentPosition = position;
         } else if (hasCurrent()) {
+            mPlayOnFocusGain = true;
             mCurrentPlayer.player.seekTo(position);
             mState = PlaybackStateCompat.STATE_BUFFERING;
             notifyOnPlaybackStatusChanged(mState);
@@ -403,7 +404,8 @@ public class LocalRenderer implements IMusicRenderer,
             // If we were playing when we lost focus, we need to resume playing.
             if (mPlayOnFocusGain) {
                 if (hasCurrent() && !mCurrentPlayer.player.isPlaying()) {
-                    if (mCurrentPosition == mCurrentPlayer.player.getCurrentPosition()) {
+                    if (mCurrentPosition >= 0 &&
+                            mCurrentPosition == mCurrentPlayer.player.getCurrentPosition()) {
                         //todo is there a better place for this?
                         notifyOnAudioSessionId(mCurrentPlayer.sessionId);
                         mCurrentPlayer.player.start();
@@ -465,17 +467,17 @@ public class LocalRenderer implements IMusicRenderer,
     public void onSeekComplete(IMediaPlayer player) {
         if (player == mCurrentPlayer.player) {
             mCurrentPosition = player.getCurrentPosition();
-            switch (mState) {
-                case PlaybackStateCompat.STATE_BUFFERING:
-                case PlaybackStateCompat.STATE_SKIPPING_TO_NEXT:
-                    player.start();
-                    mState = PlaybackStateCompat.STATE_PLAYING;
-                    break;
-                default:
-                    mState = PlaybackStateCompat.STATE_PAUSED;
-                    break;
+            if (player.isPlaying()) {
+                //TODO find out why we get this callback when starting playback
+                mState = PlaybackStateCompat.STATE_PLAYING;
+                notifyOnPlaybackStatusChanged(mState);
+            } else if (mState == PlaybackStateCompat.STATE_BUFFERING
+                    || mState == PlaybackStateCompat.STATE_SKIPPING_TO_NEXT) {
+                configMediaPlayerState();
+            } else {
+                mState = PlaybackStateCompat.STATE_PAUSED;
+                notifyOnPlaybackStatusChanged(mState);
             }
-            notifyOnPlaybackStatusChanged(mState);
         }
     }
 
