@@ -17,7 +17,6 @@
 
 package org.opensilk.music.ui3.nowplaying;
 
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.media.session.MediaSessionCompat.QueueItem;
@@ -27,7 +26,6 @@ import android.view.MenuItem;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.rx.RxUtils;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
-import org.opensilk.common.ui.mortar.ActivityResultsOwner;
 import org.opensilk.common.ui.mortar.Lifecycle;
 import org.opensilk.common.ui.mortar.LifecycleService;
 import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
@@ -36,10 +34,6 @@ import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.index.client.IndexClient;
 import org.opensilk.music.playback.PlaybackStateHelper;
 import org.opensilk.music.playback.control.PlaybackController;
-import org.opensilk.music.ui3.PlaylistManageActivity;
-import org.opensilk.music.ui3.common.ActivityRequestCodes;
-import org.opensilk.music.ui3.playlist.PlaylistChooseScreen;
-import org.opensilk.music.ui3.playlist.PlaylistProviderSelectScreen;
 import org.opensilk.music.ui3.playlist.PlaylistProviderSelectScreenFragment;
 
 import java.util.ArrayList;
@@ -78,7 +72,7 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView> {
     boolean isPlaying;
     long lastPlayingId;
     boolean selfChange;
-    ArrayList<QueueItem> queue = new ArrayList<>();
+    final ArrayList<QueueItem> queue = new ArrayList<>();
 
     @Inject
     public QueueScreenPresenter(
@@ -134,11 +128,13 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView> {
         });
     }
 
+    @DebugLog
     void onItemMoved(int from, int to) {
         selfChange = true;
         playbackController.moveQueueItem(from, to);
     }
 
+    @DebugLog
     void onItemRemoved(int pos) {
         selfChange = true;
         playbackController.removeQueueItemAt(pos);
@@ -175,19 +171,7 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView> {
         if (isSubscribed(broadcastSubscriptions)) {
             return;
         }
-        Subscription s1 = playbackController.subscribePlayStateChanges(
-                new Action1<PlaybackStateCompat>() {
-                    @Override
-                    public void call(PlaybackStateCompat playbackState) {
-                        isPlaying = PlaybackStateHelper.isPlaying(playbackState.getState());
-                        lastPlayingId = playbackState.getActiveQueueItemId();
-                        if (hasView()) {
-                            getView().getAdapter().poke();
-                        }
-                    }
-                }
-        );
-        Subscription s2 = playbackController.subscribeQueueChanges(
+        Subscription s1 = playbackController.subscribeQueueChanges(
                 new Action1<List<QueueItem>>() {
                     @Override
                     @DebugLog
@@ -219,6 +203,18 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView> {
                                     getView().getAdapter().replaceAll(queue);
                                 }
                             }
+                            getView().getAdapter().poke();
+                        }
+                    }
+                }
+        );
+        Subscription s2 = playbackController.subscribePlayStateChanges(
+                new Action1<PlaybackStateCompat>() {
+                    @Override
+                    public void call(PlaybackStateCompat playbackState) {
+                        isPlaying = PlaybackStateHelper.isPlaying(playbackState.getState());
+                        lastPlayingId = playbackState.getActiveQueueItemId();
+                        if (hasView()) {
                             getView().getAdapter().poke();
                         }
                     }
