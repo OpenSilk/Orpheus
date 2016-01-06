@@ -21,6 +21,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.media.session.MediaSessionCompat.QueueItem;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
@@ -144,8 +145,19 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView> {
         playbackController.skipToQueueItem(item.getQueueId());
     }
 
+    public void populateMenu(Toolbar toolbar) {
+        toolbar.getMenu().clear();
+        toolbar.inflateMenu(R.menu.shuffle_queue);
+        toolbar.inflateMenu(R.menu.save_queue);
+        toolbar.inflateMenu(R.menu.clear_queue);
+    }
+
     public boolean onMenuItemClicked(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.shuffle_queue: {
+                playbackController.shuffleQueue();
+                return true;
+            }
             case R.id.save_queue: {
                 if (hasView()) {
                     List<QueueItem> items = getView().getAdapter().getItems();

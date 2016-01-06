@@ -66,9 +66,7 @@ public class QueueScreenView extends RelativeLayout {
         mList.setAdapter(wrapper);
         mPresenter.takeView(this);
         mToolbar.setTitle(R.string.title_queue);
-        mToolbar.getMenu().clear();
-        mToolbar.inflateMenu(R.menu.save_queue);
-        mToolbar.inflateMenu(R.menu.clear_queue);
+        mPresenter.populateMenu(mToolbar);
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
