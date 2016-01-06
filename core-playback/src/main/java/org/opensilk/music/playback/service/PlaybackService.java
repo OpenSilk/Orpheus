@@ -957,6 +957,7 @@ public class PlaybackService {
                     mSessionHolder.sendSessionEvent(EVENT.REPEAT_CHANGED,
                             BundleHelper.b().putInt(mQueue.getRepeatMode()).get());
                     updatePlaybackState(null);
+                    saveState(false);
                     break;
                 }
                 case ACTION.CYCLE_SHUFFLE: {
@@ -966,6 +967,7 @@ public class PlaybackService {
                     mSessionHolder.sendSessionEvent(EVENT.QUEUE_SHUFFLED,
                             BundleHelper.b().putInt(mQueue.getShuffleMode()).get());
                     updatePlaybackState(null);
+                    saveState(false);
                     break;
                 }
                 case ACTION.SHUFFLE_QUEUE: {
