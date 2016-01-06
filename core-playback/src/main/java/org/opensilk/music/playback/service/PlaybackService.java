@@ -395,7 +395,7 @@ public class PlaybackService {
                 actions &= ~PlaybackStateCompat.ACTION_PLAY;
                 actions |= PlaybackStateCompat.ACTION_SEEK_TO;
             }
-            if (mQueue.getPrevious() >= 0) {
+            if (mQueue.getPreviousPos() >= 0) {
                 actions |= PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS;
             }
             if (mQueue.getNextPos() >= 0) {
@@ -562,9 +562,11 @@ public class PlaybackService {
         resetState();
         if (mConnectedClients > 0) {
             //we cant stop so try going to paused
-            if (mQueue.isReady()) {
-                mQueueChangeListener.onCurrentPosChanged();
-            }//else TODO
+            if (mQueue.notEmpty()) {
+                if (mQueue.isReady()) {
+                    mQueueChangeListener.onCurrentPosChanged();
+                }//else TODO
+            }
         } else {
             //we aren't bound by anyone so we can stop
             mProxy.stopSelf();
@@ -862,19 +864,21 @@ public class PlaybackService {
         @Override
         @DebugLog
         public void onSkipToQueueItem(long id) {
-            int pos = mQueue.getPosOfId(id);
-            if (pos >= 0) {
-                if (mQueue.getCurrentPos() != pos) {
-                    if (mQueue.getNextPos() == pos) {
-                        onSkipToNext();
-                    } else {
-                        mPlayback.prepareForTrack();
-                        mPlayWhenReady = true;
-                        mQueue.goToItem(pos);
+            if (mQueue.isReady() && mQueue.notEmpty()) {
+                int pos = mQueue.getPosOfId(id);
+                if (pos >= 0) {
+                    if (mQueue.getCurrentPos() != pos) {
+                        if (mQueue.getNextPos() == pos) {
+                            onSkipToNext();
+                        } else {
+                            mPlayback.prepareForTrack();
+                            mPlayWhenReady = true;
+                            mQueue.goToItem(pos);
+                        }
                     }
+                } else {
+                    //no longer in queue TODO
                 }
-            } else {
-                //no longer in queue TODO
             }
         }
 
@@ -914,7 +918,7 @@ public class PlaybackService {
             if (mPlayback.getCurrentStreamPosition() > REWIND_INSTEAD_PREVIOUS_THRESHOLD) {
                 onSeekTo(0);
             } else if (mQueue.notEmpty()) {
-                int prev = mQueue.getPrevious();
+                int prev = mQueue.getPreviousPos();
                 if (prev >= 0) {
                     mPlayback.prepareForTrack();
                     mPlayWhenReady = true;

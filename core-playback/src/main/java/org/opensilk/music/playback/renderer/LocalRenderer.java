@@ -403,8 +403,7 @@ public class LocalRenderer implements IMusicRenderer,
             // If we were playing when we lost focus, we need to resume playing.
             if (mPlayOnFocusGain) {
                 if (hasCurrent() && !mCurrentPlayer.player.isPlaying()) {
-                    if (mCurrentPosition >= 0 &&
-                            mCurrentPosition == mCurrentPlayer.player.getCurrentPosition()) {
+                    if (mCurrentPosition == mCurrentPlayer.player.getCurrentPosition()) {
                         //todo is there a better place for this?
                         notifyOnAudioSessionId(mCurrentPlayer.sessionId);
                         mCurrentPlayer.player.start();

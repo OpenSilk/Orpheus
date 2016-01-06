@@ -30,6 +30,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Random;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
@@ -49,8 +51,12 @@ public class PlaybackQueue {
     private final PlaybackServiceProxy mService;
     private final ArrayList<Uri> mQueue = new ArrayList<>();
     private final ArrayList<QueueItem> mQueueMeta = new ArrayList<>();
+    private final TreeSet<Uri> mHistory = new TreeSet<>();
+    private final Random mRandom = new Random();
 
     private int mCurrentPos = -1;
+    private int mNextPos = -1;
+    private int mPreviousPos = -1;
     private int mRepeatMode = PlaybackConstants.REPEAT_ALL;
     private int mShuffleMode = PlaybackConstants.SHUFFLE_NONE;
     private QueueChangeListener mListener;
@@ -74,18 +80,21 @@ public class PlaybackQueue {
     @DebugLog
     public void load() {
         mReady = false;
-        mQueue.clear();
+        resetState();
+
         mIndexClient.startBatch();
-        mQueue.addAll(mIndexClient.getLastQueue());
+
+        List<Uri> lastQueue = mIndexClient.getLastQueue();
+        if (lastQueue != null && !lastQueue.isEmpty()) {
+            mQueue.addAll(lastQueue);
+        }
         int pos = mIndexClient.getLastQueuePosition();
-        if (pos >= 0) {
-            mCurrentPos = pos;
+        if (isInQueueBounds(pos)) {
+            updateCurrentPos(pos);
+        } else if (!mQueue.isEmpty()) {
+            updateCurrentPos(0);
         }
-        if (mQueue.isEmpty()) {
-            mCurrentPos = -1;
-        } else if (mCurrentPos >= mQueue.size()) {
-            mCurrentPos = 0; //just start over
-        }
+
         int rep = mIndexClient.getLastQueueRepeatMode();
         switch (rep) {
             case PlaybackConstants.REPEAT_NONE:
@@ -94,8 +103,10 @@ public class PlaybackQueue {
                 mRepeatMode = rep;
                 break;
             default:
+                mRepeatMode = PlaybackConstants.REPEAT_ALL;
                 break;
         }
+
         int shuf = mIndexClient.getLastQueueShuffleMode();
         switch (shuf) {
             case PlaybackConstants.SHUFFLE_NONE:
@@ -103,57 +114,42 @@ public class PlaybackQueue {
                 mShuffleMode = shuf;
                 break;
             default:
+                mShuffleMode = PlaybackConstants.SHUFFLE_NONE;
                 break;
         }
+
         mIndexClient.endBatch();
-        notifyCurrentPosChanged();
-    }
 
-    public static class Snapshot {
-        public final List<Uri> q;
-        public final int pos;
-        public final int repeat;
-        public final int shuffle;
-        public Snapshot(List<Uri> q, int pos, int repeat, int shuffle) {
-            this.q = new ArrayList<>(q);
-            this.pos = pos;
-            this.repeat = repeat;
-            this.shuffle = shuffle;
+        if (isInQueueBounds(mCurrentPos)) {
+            updateNextPos(mCurrentPos);
+            updatePreviousPos(mCurrentPos, -1);
         }
-    }
 
-    public Snapshot snapshot() {
-        return new Snapshot(mQueue, mCurrentPos, mRepeatMode, mShuffleMode);
+        notifyCurrentPosChanged();
+
     }
 
     public void addNext(List<Uri> list) {
-        //We don't shuffle these
-        if (mQueue.isEmpty() || mCurrentPos == -1) {
+        if (mQueue.isEmpty() || !isInQueueBounds(mCurrentPos)) {
+            resetState();
             mQueue.addAll(0, list);
-            mCurrentPos = 0;
-            notifyCurrentPosChanged();
+            goToItem(0);
         } else {
             mQueue.addAll(mCurrentPos + 1, list);
+            updateNextPos(mCurrentPos);
             notifyQueueChanged();
         }
     }
 
     public void addEnd(List<Uri> list) {
-        if (mQueue.isEmpty()) {
+        if (mQueue.isEmpty() || !isInQueueBounds(mCurrentPos)) {
+            resetState();
             mQueue.addAll(list);
-            mCurrentPos = 0;
-            notifyCurrentPosChanged();
+            goToItem(0);
         } else {
-            int oldsize = mQueue.size();
             mQueue.addAll(list);
-            if (isShuffleOn()) {
-                shuffle();
-            } else if (mCurrentPos < 0) {
-                mCurrentPos = oldsize;
-                notifyCurrentPosChanged();
-            } else {
-                notifyQueueChanged();
-            }
+            updateNextPos(mCurrentPos);
+            notifyQueueChanged();
         }
     }
 
@@ -161,201 +157,245 @@ public class PlaybackQueue {
         replace(list, 0);
     }
 
-    @DebugLog
     public void replace(List<Uri> list, int startpos) {
-        int oldsize = mQueue.size();
-        mQueue.clear();
-        if (list.isEmpty()) {
-            mCurrentPos = -1;
+        resetState();
+        if (list == null || list.isEmpty()) {
             notifyCurrentPosChanged();
-        } else {
-            mQueue.addAll(list);
-            if (mQueue.size() * 2 < oldsize) {
-                mQueue.trimToSize(); //Trim if much smaller
-            }
-            if (isShuffleOn()) {
-                mCurrentPos = 0;//no need to keep position
-                randomizeQueue();
-            } else {
-                mCurrentPos = clamp(startpos);
-            }
-            notifyCurrentPosChanged();
+            return;
         }
+        mQueue.addAll(list);
+        mQueue.trimToSize();
+        goToItem(startpos);
     }
 
     public void remove(List<Uri> list) {
-        if (list.isEmpty()) {
+        if (list == null || list.isEmpty()) {
             return;
         }
         Uri current = null;
-        if (mCurrentPos >= 0 && mCurrentPos < mQueue.size()) {
+        if (isInQueueBounds(mCurrentPos)) {
             current = mQueue.get(mCurrentPos);
         }
+        Uri next = null;
+        if (isInQueueBounds(mNextPos)) {
+            next = mQueue.get(mNextPos);
+        }
+        Uri prev = null;
+        if (isInQueueBounds(mPreviousPos)) {
+            prev = mQueue.get(mPreviousPos);
+        }
         mQueue.removeAll(list);
+        mHistory.removeAll(list);
         if (mQueue.isEmpty()) {
-            mCurrentPos = -1;
+            resetState();
             notifyCurrentPosChanged();
-        } else if (current != null) {
-            int newPos = mQueue.indexOf(current);
-            if (newPos >= 0) {
-                //We still have the current, update pointer
-                mCurrentPos = newPos;
-                notifyQueueChanged();
-            } else {
-                //play whatevers next
-                mCurrentPos = clamp(mCurrentPos);
-                notifyCurrentPosChanged();
-            }
+            return;
+        }
+        int curIdx = -1;
+        if (current != null) {
+            curIdx = mQueue.indexOf(current);
+        }
+        int nextIdx = -1;
+        if (next != null) {
+            nextIdx = mQueue.indexOf(next);
+        }
+        int prevIdx = -1;
+        if (prev != null) {
+            prevIdx = mQueue.indexOf(prev);
+        }
+        if (isInQueueBounds(curIdx)) {
+            //still have current update pointer
+            updateCurrentPos(curIdx);
+            updateNextPos(mCurrentPos);
+            updatePreviousPos(mCurrentPos, prevIdx);
+            notifyQueueChanged();
         } else {
-            mCurrentPos = 0;
+            //Current was removed
+            if (isInQueueBounds(nextIdx)) {
+                //we have next make it current
+                updateCurrentPos(nextIdx);
+            } else {
+                //re-clamp old current as current
+                updateCurrentPos(mCurrentPos);
+            }
+            updateNextPos(mCurrentPos);
+            updatePreviousPos(mCurrentPos, prevIdx);
             notifyCurrentPosChanged();
         }
     }
 
     public void remove(Uri uri) {
+        if (!mQueue.contains(uri)) {
+            return;
+        }
         remove(Collections.singletonList(uri));
     }
 
     public void remove(int pos) {
-        if (pos < 0 || pos >= mQueue.size()) {
+        if (!isInQueueBounds(pos)) {
             return;
         }
         remove(mQueue.get(pos));
     }
 
     public void moveItem(Uri uri, int to) {
-        if (uri == null || mQueue.isEmpty()) {
+        if (uri == null || mQueue.isEmpty() || !mQueue.contains(uri)) {
             return;
         }
         Uri current = null;
-        if (mCurrentPos >= 0 && mCurrentPos < mQueue.size()) {
+        if (isInQueueBounds(mCurrentPos)) {
             current = mQueue.get(mCurrentPos);
         }
-        mQueue.remove(uri);
-        if (to > mQueue.size()) {
-            to = mQueue.size();
+        Uri next = null;
+        if (isInQueueBounds(mNextPos)) {
+            next = mQueue.get(mNextPos);
         }
-        mQueue.add(to, uri);
+        Uri prev = null;
+        if (isInQueueBounds(mPreviousPos)) {
+            prev = mQueue.get(mPreviousPos);
+        }
+        mQueue.remove(uri);
+        mQueue.add(clamp(to), uri);
+        int curIdx = -1;
+        if (current != null) {
+            curIdx = mQueue.indexOf(current);
+        }
+        int nextIdx = -1;
+        if (next != null) {
+            nextIdx = mQueue.indexOf(next);
+        }
+        int prevIdx = -1;
+        if (prev != null) {
+            prevIdx = mQueue.indexOf(prev);
+        }
+        if (mCurrentPos != curIdx) {
+            updateCurrentPos(curIdx);
+        }
+        if (isShuffleOn() && isInQueueBounds(nextIdx)) {
+            mNextPos = nextIdx;
+        } else {
+            updateNextPos(mCurrentPos);
+        }
+        updatePreviousPos(mCurrentPos, prevIdx);
         if (current == null) {
-            mCurrentPos = 0;
             notifyCurrentPosChanged();
         } else {
-            int idx = mQueue.indexOf(current);
-            if (mCurrentPos != idx) {
-                mCurrentPos = idx;
-            }
             notifyQueueChanged();
         }
     }
 
     public void moveItem(int from, int to) {
-        if (from == to || from < 0 || from > mQueue.size()) {
+        if (from == to || !isInQueueBounds(from)) {
             return;
         }
         moveItem(mQueue.get(from), to);
     }
 
     public void clear() {
-        mQueue.clear();
-        mCurrentPos = -1;
+        resetState();
         notifyCurrentPosChanged();
     }
 
     public int getPosOfId(long id) {
-        int pos = 0;
-        boolean found = false;
-        for (QueueItem qi : mQueueMeta) {
-            if (qi.getQueueId() == id) {
-                found = true;
+        int pos = -1;
+        for (int ii=0; ii<mQueueMeta.size(); ii++) {
+            if (mQueueMeta.get(ii).getQueueId() == id) {
+                pos = ii;
                 break;
             }
-            pos++;
         }
-        return found ? pos : -1;
+        return pos;
     }
 
     public void goToItem(int pos) {
-        mCurrentPos = clamp(pos);
+        if (mCurrentPos == pos) {
+            return;
+        }
+        int oldCurrent = mCurrentPos;
+        updateCurrentPos(pos);
+        updateNextPos(mCurrentPos);
+        updatePreviousPos(mCurrentPos, oldCurrent);
         notifyCurrentPosChanged();
     }
 
     public void moveToNext() {
-        moveToNext(true);
+        if (isInQueueBounds(mNextPos)) {
+            int oldCurrent = mCurrentPos;
+            updateCurrentPos(mNextPos);
+            updateNextPos(mCurrentPos);
+            updatePreviousPos(mCurrentPos, oldCurrent);
+        }
+        notifyWentToNext();
     }
 
-    private void moveToNext(boolean notify) {
-        //if were repeating the current or previously went off the end we dont move
-        if (mRepeatMode != PlaybackConstants.REPEAT_CURRENT && mCurrentPos != -1) {
-            if (++mCurrentPos >= mQueue.size()) {
-                //we went of the end, shall we loop back?
-                if (mRepeatMode == PlaybackConstants.REPEAT_ALL) {
-                    mCurrentPos = 0;
-                } else {
-                    mCurrentPos = -1;
-                }
-            }
-        }
-        if (notify) {
-            notifyWentToNext();
-        }
-    }
-
-    /**
-     * negative means cant go forward
-     */
     public int getNextPos() {
-        if (mRepeatMode == PlaybackConstants.REPEAT_CURRENT) {
-            return mCurrentPos;
-        } else if (mCurrentPos + 1 >= mQueue.size()) {
-            if (mRepeatMode == PlaybackConstants.REPEAT_ALL) {
-                return 0;
-            } else {
-                return -1;
-            }
-        } else {
-            return mCurrentPos + 1;
-        }
+        return mNextPos;
     }
 
-    /**
-     * negative value means cant go back
-     */
-    public int getPrevious() {
-        switch (mRepeatMode) {
-            case PlaybackConstants.REPEAT_CURRENT:
-                return mCurrentPos;
-            case PlaybackConstants.REPEAT_ALL:
-                if (mCurrentPos - 1 < 0) {
-                    return mQueue.size() - 1;
-                } else {
-                    return mCurrentPos - 1;
-                }
-            case PlaybackConstants.REPEAT_NONE:
-            default:
-                return (mCurrentPos - 1);
-        }
+    public boolean hasNext() {
+        return isInQueueBounds(mNextPos);
+    }
+
+    public int getPreviousPos() {
+        return mPreviousPos;
+    }
+
+    public boolean hasPrevious() {
+        return isInQueueBounds(mPreviousPos);
     }
 
     public int getCurrentPos() {
         return mCurrentPos;
     }
 
+    public boolean hasCurrent() {
+        return isInQueueBounds(mCurrentPos);
+    }
+
     public List<Uri> get() {
         return new ArrayList<>(mQueue);
     }
 
-    private void shuffle() {
-        if (mCurrentPos < 0 || mCurrentPos >= mQueue.size()) {
-            randomizeQueue();
-            mCurrentPos = 0;
+    public void shuffle() {
+        Uri current = null;
+        if (isInQueueBounds(mCurrentPos)) {
+            current = mQueue.get(mCurrentPos);
+        }
+        Uri next = null;
+        if (isInQueueBounds(mNextPos)) {
+            next = mQueue.get(mNextPos);
+        }
+        Uri prev = null;
+        if (isInQueueBounds(mPreviousPos)) {
+            prev = mQueue.get(mPreviousPos);
+        }
+        randomizeQueue();
+        int curIdx = -1;
+        if (current != null) {
+            curIdx = mQueue.indexOf(current);
+        }
+        int nextIdx = -1;
+        if (next != null) {
+            nextIdx = mQueue.indexOf(next);
+        }
+        int prevIdx = -1;
+        if (prev != null) {
+            prevIdx = mQueue.indexOf(prev);
+        }
+        if (isInQueueBounds(curIdx)) {
+            updateCurrentPos(curIdx);
+        } else {
+            updateCurrentPos(0);
+        }
+        if (isShuffleOn() && isInQueueBounds(nextIdx)) {
+            mNextPos = nextIdx;
+        } else {
+            updateNextPos(mCurrentPos);
+        }
+        updatePreviousPos(mCurrentPos, prevIdx);
+        if (current == null) {
             notifyCurrentPosChanged();
         } else {
-            Uri current = mQueue.get(mCurrentPos);
-            randomizeQueue();
-            int idx = mQueue.indexOf(current);
-            if (mCurrentPos != idx) {
-                mCurrentPos = idx;
-            }
             notifyQueueChanged();
         }
     }
@@ -368,16 +408,28 @@ public class PlaybackQueue {
         return !mQueue.isEmpty();
     }
 
-    public Uri getCurrentUri() {
-        return mQueue.get(mCurrentPos);
+    public boolean isEmpty() {
+        return mQueue.isEmpty();
     }
 
-    public Uri getNextUri() {
-        return mQueue.get(getNextPos());
+    public @Nullable Uri getCurrentUri() {
+        return isInQueueBounds(mCurrentPos) ? mQueue.get(mCurrentPos) : null;
+    }
+
+    public @Nullable Uri getNextUri() {
+        return isInQueueBounds(mNextPos) ? mQueue.get(mNextPos) : null;
     }
 
     public int getRepeatMode() {
         return mRepeatMode;
+    }
+
+    private boolean isRepeatCurrent() {
+        return mRepeatMode == PlaybackConstants.REPEAT_CURRENT;
+    }
+
+    private boolean isRepeatAll() {
+        return mRepeatMode == PlaybackConstants.REPEAT_ALL;
     }
 
     public void toggleRepeat() {
@@ -394,6 +446,9 @@ public class PlaybackQueue {
                 break;
         }
         setRepeatMode(newMode);
+        updateNextPos(mCurrentPos);
+        updatePreviousPos(mCurrentPos, mPreviousPos);
+        notifyQueueChanged();
     }
 
     //exposed for testing
@@ -402,7 +457,6 @@ public class PlaybackQueue {
             return;
         }
         mRepeatMode = newMode;
-        notifyQueueChanged();
     }
 
     public int getShuffleMode() {
@@ -424,6 +478,9 @@ public class PlaybackQueue {
                 break;
         }
         setShuffleMode(newMode);
+        updateNextPos(mCurrentPos);
+        updatePreviousPos(mCurrentPos, mPreviousPos);
+        notifyQueueChanged();
     }
 
     //exposed for testing
@@ -432,18 +489,82 @@ public class PlaybackQueue {
             return;
         }
         mShuffleMode = newMode;
-        switch (newMode) {
-            case PlaybackConstants.SHUFFLE_NONE:
-                //todo or how?
-                break;
-            case PlaybackConstants.SHUFFLE_NORMAL:
-                shuffle();
-                break;
-        }
     }
 
     private int clamp(int pos) {
         return (pos < 0) ? 0 : (pos >= mQueue.size()) ? (mQueue.size() - 1) : pos;
+    }
+
+    private boolean isInQueueBounds(int pos) {
+        return pos >= 0 && pos < mQueue.size();
+    }
+
+    private void updateCurrentPos(int pos) {
+        mCurrentPos = clamp(pos);
+        if (isInQueueBounds(mCurrentPos)) {
+            mHistory.add(mQueue.get(mCurrentPos));
+        }
+    }
+
+    private void updateNextPos(int current) {
+        if (isRepeatCurrent()) {
+            mNextPos = current;
+        } else if (isShuffleOn()) {
+            int next = mRandom.nextInt(mQueue.size());
+            //TODO handle same uri in multiple positions
+            while (mHistory.contains(mQueue.get(next)) && next > 0) {
+                next--;
+            }
+            if (next == 0) {
+                //find something that hasn't been played
+                for (int ii = mQueue.size() - 1; ii >= 0; ii--) {
+                    if (!mHistory.contains(mQueue.get(ii))) {
+                        next = ii;
+                        break;
+                    }
+                }
+            }
+            if (next == 0) {
+                //Queue has been exhausted
+                mHistory.clear();
+                mNextPos = isRepeatAll() ? 0 : -1;
+            } else {
+                mNextPos = next;
+            }
+        } else if (isInQueueBounds(current + 1)) {
+            mNextPos = current + 1;
+        } else {
+            mNextPos = isRepeatAll() ? 0 : -1;
+        }
+    }
+
+    private void updatePreviousPos(int current, int oldCurrent) {
+        if (isShuffleOn() && !isRepeatCurrent()) {
+            if (isInQueueBounds(oldCurrent)) {
+                mPreviousPos = oldCurrent;
+            } else {
+                mPreviousPos = -1;
+            }
+        } else {
+            if (isRepeatCurrent()) {
+                mPreviousPos = -1;
+            } else {
+                mPreviousPos = isInQueueBounds(current - 1) ? (current - 1)
+                        : (isRepeatAll() ? (mQueue.size() - 1) : -1);
+            }
+        }
+    }
+
+    private void resetState() {
+        mQueue.clear();
+        mHistory.clear();
+        resetPositions();
+    }
+
+    private void resetPositions() {
+        mCurrentPos = -1;
+        mNextPos = -1;
+        mPreviousPos = -1;
     }
 
     public List<QueueItem> getQueueItems() {
@@ -628,4 +749,22 @@ public class PlaybackQueue {
         void onQueueChanged();
         void onMovedToNext();
     }
+
+    public Snapshot snapshot() {
+        return new Snapshot(mQueue, mCurrentPos, mRepeatMode, mShuffleMode);
+    }
+
+    public static class Snapshot {
+        public final List<Uri> q;
+        public final int pos;
+        public final int repeat;
+        public final int shuffle;
+        public Snapshot(List<Uri> q, int pos, int repeat, int shuffle) {
+            this.q = new ArrayList<>(q);
+            this.pos = pos;
+            this.repeat = repeat;
+            this.shuffle = shuffle;
+        }
+    }
+
 }
