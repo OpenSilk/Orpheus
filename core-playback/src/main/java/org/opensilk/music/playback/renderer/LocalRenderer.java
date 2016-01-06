@@ -294,7 +294,6 @@ public class LocalRenderer implements IMusicRenderer,
             // If we do not have a current media player, simply update the current position
             mCurrentPosition = position;
         } else if (hasCurrent()) {
-            mPlayOnFocusGain = true;
             mCurrentPlayer.player.seekTo(position);
             mState = PlaybackStateCompat.STATE_BUFFERING;
             notifyOnPlaybackStatusChanged(mState);
@@ -470,14 +469,14 @@ public class LocalRenderer implements IMusicRenderer,
             if (player.isPlaying()) {
                 //TODO find out why we get this callback when starting playback
                 mState = PlaybackStateCompat.STATE_PLAYING;
-                notifyOnPlaybackStatusChanged(mState);
             } else if (mState == PlaybackStateCompat.STATE_BUFFERING
                     || mState == PlaybackStateCompat.STATE_SKIPPING_TO_NEXT) {
-                configMediaPlayerState();
+                player.start();
+                mState = PlaybackStateCompat.STATE_PLAYING;
             } else {
                 mState = PlaybackStateCompat.STATE_PAUSED;
-                notifyOnPlaybackStatusChanged(mState);
             }
+            notifyOnPlaybackStatusChanged(mState);
         }
     }
 
