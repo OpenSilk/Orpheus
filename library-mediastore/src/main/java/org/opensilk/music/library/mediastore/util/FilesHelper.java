@@ -48,6 +48,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
 import static org.opensilk.music.library.mediastore.util.CursorHelpers.generateArtworkUri;
@@ -428,7 +429,33 @@ public class FilesHelper {
         return tb;
     }
 
-    public static StorageVolume guessStorageVolume(List<StorageLookup.StorageVolume> volumes, String path) {
+    public static StorageVolume guessStorageVolume(Context context, List<StorageLookup.StorageVolume> volumes, String path) {
+        Cursor c = null;
+        try {
+            c = context.getContentResolver().query(Uris.EXTERNAL_MEDIASTORE_FILES,
+                    new String[]{"storage_id"}, MediaStore.Files.FileColumns.DATA + "=?",
+                    new String[]{path}, null);
+            if (c != null && c.moveToFirst()) {
+                int volId = c.getInt(0);
+                if (volumes != null && volumes.size() != 0) {
+                    for (StorageVolume v : volumes) {
+                        if (v.id == volId) {
+                            return v;
+                        }
+                    }
+                }
+            }
+            Timber.w("Failed to locate %s in files db", path);
+            return guessStorageVolumeFromPath(volumes, path);
+        } catch (Exception e) {
+            Timber.w("Error querying for storage_id for %s", path);
+            return guessStorageVolumeFromPath(volumes, path);
+        } finally {
+            closeQuietly(c);
+        }
+    }
+
+    static StorageVolume guessStorageVolumeFromPath(List<StorageVolume> volumes, String path) {
         if (volumes != null && volumes.size() != 0) {
             for (StorageLookup.StorageVolume v : volumes) {
                 if (StringUtils.startsWith(path, v.path)) {

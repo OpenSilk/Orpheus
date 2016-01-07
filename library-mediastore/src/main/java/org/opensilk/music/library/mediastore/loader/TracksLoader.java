@@ -68,7 +68,7 @@ public class TracksLoader extends RxCursorLoader<Track> {
     @Override
     protected Track makeFromCursor(Cursor c) throws Exception {
         File f = new File(c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)));
-        StorageLookup.StorageVolume storageVolume = FilesHelper.guessStorageVolume(volumes, f.getAbsolutePath());
+        StorageLookup.StorageVolume storageVolume = FilesHelper.guessStorageVolume(context, volumes, f.getAbsolutePath());
         if (storageVolume == null) {
             Timber.e("Unable to locate volume for %s", f.getAbsolutePath());
             throw new IllegalArgumentException("Unable to locate storage volume for " + f.getAbsolutePath());

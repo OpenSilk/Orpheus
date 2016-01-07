@@ -93,7 +93,7 @@ public class PlaylistUtil {
                 do {
                     String path = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DATA));
                     File f = new File(path);
-                    StorageLookup.StorageVolume volume = FilesHelper.guessStorageVolume(volumes, path);
+                    StorageLookup.StorageVolume volume = FilesHelper.guessStorageVolume(context, volumes, path);
                     if (volume == null) {
                         Timber.e("Unable to locate volume for %s", path);
                         continue;
