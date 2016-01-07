@@ -11,9 +11,11 @@
 
 package org.opensilk.music.playback;
 
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.TaskStackBuilder;
 
 /**
  * Various navigation helpers.
@@ -22,11 +24,17 @@ import android.content.Intent;
  */
 public final class NavUtils {
 
-    public static Intent makePlayerIntent(Context context) {
-        return new Intent()
+    public static PendingIntent makePlayerIntent(Context context, int code) {
+        Intent i = new Intent()
                 .setPackage(context.getPackageName())
                 .setAction("org.opensilk.music.AUDIO_PLAYER")
                 ;
+        return TaskStackBuilder.create(context)
+                // hardcoding this component is not ideal for composability
+                //TODO make mortar service that provides proper component
+                .addParentStack(new ComponentName(context, "org.opensilk.music.ui3.NowPlayingActivity"))
+                .addNextIntent(i)
+                .getPendingIntent(code, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     /**

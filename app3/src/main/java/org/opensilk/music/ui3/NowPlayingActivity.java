@@ -31,6 +31,7 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import mortar.MortarScope;
+import timber.log.Timber;
 
 /**
  * Created by drew on 10/2/15.
@@ -90,4 +91,14 @@ public class NowPlayingActivity extends MusicActivity {
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
+    @Override
+    public void onBackPressed() {
+        if (mDrawerOwnerDelegate != null && mDrawerOwnerDelegate.onBackPressed()) {
+            return;
+        }
+        if (onSupportNavigateUp()) {
+            return;
+        }
+        super.onBackPressed();
+    }
 }

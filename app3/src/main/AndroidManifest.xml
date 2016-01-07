@@ -70,7 +70,7 @@
             android:launchMode="singleTop"
             android:process=":ui">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
+                android:value="org.opensilk.music.ui3.LauncherActivity"/>
             <intent-filter>
                 <action android:name="org.opensilk.music.AUDIO_PLAYER" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -119,7 +119,7 @@
             android:theme="@style/Theme.Dark"
             android:process=":ui">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
+                android:value="org.opensilk.music.ui3.LauncherActivity"/>
         </activity>
 
         <activity
@@ -127,7 +127,7 @@
             android:theme="@style/Theme.Dark"
             android:process=":ui">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
+                android:value="org.opensilk.music.ui3.LauncherActivity"/>
         </activity>
 
         <activity
@@ -135,7 +135,7 @@
             android:theme="@style/Theme.Settings.Dark"
             android:process=":ui">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
+                android:value="org.opensilk.music.ui3.LauncherActivity"/>
         </activity>
 
         <activity

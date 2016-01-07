@@ -211,9 +211,7 @@ public class NotificationHelper2 extends BroadcastReceiver {
     }
 
     private PendingIntent createContentIntent() {
-        Intent openUI = NavUtils.makePlayerIntent(mContext);
-        return PendingIntent.getActivity(mContext, REQUEST_CODE, openUI,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+        return NavUtils.makePlayerIntent(mContext, REQUEST_CODE);
     }
 
     private final IMediaControllerProxy.Callback mCb = new IMediaControllerProxy.Callback() {

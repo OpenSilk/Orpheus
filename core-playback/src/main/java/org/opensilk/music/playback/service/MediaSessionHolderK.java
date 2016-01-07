@@ -71,9 +71,7 @@ class MediaSessionHolderK implements IMediaSessionProxy {
     private void configureSession(Context context) {
         mSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
                 | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
-        mSession.setSessionActivity(PendingIntent.getActivity(
-                context, 2, NavUtils.makePlayerIntent(context),
-                PendingIntent.FLAG_UPDATE_CURRENT));
+        mSession.setSessionActivity(NavUtils.makePlayerIntent(context, 2));
     }
 
     public MediaSessionCompat.Token getSessionToken() {
