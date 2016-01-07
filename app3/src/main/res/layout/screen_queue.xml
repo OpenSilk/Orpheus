@@ -30,6 +30,7 @@
         android:id="@+id/queue_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?actionBarSize"
+        android:background="@null"
         style="?toolbarStyle"/>
 
     <android.support.v7.widget.RecyclerView
