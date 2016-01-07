@@ -497,7 +497,8 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
             Bundle extras = BundleHelper.b()
                     .putString(lightTheme ? PaletteSwatchType.VIBRANT_LIGHT.toString()
                             : PaletteSwatchType.VIBRANT_DARK.toString())
-                    .putString2(PaletteSwatchType.VIBRANT.toString())
+                    .putString2(lightTheme ? PaletteSwatchType.MUTED_LIGHT.toString()
+                            : PaletteSwatchType.MUTED_DARK.toString())
                     .get();
             clearArtworkRequests();
             Target<?> target = requestor.newRequest(artInfo, artwork, descriptionContainer, extras);
