@@ -93,7 +93,7 @@ public class NowPlayingScreenView extends RelativeLayout {
     @InjectView(R.id.now_playing_title) TextView title;
     @InjectView(R.id.now_playing_subtitle) TextView subTitle;
     @InjectView(R.id.now_playing_playpause) ImageButtonCheckable playPause;
-    @InjectView(R.id.now_playing_card) CardView card;
+//    @InjectView(R.id.now_playing_card) CardView card;
     @InjectView(R.id.now_playing_progress) ProgressBar progress;
     @InjectView(R.id.now_playing_previous) ImageButton previousBtn;
     @InjectView(R.id.now_playing_next) ImageButton nextButton;
@@ -434,47 +434,55 @@ public class NowPlayingScreenView extends RelativeLayout {
         @Override
         @DebugLog
         public void onGenerated(Palette palette) {
-            Palette.Swatch s1 = palette.getDarkVibrantSwatch();
-            Palette.Swatch s2 = palette.getVibrantSwatch();
-            if (s1 != null && s2 != null) {
+            int cardBackground, titleText, subTitleText;
+            int accent, buttons;
+
+            if ((palette.getDarkVibrantSwatch() != null && palette.getVibrantSwatch() != null)
+                    || (palette.getDarkMutedSwatch() != null && palette.getMutedSwatch() != null)) {
+                PaletteSwatchType primary;
+                Palette.Swatch s1 = palette.getDarkVibrantSwatch();
+                Palette.Swatch s2 = palette.getVibrantSwatch();
+                primary = PaletteSwatchType.VIBRANT_DARK;
+                if (s1 == null || s2 == null) {
+                    s1 = palette.getDarkMutedSwatch();
+                    s2 = palette.getMutedSwatch();
+                    primary = PaletteSwatchType.MUTED_DARK;
+                }
                 Timber.d("Themeing view");
                 ViewBackgroundDrawableTarget.builder()
                         .into(getView())
-                        .using(PaletteSwatchType.VIBRANT_DARK)
+                        .using(primary)
                         .build().onResourceReady(palette, backgroundTransition);
-                //cant transition this pre L so just dont even try
-                getView().card.setCardBackgroundColor(s2.getRgb());
-                getView().title.setTextColor(s2.getTitleTextColor());
-                getView().subTitle.setTextColor(s2.getBodyTextColor());
-                ThemeUtils.themeProgressBar2(getView().progress, s1.getRgb());
-                if (VersionUtils.hasLollipop()) {
-                    themeButtons(s2.getTitleTextColor());
-                }
-                getView().reInitRenderer(s1.getRgb());
+
+                cardBackground = s1.getRgb();
+                titleText = s1.getTitleTextColor();
+                subTitleText = s1.getBodyTextColor();
+                accent = s2.getRgb();
+                buttons = s1.getTitleTextColor();
             } else {
                 Timber.d("Resetting view theme");
                 int background = ThemeUtils.getThemeAttrColor(getView().getContext(),
                         android.R.attr.colorBackground);
                 getView().setBackgroundColor(background);
-                int cardBackground = ThemeUtils.getThemeAttrColor(getView().getContext(),
+
+                cardBackground = ThemeUtils.getThemeAttrColor(getView().getContext(),
                         R.attr.nowPlayingCardBackground);
-                getView().card.setCardBackgroundColor(cardBackground);
-                int titleText = ThemeUtils.getThemeAttrColor(getView().getContext(),
+                titleText = ThemeUtils.getThemeAttrColor(getView().getContext(),
                         android.R.attr.textColorPrimary);
-                getView().title.setTextColor(titleText);
-                int subTitleText = ThemeUtils.getThemeAttrColor(getView().getContext(),
+                subTitleText = ThemeUtils.getThemeAttrColor(getView().getContext(),
                         android.R.attr.textColorSecondary);
-                getView().subTitle.setTextColor(subTitleText);
-                int accent = ThemeUtils.getThemeAttrColor(getView().getContext(),
+                accent = ThemeUtils.getThemeAttrColor(getView().getContext(),
                         R.attr.colorAccent);
-                ThemeUtils.themeProgressBar2(getView().progress, accent);
-                int primaryDark = ThemeUtils.getThemeAttrColor(getContext(),
-                        R.attr.colorPrimaryDark);
-                if (VersionUtils.hasLollipop()) {
-                    themeButtons(ContextCompat.getColor(getContext(), R.color.white));
-                }
-                getView().reInitRenderer(accent);
+                buttons = ContextCompat.getColor(getContext(), R.color.white);
             }
+//            getView().card.setCardBackgroundColor(cardBackground);
+            getView().title.setTextColor(titleText);
+            getView().subTitle.setTextColor(subTitleText);
+            ThemeUtils.themeProgressBar2(getView().progress, accent);
+            if (VersionUtils.hasLollipop()) {
+                themeButtons(buttons);
+            }
+            getView().reInitRenderer(accent);
         }
     };
 
