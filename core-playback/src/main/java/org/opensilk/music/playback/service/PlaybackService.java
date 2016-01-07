@@ -363,8 +363,6 @@ public class PlaybackService {
         if (PlaybackStateHelper.isPlayingOrPaused(state)) {
             if (mHasPreviouslyBeenPlaying) {
                 mNotificationHelper.startNotification();
-            } else {
-                mNotificationHelper.
             }
             //we only notify of changing
             sendMetaBroadcast();
@@ -397,10 +395,10 @@ public class PlaybackService {
                 actions &= ~PlaybackStateCompat.ACTION_PLAY;
                 actions |= PlaybackStateCompat.ACTION_SEEK_TO;
             }
-            if (mQueue.getPreviousPos() >= 0) {
+            if (mQueue.hasPrevious()) {
                 actions |= PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS;
             }
-            if (mQueue.getNextPos() >= 0) {
+            if (mQueue.hasNext()) {
                 actions |= PlaybackStateCompat.ACTION_SKIP_TO_NEXT;
             }
         }
@@ -637,14 +635,6 @@ public class PlaybackService {
         if (uri == null) {
             throw new IllegalStateException("Current uri is null for pos " + mQueue.getCurrentPos());
         }
-        if (mCurrentTrack != null && mCurrentTrack.getUri().equals(uri) && mPlayback.hasCurrent()) {
-            Timber.e("Current track is up to date");
-            if (mPlayWhenReady && !mPlayback.isPlaying()) {
-                mPlayWhenReady = false;
-                mHasPreviouslyBeenPlaying = true;
-                mPlayback.play();
-            }
-        }
         mHandler.removeCallbacks(mProgressCheckRunnable);
         mPlayback.prepareForTrack();
         RxUtils.unsubscribe(mCurrentTrackSub);
@@ -671,12 +661,11 @@ public class PlaybackService {
                                 seek = mSeekForNewRenderer;
                             }
                             if (seek > 0) {
-                                mPlayback.seekTo(seek);
+                                mSessionCallback.onSeekTo(seek);
                             }
                             if (mPlayWhenReady) {
                                 mPlayWhenReady = false;
-                                mHasPreviouslyBeenPlaying = true;
-                                mPlayback.play();
+                                mSessionCallback.onPlay();
                             }
                             updateMeta();
                             setNextTrack();
@@ -692,7 +681,7 @@ public class PlaybackService {
 
     @DebugLog
     private void setNextTrack() {
-        if (mQueue.getNextPos() < 0) {
+        if (!mQueue.hasNext()) {
             Timber.i("No next track in queue");
             if (mPlayback.hasNext()) {
                 //removes the next player
@@ -808,13 +797,15 @@ public class PlaybackService {
             if (mQueue.isReady()) {
                 mSessionHolder.setActive(true);
                 if (mQueue.notEmpty()) {
-                    if (PlaybackStateHelper.isConnecting(mPlayback.getState())) {
-                        //we are still fetching the current track, tell it to
-                        //play when it arrives
-                        mPlayWhenReady = true;
-                    } else if (!mPlayback.isPlaying()) {
+                    if (mPlayback.hasCurrent()) {
+                        mPlayWhenReady = false;
                         mHasPreviouslyBeenPlaying = true;
-                        mPlayback.play();
+                        if (!mPlayback.isPlaying()) {
+                            mPlayback.play();
+                        } //else already playing
+                    } else {
+                        //callback in here when track ready
+                        mPlayWhenReady = true;
                     }
                 } else {
                     //TODO make random queue
@@ -873,8 +864,9 @@ public class PlaybackService {
                         if (mQueue.getNextPos() == pos) {
                             onSkipToNext();
                         } else {
-                            mPlayback.prepareForTrack();
+                            mHandler.removeCallbacks(mProgressCheckRunnable);
                             mPlayWhenReady = true;
+                            mPlayback.prepareForTrack();
                             mQueue.goToItem(pos);
                         }
                     }
@@ -904,11 +896,10 @@ public class PlaybackService {
             if (mPlayback.hasNext()) {
                 mPlayback.goToNext();
             } else if (mQueue.notEmpty()) {
-                int next = mQueue.getNextPos();
-                if (next >= 0) {
+                if (mQueue.hasNext()) {
                     mPlayback.prepareForTrack();
                     mPlayWhenReady = true;
-                    mQueue.goToItem(next);
+                    mQueue.goToItem(mQueue.getNextPos());
                 }//else ignore
             } //else ignore
         }
@@ -916,16 +907,15 @@ public class PlaybackService {
         @Override
         @DebugLog
         public void onSkipToPrevious() {
-            mHandler.removeCallbacks(mProgressCheckRunnable);
             if (mPlayback.getCurrentStreamPosition() > REWIND_INSTEAD_PREVIOUS_THRESHOLD) {
                 onSeekTo(0);
             } else if (mQueue.notEmpty()) {
-                int prev = mQueue.getPreviousPos();
-                if (prev >= 0) {
-                    mPlayback.prepareForTrack();
+                if (mQueue.hasPrevious()) {
+                    mHandler.removeCallbacks(mProgressCheckRunnable);
                     mPlayWhenReady = true;
+                    mPlayback.prepareForTrack();
                     //will callback to onCurrentPosChanged
-                    mQueue.goToItem(prev);
+                    mQueue.goToItem(mQueue.getPreviousPos());
                 }//else ignore
             } //else ignore
         }
@@ -939,7 +929,6 @@ public class PlaybackService {
 
         @Override
         public void onSeekTo(long pos) {
-            mHandler.removeCallbacks(mProgressCheckRunnable);
             mPlayback.seekTo(pos);
         }
 
@@ -994,21 +983,6 @@ public class PlaybackService {
                     mPlayback.prepareForTrack();
                     mPlayWhenReady = true;
                     mQueue.replace(list, startpos);
-                    /*
-                    if (!list.equals(mQueue.get())) {
-                        mPlayback.prepareForTrack();
-                        mPlayWhenReady = true;
-                        mQueue.replace(list, startpos);
-                    } else if (startpos != mQueue.getCurrentPos()) {
-                        if (startpos == mQueue.getNextPos()) {
-                            onSkipToNext();
-                        } else {
-                            mPlayback.prepareForTrack();
-                            mPlayWhenReady = true;
-                            mQueue.goToItem(startpos);
-                        }
-                    } //else no change, ignore
-                    */
                     break;
                 }
                 case ACTION.REMOVE_QUEUE_ITEM: {
@@ -1102,6 +1076,7 @@ public class PlaybackService {
                 if (mQueueReloaded) {
                     //update available actions
                     updatePlaybackState(null);
+                    mSessionHolder.setActive(true);
                 }
                 setTrack();
             } else {
