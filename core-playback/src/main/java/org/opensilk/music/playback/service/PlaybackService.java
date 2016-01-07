@@ -363,6 +363,8 @@ public class PlaybackService {
         if (PlaybackStateHelper.isPlayingOrPaused(state)) {
             if (mHasPreviouslyBeenPlaying) {
                 mNotificationHelper.startNotification();
+            } else {
+                mNotificationHelper.
             }
             //we only notify of changing
             sendMetaBroadcast();
@@ -639,6 +641,7 @@ public class PlaybackService {
             Timber.e("Current track is up to date");
             if (mPlayWhenReady && !mPlayback.isPlaying()) {
                 mPlayWhenReady = false;
+                mHasPreviouslyBeenPlaying = true;
                 mPlayback.play();
             }
         }
@@ -672,6 +675,7 @@ public class PlaybackService {
                             }
                             if (mPlayWhenReady) {
                                 mPlayWhenReady = false;
+                                mHasPreviouslyBeenPlaying = true;
                                 mPlayback.play();
                             }
                             updateMeta();
@@ -801,9 +805,6 @@ public class PlaybackService {
                 mProxy.startSelf();
                 mServiceStarted = true;
             }
-            if (!mHasPreviouslyBeenPlaying) {
-                mHasPreviouslyBeenPlaying = true;
-            }
             if (mQueue.isReady()) {
                 mSessionHolder.setActive(true);
                 if (mQueue.notEmpty()) {
@@ -812,6 +813,7 @@ public class PlaybackService {
                         //play when it arrives
                         mPlayWhenReady = true;
                     } else if (!mPlayback.isPlaying()) {
+                        mHasPreviouslyBeenPlaying = true;
                         mPlayback.play();
                     }
                 } else {
