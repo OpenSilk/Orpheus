@@ -156,7 +156,7 @@ public class FoldersUris {
 
     private static final String slash_wild = "/*";
     private static final String slash_num = "/#";
-    private static final String base_match = "#/";
+    private static final String base_match = "*/";
     private static final String external_slash = external + "/";
     private static final String slash_num_slash = "/#/";
 
