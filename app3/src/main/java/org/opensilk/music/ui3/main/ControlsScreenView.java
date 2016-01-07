@@ -163,6 +163,7 @@ public class ControlsScreenView extends RelativeLayout {
         drawable.addTransition(R.id.play_state, R.id.pause_state, (AnimatedVectorDrawable)
                 ContextCompat.getDrawable(getContext(), R.drawable.vector_play_pause_black_36dp), false);
 
+        /*
         AnimatedStateListDrawable repeatDrawable = (AnimatedStateListDrawable) repeat.getDrawable();
         repeatDrawable.addTransition(R.id.repeat_off_state, R.id.repeat_on_state, (AnimatedVectorDrawable)
                 ContextCompat.getDrawable(getContext(), R.drawable.vector_repeat_off_on_black_36dp), true);
@@ -172,6 +173,7 @@ public class ControlsScreenView extends RelativeLayout {
                 ContextCompat.getDrawable(getContext(), R.drawable.vector_repeat_one_off_black_36dp), true);
         repeatDrawable.addTransition(R.id.repeat_off_state, R.id.repeat_one_state, (AnimatedVectorDrawable)
                 ContextCompat.getDrawable(getContext(), R.drawable.vector_repeat_off_one_black_36dp), true);
+                */
     }
 
     void subscribeClicks() {
