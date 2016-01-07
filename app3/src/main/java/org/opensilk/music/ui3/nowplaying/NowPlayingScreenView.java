@@ -448,7 +448,6 @@ public class NowPlayingScreenView extends RelativeLayout {
                 getView().subTitle.setTextColor(s2.getBodyTextColor());
                 ThemeUtils.themeProgressBar2(getView().progress, s1.getRgb());
                 if (VersionUtils.hasLollipop()) {
-                    themeStatusbar21(s1.getRgb());
                     themeButtons(s2.getTitleTextColor());
                 }
                 getView().reInitRenderer(s1.getRgb());
@@ -472,19 +471,12 @@ public class NowPlayingScreenView extends RelativeLayout {
                 int primaryDark = ThemeUtils.getThemeAttrColor(getContext(),
                         R.attr.colorPrimaryDark);
                 if (VersionUtils.hasLollipop()) {
-                    themeStatusbar21(primaryDark);
                     themeButtons(ContextCompat.getColor(getContext(), R.color.white));
                 }
                 getView().reInitRenderer(accent);
             }
         }
     };
-
-    @TargetApi(21)
-    void themeStatusbar21(int color) {
-        UtilsCommon.findActivity(getContext())
-                .getWindow().setStatusBarColor(color);
-    }
 
     static final int[] EMPTY_STATE_SET = new int[0];
     @TargetApi(21)
