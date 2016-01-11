@@ -566,16 +566,29 @@ public class IndexProvider extends LibraryProvider implements PlaylistLibraryAdd
                 }
                 final String sortOrder = LibraryExtras.getSortOrder(args);
                 Observable<Observable<List<Container>>> loaderCreator = Observable.from(list)
-                        .map(new Func1<Pair<Uri,Uri>, Observable<List<Container>>>() {
+                        .map(new Func1<Pair<Uri, Uri>, Uri>() {
                             @Override
-                            public Observable<List<Container>> call(final Pair<Uri,Uri> pair) {
+                            public Uri call(Pair<Uri, Uri> uriUriPair) {
+                                return uriUriPair.first;
+                            }
+                        })
+                        .map(new Func1<Uri, Observable<List<Container>>>() {
+                            @Override
+                            public Observable<List<Container>> call(final Uri containerUri) {
                                 //Use defer for lazy creation
                                 return Observable.defer(new Func0<Observable<List<Container>>>() {
                                     @Override
                                     public Observable<List<Container>> call() {
                                         return TypedBundleableLoader.<Container>create(getContext())
-                                                .setUri(pair.first).setMethod(LibraryMethods.GET)
-                                                .createObservable();
+                                                .setUri(containerUri).setMethod(LibraryMethods.GET)
+                                                .createObservable()
+                                                .doOnError(new Action1<Throwable>() {
+                                                    @Override
+                                                    public void call(Throwable throwable) {
+                                                        Timber.e(throwable, "Unable to get container %s", containerUri);
+                                                        mDataBase.markContainerInError(containerUri);
+                                                    }
+                                                });
                                     }
                                 });
                             }

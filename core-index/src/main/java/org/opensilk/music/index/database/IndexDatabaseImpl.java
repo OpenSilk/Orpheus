@@ -1188,6 +1188,33 @@ public class IndexDatabaseImpl implements IndexDatabase {
         return containers;
     }
 
+    static final String markContainerInErrorSel = IndexSchema.Containers.URI + "=?";
+
+    @Override
+    public boolean markContainerInError(Uri uri) {
+        ContentValues cv = new ContentValues(5);
+        cv.put(IndexSchema.Containers.IN_ERROR, 1);
+        Timber.v("Inserting container %s", cv);
+        return update(IndexSchema.Containers.TABLE, cv, markContainerInErrorSel, new String[]{uri.toString()}) > 0;
+    }
+
+    @Override
+    public void removeContainersInError() {
+        delete(IndexSchema.Containers.TABLE, IndexSchema.Containers.IN_ERROR + "=?", new String[]{"1"});
+    }
+
+    @Override
+    public boolean hasContainersInError() {
+        Cursor c = null;
+        try {
+            c = query(IndexSchema.Containers.TABLE, new String[]{IndexSchema.Containers._ID},
+                    IndexSchema.Containers.IN_ERROR + "=?", new String[]{"1"}, null, null, null);
+            return c != null && c.getCount() > 0;
+        } finally {
+            closeCursor(c);
+        }
+    }
+
     public boolean trackNeedsScan(Track track) {
         Track t = getTrack(track.getUri());
         if (t == null) {
@@ -1706,6 +1733,17 @@ public class IndexDatabaseImpl implements IndexDatabase {
     @Override
     public void notifyObservers() {
         mAppContext.getContentResolver().notifyChange(IndexUris.call(indexAuthority), null);
+    }
+
+    @Override
+    public void clearMusic() {
+        mLock.writeLock().lock();
+        try {
+            helper.clearMusic();
+        } finally {
+            mLock.writeLock().unlock();
+            notifyObservers();
+        }
     }
 
     static final String[] highestPlaylistPlayPosCols = new String[] {

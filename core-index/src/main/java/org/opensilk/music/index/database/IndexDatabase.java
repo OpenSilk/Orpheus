@@ -78,11 +78,15 @@ public interface IndexDatabase {
     @NonNull List<Pair<Uri, Uri>> findTopLevelContainers(@Nullable String authority);
     long insertContainer(Uri uri, Uri parentUri);
     int removeContainer(Uri uri);
+    boolean markContainerInError(Uri uri);
+    void removeContainersInError();
+    boolean hasContainersInError();
     long insertTrack(Track track, Metadata metadata);
     boolean trackNeedsScan(Track track);
     TreeNode buildTree(Uri uri, Uri parentUri);
     boolean removeTrack(Uri uri, Uri parentUri);
     void notifyObservers();
+    void clearMusic();
 
     List<Uri> getLastQueue();
     void saveQueue(List<Uri> queue);

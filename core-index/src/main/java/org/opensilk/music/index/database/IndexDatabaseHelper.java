@@ -461,15 +461,18 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "DELETE FROM playlist_track_meta WHERE track_id=OLD._id; " +
                     "END");
         }
+    }
 
-        /*
-        // Cleans up when an audio playlist is deleted
-        db.execSQL("CREATE TRIGGER IF NOT EXISTS audio_playlists_cleanup DELETE ON audio_playlists " +
-                "BEGIN " +
-                "DELETE FROM audio_playlists_map WHERE playlist_id = old._id;" +
-                "SELECT _DELETE_FILE(old._data);" +
-                "END");
-        */
+    public void clearMusic() {
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL("DELETE FROM artist_meta;");
+        db.execSQL("DELETE FROM album_meta;");
+        db.execSQL("DELETE FROM genre_meta;");
+        db.execSQL("DELETE FROM containers;");
+        db.execSQL("DELETE FROM tracks;");
+        db.execSQL("DELETE FROM track_meta;");
+        db.execSQL("DELETE FROM playlist_meta;");
+        db.execSQL("DELETE FROM playlist_track_meta;");
     }
 
     @Override
