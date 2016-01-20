@@ -815,8 +815,8 @@ public class IndexDatabaseImpl implements IndexDatabase {
             IndexSchema.Info.Track.ALBUM_ID,
             IndexSchema.Info.Track.ALBUM_ARTIST,
             IndexSchema.Info.Track.ALBUM_ARTIST_ID,
-            IndexSchema.Info.Track.TRACK, //10
-            IndexSchema.Info.Track.DISC,
+            IndexSchema.Info.Track.TRACK_NUMBER, //10
+            IndexSchema.Info.Track.DISC_NUMBER,
             IndexSchema.Info.Track.COMPILATION,
             IndexSchema.Info.Track.GENRE,
             IndexSchema.Info.Track.GENRE_ID,

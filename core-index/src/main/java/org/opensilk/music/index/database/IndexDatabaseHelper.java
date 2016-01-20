@@ -30,15 +30,13 @@ import java.io.File;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import timber.log.Timber;
-
 /**
  * Created by drew on 8/25/15.
  */
 @Singleton
 public class IndexDatabaseHelper extends SQLiteOpenHelper {
 
-    public static final int DB_VERSION = 41;
+    public static final int DB_VERSION = 43;
     public static final String DB_NAME = "music.db";
 
     @Inject
@@ -460,6 +458,46 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
                     "BEGIN " +
                     "DELETE FROM playlist_track_meta WHERE track_id=OLD._id; " +
                     "END");
+        }
+
+        if (oldVersion < 43) {
+            db.execSQL("DROP VIEW IF EXISTS track_info;");
+            db.execSQL("CREATE VIEW track_info as SELECT " +
+                    "t2.uri, " +
+                    "tpm.uri as parent_uri, " +
+                    "t2.authority, " +
+                    "t1._id," +
+                    "coalesce(t1.track_name, t2.track_name) as name, " +
+                    "coalesce(t1.track_key, t2.track_key) as track_key, " +
+                    "coalesce(a1.name, t2.artist_name) as artist," +
+                    "t1.artist_id, " +
+                    "coalesce(a2.name, t2.album_name) as album, " +
+                    "t1.album_id, " +
+                    "coalesce(a2.artist, t2.album_artist_name) as album_artist, " +
+                    "a2.artist_id as album_artist_id, " +
+                    //renamed these, make track like mediastore to fix sorting
+                    "t1.track_number, " +
+                    "t1.disc_number, " +
+                    "(coalesce(t1.disc_number, 1) * 1000 + coalesce(t1.track_number, 0)) as track, " +
+                    "coalesce(t1.compilation, t2.compilation) as compilation, " +
+                    "coalesce(g1.genre_name, t2.genre) as genre, " +
+                    "t1.genre_id, " +
+                    "t2.artwork_uri, " +
+                    "t2.res_uri, " +
+                    "t2.res_headers, " +
+                    "t2.res_size, " +
+                    "coalesce(t1.mime_type, t2.res_mime_type) as res_mime_type, " +
+                    "coalesce(t1.bitrate, t2.res_bitrate) as res_bitrate, " +
+                    "coalesce(t1.duration, t2.res_duration) as res_duration, " +
+                    "t2.res_last_modified, " +
+                    "t2.date_added " +
+                    "FROM track_meta t1 " +
+                    "LEFT OUTER JOIN tracks t2 ON t1.track_id = t2._id " +
+                    "LEFT OUTER JOIN track_parent_map tpm ON t1.track_id = tpm._id " +
+                    "LEFT OUTER JOIN artist_info a1 ON t1.artist_id = a1._id " +
+                    "LEFT OUTER JOIN album_info a2 ON t1.album_id = a2._id " +
+                    "LEFT OUTER JOIN genre_meta g1 ON t1.genre_id = g1._id " +
+                    ";");
         }
     }
 

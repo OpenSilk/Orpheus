@@ -85,8 +85,9 @@ public class IndexSchema {
             String ALBUM_ID = "album_id";
             String ALBUM_ARTIST = "album_artist";
             String ALBUM_ARTIST_ID = "album_artist_id";
-            String TRACK = "track";
-            String DISC = "disc";
+            String TRACK_NUMBER = "track_number";
+            String DISC_NUMBER = "disc_number";
+            String TRACK = "track"; //disc_number * 1000 + track_number (for sorting)
             String COMPILATION = "compilation";
             String GENRE = "genre";
             String GENRE_ID = "genre_id";
